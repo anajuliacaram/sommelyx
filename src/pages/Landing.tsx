@@ -220,7 +220,7 @@ export default function Landing() {
             </motion.h1>
 
             <motion.p
-              className="text-center text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-10 leading-relaxed font-light"
+              className="text-center text-sm sm:text-base text-secondary-foreground max-w-md mx-auto mb-10 leading-[1.8] font-light"
               initial="hidden" animate="visible" variants={fadeUp} custom={2}
             >
               Gerencie sua coleção pessoal ou operação comercial com{" "}
@@ -255,7 +255,7 @@ export default function Landing() {
       </section>
 
       {/* Stats bar */}
-      <section className="relative z-10 border-y border-border/20 bg-card/20 backdrop-blur-xl">
+      <section className="relative z-10 border-y border-border/20 bg-card/40 backdrop-blur-xl">
         <div className="container mx-auto max-w-5xl">
           <motion.div
             className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border/20"
@@ -296,7 +296,7 @@ export default function Landing() {
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
-                className="group card-depth p-6 hover:border-border transition-all duration-200"
+                className="group card-depth p-7 hover:border-border transition-all duration-200"
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 whileHover={{ y: -2 }}
               >
@@ -304,7 +304,7 @@ export default function Landing() {
                   <f.icon className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <h3 className="text-sm font-semibold text-foreground mb-1.5 font-sans tracking-tight">{f.title}</h3>
-                <p className="text-muted-foreground text-xs leading-relaxed">{f.desc}</p>
+                <p className="text-muted-foreground text-xs leading-[1.7]">{f.desc}</p>
               </motion.div>
             ))}
           </div>

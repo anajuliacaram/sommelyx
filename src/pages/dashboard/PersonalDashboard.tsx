@@ -33,11 +33,11 @@ export default function PersonalDashboard() {
       </motion.div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {metrics.map((m, i) => (
           <motion.div
             key={m.label}
-            className="card-depth p-4 group hover:border-border/60 transition-all duration-200"
+            className="card-depth p-5 group hover:border-border/60 transition-all duration-200"
             initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
           >
             <div className="flex items-center justify-between mb-3">
@@ -50,8 +50,8 @@ export default function PersonalDashboard() {
                 </span>
               )}
             </div>
-            <p className="text-lg font-bold text-foreground font-sans tracking-tight">{m.value}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{m.label}</p>
+            <p className="text-xl font-bold text-foreground font-sans tracking-tight">{m.value}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{m.label}</p>
           </motion.div>
         ))}
       </div>

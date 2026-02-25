@@ -6,23 +6,23 @@
 
 @layer base {
   :root {
-    --background: 340 20% 7%;
-    --foreground: 30 10% 90%;
+    --background: 340 20% 5%;
+    --foreground: 30 10% 93%;
 
-    --card: 340 16% 10%;
-    --card-foreground: 30 10% 90%;
+    --card: 340 16% 12%;
+    --card-foreground: 30 10% 93%;
 
-    --popover: 340 16% 10%;
-    --popover-foreground: 30 10% 90%;
+    --popover: 340 16% 12%;
+    --popover-foreground: 30 10% 93%;
 
-    --primary: 340 50% 42%;
+    --primary: 340 50% 46%;
     --primary-foreground: 30 10% 96%;
 
     --secondary: 340 14% 15%;
-    --secondary-foreground: 30 10% 78%;
+    --secondary-foreground: 30 10% 82%;
 
-    --muted: 340 10% 13%;
-    --muted-foreground: 340 6% 48%;
+    --muted: 340 10% 16%;
+    --muted-foreground: 340 6% 58%;
 
     --accent: 37 28% 52%;
     --accent-foreground: 30 10% 96%;
@@ -30,14 +30,14 @@
     --destructive: 0 65% 48%;
     --destructive-foreground: 30 10% 96%;
 
-    --border: 340 10% 15%;
-    --input: 340 10% 15%;
-    --ring: 340 50% 42%;
+    --border: 340 10% 18%;
+    --input: 340 10% 18%;
+    --ring: 340 50% 46%;
 
     --radius: 0.625rem;
 
-    --sidebar-background: 340 20% 8%;
-    --sidebar-foreground: 30 8% 75%;
+    --sidebar-background: 340 20% 7%;
+    --sidebar-foreground: 30 8% 78%;
     --sidebar-primary: 340 50% 42%;
     --sidebar-primary-foreground: 30 10% 96%;
     --sidebar-accent: 340 16% 13%;
@@ -60,27 +60,27 @@
   }
 
   .dark {
-    --background: 340 20% 7%;
-    --foreground: 30 10% 90%;
-    --card: 340 16% 10%;
-    --card-foreground: 30 10% 90%;
-    --popover: 340 16% 10%;
-    --popover-foreground: 30 10% 90%;
-    --primary: 340 50% 42%;
+    --background: 340 20% 5%;
+    --foreground: 30 10% 93%;
+    --card: 340 16% 12%;
+    --card-foreground: 30 10% 93%;
+    --popover: 340 16% 12%;
+    --popover-foreground: 30 10% 93%;
+    --primary: 340 50% 46%;
     --primary-foreground: 30 10% 96%;
     --secondary: 340 14% 15%;
-    --secondary-foreground: 30 10% 78%;
-    --muted: 340 10% 13%;
-    --muted-foreground: 340 6% 48%;
+    --secondary-foreground: 30 10% 82%;
+    --muted: 340 10% 16%;
+    --muted-foreground: 340 6% 58%;
     --accent: 37 28% 52%;
     --accent-foreground: 30 10% 96%;
     --destructive: 0 65% 48%;
     --destructive-foreground: 30 10% 96%;
-    --border: 340 10% 15%;
-    --input: 340 10% 15%;
-    --ring: 340 50% 42%;
-    --sidebar-background: 340 20% 8%;
-    --sidebar-foreground: 30 8% 75%;
+    --border: 340 10% 18%;
+    --input: 340 10% 18%;
+    --ring: 340 50% 46%;
+    --sidebar-background: 340 20% 7%;
+    --sidebar-foreground: 30 8% 78%;
     --sidebar-primary: 340 50% 42%;
     --sidebar-primary-foreground: 30 10% 96%;
     --sidebar-accent: 340 16% 13%;
@@ -99,7 +99,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.011em;
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
   h1, h2, h3 {
@@ -112,11 +112,11 @@
 @layer utilities {
   /* --- Surfaces --- */
   .glass {
-    @apply backdrop-blur-2xl border border-border/30;
+    @apply backdrop-blur-2xl border border-border/40;
     background: linear-gradient(
       145deg,
-      hsl(340 16% 11% / 0.7),
-      hsl(340 18% 9% / 0.6)
+      hsl(340 16% 13% / 0.7),
+      hsl(340 18% 11% / 0.6)
     );
     box-shadow:
       inset 0 1px 0 hsl(340 12% 20% / 0.15),
@@ -138,11 +138,11 @@
   }
 
   .card-depth {
-    @apply backdrop-blur-xl border border-border/30 rounded-xl;
+    @apply backdrop-blur-xl border border-border/40 rounded-xl;
     background: linear-gradient(
       160deg,
-      hsl(340 16% 12% / 0.8),
-      hsl(340 18% 9% / 0.6)
+      hsl(340 16% 14% / 0.8),
+      hsl(340 18% 11% / 0.6)
     );
     box-shadow:
       inset 0 1px 0 hsl(340 12% 20% / 0.12),
@@ -153,11 +153,11 @@
   }
 
   .surface-elevated {
-    @apply border border-border/25 rounded-xl;
+    @apply border border-border/35 rounded-xl;
     background: linear-gradient(
       155deg,
-      hsl(340 16% 13% / 0.9),
-      hsl(340 18% 10% / 0.8)
+      hsl(340 16% 15% / 0.9),
+      hsl(340 18% 12% / 0.8)
     );
     box-shadow:
       0 0 0 1px hsl(340 12% 16% / 0.4),
@@ -171,9 +171,9 @@
   .gradient-wine {
     background: linear-gradient(
       135deg,
-      hsl(340 45% 32%) 0%,
-      hsl(340 55% 38%) 40%,
-      hsl(330 50% 42%) 100%
+      hsl(340 45% 35%) 0%,
+      hsl(340 55% 42%) 40%,
+      hsl(330 50% 46%) 100%
     );
   }
 
