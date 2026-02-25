@@ -32,8 +32,10 @@ const App = () => (
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<DashboardIndex />} />
               <Route path="cellar" element={<CellarPage />} />
+              <Route path="alerts" element={<Placeholder title="Alertas" />} />
               <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
-              <Route path="stats" element={<Placeholder title="Estatísticas" />} />
+              <Route path="stats" element={<Placeholder title="Analytics" />} />
+              <Route path="settings" element={<Placeholder title="Configurações" />} />
               <Route path="inventory" element={<Placeholder title="Estoque" />} />
               <Route path="sales" element={<Placeholder title="Vendas" />} />
               <Route path="registers" element={<Placeholder title="Cadastros" />} />
