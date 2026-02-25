@@ -1,20 +1,34 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, Search, Bell } from "lucide-react";
+import { Plus, Search, Bell, GlassWater } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
-import { useWineMetrics } from "@/hooks/useWines";
-import { useNavigate } from "react-router-dom";
+import { useWineMetrics, useWines } from "@/hooks/useWines";
 
 export default function DashboardLayout() {
   const { user, profileType, loading } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const navigate = useNavigate();
   const { drinkNow, lowStock } = useWineMetrics();
+  const { data: wines } = useWines();
   const alertCount = drinkNow + lowStock;
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery || !wines) return [];
+    const q = searchQuery.toLowerCase();
+    return wines
+      .filter(w => w.quantity > 0 && (
+        w.name.toLowerCase().includes(q) || w.producer?.toLowerCase().includes(q) ||
+        w.grape?.toLowerCase().includes(q) || w.country?.toLowerCase().includes(q) ||
+        String(w.vintage).includes(q)
+      ))
+      .slice(0, 6);
+  }, [searchQuery, wines]);
 
   const initials = user?.user_metadata?.full_name
     ?.split(" ")
@@ -42,11 +56,11 @@ export default function DashboardLayout() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full" style={{ background: "#F7F7F8" }}>
         <AppSidebar />
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col min-w-0">
           <header
-            className="h-[56px] flex items-center px-4 md:px-6 gap-4 sticky top-0 z-30"
+            className="h-[56px] flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30"
             style={{
-              background: "rgba(247,247,248,0.75)",
+              background: "rgba(247,247,248,0.82)",
               backdropFilter: "blur(16px) saturate(1.5)",
               borderBottom: "1px solid rgba(0,0,0,0.05)",
             }}
@@ -54,24 +68,65 @@ export default function DashboardLayout() {
             <SidebarTrigger className="transition-colors" style={{ color: "#9CA3AF" }} />
             
             {/* Search */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "#9CA3AF" }} />
-                <input
-                  type="text"
-                  placeholder="Buscar vinhos, produtores..."
-                  className="w-full h-9 pl-9 pr-3 rounded-[12px] text-sm focus:outline-none focus:ring-2 focus:ring-[#8F2D56]/20 transition-all"
+            <div className="flex-1 max-w-lg relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "#9CA3AF" }} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                placeholder="Pesquise vinho, produtor, uva, safra…"
+                className="w-full h-9 pl-9 pr-3 rounded-[12px] text-sm focus:outline-none transition-all"
+                style={{
+                  background: searchFocused ? "rgba(0,0,0,0.04)" : "rgba(0,0,0,0.025)",
+                  border: `1px solid ${searchFocused ? "rgba(143,45,86,0.15)" : "rgba(0,0,0,0.05)"}`,
+                  color: "#0F0F14",
+                  boxShadow: searchFocused ? "0 0 0 3px rgba(143,45,86,0.08)" : "none",
+                }}
+              />
+              {/* Search dropdown */}
+              {searchFocused && searchQuery && searchResults.length > 0 && (
+                <div
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-[14px] overflow-hidden z-50"
                   style={{
-                    background: "rgba(0,0,0,0.03)",
-                    border: "1px solid rgba(0,0,0,0.06)",
-                    color: "#0F0F14",
+                    background: "rgba(255,255,255,0.96)",
+                    backdropFilter: "blur(20px)",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
                   }}
-                />
-              </div>
+                >
+                  {searchResults.map(w => (
+                    <button
+                      key={w.id}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.03]"
+                      onMouseDown={() => { navigate("/dashboard/cellar"); setSearchQuery(""); }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-semibold truncate" style={{ color: "#0F0F14" }}>{w.name}</p>
+                        <p className="text-[10px]" style={{ color: "#9CA3AF" }}>
+                          {[w.producer, w.vintage, w.country].filter(Boolean).join(" · ")} · {w.quantity} un.
+                          {w.cellar_location ? ` · ${w.cellar_location}` : ""}
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0" style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e" }}>
+                        Em estoque
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {searchFocused && searchQuery && searchResults.length === 0 && (
+                <div
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-[14px] p-4 text-center z-50"
+                  style={{ background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}
+                >
+                  <p className="text-[12px]" style={{ color: "#9CA3AF" }}>Nenhum resultado para "{searchQuery}"</p>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Notifications */}
               <button
                 onClick={() => navigate("/dashboard/alerts")}
                 className="w-9 h-9 rounded-[12px] flex items-center justify-center transition-all duration-200 hover:bg-black/[0.04] relative"
@@ -85,7 +140,6 @@ export default function DashboardLayout() {
                 )}
               </button>
 
-              {/* Add button */}
               <Button
                 size="sm"
                 className="gradient-wine text-white btn-glow h-9 px-4 text-[12px] font-semibold border-0"
@@ -95,10 +149,10 @@ export default function DashboardLayout() {
                 <span className="hidden sm:inline">{profileType === "commercial" ? "Cadastrar" : "Adicionar"}</span>
               </Button>
 
-              {/* Avatar */}
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105"
                 style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)" }}
+                onClick={() => navigate("/dashboard/settings")}
               >
                 {initials}
               </div>
