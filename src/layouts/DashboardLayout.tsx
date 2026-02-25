@@ -2,15 +2,30 @@ import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, Search, Bell, GlassWater } from "lucide-react";
+import { Plus, Search, Bell, GlassWater, Wine, ArrowDownRight, Camera, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
+import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { useWineMetrics, useWines } from "@/hooks/useWines";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function DashboardLayout() {
   const { user, profileType, loading } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const navigate = useNavigate();
@@ -127,6 +142,18 @@ export default function DashboardLayout() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Profile badge */}
+              <span
+                className="hidden sm:inline-flex items-center h-7 px-2.5 rounded-full text-[10px] font-semibold uppercase tracking-wider"
+                style={{
+                  background: profileType === "commercial" ? "rgba(201,168,106,0.1)" : "rgba(143,45,86,0.06)",
+                  color: profileType === "commercial" ? "#C9A86A" : "#8F2D56",
+                  border: `1px solid ${profileType === "commercial" ? "rgba(201,168,106,0.2)" : "rgba(143,45,86,0.12)"}`,
+                }}
+              >
+                {profileType === "commercial" ? "Comercial" : "Pessoal"}
+              </span>
+
               <button
                 onClick={() => navigate("/dashboard/alerts")}
                 className="w-9 h-9 rounded-[12px] flex items-center justify-center transition-all duration-200 hover:bg-black/[0.04] relative"
@@ -140,14 +167,43 @@ export default function DashboardLayout() {
                 )}
               </button>
 
-              <Button
-                size="sm"
-                className="gradient-wine text-white btn-glow h-9 px-4 text-[12px] font-semibold border-0"
-                onClick={() => setAddOpen(true)}
-              >
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                <span className="hidden sm:inline">{profileType === "commercial" ? "Cadastrar" : "Adicionar"}</span>
-              </Button>
+              {/* Add wine dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="sm"
+                    className="gradient-wine text-white btn-glow h-9 px-4 text-[12px] font-semibold border-0"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    <span className="hidden sm:inline">{profileType === "commercial" ? "Cadastrar" : "Adicionar"}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
+                    <Wine className="h-4 w-4 mr-2" style={{ color: "#8F2D56" }} />
+                    <span className="text-[13px]">Adicionar garrafa</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setManageTab("open"); setManageOpen(true); }} className="cursor-pointer">
+                    <GlassWater className="h-4 w-4 mr-2" style={{ color: "#22c55e" }} />
+                    <span className="text-[13px]">Registrar abertura</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setManageTab("exit"); setManageOpen(true); }} className="cursor-pointer">
+                    <ArrowDownRight className="h-4 w-4 mr-2" style={{ color: "#E07A5F" }} />
+                    <span className="text-[13px]">Registrar saída</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+                        <Camera className="h-4 w-4 mr-2" />
+                        <span className="text-[13px]">Adicionar via foto</span>
+                        <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(143,45,86,0.08)", color: "#8F2D56" }}>Em breve</span>
+                      </DropdownMenuItem>
+                    </TooltipTrigger>
+                    <TooltipContent side="left"><p className="text-xs">Reconhecimento de rótulo por foto será lançado em breve.</p></TooltipContent>
+                  </Tooltip>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105"
@@ -164,6 +220,7 @@ export default function DashboardLayout() {
         </main>
       </div>
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
+      <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
     </SidebarProvider>
   );
 }
