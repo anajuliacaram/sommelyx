@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 type ProfileType = "personal" | "commercial" | null;
 
@@ -30,45 +29,62 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profileType, setProfileTypeState] = useState<ProfileType>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfileType = async (userId: string): Promise<ProfileType> => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("profile_type")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (error) {
+        console.error("[Auth] Profile fetch error:", error);
+        return null;
+      }
+      return (data?.profile_type as ProfileType) ?? null;
+    } catch (err) {
+      console.error("[Auth] Profile fetch exception:", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
+    let mounted = true;
+
+    // Get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
+      console.log("[Auth] Initial session:", session ? "found" : "none");
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        const pt = await fetchProfileType(session.user.id);
+        if (mounted) setProfileTypeState(pt);
+      }
+      if (mounted) setLoading(false);
+    });
+
+    // Listen for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        if (!mounted) return;
+        console.log("[Auth] State change:", event, session ? "session" : "no-session");
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          const { data } = await supabase
-            .from("profiles")
-            .select("profile_type")
-            .eq("user_id", session.user.id)
-            .single();
-          setProfileTypeState((data?.profile_type as ProfileType) ?? null);
+          const pt = await fetchProfileType(session.user.id);
+          if (mounted) setProfileTypeState(pt);
         } else {
           setProfileTypeState(null);
         }
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        supabase
-          .from("profiles")
-          .select("profile_type")
-          .eq("user_id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            setProfileTypeState((data?.profile_type as ProfileType) ?? null);
-            setLoading(false);
-          });
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -84,18 +100,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    console.log("[Auth] signIn called");
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    if (error) {
+      console.error("[Auth] signIn error:", error);
+      throw error;
+    }
+    console.log("[Auth] signIn success");
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setProfileTypeState(null);
   };
 
   const setProfileType = async (type: "personal" | "commercial") => {
     if (!user) throw new Error("Usuário não autenticado");
     
-    // Try update first
     const { data: existing, error: fetchError } = await supabase
       .from("profiles")
       .select("id")

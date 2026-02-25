@@ -15,7 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const emailConfirmed = searchParams.get("confirmed") === "true";
-  const { signIn } = useAuth();
+  const { signIn, user, profileType, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -28,21 +28,40 @@ export default function Login() {
     }
   }, [emailConfirmed]);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (authLoading) return;
+    if (user) {
+      if (!profileType) {
+        navigate("/select-profile", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [user, profileType, authLoading, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
+    console.log("[Login] Attempting sign in...");
     try {
       await signIn(email, password);
-      navigate("/dashboard");
+      console.log("[Login] Sign in successful, waiting for auth state...");
+      // Navigation handled by useEffect above after auth state updates
     } catch (err: any) {
+      console.error("[Login] Sign in error:", err);
+      const msg =
+        err.message === "Invalid login credentials"
+          ? "Email ou senha incorretos."
+          : err.message === "Email not confirmed"
+          ? "Confirme seu email antes de fazer login."
+          : err.message || "Erro desconhecido. Tente novamente.";
       toast({
         title: "Erro ao entrar",
-        description: err.message === "Invalid login credentials"
-          ? "Email ou senha incorretos."
-          : err.message,
+        description: msg,
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -60,7 +79,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: "#F7F7F8" }}>
-      {/* ═══ Left — editorial wine panel ═══ */}
+      {/* Left — editorial wine panel */}
       <div
         className="relative flex items-center justify-center overflow-hidden lg:w-[52%]"
         style={{
@@ -78,7 +97,6 @@ export default function Login() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* Logo in glass card */}
           <motion.div
             className="relative inline-flex items-center gap-3 lg:gap-4 rounded-[20px] px-3 py-2.5 lg:px-4 lg:py-3 cursor-default"
             style={{
@@ -96,36 +114,14 @@ export default function Login() {
             <span className="text-[17px] lg:text-[19px] font-extrabold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
           </motion.div>
 
-          <h2
-            className="font-serif font-bold text-white"
-            style={{
-              fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.05,
-              marginBottom: 12,
-            }}
-          >
+          <h2 className="font-serif font-bold text-white" style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.05, marginBottom: 12 }}>
             Bem-vindo
           </h2>
-          <h2
-            className="font-serif italic"
-            style={{
-              fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
-              fontWeight: 600,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.05,
-              color: "#C9A86A",
-              marginBottom: 32,
-            }}
-          >
+          <h2 className="font-serif italic" style={{ fontSize: "clamp(2.2rem, 4.5vw, 4rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.05, color: "#C9A86A", marginBottom: 32 }}>
             de volta.
           </h2>
 
-          <p
-            className="text-[18px] lg:text-[20px] leading-[1.6] max-w-sm"
-            style={{ color: "rgba(255,255,255,0.60)" }}
-          >
+          <p className="text-[18px] lg:text-[20px] leading-[1.6] max-w-sm" style={{ color: "rgba(255,255,255,0.60)" }}>
             Acesse sua adega inteligente e continue gerenciando sua coleção com precisão.
           </p>
         </motion.div>
@@ -133,7 +129,7 @@ export default function Login() {
         <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.08), transparent)" }} />
       </div>
 
-      {/* ═══ Right — form ═══ */}
+      {/* Right — form */}
       <div className="flex-1 flex items-center justify-center p-5 sm:p-10 lg:p-16">
         <motion.div
           className="w-[94%] sm:w-full max-w-[420px]"
@@ -141,7 +137,6 @@ export default function Login() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.12, ease: "easeOut" }}
         >
-          {/* Glass card */}
           <div
             style={{
               background: "rgba(255,255,255,0.72)",
@@ -153,34 +148,14 @@ export default function Login() {
             }}
           >
             {/* Mobile logo */}
-            <motion.div
-              className="flex items-center gap-3 mb-8 lg:hidden"
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div
-                className="flex items-center justify-center rounded-[14px] p-2"
-                style={{
-                  background: "rgba(255,255,255,0.6)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(120,60,90,0.15)",
-                }}
-              >
+            <motion.div className="flex items-center gap-3 mb-8 lg:hidden" whileHover={{ scale: 1.03 }} transition={{ duration: 0.25 }}>
+              <div className="flex items-center justify-center rounded-[14px] p-2" style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(10px)", border: "1px solid rgba(120,60,90,0.15)" }}>
                 <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-10 object-contain" />
               </div>
               <span className="text-[16px] font-extrabold font-sans" style={{ color: "#0F0F14", letterSpacing: "-0.02em" }}>Sommelyx</span>
             </motion.div>
 
-            <h1
-              className="font-serif font-bold"
-              style={{
-                fontSize: "clamp(2rem, 4vw, 3rem)",
-                letterSpacing: "-0.02em",
-                color: "#6B1F3A",
-                lineHeight: 1.05,
-                marginBottom: 6,
-              }}
-            >
+            <h1 className="font-serif font-bold" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", letterSpacing: "-0.02em", color: "#6B1F3A", lineHeight: 1.05, marginBottom: 6 }}>
               Entrar
             </h1>
             <p style={{ fontSize: "clamp(16px, 2vw, 19px)", color: "#6B7280", lineHeight: 1.5, marginBottom: "clamp(24px, 3vw, 32px)" }}>
@@ -200,23 +175,11 @@ export default function Login() {
                   Email
                 </Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  id="email" type="email" placeholder="seu@email.com"
+                  value={email} onChange={(e) => setEmail(e.target.value)} required
                   className="text-[16px]"
-                  style={{
-                    height: 56,
-                    borderRadius: 16,
-                    background: "rgba(240,240,242,0.8)",
-                    border: "1px solid rgba(120,60,90,0.15)",
-                    color: "#0F0F14",
-                    transition: "all 0.18s ease",
-                  }}
-                  onFocus={inputFocus}
-                  onBlur={inputBlur}
+                  style={{ height: 56, borderRadius: 16, background: "rgba(240,240,242,0.8)", border: "1px solid rgba(120,60,90,0.15)", color: "#0F0F14", transition: "all 0.18s ease" }}
+                  onFocus={inputFocus} onBlur={inputBlur}
                 />
               </div>
 
@@ -226,56 +189,31 @@ export default function Login() {
                 </Label>
                 <div className="relative">
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                    id="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                    value={password} onChange={(e) => setPassword(e.target.value)} required
                     className="text-[16px] pr-12"
-                    style={{
-                      height: 56,
-                      borderRadius: 16,
-                      background: "rgba(240,240,242,0.8)",
-                      border: "1px solid rgba(120,60,90,0.15)",
-                      color: "#0F0F14",
-                      transition: "all 0.18s ease",
-                    }}
-                    onFocus={inputFocus}
-                    onBlur={inputBlur}
+                    style={{ height: 56, borderRadius: 16, background: "rgba(240,240,242,0.8)", border: "1px solid rgba(120,60,90,0.15)", color: "#0F0F14", transition: "all 0.18s ease" }}
+                    onFocus={inputFocus} onBlur={inputBlur}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-60"
-                    style={{ color: "#9CA3AF" }}
-                  >
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-60" style={{ color: "#9CA3AF" }}>
                     {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
                   </button>
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <Link
-                  to="/forgot-password"
-                  className="text-[13px] font-semibold relative group"
-                  style={{ color: "#8F2D56" }}
-                >
+                <Link to="/forgot-password" className="text-[13px] font-semibold relative group" style={{ color: "#8F2D56" }}>
                   Esqueci minha senha
-                  <span
-                    className="absolute left-0 -bottom-0.5 w-full h-[1.5px] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-250"
-                    style={{ background: "#8F2D56" }}
-                  />
+                  <span className="absolute left-0 -bottom-0.5 w-full h-[1.5px] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-250" style={{ background: "#8F2D56" }} />
                 </Link>
               </div>
 
               <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
                 <Button
-                  type="submit"
+                  type="submit" disabled={loading}
                   className="w-full text-[17px] font-semibold text-white border-0 cursor-pointer"
                   style={{
-                    height: 60,
-                    borderRadius: 18,
+                    height: 60, borderRadius: 18,
                     background: "linear-gradient(135deg, #7a1f3d 0%, #b23a6f 55%, #d6a46b 120%)",
                     boxShadow: "0 12px 28px rgba(122,31,61,0.25), 0 4px 10px rgba(0,0,0,0.08)",
                     transition: "box-shadow 200ms ease, filter 200ms ease",
@@ -291,7 +229,6 @@ export default function Login() {
                     e.currentTarget.style.boxShadow = "0 12px 28px rgba(122,31,61,0.25), 0 4px 10px rgba(0,0,0,0.08)";
                     e.currentTarget.style.filter = loading ? "brightness(0.97)" : "none";
                   }}
-                  disabled={loading}
                 >
                   {loading ? "Entrando..." : "Entrar"}
                 </Button>
