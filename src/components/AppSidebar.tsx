@@ -45,7 +45,7 @@ export function AppSidebar() {
     <Sidebar className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
       <SidebarHeader>
         <div className="flex items-center gap-3 px-3 py-4">
-          <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-9 w-9 object-contain" />
+          <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
           <div className="flex flex-col">
             <span className="text-[14px] font-bold font-sans tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.02em" }}>Sommelyx</span>
             <span className="text-[10px] capitalize font-medium" style={{ color: "#9CA3AF" }}>
