@@ -183,7 +183,7 @@ export default function Landing() {
       >
         <div className="container mx-auto flex items-center justify-between h-[64px] px-5 lg:px-8">
           <div className="flex items-center gap-2.5">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-14 w-14 object-contain" />
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-16 w-16 object-contain" />
             <span className="text-[18px] font-extrabold tracking-tight font-sans" style={{ color: "#0F0F14", letterSpacing: "-0.025em" }}>
               Sommelyx
             </span>
@@ -455,7 +455,7 @@ export default function Landing() {
       <footer className="py-14 px-4 relative z-10" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-10 object-contain" />
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
             <span className="font-bold text-[14px] font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
           </div>
           <p className="text-[11px]" style={{ color: "#9CA3AF" }}>

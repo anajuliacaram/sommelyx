@@ -61,7 +61,7 @@ export default function Login() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-20 w-20 object-contain mb-8" />
+          <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-24 w-24 object-contain mb-8" />
           <h2 className="text-4xl font-serif font-bold text-white mb-4" style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}>
             Bem-vindo
             <br />
@@ -82,7 +82,7 @@ export default function Login() {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="flex items-center gap-2.5 mb-10 lg:hidden">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-14 w-14 object-contain" />
             <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: "#1A1A1A" }}>Sommelyx</span>
           </div>
 
