@@ -39,15 +39,15 @@ const plans = [
 
 export default function Plans() {
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-7">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Meu Plano</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Gerencie sua assinatura e recursos.</p>
+        <p className="text-sm text-muted-foreground mt-1">Gerencie sua assinatura e recursos.</p>
       </motion.div>
 
       {/* Current plan badge */}
       <motion.div
-        className="card-depth p-5 flex items-center justify-between"
+        className="card-depth p-6 flex items-center justify-between"
         initial="hidden" animate="visible" variants={fadeUp} custom={1}
       >
         <div className="flex items-center gap-3">
@@ -57,30 +57,30 @@ export default function Plans() {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-foreground font-sans tracking-tight">Plano Free</h3>
-              <Badge variant="outline" className="text-[10px] h-5 border-border/50 text-muted-foreground">Ativo</Badge>
+              <Badge variant="outline" className="text-[10px] h-5 border-border/60 text-muted-foreground">Ativo</Badge>
             </div>
-            <p className="text-xs text-muted-foreground">Trial de 14 dias do Pro disponível</p>
+            <p className="text-sm text-muted-foreground">Trial de 14 dias do Pro disponível</p>
           </div>
         </div>
-        <Button className="gradient-gold text-gold-foreground rounded-lg h-8 text-xs font-medium btn-gold-glow px-4">
+        <Button className="gradient-gold text-gold-foreground rounded-lg h-9 text-xs font-medium btn-gold-glow px-5">
           <Crown className="h-3.5 w-3.5 mr-1.5" /> Fazer Upgrade
         </Button>
       </motion.div>
 
       {/* Plans grid */}
-      <div className="grid md:grid-cols-3 gap-3">
+      <div className="grid md:grid-cols-3 gap-4">
         {plans.map((plan, i) => (
           <motion.div
             key={plan.name}
-            className={`rounded-xl p-6 transition-all duration-200 relative ${
+            className={`rounded-xl p-7 transition-all duration-200 relative ${
               plan.highlighted
-                ? "gradient-wine text-primary-foreground shadow-wine glow-wine border border-wine-vivid/20"
+                ? "gradient-wine text-primary-foreground shadow-wine glow-wine border border-wine-vivid/25"
                 : "card-depth"
             }`}
             initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
           >
             {plan.current && (
-              <Badge variant="outline" className="mb-3 text-[10px] h-5 border-border/50 text-muted-foreground">Plano Atual</Badge>
+              <Badge variant="outline" className="mb-3 text-[10px] h-5 border-border/60 text-muted-foreground">Plano Atual</Badge>
             )}
             {plan.highlighted && (
               <Badge className="mb-3 text-[10px] h-5 bg-primary-foreground/15 text-primary-foreground border-0">
@@ -88,18 +88,18 @@ export default function Plans() {
               </Badge>
             )}
             <h3 className="text-base font-semibold font-sans tracking-tight">{plan.name}</h3>
-            <p className={`text-xs mb-4 ${plan.highlighted ? "text-primary-foreground/55" : "text-muted-foreground"}`}>
+            <p className={`text-[12px] mb-4 ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
               {plan.desc}
             </p>
             <div className="mb-5">
               <span className="text-2xl font-bold font-sans tracking-tight">{plan.price}</span>
-              <span className={`text-xs ml-1 ${plan.highlighted ? "text-primary-foreground/55" : "text-muted-foreground"}`}>
+              <span className={`text-[12px] ml-1 ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                 {plan.period}
               </span>
             </div>
-            <ul className="space-y-2 mb-6">
+            <ul className="space-y-2.5 mb-6">
               {plan.features.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-xs">
+                <li key={f} className="flex items-center gap-2.5 text-[13px]">
                   <Check className={`h-3.5 w-3.5 flex-shrink-0 ${plan.highlighted ? "text-gold-light" : "text-primary"}`} />
                   {f}
                 </li>
@@ -107,11 +107,11 @@ export default function Plans() {
             </ul>
             <Button
               variant={plan.current ? "outline" : "default"}
-              className={`w-full rounded-lg h-9 text-xs font-medium ${
+              className={`w-full rounded-lg h-10 text-xs font-medium ${
                 plan.highlighted
                   ? "bg-primary-foreground text-wine hover:bg-primary-foreground/90 btn-gold-glow"
                   : plan.current
-                    ? "border-border/50 text-muted-foreground"
+                    ? "border-border/60 text-muted-foreground"
                     : "gradient-wine text-primary-foreground btn-glow"
               }`}
               disabled={plan.current}

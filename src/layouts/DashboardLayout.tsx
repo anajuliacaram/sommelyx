@@ -26,11 +26,11 @@ export default function DashboardLayout() {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col">
-          <header className="h-12 border-b border-border/30 flex items-center px-4 gap-4 bg-card/60 backdrop-blur-xl sticky top-0 z-30">
+          <header className="h-12 border-b border-border/35 flex items-center px-4 gap-4 bg-secondary/50 backdrop-blur-xl sticky top-0 z-30">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
             <div className="flex-1" />
           </header>
-          <div className="flex-1 p-4 md:p-6 lg:p-8">
+          <div className="flex-1 p-5 md:p-7 lg:p-8">
             <Outlet />
           </div>
         </main>

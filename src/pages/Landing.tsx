@@ -67,19 +67,19 @@ function DashboardMockup() {
       transition={{ delay: 0.5, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Glow behind */}
-      <div className="absolute -inset-8 rounded-3xl opacity-40" style={{ background: "radial-gradient(ellipse at center, hsl(340 55% 20% / 0.3), transparent 70%)" }} />
+      <div className="absolute -inset-10 rounded-3xl opacity-50" style={{ background: "radial-gradient(ellipse at center, hsl(338 55% 25% / 0.35), transparent 70%)" }} />
 
       <div className="relative surface-elevated rounded-2xl p-[2px] overflow-hidden" style={{ transform: "perspective(1400px) rotateX(4deg)", transformOrigin: "center bottom" }}>
         {/* Subtle border gradient */}
-        <div className="absolute inset-0 rounded-2xl" style={{ background: "linear-gradient(135deg, hsl(340 40% 25% / 0.3), transparent 50%, hsl(37 30% 45% / 0.15))" }} />
+        <div className="absolute inset-0 rounded-2xl" style={{ background: "linear-gradient(135deg, hsl(338 40% 28% / 0.35), transparent 50%, hsl(37 30% 50% / 0.18))" }} />
 
         <div className="relative bg-background rounded-[14px] overflow-hidden">
           {/* Chrome bar */}
-          <div className="flex items-center gap-2 px-5 py-3 border-b border-border/30 bg-card/30">
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-border/40 bg-card/40">
             <div className="flex gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-wine-vivid/30" />
-              <div className="w-2 h-2 rounded-full bg-gold/20" />
-              <div className="w-2 h-2 rounded-full bg-muted-foreground/15" />
+              <div className="w-2 h-2 rounded-full bg-wine-vivid/40" />
+              <div className="w-2 h-2 rounded-full bg-gold/25" />
+              <div className="w-2 h-2 rounded-full bg-muted-foreground/20" />
             </div>
             <div className="flex-1 flex justify-center">
               <div className="skeleton-premium h-2.5 w-40 rounded-full" />
@@ -90,9 +90,9 @@ function DashboardMockup() {
           {/* Mock dashboard */}
           <div className="flex">
             {/* Mini sidebar */}
-            <div className="w-44 border-r border-border/20 p-3 space-y-1.5 hidden sm:block">
+            <div className="w-44 border-r border-border/25 p-3 space-y-1.5 hidden sm:block bg-secondary/50">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md ${i === 1 ? "bg-sidebar-accent/50" : ""}`}>
+                <div key={i} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md ${i === 1 ? "bg-sidebar-accent/60" : ""}`}>
                   <div className="skeleton-premium h-3 w-3 rounded" />
                   <div className="skeleton-premium h-2 w-16 rounded" />
                 </div>
@@ -109,7 +109,7 @@ function DashboardMockup() {
                 <div className="skeleton-premium h-7 w-24 rounded-md" />
               </div>
 
-              <div className="grid grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-4 gap-3">
                 {[
                   { v: "2.847", l: "Garrafas" },
                   { v: "R$ 184k", l: "Valor" },
@@ -133,8 +133,8 @@ function DashboardMockup() {
                       style={{
                         height: `${h * 0.65}%`,
                         background: i >= 13
-                          ? "linear-gradient(to top, hsl(340 45% 32%), hsl(340 50% 42%))"
-                          : `hsl(340 10% ${14 + (i % 3)}%)`,
+                          ? "linear-gradient(to top, hsl(338 48% 38%), hsl(338 55% 48%))"
+                          : `hsl(340 12% ${14 + (i % 3)}%)`,
                       }}
                     />
                   ))}
@@ -146,7 +146,7 @@ function DashboardMockup() {
       </div>
 
       {/* Floating shadow */}
-      <div className="absolute -bottom-8 left-[15%] right-[15%] h-16 rounded-full blur-3xl" style={{ background: "hsl(340 30% 8% / 0.8)" }} />
+      <div className="absolute -bottom-8 left-[15%] right-[15%] h-16 rounded-full blur-3xl" style={{ background: "hsl(340 30% 6% / 0.9)" }} />
     </motion.div>
   );
 }
@@ -157,13 +157,13 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-background/60 backdrop-blur-2xl border-b border-border/20">
+      <nav className="fixed top-0 w-full z-50 bg-background/70 backdrop-blur-2xl border-b border-border/25">
         <div className="container mx-auto flex items-center justify-between h-14 px-4 lg:px-6">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-md gradient-wine flex items-center justify-center">
               <Wine className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold text-foreground tracking-tight font-sans">WineVault</span>
+            <span className="text-sm font-semibold text-foreground tracking-tight font-sans">Sommelyx</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-[13px] text-muted-foreground font-medium">
             <a href="#features" className="hover:text-foreground transition-colors duration-200">Funcionalidades</a>
@@ -184,21 +184,21 @@ export default function Landing() {
       <section className="relative pt-24 pb-4 px-4 min-h-[90vh] flex flex-col justify-center noise">
         {/* Layered background */}
         <div className="absolute inset-0 gradient-wine-deep" />
-        <div className="absolute inset-0 dot-pattern opacity-20" />
+        <div className="absolute inset-0 dot-pattern opacity-15" />
         <WineMesh variant="hero" />
 
         <div className="container mx-auto relative z-10 max-w-6xl">
           {/* Tag */}
           <motion.div className="flex justify-center mb-10" initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-medium border border-border/30 bg-card/20 backdrop-blur-xl text-muted-foreground tracking-wide uppercase">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-medium border border-border/40 bg-card/30 backdrop-blur-xl text-secondary-foreground tracking-wide uppercase">
               <Sparkles className="h-3 w-3 text-gold" /> Wine Tech Platform
             </span>
           </motion.div>
 
           {/* Editorial headline */}
           <div className="max-w-5xl mx-auto relative">
-            {/* Glow behind headline */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full pointer-events-none" style={{ background: "radial-gradient(ellipse, hsl(340 50% 20% / 0.25), transparent 70%)", filter: "blur(60px)" }} />
+            {/* Radial glow behind headline */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] rounded-full pointer-events-none" style={{ background: "radial-gradient(ellipse, hsl(338 50% 22% / 0.3), transparent 70%)", filter: "blur(60px)" }} />
 
             <motion.h1
               className="text-center text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-serif font-black text-foreground leading-[0.92] mb-8 relative z-10"
@@ -210,7 +210,7 @@ export default function Landing() {
                 <span className="text-gradient-gold italic">inteligente</span>
                 <motion.span
                   className="absolute -bottom-2 left-0 right-0 h-[2px]"
-                  style={{ background: "linear-gradient(90deg, transparent, hsl(37 35% 55% / 0.6), hsl(37 38% 65% / 0.3), transparent)" }}
+                  style={{ background: "linear-gradient(90deg, transparent, hsl(37 38% 58% / 0.6), hsl(37 40% 68% / 0.3), transparent)" }}
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ delay: 1, duration: 1, ease: [0.22, 1, 0.36, 1] }}
@@ -220,7 +220,7 @@ export default function Landing() {
             </motion.h1>
 
             <motion.p
-              className="text-center text-sm sm:text-base text-secondary-foreground max-w-md mx-auto mb-10 leading-[1.8] font-light"
+              className="text-center text-sm sm:text-base text-secondary-foreground max-w-md mx-auto mb-10 leading-[1.85] font-light"
               initial="hidden" animate="visible" variants={fadeUp} custom={2}
             >
               Gerencie sua coleção pessoal ou operação comercial com{" "}
@@ -239,7 +239,7 @@ export default function Landing() {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-[13px] px-6 h-12 text-muted-foreground hover:text-foreground font-medium"
+                className="text-[13px] px-6 h-12 text-secondary-foreground hover:text-foreground font-medium"
                 onClick={() => navigate("/login")}
               >
                 Já tenho conta →
@@ -248,17 +248,17 @@ export default function Landing() {
           </div>
 
           {/* Dashboard mockup */}
-          <div className="mt-20 mb-8">
+          <div className="mt-24 mb-8">
             <DashboardMockup />
           </div>
         </div>
       </section>
 
       {/* Stats bar */}
-      <section className="relative z-10 border-y border-border/20 bg-card/40 backdrop-blur-xl">
+      <section className="relative z-10 border-y border-border/25 bg-secondary/60 backdrop-blur-xl">
         <div className="container mx-auto max-w-5xl">
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border/20"
+            className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border/25"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -270,9 +270,9 @@ export default function Landing() {
               { label: "Avaliações feitas", value: "1.293" },
               { label: "Usuários ativos", value: "12.5k" },
             ].map((stat) => (
-              <motion.div key={stat.label} className="px-6 py-6 text-center" variants={fadeUp}>
+              <motion.div key={stat.label} className="px-6 py-7 text-center" variants={fadeUp}>
                 <p className="text-lg sm:text-xl font-bold text-foreground font-sans tracking-tight">{stat.value}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{stat.label}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -280,7 +280,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ FEATURES ═══════════════ */}
-      <section id="features" className="relative py-28 px-4">
+      <section id="features" className="relative py-32 px-4">
         <WineMesh variant="subtle" />
         <div className="container mx-auto max-w-6xl relative z-10">
           <motion.div className="mb-20" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
@@ -292,7 +292,7 @@ export default function Landing() {
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -300,11 +300,11 @@ export default function Landing() {
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 whileHover={{ y: -2 }}
               >
-                <div className="w-9 h-9 rounded-lg gradient-wine flex items-center justify-center mb-4 group-hover:shadow-wine transition-shadow duration-200">
+                <div className="w-9 h-9 rounded-lg gradient-wine flex items-center justify-center mb-5 group-hover:shadow-wine transition-shadow duration-200">
                   <f.icon className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <h3 className="text-sm font-semibold text-foreground mb-1.5 font-sans tracking-tight">{f.title}</h3>
-                <p className="text-muted-foreground text-xs leading-[1.7]">{f.desc}</p>
+                <h3 className="text-sm font-semibold text-foreground mb-2 font-sans tracking-tight">{f.title}</h3>
+                <p className="text-muted-foreground text-xs leading-[1.8]">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -314,7 +314,7 @@ export default function Landing() {
       <WineDivider />
 
       {/* ═══════════════ PRICING ═══════════════ */}
-      <section id="pricing" className="relative py-28 px-4">
+      <section id="pricing" className="relative py-32 px-4">
         <WineMesh variant="subtle" />
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mb-20" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
@@ -326,13 +326,13 @@ export default function Landing() {
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-3">
+          <div className="grid md:grid-cols-3 gap-4">
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`rounded-2xl p-7 transition-all duration-200 relative ${
+                className={`rounded-2xl p-8 transition-all duration-200 relative ${
                   plan.highlighted
-                    ? "gradient-wine text-primary-foreground shadow-wine glow-wine border border-wine-vivid/20"
+                    ? "gradient-wine text-primary-foreground shadow-wine glow-wine border border-wine-vivid/25"
                     : "card-depth hover:border-border"
                 }`}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
@@ -344,19 +344,19 @@ export default function Landing() {
                   </span>
                 )}
                 <h3 className="text-base font-bold font-sans mb-0.5 tracking-tight">{plan.name}</h3>
-                <p className={`text-[11px] mb-5 ${plan.highlighted ? "text-primary-foreground/50" : "text-muted-foreground"}`}>
+                <p className={`text-[12px] mb-5 ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                   {plan.desc}
                 </p>
                 <div className="mb-6">
                   <span className="text-3xl font-bold font-sans tracking-tight">{plan.price}</span>
-                  <span className={`text-[11px] ml-1 ${plan.highlighted ? "text-primary-foreground/50" : "text-muted-foreground"}`}>
+                  <span className={`text-[12px] ml-1 ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                     {plan.period}
                   </span>
                 </div>
-                <ul className="space-y-2 mb-8">
+                <ul className="space-y-2.5 mb-8">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs">
-                      <Check className={`h-3 w-3 flex-shrink-0 ${plan.highlighted ? "text-gold-light" : "text-primary"}`} />
+                    <li key={f} className="flex items-center gap-2.5 text-[13px]">
+                      <Check className={`h-3.5 w-3.5 flex-shrink-0 ${plan.highlighted ? "text-gold-light" : "text-primary"}`} />
                       {f}
                     </li>
                   ))}
@@ -378,16 +378,16 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/20 py-10 px-4 relative z-10">
+      <footer className="border-t border-border/25 py-12 px-4 relative z-10">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md gradient-wine flex items-center justify-center">
               <Wine className="h-3 w-3 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-[13px] text-foreground font-sans tracking-tight">WineVault</span>
+            <span className="font-semibold text-[13px] text-foreground font-sans tracking-tight">Sommelyx</span>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            © 2026 WineVault. Todos os direitos reservados.
+            © 2026 Sommelyx. Todos os direitos reservados.
           </p>
         </div>
       </footer>

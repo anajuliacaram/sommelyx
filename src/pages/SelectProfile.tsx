@@ -35,20 +35,20 @@ export default function SelectProfile() {
             <div className="w-8 h-8 rounded-lg gradient-wine flex items-center justify-center">
               <Wine className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold text-foreground font-sans tracking-tight">WineVault</span>
+            <span className="text-sm font-semibold text-foreground font-sans tracking-tight">Sommelyx</span>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-2" style={{ letterSpacing: "-0.03em" }}>
             Como você vai usar
             <br />
-            <span className="italic text-gradient-gold">o WineVault?</span>
+            <span className="italic text-gradient-gold">o Sommelyx?</span>
           </h1>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Escolha o perfil ideal. Você pode mudar depois.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-3">
+        <div className="grid md:grid-cols-2 gap-4">
           {[
             {
               type: "personal" as const,
@@ -68,29 +68,29 @@ export default function SelectProfile() {
             <motion.button
               key={option.type}
               onClick={() => handleSelect(option.type)}
-              className="card-depth p-6 text-left group hover:border-primary/15 transition-all duration-200"
+              className="card-depth p-7 text-left group hover:border-primary/20 transition-all duration-200"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 + i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ y: -2 }}
             >
-              <div className="w-10 h-10 rounded-lg gradient-wine flex items-center justify-center mb-4 group-hover:shadow-wine transition-shadow duration-200">
+              <div className="w-10 h-10 rounded-lg gradient-wine flex items-center justify-center mb-5 group-hover:shadow-wine transition-shadow duration-200">
                 <option.icon className="h-5 w-5 text-primary-foreground" />
               </div>
 
-              <h3 className="text-base font-semibold text-foreground mb-1.5 font-sans tracking-tight">{option.title}</h3>
-              <p className="text-muted-foreground text-[11px] mb-4 leading-relaxed">{option.desc}</p>
+              <h3 className="text-base font-semibold text-foreground mb-2 font-sans tracking-tight">{option.title}</h3>
+              <p className="text-muted-foreground text-[12px] mb-5 leading-relaxed">{option.desc}</p>
 
-              <ul className="space-y-1.5 mb-4">
+              <ul className="space-y-2 mb-5">
                 {option.features.map((f) => (
-                  <li key={f} className="text-[11px] text-muted-foreground flex items-center gap-2">
+                  <li key={f} className="text-[12px] text-muted-foreground flex items-center gap-2">
                     <div className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
                     {f}
                   </li>
                 ))}
               </ul>
 
-              <div className="flex items-center gap-1.5 text-primary font-medium text-[11px] group-hover:gap-2.5 transition-all duration-200">
+              <div className="flex items-center gap-1.5 text-primary font-medium text-[12px] group-hover:gap-2.5 transition-all duration-200">
                 Selecionar <ArrowRight className="h-3 w-3" />
               </div>
             </motion.button>
