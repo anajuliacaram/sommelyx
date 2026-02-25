@@ -80,18 +80,20 @@ export default function Login() {
         >
           {/* Logo in glass card */}
           <motion.div
-            className="inline-flex items-center gap-4 rounded-[18px] px-[14px] py-[10px] mb-8 lg:mb-10 cursor-default"
+            className="relative inline-flex items-center gap-4 rounded-[20px] px-4 py-3 mb-8 lg:mb-10 cursor-default"
             style={{
-              background: "rgba(255,255,255,0.12)",
-              backdropFilter: "blur(10px)",
+              background: "rgba(255,255,255,0.10)",
+              backdropFilter: "blur(12px)",
               border: "1px solid rgba(255,255,255,0.18)",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.18), 0 2px 10px rgba(0,0,0,0.10)",
             }}
             whileHover={{ scale: 1.04, y: -1 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-14 w-14 lg:h-16 lg:w-16 object-contain" style={{ opacity: 1, filter: "none" }} />
-            <span className="text-[17px] lg:text-[18px] font-extrabold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
+            {/* Halo vinho premium */}
+            <div className="absolute -inset-5 -z-10 pointer-events-none" style={{ background: "radial-gradient(circle, rgba(139,45,85,0.18) 0%, rgba(139,45,85,0.08) 40%, transparent 70%)", filter: "blur(18px)" }} />
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[46px] w-[46px] lg:h-[60px] lg:w-[60px] object-contain block" />
+            <span className="text-[17px] lg:text-[19px] font-extrabold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
           </motion.div>
 
           <h2
