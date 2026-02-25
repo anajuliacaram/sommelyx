@@ -347,14 +347,21 @@ export default function Landing() {
           </motion.p>
 
           {/* CTAs — premium size */}
-          <motion.div className="flex flex-col sm:flex-row gap-3 justify-center items-center" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-            <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
+          <motion.div className="flex flex-col sm:flex-row gap-4 justify-center items-center" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
               <Button
-                className="text-[14px] px-10 h-14 font-semibold text-white border-0 rounded-2xl group"
+                className="w-full sm:w-auto text-[15px] px-10 h-[58px] font-semibold text-white border-0 rounded-[15px] group cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2"
                 onClick={() => navigate("/signup")}
                 style={{
-                  background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                  boxShadow: `0 0 30px ${c.wineGlow}, 0 4px 16px rgba(107,29,58,0.15), 0 1px 3px rgba(0,0,0,0.06)`,
+                  background: "linear-gradient(135deg, #8F2D56 0%, #C44569 45%, #E07A5F 100%)",
+                  boxShadow: "0 12px 30px rgba(190,60,120,0.25), 0 2px 6px rgba(0,0,0,0.08)",
+                  transition: "all 200ms ease",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = "0 16px 40px rgba(190,60,120,0.35), 0 4px 10px rgba(0,0,0,0.1)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = "0 12px 30px rgba(190,60,120,0.25), 0 2px 6px rgba(0,0,0,0.08)";
                 }}
               >
                 <span className="flex items-center gap-2">
@@ -362,17 +369,26 @@ export default function Landing() {
                 </span>
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
               <Button
                 variant="outline"
-                className="text-[13px] px-8 h-14 font-medium rounded-2xl"
+                className="w-full sm:w-auto text-[14px] px-8 h-[58px] font-medium rounded-[15px] cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2"
                 style={{
                   color: c.textSecondary,
-                  border: `1px solid ${c.borderHover}`,
-                  background: "rgba(255,255,255,0.55)",
-                  backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(143,45,86,0.25)",
+                  background: "rgba(255,255,255,0.6)",
+                  backdropFilter: "blur(10px)",
+                  transition: "all 200ms ease",
                 }}
                 onClick={() => navigate("/login")}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.8)";
+                  e.currentTarget.style.borderColor = "rgba(143,45,86,0.4)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.6)";
+                  e.currentTarget.style.borderColor = "rgba(143,45,86,0.25)";
+                }}
               >
                 Já tenho conta →
               </Button>
