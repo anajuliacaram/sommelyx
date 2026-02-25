@@ -336,4 +336,20 @@
   .nav-link-premium:hover::after {
     transform: scaleX(1);
   }
+
+  /* ── CTA Primary Button ── */
+  .cta-primary-btn {
+    background: linear-gradient(135deg, #8F2D56, #C44569);
+    box-shadow: 0 10px 24px rgba(143, 45, 86, 0.25);
+    transition: all 0.25s ease;
+  }
+  .cta-primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(143, 45, 86, 0.32);
+    filter: brightness(1.05);
+  }
+  .cta-primary-btn:active {
+    transform: translateY(0px) scale(0.98);
+    box-shadow: 0 6px 16px rgba(143, 45, 86, 0.2);
+  }
 }
