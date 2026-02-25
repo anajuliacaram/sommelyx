@@ -34,36 +34,36 @@ export default function PersonalDashboard() {
   ).slice(0, 4);
 
   const metrics = [
-    { label: "Garrafas", value: totalBottles.toString(), icon: Wine },
-    { label: "Valor estimado", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: TrendingUp },
-    { label: "Beber agora", value: drinkNow.toString(), icon: GlassWater },
-    { label: "Últimas entradas", value: recentCount.toString(), icon: Clock },
+    { label: "Garrafas", value: totalBottles.toString(), icon: Wine, color: "#8F2D56" },
+    { label: "Valor estimado", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: TrendingUp, color: "#C44569" },
+    { label: "Beber agora", value: drinkNow.toString(), icon: GlassWater, color: "#E07A5F" },
+    { label: "Últimas entradas", value: recentCount.toString(), icon: Clock, color: "#C9A86A" },
   ];
 
   return (
     <div className="space-y-7 max-w-6xl">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>
+        <h1 className="text-xl md:text-2xl font-serif font-bold" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>
           Olá, {firstName}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Resumo da sua adega</p>
+        <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Resumo da sua adega</p>
       </motion.div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((m, i) => (
           <motion.div
             key={m.label}
-            className="card-depth p-5 group hover:border-border/70 transition-all duration-200"
+            className="glass-card p-5 group"
             initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-md bg-muted/50 flex items-center justify-center">
-                <m.icon className="h-4 w-4 text-muted-foreground" />
+              <div className="w-9 h-9 rounded-[12px] flex items-center justify-center" style={{ background: `${m.color}12` }}>
+                <m.icon className="h-4 w-4" style={{ color: m.color }} />
               </div>
             </div>
-            <p className="text-xl font-bold text-foreground font-sans tracking-tight">{m.value}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">{m.label}</p>
+            <p className="text-xl font-bold font-sans tracking-tight" style={{ color: "#0F0F14" }}>{m.value}</p>
+            <p className="text-[11px] mt-1" style={{ color: "#9CA3AF" }}>{m.label}</p>
           </motion.div>
         ))}
       </div>
@@ -78,41 +78,44 @@ export default function PersonalDashboard() {
       {/* Drink Now section or Empty State */}
       {totalBottles === 0 ? (
         <motion.div
-          className="card-depth p-12 text-center relative overflow-hidden"
+          className="glass-card p-12 text-center relative overflow-hidden"
           initial="hidden" animate="visible" variants={fadeUp} custom={5}
         >
           <WineMesh variant="empty-state" />
           <div className="relative z-10">
-            <div className="w-12 h-12 rounded-xl gradient-wine flex items-center justify-center mx-auto mb-5 glow-wine">
-              <Wine className="h-6 w-6 text-primary-foreground" />
+            <div className="w-12 h-12 rounded-[14px] gradient-wine flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "0 4px 16px rgba(143,45,86,0.2)" }}>
+              <Wine className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-sm font-semibold text-foreground mb-2 font-sans tracking-tight">
+            <h3 className="text-sm font-semibold mb-2 font-sans tracking-tight" style={{ color: "#0F0F14" }}>
               Sua adega está vazia
             </h3>
-            <p className="text-sm text-muted-foreground mb-7 max-w-xs mx-auto leading-relaxed">
+            <p className="text-sm mb-7 max-w-xs mx-auto leading-relaxed" style={{ color: "#6B7280" }}>
               Comece adicionando seu primeiro vinho e descubra tudo que o Sommelyx pode fazer.
             </p>
-            <Button onClick={() => setAddOpen(true)} className="gradient-wine text-primary-foreground btn-glow h-10 px-6 text-[13px] font-medium">
+            <Button
+              onClick={() => setAddOpen(true)}
+              className="gradient-wine text-white btn-glow h-11 px-6 text-[13px] font-semibold border-0"
+            >
               <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar Vinho
             </Button>
           </div>
         </motion.div>
       ) : drinkNowWines.length > 0 ? (
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6} className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground font-sans">🍷 Beber agora</h2>
+          <h2 className="text-sm font-semibold font-sans" style={{ color: "#0F0F14" }}>🍷 Beber agora</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {drinkNowWines.map(w => (
-              <div key={w.id} className="card-depth p-4 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                  <GlassWater className="h-4 w-4 text-green-400" />
+              <div key={w.id} className="glass-card p-4 flex items-center gap-4">
+                <div className="w-9 h-9 rounded-[12px] flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.08)" }}>
+                  <GlassWater className="h-4 w-4" style={{ color: "#22c55e" }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{w.name}</p>
-                  <p className="text-xs text-muted-foreground">{w.producer} {w.vintage ? `· ${w.vintage}` : ""}</p>
+                  <p className="text-sm font-medium truncate" style={{ color: "#0F0F14" }}>{w.name}</p>
+                  <p className="text-xs" style={{ color: "#9CA3AF" }}>{w.producer} {w.vintage ? `· ${w.vintage}` : ""}</p>
                 </div>
-                <Badge variant="secondary" className="bg-green-500/15 text-green-400 text-[10px]">
+                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e" }}>
                   Beber agora
-                </Badge>
+                </span>
               </div>
             ))}
           </div>

@@ -48,9 +48,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#F7F4F2" }}>
+    <div className="min-h-screen flex" style={{ background: "#F7F7F8" }}>
       {/* Left — editorial visual panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden" style={{ background: "linear-gradient(160deg, #3A0E1F 0%, #6B1D3A 50%, #4E1229 100%)" }}>
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden" style={{ background: "linear-gradient(160deg, #3A0E1F 0%, #8F2D56 50%, #4E1229 100%)" }}>
         {/* Subtle glow */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 30% 40%, rgba(196,69,122,0.15), transparent 70%)" }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 40% at 70% 60%, rgba(201,168,106,0.08), transparent 60%)" }} />
@@ -86,8 +86,8 @@ export default function Login() {
             <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: "#1A1A1A" }}>Sommelyx</span>
           </div>
 
-          <h1 className="text-2xl font-serif font-bold mb-1" style={{ letterSpacing: "-0.03em", color: "#1A1A1A" }}>Entrar</h1>
-          <p className="text-sm mb-6" style={{ color: "#8A8A8A" }}>Acesse sua conta Sommelyx</p>
+          <h1 className="text-2xl font-serif font-bold mb-1" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>Entrar</h1>
+          <p className="text-sm mb-6" style={{ color: "#6B7280" }}>Acesse sua conta Sommelyx</p>
 
           {emailConfirmed && (
             <div className="flex items-center gap-2.5 p-3.5 rounded-xl mb-6" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}>
@@ -98,7 +98,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#8A8A8A" }}>Email</Label>
+              <Label htmlFor="email" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#6B7280" }}>Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -107,12 +107,12 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="h-11 rounded-xl text-sm"
-                style={{ background: "#F0EDEA", border: "1px solid rgba(0,0,0,0.06)", color: "#1A1A1A" }}
+                style={{ background: "#F0F0F2", border: "1px solid rgba(0,0,0,0.06)", color: "#0F0F14" }}
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#8A8A8A" }}>Senha</Label>
+              <Label htmlFor="password" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#6B7280" }}>Senha</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -122,13 +122,13 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="h-11 rounded-xl text-sm pr-10"
-                  style={{ background: "#F0EDEA", border: "1px solid rgba(0,0,0,0.06)", color: "#1A1A1A" }}
+                  style={{ background: "#F0F0F2", border: "1px solid rgba(0,0,0,0.06)", color: "#0F0F14" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: "#8A8A8A" }}
+                  style={{ color: "#9CA3AF" }}
                 >
                   {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
@@ -139,8 +139,8 @@ export default function Login() {
               type="submit"
               className="w-full h-12 rounded-xl text-[13px] font-semibold mt-2 text-white border-0"
               style={{
-                background: "linear-gradient(135deg, #6B1D3A, #C4457A)",
-                boxShadow: "0 2px 12px rgba(107,29,58,0.15)",
+                background: "linear-gradient(135deg, #8F2D56, #C44569)",
+                boxShadow: "0 4px 16px rgba(143,45,86,0.15)",
               }}
               disabled={loading}
             >
@@ -148,15 +148,15 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-[12px] mt-6" style={{ color: "#8A8A8A" }}>
+          <p className="text-center text-[12px] mt-6" style={{ color: "#9CA3AF" }}>
             Não tem conta?{" "}
-            <Link to="/signup" className="font-medium transition-colors" style={{ color: "#6B1D3A" }}>
+            <Link to="/signup" className="font-medium transition-colors" style={{ color: "#8F2D56" }}>
               Criar conta grátis
             </Link>
           </p>
 
           <p className="text-center mt-4">
-            <Link to="/" className="text-[12px] transition-colors duration-200" style={{ color: "#8A8A8A" }}>
+            <Link to="/" className="text-[12px] transition-colors duration-200" style={{ color: "#9CA3AF" }}>
               ← Voltar ao início
             </Link>
           </p>
