@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Wine, Eye, EyeOff } from "lucide-react";
+import { Wine, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,9 +13,20 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const emailConfirmed = searchParams.get("confirmed") === "true";
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (emailConfirmed) {
+      toast({
+        title: "Email confirmado!",
+        description: "Seu email foi verificado com sucesso. Faça login para continuar.",
+      });
+    }
+  }, [emailConfirmed]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +94,14 @@ export default function Login() {
           </div>
 
           <h1 className="text-2xl font-serif font-bold mb-1" style={{ letterSpacing: "-0.03em", color: "#1A1A1A" }}>Entrar</h1>
-          <p className="text-sm mb-8" style={{ color: "#8A8A8A" }}>Acesse sua conta Sommelyx</p>
+          <p className="text-sm mb-6" style={{ color: "#8A8A8A" }}>Acesse sua conta Sommelyx</p>
+
+          {emailConfirmed && (
+            <div className="flex items-center gap-2.5 p-3.5 rounded-xl mb-6" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}>
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: "#22c55e" }} />
+              <p className="text-[13px] font-medium" style={{ color: "#16a34a" }}>Email confirmado com sucesso! Faça login.</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
