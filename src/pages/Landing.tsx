@@ -173,8 +173,11 @@ export default function Landing() {
       />
 
       {/* ─── NAV ─── */}
-      <nav
+      <motion.nav
         className="fixed top-0 w-full z-50"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         style={{
           background: "rgba(255,255,255,0.72)",
           backdropFilter: "blur(14px) saturate(1.4)",
@@ -182,7 +185,7 @@ export default function Landing() {
           boxShadow: "0 6px 24px rgba(0,0,0,0.04)",
         }}
       >
-        <div className="container mx-auto flex items-center justify-between h-[68px] px-5 lg:px-8">
+        <div className="container mx-auto flex items-center justify-between h-[76px] px-8 lg:px-12">
           <a
             href="/"
             className="flex items-center gap-2.5 cursor-pointer transition-all duration-250 hover:brightness-110 hover:scale-[1.03]"
@@ -192,26 +195,33 @@ export default function Landing() {
               Sommelyx
             </span>
           </a>
-          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium" style={{ letterSpacing: "0.2px" }}>
+          <div className="hidden md:flex items-center gap-9 text-[13px] font-medium" style={{ letterSpacing: "0.2px" }}>
             <a href="#features" className="nav-link-premium" style={{ color: "#6B7280" }}>Funcionalidades</a>
             <a href="#pricing" className="nav-link-premium" style={{ color: "#6B7280" }}>Planos</a>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" className="nav-link-premium text-[13px] h-10 px-5 font-medium" style={{ color: "#6B7280" }} onClick={() => navigate("/login")}>
+          <div className="flex items-center gap-3.5">
+            <button
+              className="h-[46px] px-[22px] rounded-[12px] text-[14px] font-medium transition-all duration-250 cursor-pointer"
+              style={{
+                background: "rgba(143,45,86,0.06)",
+                border: "1px solid rgba(143,45,86,0.18)",
+                color: "#8F2D56",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.10)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.06)"; e.currentTarget.style.transform = "translateY(0)"; }}
+              onClick={() => navigate("/login")}
+            >
               Entrar
-            </Button>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                className="text-[13px] h-11 px-6 text-white border-0 font-semibold"
-                style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)", boxShadow: "0 4px 16px rgba(143,45,86,0.2)" }}
-                onClick={() => navigate("/signup")}
-              >
-                Começar Grátis
-              </Button>
-            </motion.div>
+            </button>
+            <button
+              className="cta-primary-btn h-[48px] px-[26px] rounded-[14px] text-[15px] font-semibold text-white cursor-pointer border-0"
+              onClick={() => navigate("/signup")}
+            >
+              Começar Grátis
+            </button>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative pt-36 pb-8 px-4 min-h-[92vh] flex flex-col justify-center">
