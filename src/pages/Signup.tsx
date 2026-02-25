@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { WineMesh } from "@/components/WineMesh";
 
 export default function Signup() {
   const [fullName, setFullName] = useState("");
@@ -41,26 +40,30 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex" style={{ background: "#F7F4F2" }}>
       {/* Left — editorial visual */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
-        <div className="absolute inset-0 gradient-wine-deep" />
-        <WineMesh variant="hero" />
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden" style={{ background: "linear-gradient(160deg, #3A0E1F 0%, #6B1D3A 50%, #4E1229 100%)" }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 30% 40%, rgba(196,69,122,0.15), transparent 70%)" }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 40% at 70% 60%, rgba(201,168,106,0.08), transparent 60%)" }} />
+        
         <motion.div
           className="relative z-10 max-w-sm"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="w-12 h-12 rounded-xl gradient-wine flex items-center justify-center mb-8 glow-wine">
-            <Wine className="h-6 w-6 text-primary-foreground" />
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center mb-8"
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <Wine className="h-6 w-6 text-white" />
           </div>
-          <h2 className="text-4xl font-serif font-bold text-foreground mb-4" style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}>
+          <h2 className="text-4xl font-serif font-bold text-white mb-4" style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}>
             Comece sua
             <br />
-            <span className="italic text-gradient-gold">jornada.</span>
+            <span className="italic" style={{ color: "#C9A86A" }}>jornada.</span>
           </h2>
-          <p className="text-sm text-secondary-foreground leading-relaxed">
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
             Crie sua conta e descubra uma nova forma de gerenciar seus vinhos com inteligência.
           </p>
         </motion.div>
@@ -74,19 +77,19 @@ export default function Signup() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex items-center gap-2 mb-10 lg:hidden">
-            <div className="w-7 h-7 rounded-md gradient-wine flex items-center justify-center">
-              <Wine className="h-3.5 w-3.5 text-primary-foreground" />
+          <div className="flex items-center gap-2.5 mb-10 lg:hidden">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #6B1D3A, #C4457A)" }}>
+              <Wine className="h-4 w-4 text-white" />
             </div>
-            <span className="text-sm font-semibold font-sans tracking-tight">Sommelyx</span>
+            <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: "#1A1A1A" }}>Sommelyx</span>
           </div>
 
-          <h1 className="text-2xl font-serif font-bold text-foreground mb-1" style={{ letterSpacing: "-0.03em" }}>Criar conta</h1>
-          <p className="text-sm text-muted-foreground mb-8">Comece grátis, sem cartão de crédito</p>
+          <h1 className="text-2xl font-serif font-bold mb-1" style={{ letterSpacing: "-0.03em", color: "#1A1A1A" }}>Criar conta</h1>
+          <p className="text-sm mb-8" style={{ color: "#8A8A8A" }}>Comece grátis, sem cartão de crédito</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nome completo</Label>
+              <Label htmlFor="name" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#8A8A8A" }}>Nome completo</Label>
               <Input
                 id="name"
                 type="text"
@@ -94,12 +97,13 @@ export default function Signup() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm"
+                className="h-11 rounded-xl text-sm"
+                style={{ background: "#F0EDEA", border: "1px solid rgba(0,0,0,0.06)", color: "#1A1A1A" }}
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Email</Label>
+              <Label htmlFor="email" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#8A8A8A" }}>Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -107,12 +111,13 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm"
+                className="h-11 rounded-xl text-sm"
+                style={{ background: "#F0EDEA", border: "1px solid rgba(0,0,0,0.06)", color: "#1A1A1A" }}
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Senha</Label>
+              <Label htmlFor="password" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#8A8A8A" }}>Senha</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -122,12 +127,14 @@ export default function Signup() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm pr-10"
+                  className="h-11 rounded-xl text-sm pr-10"
+                  style={{ background: "#F0EDEA", border: "1px solid rgba(0,0,0,0.06)", color: "#1A1A1A" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: "#8A8A8A" }}
                 >
                   {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
@@ -136,22 +143,26 @@ export default function Signup() {
 
             <Button
               type="submit"
-              className="w-full h-10 rounded-lg gradient-wine text-primary-foreground btn-glow text-[13px] font-medium mt-2"
+              className="w-full h-12 rounded-xl text-[13px] font-semibold mt-2 text-white border-0"
+              style={{
+                background: "linear-gradient(135deg, #6B1D3A, #C4457A)",
+                boxShadow: "0 2px 12px rgba(107,29,58,0.15)",
+              }}
               disabled={loading}
             >
               {loading ? "Criando..." : "Criar conta grátis"}
             </Button>
           </form>
 
-          <p className="text-center text-[12px] text-muted-foreground mt-6">
+          <p className="text-center text-[12px] mt-6" style={{ color: "#8A8A8A" }}>
             Já tem conta?{" "}
-            <Link to="/login" className="text-primary font-medium hover:text-primary/80 transition-colors">
+            <Link to="/login" className="font-medium transition-colors" style={{ color: "#6B1D3A" }}>
               Entrar
             </Link>
           </p>
 
           <p className="text-center mt-4">
-            <Link to="/" className="text-[12px] text-muted-foreground hover:text-foreground transition-colors duration-200">
+            <Link to="/" className="text-[12px] transition-colors duration-200" style={{ color: "#8A8A8A" }}>
               ← Voltar ao início
             </Link>
           </p>

@@ -5,7 +5,17 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { WineMesh } from "@/components/WineMesh";
+
+const c = {
+  bg: "#F7F4F2",
+  text: "#1A1A1A",
+  textSecondary: "#5C5C5C",
+  textTertiary: "#8A8A8A",
+  wine: "#6B1D3A",
+  wineLight: "#C4457A",
+  gold: "#C9A86A",
+  border: "rgba(0,0,0,0.06)",
+};
 
 export default function SelectProfile() {
   const { setProfileType } = useAuth();
@@ -27,9 +37,9 @@ export default function SelectProfile() {
   const handleFinish = () => navigate("/dashboard");
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
-      <div className="absolute inset-0 gradient-wine-deep opacity-40" />
-      <WineMesh variant="subtle" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: c.bg }}>
+      {/* Subtle ambient */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 50% 30%, rgba(107,29,58,0.04), transparent 70%)" }} />
 
       <div className="w-full max-w-3xl relative z-10">
         {/* Progress dots */}
@@ -37,7 +47,11 @@ export default function SelectProfile() {
           {[1, 2].map(s => (
             <div
               key={s}
-              className={`h-1.5 rounded-full transition-all duration-300 ${s === step ? "w-8 bg-primary" : s < step ? "w-4 bg-primary/50" : "w-4 bg-muted"}`}
+              className="h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width: s === step ? 32 : 16,
+                background: s === step ? c.wine : s < step ? c.wineLight : "rgba(0,0,0,0.08)",
+              }}
             />
           ))}
         </div>
@@ -52,18 +66,18 @@ export default function SelectProfile() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="text-center mb-10">
-                <div className="flex items-center justify-center gap-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg gradient-wine flex items-center justify-center">
-                    <Wine className="h-4 w-4 text-primary-foreground" />
+                <div className="flex items-center justify-center gap-2.5 mb-6">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})` }}>
+                    <Wine className="h-[18px] w-[18px] text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-foreground font-sans tracking-tight">Sommelyx</span>
+                  <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: c.text }}>Sommelyx</span>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-3" style={{ letterSpacing: "-0.03em" }}>
+                <h1 className="text-3xl md:text-4xl font-serif font-bold mb-3" style={{ letterSpacing: "-0.03em", color: c.text }}>
                   Como você vai usar
                   <br />
-                  <span className="italic text-gradient-gold">o Sommelyx?</span>
+                  <span className="italic" style={{ color: c.gold }}>o Sommelyx?</span>
                 </h1>
-                <p className="text-sm text-muted-foreground">Escolha o perfil ideal. Você pode mudar depois.</p>
+                <p className="text-sm" style={{ color: c.textTertiary }}>Escolha o perfil ideal. Você pode mudar depois.</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -86,26 +100,36 @@ export default function SelectProfile() {
                   <motion.button
                     key={option.type}
                     onClick={() => handleSelect(option.type)}
-                    className="card-depth p-7 text-left group hover:border-primary/20 transition-all duration-200"
+                    className="p-7 text-left group"
+                    style={{
+                      borderRadius: 16,
+                      background: "rgba(255,255,255,0.65)",
+                      backdropFilter: "blur(14px)",
+                      border: "1px solid rgba(255,255,255,0.35)",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)",
+                    }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 + i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    whileHover={{ y: -2 }}
+                    whileHover={{ y: -4, boxShadow: "0 12px 36px rgba(0,0,0,0.07)", transition: { duration: 0.22 } }}
                   >
-                    <div className="w-10 h-10 rounded-lg gradient-wine flex items-center justify-center mb-5 group-hover:shadow-wine transition-shadow duration-200">
-                      <option.icon className="h-5 w-5 text-primary-foreground" />
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
+                      style={{ background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`, boxShadow: `0 2px 8px rgba(107,29,58,0.12)` }}
+                    >
+                      <option.icon className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-base font-semibold text-foreground mb-2 font-sans tracking-tight">{option.title}</h3>
-                    <p className="text-muted-foreground text-[12px] mb-5 leading-relaxed">{option.desc}</p>
+                    <h3 className="text-base font-semibold mb-2 font-sans tracking-tight" style={{ color: c.text }}>{option.title}</h3>
+                    <p className="text-[12px] mb-5 leading-relaxed" style={{ color: c.textTertiary }}>{option.desc}</p>
                     <ul className="space-y-2 mb-5">
                       {option.features.map(f => (
-                        <li key={f} className="text-[12px] text-muted-foreground flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
+                        <li key={f} className="text-[12px] flex items-center gap-2" style={{ color: c.textSecondary }}>
+                          <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: c.wine }} />
                           {f}
                         </li>
                       ))}
                     </ul>
-                    <div className="flex items-center gap-1.5 text-primary font-medium text-[12px] group-hover:gap-2.5 transition-all duration-200">
+                    <div className="flex items-center gap-1.5 font-medium text-[12px] group-hover:gap-2.5 transition-all duration-200" style={{ color: c.wine }}>
                       Selecionar <ArrowRight className="h-3 w-3" />
                     </div>
                   </motion.button>
@@ -122,18 +146,19 @@ export default function SelectProfile() {
               className="text-center max-w-md mx-auto"
             >
               <motion.div
-                className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center mx-auto mb-6 glow-wine"
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                style={{ background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`, boxShadow: `0 4px 20px rgba(107,29,58,0.2)` }}
                 initial={{ scale: 0.5 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15 }}
               >
-                <Check className="h-8 w-8 text-primary-foreground" />
+                <Check className="h-8 w-8 text-white" />
               </motion.div>
 
-              <h2 className="text-2xl font-serif font-bold text-foreground mb-3" style={{ letterSpacing: "-0.03em" }}>
+              <h2 className="text-2xl font-serif font-bold mb-3" style={{ letterSpacing: "-0.03em", color: c.text }}>
                 Pronto! Sua adega está configurada.
               </h2>
-              <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-sm mb-8 leading-relaxed" style={{ color: c.textTertiary }}>
                 {selectedType === "commercial"
                   ? "Cadastre seus primeiros produtos e comece a controlar seu estoque."
                   : "Adicione seus primeiros vinhos e organize sua coleção."}
@@ -141,7 +166,11 @@ export default function SelectProfile() {
 
               <Button
                 onClick={handleFinish}
-                className="gradient-wine text-primary-foreground btn-glow h-12 px-8 text-sm font-medium"
+                className="h-14 px-10 text-sm font-semibold text-white border-0 rounded-2xl"
+                style={{
+                  background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
+                  boxShadow: `0 2px 16px rgba(107,29,58,0.15)`,
+                }}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
                 Ir para o Dashboard
