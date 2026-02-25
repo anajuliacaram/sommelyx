@@ -72,7 +72,7 @@ export default function PersonalDashboard() {
           <p className="text-xs text-muted-foreground mb-6 max-w-xs mx-auto leading-relaxed">
             Comece adicionando seu primeiro vinho e descubra tudo que o WineVault pode fazer.
           </p>
-          <Button className="gradient-wine text-primary-foreground btn-glow rounded-lg h-9 px-5 text-xs font-medium">
+          <Button className="gradient-wine text-primary-foreground btn-glow h-9 px-5 text-xs font-medium">
             <Plus className="h-3 w-3 mr-1.5" /> Adicionar Vinho
           </Button>
         </div>

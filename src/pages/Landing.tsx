@@ -173,7 +173,7 @@ export default function Landing() {
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-[13px] h-8" onClick={() => navigate("/login")}>
               Entrar
             </Button>
-            <Button size="sm" className="gradient-wine text-primary-foreground btn-glow text-[13px] h-8 px-4 rounded-lg font-medium" onClick={() => navigate("/signup")}>
+            <Button size="sm" className="gradient-wine text-primary-foreground btn-glow text-[13px] h-8 px-5" onClick={() => navigate("/signup")}>
               Começar Grátis
             </Button>
           </div>
@@ -196,9 +196,12 @@ export default function Landing() {
           </motion.div>
 
           {/* Editorial headline */}
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto relative">
+            {/* Glow behind headline */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full pointer-events-none" style={{ background: "radial-gradient(ellipse, hsl(340 50% 20% / 0.25), transparent 70%)", filter: "blur(60px)" }} />
+
             <motion.h1
-              className="text-center text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-serif font-black text-foreground leading-[0.92] mb-8"
+              className="text-center text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-serif font-black text-foreground leading-[0.92] mb-8 relative z-10"
               style={{ letterSpacing: "-0.04em" }}
               initial="hidden" animate="visible" variants={fadeUp} custom={1}
             >
@@ -228,15 +231,15 @@ export default function Landing() {
             <motion.div className="flex flex-col sm:flex-row gap-3 justify-center items-center" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
               <Button
                 size="lg"
-                className="gradient-wine text-primary-foreground btn-glow text-[13px] px-8 h-12 rounded-xl font-medium shadow-wine"
+                className="gradient-wine text-primary-foreground btn-glow text-[14px] px-8 h-12 font-medium shadow-wine"
                 onClick={() => navigate("/signup")}
               >
                 Começar Gratuitamente <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
                 size="lg"
-                variant="ghost"
-                className="text-[13px] px-6 h-12 rounded-xl text-muted-foreground hover:text-foreground font-medium"
+                variant="outline"
+                className="text-[13px] px-6 h-12 text-muted-foreground hover:text-foreground font-medium"
                 onClick={() => navigate("/login")}
               >
                 Já tenho conta →
@@ -359,7 +362,7 @@ export default function Landing() {
                   ))}
                 </ul>
                 <Button
-                  className={`w-full rounded-xl h-10 text-xs font-medium ${
+                  className={`w-full h-11 text-xs font-medium ${
                     plan.highlighted
                       ? "bg-primary-foreground text-wine hover:bg-primary-foreground/90 btn-gold-glow"
                       : "gradient-wine text-primary-foreground btn-glow"
