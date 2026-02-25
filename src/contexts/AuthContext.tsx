@@ -93,12 +93,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const setProfileType = async (type: "personal" | "commercial") => {
-    if (!user) return;
-    const { error } = await supabase
+    if (!user) throw new Error("Usuário não autenticado");
+    
+    // Try update first
+    const { data: existing, error: fetchError } = await supabase
       .from("profiles")
-      .update({ profile_type: type })
-      .eq("user_id", user.id);
-    if (error) throw error;
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    
+    if (fetchError) throw fetchError;
+
+    if (existing) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ profile_type: type, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from("profiles")
+        .insert({
+          user_id: user.id,
+          profile_type: type,
+          full_name: user.user_metadata?.full_name || null,
+        });
+      if (error) throw error;
+    }
+    
     setProfileTypeState(type);
   };
 

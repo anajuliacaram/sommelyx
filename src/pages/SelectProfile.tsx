@@ -23,14 +23,21 @@ export default function SelectProfile() {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState<"personal" | "commercial" | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const handleSelect = async (type: "personal" | "commercial") => {
+    if (saving) return;
+    setSaving(true);
+    setSelectedType(type);
     try {
-      setSelectedType(type);
       await setProfileType(type);
       setStep(2);
-    } catch {
-      toast({ title: "Erro ao salvar perfil", variant: "destructive" });
+    } catch (err: any) {
+      console.error("Profile save error:", err);
+      toast({ title: "Erro ao salvar perfil", description: err.message, variant: "destructive" });
+      setSelectedType(null);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -100,19 +107,29 @@ export default function SelectProfile() {
                   <motion.button
                     key={option.type}
                     onClick={() => handleSelect(option.type)}
-                    className="p-7 text-left group"
+                    disabled={saving}
+                    className="p-7 text-left group cursor-pointer relative w-full"
                     style={{
                       borderRadius: 16,
-                      background: "rgba(255,255,255,0.65)",
+                      background: selectedType === option.type ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.65)",
                       backdropFilter: "blur(14px)",
-                      border: "1px solid rgba(255,255,255,0.35)",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)",
+                      border: selectedType === option.type ? `2px solid ${c.wine}` : "1px solid rgba(255,255,255,0.35)",
+                      boxShadow: selectedType === option.type
+                        ? `0 4px 20px rgba(107,29,58,0.12)`
+                        : "0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)",
+                      opacity: saving && selectedType !== option.type ? 0.5 : 1,
                     }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 + i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    whileHover={{ y: -4, boxShadow: "0 12px 36px rgba(0,0,0,0.07)", transition: { duration: 0.22 } }}
+                    whileHover={!saving ? { y: -4, boxShadow: "0 12px 36px rgba(0,0,0,0.07)", transition: { duration: 0.22 } } : {}}
+                    whileTap={!saving ? { scale: 0.98 } : {}}
                   >
+                    {saving && selectedType === option.type && (
+                      <div className="absolute top-4 right-4">
+                        <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: `${c.wine} transparent transparent transparent` }} />
+                      </div>
+                    )}
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
                       style={{ background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`, boxShadow: `0 2px 8px rgba(107,29,58,0.12)` }}
@@ -130,7 +147,7 @@ export default function SelectProfile() {
                       ))}
                     </ul>
                     <div className="flex items-center gap-1.5 font-medium text-[12px] group-hover:gap-2.5 transition-all duration-200" style={{ color: c.wine }}>
-                      Selecionar <ArrowRight className="h-3 w-3" />
+                      {saving && selectedType === option.type ? "Salvando..." : "Selecionar"} <ArrowRight className="h-3 w-3" />
                     </div>
                   </motion.button>
                 ))}
