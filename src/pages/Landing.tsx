@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 } as const,
+  hidden: { opacity: 0, y: 18 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.06 } },
 };
 
 const features = [
@@ -64,16 +64,16 @@ const c = {
   textSecondary: "#5C5C5C",
   textTertiary: "#8A8A8A",
   border: "rgba(0,0,0,0.06)",
-  borderHover: "rgba(0,0,0,0.12)",
+  borderHover: "rgba(0,0,0,0.10)",
   wine: "#6B1D3A",
   wineLight: "#C4457A",
   wineDark: "#4E1229",
-  wineGlow: "rgba(107, 29, 58, 0.12)",
+  wineGlow: "rgba(107, 29, 58, 0.10)",
   gold: "#C9A86A",
   goldLight: "#D9BF8A",
   cardBg: "rgba(255,255,255,0.7)",
   cardBorder: "rgba(0,0,0,0.05)",
-  navBg: "rgba(247,244,242,0.8)",
+  navBg: "rgba(247,244,242,0.72)",
 };
 
 /* Dashboard mockup — light version */
@@ -81,13 +81,13 @@ function DashboardMockup() {
   return (
     <motion.div
       className="relative mx-auto max-w-4xl"
-      initial={{ opacity: 0, y: 50, scale: 0.97 }}
+      initial={{ opacity: 0, y: 40, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: 0.6, duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ delay: 0.6, duration: 1, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Glow behind */}
       <div
-        className="absolute -inset-20 rounded-[48px] pointer-events-none"
+        className="absolute -inset-16 rounded-[48px] pointer-events-none"
         style={{ background: `radial-gradient(ellipse at center, ${c.wineGlow}, transparent 70%)` }}
       />
 
@@ -98,19 +98,19 @@ function DashboardMockup() {
           transformOrigin: "center bottom",
           background: "linear-gradient(135deg, #FFFFFF 0%, #FAFAF9 100%)",
           border: `1px solid ${c.border}`,
-          boxShadow: "0 0 0 1px rgba(0,0,0,0.03), 0 24px 80px -12px rgba(0,0,0,0.12), 0 8px 24px -4px rgba(0,0,0,0.06)",
+          boxShadow: "0 0 0 1px rgba(0,0,0,0.03), 0 24px 80px -12px rgba(0,0,0,0.10), 0 8px 24px -4px rgba(0,0,0,0.05)",
         }}
       >
         {/* Chrome bar */}
         <div className="flex items-center gap-2 px-5 py-3" style={{ borderBottom: `1px solid ${c.border}`, background: "#FEFEFE" }}>
           <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,95,87,0.7)" }} />
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,189,46,0.6)" }} />
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(39,201,63,0.6)" }} />
           </div>
           <div className="flex-1 flex justify-center">
-            <div className="h-5 w-52 rounded-full bg-gray-100 flex items-center justify-center">
-              <span className="text-[9px] text-gray-400 font-medium">app.sommelyx.com</span>
+            <div className="h-5 w-52 rounded-full flex items-center justify-center" style={{ background: "#F5F5F4" }}>
+              <span className="text-[9px] font-medium" style={{ color: c.textTertiary }}>app.sommelyx.com</span>
             </div>
           </div>
           <div className="w-14" />
@@ -125,9 +125,9 @@ function DashboardMockup() {
                 key={label}
                 className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11px] font-medium"
                 style={{
-                  background: i === 0 ? "rgba(155,45,94,0.06)" : "transparent",
+                  background: i === 0 ? "rgba(107,29,58,0.06)" : "transparent",
                   color: i === 0 ? c.wine : c.textTertiary,
-                  border: i === 0 ? `1px solid rgba(155,45,94,0.1)` : "1px solid transparent",
+                  border: i === 0 ? "1px solid rgba(107,29,58,0.08)" : "1px solid transparent",
                 }}
               >
                 <div className="h-3 w-3 rounded" style={{ background: i === 0 ? c.wine : "#E5E5E5" }} />
@@ -192,8 +192,8 @@ function DashboardMockup() {
 
       {/* Shadow */}
       <div
-        className="absolute -bottom-8 left-[12%] right-[12%] h-16 rounded-full blur-3xl pointer-events-none"
-        style={{ background: "rgba(0,0,0,0.06)" }}
+        className="absolute -bottom-8 left-[12%] right-[12%] h-16 rounded-full pointer-events-none"
+        style={{ background: "rgba(0,0,0,0.05)", filter: "blur(24px)" }}
       />
     </motion.div>
   );
@@ -208,7 +208,7 @@ export default function Landing() {
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          opacity: 0.025,
+          opacity: 0.02,
           backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
         }}
       />
@@ -217,46 +217,48 @@ export default function Landing() {
       <nav
         className="fixed top-0 w-full z-50"
         style={{
-          background: "rgba(247,244,242,0.65)",
-          backdropFilter: "blur(14px) saturate(1.4)",
-          borderBottom: "1px solid rgba(107,29,58,0.06)",
-          backgroundImage: "radial-gradient(ellipse 80% 100% at 50% 0%, rgba(107,29,58,0.012), transparent 70%)",
+          background: c.navBg,
+          backdropFilter: "blur(16px) saturate(1.5)",
+          borderBottom: "1px solid rgba(0,0,0,0.04)",
         }}
       >
-        <div className="container mx-auto flex items-center justify-between h-[56px] px-4 lg:px-6">
-          <div className="flex items-center gap-3">
+        <div className="container mx-auto flex items-center justify-between h-[60px] px-5 lg:px-8">
+          <div className="flex items-center gap-3.5">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
                 background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                boxShadow: `0 3px 12px ${c.wineGlow}, 0 0 0 1px rgba(255,255,255,0.1) inset`,
+                boxShadow: `0 2px 10px ${c.wineGlow}`,
               }}
             >
               <Wine className="h-[18px] w-[18px] text-white" />
             </div>
-            <span className="text-[16px] font-extrabold tracking-tight font-sans" style={{ color: c.text, letterSpacing: "-0.02em" }}>Sommelyx</span>
+            <span
+              className="text-[18px] font-extrabold tracking-tight font-sans"
+              style={{ color: c.text, letterSpacing: "-0.025em" }}
+            >
+              Sommelyx
+            </span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-[13px] font-medium" style={{ color: c.textSecondary }}>
-            <a href="#features" className="hover:text-[#1A1A1A] transition-colors duration-200">Funcionalidades</a>
-            <a href="#pricing" className="hover:text-[#1A1A1A] transition-colors duration-200">Planos</a>
+            <a href="#features" className="transition-colors duration-200" style={{ color: c.textSecondary }} onMouseEnter={e => (e.currentTarget.style.color = c.text)} onMouseLeave={e => (e.currentTarget.style.color = c.textSecondary)}>Funcionalidades</a>
+            <a href="#pricing" className="transition-colors duration-200" style={{ color: c.textSecondary }} onMouseEnter={e => (e.currentTarget.style.color = c.text)} onMouseLeave={e => (e.currentTarget.style.color = c.textSecondary)}>Planos</a>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
-              size="sm"
-              className="text-[13px] h-9 px-4 hover:bg-black/[0.04] rounded-full"
+              className="text-[13px] h-10 px-5 rounded-xl font-medium"
               style={{ color: c.textSecondary }}
               onClick={() => navigate("/login")}
             >
               Entrar
             </Button>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.2 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
-                size="sm"
-                className="text-[13px] h-9 px-5 text-white border-0 rounded-full transition-shadow duration-220"
+                className="text-[13px] h-11 px-6 text-white border-0 rounded-xl font-semibold"
                 style={{
-                  background: `linear-gradient(135deg, ${c.wineLight}, ${c.wine})`,
-                  boxShadow: `0 2px 16px ${c.wineGlow}, 0 1px 2px rgba(0,0,0,0.06)`,
+                  background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
+                  boxShadow: `0 2px 12px ${c.wineGlow}`,
                 }}
                 onClick={() => navigate("/signup")}
               >
@@ -268,54 +270,19 @@ export default function Landing() {
       </nav>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-28 pb-8 px-4 min-h-[92vh] flex flex-col justify-center">
-        {/* Slow-drifting ambient gradient */}
-        <motion.div
+      <section className="relative pt-32 pb-8 px-4 min-h-[92vh] flex flex-col justify-center">
+        {/* Slow ambient gradients — NO solid blocks */}
+        <div
           className="absolute inset-0 pointer-events-none"
-          animate={{
-            background: [
-              "radial-gradient(ellipse 70% 50% at 45% 35%, rgba(155,45,94,0.045), transparent 65%)",
-              "radial-gradient(ellipse 70% 50% at 55% 30%, rgba(155,45,94,0.035), transparent 65%)",
-              "radial-gradient(ellipse 70% 50% at 45% 35%, rgba(155,45,94,0.045), transparent 65%)",
-            ],
+          style={{
+            background: "radial-gradient(ellipse 80% 60% at 50% 30%, rgba(107,29,58,0.04), transparent 70%)",
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div
+        <div
           className="absolute inset-0 pointer-events-none"
-          animate={{
-            background: [
-              "radial-gradient(ellipse 40% 35% at 20% 50%, rgba(184,134,11,0.03), transparent 60%)",
-              "radial-gradient(ellipse 40% 35% at 25% 45%, rgba(184,134,11,0.02), transparent 60%)",
-              "radial-gradient(ellipse 40% 35% at 20% 50%, rgba(184,134,11,0.03), transparent 60%)",
-            ],
+          style={{
+            background: "radial-gradient(ellipse 50% 40% at 20% 50%, rgba(201,168,106,0.025), transparent 60%)",
           }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          animate={{
-            background: [
-              "radial-gradient(ellipse 35% 30% at 80% 40%, rgba(155,45,94,0.025), transparent 55%)",
-              "radial-gradient(ellipse 35% 30% at 75% 45%, rgba(155,45,94,0.018), transparent 55%)",
-              "radial-gradient(ellipse 35% 30% at 80% 40%, rgba(155,45,94,0.025), transparent 55%)",
-            ],
-          }}
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Floating orbs */}
-        <motion.div
-          className="absolute pointer-events-none"
-          style={{ top: "12%", left: "8%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(155,45,94,0.05), transparent 70%)", filter: "blur(80px)" }}
-          animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute pointer-events-none"
-          style={{ top: "25%", right: "3%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(184,134,11,0.035), transparent 70%)", filter: "blur(70px)" }}
-          animate={{ x: [0, -25, 0], y: [0, 20, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         />
 
         <div className="container mx-auto relative z-10 max-w-6xl">
@@ -334,38 +301,24 @@ export default function Landing() {
             </span>
           </motion.div>
 
-          {/* Headline */}
-          <div className="max-w-5xl mx-auto relative">
-            {/* Subtle radial glow behind text */}
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] pointer-events-none"
-              style={{ background: "radial-gradient(ellipse, rgba(155,45,94,0.06), transparent 65%)", filter: "blur(60px)" }}
-            />
-
-            <motion.h1
-              className="text-center text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-serif font-black leading-[0.92] mb-8 relative z-10"
-              style={{ letterSpacing: "-0.04em", color: c.text }}
-              initial="hidden" animate="visible" variants={fadeUp} custom={1}
-            >
-              <span className="block">Sua adega,</span>
-              <span className="relative inline-block mt-1">
-                <span
-                  className="italic"
-                  style={{
-                    background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight}, ${c.goldLight})`,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  inteligente
-                </span>
-                <motion.span
-                  className="absolute -bottom-2 left-0 right-0 h-[2px]"
-                  style={{ background: `linear-gradient(90deg, transparent, ${c.goldLight}, ${c.gold}, transparent)` }}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 1.2, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                />
+          {/* Headline — clean, no overlays */}
+          <motion.h1
+            className="text-center text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-serif font-black leading-[0.92] mb-8"
+            style={{ letterSpacing: "-0.04em", color: c.text }}
+            initial="hidden" animate="visible" variants={fadeUp} custom={1}
+          >
+            <span className="block">Sua adega,</span>
+            <span className="inline-block mt-1">
+              <span
+                className="italic"
+                style={{
+                  background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight}, ${c.goldLight})`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                inteligente
               </span>
               <span
                 className="italic"
@@ -373,57 +326,69 @@ export default function Landing() {
                   background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}
               >.</span>
-            </motion.h1>
+            </span>
+          </motion.h1>
 
-            <motion.p
-              className="text-center text-base sm:text-lg max-w-lg mx-auto mb-12 font-light"
-              style={{ color: c.textSecondary, lineHeight: 1.85 }}
-              initial="hidden" animate="visible" variants={fadeUp} custom={2}
-            >
-              Gerencie sua coleção pessoal ou operação comercial com{" "}
-              <span style={{ color: c.text, fontWeight: 500 }}>tecnologia de ponta</span> e insights que fazem a diferença.
-            </motion.p>
+          {/* Gold underline accent */}
+          <motion.div
+            className="mx-auto mb-8"
+            style={{
+              width: 120,
+              height: 2,
+              background: `linear-gradient(90deg, transparent, ${c.gold}, transparent)`,
+            }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          />
 
-            {/* CTAs */}
-            <motion.div className="flex flex-col sm:flex-row gap-3 justify-center items-center" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.2 }}>
-                <Button
-                  size="lg"
-                  className="text-[14px] px-10 h-13 font-semibold relative overflow-hidden group text-white border-0 rounded-full transition-shadow duration-250"
-                  onClick={() => navigate("/signup")}
-                  style={{
-                    background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                    boxShadow: `0 0 40px ${c.wineGlow}, 0 4px 16px rgba(155,45,94,0.2), 0 1px 3px rgba(0,0,0,0.08)`,
-                  }}
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Começar Gratuitamente <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-200" />
-                  </span>
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.2 }}>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-[13px] px-7 h-13 font-medium rounded-full transition-all duration-250 hover:shadow-sm"
-                  style={{
-                    color: c.textSecondary,
-                    border: `1px solid ${c.borderHover}`,
-                    background: "rgba(255,255,255,0.5)",
-                    backdropFilter: "blur(8px)",
-                  }}
-                  onClick={() => navigate("/login")}
-                >
-                  Já tenho conta →
-                </Button>
-              </motion.div>
+          <motion.p
+            className="text-center text-base sm:text-lg max-w-lg mx-auto mb-12 font-light"
+            style={{ color: c.textSecondary, lineHeight: 1.85 }}
+            initial="hidden" animate="visible" variants={fadeUp} custom={2}
+          >
+            Gerencie sua coleção pessoal ou operação comercial com{" "}
+            <span style={{ color: c.text, fontWeight: 500 }}>tecnologia de ponta</span> e insights que fazem a diferença.
+          </motion.p>
+
+          {/* CTAs — premium size */}
+          <motion.div className="flex flex-col sm:flex-row gap-3 justify-center items-center" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+            <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                className="text-[14px] px-10 h-14 font-semibold text-white border-0 rounded-2xl group"
+                onClick={() => navigate("/signup")}
+                style={{
+                  background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
+                  boxShadow: `0 0 30px ${c.wineGlow}, 0 4px 16px rgba(107,29,58,0.15), 0 1px 3px rgba(0,0,0,0.06)`,
+                }}
+              >
+                <span className="flex items-center gap-2">
+                  Começar Gratuitamente <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                </span>
+              </Button>
             </motion.div>
-          </div>
+            <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                variant="outline"
+                className="text-[13px] px-8 h-14 font-medium rounded-2xl"
+                style={{
+                  color: c.textSecondary,
+                  border: `1px solid ${c.borderHover}`,
+                  background: "rgba(255,255,255,0.55)",
+                  backdropFilter: "blur(8px)",
+                }}
+                onClick={() => navigate("/login")}
+              >
+                Já tenho conta →
+              </Button>
+            </motion.div>
+          </motion.div>
 
           {/* Dashboard mockup */}
-          <div className="mt-28 mb-8">
+          <div className="mt-24 mb-8">
             <DashboardMockup />
           </div>
         </div>
@@ -437,7 +402,6 @@ export default function Landing() {
         <div className="container mx-auto max-w-5xl">
           <motion.div
             className="grid grid-cols-2 md:grid-cols-4"
-            style={{ "--divide-color": c.border } as React.CSSProperties}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -465,11 +429,6 @@ export default function Landing() {
 
       {/* ═══════════════ FEATURES ═══════════════ */}
       <section id="features" className="relative py-20 md:py-24 px-4">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 50% 40% at 50% 30%, rgba(107,29,58,0.02), transparent 70%)" }}
-        />
-
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-4 block" style={{ color: c.wine }}>
@@ -484,6 +443,7 @@ export default function Landing() {
                   background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}
               >seus vinhos</span>
             </h2>
@@ -493,19 +453,19 @@ export default function Landing() {
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
-                className="group"
+                className="group cursor-default"
                 style={{
-                  borderRadius: 18,
+                  borderRadius: 16,
                   background: "rgba(255,255,255,0.65)",
                   backdropFilter: "blur(14px)",
                   border: "1px solid rgba(255,255,255,0.35)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-                  padding: "26px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)",
+                  padding: "28px",
                 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 whileHover={{
                   y: -6,
-                  boxShadow: "0 16px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.03)",
+                  boxShadow: "0 12px 36px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.03)",
                   transition: { duration: 0.22, ease: "easeOut" },
                 }}
               >
@@ -513,13 +473,13 @@ export default function Landing() {
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
                   style={{
                     background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                    boxShadow: `0 3px 12px ${c.wineGlow}`,
+                    boxShadow: `0 3px 10px ${c.wineGlow}`,
                   }}
                 >
                   <f.icon className="h-4 w-4 text-white" />
                 </div>
-                <h3 className="text-base font-semibold mb-2 font-sans tracking-tight" style={{ color: "#1a1a1a" }}>{f.title}</h3>
-                <p className="text-[13.5px] leading-[1.75]" style={{ color: "#6b7280" }}>{f.desc}</p>
+                <h3 className="text-[17px] font-semibold mb-2.5 font-sans tracking-tight" style={{ color: c.text }}>{f.title}</h3>
+                <p className="text-[14px] leading-[1.7]" style={{ color: "#6b7280" }}>{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -533,11 +493,6 @@ export default function Landing() {
 
       {/* ═══════════════ PRICING ═══════════════ */}
       <section id="pricing" className="relative py-20 md:py-24 px-4">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(155,45,94,0.02), transparent 70%)" }}
-        />
-
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-4 block" style={{ color: c.wine }}>Planos</span>
@@ -550,6 +505,7 @@ export default function Landing() {
                   background: `linear-gradient(135deg, ${c.gold}, ${c.goldLight})`,
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}
               >necessidade</span>
             </h2>
@@ -562,16 +518,16 @@ export default function Landing() {
                 className="rounded-2xl p-8 relative"
                 style={plan.highlighted ? {
                   background: `linear-gradient(160deg, ${c.wine}, ${c.wineLight})`,
-                  boxShadow: `0 0 60px ${c.wineGlow}, 0 24px 48px -12px rgba(155,45,94,0.2), 0 1px 3px rgba(0,0,0,0.08)`,
-                  border: "1px solid rgba(255,255,255,0.15)",
+                  boxShadow: `0 0 50px ${c.wineGlow}, 0 20px 40px -12px rgba(107,29,58,0.18)`,
+                  border: "1px solid rgba(255,255,255,0.12)",
                 } : {
                   background: c.cardBg,
                   backdropFilter: "blur(12px)",
                   border: `1px solid ${c.cardBorder}`,
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.02)",
                 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.25, ease: "easeOut" } }}
+                whileHover={{ y: -6, transition: { duration: 0.22, ease: "easeOut" } }}
               >
                 {plan.highlighted && (
                   <span
@@ -616,22 +572,24 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  className={`w-full h-11 text-[13px] font-medium rounded-full ${
-                    plan.highlighted ? "" : "text-white border-0"
-                  }`}
-                  style={plan.highlighted ? {
-                    background: "white",
-                    color: c.wine,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  } : {
-                    background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                    boxShadow: `0 2px 12px ${c.wineGlow}`,
-                  }}
-                  onClick={() => navigate("/signup")}
-                >
-                  {plan.cta}
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    className={`w-full h-12 text-[13px] font-semibold rounded-xl ${
+                      plan.highlighted ? "" : "text-white border-0"
+                    }`}
+                    style={plan.highlighted ? {
+                      background: "white",
+                      color: c.wine,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                    } : {
+                      background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
+                      boxShadow: `0 2px 10px ${c.wineGlow}`,
+                    }}
+                    onClick={() => navigate("/signup")}
+                  >
+                    {plan.cta}
+                  </Button>
+                </motion.div>
               </motion.div>
             ))}
           </div>
@@ -641,14 +599,14 @@ export default function Landing() {
       {/* ─── Footer ─── */}
       <footer className="py-14 px-4 relative z-10" style={{ borderTop: `1px solid ${c.border}` }}>
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <div
-              className="w-6 h-6 rounded-md flex items-center justify-center"
+              className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})` }}
             >
-              <Wine className="h-3 w-3 text-white" />
+              <Wine className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="font-bold text-[13px] font-sans tracking-tight" style={{ color: c.text }}>Sommelyx</span>
+            <span className="font-bold text-[14px] font-sans tracking-tight" style={{ color: c.text }}>Sommelyx</span>
           </div>
           <p className="text-[11px]" style={{ color: c.textTertiary }}>
             © 2026 Sommelyx. Todos os direitos reservados.
