@@ -19,26 +19,32 @@ export default function SelectProfile() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background noise relative overflow-hidden">
+      <div className="absolute inset-0 gradient-wine-deep opacity-50" />
+      <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute w-[500px] h-[500px] rounded-full blur-3xl top-1/4 left-1/4 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(340 60% 25% / 0.12) 0%, transparent 70%)" }} />
+
       <motion.div
-        className="w-full max-w-3xl text-center"
-        initial={{ opacity: 0, y: 20 }}
+        className="w-full max-w-3xl text-center relative z-10"
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Wine className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-serif font-bold text-foreground">WineVault</span>
+        <div className="flex items-center justify-center gap-2.5 mb-10">
+          <div className="w-9 h-9 rounded-lg gradient-wine flex items-center justify-center">
+            <Wine className="h-4.5 w-4.5 text-primary-foreground" />
+          </div>
+          <span className="text-lg font-semibold text-foreground font-sans tracking-tight">WineVault</span>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-3">
+        <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-3 tracking-tight">
           Como você vai usar o WineVault?
         </h1>
-        <p className="text-muted-foreground text-lg mb-12">
+        <p className="text-muted-foreground text-sm mb-12">
           Escolha o perfil que melhor se encaixa. Você pode mudar depois.
         </p>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4">
           {[
             {
               type: "personal" as const,
@@ -58,30 +64,30 @@ export default function SelectProfile() {
             <motion.button
               key={option.type}
               onClick={() => handleSelect(option.type)}
-              className="glass rounded-3xl p-8 text-left group hover:shadow-xl transition-all duration-300 hover:border-primary/30"
-              initial={{ opacity: 0, y: 30 }}
+              className="card-depth p-7 text-left group hover:border-primary/20 transition-all duration-200"
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.15, duration: 0.5 }}
-              whileHover={{ y: -4 }}
+              transition={{ delay: 0.2 + i * 0.12, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -2 }}
             >
-              <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <option.icon className="h-8 w-8 text-primary-foreground" />
+              <div className="w-12 h-12 rounded-xl gradient-wine flex items-center justify-center mb-5 group-hover:glow-wine transition-shadow duration-200">
+                <option.icon className="h-6 w-6 text-primary-foreground" />
               </div>
 
-              <h3 className="text-xl font-bold text-foreground mb-2 font-sans">{option.title}</h3>
-              <p className="text-muted-foreground text-sm mb-6">{option.desc}</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2 font-sans tracking-tight">{option.title}</h3>
+              <p className="text-muted-foreground text-xs mb-5 leading-relaxed">{option.desc}</p>
 
-              <ul className="space-y-2 mb-6">
+              <ul className="space-y-2 mb-5">
                 {option.features.map((f) => (
-                  <li key={f} className="text-sm text-muted-foreground flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <li key={f} className="text-xs text-muted-foreground flex items-center gap-2.5">
+                    <div className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
                     {f}
                   </li>
                 ))}
               </ul>
 
-              <div className="flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all">
-                Selecionar <ArrowRight className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-primary font-medium text-xs group-hover:gap-3 transition-all duration-200">
+                Selecionar <ArrowRight className="h-3.5 w-3.5" />
               </div>
             </motion.button>
           ))}
