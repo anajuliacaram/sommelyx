@@ -458,36 +458,49 @@ export default function Landing() {
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
-                className="group rounded-xl p-8 transition-all duration-300"
-                style={{
-                  background: c.cardBg,
-                  backdropFilter: "blur(12px)",
-                  border: `1px solid ${c.cardBorder}`,
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02)",
-                }}
+                className="group relative p-[1px] transition-all duration-[250ms] ease-out"
+                style={{ borderRadius: 20 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 whileHover={{
-                  y: -4,
-                  boxShadow: `0 8px 30px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)`,
-                  borderColor: c.borderHover,
-                  transition: { duration: 0.25 },
+                  y: -6,
+                  scale: 1.01,
+                  transition: { duration: 0.25, ease: "easeOut" },
                 }}
               >
+                {/* Gradient border layer */}
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-6 transition-shadow duration-300"
+                  className="absolute inset-0 pointer-events-none"
                   style={{
-                    background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                    boxShadow: `0 2px 8px ${c.wineGlow}`,
+                    borderRadius: 20,
+                    background: "linear-gradient(135deg, rgba(155,45,94,0.12), rgba(212,168,67,0.10), rgba(155,45,94,0.06))",
+                  }}
+                />
+                {/* Card content */}
+                <div
+                  className="relative p-8 group-hover:bg-white/80 transition-[background,box-shadow] duration-[250ms]"
+                  style={{
+                    borderRadius: 19,
+                    background: "rgba(255,255,255,0.65)",
+                    backdropFilter: "blur(14px)",
+                    boxShadow: "0 2px 12px rgba(0,0,0,0.03), 0 8px 32px rgba(0,0,0,0.02)",
                   }}
                 >
-                  <f.icon className="h-4 w-4 text-white" />
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-6 transition-shadow duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
+                      boxShadow: `0 3px 12px ${c.wineGlow}`,
+                    }}
+                  >
+                    <f.icon className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="text-sm font-semibold mb-2.5 font-sans tracking-tight" style={{ color: c.text }}>{f.title}</h3>
+                  <p className="text-[13px] leading-[1.8]" style={{ color: c.textSecondary }}>{f.desc}</p>
                 </div>
-                <h3 className="text-sm font-semibold mb-2.5 font-sans tracking-tight" style={{ color: c.text }}>{f.title}</h3>
-                <p className="text-[13px] leading-[1.8]" style={{ color: c.textSecondary }}>{f.desc}</p>
               </motion.div>
             ))}
           </div>
