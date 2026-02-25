@@ -68,7 +68,7 @@ export default function CommercialDashboard() {
           <p className="text-xs text-muted-foreground mb-6 max-w-xs mx-auto leading-relaxed">
             Cadastre produtos, registre vendas e acompanhe métricas em tempo real.
           </p>
-          <Button className="gradient-wine text-primary-foreground btn-glow rounded-lg h-9 px-5 text-xs font-medium">
+          <Button className="gradient-wine text-primary-foreground btn-glow h-9 px-5 text-xs font-medium">
             <Plus className="h-3 w-3 mr-1.5" /> Cadastrar Produto
           </Button>
         </div>
