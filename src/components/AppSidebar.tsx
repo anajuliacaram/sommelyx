@@ -38,23 +38,23 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-2.5 px-2 py-3">
-          <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center">
-            <Wine className="h-5 w-5 text-gold-foreground" />
+          <div className="w-8 h-8 rounded-lg gradient-wine flex items-center justify-center">
+            <Wine className="h-4 w-4 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-sidebar-foreground font-serif">WineVault</span>
-            <span className="text-[10px] text-sidebar-foreground/60 capitalize">
+            <span className="text-[13px] font-semibold text-sidebar-foreground font-sans tracking-tight">WineVault</span>
+            <span className="text-[10px] text-sidebar-foreground/50 capitalize font-medium">
               {profileType === "commercial" ? "Comercial" : "Pessoal"}
             </span>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarSeparator />
+      <SidebarSeparator className="opacity-30" />
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-wider">
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-[10px] uppercase tracking-[0.1em] font-medium">
             Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -65,7 +65,7 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/dashboard"}
-                      className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                      className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-150 rounded-lg text-[13px]"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4" />
@@ -79,7 +79,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-wider">
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-[10px] uppercase tracking-[0.1em] font-medium">
             Conta
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -88,7 +88,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink
                     to="/dashboard/plans"
-                    className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                    className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-150 rounded-lg text-[13px]"
                     activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                   >
                     <CreditCard className="h-4 w-4" />
@@ -102,14 +102,14 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarSeparator />
+        <SidebarSeparator className="opacity-30" />
         <div className="px-2 py-3">
-          <p className="text-xs text-sidebar-foreground/60 truncate mb-2 px-2">{user?.email}</p>
+          <p className="text-[11px] text-sidebar-foreground/40 truncate mb-2 px-2 font-mono">{user?.email}</p>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={signOut}
-                className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-150 rounded-lg text-[13px]"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sair</span>
