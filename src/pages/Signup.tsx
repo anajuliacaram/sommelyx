@@ -91,7 +91,7 @@ export default function Signup() {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 className="h-11 rounded-xl text-sm"
-                style={{ background: "#F0EDEA", border: "1px solid rgba(0,0,0,0.06)", color: "#1A1A1A" }}
+                style={{ background: "#F0F0F2", border: "1px solid rgba(0,0,0,0.06)", color: "#0F0F14" }}
               />
             </div>
 

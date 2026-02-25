@@ -224,7 +224,7 @@ export default function Landing() {
       </motion.nav>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-36 pb-8 px-4 min-h-[92vh] flex flex-col justify-center">
+      <section className="relative pt-36 pb-8 px-4 flex flex-col justify-center" style={{ minHeight: "max(80vh, 640px)" }}>
         {/* Ambient radial gradients */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 25%, rgba(143,45,86,0.05), transparent 70%)" }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 50% 40% at 80% 60%, rgba(224,122,95,0.03), transparent 60%)" }} />
@@ -466,14 +466,19 @@ export default function Landing() {
       </section>
 
       {/* ─── Footer ─── */}
-      <footer className="py-14 px-4 relative z-10" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="py-12 px-4 relative z-10" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+        <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
             <span className="font-bold text-[14px] font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
           </div>
+          <div className="flex items-center gap-6 text-[12px] font-medium" style={{ color: "#6B7280" }}>
+            <a href="#features" className="nav-link-premium hover:text-[#8F2D56] transition-colors">Funcionalidades</a>
+            <a href="#pricing" className="nav-link-premium hover:text-[#8F2D56] transition-colors">Planos</a>
+            <button onClick={() => navigate("/login")} className="nav-link-premium hover:text-[#8F2D56] transition-colors cursor-pointer bg-transparent border-0">Entrar</button>
+          </div>
           <p className="text-[11px]" style={{ color: "#9CA3AF" }}>
-            © 2026 Sommelyx. Todos os direitos reservados.
+            © {new Date().getFullYear()} Sommelyx. Todos os direitos reservados.
           </p>
         </div>
       </footer>

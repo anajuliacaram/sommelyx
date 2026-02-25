@@ -101,14 +101,14 @@ export default function CommercialDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {lowStockWines.map(w => (
               <div key={w.id} className="card-depth p-4 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="h-4 w-4 text-orange-400" />
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.08)" }}>
+                  <AlertTriangle className="h-4 w-4" style={{ color: "#f59e0b" }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{w.name}</p>
                   <p className="text-xs text-muted-foreground">{w.quantity} un. restante(s)</p>
                 </div>
-                <Badge variant="secondary" className="bg-orange-500/15 text-orange-400 text-[10px]">
+                <Badge variant="secondary" className="text-[10px]" style={{ background: "rgba(245,158,11,0.08)", color: "#d97706" }}>
                   Baixo
                 </Badge>
               </div>

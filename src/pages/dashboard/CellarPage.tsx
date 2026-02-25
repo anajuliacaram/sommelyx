@@ -20,7 +20,7 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 }
 
 const statusLabel = { now: "Beber agora", past: "Passou da janela", young: "Jovem demais" };
-const statusColor = { now: "bg-green-500/20 text-green-400", past: "bg-orange-500/20 text-orange-400", young: "bg-blue-500/20 text-blue-400" };
+const statusColor = { now: "bg-green-500/10 text-green-700", past: "bg-orange-500/10 text-orange-700", young: "bg-blue-500/10 text-blue-700" };
 
 export default function CellarPage() {
   const { data: wines, isLoading } = useWines();
