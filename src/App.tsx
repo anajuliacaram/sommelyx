@@ -12,6 +12,7 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardIndex from "@/pages/dashboard/DashboardIndex";
 import Plans from "@/pages/dashboard/Plans";
 import Placeholder from "@/pages/dashboard/Placeholder";
+import CellarPage from "@/pages/dashboard/CellarPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,7 +31,7 @@ const App = () => (
             <Route path="/select-profile" element={<SelectProfile />} />
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<DashboardIndex />} />
-              <Route path="cellar" element={<Placeholder title="Minha Adega" />} />
+              <Route path="cellar" element={<CellarPage />} />
               <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
               <Route path="stats" element={<Placeholder title="Estatísticas" />} />
               <Route path="inventory" element={<Placeholder title="Estoque" />} />

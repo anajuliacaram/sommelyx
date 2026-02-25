@@ -16,18 +16,18 @@ import {
 } from "@/components/ui/sidebar";
 
 const personalMenu = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater },
-  { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart },
-  { title: "Estatísticas", url: "/dashboard/stats", icon: BarChart3 },
+  { title: "Início", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Meus Vinhos", url: "/dashboard/cellar", icon: GlassWater },
+  { title: "Quero Comprar", url: "/dashboard/wishlist", icon: Heart },
+  { title: "Números", url: "/dashboard/stats", icon: BarChart3 },
 ];
 
 const commercialMenu = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Estoque", url: "/dashboard/inventory", icon: Package },
-  { title: "Vendas", url: "/dashboard/sales", icon: ShoppingCart },
+  { title: "Início", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Meus Produtos", url: "/dashboard/inventory", icon: Package },
+  { title: "Registrar Venda", url: "/dashboard/sales", icon: ShoppingCart },
   { title: "Cadastros", url: "/dashboard/registers", icon: Users },
-  { title: "Relatórios", url: "/dashboard/reports", icon: FileText },
+  { title: "Números", url: "/dashboard/reports", icon: FileText },
 ];
 
 export function AppSidebar() {
