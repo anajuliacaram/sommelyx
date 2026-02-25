@@ -65,6 +65,7 @@ export default {
           DEFAULT: "hsl(var(--wine))",
           foreground: "hsl(var(--wine-foreground))",
           light: "hsl(var(--wine-light))",
+          vivid: "hsl(var(--wine-vivid))",
         },
         gold: {
           DEFAULT: "hsl(var(--gold))",
