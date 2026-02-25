@@ -15,15 +15,16 @@ export default function SelectProfile() {
   const [saving, setSaving] = useState(false);
 
   const handleSelect = async (type: "personal" | "commercial") => {
-    if (saving) return;
+    if (saving || selectedType) return; // prevent double-click
     setSaving(true);
     setSelectedType(type);
     try {
       await setProfileType(type);
+      toast({ title: "Perfil salvo!", description: `Modo ${type === "personal" ? "Adega Pessoal" : "Operação Comercial"} ativado.` });
       setStep(2);
     } catch (err: any) {
-      console.error("Profile save error:", err);
-      toast({ title: "Erro ao salvar perfil", description: err.message, variant: "destructive" });
+      console.error("[SelectProfile] Save error:", err);
+      toast({ title: "Erro ao salvar perfil", description: err.message || "Tente novamente.", variant: "destructive" });
       setSelectedType(null);
     } finally {
       setSaving(false);
@@ -74,12 +75,12 @@ export default function SelectProfile() {
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="text-center mb-10">
-                <div className="flex items-center justify-center gap-2.5 mb-6">
-                  <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-18 w-18 object-contain" />
-                  <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center gap-2 mb-5">
+                  <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-auto object-contain" />
+                  <span className="text-[14px] font-bold font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-serif font-bold mb-3" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>
+                <h1 className="text-2xl md:text-3xl font-serif font-bold mb-2" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>
                   Como você vai usar
                   <br />
                   <span className="italic" style={{ color: "#C9A86A" }}>o Sommelyx?</span>

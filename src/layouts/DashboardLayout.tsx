@@ -55,10 +55,10 @@ export default function DashboardLayout() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F7F8" }}>
-        <div className="space-y-3 w-48">
-          <div className="skeleton-premium h-6 w-full rounded-lg" />
-          <div className="skeleton-premium h-4 w-3/4 rounded-lg" />
-          <div className="skeleton-premium h-4 w-1/2 rounded-lg" />
+        <div className="space-y-3 w-48 animate-pulse">
+          <div className="h-6 w-full rounded-lg" style={{ background: "rgba(0,0,0,0.06)" }} />
+          <div className="h-4 w-3/4 rounded-lg" style={{ background: "rgba(0,0,0,0.04)" }} />
+          <div className="h-4 w-1/2 rounded-lg" style={{ background: "rgba(0,0,0,0.03)" }} />
         </div>
       </div>
     );

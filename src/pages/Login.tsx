@@ -111,8 +111,8 @@ export default function Login() {
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
             <div className="absolute -inset-4 lg:-inset-5 -z-10 pointer-events-none" style={{ background: "radial-gradient(circle, rgba(139,45,85,0.15) 0%, rgba(139,45,85,0.06) 40%, transparent 70%)", filter: "blur(16px)" }} />
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[46px] w-[46px] lg:h-[60px] lg:w-[60px] object-contain block" />
-            <span className="text-[17px] lg:text-[19px] font-extrabold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-10 lg:h-14 lg:w-14 object-contain block" />
+            <span className="text-[16px] lg:text-[18px] font-extrabold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
           </motion.div>
 
           <h2 className="font-serif font-bold text-white" style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.05, marginBottom: 12 }}>
