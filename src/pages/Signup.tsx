@@ -171,8 +171,8 @@ export default function Signup() {
                 </Label>
                 <div className="relative">
                   <Input
-                    id="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 6 caracteres"
-                    value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+                    id="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 8 caracteres"
+                    value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
                     className="text-[16px] pr-12"
                     style={{ height: 56, borderRadius: 16, background: "rgba(240,240,242,0.8)", border: "1px solid rgba(120,60,90,0.15)", color: "#0F0F14", transition: "all 0.18s ease" }}
                     onFocus={inputFocus} onBlur={inputBlur}

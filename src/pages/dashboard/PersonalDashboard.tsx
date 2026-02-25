@@ -127,11 +127,13 @@ export default function PersonalDashboard() {
     }
   };
 
+  const inGuard = wines.filter(w => w.drink_from && currentYear < w.drink_from && w.quantity > 0).length;
+
   const metrics = [
     { label: "Garrafas em estoque", value: totalBottles.toString(), icon: Wine, color: "#8F2D56", badge: recentCount > 0 ? `+${recentCount}` : undefined, onClick: () => navigate("/dashboard/cellar") },
-    { label: "Valor estimado", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: TrendingUp, color: "#C44569", onClick: undefined },
     { label: "Beber agora", value: drinkNow.toString(), icon: GlassWater, color: "#22c55e", badge: undefined, onClick: () => navigate("/dashboard/cellar") },
-    { label: "Baixo estoque", value: lowStock.toString(), icon: AlertTriangle, color: "#E07A5F", badge: undefined, onClick: () => navigate("/dashboard/cellar") },
+    { label: "Em guarda", value: inGuard.toString(), icon: Clock, color: "#3b82f6", badge: undefined, onClick: () => navigate("/dashboard/cellar") },
+    { label: "Consumo recente", value: recentCount.toString(), icon: TrendingUp, color: "#C44569", badge: undefined, onClick: undefined },
   ];
 
   return (

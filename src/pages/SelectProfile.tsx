@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wine, Building2, ArrowRight, Check, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
 export default function SelectProfile() {
-  const { setProfileType } = useAuth();
+  const { setProfileType, user, profileType: existingProfile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
@@ -31,6 +31,20 @@ export default function SelectProfile() {
   };
 
   const handleFinish = () => navigate("/dashboard");
+
+  // Auth guards
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F7F8" }}>
+        <div className="space-y-3 w-48">
+          <div className="skeleton-premium h-6 w-full rounded-lg" />
+          <div className="skeleton-premium h-4 w-3/4 rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/login" replace />;
+  if (existingProfile) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "#F7F7F8" }}>
