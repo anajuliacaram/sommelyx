@@ -1,4 +1,4 @@
-import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut } from "lucide-react";
+import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -18,8 +18,9 @@ import {
 const personalMenu = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater },
-  { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart },
+  { title: "Alertas", url: "/dashboard/alerts", icon: Bell },
   { title: "Analytics", url: "/dashboard/stats", icon: BarChart3 },
+  { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart },
 ];
 
 const commercialMenu = [
@@ -33,6 +34,12 @@ const commercialMenu = [
 export function AppSidebar() {
   const { profileType, signOut, user } = useAuth();
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
+  const initials = user?.user_metadata?.full_name
+    ?.split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "U";
 
   return (
     <Sidebar className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
@@ -96,6 +103,19 @@ export function AppSidebar() {
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to="/dashboard/settings"
+                    className="transition-all duration-150 rounded-[12px] text-[13px]"
+                    style={{ color: "#6B7280" }}
+                    activeClassName="font-medium"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Configurações</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -104,7 +124,18 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarSeparator style={{ opacity: 0.5, borderColor: "rgba(0,0,0,0.06)" }} />
         <div className="px-3 py-3">
-          <p className="text-[11px] truncate mb-2 px-2 font-mono" style={{ color: "#9CA3AF" }}>{user?.email}</p>
+          <div className="flex items-center gap-2.5 px-2 mb-3">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)" }}
+            >
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-medium truncate" style={{ color: "#0F0F14" }}>{user?.user_metadata?.full_name || "Usuário"}</p>
+              <p className="text-[10px] truncate font-mono" style={{ color: "#9CA3AF" }}>{user?.email}</p>
+            </div>
+          </div>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
