@@ -92,6 +92,116 @@ export type Database = {
         }
         Relationships: []
       }
+      wine_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          notes: string | null
+          quantity: number
+          user_id: string
+          wine_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          user_id: string
+          wine_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          user_id?: string
+          wine_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wine_events_wine_id_fkey"
+            columns: ["wine_id"]
+            isOneToOne: false
+            referencedRelation: "wines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wines: {
+        Row: {
+          cellar_location: string | null
+          country: string | null
+          created_at: string
+          current_value: number | null
+          drink_from: number | null
+          drink_until: number | null
+          food_pairing: string | null
+          grape: string | null
+          id: string
+          image_url: string | null
+          name: string
+          producer: string | null
+          purchase_price: number | null
+          quantity: number
+          rating: number | null
+          region: string | null
+          style: string | null
+          tasting_notes: string | null
+          updated_at: string
+          user_id: string
+          vintage: number | null
+        }
+        Insert: {
+          cellar_location?: string | null
+          country?: string | null
+          created_at?: string
+          current_value?: number | null
+          drink_from?: number | null
+          drink_until?: number | null
+          food_pairing?: string | null
+          grape?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          producer?: string | null
+          purchase_price?: number | null
+          quantity?: number
+          rating?: number | null
+          region?: string | null
+          style?: string | null
+          tasting_notes?: string | null
+          updated_at?: string
+          user_id: string
+          vintage?: number | null
+        }
+        Update: {
+          cellar_location?: string | null
+          country?: string | null
+          created_at?: string
+          current_value?: number | null
+          drink_from?: number | null
+          drink_until?: number | null
+          food_pairing?: string | null
+          grape?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          producer?: string | null
+          purchase_price?: number | null
+          quantity?: number
+          rating?: number | null
+          region?: string | null
+          style?: string | null
+          tasting_notes?: string | null
+          updated_at?: string
+          user_id?: string
+          vintage?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
