@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { WineMesh } from "@/components/WineMesh";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -38,30 +39,31 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Left panel */}
+      {/* Left — editorial visual panel */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 gradient-wine-deep" />
-        <div className="absolute inset-0 grid-pattern opacity-30" />
-        <div className="absolute w-[400px] h-[400px] rounded-full blur-3xl top-1/4 left-1/4 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(340 60% 25% / 0.2) 0%, transparent 70%)" }} />
+        <WineMesh variant="hero" />
         <motion.div
-          className="text-center relative z-10"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 max-w-sm"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center mx-auto mb-8 glow-wine">
-            <Wine className="h-8 w-8 text-primary-foreground" />
+          <div className="w-12 h-12 rounded-xl gradient-wine flex items-center justify-center mb-8 glow-wine">
+            <Wine className="h-6 w-6 text-primary-foreground" />
           </div>
-          <h2 className="text-4xl font-serif font-bold text-foreground mb-4 tracking-tight">
-            Bem-vindo de volta
+          <h2 className="text-4xl font-serif font-bold text-foreground mb-4" style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}>
+            Bem-vindo
+            <br />
+            <span className="italic text-gradient-gold">de volta.</span>
           </h2>
-          <p className="text-muted-foreground text-base max-w-sm leading-relaxed">
-            Acesse sua adega inteligente e continue gerenciando sua coleção.
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Acesse sua adega inteligente e continue gerenciando sua coleção com precisão.
           </p>
         </motion.div>
       </div>
 
-      {/* Right panel */}
+      {/* Right — form */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
         <motion.div
           className="w-full max-w-sm"
@@ -69,19 +71,19 @@ export default function Login() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex items-center gap-2.5 mb-10 lg:hidden">
-            <div className="w-8 h-8 rounded-lg gradient-wine flex items-center justify-center">
-              <Wine className="h-4 w-4 text-primary-foreground" />
+          <div className="flex items-center gap-2 mb-10 lg:hidden">
+            <div className="w-7 h-7 rounded-md gradient-wine flex items-center justify-center">
+              <Wine className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <span className="text-base font-semibold font-sans tracking-tight">WineVault</span>
+            <span className="text-sm font-semibold font-sans tracking-tight">WineVault</span>
           </div>
 
-          <h1 className="text-2xl font-serif font-bold text-foreground mb-1.5 tracking-tight">Entrar</h1>
-          <p className="text-sm text-muted-foreground mb-8">Acesse sua conta WineVault</p>
+          <h1 className="text-2xl font-serif font-bold text-foreground mb-1" style={{ letterSpacing: "-0.03em" }}>Entrar</h1>
+          <p className="text-xs text-muted-foreground mb-8">Acesse sua conta WineVault</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">Email</Label>
+              <Label htmlFor="email" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -89,12 +91,12 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-10 rounded-lg bg-muted/50 border-border/50 focus:border-primary/50 transition-colors"
+                className="h-10 rounded-lg bg-muted/40 border-border/40 focus:border-primary/40 focus:bg-muted/60 transition-all text-sm"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">Senha</Label>
+              <Label htmlFor="password" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Senha</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -103,7 +105,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-10 rounded-lg bg-muted/50 border-border/50 focus:border-primary/50 transition-colors pr-10"
+                  className="h-10 rounded-lg bg-muted/40 border-border/40 focus:border-primary/40 focus:bg-muted/60 transition-all text-sm pr-10"
                 />
                 <button
                   type="button"
@@ -117,14 +119,14 @@ export default function Login() {
 
             <Button
               type="submit"
-              className="w-full h-10 rounded-lg gradient-wine text-primary-foreground btn-glow text-sm font-medium"
+              className="w-full h-10 rounded-lg gradient-wine text-primary-foreground btn-glow text-[13px] font-medium mt-2"
               disabled={loading}
             >
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
+          <p className="text-center text-[11px] text-muted-foreground mt-6">
             Não tem conta?{" "}
             <Link to="/signup" className="text-primary font-medium hover:text-primary/80 transition-colors">
               Criar conta grátis
@@ -132,7 +134,7 @@ export default function Login() {
           </p>
 
           <p className="text-center mt-4">
-            <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors duration-200">
+            <Link to="/" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors duration-200">
               ← Voltar ao início
             </Link>
           </p>
