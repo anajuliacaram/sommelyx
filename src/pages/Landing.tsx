@@ -190,31 +190,38 @@ export default function Landing() {
             href="/"
             className="flex items-center gap-2.5 cursor-pointer transition-all duration-250 hover:brightness-110 hover:scale-[1.03]"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-16 w-16 object-contain" />
-            <span className="text-[18px] font-extrabold tracking-tight font-sans" style={{ color: "#0F0F14", letterSpacing: "-0.025em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-auto object-contain" />
+            <span className="text-[15px] font-extrabold tracking-tight font-sans" style={{ color: "#0F0F14", letterSpacing: "-0.025em" }}>
               Sommelyx
             </span>
           </a>
           <div className="hidden md:flex items-center gap-9 text-[13px] font-medium" style={{ letterSpacing: "0.2px" }}>
-            <a href="#features" className="nav-link-premium" style={{ color: "#6B7280" }}>Funcionalidades</a>
-            <a href="#pricing" className="nav-link-premium" style={{ color: "#6B7280" }}>Planos</a>
+            <a href="#features" className="relative py-1 transition-colors duration-200 hover:text-[#8F2D56] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[1.5px] after:bg-[#8F2D56] after:transition-all after:duration-200 hover:after:w-full" style={{ color: "#6B7280" }}>Funcionalidades</a>
+            <a href="#pricing" className="relative py-1 transition-colors duration-200 hover:text-[#8F2D56] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[1.5px] after:bg-[#8F2D56] after:transition-all after:duration-200 hover:after:w-full" style={{ color: "#6B7280" }}>Planos</a>
           </div>
           <div className="flex items-center gap-3.5">
             <button
-              className="h-[46px] px-[22px] rounded-[12px] text-[14px] font-medium transition-all duration-250 cursor-pointer"
+              className="h-[44px] px-6 rounded-[14px] text-[14px] font-semibold cursor-pointer transition-all duration-200"
               style={{
                 background: "rgba(143,45,86,0.06)",
-                border: "1px solid rgba(143,45,86,0.18)",
+                border: "1.5px solid rgba(143,45,86,0.2)",
                 color: "#8F2D56",
+                boxShadow: "0 2px 8px rgba(143,45,86,0.06)",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.10)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.06)"; e.currentTarget.style.transform = "translateY(0)"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 16px rgba(143,45,86,0.12)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.06)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(143,45,86,0.06)"; }}
               onClick={() => navigate("/login")}
             >
               Entrar
             </button>
             <button
-              className="cta-primary-btn h-[48px] px-[26px] rounded-[14px] text-[15px] font-semibold text-white cursor-pointer border-0"
+              className="h-[44px] px-7 rounded-[14px] text-[14px] font-semibold text-white cursor-pointer border-0 transition-all duration-200"
+              style={{
+                background: "linear-gradient(135deg, #8F2D56, #C44569)",
+                boxShadow: "0 4px 16px rgba(143,45,86,0.2)",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(143,45,86,0.3)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(143,45,86,0.2)"; }}
               onClick={() => navigate("/signup")}
             >
               Começar Grátis
@@ -500,8 +507,8 @@ export default function Landing() {
       <footer className="py-12 px-4 relative z-10" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
         <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
-            <span className="font-bold text-[14px] font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 w-auto object-contain" />
+            <span className="font-bold text-[13px] font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
           </div>
           <div className="flex items-center gap-6 text-[12px] font-medium" style={{ color: "#6B7280" }}>
             <a href="#features" className="nav-link-premium hover:text-[#8F2D56] transition-colors">Funcionalidades</a>

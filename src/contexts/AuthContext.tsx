@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,8 +28,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profileType, setProfileTypeState] = useState<ProfileType>(null);
   const [loading, setLoading] = useState(true);
+  const mountedRef = useRef(true);
+  const initializedRef = useRef(false);
 
-  const fetchProfileType = async (userId: string): Promise<ProfileType> => {
+  const fetchProfileType = useCallback(async (userId: string): Promise<ProfileType> => {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -45,47 +47,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("[Auth] Profile fetch exception:", err);
       return null;
     }
-  };
+  }, []);
 
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return;
-      console.log("[Auth] Initial session:", session ? "found" : "none");
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const pt = await fetchProfileType(session.user.id);
-        if (mounted) setProfileTypeState(pt);
-      }
-      if (mounted) setLoading(false);
-    });
-
-    // Listen for changes
+    // Set up listener FIRST (per Supabase best practice)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        console.log("[Auth] State change:", event, session ? "session" : "no-session");
-        setSession(session);
-        setUser(session?.user ?? null);
+      async (event, newSession) => {
+        if (!mountedRef.current) return;
+        console.log("[Auth] State change:", event);
 
-        if (session?.user) {
-          const pt = await fetchProfileType(session.user.id);
-          if (mounted) setProfileTypeState(pt);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+
+        if (newSession?.user) {
+          // Use setTimeout to avoid Supabase lock contention during auth events
+          setTimeout(async () => {
+            if (!mountedRef.current) return;
+            const pt = await fetchProfileType(newSession.user.id);
+            if (mountedRef.current) {
+              setProfileTypeState(pt);
+              setLoading(false);
+            }
+          }, 0);
         } else {
           setProfileTypeState(null);
+          setLoading(false);
         }
-        if (mounted) setLoading(false);
       }
     );
 
+    // Then get initial session
+    supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
+      if (!mountedRef.current || initializedRef.current) return;
+      initializedRef.current = true;
+      console.log("[Auth] Initial session:", initialSession ? "found" : "none");
+
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+
+      if (initialSession?.user) {
+        const pt = await fetchProfileType(initialSession.user.id);
+        if (mountedRef.current) setProfileTypeState(pt);
+      }
+      if (mountedRef.current) setLoading(false);
+    });
+
     return () => {
-      mounted = false;
+      mountedRef.current = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfileType]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
