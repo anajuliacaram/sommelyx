@@ -62,7 +62,7 @@ export default function SelectProfile() {
             >
               <div className="text-center mb-10">
                 <div className="flex items-center justify-center gap-2.5 mb-6">
-                  <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-9 w-9 object-contain" />
+                  <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-14 w-14 object-contain" />
                   <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-serif font-bold mb-3" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>
