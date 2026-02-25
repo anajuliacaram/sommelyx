@@ -217,30 +217,34 @@ export default function Landing() {
       <nav
         className="fixed top-0 w-full z-50"
         style={{
-          background: c.navBg,
-          backdropFilter: "blur(20px) saturate(1.5)",
-          borderBottom: `1px solid ${c.border}`,
+          background: "rgba(255,255,255,0.72)",
+          backdropFilter: "blur(12px) saturate(1.4)",
+          borderBottom: "1px solid rgba(155,45,94,0.06)",
+          backgroundImage: "radial-gradient(ellipse 80% 100% at 50% 0%, rgba(155,45,94,0.015), transparent 70%)",
         }}
       >
-        <div className="container mx-auto flex items-center justify-between h-14 px-4 lg:px-6">
-          <div className="flex items-center gap-2.5">
+        <div className="container mx-auto flex items-center justify-between h-[56px] px-4 lg:px-6">
+          <div className="flex items-center gap-3">
             <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})` }}
+              className="w-8 h-8 rounded-[10px] flex items-center justify-center"
+              style={{
+                background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
+                boxShadow: `0 2px 8px ${c.wineGlow}`,
+              }}
             >
-              <Wine className="h-3.5 w-3.5 text-white" />
+              <Wine className="h-4 w-4 text-white" />
             </div>
-            <span className="text-sm font-bold tracking-tight font-sans" style={{ color: c.text }}>Sommelyx</span>
+            <span className="text-[15px] font-extrabold tracking-tight font-sans" style={{ color: c.text }}>Sommelyx</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-[13px] font-medium" style={{ color: c.textSecondary }}>
-            <a href="#features" className="hover:text-black transition-colors duration-200">Funcionalidades</a>
-            <a href="#pricing" className="hover:text-black transition-colors duration-200">Planos</a>
+            <a href="#features" className="hover:text-[#1A1A1A] transition-colors duration-200">Funcionalidades</a>
+            <a href="#pricing" className="hover:text-[#1A1A1A] transition-colors duration-200">Planos</a>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Button
               variant="ghost"
               size="sm"
-              className="text-[13px] h-8 hover:bg-black/5"
+              className="text-[13px] h-9 px-4 hover:bg-black/[0.04] rounded-full"
               style={{ color: c.textSecondary }}
               onClick={() => navigate("/login")}
             >
@@ -248,10 +252,10 @@ export default function Landing() {
             </Button>
             <Button
               size="sm"
-              className="text-[13px] h-8 px-5 text-white border-0"
+              className="text-[13px] h-9 px-5 text-white border-0 rounded-full transition-all duration-200 hover:brightness-110 hover:shadow-lg"
               style={{
-                background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                boxShadow: `0 2px 12px ${c.wineGlow}, 0 1px 3px rgba(0,0,0,0.08)`,
+                background: `linear-gradient(135deg, ${c.wineLight}, ${c.wine})`,
+                boxShadow: `0 2px 16px ${c.wineGlow}, 0 1px 2px rgba(0,0,0,0.06)`,
               }}
               onClick={() => navigate("/signup")}
             >
