@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Settings, User, Bell, Building2, Save, Check } from "lucide-react";
+import { Settings, User, Bell, Building2, Save, Check, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -70,12 +74,22 @@ export default function SettingsPage() {
     }
   };
 
+  const [switchTarget, setSwitchTarget] = useState<"personal" | "commercial" | null>(null);
+
   const handleProfileSwitch = async (type: "personal" | "commercial") => {
+    if (type === profileType) return;
+    setSwitchTarget(type);
+  };
+
+  const confirmProfileSwitch = async () => {
+    if (!switchTarget) return;
     try {
-      await setProfileType(type);
-      toast({ title: `Modo alterado para ${type === "personal" ? "Adega Pessoal" : "Operação Comercial"}` });
+      await setProfileType(switchTarget);
+      toast({ title: `Modo alterado para ${switchTarget === "personal" ? "Adega Pessoal" : "Operação Comercial"}` });
     } catch {
       toast({ title: "Erro ao trocar perfil", variant: "destructive" });
+    } finally {
+      setSwitchTarget(null);
     }
   };
 
@@ -187,6 +201,26 @@ export default function SettingsPage() {
           {saving ? "Salvando..." : saved ? "Salvo!" : "Salvar configurações"}
         </Button>
       </motion.div>
+
+      {/* Profile switch confirmation */}
+      <AlertDialog open={!!switchTarget} onOpenChange={(open) => { if (!open) setSwitchTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">Trocar perfil?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Seu dashboard e menus serão ajustados para o modo{" "}
+              <strong>{switchTarget === "personal" ? "Adega Pessoal" : "Operação Comercial"}</strong>.
+              Seus dados de vinhos serão mantidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmProfileSwitch} className="gradient-wine text-white border-0">
+              Confirmar troca
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
