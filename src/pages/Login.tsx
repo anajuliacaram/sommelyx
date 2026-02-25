@@ -62,6 +62,7 @@ export default function Login() {
         description: msg,
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
