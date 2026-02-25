@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Wine, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,121 +48,210 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#F7F7F8" }}>
-      {/* Left — editorial visual panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden" style={{ background: "linear-gradient(160deg, #3A0E1F 0%, #8F2D56 50%, #4E1229 100%)" }}>
-        {/* Subtle glow */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 30% 40%, rgba(196,69,122,0.15), transparent 70%)" }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 40% at 70% 60%, rgba(201,168,106,0.08), transparent 60%)" }} />
-        
+    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: "#F7F7F8" }}>
+      {/* ═══ Left — editorial wine panel ═══ */}
+      <div
+        className="relative flex items-center justify-center overflow-hidden lg:w-[52%]"
+        style={{
+          background: "linear-gradient(175deg, #2E0A18 0%, #6B1D3A 40%, #8F2D56 70%, #A8436A 100%)",
+          minHeight: 240,
+        }}
+      >
+        {/* Ambient glows */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 60% at 25% 35%, rgba(201,168,106,0.10), transparent 70%)" }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 50% 50% at 75% 70%, rgba(196,69,122,0.12), transparent 65%)" }} />
+        {/* Subtle overlay for text contrast */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "rgba(0,0,0,0.06)" }} />
+
         <motion.div
-          className="relative z-10 max-w-sm"
-          initial={{ opacity: 0, y: 20 }}
+          className="relative z-10 px-10 py-12 lg:px-16 lg:py-0 text-center lg:text-left max-w-lg"
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
-          <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-24 w-24 object-contain mb-8" />
-          <h2 className="text-4xl font-serif font-bold text-white mb-4" style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}>
+          {/* Logo in glass circle */}
+          <div
+            className="inline-flex items-center justify-center w-[72px] h-[72px] rounded-2xl mb-8"
+            style={{
+              background: "rgba(255,255,255,0.12)",
+              backdropFilter: "blur(14px)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+            }}
+          >
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
+          </div>
+
+          <h2
+            className="font-serif font-black text-white mb-1"
+            style={{
+              fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+              letterSpacing: "-0.04em",
+              lineHeight: 1,
+            }}
+          >
             Bem-vindo
-            <br />
-            <span className="italic" style={{ color: "#C9A86A" }}>de volta.</span>
           </h2>
-          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+          <h2
+            className="font-serif font-bold italic mb-6"
+            style={{
+              fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
+              letterSpacing: "-0.03em",
+              lineHeight: 1.05,
+              color: "#C9A86A",
+            }}
+          >
+            de volta.
+          </h2>
+
+          <p
+            className="text-[17px] lg:text-[19px] leading-[1.65] max-w-sm"
+            style={{ color: "rgba(255,255,255,0.65)" }}
+          >
             Acesse sua adega inteligente e continue gerenciando sua coleção com precisão.
           </p>
         </motion.div>
+
+        {/* Bottom fade for depth */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.08), transparent)" }} />
       </div>
 
-      {/* Right — form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
+      {/* ═══ Right — form ═══ */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 lg:p-16">
         <motion.div
-          className="w-full max-w-sm"
-          initial={{ opacity: 0, y: 16 }}
+          className="w-full max-w-[400px]"
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex items-center gap-2.5 mb-10 lg:hidden">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-14 w-14 object-contain" />
-            <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: "#1A1A1A" }}>Sommelyx</span>
-          </div>
-
-          <h1 className="text-2xl font-serif font-bold mb-1" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>Entrar</h1>
-          <p className="text-sm mb-6" style={{ color: "#6B7280" }}>Acesse sua conta Sommelyx</p>
-
-          {emailConfirmed && (
-            <div className="flex items-center gap-2.5 p-3.5 rounded-xl mb-6" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}>
-              <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: "#22c55e" }} />
-              <p className="text-[13px] font-medium" style={{ color: "#16a34a" }}>Email confirmado com sucesso! Faça login.</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#6B7280" }}>Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="h-11 rounded-xl text-sm"
-                style={{ background: "#F0F0F2", border: "1px solid rgba(0,0,0,0.06)", color: "#0F0F14" }}
-              />
+          {/* Glass card wrapper */}
+          <div
+            className="p-8 sm:p-10"
+            style={{
+              background: "rgba(255,255,255,0.75)",
+              backdropFilter: "blur(14px)",
+              border: "1px solid rgba(143,45,86,0.10)",
+              borderRadius: 22,
+              boxShadow: "0 12px 48px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.03)",
+            }}
+          >
+            {/* Mobile logo */}
+            <div className="flex items-center gap-3 mb-8 lg:hidden">
+              <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-11 w-11 object-contain" />
+              <span className="text-[16px] font-extrabold font-sans tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.02em" }}>Sommelyx</span>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "#6B7280" }}>Senha</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-11 rounded-xl text-sm pr-10"
-                  style={{ background: "#F0F0F2", border: "1px solid rgba(0,0,0,0.06)", color: "#0F0F14" }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: "#9CA3AF" }}
-                >
-                  {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-12 rounded-xl text-[13px] font-semibold mt-2 text-white border-0"
-              style={{
-                background: "linear-gradient(135deg, #8F2D56, #C44569)",
-                boxShadow: "0 4px 16px rgba(143,45,86,0.15)",
-              }}
-              disabled={loading}
+            <h1
+              className="font-serif font-bold mb-1.5"
+              style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)", letterSpacing: "-0.035em", color: "#0F0F14", lineHeight: 1.1 }}
             >
-              {loading ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
+              Entrar
+            </h1>
+            <p className="text-[16px] mb-7" style={{ color: "#6B7280", lineHeight: 1.6 }}>
+              Acesse sua conta Sommelyx
+            </p>
 
-          <div className="flex items-center justify-between mt-4">
-            <Link to="/forgot-password" className="text-[12px] transition-colors" style={{ color: "#9CA3AF" }}>
-              Esqueci minha senha
-            </Link>
+            {emailConfirmed && (
+              <div className="flex items-center gap-3 p-4 rounded-2xl mb-6" style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.14)" }}>
+                <CheckCircle2 className="h-5 w-5 flex-shrink-0" style={{ color: "#22c55e" }} />
+                <p className="text-[14px] font-medium" style={{ color: "#16a34a" }}>Email confirmado com sucesso!</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-[12px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#6B7280" }}>Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="rounded-2xl text-[16px] transition-shadow duration-200"
+                  style={{
+                    height: 54,
+                    background: "rgba(240,240,242,0.7)",
+                    border: "1px solid rgba(0,0,0,0.07)",
+                    color: "#0F0F14",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.boxShadow = "0 0 0 4px rgba(143,45,86,0.12)"; e.currentTarget.style.borderColor = "rgba(143,45,86,0.25)"; }}
+                  onBlur={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.07)"; }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-[12px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#6B7280" }}>Senha</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="rounded-2xl text-[16px] pr-12 transition-shadow duration-200"
+                    style={{
+                      height: 54,
+                      background: "rgba(240,240,242,0.7)",
+                      border: "1px solid rgba(0,0,0,0.07)",
+                      color: "#0F0F14",
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.boxShadow = "0 0 0 4px rgba(143,45,86,0.12)"; e.currentTarget.style.borderColor = "rgba(143,45,86,0.25)"; }}
+                    onBlur={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.07)"; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors hover:opacity-70"
+                    style={{ color: "#9CA3AF" }}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Forgot password */}
+              <div className="flex justify-end">
+                <Link
+                  to="/forgot-password"
+                  className="text-[13px] font-medium transition-all duration-200 hover:underline"
+                  style={{ color: "#8F2D56" }}
+                >
+                  Esqueci minha senha
+                </Link>
+              </div>
+
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  type="submit"
+                  className="w-full rounded-2xl text-[16px] font-semibold text-white border-0 cursor-pointer"
+                  style={{
+                    height: 58,
+                    background: "linear-gradient(135deg, #8F2D56 0%, #C44569 50%, #D4896B 100%)",
+                    boxShadow: "0 8px 28px rgba(143,45,86,0.22), 0 2px 6px rgba(0,0,0,0.06)",
+                    transition: "box-shadow 200ms ease, filter 200ms ease",
+                    ...(loading ? { filter: "brightness(0.95)" } : {}),
+                  }}
+                  onMouseEnter={(e) => { if (!loading) e.currentTarget.style.boxShadow = "0 14px 40px rgba(143,45,86,0.32), 0 4px 10px rgba(0,0,0,0.1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 8px 28px rgba(143,45,86,0.22), 0 2px 6px rgba(0,0,0,0.06)"; }}
+                  disabled={loading}
+                >
+                  {loading ? "Entrando..." : "Entrar"}
+                </Button>
+              </motion.div>
+            </form>
+
+            <p className="text-center text-[14px] mt-7" style={{ color: "#9CA3AF" }}>
+              Não tem conta?{" "}
+              <Link to="/signup" className="font-semibold transition-colors hover:underline" style={{ color: "#8F2D56" }}>
+                Criar conta grátis
+              </Link>
+            </p>
           </div>
 
-          <p className="text-center text-[12px] mt-4" style={{ color: "#9CA3AF" }}>
-            Não tem conta?{" "}
-            <Link to="/signup" className="font-medium transition-colors" style={{ color: "#8F2D56" }}>
-              Criar conta grátis
-            </Link>
-          </p>
-
-          <p className="text-center mt-4">
-            <Link to="/" className="text-[12px] transition-colors duration-200" style={{ color: "#9CA3AF" }}>
+          <p className="text-center mt-5">
+            <Link to="/" className="text-[13px] transition-colors duration-200 hover:underline" style={{ color: "#9CA3AF" }}>
               ← Voltar ao início
             </Link>
           </p>
