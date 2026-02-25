@@ -58,22 +58,22 @@ const plans = [
 
 /* ─── Light theme color tokens ─── */
 const c = {
-  bg: "#FAFAF9",
-  bgSubtle: "#F5F4F2",
+  bg: "#F7F4F2",
+  bgSubtle: "#F0EDEA",
   text: "#1A1A1A",
   textSecondary: "#5C5C5C",
   textTertiary: "#8A8A8A",
   border: "rgba(0,0,0,0.06)",
   borderHover: "rgba(0,0,0,0.12)",
-  wine: "#9B2D5E",
-  wineLight: "#C44B7A",
-  wineDark: "#7A1E48",
-  wineGlow: "rgba(155, 45, 94, 0.12)",
-  gold: "#B8860B",
-  goldLight: "#D4A843",
+  wine: "#6B1D3A",
+  wineLight: "#C4457A",
+  wineDark: "#4E1229",
+  wineGlow: "rgba(107, 29, 58, 0.12)",
+  gold: "#C9A86A",
+  goldLight: "#D9BF8A",
   cardBg: "rgba(255,255,255,0.7)",
   cardBorder: "rgba(0,0,0,0.05)",
-  navBg: "rgba(250,250,249,0.8)",
+  navBg: "rgba(247,244,242,0.8)",
 };
 
 /* Dashboard mockup — light version */
