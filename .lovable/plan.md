@@ -1,74 +1,84 @@
 
 
-# WineVault — SaaS de Gestão de Adega de Vinhos
+# Refinamento de Legibilidade, Contraste e Hierarquia Visual
 
-## Visão Geral
-Construir as telas fundacionais de um SaaS premium de gestão de adega, com design de alto padrão visual, em português (PT-BR), usando Lovable Cloud (Supabase) para backend.
+## Diagnóstico
 
----
+O design atual sofre de contraste insuficiente entre camadas. Os valores CSS mostram:
+- `--background: 340 20% 7%` (lightness 7%)
+- `--card: 340 16% 10%` (lightness 10%) — apenas 3% de diferença
+- `--muted-foreground: 340 6% 48%` — texto secundário com apenas 48% lightness sobre fundo 7%, resultando em baixa legibilidade
+- `--border: 340 10% 15%` — bordas quase invisíveis
+- Botões com gradient wine (32-42% lightness) ficam "afundados" no fundo escuro
 
-## 1. Design System Premium
-- Paleta: vinho profundo (#5B0F2F), dourado suave (#C9A96E), off-white (#FAF8F5), cinzas sofisticados
-- Tipografia: Inter com hierarquia clara
-- Cantos arredondados (2xl), sombras suaves, micro-animações com framer-motion
-- Componentes base: Cards com glassmorphism sutil, botões elegantes, skeleton loading
+## Alterações Planejadas
 
-## 2. Landing Page
-- Hero impactante com headline forte: "Sua adega, inteligente."
-- Ilustração/visual premium de vinhos
-- Seção de funcionalidades com ícones elegantes
-- Seção de planos (Free / Pro / Business) com cards comparativos
-- CTA claro para começar gratuitamente
-- Footer profissional
+### 1. CSS Variables (`src/index.css`) — Sistema de Cores
 
-## 3. Seleção de Perfil
-- Tela elegante pós-registro com duas opções grandes:
-  - 🍷 **Adega Pessoal** — para colecionadores
-  - 🏢 **Adega Comercial** — para negócios
-- Essa escolha é salva no perfil do usuário e define toda a experiência
+Ajustar lightness para criar camadas distintas:
 
-## 4. Autenticação
-- Telas de Login e Cadastro com design premium
-- Autenticação por email/senha via Supabase Auth
-- Tabela `profiles` com campos: nome, avatar, tipo de perfil (pessoal/comercial)
-- Tabela `user_roles` para controle de permissões
-- Redirecionamento inteligente pós-login baseado no tipo de perfil
+| Token | Atual | Novo | Motivo |
+|-------|-------|------|--------|
+| `--background` | 7% | 5% | Base mais escura para separar camadas |
+| `--card` | 10% | 12% | Cards mais distintos do fundo |
+| `--muted` | 13% | 16% | Superfícies secundárias mais visíveis |
+| `--muted-foreground` | 48% | 58% | Texto secundário mais legível |
+| `--secondary-foreground` | 78% | 82% | Texto auxiliar mais claro |
+| `--foreground` | 90% | 93% | Headlines com mais contraste |
+| `--border` | 15% | 18% | Bordas hairline mais perceptíveis |
+| `--sidebar-foreground` | 75% | 78% | Sidebar mais legível |
 
-## 5. Dashboard — Adega Pessoal
-- Layout com sidebar elegante (collapsible)
-- Cards de métricas: total de garrafas, valor da adega, vinhos no auge, últimas adições
-- Gráficos: distribuição por país/região, evolução da coleção
-- Lista recente de vinhos adicionados
-- Empty states elegantes com CTAs
+Botões: ajustar `--primary` de 42% para 46% lightness para CTAs mais luminosos.
 
-## 6. Dashboard — Adega Comercial
-- Mesma estrutura visual, métricas diferentes:
-  - Faturamento do mês, estoque total, produtos críticos, vendas recentes, margem média
-- Gráficos: vendas por período, curva de estoque
-- Alertas de estoque baixo
-- Empty states com CTAs comerciais
+### 2. CSS Utilities (`src/index.css`) — Superfícies
 
-## 7. Navegação
-- Sidebar com ícones e labels, adaptativa ao perfil:
-  - **Pessoal**: Dashboard, Minha Adega, Wishlist, Estatísticas, Plano
-  - **Comercial**: Dashboard, Estoque, Vendas, Cadastros, Relatórios, Plano
-- Mobile: bottom navigation ou drawer menu
-- Breadcrumbs contextuais
+- `.card-depth`: aumentar lightness do gradiente (de 12%→14% e 9%→11%), border opacity de 30→40%
+- `.glass`: lightness de 11%/9% para 13%/11%
+- `.surface-elevated`: lightness de 13%/10% para 15%/12%
+- `.gradient-wine`: lightness de 32-42% para 35-46% (CTAs mais luminosos)
+- Body `line-height`: de 1.6 para 1.7 para melhor legibilidade em dark
 
-## 8. Tela de Planos & Upgrade
-- Página de planos com cards comparativos (sem integração real com Stripe por enquanto)
-- Badges de plano atual
-- Modal de upgrade elegante com benefícios
-- Simulação de trial gratuito de 14 dias
+### 3. Landing Page (`src/pages/Landing.tsx`)
 
-## 9. Banco de Dados (Supabase)
-- `profiles` — dados do usuário (nome, avatar, tipo de perfil)
-- `user_roles` — roles separados (admin, user, etc.)
-- `subscriptions` — plano atual do usuário (mock por enquanto)
-- RLS configurado para multi-tenant seguro
+- Subtítulo: de `text-muted-foreground` para `text-secondary-foreground` com `leading-[1.8]`
+- Parágrafo hero: adicionar `leading-[1.8]`
+- Stats bar: `bg-card/20` → `bg-card/40` para mais presença
+- Stat values: manter `text-foreground`, stat labels: `text-muted-foreground` (agora mais legível com novo valor)
+- Feature cards: adicionar `p-7` (de `p-6`) e description `leading-[1.7]`
+- Pricing description text: garantir contraste adequado
+- Reduzir opacidade do overlay escuro da hero: `gradient-wine-deep` com center radial mais luminoso
 
-## 10. Responsividade
-- Design mobile-first em todas as telas
-- Tabelas adaptativas (cards no mobile)
-- Navegação fluida com transições suaves
+### 4. Dashboards (`PersonalDashboard.tsx`, `CommercialDashboard.tsx`)
+
+- Cards de métricas: `p-4` → `p-5`, valores com `text-xl` (de `text-lg`)
+- Labels de métricas: `text-[10px]` → `text-[11px]` para legibilidade
+- Subtítulos: de `text-muted-foreground` (novo valor mais claro)
+- Gap entre cards: `gap-2.5` → `gap-3`
+- Container máximo: `max-w-6xl` permanece
+
+### 5. Sidebar & Dashboard Layout (`AppSidebar.tsx`, `DashboardLayout.tsx`)
+
+- Sidebar email: `text-sidebar-foreground/40` → `text-sidebar-foreground/55`
+- Menu items: `text-sidebar-foreground/60` → `text-sidebar-foreground/70`
+- Header do dashboard: `bg-background/80` → `bg-card/60` para criar camada visual
+- Content padding: manter responsivo atual
+
+### 6. Botão (`button.tsx`)
+
+- Default variant shadow: aumentar lightness do inner glow de 55% para 60%
+- Garantir que `gradient-wine` atualizado (mais luminoso) se aplique automaticamente via classes utilitárias
+
+## Arquivos Modificados
+
+1. `src/index.css` — variáveis de cor, superfícies, tipografia base
+2. `src/pages/Landing.tsx` — contraste de texto, espaçamento, hero overlay
+3. `src/pages/dashboard/PersonalDashboard.tsx` — padding, tamanhos de texto
+4. `src/pages/dashboard/CommercialDashboard.tsx` — mesmos ajustes
+5. `src/components/AppSidebar.tsx` — opacidades de texto
+6. `src/layouts/DashboardLayout.tsx` — header background
+7. `src/components/ui/button.tsx` — shadow adjustments
+
+## Resultado
+
+Dark mode premium com camadas visuais claras, texto confortável de ler, e cards/botões com presença adequada — sem perder a atmosfera escura e sofisticada.
 
