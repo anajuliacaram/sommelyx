@@ -348,7 +348,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ FEATURES ═══════════════ */}
-      <section id="features" className="relative py-24 md:py-28 px-4">
+      <section id="features" className="relative py-12 md:py-[72px] px-4">
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-4 block" style={{ color: "#8F2D56" }}>
@@ -361,7 +361,7 @@ export default function Landing() {
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-0">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -388,7 +388,7 @@ export default function Landing() {
       </div>
 
       {/* ═══════════════ PRICING ═══════════════ */}
-      <section id="pricing" className="relative py-24 md:py-28 px-4">
+      <section id="pricing" className="relative pt-12 md:pt-[72px] pb-12 md:pb-[72px] px-4">
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-4 block" style={{ color: "#8F2D56" }}>Planos</span>
