@@ -310,4 +310,30 @@
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
+
+  /* ── Nav Link Premium ── */
+  .nav-link-premium {
+    position: relative;
+    transition: color 0.25s ease;
+    cursor: pointer;
+  }
+  .nav-link-premium::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #8F2D56, #C44569);
+    border-radius: 1px;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s ease;
+  }
+  .nav-link-premium:hover {
+    color: #8F2D56 !important;
+  }
+  .nav-link-premium:hover::after {
+    transform: scaleX(1);
+  }
 }

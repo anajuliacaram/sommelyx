@@ -176,24 +176,28 @@ export default function Landing() {
       <nav
         className="fixed top-0 w-full z-50"
         style={{
-          background: "rgba(247,247,248,0.75)",
-          backdropFilter: "blur(16px) saturate(1.5)",
-          borderBottom: "1px solid rgba(0,0,0,0.04)",
+          background: "rgba(255,255,255,0.72)",
+          backdropFilter: "blur(14px) saturate(1.4)",
+          borderBottom: "1px solid rgba(143,45,86,0.10)",
+          boxShadow: "0 6px 24px rgba(0,0,0,0.04)",
         }}
       >
-        <div className="container mx-auto flex items-center justify-between h-[64px] px-5 lg:px-8">
-          <div className="flex items-center gap-2.5">
+        <div className="container mx-auto flex items-center justify-between h-[68px] px-5 lg:px-8">
+          <a
+            href="/"
+            className="flex items-center gap-2.5 cursor-pointer transition-all duration-250 hover:brightness-110 hover:scale-[1.03]"
+          >
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-16 w-16 object-contain" />
             <span className="text-[18px] font-extrabold tracking-tight font-sans" style={{ color: "#0F0F14", letterSpacing: "-0.025em" }}>
               Sommelyx
             </span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium" style={{ color: "#6B7280" }}>
-            <a href="#features" className="hover:text-[#0F0F14] transition-colors duration-200">Funcionalidades</a>
-            <a href="#pricing" className="hover:text-[#0F0F14] transition-colors duration-200">Planos</a>
+          </a>
+          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium" style={{ letterSpacing: "0.2px" }}>
+            <a href="#features" className="nav-link-premium" style={{ color: "#6B7280" }}>Funcionalidades</a>
+            <a href="#pricing" className="nav-link-premium" style={{ color: "#6B7280" }}>Planos</a>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="text-[13px] h-10 px-5 font-medium" style={{ color: "#6B7280" }} onClick={() => navigate("/login")}>
+            <Button variant="ghost" className="nav-link-premium text-[13px] h-10 px-5 font-medium" style={{ color: "#6B7280" }} onClick={() => navigate("/login")}>
               Entrar
             </Button>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
