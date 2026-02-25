@@ -223,16 +223,8 @@ export default function Landing() {
         }}
       >
         <div className="container mx-auto flex items-center justify-between h-[60px] px-5 lg:px-8">
-          <div className="flex items-center gap-3.5">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{
-                background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                boxShadow: `0 2px 10px ${c.wineGlow}`,
-              }}
-            >
-              <Wine className="h-[18px] w-[18px] text-white" />
-            </div>
+          <div className="flex items-center gap-2.5">
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-10 object-contain" />
             <span
               className="text-[18px] font-extrabold tracking-tight font-sans"
               style={{ color: c.text, letterSpacing: "-0.025em" }}

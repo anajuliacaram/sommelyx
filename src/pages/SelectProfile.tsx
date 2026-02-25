@@ -74,9 +74,7 @@ export default function SelectProfile() {
             >
               <div className="text-center mb-10">
                 <div className="flex items-center justify-center gap-2.5 mb-6">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})` }}>
-                    <Wine className="h-[18px] w-[18px] text-white" />
-                  </div>
+                  <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-9 w-9 object-contain" />
                   <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: c.text }}>Sommelyx</span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-serif font-bold mb-3" style={{ letterSpacing: "-0.03em", color: c.text }}>

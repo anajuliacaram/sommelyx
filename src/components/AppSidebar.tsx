@@ -38,9 +38,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-3 px-3 py-4">
-          <div className="w-9 h-9 rounded-xl gradient-wine flex items-center justify-center" style={{ boxShadow: "0 2px 8px hsl(338 52% 52% / 0.15)" }}>
-            <Wine className="h-[18px] w-[18px] text-primary-foreground" />
-          </div>
+          <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-9 w-9 object-contain" />
           <div className="flex flex-col">
             <span className="text-[14px] font-bold text-sidebar-foreground font-sans tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
             <span className="text-[10px] text-sidebar-foreground/50 capitalize font-medium">
