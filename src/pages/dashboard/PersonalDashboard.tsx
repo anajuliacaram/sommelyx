@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { WineMesh } from "@/components/WineMesh";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
+import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { useWineMetrics } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import {
@@ -35,6 +36,7 @@ export default function PersonalDashboard() {
   const { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines } = useWineMetrics();
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
+  const [csvOpen, setCsvOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
 
   // Drink window data
@@ -109,7 +111,7 @@ export default function PersonalDashboard() {
     { label: "Abrir agora", desc: "Registrar abertura", icon: GlassWater, color: "#22c55e", bg: "rgba(34,197,94,0.06)", onClick: () => { setManageTab("open"); setManageOpen(true); } },
     { label: "Registrar saída", desc: "Saída de garrafa", icon: ArrowDownRight, color: "#E07A5F", bg: "rgba(224,122,95,0.06)", onClick: () => { setManageTab("exit"); setManageOpen(true); } },
     { label: "Comprar reposição", desc: "Adicionar ao estoque", icon: ShoppingCart, color: "#8F2D56", bg: "rgba(143,45,86,0.06)", onClick: () => { setManageTab("add"); setManageOpen(true); } },
-    { label: "Importar CSV", desc: "Upload em lote", icon: Upload, color: "#C9A86A", bg: "rgba(201,168,106,0.06)", onClick: () => {} },
+    { label: "Importar CSV", desc: "Upload em lote", icon: Upload, color: "#C9A86A", bg: "rgba(201,168,106,0.06)", onClick: () => setCsvOpen(true) },
   ];
 
   const metrics = [
@@ -421,6 +423,7 @@ export default function PersonalDashboard() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
+      <ImportCsvDialog open={csvOpen} onOpenChange={setCsvOpen} />
     </div>
   );
 }

@@ -148,7 +148,13 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-[12px] mt-6" style={{ color: "#9CA3AF" }}>
+          <div className="flex items-center justify-between mt-4">
+            <Link to="/forgot-password" className="text-[12px] transition-colors" style={{ color: "#9CA3AF" }}>
+              Esqueci minha senha
+            </Link>
+          </div>
+
+          <p className="text-center text-[12px] mt-4" style={{ color: "#9CA3AF" }}>
             Não tem conta?{" "}
             <Link to="/signup" className="font-medium transition-colors" style={{ color: "#8F2D56" }}>
               Criar conta grátis
