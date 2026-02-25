@@ -80,39 +80,43 @@ export default function Login() {
         >
           {/* Logo in glass card */}
           <motion.div
-            className="relative inline-flex items-center gap-4 rounded-[20px] px-4 py-3 mb-8 lg:mb-10 cursor-default"
+            className="relative inline-flex items-center gap-3 lg:gap-4 rounded-[20px] px-3 py-2.5 lg:px-4 lg:py-3 cursor-default"
             style={{
               background: "rgba(255,255,255,0.10)",
               backdropFilter: "blur(12px)",
               border: "1px solid rgba(255,255,255,0.18)",
               boxShadow: "0 10px 30px rgba(0,0,0,0.18), 0 2px 10px rgba(0,0,0,0.10)",
+              marginBottom: 28,
             }}
             whileHover={{ scale: 1.04, y: -1 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
-            {/* Halo vinho premium */}
-            <div className="absolute -inset-5 -z-10 pointer-events-none" style={{ background: "radial-gradient(circle, rgba(139,45,85,0.18) 0%, rgba(139,45,85,0.08) 40%, transparent 70%)", filter: "blur(18px)" }} />
+            <div className="absolute -inset-4 lg:-inset-5 -z-10 pointer-events-none" style={{ background: "radial-gradient(circle, rgba(139,45,85,0.15) 0%, rgba(139,45,85,0.06) 40%, transparent 70%)", filter: "blur(16px)" }} />
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[46px] w-[46px] lg:h-[60px] lg:w-[60px] object-contain block" />
             <span className="text-[17px] lg:text-[19px] font-extrabold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
           </motion.div>
 
           <h2
-            className="font-serif font-black text-white mb-1"
+            className="font-serif font-bold text-white"
             style={{
               fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
-              letterSpacing: "-0.04em",
-              lineHeight: 1,
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.05,
+              marginBottom: 12,
             }}
           >
             Bem-vindo
           </h2>
           <h2
-            className="font-serif font-bold italic mb-8"
+            className="font-serif italic"
             style={{
               fontSize: "clamp(2.2rem, 4.5vw, 4rem)",
+              fontWeight: 600,
               letterSpacing: "-0.03em",
               lineHeight: 1.05,
               color: "#C9A86A",
+              marginBottom: 32,
             }}
           >
             de volta.
