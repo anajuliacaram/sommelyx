@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Wine, BarChart3, Shield, Smartphone, Star, TrendingUp, ArrowRight, Check, Sparkles } from "lucide-react";
+import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -18,12 +18,12 @@ const stagger = {
 };
 
 const features = [
-  { icon: Wine, title: "Gestão Completa", desc: "Cadastre vinhos com todos os detalhes: safra, uvas, notas de degustação e mais." },
-  { icon: BarChart3, title: "Analytics Inteligente", desc: "Dashboards visuais com métricas em tempo real da sua coleção ou negócio." },
-  { icon: Shield, title: "Multi-tenant Seguro", desc: "Dados isolados por conta. Permissões granulares por papel de usuário." },
-  { icon: Smartphone, title: "Mobile First", desc: "Interface responsiva otimizada para uso em celular, tablet e desktop." },
-  { icon: Star, title: "Avaliações & Notas", desc: "Sistema de avaliação pessoal com notas de degustação detalhadas." },
-  { icon: TrendingUp, title: "Relatórios Comerciais", desc: "Faturamento, margem, curva ABC e giro de estoque para negócios." },
+  { icon: Wine, title: "O que abrir hoje", desc: "Sugestões pelo momento ideal de consumo e suas preferências." },
+  { icon: LayoutGrid, title: "Sua adega em ordem", desc: "Saiba quantas garrafas tem e onde estão (prateleira, caixa, posição)." },
+  { icon: Bell, title: "Alertas inteligentes", desc: "Beber agora, estoque baixo e lembretes do que vale priorizar." },
+  { icon: Search, title: "Busca e filtros rápidos", desc: "Encontre em segundos por uva, país, estilo e faixa de preço." },
+  { icon: StickyNote, title: "Notas de degustação", desc: "Registre notas, avaliações e harmonizações pra não esquecer." },
+  { icon: Upload, title: "Importe sua lista", desc: "Comece rápido importando CSV/planilha. Sem retrabalho." },
 ];
 
 const plans = [
@@ -348,34 +348,57 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ FEATURES ═══════════════ */}
-      <section id="features" className="relative py-12 md:py-[72px] px-4">
-        <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-4 block" style={{ color: "#8F2D56" }}>
+      <section id="features" className="relative py-10 md:py-14 px-4">
+        <div className="container mx-auto max-w-4xl relative z-10">
+          <motion.div className="mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-3 block" style={{ color: "#8F2D56" }}>
               Funcionalidades
             </span>
-            <h2 className="text-3xl md:text-5xl lg:text-[3.5rem] font-serif font-bold tracking-tight max-w-2xl" style={{ lineHeight: "1.05", color: "#0F0F14" }}>
-              Tudo para gerenciar
+            <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight max-w-xl" style={{ lineHeight: "1.05", color: "#0F0F14" }}>
+              O que o Sommelyx
               <br />
-              <span className="italic text-gradient-wine">seus vinhos</span>
+              <span className="italic text-gradient-wine">faz por você</span>
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
-                className="glass-card p-7 group cursor-default"
+                className="group cursor-default"
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
+                style={{
+                  borderRadius: 16,
+                  padding: "20px 24px",
+                  background: "rgba(255,255,255,0.65)",
+                  backdropFilter: "blur(12px)",
+                  border: "2px solid rgba(143,45,86,0.12)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                  transition: "all 220ms ease-out",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow = "0 12px 32px rgba(143,45,86,0.12), 0 4px 12px rgba(0,0,0,0.06)";
+                  e.currentTarget.style.borderColor = "rgba(143,45,86,0.28)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.04)";
+                  e.currentTarget.style.borderColor = "rgba(143,45,86,0.12)";
+                }}
               >
-                <div
-                  className="w-11 h-11 rounded-[14px] flex items-center justify-center mb-5"
-                  style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)", boxShadow: "0 4px 12px rgba(143,45,86,0.15)" }}
-                >
-                  <f.icon className="h-[18px] w-[18px] text-white" />
+                <div className="flex items-start gap-4">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: "rgba(143,45,86,0.08)" }}
+                  >
+                    <f.icon className="h-[18px] w-[18px]" style={{ color: "#8F2D56" }} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-[17px] font-bold mb-1 font-sans tracking-tight" style={{ color: "#0F0F14" }}>{f.title}</h3>
+                    <p className="text-[16px] leading-[1.6]" style={{ color: "#6B7280" }}>{f.desc}</p>
+                  </div>
                 </div>
-                <h3 className="text-[17px] font-semibold mb-2.5 font-sans tracking-tight" style={{ color: "#0F0F14" }}>{f.title}</h3>
-                <p className="text-[14px] leading-[1.75]" style={{ color: "#6B7280" }}>{f.desc}</p>
               </motion.div>
             ))}
           </div>
