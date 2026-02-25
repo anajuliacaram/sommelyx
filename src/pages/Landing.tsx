@@ -266,12 +266,20 @@ export default function Landing() {
           />
 
           <motion.p
-            className="text-center text-base sm:text-lg max-w-lg mx-auto mb-14 font-light"
-            style={{ color: "#6B7280", lineHeight: 1.85 }}
+            className="text-center text-lg sm:text-xl max-w-2xl mx-auto mb-4 font-light"
+            style={{ color: "#6B7280", lineHeight: 1.75 }}
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            Gerencie sua coleção pessoal ou operação comercial com{" "}
-            <span className="font-medium" style={{ color: "#0F0F14" }}>tecnologia de ponta</span> e insights que fazem a diferença.
+            Gerencie sua adega com inteligência — do controle pessoal à operação profissional, com{" "}
+            <span className="font-medium" style={{ color: "#0F0F14" }}>insights que realmente fazem a diferença</span>.
+          </motion.p>
+
+          <motion.p
+            className="text-center text-sm sm:text-base max-w-md mx-auto mb-14"
+            style={{ color: "#9CA3AF", lineHeight: 1.7 }}
+            initial="hidden" animate="visible" variants={fadeUp} custom={2.5}
+          >
+            Estoque, consumo e performance de vinhos em uma única plataforma.
           </motion.p>
 
           {/* CTAs */}
