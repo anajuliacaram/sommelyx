@@ -52,12 +52,7 @@ export default function Signup() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center mb-8"
-            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }}
-          >
-            <Wine className="h-6 w-6 text-white" />
-          </div>
+          <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-14 w-14 object-contain mb-8" />
           <h2 className="text-4xl font-serif font-bold text-white mb-4" style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}>
             Comece sua
             <br />
@@ -78,9 +73,7 @@ export default function Signup() {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="flex items-center gap-2.5 mb-10 lg:hidden">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #6B1D3A, #C4457A)" }}>
-              <Wine className="h-4 w-4 text-white" />
-            </div>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 w-8 object-contain" />
             <span className="text-[15px] font-bold font-sans tracking-tight" style={{ color: "#1A1A1A" }}>Sommelyx</span>
           </div>
 
