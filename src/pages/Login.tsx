@@ -80,18 +80,18 @@ export default function Login() {
         >
           {/* Logo in glass card */}
           <motion.div
-            className="inline-flex items-center gap-3 rounded-[14px] px-4 py-2.5 mb-10 cursor-default"
+            className="inline-flex items-center gap-4 rounded-[18px] px-[14px] py-[10px] mb-8 lg:mb-10 cursor-default"
             style={{
-              background: "rgba(255,255,255,0.14)",
-              backdropFilter: "blur(14px)",
-              border: "1px solid rgba(255,255,255,0.20)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+              background: "rgba(255,255,255,0.12)",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12)",
             }}
-            whileHover={{ scale: 1.03 }}
+            whileHover={{ scale: 1.04, y: -1 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
-            <span className="text-[15px] font-bold text-white/90 tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-14 w-14 lg:h-16 lg:w-16 object-contain" style={{ opacity: 1, filter: "none" }} />
+            <span className="text-[17px] lg:text-[18px] font-extrabold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>Sommelyx</span>
           </motion.div>
 
           <h2
