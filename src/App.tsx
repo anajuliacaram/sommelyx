@@ -3,8 +3,16 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { AuthProvider } from "@/contexts/AuthContext";
+import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import SelectProfile from "@/pages/SelectProfile";
+import DashboardLayout from "@/layouts/DashboardLayout";
+import DashboardIndex from "@/pages/dashboard/DashboardIndex";
+import Plans from "@/pages/dashboard/Plans";
+import Placeholder from "@/pages/dashboard/Placeholder";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -14,11 +22,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/select-profile" element={<SelectProfile />} />
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<DashboardIndex />} />
+              <Route path="cellar" element={<Placeholder title="Minha Adega" />} />
+              <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
+              <Route path="stats" element={<Placeholder title="Estatísticas" />} />
+              <Route path="inventory" element={<Placeholder title="Estoque" />} />
+              <Route path="sales" element={<Placeholder title="Vendas" />} />
+              <Route path="registers" element={<Placeholder title="Cadastros" />} />
+              <Route path="reports" element={<Placeholder title="Relatórios" />} />
+              <Route path="plans" element={<Plans />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
