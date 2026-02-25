@@ -267,18 +267,39 @@ export default function Landing() {
 
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative pt-28 pb-8 px-4 min-h-[92vh] flex flex-col justify-center">
-        {/* Ambient glows */}
-        <div
+        {/* Slow-drifting ambient gradient */}
+        <motion.div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 70% 50% at 50% 30%, rgba(155,45,94,0.04), transparent 65%)" }}
+          animate={{
+            background: [
+              "radial-gradient(ellipse 70% 50% at 45% 35%, rgba(155,45,94,0.045), transparent 65%)",
+              "radial-gradient(ellipse 70% 50% at 55% 30%, rgba(155,45,94,0.035), transparent 65%)",
+              "radial-gradient(ellipse 70% 50% at 45% 35%, rgba(155,45,94,0.045), transparent 65%)",
+            ],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         />
-        <div
+        <motion.div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 40% 35% at 20% 50%, rgba(184,134,11,0.03), transparent 60%)" }}
+          animate={{
+            background: [
+              "radial-gradient(ellipse 40% 35% at 20% 50%, rgba(184,134,11,0.03), transparent 60%)",
+              "radial-gradient(ellipse 40% 35% at 25% 45%, rgba(184,134,11,0.02), transparent 60%)",
+              "radial-gradient(ellipse 40% 35% at 20% 50%, rgba(184,134,11,0.03), transparent 60%)",
+            ],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
         />
-        <div
+        <motion.div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 35% 30% at 80% 40%, rgba(155,45,94,0.025), transparent 55%)" }}
+          animate={{
+            background: [
+              "radial-gradient(ellipse 35% 30% at 80% 40%, rgba(155,45,94,0.025), transparent 55%)",
+              "radial-gradient(ellipse 35% 30% at 75% 45%, rgba(155,45,94,0.018), transparent 55%)",
+              "radial-gradient(ellipse 35% 30% at 80% 40%, rgba(155,45,94,0.025), transparent 55%)",
+            ],
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         />
 
         {/* Floating orbs */}
@@ -365,33 +386,37 @@ export default function Landing() {
 
             {/* CTAs */}
             <motion.div className="flex flex-col sm:flex-row gap-3 justify-center items-center" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-              <Button
-                size="lg"
-                className="text-[14px] px-10 h-13 font-semibold relative overflow-hidden group text-white border-0 rounded-full"
-                onClick={() => navigate("/signup")}
-                style={{
-                  background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
-                  boxShadow: `0 0 40px ${c.wineGlow}, 0 4px 16px rgba(155,45,94,0.2), 0 1px 3px rgba(0,0,0,0.08)`,
-                }}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Começar Gratuitamente <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                </span>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-[13px] px-7 h-13 font-medium rounded-full"
-                style={{
-                  color: c.textSecondary,
-                  border: `1px solid ${c.borderHover}`,
-                  background: "rgba(255,255,255,0.5)",
-                  backdropFilter: "blur(8px)",
-                }}
-                onClick={() => navigate("/login")}
-              >
-                Já tenho conta →
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.2 }}>
+                <Button
+                  size="lg"
+                  className="text-[14px] px-10 h-13 font-semibold relative overflow-hidden group text-white border-0 rounded-full transition-shadow duration-250"
+                  onClick={() => navigate("/signup")}
+                  style={{
+                    background: `linear-gradient(135deg, ${c.wine}, ${c.wineLight})`,
+                    boxShadow: `0 0 40px ${c.wineGlow}, 0 4px 16px rgba(155,45,94,0.2), 0 1px 3px rgba(0,0,0,0.08)`,
+                  }}
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Começar Gratuitamente <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                  </span>
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.2 }}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-[13px] px-7 h-13 font-medium rounded-full transition-all duration-250 hover:shadow-sm"
+                  style={{
+                    color: c.textSecondary,
+                    border: `1px solid ${c.borderHover}`,
+                    background: "rgba(255,255,255,0.5)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                  onClick={() => navigate("/login")}
+                >
+                  Já tenho conta →
+                </Button>
+              </motion.div>
             </motion.div>
           </div>
 
@@ -544,7 +569,7 @@ export default function Landing() {
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className="rounded-2xl p-8 transition-all duration-300 relative"
+                className="rounded-2xl p-8 relative"
                 style={plan.highlighted ? {
                   background: `linear-gradient(160deg, ${c.wine}, ${c.wineLight})`,
                   boxShadow: `0 0 60px ${c.wineGlow}, 0 24px 48px -12px rgba(155,45,94,0.2), 0 1px 3px rgba(0,0,0,0.08)`,
@@ -556,7 +581,7 @@ export default function Landing() {
                   boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02)",
                 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -4, transition: { duration: 0.25 } }}
+                whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.25, ease: "easeOut" } }}
               >
                 {plan.highlighted && (
                   <span
