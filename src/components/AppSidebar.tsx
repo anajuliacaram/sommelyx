@@ -42,8 +42,8 @@ export function AppSidebar() {
             <Wine className="h-4 w-4 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[13px] font-semibold text-sidebar-foreground font-sans tracking-tight">WineVault</span>
-            <span className="text-[10px] text-sidebar-foreground/50 capitalize font-medium">
+            <span className="text-[13px] font-semibold text-sidebar-foreground font-sans tracking-tight">Sommelyx</span>
+            <span className="text-[10px] text-sidebar-foreground/55 capitalize font-medium">
               {profileType === "commercial" ? "Comercial" : "Pessoal"}
             </span>
           </div>
@@ -54,7 +54,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/40 text-[10px] uppercase tracking-[0.1em] font-medium">
+          <SidebarGroupLabel className="text-sidebar-foreground/45 text-[10px] uppercase tracking-[0.1em] font-medium">
             Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -65,7 +65,7 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/dashboard"}
-                      className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-150 rounded-lg text-[13px]"
+                      className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/70 transition-all duration-150 rounded-lg text-[13px]"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4" />
@@ -79,7 +79,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/40 text-[10px] uppercase tracking-[0.1em] font-medium">
+          <SidebarGroupLabel className="text-sidebar-foreground/45 text-[10px] uppercase tracking-[0.1em] font-medium">
             Conta
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -88,7 +88,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink
                     to="/dashboard/plans"
-                    className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-150 rounded-lg text-[13px]"
+                    className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/70 transition-all duration-150 rounded-lg text-[13px]"
                     activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                   >
                     <CreditCard className="h-4 w-4" />
@@ -109,7 +109,7 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={signOut}
-                className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-150 rounded-lg text-[13px]"
+                className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/70 transition-all duration-150 rounded-lg text-[13px]"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sair</span>

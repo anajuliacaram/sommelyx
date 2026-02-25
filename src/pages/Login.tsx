@@ -57,7 +57,7 @@ export default function Login() {
             <br />
             <span className="italic text-gradient-gold">de volta.</span>
           </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-secondary-foreground leading-relaxed">
             Acesse sua adega inteligente e continue gerenciando sua coleção com precisão.
           </p>
         </motion.div>
@@ -75,11 +75,11 @@ export default function Login() {
             <div className="w-7 h-7 rounded-md gradient-wine flex items-center justify-center">
               <Wine className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold font-sans tracking-tight">WineVault</span>
+            <span className="text-sm font-semibold font-sans tracking-tight">Sommelyx</span>
           </div>
 
           <h1 className="text-2xl font-serif font-bold text-foreground mb-1" style={{ letterSpacing: "-0.03em" }}>Entrar</h1>
-          <p className="text-xs text-muted-foreground mb-8">Acesse sua conta WineVault</p>
+          <p className="text-sm text-muted-foreground mb-8">Acesse sua conta Sommelyx</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
@@ -91,7 +91,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-10 rounded-lg bg-muted/40 border-border/40 focus:border-primary/40 focus:bg-muted/60 transition-all text-sm"
+                className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm"
               />
             </div>
 
@@ -105,7 +105,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-10 rounded-lg bg-muted/40 border-border/40 focus:border-primary/40 focus:bg-muted/60 transition-all text-sm pr-10"
+                  className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm pr-10"
                 />
                 <button
                   type="button"
@@ -126,7 +126,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-[11px] text-muted-foreground mt-6">
+          <p className="text-center text-[12px] text-muted-foreground mt-6">
             Não tem conta?{" "}
             <Link to="/signup" className="text-primary font-medium hover:text-primary/80 transition-colors">
               Criar conta grátis
@@ -134,7 +134,7 @@ export default function Login() {
           </p>
 
           <p className="text-center mt-4">
-            <Link to="/" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors duration-200">
+            <Link to="/" className="text-[12px] text-muted-foreground hover:text-foreground transition-colors duration-200">
               ← Voltar ao início
             </Link>
           </p>

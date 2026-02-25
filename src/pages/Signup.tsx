@@ -60,7 +60,7 @@ export default function Signup() {
             <br />
             <span className="italic text-gradient-gold">jornada.</span>
           </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-secondary-foreground leading-relaxed">
             Crie sua conta e descubra uma nova forma de gerenciar seus vinhos com inteligência.
           </p>
         </motion.div>
@@ -78,11 +78,11 @@ export default function Signup() {
             <div className="w-7 h-7 rounded-md gradient-wine flex items-center justify-center">
               <Wine className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold font-sans tracking-tight">WineVault</span>
+            <span className="text-sm font-semibold font-sans tracking-tight">Sommelyx</span>
           </div>
 
           <h1 className="text-2xl font-serif font-bold text-foreground mb-1" style={{ letterSpacing: "-0.03em" }}>Criar conta</h1>
-          <p className="text-xs text-muted-foreground mb-8">Comece grátis, sem cartão de crédito</p>
+          <p className="text-sm text-muted-foreground mb-8">Comece grátis, sem cartão de crédito</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
@@ -94,7 +94,7 @@ export default function Signup() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="h-10 rounded-lg bg-muted/40 border-border/40 focus:border-primary/40 focus:bg-muted/60 transition-all text-sm"
+                className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm"
               />
             </div>
 
@@ -107,7 +107,7 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-10 rounded-lg bg-muted/40 border-border/40 focus:border-primary/40 focus:bg-muted/60 transition-all text-sm"
+                className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm"
               />
             </div>
 
@@ -122,7 +122,7 @@ export default function Signup() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="h-10 rounded-lg bg-muted/40 border-border/40 focus:border-primary/40 focus:bg-muted/60 transition-all text-sm pr-10"
+                  className="h-10 rounded-lg bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all text-sm pr-10"
                 />
                 <button
                   type="button"
@@ -143,7 +143,7 @@ export default function Signup() {
             </Button>
           </form>
 
-          <p className="text-center text-[11px] text-muted-foreground mt-6">
+          <p className="text-center text-[12px] text-muted-foreground mt-6">
             Já tem conta?{" "}
             <Link to="/login" className="text-primary font-medium hover:text-primary/80 transition-colors">
               Entrar
@@ -151,7 +151,7 @@ export default function Signup() {
           </p>
 
           <p className="text-center mt-4">
-            <Link to="/" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors duration-200">
+            <Link to="/" className="text-[12px] text-muted-foreground hover:text-foreground transition-colors duration-200">
               ← Voltar ao início
             </Link>
           </p>
