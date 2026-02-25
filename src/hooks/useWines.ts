@@ -83,6 +83,34 @@ export function useAddWine() {
   });
 }
 
+export function useUpdateWine() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Wine, "id" | "created_at" | "updated_at" | "user_id">> }) => {
+      const { error } = await supabase.from("wines").update(updates).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wines"] });
+    },
+  });
+}
+
+export function useDeleteWine() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("wines").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wines"] });
+    },
+  });
+}
+
 export function useWineEvent() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -91,13 +119,11 @@ export function useWineEvent() {
     mutationFn: async ({ wineId, eventType, quantity, notes }: { wineId: string; eventType: string; quantity: number; notes?: string }) => {
       if (!user) throw new Error("Not authenticated");
 
-      // Insert event
       const { error: eventError } = await supabase
         .from("wine_events")
         .insert({ wine_id: wineId, user_id: user.id, event_type: eventType, quantity, notes });
       if (eventError) throw eventError;
 
-      // Update wine quantity
       const { data: wine } = await supabase.from("wines").select("quantity").eq("id", wineId).single();
       if (!wine) throw new Error("Wine not found");
 

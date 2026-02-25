@@ -6,10 +6,15 @@ import { Plus, Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
+import { useWineMetrics } from "@/hooks/useWines";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardLayout() {
   const { user, profileType, loading } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
+  const navigate = useNavigate();
+  const { drinkNow, lowStock } = useWineMetrics();
+  const alertCount = drinkNow + lowStock;
 
   const initials = user?.user_metadata?.full_name
     ?.split(" ")
@@ -68,10 +73,16 @@ export default function DashboardLayout() {
             <div className="flex items-center gap-2">
               {/* Notifications */}
               <button
-                className="w-9 h-9 rounded-[12px] flex items-center justify-center transition-all duration-200 hover:bg-black/[0.04]"
+                onClick={() => navigate("/dashboard/alerts")}
+                className="w-9 h-9 rounded-[12px] flex items-center justify-center transition-all duration-200 hover:bg-black/[0.04] relative"
                 style={{ color: "#9CA3AF" }}
               >
                 <Bell className="h-4 w-4" />
+                {alertCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white" style={{ background: "#E07A5F" }}>
+                    {alertCount}
+                  </span>
+                )}
               </button>
 
               {/* Add button */}
