@@ -260,7 +260,7 @@ export default function CellarPage() {
           <h1 className="text-2xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>Minha Adega</h1>
           <p className="text-sm mt-0.5 text-muted-foreground">{filtered.length} vinho(s) em estoque</p>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="gradient-wine text-primary-foreground btn-glow h-10 px-5 text-[13px] font-semibold border-0">
+        <Button variant="premium" onClick={() => setAddOpen(true)} className="h-10 px-6 text-[13px] font-bold">
           <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
         </Button>
       </div>

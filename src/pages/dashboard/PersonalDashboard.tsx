@@ -147,10 +147,10 @@ export default function PersonalDashboard() {
           <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Resumo da sua adega</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-9 text-[12px] font-medium" onClick={() => setCsvOpen(true)}>
+          <Button variant="outline" size="sm" className="h-9 text-[12px] font-semibold transition-all duration-300" onClick={() => setCsvOpen(true)}>
             <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar CSV
           </Button>
-          <Button size="sm" className="gradient-wine text-white btn-glow h-9 px-4 text-[12px] font-semibold border-0" onClick={() => setAddOpen(true)}>
+          <Button variant="premium" size="sm" className="h-9 px-4 text-[12px] font-bold" onClick={() => setAddOpen(true)}>
             <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
           </Button>
         </div>
@@ -434,12 +434,13 @@ export default function PersonalDashboard() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
+                variant="premium"
                 onClick={() => setAddOpen(true)}
-                className="cta-primary-btn h-[48px] px-8 text-[14px] font-semibold text-white border-0 rounded-[14px]"
+                className="h-[48px] px-8 text-[14px] font-bold rounded-[16px]"
               >
                 <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
               </Button>
-              <Button variant="outline" onClick={() => setCsvOpen(true)} className="h-[48px] px-6 text-[13px] rounded-[14px]">
+              <Button variant="outline" onClick={() => setCsvOpen(true)} className="h-[48px] px-6 text-[13px] font-bold rounded-[16px]">
                 <Upload className="h-4 w-4 mr-1.5" /> Importar CSV
               </Button>
             </div>
