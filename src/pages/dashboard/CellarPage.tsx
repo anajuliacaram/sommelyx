@@ -1,9 +1,10 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, MapPin, X, Bookmark, BookmarkCheck } from "lucide-react";
+import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, MapPin, X, Bookmark, BookmarkCheck, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -27,8 +28,7 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 const statusLabel = { now: "Beber agora", past: "Passou", young: "Jovem" };
 const statusColor = { now: "bg-green-500/10 text-green-700", past: "bg-orange-500/10 text-orange-700", young: "bg-blue-500/10 text-blue-700" };
 
-const styleChips = [
-  { value: "all", label: "Todos" },
+const styleOptions = [
   { value: "tinto", label: "Tinto" },
   { value: "branco", label: "Branco" },
   { value: "rose", label: "Rosé" },
@@ -37,18 +37,88 @@ const styleChips = [
   { value: "fortificado", label: "Fortificado" },
 ];
 
+const drinkWindowOptions = [
+  { value: "now", label: "Beber agora" },
+  { value: "young", label: "Jovem" },
+  { value: "past", label: "Passou" },
+];
+
 interface SavedFilter {
   name: string;
-  style: string;
-  drinkWindow: string;
-  stockFilter: string;
+  styles: string[];
+  countries: string[];
+  grapes: string[];
+  vintages: string[];
+  drinkWindows: string[];
+  lowStock: boolean;
 }
 
 const defaultSavedFilters: SavedFilter[] = [
-  { name: "Tintos para beber agora", style: "tinto", drinkWindow: "now", stockFilter: "all" },
-  { name: "Espumantes", style: "espumante", drinkWindow: "all", stockFilter: "all" },
-  { name: "Baixo estoque", style: "all", drinkWindow: "all", stockFilter: "low" },
+  { name: "Tintos para beber agora", styles: ["tinto"], countries: [], grapes: [], vintages: [], drinkWindows: ["now"], lowStock: false },
+  { name: "Espumantes", styles: ["espumante"], countries: [], grapes: [], vintages: [], drinkWindows: [], lowStock: false },
+  { name: "Baixo estoque", styles: [], countries: [], grapes: [], vintages: [], drinkWindows: [], lowStock: true },
 ];
+
+// Multi-select chip dropdown component
+function MultiSelectFilter({ label, options, selected, onToggle }: {
+  label: string;
+  options: { value: string; label: string }[];
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  const isActive = selected.length > 0;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className="h-8 px-3 rounded-full text-[11px] font-medium transition-all duration-200 flex items-center gap-1.5"
+          style={{
+            background: isActive ? "#8F2D56" : "rgba(0,0,0,0.03)",
+            color: isActive ? "white" : "#6B7280",
+            border: `1px solid ${isActive ? "#8F2D56" : "rgba(0,0,0,0.06)"}`,
+          }}
+        >
+          {label}
+          {isActive && (
+            <span className="w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center" style={{ background: "rgba(255,255,255,0.25)" }}>
+              {selected.length}
+            </span>
+          )}
+          <ChevronDown className="h-3 w-3 ml-0.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2 z-50 bg-card border border-border shadow-lg rounded-xl" align="start" sideOffset={6}>
+        <div className="space-y-0.5 max-h-56 overflow-y-auto">
+          {options.map(opt => {
+            const active = selected.includes(opt.value);
+            return (
+              <button
+                key={opt.value}
+                onClick={() => onToggle(opt.value)}
+                className="w-full text-left px-3 py-2 rounded-lg text-[12px] font-medium flex items-center justify-between transition-colors hover:bg-muted/50"
+                style={{ color: active ? "#8F2D56" : "#374151" }}
+              >
+                <span>{opt.label}</span>
+                {active && (
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#8F2D56" }}>
+                    <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+          {options.length === 0 && (
+            <p className="text-[11px] text-muted-foreground text-center py-3">Nenhuma opção</p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function toggleInArray(arr: string[], val: string): string[] {
+  return arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
+}
 
 export default function CellarPage() {
   const { data: wines, isLoading } = useWines();
@@ -57,9 +127,12 @@ export default function CellarPage() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("drink");
-  const [styleFilter, setStyleFilter] = useState("all");
-  const [drinkWindowFilter, setDrinkWindowFilter] = useState("all");
-  const [stockFilter, setStockFilter] = useState("all");
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedGrapes, setSelectedGrapes] = useState<string[]>([]);
+  const [selectedVintages, setSelectedVintages] = useState<string[]>([]);
+  const [selectedDrinkWindows, setSelectedDrinkWindows] = useState<string[]>([]);
+  const [lowStock, setLowStock] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -67,22 +140,38 @@ export default function CellarPage() {
   const [deleteTarget, setDeleteTarget] = useState<WineType | null>(null);
   const [activeSavedFilter, setActiveSavedFilter] = useState<string | null>(null);
 
+  // Derive dynamic filter options from wine data
+  const dynamicOptions = useMemo(() => {
+    if (!wines) return { countries: [], grapes: [], vintages: [] };
+    const countries = [...new Set(wines.map(w => w.country).filter(Boolean) as string[])].sort().map(v => ({ value: v, label: v }));
+    const grapes = [...new Set(wines.map(w => w.grape).filter(Boolean) as string[])].sort().map(v => ({ value: v, label: v }));
+    const vintages = [...new Set(wines.map(w => w.vintage).filter(Boolean) as number[])].sort((a, b) => b - a).map(v => ({ value: String(v), label: String(v) }));
+    return { countries, grapes, vintages };
+  }, [wines]);
+
   const applySavedFilter = (f: SavedFilter) => {
-    setStyleFilter(f.style);
-    setDrinkWindowFilter(f.drinkWindow);
-    setStockFilter(f.stockFilter);
+    setSelectedStyles(f.styles);
+    setSelectedCountries(f.countries);
+    setSelectedGrapes(f.grapes);
+    setSelectedVintages(f.vintages);
+    setSelectedDrinkWindows(f.drinkWindows);
+    setLowStock(f.lowStock);
     setActiveSavedFilter(f.name);
   };
 
   const clearFilters = () => {
-    setStyleFilter("all");
-    setDrinkWindowFilter("all");
-    setStockFilter("all");
+    setSelectedStyles([]);
+    setSelectedCountries([]);
+    setSelectedGrapes([]);
+    setSelectedVintages([]);
+    setSelectedDrinkWindows([]);
+    setLowStock(false);
     setActiveSavedFilter(null);
     setSearch("");
   };
 
-  const hasActiveFilters = styleFilter !== "all" || drinkWindowFilter !== "all" || stockFilter !== "all" || search;
+  const activeFilterCount = selectedStyles.length + selectedCountries.length + selectedGrapes.length + selectedVintages.length + selectedDrinkWindows.length + (lowStock ? 1 : 0);
+  const hasActiveFilters = activeFilterCount > 0 || !!search;
 
   const filtered = useMemo(() => {
     if (!wines) return [];
@@ -92,14 +181,19 @@ export default function CellarPage() {
       list = list.filter(w =>
         w.name.toLowerCase().includes(q) || w.producer?.toLowerCase().includes(q) ||
         w.grape?.toLowerCase().includes(q) || w.country?.toLowerCase().includes(q) ||
-        w.region?.toLowerCase().includes(q) || w.cellar_location?.toLowerCase().includes(q)
+        w.region?.toLowerCase().includes(q) || w.cellar_location?.toLowerCase().includes(q) ||
+        (w.vintage && String(w.vintage).includes(q))
       );
     }
-    if (styleFilter !== "all") list = list.filter(w => w.style === styleFilter);
-    if (drinkWindowFilter !== "all") {
-      list = list.filter(w => drinkStatus(w) === drinkWindowFilter);
-    }
-    if (stockFilter === "low") list = list.filter(w => w.quantity <= 2);
+    if (selectedStyles.length > 0) list = list.filter(w => w.style && selectedStyles.includes(w.style));
+    if (selectedCountries.length > 0) list = list.filter(w => w.country && selectedCountries.includes(w.country));
+    if (selectedGrapes.length > 0) list = list.filter(w => w.grape && selectedGrapes.includes(w.grape));
+    if (selectedVintages.length > 0) list = list.filter(w => w.vintage && selectedVintages.includes(String(w.vintage)));
+    if (selectedDrinkWindows.length > 0) list = list.filter(w => {
+      const s = drinkStatus(w);
+      return s && selectedDrinkWindows.includes(s);
+    });
+    if (lowStock) list = list.filter(w => w.quantity <= 2);
 
     list.sort((a, b) => {
       if (sortBy === "drink") {
@@ -113,7 +207,7 @@ export default function CellarPage() {
       return 0;
     });
     return list;
-  }, [wines, search, sortBy, styleFilter, drinkWindowFilter, stockFilter]);
+  }, [wines, search, sortBy, selectedStyles, selectedCountries, selectedGrapes, selectedVintages, selectedDrinkWindows, lowStock]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -135,15 +229,38 @@ export default function CellarPage() {
     }
   };
 
+  // Build active filter summary chips
+  const activeChips: { label: string; onRemove: () => void }[] = [];
+  selectedStyles.forEach(s => {
+    const opt = styleOptions.find(o => o.value === s);
+    activeChips.push({ label: opt?.label || s, onRemove: () => setSelectedStyles(prev => prev.filter(v => v !== s)) });
+  });
+  selectedCountries.forEach(c => {
+    activeChips.push({ label: c, onRemove: () => setSelectedCountries(prev => prev.filter(v => v !== c)) });
+  });
+  selectedGrapes.forEach(g => {
+    activeChips.push({ label: g, onRemove: () => setSelectedGrapes(prev => prev.filter(v => v !== g)) });
+  });
+  selectedVintages.forEach(v => {
+    activeChips.push({ label: v, onRemove: () => setSelectedVintages(prev => prev.filter(x => x !== v)) });
+  });
+  selectedDrinkWindows.forEach(dw => {
+    const opt = drinkWindowOptions.find(o => o.value === dw);
+    activeChips.push({ label: opt?.label || dw, onRemove: () => setSelectedDrinkWindows(prev => prev.filter(v => v !== dw)) });
+  });
+  if (lowStock) {
+    activeChips.push({ label: "Baixo estoque", onRemove: () => setLowStock(false) });
+  }
+
   return (
     <div className="space-y-5 max-w-[1200px]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-serif font-bold" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>Minha Adega</h1>
-          <p className="text-sm mt-0.5" style={{ color: "#6B7280" }}>{filtered.length} vinho(s) em estoque</p>
+          <h1 className="text-2xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>Minha Adega</h1>
+          <p className="text-sm mt-0.5 text-muted-foreground">{filtered.length} vinho(s) em estoque</p>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="gradient-wine text-white btn-glow h-10 px-5 text-[13px] font-semibold border-0">
+        <Button onClick={() => setAddOpen(true)} className="gradient-wine text-primary-foreground btn-glow h-10 px-5 text-[13px] font-semibold border-0">
           <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
         </Button>
       </div>
@@ -151,28 +268,27 @@ export default function CellarPage() {
       {/* Search + View Toggle */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#9CA3AF" }} />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquise vinho, produtor, uva, safra, localização…"
-            className="pl-10 h-10 text-sm rounded-[14px]"
-            style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.06)" }}
+            className="pl-10 h-10 text-sm rounded-[14px] bg-muted/30 border-border/40"
           />
         </div>
         <div className="flex gap-2">
-          <div className="flex rounded-[10px] overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.06)" }}>
+          <div className="flex rounded-[10px] overflow-hidden border border-border/40">
             <button
               onClick={() => setViewMode("grid")}
               className="h-10 w-10 flex items-center justify-center transition-colors"
-              style={{ background: viewMode === "grid" ? "rgba(143,45,86,0.08)" : "transparent", color: viewMode === "grid" ? "#8F2D56" : "#9CA3AF" }}
+              style={{ background: viewMode === "grid" ? "rgba(143,45,86,0.08)" : "transparent", color: viewMode === "grid" ? "#8F2D56" : undefined }}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
               className="h-10 w-10 flex items-center justify-center transition-colors"
-              style={{ background: viewMode === "list" ? "rgba(143,45,86,0.08)" : "transparent", color: viewMode === "list" ? "#8F2D56" : "#9CA3AF" }}
+              style={{ background: viewMode === "list" ? "rgba(143,45,86,0.08)" : "transparent", color: viewMode === "list" ? "#8F2D56" : undefined }}
             >
               <List className="h-4 w-4" />
             </button>
@@ -180,8 +296,7 @@ export default function CellarPage() {
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
-            className="h-10 px-3 text-[12px] rounded-[10px] bg-transparent cursor-pointer"
-            style={{ border: "1px solid rgba(0,0,0,0.06)", color: "#6B7280" }}
+            className="h-10 px-3 text-[12px] rounded-[10px] bg-card cursor-pointer border border-border/40 text-muted-foreground"
           >
             <option value="drink">Prioridade de consumo</option>
             <option value="date">Data de entrada</option>
@@ -192,59 +307,81 @@ export default function CellarPage() {
         </div>
       </div>
 
-      {/* Style Chips */}
-      <div className="flex flex-wrap gap-2">
-        {styleChips.map(c => (
-          <button
-            key={c.value}
-            onClick={() => { setStyleFilter(c.value); setActiveSavedFilter(null); }}
-            className="h-8 px-3.5 rounded-full text-[11px] font-medium transition-all duration-200"
-            style={{
-              background: styleFilter === c.value ? "#8F2D56" : "rgba(0,0,0,0.03)",
-              color: styleFilter === c.value ? "white" : "#6B7280",
-              border: `1px solid ${styleFilter === c.value ? "#8F2D56" : "rgba(0,0,0,0.06)"}`,
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
-        <div className="w-px h-8 mx-1" style={{ background: "rgba(0,0,0,0.06)" }} />
-        {/* Drink window chips */}
-        {(["now", "young", "past"] as const).map(dw => (
-          <button
-            key={dw}
-            onClick={() => { setDrinkWindowFilter(drinkWindowFilter === dw ? "all" : dw); setActiveSavedFilter(null); }}
-            className="h-8 px-3.5 rounded-full text-[11px] font-medium transition-all duration-200"
-            style={{
-              background: drinkWindowFilter === dw ? (dw === "now" ? "#22c55e" : dw === "past" ? "#f59e0b" : "#3b82f6") : "rgba(0,0,0,0.03)",
-              color: drinkWindowFilter === dw ? "white" : "#6B7280",
-              border: `1px solid ${drinkWindowFilter === dw ? "transparent" : "rgba(0,0,0,0.06)"}`,
-            }}
-          >
-            {statusLabel[dw]}
-          </button>
-        ))}
+      {/* Multi-select filter dropdowns */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <MultiSelectFilter
+          label="Estilo"
+          options={styleOptions}
+          selected={selectedStyles}
+          onToggle={v => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+        />
+        {dynamicOptions.countries.length > 0 && (
+          <MultiSelectFilter
+            label="País"
+            options={dynamicOptions.countries}
+            selected={selectedCountries}
+            onToggle={v => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+          />
+        )}
+        {dynamicOptions.grapes.length > 0 && (
+          <MultiSelectFilter
+            label="Uva"
+            options={dynamicOptions.grapes}
+            selected={selectedGrapes}
+            onToggle={v => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+          />
+        )}
+        {dynamicOptions.vintages.length > 0 && (
+          <MultiSelectFilter
+            label="Safra"
+            options={dynamicOptions.vintages}
+            selected={selectedVintages}
+            onToggle={v => { setSelectedVintages(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+          />
+        )}
+        <MultiSelectFilter
+          label="Janela"
+          options={drinkWindowOptions}
+          selected={selectedDrinkWindows}
+          onToggle={v => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+        />
         <button
-          onClick={() => { setStockFilter(stockFilter === "low" ? "all" : "low"); setActiveSavedFilter(null); }}
+          onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
           className="h-8 px-3.5 rounded-full text-[11px] font-medium transition-all duration-200"
           style={{
-            background: stockFilter === "low" ? "#E07A5F" : "rgba(0,0,0,0.03)",
-            color: stockFilter === "low" ? "white" : "#6B7280",
-            border: `1px solid ${stockFilter === "low" ? "transparent" : "rgba(0,0,0,0.06)"}`,
+            background: lowStock ? "#E07A5F" : "rgba(0,0,0,0.03)",
+            color: lowStock ? "white" : "#6B7280",
+            border: `1px solid ${lowStock ? "transparent" : "rgba(0,0,0,0.06)"}`,
           }}
         >
           Baixo estoque
         </button>
-        {hasActiveFilters && (
-          <button onClick={clearFilters} className="h-8 px-3 rounded-full text-[11px] font-medium flex items-center gap-1" style={{ color: "#E07A5F" }}>
-            <X className="h-3 w-3" /> Limpar
-          </button>
-        )}
       </div>
+
+      {/* Active filter chips summary */}
+      {activeChips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 items-center">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mr-1">Filtros ativos:</span>
+          {activeChips.map((chip, i) => (
+            <span
+              key={i}
+              className="h-6 px-2.5 rounded-full text-[10px] font-medium flex items-center gap-1 bg-primary/10 text-primary border border-primary/20"
+            >
+              {chip.label}
+              <button onClick={chip.onRemove} className="hover:text-destructive transition-colors">
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </span>
+          ))}
+          <button onClick={clearFilters} className="h-6 px-2.5 rounded-full text-[10px] font-medium flex items-center gap-1 text-destructive hover:bg-destructive/10 transition-colors">
+            <X className="h-3 w-3" /> Limpar tudo
+          </button>
+        </div>
+      )}
 
       {/* Saved Filters */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-[10px] font-medium uppercase tracking-wider self-center mr-1" style={{ color: "#9CA3AF" }}>Filtros salvos:</span>
+        <span className="text-[10px] font-medium uppercase tracking-wider self-center mr-1 text-muted-foreground">Filtros salvos:</span>
         {defaultSavedFilters.map(f => (
           <button
             key={f.name}
@@ -270,14 +407,14 @@ export default function CellarPage() {
       ) : filtered.length === 0 ? (
         <motion.div className="glass-card p-12 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="w-14 h-14 rounded-[16px] gradient-wine flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "0 8px 24px rgba(143,45,86,0.2)" }}>
-            <Wine className="h-7 w-7 text-white" />
+            <Wine className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h3 className="text-base font-semibold mb-2" style={{ color: "#0F0F14" }}>Nenhum vinho encontrado</h3>
-          <p className="text-sm mb-5" style={{ color: "#6B7280" }}>
+          <h3 className="text-base font-semibold mb-2 text-foreground">Nenhum vinho encontrado</h3>
+          <p className="text-sm mb-5 text-muted-foreground">
             {hasActiveFilters ? "Tente alterar os filtros." : "Adicione seu primeiro vinho para começar."}
           </p>
           {!hasActiveFilters && (
-            <Button onClick={() => setAddOpen(true)} className="gradient-wine text-white btn-glow h-11 px-6 text-[13px] border-0">
+            <Button onClick={() => setAddOpen(true)} className="gradient-wine text-primary-foreground btn-glow h-11 px-6 text-[13px] border-0">
               <Plus className="h-4 w-4 mr-1.5" /> Adicionar Vinho
             </Button>
           )}
@@ -296,8 +433,8 @@ export default function CellarPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold truncate" style={{ color: "#0F0F14" }}>{wine.name}</h3>
-                    <p className="text-[11px] truncate" style={{ color: "#6B7280" }}>
+                    <h3 className="text-sm font-semibold truncate text-foreground">{wine.name}</h3>
+                    <p className="text-[11px] truncate text-muted-foreground">
                       {[wine.producer, wine.vintage].filter(Boolean).join(" · ") || "—"}
                     </p>
                   </div>
@@ -307,8 +444,8 @@ export default function CellarPage() {
                     </Badge>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] mb-3" style={{ color: "#6B7280" }}>
-                  <span className="font-semibold" style={{ color: "#0F0F14" }}>{wine.quantity} un.</span>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground mb-3">
+                  <span className="font-semibold text-foreground">{wine.quantity} un.</span>
                   {wine.style && <span className="capitalize">{wine.style}</span>}
                   {wine.purchase_price && <span>R$ {wine.purchase_price.toFixed(0)}</span>}
                   {wine.country && <span>{wine.country}</span>}
@@ -316,7 +453,6 @@ export default function CellarPage() {
                     <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" />{wine.cellar_location}</span>
                   )}
                 </div>
-                {/* Actions */}
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   {status === "now" && (
                     <Button
@@ -327,18 +463,10 @@ export default function CellarPage() {
                       <GlassWater className="h-3 w-3 mr-1" /> Abrir
                     </Button>
                   )}
-                  <Button
-                    variant="outline" size="sm"
-                    className="h-7 text-[10px] px-2.5 flex-1"
-                    onClick={() => setEditWine(wine)}
-                  >
+                  <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 flex-1" onClick={() => setEditWine(wine)}>
                     <Pencil className="h-3 w-3 mr-1" /> Editar
                   </Button>
-                  <Button
-                    variant="outline" size="sm"
-                    className="h-7 text-[10px] px-2.5 text-destructive hover:text-destructive"
-                    onClick={() => setDeleteTarget(wine)}
-                  >
+                  <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(wine)}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
@@ -347,43 +475,42 @@ export default function CellarPage() {
           })}
         </div>
       ) : (
-        /* List view */
         <div className="glass-card overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3" style={{ color: "#9CA3AF" }}>Vinho</th>
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden sm:table-cell" style={{ color: "#9CA3AF" }}>Estilo</th>
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell" style={{ color: "#9CA3AF" }}>Local</th>
-                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3" style={{ color: "#9CA3AF" }}>Qtd</th>
-                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell" style={{ color: "#9CA3AF" }}>Status</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-wider px-4 py-3" style={{ color: "#9CA3AF" }}>Ações</th>
+              <tr className="border-b border-border/40">
+                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Vinho</th>
+                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden sm:table-cell text-muted-foreground">Estilo</th>
+                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell text-muted-foreground">Local</th>
+                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Qtd</th>
+                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell text-muted-foreground">Status</th>
+                <th className="text-right text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((wine, i) => {
                 const status = drinkStatus(wine);
                 return (
-                  <tr key={wine.id} className="transition-colors hover:bg-black/[0.015] group" style={{ borderBottom: i < filtered.length - 1 ? "1px solid rgba(0,0,0,0.04)" : "none" }}>
+                  <tr key={wine.id} className="transition-colors hover:bg-muted/30 group border-b border-border/20 last:border-0">
                     <td className="px-4 py-3">
-                      <p className="text-[12px] font-semibold" style={{ color: "#0F0F14" }}>{wine.name}</p>
-                      <p className="text-[10px]" style={{ color: "#9CA3AF" }}>{[wine.producer, wine.vintage, wine.country].filter(Boolean).join(" · ")}</p>
+                      <p className="text-[12px] font-semibold text-foreground">{wine.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{[wine.producer, wine.vintage, wine.country].filter(Boolean).join(" · ")}</p>
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize bg-primary/5 text-primary">
                         {wine.style || "—"}
                       </span>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-[10px]" style={{ color: "#6B7280" }}>{wine.cellar_location || "—"}</span>
+                      <span className="text-[10px] text-muted-foreground">{wine.cellar_location || "—"}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="text-[12px] font-bold" style={{ color: "#0F0F14" }}>{wine.quantity}</span>
+                      <span className="text-[12px] font-bold text-foreground">{wine.quantity}</span>
                     </td>
                     <td className="px-4 py-3 text-center hidden md:table-cell">
                       {status ? (
                         <Badge variant="secondary" className={`text-[9px] ${statusColor[status]}`}>{statusLabel[status]}</Badge>
-                      ) : <span className="text-[10px]" style={{ color: "#9CA3AF" }}>—</span>}
+                      ) : <span className="text-[10px] text-muted-foreground">—</span>}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
@@ -393,7 +520,7 @@ export default function CellarPage() {
                           </Button>
                         )}
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditWine(wine)}>
-                          <Pencil className="h-3.5 w-3.5" style={{ color: "#6B7280" }} />
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setDeleteTarget(wine)}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
@@ -412,7 +539,6 @@ export default function CellarPage() {
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
       <EditWineDialog open={!!editWine} onOpenChange={v => { if (!v) setEditWine(null); }} wine={editWine} />
 
-      {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={v => { if (!v) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
