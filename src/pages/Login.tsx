@@ -58,92 +58,93 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-organic-gradient relative overflow-hidden flex items-center justify-center p-6 sm:p-12 premium-noise">
-
-      {/* Decorative Hero elements */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-[10%] left-[15%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[10%] right-[15%] w-[40%] h-[40%] bg-accent/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
+    <div className="min-h-screen bg-aurora relative flex items-center justify-center p-4 sm:p-8 premium-noise">
 
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        initial={{ opacity: 0, y: 30, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-[480px] z-10"
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-[460px] z-10"
       >
-        <div className="glass-card p-10 lg:p-16 border-white/20 shadow-float">
-          {/* Internal Shimmer */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        <motion.div
+          whileHover={{ y: -4, boxShadow: "0 60px 120px -20px rgba(140, 32, 68, 0.25)" }}
+          className="glass-card p-8 sm:p-14 border-white/30 w-[94%] sm:w-full mx-auto"
+        >
+          {/* Internal Specs Highlight */}
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
 
-          <div className="flex flex-col items-center mb-12">
+          <div className="flex flex-col items-center mb-10">
             <motion.div
-              whileHover={{ rotate: -5, scale: 1.05 }}
-              className="w-16 h-16 lg:w-20 lg:h-20 rounded-[22px] bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-premium mb-6"
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="w-20 h-20 sm:w-28 sm:h-28 rounded-[28px] bg-white/10 backdrop-blur-2xl border border-white/20 flex items-center justify-center shadow-premium mb-8 relative group"
             >
-              <img src="/logo-sommelyx.png" alt="Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
+              <div className="absolute inset-0 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <img src="/logo-sommelyx.png" alt="Logo" className="w-12 h-12 sm:w-18 sm:h-18 object-contain relative z-10" />
             </motion.div>
-            <h1 className="text-3xl lg:text-4xl font-serif font-black italic text-[#0F0F14] text-center tracking-tight">
-              Bem-vindo <span className="text-gradient-wine block">de volta.</span>
+
+            <h1 className="text-3xl sm:text-5xl font-serif font-black italic text-[#0F0F14] text-center tracking-tight leading-tight">
+              Bem-vindo <br />
+              <span className="text-gradient-wine">de volta.</span>
             </h1>
-            <p className="text-sm font-medium text-muted-foreground mt-3 text-center opacity-70">
-              Acesse sua curadoria exclusiva Sommelyx
+            <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-5 opacity-60">
+              Acesso Exclusivo
             </p>
           </div>
 
           {emailConfirmed && (
-            <div className="mb-8 p-4 rounded-xl bg-green-50/50 border border-green-100/50 flex items-center gap-3">
+            <div className="mb-8 p-4 rounded-2xl bg-green-50/10 border border-green-500/20 flex items-center gap-3 backdrop-blur-md">
               <CheckCircle2 className="h-5 w-5 text-green-500" />
-              <p className="text-[13px] font-bold text-green-700">Identidade verificada!</p>
+              <p className="text-[12px] font-black uppercase text-green-600 tracking-wider">Conta verificada!</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8C2044] ml-1">
-                E-mail
+                Identificação / E-mail
               </Label>
               <Input
                 id="email" type="email" placeholder="seu@acervo.com"
                 value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="input-premium h-14"
+                className="input-premium"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex justify-between items-center px-1">
                 <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8C2044]">
-                  Senha
+                  Senha Segura
                 </Label>
-                <Link to="/forgot-password" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors">
-                  Esqueceu a senha?
+                <Link to="/forgot-password" title="Recover Access" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors">
+                  Recuperar acesso
                 </Link>
               </div>
               <div className="relative">
                 <Input
                   id="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
                   value={password} onChange={(e) => setPassword(e.target.value)} required
-                  className="input-premium h-14 pr-12"
+                  className="input-premium pr-14"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#0F0F14] transition-colors"
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#0F0F14] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <motion.div whileHover={{ y: -2, scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
+            <div className="pt-4">
               <Button
                 type="submit" disabled={loading}
-                className="w-full h-15 rounded-2xl text-[15px] font-bold shadow-float variant-premium"
+                className="w-full h-[60px] rounded-2xl text-[15px] font-bold shadow-float"
                 variant="premium"
               >
                 {loading ? "Processando..." : "Entrar na Plataforma"}
               </Button>
-            </motion.div>
+            </div>
           </form>
 
           <div className="mt-12 text-center">
@@ -161,7 +162,7 @@ export default function Login() {
               <ChevronLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" /> Retornar ao Início
             </Link>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );

@@ -183,105 +183,84 @@ export default function Landing() {
         }}
       />
 
-      {/* ─── NAV ─── */}
-      <motion.nav
-        className="fixed top-0 w-full z-50 px-4 pt-4"
+      {/* ─── HEADER ─── */}
+      <motion.header
+        className="fixed top-0 w-full z-50 px-6 py-6"
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div
-          className="container mx-auto flex items-center justify-between h-[68px] px-5 sm:px-8 rounded-2xl border border-white/20 shadow-premium"
-          style={{
-            background: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(20px) saturate(1.6)",
-          }}
-        >
+        <div className="container mx-auto flex items-center justify-between">
           <a
             href="/"
-            className="flex items-center gap-2.5 shrink-0 transition-all duration-300 hover:opacity-80 active:scale-95"
+            className="flex items-center gap-2.5 transition-all duration-300 hover:opacity-80 active:scale-95"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[28px] sm:h-[36px] w-auto object-contain shrink-0" />
-            <span className="text-[15px] sm:text-[17px] font-extrabold tracking-tighter sm:tracking-tight font-sans hidden xsm:block" style={{ color: "#0F0F14", letterSpacing: "-0.03em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[32px] sm:h-[40px] w-auto object-contain" />
+            <span className="text-[17px] sm:text-[19px] font-black tracking-tight font-sans hidden xsm:block" style={{ color: "#0F0F14", letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
 
-          <div className="hidden md:flex items-center gap-9 text-[13px] font-bold tracking-tight" style={{ color: "#6B7280" }}>
-            <a href="#features" className="hover:text-[#8F2D56] transition-all">Funcionalidades</a>
-            <a href="#pricing" className="hover:text-[#8F2D56] transition-all">Planos</a>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-5 sm:gap-6">
             <Button
               variant="ghost"
-              size="sm"
-              className="text-[13px] font-bold text-[#8C2044] hover:bg-[#8C2044]/5 px-5"
+              className="text-[14px] font-bold text-[#0F0F14]/70 hover:text-[#8C2044] hover:bg-[#8C2044]/5 px-6 h-12 rounded-2xl transition-all"
               onClick={() => navigate("/login")}
             >
               Entrar
             </Button>
             <Button
               variant="premium"
-              size="sm"
-              className="px-6 text-[13px] font-bold shadow-float"
+              className="px-10 h-16 text-[15px] font-black uppercase tracking-wider shadow-float rounded-2xl ring-1 ring-[#8C2044]/20"
               onClick={() => navigate("/signup")}
             >
               Começar Grátis
             </Button>
           </div>
         </div>
-      </motion.nav>
+      </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-32 pb-4 px-4 flex flex-col justify-center" style={{ minHeight: "72vh" }}>
+      <section className="relative pt-44 lg:pt-64 pb-12 px-6 overflow-hidden">
         {/* Ambient radial gradients */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 30%, rgba(143,45,86,0.08), transparent 70%)" }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 80% 50%, rgba(224,122,95,0.04), transparent 60%)" }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 30%, rgba(143,45,86,0.06), transparent 70%)" }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 100% 0%, rgba(140,32,68,0.08), transparent 50%)" }} />
 
-        <div className="container mx-auto relative z-10 max-w-5xl">
-          {/* Headline */}
-          <motion.h1
-            className="text-center font-serif font-black mb-8 px-4"
-            style={{
-              fontSize: "clamp(38px, 6vw, 68px)",
-              lineHeight: 1,
-              letterSpacing: "-0.04em",
-              color: "#0F0F14"
-            }}
-            initial="hidden" animate="visible" variants={fadeUp} custom={1}
+        <div className="container mx-auto relative z-10 max-w-7xl">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 lg:gap-24 mb-16">
+
+            {/* Headline Block */}
+            <div className="max-w-4xl">
+              <motion.h1
+                className="text-left font-serif font-black"
+                style={{
+                  fontSize: "clamp(46px, 8vw, 84px)",
+                  lineHeight: 0.9,
+                  letterSpacing: "-0.05em",
+                  color: "#0F0F14"
+                }}
+                initial="hidden" animate="visible" variants={fadeUp} custom={1}
+              >
+                Sua adega, <br />
+                <span className="italic text-gradient-wine font-serif block sm:inline mt-2">inteligente.</span>
+              </motion.h1>
+
+              <motion.p
+                className="text-left text-base sm:text-lg max-w-[620px] mt-8 font-medium"
+                style={{ color: "#4B5563", lineHeight: 1.55 }}
+                initial="hidden" animate="visible" variants={fadeUp} custom={2}
+              >
+                Gerencie sua adega com perfeição técnica. Do controle pessoal à operação profissional, com{" "}
+                <span className="font-bold inline-block text-[#0F0F14]">insights que realmente valorizam seu negócio.</span>
+              </motion.p>
+            </div>
+          </div>
+
+          <motion.div
+            initial="hidden" animate="visible" variants={fadeUp} custom={3}
+            className="w-full"
           >
-            Sua adega, <br />
-            <span className="italic text-gradient-wine font-serif block sm:inline mt-2">inteligente.</span>
-          </motion.h1>
-
-          <motion.p
-            className="text-center text-base sm:text-lg max-w-[620px] mx-auto mb-10 font-medium px-6"
-            style={{ color: "#4B5563", lineHeight: 1.55 }}
-            initial="hidden" animate="visible" variants={fadeUp} custom={2}
-          >
-            Gerencie sua adega com perfeição técnica. Do controle pessoal à operação profissional, com{" "}
-            <span className="font-bold inline-block" style={{ color: "#0F0F14" }}>insights que realmente valorizam seu negócio.</span>
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div className="flex flex-col sm:flex-row gap-5 justify-center items-center px-6" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-            <Button
-              variant="premium"
-              size="lg"
-              className="w-full sm:w-auto h-15 min-w-[240px] text-base font-bold group shadow-float rounded-2xl"
-              onClick={() => navigate("/signup")}
-            >
-              Começar Gratuitamente <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full sm:w-auto h-15 min-w-[200px] text-base font-bold border-[#8C2044]/20 rounded-2xl"
-              onClick={() => navigate("/login")}
-            >
-              Já tenho conta →
-            </Button>
+            {/* The Dashboard Mockup is below this */}
           </motion.div>
         </div>
       </section>
