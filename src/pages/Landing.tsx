@@ -60,103 +60,102 @@ const plans = [
 function DashboardMockup() {
   return (
     <motion.div
-      className="relative mx-auto max-w-[940px] px-4"
-      initial={{ opacity: 0, y: 40, scale: 0.98 }}
+      className="relative mx-auto max-w-[820px] px-4" // Reduced from 940px
+      initial={{ opacity: 0, y: 24, scale: 0.99 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Radial glow behind preview */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] pointer-events-none z-0">
-        <div className="absolute inset-0 bg-radial-glow opacity-30 animate-pulse-slow" style={{ background: "radial-gradient(circle at center, rgba(140,32,68,0.2) 0%, transparent 65%)" }} />
+        <div className="absolute inset-0 opacity-40 animate-pulse-slow" style={{ background: "radial-gradient(circle at center, rgba(140,32,68,0.25) 0%, transparent 65%)" }} />
       </div>
 
       <motion.div
         className="relative z-10"
-        animate={{ y: [0, -8, 0] }}
+        animate={{ y: [0, -6, 0] }} // Subtle float
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       >
         <div
-          className="relative rounded-[28px] overflow-hidden shadow-float"
+          className="relative rounded-[24px] overflow-hidden shadow-float perspective-1000"
           style={{
             background: "#fff",
             border: "1px solid rgba(0,0,0,0.06)",
-            boxShadow: "0 0 0 1px rgba(0,0,0,0.02), 0 40px 80px -20px rgba(140,32,68,0.18)",
+            boxShadow: "0 0 0 1px rgba(0,0,0,0.02), 0 40px 100px -20px rgba(140,32,68,0.2)",
           }}
         >
           {/* Chrome bar */}
-          <div className="flex items-center gap-2 px-6 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)", background: "#FEFEFE" }}>
-            <div className="flex gap-1.5 grayscale opacity-40">
-              <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-              <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-              <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
+          <div className="flex items-center gap-2 px-6 py-3.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)", background: "#FEFEFE" }}>
+            <div className="flex gap-1.5 grayscale opacity-30">
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
             </div>
             <div className="flex-1 flex justify-center">
-              <div className="h-6 w-64 rounded-full flex items-center justify-center bg-gray-50/80 border border-black/[0.03]">
-                <span className="text-[10px] font-medium text-gray-400 tracking-tight">app.sommelyx.com</span>
+              <div className="h-5 w-48 rounded-full flex items-center justify-center bg-gray-50/50 border border-black/[0.02]">
+                <span className="text-[9px] font-bold text-gray-300 tracking-tight uppercase">sommelyx.app</span>
               </div>
             </div>
           </div>
 
           {/* Mock content */}
-          <div className="flex min-h-[440px]">
+          <div className="flex min-h-[380px]">
             {/* Sidebar */}
-            <div className="w-56 p-5 space-y-1 hidden sm:block border-r border-black/[0.04] bg-gray-50/50">
-              {["Overview", "Minha Adega", "Analytics", "Configurações"].map((label, i) => (
+            <div className="w-48 p-4 space-y-1 hidden sm:block border-r border-black/[0.04] bg-gray-50/30">
+              {["Overview", "Adega", "Analytics", "Settings"].map((label, i) => (
                 <div
                   key={label}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12px] font-bold transition-all"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all"
                   style={{
                     background: i === 0 ? "white" : "transparent",
-                    color: i === 0 ? "#8C2044" : "#6B7280",
-                    boxShadow: i === 0 ? "0 2px 8px rgba(0,0,0,0.04)" : "none",
+                    color: i === 0 ? "#8C2044" : "#9CA3AF",
+                    boxShadow: i === 0 ? "0 2px 8px rgba(0,0,0,0.03)" : "none",
                   }}
                 >
-                  <div className="h-4 w-4 rounded-md" style={{ background: i === 0 ? "#8C2044" : "#E5E7EB" }} />
+                  <div className="h-3 w-3 rounded-sm" style={{ background: i === 0 ? "#8C2044" : "#E5E7EB" }} />
                   {label}
                 </div>
               ))}
             </div>
 
             {/* Main Area */}
-            <div className="flex-1 p-8 space-y-7 bg-white">
+            <div className="flex-1 p-6 space-y-6 bg-white overflow-hidden">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xl font-bold tracking-tight text-[#0F0F14]">Boa tarde, Marcelo</h4>
-                  <p className="text-[13px] text-[#6B7280] font-medium">Resumo do seu negócio premium.</p>
+                  <h4 className="text-lg font-bold tracking-tight text-[#0F0F14]">Painel Sommelyx</h4>
+                  <p className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-widest">Resumo do acervo</p>
                 </div>
-                <div className="h-10 px-6 rounded-xl flex items-center text-[12px] font-bold text-white shadow-premium gradient-wine">
-                  + Nova Garrafa
+                <div className="h-8 px-4 rounded-lg flex items-center text-[11px] font-bold text-white shadow-premium gradient-wine">
+                  + Adicionar
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-3">
                 {[
-                  { v: "2.847", l: "Garrafas" },
-                  { v: "R$ 184k", l: "Valor Total" },
-                  { v: "24", l: "Beber Agora" },
-                  { v: "56", l: "Favoritos" },
+                  { v: "2.8k", l: "Vinhos" },
+                  { v: "R$ 180k", l: "Valor" },
+                  { v: "14", l: "Alertas" },
+                  { v: "98 pts", l: "Score" },
                 ].map((m, i) => (
-                  <div key={i} className="p-5 rounded-2xl space-y-1.5 bg-gray-50/50 border border-black/[0.02]">
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{m.l}</div>
-                    <div className="text-2xl font-bold text-[#0F0F14] tracking-tight">{m.v}</div>
+                  <div key={i} className="p-4 rounded-xl space-y-1 bg-gray-50/50 border border-black/[0.01]">
+                    <div className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{m.l}</div>
+                    <div className="text-lg font-black text-[#0F0F14] tracking-tight">{m.v}</div>
                   </div>
                 ))}
               </div>
 
-              <div className="p-7 rounded-[24px] bg-gray-50/50 border border-black/[0.02]">
-                <div className="flex justify-between items-center mb-6">
-                  <div className="text-[14px] font-bold text-[#0F0F14]">Distribuição por Região</div>
-                  <div className="text-[12px] font-bold text-[#8C2044] cursor-pointer hover:underline underline-offset-4">Ver todos →</div>
+              <div className="p-6 rounded-[20px] bg-gray-50/50 border border-black/[0.01]">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-[11px] font-black uppercase tracking-widest text-[#0F0F14]">Estoque por Região</div>
                 </div>
-                <div className="flex gap-2.5 items-end h-28">
-                  {[45, 76, 52, 88, 62, 95, 70, 82, 100, 78, 92, 65, 84].map((h, i) => (
+                <div className="flex gap-2 items-end h-20">
+                  {[40, 70, 50, 80, 60, 90, 65, 80, 100, 75, 88].map((h, i) => (
                     <div
                       key={i}
-                      className="flex-1 rounded-t-lg transition-all duration-700"
+                      className="flex-1 rounded-t-md transition-all duration-700"
                       style={{
                         height: `${h}%`,
-                        background: i === 8 ? "linear-gradient(to top, #8C2044, #C44569)" : "rgba(140,32,68,0.08)",
+                        background: i === 8 ? "#8C2044" : "rgba(140,32,68,0.06)",
                       }}
                     />
                   ))}
@@ -174,7 +173,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-hidden" style={{ background: "#F7F7F8", color: "#0F0F14" }}>
+    <div className="min-h-screen overflow-hidden premium-noise" style={{ background: "#F7F7F8", color: "#0F0F14" }}>
       {/* Noise */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
@@ -213,11 +212,11 @@ export default function Landing() {
             <a href="#pricing" className="hover:text-[#8F2D56] transition-all">Planos</a>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <Button
               variant="ghost"
               size="sm"
-              className="text-[13px] font-bold text-[#8F2D56] hover:bg-[#8F2D56]/5 px-4"
+              className="text-[13px] font-bold text-[#8C2044] hover:bg-[#8C2044]/5 px-5"
               onClick={() => navigate("/login")}
             >
               Entrar
@@ -225,7 +224,7 @@ export default function Landing() {
             <Button
               variant="premium"
               size="sm"
-              className="px-5 text-[13px] font-bold transition-all shadow-premium"
+              className="px-6 text-[13px] font-bold shadow-float"
               onClick={() => navigate("/signup")}
             >
               Começar Grátis
@@ -266,19 +265,19 @@ export default function Landing() {
           </motion.p>
 
           {/* CTAs */}
-          <motion.div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-6" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+          <motion.div className="flex flex-col sm:flex-row gap-5 justify-center items-center px-6" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
             <Button
               variant="premium"
               size="lg"
-              className="w-full sm:w-auto h-14 min-w-[220px] text-base font-bold group"
+              className="w-full sm:w-auto h-15 min-w-[240px] text-base font-bold group shadow-float rounded-2xl"
               onClick={() => navigate("/signup")}
             >
-              Começar Gratuitamente <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              Começar Gratuitamente <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
               variant="outline"
               size="lg"
-              className="w-full sm:w-auto h-14 min-w-[200px] text-sm font-bold bg-white/50 backdrop-blur-md"
+              className="w-full sm:w-auto h-15 min-w-[200px] text-base font-bold border-[#8C2044]/20 rounded-2xl"
               onClick={() => navigate("/login")}
             >
               Já tenho conta →
@@ -288,52 +287,47 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 2. FEATURES ═══════════════ */}
-      <section id="features" className="relative py-8 px-4">
+      <section id="features" className="relative py-4 px-4"> {/* Reduced from py-8 */}
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="mb-8 text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block" style={{ color: "#8C2044" }}>
+          <motion.div className="mb-6 text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3 block" style={{ color: "#8C2044" }}>
               Funcionalidades
             </span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight mx-auto max-w-2xl" style={{ lineHeight: "1.1", color: "#0F0F14" }}>
+            <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mx-auto max-w-2xl" style={{ lineHeight: "1.1", color: "#0F0F14" }}>
               Tudo o que você precisa em
               <br />
               <span className="italic text-gradient-wine">um só lugar</span>
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
                 className="group cursor-default"
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
+                whileHover={{
+                  y: -2,
+                  scale: 1.01,
+                  boxShadow: "0 20px 40px -10px rgba(140,32,68,0.12)",
+                }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                   borderRadius: 20,
-                  padding: "32px",
+                  padding: "24px",
                   background: "rgba(255,255,255,0.7)",
-                  backdropFilter: "blur(10px)",
-                  border: "1.5px solid rgba(140, 32, 68, 0.12)",
-                  transition: "all 0.25s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 12px 30px rgba(140, 32, 68, 0.08)";
-                  e.currentTarget.style.borderColor = "rgba(140, 32, 68, 0.25)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                  e.currentTarget.style.borderColor = "rgba(140, 32, 68, 0.12)";
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid rgba(140, 32, 68, 0.08)",
                 }}
               >
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-6"
-                  style={{ background: "rgba(140,32,68,0.08)" }}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
+                  style={{ background: "rgba(140,32,68,0.06)" }}
                 >
-                  <f.icon className="h-6 w-6" style={{ color: "#8C2044" }} />
+                  <f.icon className="h-5 w-5" style={{ color: "#8C2044" }} />
                 </div>
-                <h3 className="text-[18px] font-bold mb-3 font-sans tracking-tight" style={{ color: "#0F0F14" }}>{f.title}</h3>
-                <p className="text-[15px] leading-[1.6]" style={{ color: "#4B5563" }}>{f.desc}</p>
+                <h3 className="text-[17px] font-bold mb-2 font-sans tracking-tight" style={{ color: "#0F0F14" }}>{f.title}</h3>
+                <p className="text-[14px] leading-[1.6]" style={{ color: "#4B5563" }}>{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -341,12 +335,12 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 3. DASHBOARD MOCKUP ═══════════════ */}
-      <section className="relative py-8 px-4 overflow-hidden">
-        <div className="container mx-auto max-w-[1200px] mt-4 relative">
+      <section className="relative py-4 px-4 overflow-hidden"> {/* Reduced from py-8 */}
+        <div className="container mx-auto max-w-[1200px] mt-2 relative">
           {/* Glass backdrop behind */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] pointer-events-none opacity-20"
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] pointer-events-none opacity-20"
             style={{
-              background: "radial-gradient(circle, rgba(140,32,68,0.15) 0%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(140,32,68,0.2) 0%, transparent 70%)",
               filter: "blur(60px)"
             }}
           />

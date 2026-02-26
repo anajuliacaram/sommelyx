@@ -48,25 +48,28 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
-        <SidebarHeader>
-          <div className="flex items-center gap-3 px-3 py-4">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-12 w-12 object-contain" />
+        <SidebarHeader className="pt-6">
+          <div className="flex items-center gap-3.5 px-4 py-2 group cursor-default">
+            <div className="relative">
+              <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-10 object-contain transition-transform group-hover:scale-105" />
+              <div className="absolute inset-0 bg-primary/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
             <div className="flex flex-col">
-              <span className="text-[14px] font-bold font-sans tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.02em" }}>Sommelyx</span>
-              <span className="text-[10px] capitalize font-medium" style={{ color: "#9CA3AF" }}>
-                {profileType === "commercial" ? "Comercial" : "Pessoal"}
+              <span className="text-[15px] font-black font-sans tracking-tight text-[#0F0F14]" style={{ letterSpacing: "-0.03em" }}>Sommelyx</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8C2044]/60">
+                {profileType === "commercial" ? "PREMIUM B2B" : "ACERVO PESSOAL"}
               </span>
             </div>
           </div>
           {/* CTA Adicionar Vinho */}
           <div className="px-3 pb-2">
             <Button
+              variant="premium"
               onClick={() => setAddOpen(true)}
-              className="w-full gradient-wine text-white btn-glow h-9 text-[12px] font-semibold border-0"
-              size="sm"
+              className="w-full h-10 text-[12px] font-bold"
             >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              {profileType === "commercial" ? "Cadastrar" : "Adicionar vinho"}
+              <Plus className="h-4 w-4 mr-2" />
+              {profileType === "commercial" ? "CADASTRAR VINHO" : "ADICIONAR VINHO"}
             </Button>
           </div>
         </SidebarHeader>

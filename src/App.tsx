@@ -15,6 +15,8 @@ import DashboardIndex from "@/pages/dashboard/DashboardIndex";
 import Plans from "@/pages/dashboard/Plans";
 import Placeholder from "@/pages/dashboard/Placeholder";
 import CellarPage from "@/pages/dashboard/CellarPage";
+import InventoryPage from "@/pages/dashboard/InventoryPage";
+import InventoryPlaceholder from "@/pages/dashboard/InventoryPlaceholder";
 import AlertsPage from "@/pages/dashboard/AlertsPage";
 import SettingsPage from "@/pages/dashboard/SettingsPage";
 import NotFound from "@/pages/NotFound";
@@ -42,10 +44,10 @@ const App = () => (
               <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
               <Route path="stats" element={<Placeholder title="Analytics" />} />
               <Route path="settings" element={<SettingsPage />} />
-              <Route path="inventory" element={<Placeholder title="Estoque" />} />
-              <Route path="sales" element={<Placeholder title="Vendas" />} />
-              <Route path="registers" element={<Placeholder title="Cadastros" />} />
-              <Route path="reports" element={<Placeholder title="Relatórios" />} />
+              <Route path="inventory" element={<InventoryPage />} />
+              <Route path="sales" element={<InventoryPlaceholder title="Vendas" icon="sales" description="Rastreamento de pedidos, histórico de pagamentos e CRM integrado." />} />
+              <Route path="registers" element={<InventoryPlaceholder title="Cadastros" icon="registers" description="Gestão de fornecedores, produtores e base de clientes VIP." />} />
+              <Route path="reports" element={<InventoryPlaceholder title="Relatórios" icon="reports" description="BI avançado, impostos, previsão de demanda e valuation de acervo." />} />
               <Route path="plans" element={<Plans />} />
             </Route>
             <Route path="*" element={<NotFound />} />
