@@ -4,7 +4,7 @@ import {
     Search, Filter, SlidersHorizontal, ArrowUpDown, ChevronDown,
     MoreHorizontal, Trash2, Tag, Download, Check, X,
     Package, AlertTriangle, Clock, History, Star,
-    Smartphone, ChevronRight, LayoutGrid, List as ListIcon
+    Smartphone, ChevronRight, LayoutGrid, List as ListIcon, Plus
 } from "lucide-react";
 import { useWineMetrics, useDeleteWine, Wine } from "@/hooks/useWines";
 import { Button } from "@/components/ui/button";
@@ -266,14 +266,49 @@ export default function InventoryPage() {
                         ))}
                     </div>
                 ) : filteredWines.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-                        <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                            <Search className="h-8 w-8 text-muted-foreground/40" />
+                    <motion.div
+                        className="glass-card p-20 text-center relative overflow-hidden group"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+
+                        <div className="relative z-10">
+                            <div className="w-20 h-20 rounded-[28px] bg-muted/30 flex items-center justify-center mx-auto mb-8 animate-float shadow-sm border border-black/5 group-hover:rotate-6 transition-transform duration-700">
+                                <Search className="h-10 w-10 text-muted-foreground/40" />
+                            </div>
+
+                            <h2 className="text-3xl font-serif font-bold text-foreground mb-4 tracking-tight">
+                                Nenhum rótulo encontrado
+                            </h2>
+
+                            <p className="text-base text-muted-foreground max-w-md mx-auto mb-10 leading-relaxed font-medium">
+                                {debouncedSearch || statusFilter !== "all" || styleFilters.length > 0
+                                    ? "Não encontramos vinhos com esses critérios de busca. Tente ajustar os filtros ou pesquisar por outro termo."
+                                    : "Seu estoque comercial está vazio. Registre novos produtos para começar a gerenciar suas vendas e movimentações."}
+                            </p>
+
+                            <div className="flex flex-wrap items-center justify-center gap-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={clearAllFilters}
+                                    className="h-12 px-8 rounded-2xl border-primary/20 hover:bg-primary/5 text-primary font-bold transition-all"
+                                >
+                                    <X className="h-4 w-4 mr-2" /> Limpar filtros
+                                </Button>
+                                {!debouncedSearch && statusFilter === "all" && styleFilters.length === 0 && (
+                                    <Button
+                                        variant="premium"
+                                        onClick={() => {/* Trigger Add Wine from parent/context if needed or redirect */ }}
+                                        className="h-12 px-8 rounded-2xl shadow-float font-bold"
+                                    >
+                                        <Plus className="h-4 w-4 mr-2" /> Adicionar ao Estoque
+                                    </Button>
+                                )}
+                            </div>
                         </div>
-                        <h3 className="text-lg font-bold text-foreground">Nenhum vinho encontrado</h3>
-                        <p className="text-sm text-muted-foreground max-w-xs mt-1">Ajuste os filtros ou o termo da busca para encontrar o que procura.</p>
-                        <Button variant="outline" className="mt-6 h-10 px-6 rounded-xl" onClick={clearAllFilters}>Remover filtros</Button>
-                    </div>
+                    </motion.div>
                 ) : viewMode === "table" ? (
                     <div className="overflow-x-auto">
                         <table className="table-premium">

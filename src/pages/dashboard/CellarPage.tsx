@@ -405,19 +405,47 @@ export default function CellarPage() {
           {[1, 2, 3].map(i => <div key={i} className="skeleton-premium h-40 rounded-xl" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <motion.div className="glass-card p-12 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="w-14 h-14 rounded-[16px] gradient-wine flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "0 8px 24px rgba(143,45,86,0.2)" }}>
-            <Wine className="h-7 w-7 text-primary-foreground" />
+        <motion.div
+          className="glass-card p-20 text-center relative overflow-hidden group"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+
+          <div className="relative z-10">
+            <div className="w-20 h-20 rounded-[28px] gradient-wine flex items-center justify-center mx-auto mb-8 animate-float shadow-premium rotate-3 group-hover:rotate-0 transition-transform duration-700">
+              <Wine className="h-10 w-10 text-white" />
+            </div>
+
+            <h2 className="text-3xl font-serif font-bold text-foreground mb-4 tracking-tight">
+              Sua jornada começa aqui
+            </h2>
+
+            <p className="text-base text-muted-foreground max-w-md mx-auto mb-10 leading-relaxed font-medium">
+              {hasActiveFilters
+                ? "Não encontramos vinhos com esses critérios. Tente simplificar seus filtros para descobrir novos rótulos."
+                : "Sua adega digital ainda está vazia. Comece a catalogar sua coleção e tenha o controle total do seu acervo na palma da mão."}
+            </p>
+
+            {!hasActiveFilters ? (
+              <Button
+                variant="premium"
+                onClick={() => setAddOpen(true)}
+                className="h-14 px-10 text-sm font-black uppercase tracking-widest rounded-2xl shadow-float active:scale-95 transition-all"
+              >
+                <Plus className="h-5 w-5 mr-3" /> Catalogar meu primeiro vinho
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="h-12 px-8 rounded-2xl border-primary/20 hover:bg-primary/5 text-primary font-bold transition-all"
+              >
+                <X className="h-4 w-4 mr-2" /> Limpar todos os filtros
+              </Button>
+            )}
           </div>
-          <h3 className="text-base font-semibold mb-2 text-foreground">Nenhum vinho encontrado</h3>
-          <p className="text-sm mb-5 text-muted-foreground">
-            {hasActiveFilters ? "Tente alterar os filtros." : "Adicione seu primeiro vinho para começar."}
-          </p>
-          {!hasActiveFilters && (
-            <Button onClick={() => setAddOpen(true)} className="gradient-wine text-primary-foreground btn-glow h-11 px-6 text-[13px] border-0">
-              <Plus className="h-4 w-4 mr-1.5" /> Adicionar Vinho
-            </Button>
-          )}
         </motion.div>
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
