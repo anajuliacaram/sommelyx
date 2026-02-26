@@ -67,20 +67,20 @@ export default function Login() {
         className="w-full max-w-[460px] z-10"
       >
         <motion.div
-          whileHover={{ y: -4, boxShadow: "0 60px 120px -20px rgba(140, 32, 68, 0.25)" }}
-          className="glass-card p-8 sm:p-14 border-white/30 w-[94%] sm:w-full mx-auto"
+          whileHover={{ y: -4, boxShadow: "0 80px 160px -20px rgba(140, 32, 68, 0.3)" }}
+          className="glass-card p-10 sm:p-16 border-white/20 w-[96%] sm:w-full mx-auto backdrop-blur-[40px] bg-white/[0.12]"
         >
           {/* Internal Specs Highlight */}
-          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
           <div className="flex flex-col items-center mb-10">
             <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="w-20 h-20 sm:w-28 sm:h-28 rounded-[28px] bg-white/10 backdrop-blur-2xl border border-white/20 flex items-center justify-center shadow-premium mb-8 relative group"
+              animate={{ y: [0, -8, 0], rotate: [0, 2, 0, -2, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-[32px] bg-white/15 backdrop-blur-3xl border border-white/30 flex items-center justify-center shadow-premium mb-10 relative group"
             >
-              <div className="absolute inset-0 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <img src="/logo-sommelyx.png" alt="Logo" className="w-12 h-12 sm:w-18 sm:h-18 object-contain relative z-10" />
+              <div className="absolute inset-0 bg-[#8C2044]/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+              <img src="/logo-sommelyx.png" alt="Logo" className="w-14 h-14 sm:w-20 sm:h-20 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(140,32,68,0.3)]" />
             </motion.div>
 
             <h1 className="text-3xl sm:text-5xl font-serif font-black italic text-[#0F0F14] text-center tracking-tight leading-tight">
@@ -136,13 +136,13 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-6">
               <Button
                 type="submit" disabled={loading}
-                className="w-full h-[60px] rounded-2xl text-[15px] font-bold shadow-float"
+                className="w-full h-[64px] rounded-full text-[16px] font-black shadow-float tracking-widest"
                 variant="premium"
               >
-                {loading ? "Processando..." : "Entrar na Plataforma"}
+                {loading ? "ALTAMENTE PROCESSANDO..." : "ENTRAR NA PLATAFORMA"}
               </Button>
             </div>
           </form>

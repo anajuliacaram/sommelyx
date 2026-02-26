@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -53,8 +54,18 @@ export default function InventoryPage() {
     const statusFilter = (searchParams.get("status") as StockStatus) || "all";
     const styleFilters = searchParams.getAll("style");
     const countryFilters = searchParams.getAll("country");
+    const tagFilters = searchParams.getAll("tag");
     const sortKey = searchParams.get("sort") || "name";
     const sortOrder = searchParams.get("order") || "asc";
+
+    const [vintageRange, setVintageRange] = useState<[number, number]>([
+        parseInt(searchParams.get("minYear") || "1980"),
+        parseInt(searchParams.get("maxYear") || new Date().getFullYear().toString())
+    ]);
+    const [priceRange, setPriceRange] = useState<[number, number]>([
+        parseInt(searchParams.get("minPrice") || "0"),
+        parseInt(searchParams.get("maxPrice") || "5000")
+    ]);
 
     // Debounce search
     useEffect(() => {
@@ -97,6 +108,17 @@ export default function InventoryPage() {
             // Multi-select Countries
             if (countryFilters.length > 0 && (!wine.country || !countryFilters.includes(wine.country))) return false;
 
+            // Multi-select Tags (PELO MENOS UMA)
+            if (tagFilters.length > 0) {
+                const wineTags = (wine as any).tags || [];
+                if (!tagFilters.some(t => wineTags.includes(t))) return false;
+            }
+
+            // Range Filters
+            if (wine.vintage && (wine.vintage < vintageRange[0] || wine.vintage > vintageRange[1])) return false;
+            const price = wine.current_value || wine.purchase_price || 0;
+            if (price < priceRange[0] || price > priceRange[1]) return false;
+
             return true;
         }).sort((a, b) => {
             let valA = (a as any)[sortKey];
@@ -112,7 +134,7 @@ export default function InventoryPage() {
 
             return sortOrder === "asc" ? comparison : -comparison;
         });
-    }, [wines, debouncedSearch, statusFilter, styleFilters, countryFilters, sortKey, sortOrder]);
+    }, [wines, debouncedSearch, statusFilter, styleFilters, countryFilters, tagFilters, vintageRange, priceRange, sortKey, sortOrder]);
 
     // --- Handlers ---
     const toggleSelectAll = () => {
@@ -462,9 +484,10 @@ export default function InventoryPage() {
                 )}
             </AnimatePresence>
 
-            {/* --- FILTER DRAWER --- */}
+            {/* --- FILTER DRAWER / BOTTOM SHEET --- */}
             <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
-                <SheetContent className="w-[320px] sm:w-[400px] p-0 flex flex-col bg-sidebar border-l border-white/10">
+                <SheetContent side="right" className="w-full sm:w-[400px] p-0 flex flex-col bg-sidebar border-l border-white/10 sm:mobile-bottom-sheet-none mobile-bottom-sheet">
+                    <div className="sm:hidden mobile-bottom-sheet-handle" />
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
 
                     <SheetHeader className="p-6 pb-4 relative z-10">
@@ -520,13 +543,90 @@ export default function InventoryPage() {
                                         <Badge
                                             key={s}
                                             variant={styleFilters.includes(s) ? "default" : "outline"}
-                                            className={cn("h-8 rounded-lg px-3 cursor-pointer select-none transition-all", !styleFilters.includes(s) && "bg-background hover:bg-muted/50")}
+                                            className={cn(
+                                                "h-8 rounded-lg px-3 cursor-pointer select-none transition-all",
+                                                styleFilters.includes(s) ? "bg-primary text-white border-primary shadow-sm" : "bg-background hover:bg-muted/50"
+                                            )}
                                             onClick={() => updateParam("style", s, true)}
                                         >
                                             {s}
                                             {styleFilters.includes(s) && <Check className="ml-1.5 h-3 w-3" />}
                                         </Badge>
                                     ))}
+                                </div>
+                            </div>
+
+                            {/* Range: Safra */}
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Safra</label>
+                                    <span className="text-[11px] font-bold text-primary">{vintageRange[0]} — {vintageRange[1]}</span>
+                                </div>
+                                <div className="px-1">
+                                    <Slider
+                                        defaultValue={[1980, new Date().getFullYear()]}
+                                        max={new Date().getFullYear()}
+                                        min={1980}
+                                        step={1}
+                                        value={vintageRange}
+                                        onValueChange={(v) => {
+                                            const val = v as [number, number];
+                                            setVintageRange(val);
+                                            const p = new URLSearchParams(searchParams);
+                                            p.set("minYear", val[0].toString());
+                                            p.set("maxYear", val[1].toString());
+                                            setSearchParams(p, { replace: true });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Range: Preço */}
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Preço</label>
+                                    <span className="text-[11px] font-bold text-primary">R$ {priceRange[0]} — R$ {priceRange[1]}</span>
+                                </div>
+                                <div className="px-1">
+                                    <Slider
+                                        defaultValue={[0, 5000]}
+                                        max={5000}
+                                        min={0}
+                                        step={10}
+                                        value={priceRange}
+                                        onValueChange={(v) => {
+                                            const val = v as [number, number];
+                                            setPriceRange(val);
+                                            const p = new URLSearchParams(searchParams);
+                                            p.set("minPrice", val[0].toString());
+                                            p.set("maxPrice", val[1].toString());
+                                            setSearchParams(p, { replace: true });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Multi Tags */}
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Tags (Multiselect)</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {["Orgânico", "Biodinâmico", "Vegano", "Ícone", "Raro", "Custo-benefício", "Favorito"].map(t => {
+                                        const active = tagFilters.includes(t);
+                                        return (
+                                            <button
+                                                key={t}
+                                                onClick={() => updateParam("tag", t, true)}
+                                                className={cn(
+                                                    "h-8 px-4 rounded-full text-[11px] font-bold transition-all duration-300",
+                                                    active
+                                                        ? "bg-gradient-to-r from-[#8C2044] to-[#C44569] text-white shadow-md shadow-[#8C2044]/20 scale-105"
+                                                        : "bg-white/10 border border-white/20 text-muted-foreground hover:bg-white/20 hover:text-foreground"
+                                                )}
+                                            >
+                                                {t}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 

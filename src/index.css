@@ -280,7 +280,7 @@
 
   /* ── Premium Gradients ── */
   .gradient-wine {
-    background: linear-gradient(135deg, #8C2044 0%, #C44569 50%, #D4AF37 140%);
+    background: linear-gradient(135deg, #8C2044 0%, #C44569 50%, #E07A5F 100%);
     position: relative;
     border: none !important;
   }
@@ -288,13 +288,64 @@
   .gradient-wine::after {
     content: '';
     position: absolute;
-    top: 1.5px;
-    left: 1.5px;
-    right: 1.5px;
-    height: 40%;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.25), transparent);
-    border-radius: inherit;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 300ms ease;
     pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .gradient-wine:hover::after {
+    opacity: 1;
+  }
+
+  /* ── Premium Button System ── */
+  .btn-premium {
+    @apply relative overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22, 1, 0.36, 1)] active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none;
+    background: linear-gradient(135deg, #8C2044 0%, #C44569 55%, #E07A5F 100%);
+    box-shadow: 0 4px 12px rgba(140, 32, 68, 0.2), 0 1px 1px rgba(255, 255, 255, 0.2) inset;
+  }
+
+  .btn-premium:hover {
+    @apply -translate-y-[1px];
+    box-shadow: 0 8px 20px rgba(140, 32, 68, 0.3), 0 1px 1px rgba(255, 255, 255, 0.3) inset;
+    filter: brightness(1.05);
+  }
+
+  .btn-premium::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .btn-glass {
+    @apply backdrop-blur-md border border-white/20 bg-white/5 transition-all duration-300;
+  }
+
+  .btn-glass:hover {
+    @apply bg-white/10 border-white/30 -translate-y-[1px];
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  /* ── Page Transitions ── */
+  .page-transition {
+    will-change: transform, opacity;
+  }
+
+  /* ── Mobile Bottom Sheet ── */
+  .mobile-bottom-sheet {
+    @apply rounded-t-[32px] border-t border-white/20 bg-white/70 dark:bg-black/70 backdrop-blur-2xl shadow-2xl;
+  }
+
+  .mobile-bottom-sheet-handle {
+    @apply w-12 h-1.5 rounded-full bg-muted-foreground/20 mx-auto mt-3;
   }
 
   /* ── Shimmer / Skeleton Animation ── */

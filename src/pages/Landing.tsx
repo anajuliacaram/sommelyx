@@ -201,17 +201,17 @@ export default function Landing() {
             </span>
           </a>
 
-          <div className="flex items-center gap-5 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-6">
             <Button
-              variant="ghost"
-              className="text-[14px] font-bold text-[#0F0F14]/70 hover:text-[#8C2044] hover:bg-[#8C2044]/5 px-6 h-12 rounded-2xl transition-all"
+              variant="outline"
+              className="text-[14px] font-bold px-8 h-12 transition-all"
               onClick={() => navigate("/login")}
             >
               Entrar
             </Button>
             <Button
               variant="premium"
-              className="px-10 h-16 text-[15px] font-black uppercase tracking-wider shadow-float rounded-2xl ring-1 ring-[#8C2044]/20"
+              className="px-10 h-14 sm:h-16 text-[15px] font-black uppercase tracking-widest shadow-float"
               onClick={() => navigate("/signup")}
             >
               Começar Grátis
@@ -417,16 +417,8 @@ export default function Landing() {
                   ))}
                 </ul>
                 <Button
-                  className="w-full h-[52px] text-[14px] font-bold rounded-[14px] transition-all duration-200"
-                  style={plan.highlighted ? {
-                    background: "#fff",
-                    color: "#8C2044",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  } : {
-                    background: "rgba(140,32,68,0.06)",
-                    color: "#8C2044",
-                    border: "1.5px solid rgba(140,32,68,0.2)",
-                  }}
+                  className="w-full h-[56px] text-[14px] font-black uppercase tracking-widest transition-all"
+                  variant={plan.highlighted ? "premium" : "outline"}
                   onClick={() => navigate("/signup")}
                 >
                   {plan.cta}

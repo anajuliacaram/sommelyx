@@ -9,13 +9,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[#0F0F14] text-white hover:bg-[#1A1A1F] rounded-2xl shadow-premium hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-float",
-        destructive: "bg-destructive/10 text-destructive hover:bg-destructive hover:text-white rounded-2xl transition-colors shadow-sm",
-        outline: "border border-[#8C2044]/10 bg-white/40 hover:bg-white/80 hover:border-[#8C2044]/20 text-[#0F0F14] rounded-2xl backdrop-blur-md hover:-translate-y-0.5 hover:scale-[1.01] shadow-sm hover:shadow-md",
-        secondary: "bg-[#8C2044]/5 text-[#8C2044] hover:bg-[#8C2044]/10 rounded-2xl font-bold uppercase tracking-wider text-[11px]",
-        ghost: "hover:bg-[#8C2044]/5 hover:text-[#8C2044] text-muted-foreground rounded-2xl transition-colors",
+        default: "bg-[#0F0F14] text-white hover:bg-[#1A1A1F] rounded-full shadow-premium hover:-translate-y-0.5 hover:shadow-float font-semibold tracking-tight",
+        destructive: "bg-destructive/10 text-destructive hover:bg-destructive hover:text-white rounded-full transition-colors",
+        outline: "border border-[#8C2044]/15 bg-white/40 hover:bg-white/80 hover:border-[#8C2044]/30 text-[#0F0F14] rounded-full backdrop-blur-md hover:-translate-y-0.5 shadow-sm hover:shadow-md transition-all font-semibold",
+        secondary: "bg-[#8C2044]/8 text-[#8C2044] hover:bg-[#8C2044]/15 rounded-full font-bold uppercase tracking-wider text-[11px] backdrop-blur-sm",
+        ghost: "hover:bg-[#8C2044]/5 hover:text-[#8C2044] text-muted-foreground rounded-full transition-colors font-medium",
         link: "text-primary underline-offset-4 hover:underline",
-        premium: "gradient-wine text-white rounded-2xl shadow-premium hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-float ring-1 ring-white/20",
+        premium: "btn-premium text-white rounded-full border border-white/10 font-black tracking-wide uppercase text-[13px] shadow-float",
+        glass: "btn-glass rounded-full px-6 font-semibold",
       },
       size: {
         default: "h-11 px-6 py-2",
