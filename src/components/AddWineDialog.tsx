@@ -114,130 +114,141 @@ export function AddWineDialog({ open, onOpenChange }: AddWineDialogProps) {
   return (
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card border-border/50">
-          <SheetHeader>
-            <SheetTitle className="font-serif text-lg">Adicionar Vinho</SheetTitle>
-          </SheetHeader>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card/80 backdrop-blur-2xl border-l border-white/10 shadow-premium p-0">
+          <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
 
-          <AnimatePresence mode="wait">
-            {success ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center py-16 gap-4"
-              >
-                <div className="w-14 h-14 rounded-full gradient-wine flex items-center justify-center glow-wine">
-                  <Check className="h-7 w-7 text-primary-foreground" />
-                </div>
-                <p className="text-sm font-medium text-foreground">{parseInt(quantity) || 1} garrafa(s) adicionada(s)!</p>
-              </motion.div>
-            ) : (
-              <motion.form key="form" onSubmit={handleSubmit} className="space-y-5 mt-6">
-                {/* Scan Label Button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setScanOpen(true)}
-                  className="w-full h-14 text-[13px] font-medium border-dashed border-2 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
+          <div className="p-6 h-full flex flex-col relative z-10">
+            <SheetHeader className="mb-6">
+              <SheetTitle className="font-serif text-2xl font-black italic text-gradient-wine">Adicionar Vinho</SheetTitle>
+            </SheetHeader>
+
+            <AnimatePresence mode="wait">
+              {success ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center py-16 gap-4"
                 >
-                  <Camera className="h-5 w-5 mr-2 text-primary" />
-                  <div className="text-left">
-                    <span className="block font-semibold text-foreground">Escanear Rótulo com IA</span>
-                    <span className="block text-[10px] text-muted-foreground">Tire uma foto e preencha automaticamente</span>
+                  <div className="w-14 h-14 rounded-full gradient-wine flex items-center justify-center glow-wine">
+                    <Check className="h-7 w-7 text-primary-foreground" />
                   </div>
-                </Button>
-
-                {/* Essential fields */}
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="name" className="text-xs text-muted-foreground">Nome do vinho *</Label>
-                    <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Malbec Reserva" required />
-                  </div>
-                  <div>
-                    <Label htmlFor="producer" className="text-xs text-muted-foreground">Produtor</Label>
-                    <Input id="producer" value={producer} onChange={e => setProducer(e.target.value)} placeholder="Ex: Catena Zapata" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="qty" className="text-xs text-muted-foreground">Quantidade</Label>
-                      <Input id="qty" type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label htmlFor="vintage" className="text-xs text-muted-foreground">Safra</Label>
-                      <Input id="vintage" type="number" value={vintage} onChange={e => setVintage(e.target.value)} placeholder="2020" />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Estilo</Label>
-                    <Select value={style} onValueChange={setStyle}>
-                      <SelectTrigger><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                      <SelectContent>
-                        {styles.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Collapsible advanced fields */}
-                <Collapsible open={moreOpen} onOpenChange={setMoreOpen}>
-                  <CollapsibleTrigger asChild>
-                    <Button type="button" variant="ghost" className="w-full justify-between text-xs text-muted-foreground h-9 px-2">
-                      Mais detalhes
-                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-4 pt-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">País</Label>
-                        <Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" />
+                  <p className="text-sm font-medium text-foreground">{parseInt(quantity) || 1} garrafa(s) adicionada(s)!</p>
+                </motion.div>
+              ) : (
+                <motion.form key="form" onSubmit={handleSubmit} className="space-y-5 mt-6">
+                  {/* Scan Label Button / Dropzone */}
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative group cursor-pointer"
+                    onClick={() => setScanOpen(true)}
+                  >
+                    <div className="absolute inset-0 bg-primary/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative h-24 sm:h-28 rounded-2xl border-2 border-dashed border-primary/20 bg-card/40 backdrop-blur-sm flex flex-col items-center justify-center p-4 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/[0.02]">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
+                        <Camera className="h-6 w-6 text-primary" />
                       </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Região</Label>
-                        <Input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" />
-                      </div>
+                      <p className="text-[13px] font-bold text-foreground">Escanear com IA</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Extração instantânea de dados do rótulo</p>
+
+                      {/* Shimmer overlay */}
+                      <div className="absolute inset-x-4 top-0 h-[1px] shimmer-premium opacity-50" />
+                      <div className="absolute inset-x-4 bottom-0 h-[1px] shimmer-premium opacity-50" />
+                    </div>
+                  </motion.div>
+
+                  {/* Essential fields */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name" className="text-xs text-muted-foreground">Nome do vinho *</Label>
+                      <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Malbec Reserva" required />
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Uva</Label>
-                      <Input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Preço de compra (R$)</Label>
-                      <Input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Localização na adega</Label>
-                      <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Estante A, prateleira 2" />
+                      <Label htmlFor="producer" className="text-xs text-muted-foreground">Produtor</Label>
+                      <Input id="producer" value={producer} onChange={e => setProducer(e.target.value)} placeholder="Ex: Catena Zapata" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="text-xs text-muted-foreground">Beber a partir de</Label>
-                        <Input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" />
+                        <Label htmlFor="qty" className="text-xs text-muted-foreground">Quantidade</Label>
+                        <Input id="qty" type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} />
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Beber até</Label>
-                        <Input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" />
+                        <Label htmlFor="vintage" className="text-xs text-muted-foreground">Safra</Label>
+                        <Input id="vintage" type="number" value={vintage} onChange={e => setVintage(e.target.value)} placeholder="2020" />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Harmonização</Label>
-                      <Input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" />
+                      <Label className="text-xs text-muted-foreground">Estilo</Label>
+                      <Select value={style} onValueChange={setStyle}>
+                        <SelectTrigger><SelectValue placeholder="Selecionar..." /></SelectTrigger>
+                        <SelectContent>
+                          {styles.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Notas de degustação</Label>
-                      <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Aromas, sabores, impressões..." rows={3} />
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  </div>
 
-                <Button type="submit" disabled={addWine.isPending || !name.trim()} className="w-full gradient-wine text-primary-foreground btn-glow h-11 text-[13px] font-medium">
-                  <Plus className="h-4 w-4 mr-1.5" />
-                  {addWine.isPending ? "Salvando..." : "Adicionar Vinho"}
-                </Button>
-              </motion.form>
-            )}
-          </AnimatePresence>
+                  {/* Collapsible advanced fields */}
+                  <Collapsible open={moreOpen} onOpenChange={setMoreOpen}>
+                    <CollapsibleTrigger asChild>
+                      <Button type="button" variant="ghost" className="w-full justify-between text-xs text-muted-foreground h-9 px-2">
+                        Mais detalhes
+                        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-4 pt-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">País</Label>
+                          <Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Região</Label>
+                          <Input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Uva</Label>
+                        <Input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Preço de compra (R$)</Label>
+                        <Input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Localização na adega</Label>
+                        <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Estante A, prateleira 2" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Beber a partir de</Label>
+                          <Input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Beber até</Label>
+                          <Input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Harmonização</Label>
+                        <Input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Notas de degustação</Label>
+                        <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Aromas, sabores, impressões..." rows={3} />
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <Button type="submit" disabled={addWine.isPending || !name.trim()} className="w-full gradient-wine text-primary-foreground btn-glow h-11 text-[13px] font-medium">
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    {addWine.isPending ? "Salvando..." : "Adicionar Vinho"}
+                  </Button>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </div>
         </SheetContent>
       </Sheet>
 

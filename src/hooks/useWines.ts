@@ -46,7 +46,7 @@ export function useWines() {
 }
 
 export function useWineMetrics() {
-  const { data: wines } = useWines();
+  const { data: wines, isLoading } = useWines();
   const currentYear = new Date().getFullYear();
 
   const totalBottles = wines?.reduce((sum, w) => sum + w.quantity, 0) ?? 0;
@@ -59,7 +59,7 @@ export function useWineMetrics() {
   }).length ?? 0;
   const lowStock = wines?.filter(w => w.quantity > 0 && w.quantity <= 2).length ?? 0;
 
-  return { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines: wines ?? [] };
+  return { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines: wines ?? [], isLoading };
 }
 
 export function useAddWine() {

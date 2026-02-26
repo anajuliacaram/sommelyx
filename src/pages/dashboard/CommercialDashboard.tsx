@@ -34,7 +34,7 @@ export default function CommercialDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Gestor";
-  const { totalBottles, totalValue, lowStock, wines } = useWineMetrics();
+  const { totalBottles, totalValue, lowStock, wines, isLoading } = useWineMetrics();
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
@@ -93,13 +93,13 @@ export default function CommercialDashboard() {
       {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.03em" }}>
+          <h1 className="text-2xl md:text-3xl font-serif font-black italic tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.04em" }}>
             Olá, {firstName}
           </h1>
-          <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Visão geral do seu negócio</p>
+          <p className="text-sm mt-1 font-medium" style={{ color: "#6B7280" }}>Operação Premium Sommelyx</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-9 text-[12px] font-semibold transition-all duration-300" onClick={() => setCsvOpen(true)}>
+          <Button variant="outline" size="sm" className="h-9 text-[12px] font-bold" onClick={() => setCsvOpen(true)}>
             <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar CSV
           </Button>
           <Button variant="premium" size="sm" className="h-9 px-4 text-[12px] font-bold" onClick={() => setAddOpen(true)}>
@@ -109,23 +109,34 @@ export default function CommercialDashboard() {
       </motion.div>
 
       {/* KPI Cards — Commercial focus */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {metrics.map((m, i) => (
-          <motion.div
-            key={m.label}
-            className="glass-card p-5 group cursor-pointer"
-            initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
-            onClick={() => navigate("/dashboard/inventory")}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-[12px] flex items-center justify-center" style={{ background: `${m.color}12` }}>
-                <m.icon className="h-4 w-4" style={{ color: m.color }} />
-              </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {isLoading ? (
+          [1, 2, 3, 4].map((i) => (
+            <div key={i} className="glass-card p-5 space-y-3">
+              <div className="w-10 h-10 rounded-xl shimmer-premium" />
+              <div className="h-8 w-16 rounded-lg shimmer-premium" />
+              <div className="h-3 w-24 rounded-lg shimmer-premium" />
             </div>
-            <p className="text-2xl font-bold font-sans tracking-tight" style={{ color: "#0F0F14" }}>{m.value}</p>
-            <p className="text-[11px] mt-1 font-medium" style={{ color: "#9CA3AF" }}>{m.label}</p>
-          </motion.div>
-        ))}
+          ))
+        ) : (
+          metrics.map((m, i) => (
+            <motion.div
+              key={m.label}
+              className="glass-card p-5 group cursor-pointer border border-white/5 ring-1 ring-black/[0.03]"
+              initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
+              onClick={() => navigate("/dashboard/inventory")}
+              whileHover={{ y: -4, boxShadow: "0 20px 40px -12px rgba(140,32,68,0.12)" }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ background: `${m.color}15` }}>
+                  <m.icon className="h-5 w-5" style={{ color: m.color }} />
+                </div>
+              </div>
+              <p className="text-2xl font-black font-sans tracking-tight text-[#0F0F14]">{m.value}</p>
+              <p className="text-[12px] mt-1.5 font-bold tracking-tight text-gray-400 group-hover:text-gray-600 transition-colors uppercase tracking-[0.05em]">{m.label}</p>
+            </motion.div>
+          ))
+        )}
       </div>
 
       {/* Low stock + ABC side by side */}
@@ -257,24 +268,52 @@ export default function CommercialDashboard() {
 
       {/* Empty State */}
       {totalBottles === 0 && (
-        <motion.div className="glass-card p-12 text-center relative overflow-hidden" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+        <motion.div
+          className="glass-card p-16 text-center relative overflow-hidden flex flex-col items-center"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Ambient radial gradient */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at center, rgba(140,32,68,0.08) 0%, transparent 70%)" }} />
+
           <WineMesh variant="empty-state" />
-          <div className="relative z-10">
-            <div className="w-14 h-14 rounded-[16px] gradient-wine flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "0 8px 24px rgba(143,45,86,0.2)" }}>
-              <Package className="h-7 w-7 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2 font-sans tracking-tight" style={{ color: "#0F0F14" }}>
-              Comece a gerenciar seu estoque
+
+          <div className="relative z-10 flex flex-col items-center">
+            {/* Glass Orb Icon Container */}
+            <motion.div
+              className="w-20 h-20 rounded-full flex items-center justify-center mb-8 relative"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <div className="absolute inset-0 rounded-full bg-white/20 backdrop-blur-xl border border-white/40 shadow-premium" />
+              <div className="absolute inset-0 rounded-full gradient-wine opacity-10" />
+              <Package className="h-9 w-9 text-[#8C2044] relative z-10" />
+            </motion.div>
+
+            <h3 className="text-2xl font-serif font-bold mb-3 tracking-tight text-[#0F0F14]">
+              Gestão comercial simplificada
             </h3>
-            <p className="text-sm mb-6 max-w-xs mx-auto" style={{ color: "#6B7280" }}>
-              Cadastre produtos, registre vendas e acompanhe métricas em tempo real.
+            <p className="text-[15px] mb-10 max-w-sm mx-auto font-medium leading-relaxed text-gray-500">
+              Transforme seu estoque em dados acionáveis. <br /> Cadastre seus primeiros produtos para acompanhar o valor da adega e o giro de estoque em tempo real.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="premium" onClick={() => setAddOpen(true)} className="h-[48px] px-8 text-[14px] font-bold rounded-[16px]">
-                <Plus className="h-4 w-4 mr-1.5" /> Cadastrar produto
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md">
+              <Button
+                variant="premium"
+                size="lg"
+                onClick={() => setAddOpen(true)}
+                className="h-14 px-10 text-[15px] font-bold rounded-2xl flex-1 shadow-float"
+              >
+                <Plus className="h-5 w-5 mr-2" /> Cadastrar produto
               </Button>
-              <Button variant="outline" onClick={() => setCsvOpen(true)} className="h-[48px] px-6 text-[13px] font-bold rounded-[16px]">
-                <Upload className="h-4 w-4 mr-1.5" /> Importar CSV
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setCsvOpen(true)}
+                className="h-14 px-8 text-[14px] font-bold rounded-2xl flex-1 bg-white/50"
+              >
+                <Upload className="h-4 w-4 mr-2" /> Importar lista
               </Button>
             </div>
           </div>

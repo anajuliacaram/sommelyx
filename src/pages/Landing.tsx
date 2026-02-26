@@ -60,100 +60,112 @@ const plans = [
 function DashboardMockup() {
   return (
     <motion.div
-      className="relative mx-auto"
+      className="relative mx-auto max-w-[940px] px-4"
       initial={{ opacity: 0, y: 40, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div
-        className="relative rounded-[24px] overflow-hidden shadow-2xl"
-        style={{
-          background: "#fff",
-          border: "1px solid rgba(0,0,0,0.05)",
-          boxShadow: "0 0 0 1px rgba(0,0,0,0.02), 0 32px 64px -16px rgba(140,32,68,0.12)",
-        }}
+      {/* Radial glow behind preview */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] pointer-events-none z-0">
+        <div className="absolute inset-0 bg-radial-glow opacity-30 animate-pulse-slow" style={{ background: "radial-gradient(circle at center, rgba(140,32,68,0.2) 0%, transparent 65%)" }} />
+      </div>
+
+      <motion.div
+        className="relative z-10"
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       >
-        {/* Chrome bar */}
-        <div className="flex items-center gap-2 px-6 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)", background: "#FEFEFE" }}>
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#FF5F57" }} />
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#FFBD2E" }} />
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#27C93F" }} />
-          </div>
-          <div className="flex-1 flex justify-center">
-            <div className="h-6 w-64 rounded-full flex items-center justify-center" style={{ background: "#F3F4F6" }}>
-              <span className="text-[10px] font-medium text-[#9CA3AF]">app.sommelyx.com</span>
+        <div
+          className="relative rounded-[28px] overflow-hidden shadow-float"
+          style={{
+            background: "#fff",
+            border: "1px solid rgba(0,0,0,0.06)",
+            boxShadow: "0 0 0 1px rgba(0,0,0,0.02), 0 40px 80px -20px rgba(140,32,68,0.18)",
+          }}
+        >
+          {/* Chrome bar */}
+          <div className="flex items-center gap-2 px-6 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)", background: "#FEFEFE" }}>
+            <div className="flex gap-1.5 grayscale opacity-40">
+              <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
+            </div>
+            <div className="flex-1 flex justify-center">
+              <div className="h-6 w-64 rounded-full flex items-center justify-center bg-gray-50/80 border border-black/[0.03]">
+                <span className="text-[10px] font-medium text-gray-400 tracking-tight">app.sommelyx.com</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Mock content */}
-        <div className="flex min-h-[400px]">
-          {/* Sidebar */}
-          <div className="w-52 p-4 space-y-1 hidden sm:block" style={{ borderRight: "1px solid rgba(0,0,0,0.04)", background: "#F9FAFB" }}>
-            {["Overview", "Minha Adega", "Analytics", "Configurações"].map((label, i) => (
-              <div
-                key={label}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[12px] font-semibold transition-colors"
-                style={{
-                  background: i === 0 ? "rgba(140,32,68,0.06)" : "transparent",
-                  color: i === 0 ? "#8C2044" : "#6B7280",
-                }}
-              >
-                <div className="h-4 w-4 rounded-md" style={{ background: i === 0 ? "#8C2044" : "#E5E7EB" }} />
-                {label}
-              </div>
-            ))}
-          </div>
-
-          {/* Main Area */}
-          <div className="flex-1 p-8 space-y-6" style={{ background: "#fff" }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-lg font-bold text-[#0F0F14]">Boa tarde, Marcelo</h4>
-                <p className="text-[12px] text-[#6B7280]">Aqui está o resumo da sua coleção premium.</p>
-              </div>
-              <div className="h-10 px-5 rounded-[12px] flex items-center text-[12px] font-bold text-white shadow-lg" style={{ background: "linear-gradient(135deg, #8C2044, #C44569)" }}>
-                + Nova Garrafa
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 gap-4">
-              {[
-                { v: "2.482", l: "Garrafas" },
-                { v: "R$ 142k", l: "Valor Total" },
-                { v: "18", l: "Beber Agora" },
-                { v: "42", l: "Favoritos" },
-              ].map((m, i) => (
-                <div key={i} className="p-4 rounded-[16px] space-y-1" style={{ background: "#F9FAFB", border: "1px solid rgba(0,0,0,0.03)" }}>
-                  <div className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider">{m.l}</div>
-                  <div className="text-xl font-bold text-[#0F0F14]">{m.v}</div>
+          {/* Mock content */}
+          <div className="flex min-h-[440px]">
+            {/* Sidebar */}
+            <div className="w-56 p-5 space-y-1 hidden sm:block border-r border-black/[0.04] bg-gray-50/50">
+              {["Overview", "Minha Adega", "Analytics", "Configurações"].map((label, i) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12px] font-bold transition-all"
+                  style={{
+                    background: i === 0 ? "white" : "transparent",
+                    color: i === 0 ? "#8C2044" : "#6B7280",
+                    boxShadow: i === 0 ? "0 2px 8px rgba(0,0,0,0.04)" : "none",
+                  }}
+                >
+                  <div className="h-4 w-4 rounded-md" style={{ background: i === 0 ? "#8C2044" : "#E5E7EB" }} />
+                  {label}
                 </div>
               ))}
             </div>
 
-            <div className="p-6 rounded-[20px]" style={{ background: "#F9FAFB", border: "1px solid rgba(0,0,0,0.03)" }}>
-              <div className="flex justify-between items-center mb-6">
-                <div className="text-[12px] font-bold text-[#0F0F14]">Distribuição por Região</div>
-                <div className="text-[11px] font-medium text-[#8C2044]">Ver todos →</div>
+            {/* Main Area */}
+            <div className="flex-1 p-8 space-y-7 bg-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xl font-bold tracking-tight text-[#0F0F14]">Boa tarde, Marcelo</h4>
+                  <p className="text-[13px] text-[#6B7280] font-medium">Resumo do seu negócio premium.</p>
+                </div>
+                <div className="h-10 px-6 rounded-xl flex items-center text-[12px] font-bold text-white shadow-premium gradient-wine">
+                  + Nova Garrafa
+                </div>
               </div>
-              <div className="flex gap-2 items-end h-24">
-                {[45, 76, 52, 88, 62, 95, 70, 82, 100, 78, 92, 65, 84].map((h, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-t-[4px] transition-all duration-500"
-                    style={{
-                      height: `${h}%`,
-                      background: i === 8 ? "linear-gradient(to top, #8C2044, #C44569)" : "rgba(140,32,68,0.1)",
-                    }}
-                  />
+
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { v: "2.847", l: "Garrafas" },
+                  { v: "R$ 184k", l: "Valor Total" },
+                  { v: "24", l: "Beber Agora" },
+                  { v: "56", l: "Favoritos" },
+                ].map((m, i) => (
+                  <div key={i} className="p-5 rounded-2xl space-y-1.5 bg-gray-50/50 border border-black/[0.02]">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{m.l}</div>
+                    <div className="text-2xl font-bold text-[#0F0F14] tracking-tight">{m.v}</div>
+                  </div>
                 ))}
+              </div>
+
+              <div className="p-7 rounded-[24px] bg-gray-50/50 border border-black/[0.02]">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="text-[14px] font-bold text-[#0F0F14]">Distribuição por Região</div>
+                  <div className="text-[12px] font-bold text-[#8C2044] cursor-pointer hover:underline underline-offset-4">Ver todos →</div>
+                </div>
+                <div className="flex gap-2.5 items-end h-28">
+                  {[45, 76, 52, 88, 62, 95, 70, 82, 100, 78, 92, 65, 84].map((h, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-t-lg transition-all duration-700"
+                      style={{
+                        height: `${h}%`,
+                        background: i === 8 ? "linear-gradient(to top, #8C2044, #C44569)" : "rgba(140,32,68,0.08)",
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -174,58 +186,50 @@ export default function Landing() {
 
       {/* ─── NAV ─── */}
       <motion.nav
-        className="fixed top-0 w-full z-50"
-        initial={{ opacity: 0, y: -8 }}
+        className="fixed top-0 w-full z-50 px-4 pt-4"
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-        style={{
-          background: "rgba(255,255,255,0.72)",
-          backdropFilter: "blur(14px) saturate(1.4)",
-          borderBottom: "1px solid rgba(143,45,86,0.10)",
-          boxShadow: "0 6px 24px rgba(0,0,0,0.04)",
-        }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="container mx-auto flex items-center justify-between h-[76px] px-8 lg:px-12">
+        <div
+          className="container mx-auto flex items-center justify-between h-[68px] px-5 sm:px-8 rounded-2xl border border-white/20 shadow-premium"
+          style={{
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(20px) saturate(1.6)",
+          }}
+        >
           <a
             href="/"
-            className="flex items-center gap-2.5 cursor-pointer transition-all duration-250 hover:brightness-110 hover:scale-[1.03]"
+            className="flex items-center gap-2.5 shrink-0 transition-all duration-300 hover:opacity-80 active:scale-95"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-auto object-contain" />
-            <span className="text-[15px] font-extrabold tracking-tight font-sans" style={{ color: "#0F0F14", letterSpacing: "-0.025em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[28px] sm:h-[36px] w-auto object-contain shrink-0" />
+            <span className="text-[15px] sm:text-[17px] font-extrabold tracking-tighter sm:tracking-tight font-sans hidden xsm:block" style={{ color: "#0F0F14", letterSpacing: "-0.03em" }}>
               Sommelyx
             </span>
           </a>
-          <div className="hidden md:flex items-center gap-9 text-[13px] font-medium" style={{ letterSpacing: "0.2px" }}>
-            <a href="#features" className="relative py-1 transition-colors duration-200 hover:text-[#8F2D56] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[1.5px] after:bg-[#8F2D56] after:transition-all after:duration-200 hover:after:w-full" style={{ color: "#6B7280" }}>Funcionalidades</a>
-            <a href="#pricing" className="relative py-1 transition-colors duration-200 hover:text-[#8F2D56] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[1.5px] after:bg-[#8F2D56] after:transition-all after:duration-200 hover:after:w-full" style={{ color: "#6B7280" }}>Planos</a>
+
+          <div className="hidden md:flex items-center gap-9 text-[13px] font-bold tracking-tight" style={{ color: "#6B7280" }}>
+            <a href="#features" className="hover:text-[#8F2D56] transition-all">Funcionalidades</a>
+            <a href="#pricing" className="hover:text-[#8F2D56] transition-all">Planos</a>
           </div>
-          <div className="flex items-center gap-3.5">
-            <button
-              className="h-[44px] px-6 rounded-[14px] text-[14px] font-semibold cursor-pointer transition-all duration-200"
-              style={{
-                background: "rgba(143,45,86,0.06)",
-                border: "1.5px solid rgba(143,45,86,0.2)",
-                color: "#8F2D56",
-                boxShadow: "0 2px 8px rgba(143,45,86,0.06)",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 16px rgba(143,45,86,0.12)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(143,45,86,0.06)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(143,45,86,0.06)"; }}
+
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[13px] font-bold text-[#8F2D56] hover:bg-[#8F2D56]/5 px-4"
               onClick={() => navigate("/login")}
             >
               Entrar
-            </button>
-            <button
-              className="h-[44px] px-7 rounded-[14px] text-[14px] font-semibold text-white cursor-pointer border-0 transition-all duration-200"
-              style={{
-                background: "linear-gradient(135deg, #8F2D56, #C44569)",
-                boxShadow: "0 4px 16px rgba(143,45,86,0.2)",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(143,45,86,0.3)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(143,45,86,0.2)"; }}
+            </Button>
+            <Button
+              variant="premium"
+              size="sm"
+              className="px-5 text-[13px] font-bold transition-all shadow-premium"
               onClick={() => navigate("/signup")}
             >
               Começar Grátis
-            </button>
+            </Button>
           </div>
         </div>
       </motion.nav>
@@ -236,69 +240,49 @@ export default function Landing() {
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 30%, rgba(143,45,86,0.08), transparent 70%)" }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 80% 50%, rgba(224,122,95,0.04), transparent 60%)" }} />
 
-        <div className="container mx-auto relative z-10 max-w-6xl">
+        <div className="container mx-auto relative z-10 max-w-5xl">
           {/* Headline */}
           <motion.h1
-            className="text-center font-serif font-black mb-6"
+            className="text-center font-serif font-black mb-8 px-4"
             style={{
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
+              fontSize: "clamp(38px, 6vw, 68px)",
+              lineHeight: 1,
+              letterSpacing: "-0.04em",
               color: "#0F0F14"
             }}
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            <span className="block">Sua adega,</span>
-            <span className="inline-block mt-1">
-              <span className="italic text-gradient-wine">inteligente</span>
-              <span className="italic text-gradient-wine">.</span>
-            </span>
+            Sua adega, <br />
+            <span className="italic text-gradient-wine font-serif block sm:inline mt-2">inteligente.</span>
           </motion.h1>
 
           <motion.p
-            className="text-center text-lg sm:text-xl max-w-[640px] mx-auto mb-10 font-medium"
-            style={{ color: "#374151", lineHeight: 1.6 }}
+            className="text-center text-base sm:text-lg max-w-[620px] mx-auto mb-10 font-medium px-6"
+            style={{ color: "#4B5563", lineHeight: 1.55 }}
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            Gerencie sua adega com inteligência — do controle pessoal à operação profissional, com{" "}
-            <span className="font-bold" style={{ color: "#0F0F14" }}>insights que realmente fazem a diferença</span>.
+            Gerencie sua adega com perfeição técnica. Do controle pessoal à operação profissional, com{" "}
+            <span className="font-bold inline-block" style={{ color: "#0F0F14" }}>insights que realmente valorizam seu negócio.</span>
           </motion.p>
 
           {/* CTAs */}
-          <motion.div className="flex flex-col sm:flex-row gap-4 justify-center items-center" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
-              <Button
-                className="w-full sm:w-auto text-[15px] px-10 h-[56px] font-semibold text-white border-0 rounded-[14px] group"
-                onClick={() => navigate("/signup")}
-                style={{
-                  background: "linear-gradient(135deg, #8C2044 0%, #C44569 100%)",
-                  boxShadow: "0 10px 25px rgba(140,32,68,0.2)",
-                  transition: "all 250ms ease",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 14px 35px rgba(140,32,68,0.3)"; }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 10px 25px rgba(140,32,68,0.2)"; }}
-              >
-                <span className="flex items-center gap-2">
-                  Começar Gratuitamente <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-200" />
-                </span>
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
-              <button
-                className="w-full sm:w-auto text-[14px] px-8 h-[56px] font-semibold rounded-[14px] transition-all duration-200"
-                style={{
-                  color: "#4B5563",
-                  border: "1.5px solid rgba(140,32,68,0.15)",
-                  background: "rgba(255,255,255,0.8)",
-                  backdropFilter: "blur(8px)",
-                }}
-                onClick={() => navigate("/login")}
-                onMouseEnter={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.borderColor = "rgba(140,32,68,0.3)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "rgba(140,32,68,0.15)"; }}
-              >
-                Já tenho conta →
-              </button>
-            </motion.div>
+          <motion.div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-6" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+            <Button
+              variant="premium"
+              size="lg"
+              className="w-full sm:w-auto h-14 min-w-[220px] text-base font-bold group"
+              onClick={() => navigate("/signup")}
+            >
+              Começar Gratuitamente <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto h-14 min-w-[200px] text-sm font-bold bg-white/50 backdrop-blur-md"
+              onClick={() => navigate("/login")}
+            >
+              Já tenho conta →
+            </Button>
           </motion.div>
         </div>
       </section>

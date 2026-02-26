@@ -6,91 +6,97 @@
 
 @layer base {
   :root {
-    /* ── Sommelyx Light Theme (SaaS Premium) ── */
-    --background: 240 5% 97%;
-    --foreground: 240 10% 6%;
+    /* ── Sommelyx Light Theme (Luxury SaaS) ── */
+    --background: 240 6% 98%;
+    --foreground: 240 10% 4%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 6%;
+    --card-foreground: 240 10% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 6%;
+    --popover-foreground: 240 10% 4%;
 
-    /* Primary — Sommelyx wine gradient anchors */
-    --primary: 340 52% 37%;
+    /* Primary — Premium Wine & Gold Palette */
+    --primary: 340 54% 36%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 4% 94%;
-    --secondary-foreground: 240 6% 30%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 6% 28%;
 
-    --muted: 240 4% 92%;
-    --muted-foreground: 220 6% 42%;
+    --muted: 240 5% 92%;
+    --muted-foreground: 220 8% 46%;
 
-    --accent: 16 65% 55%;
+    --accent: 18 68% 58%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 65% 50%;
+    /* Semantic States — Refined/Clean */
+    --success: 142 66% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
 
-    --border: 220 8% 90%;
-    --input: 220 8% 90%;
-    --ring: 340 52% 37%;
+    --border: 220 10% 91%;
+    --input: 220 10% 91%;
+    --ring: 340 54% 36%;
 
-    --radius: 0.625rem;
+    --radius: 1rem;
 
-    /* Sidebar — subtle off-white */
-    --sidebar-background: 240 5% 97%;
-    --sidebar-foreground: 240 6% 30%;
-    --sidebar-primary: 340 52% 37%;
+    /* Sidebar */
+    --sidebar-background: 240 8% 99%;
+    --sidebar-foreground: 240 6% 32%;
+    --sidebar-primary: 340 54% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4% 93%;
-    --sidebar-accent-foreground: 240 10% 10%;
-    --sidebar-border: 220 8% 90%;
-    --sidebar-ring: 340 52% 37%;
-
-    /* Brand tokens */
-    --wine: 340 52% 37%;
-    --wine-foreground: 0 0% 100%;
-    --wine-light: 345 45% 55%;
-    --wine-vivid: 340 60% 42%;
-    --gold: 37 34% 55%;
-    --gold-light: 37 40% 68%;
-    --gold-foreground: 340 18% 8%;
-    --cream: 30 15% 96%;
-    --cream-dark: 30 8% 88%;
-
-    --glow-wine: 340 60% 45%;
-    --glow-gold: 37 45% 45%;
+    --sidebar-accent: 240 5% 95%;
+    --sidebar-accent-foreground: 240 10% 8%;
+    --sidebar-border: 220 10% 91%;
+    --sidebar-ring: 340 54% 36%;
   }
 
   .dark {
-    --background: 240 10% 5%;
-    --foreground: 220 10% 95%;
-    --card: 240 8% 9%;
-    --card-foreground: 220 10% 95%;
-    --popover: 240 8% 10%;
-    --popover-foreground: 220 10% 95%;
-    --primary: 340 52% 50%;
+    /* ── Sommelyx Dark Theme (Deep Charcoal Premium) ── */
+    --background: 240 10% 3.5%;
+    --foreground: 220 10% 96%;
+
+    --card: 240 10% 5%;
+    --card-foreground: 220 10% 96%;
+
+    --popover: 240 10% 6%;
+    --popover-foreground: 220 10% 96%;
+
+    --primary: 340 54% 52%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 6% 12%;
-    --secondary-foreground: 220 10% 80%;
-    --muted: 240 6% 14%;
-    --muted-foreground: 220 6% 55%;
-    --accent: 16 65% 55%;
+
+    --secondary: 240 8% 9%;
+    --secondary-foreground: 220 10% 82%;
+
+    --muted: 240 8% 10%;
+    --muted-foreground: 220 8% 58%;
+
+    --accent: 18 68% 58%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 65% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 240 6% 16%;
-    --input: 240 6% 14%;
-    --ring: 340 52% 50%;
-    --sidebar-background: 240 8% 7%;
-    --sidebar-foreground: 220 8% 75%;
-    --sidebar-primary: 340 52% 50%;
+
+    /* Dark Semantic */
+    --success: 142 66% 45%;
+    --warning: 38 92% 55%;
+    --destructive: 0 72% 55%;
+    --info: 199 89% 55%;
+
+    --border: 240 8% 10%;
+    --input: 240 8% 10%;
+    --ring: 340 54% 52%;
+
+    --sidebar-background: 240 10% 3.5%;
+    --sidebar-foreground: 220 8% 78%;
+    --sidebar-primary: 340 54% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 6% 13%;
-    --sidebar-accent-foreground: 220 10% 90%;
-    --sidebar-border: 240 6% 14%;
-    --sidebar-ring: 340 52% 50%;
+    --sidebar-accent: 240 8% 8%;
+    --sidebar-accent-foreground: 220 12% 92%;
+    --sidebar-border: 240 8% 10%;
+    --sidebar-ring: 340 54% 52%;
   }
 }
 
@@ -102,39 +108,53 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
-    letter-spacing: -0.011em;
-    line-height: 1.7;
+    letter-spacing: -0.015em;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
   h2,
-  h3 {
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Playfair Display', serif;
-    letter-spacing: -0.025em;
-    line-height: 1.1;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
   }
 }
 
 @layer utilities {
 
-  /* ── Premium Glass Card ── */
+  /* ── Ultra Premium Glass Card ── */
   .glass-card {
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.82);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.85);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     background-blend-mode: soft-light;
-    backdrop-filter: blur(28px) saturate(1.4);
-    border: 1px solid rgba(140, 32, 68, 0.1);
+    backdrop-filter: blur(32px) saturate(1.8);
+    border: 1px solid rgba(140, 32, 68, 0.08);
     box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.02),
-      0 10px 15px -3px rgba(0, 0, 0, 0.03),
-      0 20px 48px -12px rgba(140, 32, 68, 0.12),
-      0 0 0 1px rgba(255, 255, 255, 0.4) inset;
-    transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+      0 1px 2px rgba(0, 0, 0, 0.01),
+      0 8px 16px -4px rgba(0, 0, 0, 0.03),
+      0 24px 64px -12px rgba(140, 32, 68, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
+  }
+
+  .dark .glass-card {
+    background: rgba(13, 13, 15, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      0 24px 64px -12px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    background-blend-mode: overlay;
+    backdrop-filter: blur(40px) saturate(1.4);
   }
 
   .glass-card::before {
@@ -143,152 +163,57 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 1.5px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.7), transparent);
     z-index: 10;
+    opacity: 0.8;
   }
 
   .glass-card:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 10px 15px -3px rgba(0, 0, 0, 0.04),
-      0 24px 64px -16px rgba(140, 32, 68, 0.18),
-      0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-    border-color: rgba(140, 32, 68, 0.16);
+      0 28px 72px -16px rgba(140, 32, 68, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    border-color: rgba(140, 32, 68, 0.15);
   }
 
-  /* ── Gradients ── */
+  /* ── Premium Gradients ── */
   .gradient-wine {
-    background: linear-gradient(135deg, #8C2044 0%, #C44569 55%, #D6A46B 120%);
+    /* Wine -> Rose -> Subtle Gold hint */
+    background: linear-gradient(135deg, #8C2044 0%, #C44569 50%, #D4AF37 140%);
     position: relative;
   }
 
   .gradient-wine::after {
     content: '';
     position: absolute;
-    top: 1px;
-    left: 1px;
-    right: 1px;
-    height: 35%;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), transparent);
+    top: 1.5px;
+    left: 1.5px;
+    right: 1.5px;
+    height: 40%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
     border-radius: inherit;
     pointer-events: none;
   }
 
-  /* ── Button interactions ── */
-  .btn-glow {
-    @apply transition-all duration-200 ease-out;
-    position: relative;
-    box-shadow: 0 4px 12px rgba(140, 32, 68, 0.15);
-  }
-
-  .btn-glow:hover {
-    box-shadow: 0 12px 28px rgba(140, 32, 68, 0.25), 0 4px 10px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-    filter: brightness(1.04);
-  }
-
-  .btn-glow:active {
-    transform: translateY(1px) scale(0.98);
-    box-shadow: 0 4px 10px rgba(140, 32, 68, 0.2);
-    filter: brightness(0.96);
-  }
-
-  .btn-secondary-glass {
-    @apply backdrop-blur-md transition-all duration-200;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    color: #6B7280;
-  }
-
-  .btn-secondary-glass:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #111827;
-    transform: translateY(-1px);
-  }
-
-  .btn-gold-glow {
-    @apply transition-all duration-200 ease-out;
-  }
-
-  .btn-gold-glow:hover {
-    box-shadow: 0 0 16px hsl(var(--glow-gold) / 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-    filter: brightness(1.06);
-  }
-
-  /* ── Patterns ── */
-  .grid-pattern {
-    background-image:
-      linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-    background-size: 64px 64px;
-  }
-
-  .dot-pattern {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-
-  .noise {
-    position: relative;
-  }
-
-  .noise::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.02;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  /* ── Typography ── */
-  .highlight-word {
-    position: relative;
-    display: inline-block;
-  }
-
-  .highlight-word::after {
-    content: '';
-    position: absolute;
-    bottom: 0.05em;
-    left: -0.05em;
-    right: -0.05em;
-    height: 0.35em;
-    background: rgba(143, 45, 86, 0.15);
-    border-radius: 2px;
-    z-index: -1;
-  }
-
-  .underline-organic {
-    position: relative;
-    display: inline-block;
-  }
-
-  .underline-organic::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
-    border-radius: 2px;
-    opacity: 0.7;
-  }
-
-  /* ── Premium skeleton ── */
-  .skeleton-premium {
-    @apply rounded-lg;
-    background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(220 6% 96%) 50%, hsl(var(--muted)) 100%);
+  /* ── Shimmer / Skeleton Animation ── */
+  .shimmer-premium {
+    background: linear-gradient(90deg,
+        rgba(0, 0, 0, 0.03) 0%,
+        rgba(0, 0, 0, 0.06) 50%,
+        rgba(0, 0, 0, 0.03) 100%);
     background-size: 200% 100%;
-    animation: shimmer 2s ease-in-out infinite;
+    animation: shimmer-anim 1.4s infinite ease-in-out;
   }
 
-  @keyframes shimmer {
+  .dark .shimmer-premium {
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.02) 100%);
+  }
+
+  @keyframes shimmer-anim {
     0% {
       background-position: 200% 0;
     }
@@ -298,50 +223,31 @@
     }
   }
 
-  /* ── Nav Link Premium ── */
-  .nav-link-premium {
-    position: relative;
-    transition: color 0.25s ease;
-    cursor: pointer;
+  /* ── Interactive Focus ── */
+  .no-focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(140, 32, 68, 0.12), 0 0 0 1px #8C2044;
   }
 
-  .nav-link-premium::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #8F2D56, #C44569);
-    border-radius: 1px;
-    transform: scaleX(0);
-    transform-origin: center;
-    transition: transform 0.25s ease;
+  /* ── Typography Gradients ── */
+  .text-gradient-wine {
+    background: linear-gradient(135deg, #8C2044 10%, #C44569 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .nav-link-premium:hover {
-    color: #8F2D56 !important;
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #D1B27A 10%, #B69255 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .nav-link-premium:hover::after {
-    transform: scaleX(1);
+  /* ── Shadows ── */
+  .shadow-premium {
+    box-shadow: 0 12px 32px -8px rgba(140, 32, 68, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.04);
   }
 
-  /* ── CTA Primary Button ── */
-  .cta-primary-btn {
-    background: linear-gradient(135deg, #8F2D56, #C44569);
-    box-shadow: 0 10px 24px rgba(143, 45, 86, 0.25);
-    transition: all 0.25s ease;
-  }
-
-  .cta-primary-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 32px rgba(143, 45, 86, 0.32);
-    filter: brightness(1.05);
-  }
-
-  .cta-primary-btn:active {
-    transform: translateY(0px) scale(0.98);
-    box-shadow: 0 6px 16px rgba(143, 45, 86, 0.2);
+  .shadow-float {
+    box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.12), 0 8px 16px -8px rgba(0, 0, 0, 0.04);
   }
 }
