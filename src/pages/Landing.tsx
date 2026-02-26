@@ -42,7 +42,7 @@ const plans = [
     period: "/mês",
     desc: "Para colecionadores sérios",
     features: ["Garrafas ilimitadas", "Analytics avançado", "Wishlist & harmonização", "Alertas inteligentes", "Exportação CSV"],
-    cta: "Iniciar Trial Grátis",
+    cta: "Iniciar teste grátis por 7 dias",
     highlighted: true,
   },
   {
@@ -51,7 +51,7 @@ const plans = [
     period: "/mês",
     desc: "Para operações comerciais",
     features: ["Tudo do Pro", "Multiusuário (até 10)", "Gestão de vendas", "Relatórios financeiros", "Cadastro de clientes", "Suporte prioritário"],
-    cta: "Falar com Vendas",
+    cta: "Iniciar teste grátis por 7 dias",
     highlighted: false,
   },
 ];
@@ -231,7 +231,7 @@ export default function Landing() {
       </motion.nav>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-32 pb-12 px-4 flex flex-col justify-center" style={{ minHeight: "72vh" }}>
+      <section className="relative pt-32 pb-4 px-4 flex flex-col justify-center" style={{ minHeight: "72vh" }}>
         {/* Ambient radial gradients */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 30%, rgba(143,45,86,0.08), transparent 70%)" }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 80% 50%, rgba(224,122,95,0.04), transparent 60%)" }} />
@@ -304,9 +304,9 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 2. FEATURES ═══════════════ */}
-      <section id="features" className="relative py-20 px-4">
+      <section id="features" className="relative py-8 px-4">
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="mb-12 text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+          <motion.div className="mb-8 text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block" style={{ color: "#8C2044" }}>
               Funcionalidades
             </span>
@@ -357,8 +357,8 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 3. DASHBOARD MOCKUP ═══════════════ */}
-      <section className="relative py-20 px-4 overflow-hidden">
-        <div className="container mx-auto max-w-[1200px] mt-20 relative">
+      <section className="relative py-8 px-4 overflow-hidden">
+        <div className="container mx-auto max-w-[1200px] mt-4 relative">
           {/* Glass backdrop behind */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] pointer-events-none opacity-20"
             style={{
@@ -375,7 +375,7 @@ export default function Landing() {
 
       {/* ═══════════════ 4. STATS ═══════════════ */}
       <section
-        className="relative z-10 py-12"
+        className="relative z-10 py-6"
         style={{ borderTop: "1px solid rgba(0,0,0,0.05)", borderBottom: "1px solid rgba(0,0,0,0.05)", background: "rgba(255,255,255,0.4)" }}
       >
         <div className="container mx-auto max-w-5xl">
@@ -401,9 +401,9 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 5. PRICING ═══════════════ */}
-      <section id="pricing" className="relative py-32 px-4">
+      <section id="pricing" className="relative py-12 px-4">
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="mb-16 text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+          <motion.div className="mb-10 text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block" style={{ color: "#8C2044" }}>Planos</span>
             <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight mx-auto" style={{ lineHeight: "1.1", color: "#0F0F14" }}>
               Escolha o plano ideal
