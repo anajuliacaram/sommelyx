@@ -1,11 +1,10 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, MapPin, X, Bookmark, BookmarkCheck, ChevronDown } from "lucide-react";
-import { RangeSliderFilter } from "@/components/RangeSliderFilter";
+import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, MapPin, X, Bookmark, BookmarkCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RangeSliderFilter } from "@/components/RangeSliderFilter";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -59,60 +58,58 @@ const defaultSavedFilters: SavedFilter[] = [
   { name: "Baixo estoque", styles: [], countries: [], grapes: [], drinkWindows: [], lowStock: true },
 ];
 
-// Multi-select chip dropdown component
-function MultiSelectFilter({ label, options, selected, onToggle }: {
-  label: string;
+// Premium tag chip component
+function TagChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        h-8 px-3.5 rounded-full text-[11px] font-semibold
+        transition-all duration-200 ease-out
+        hover:scale-[1.04] active:scale-[0.97]
+        ${active
+          ? "text-white shadow-[0_2px_12px_rgba(143,45,86,0.35)]"
+          : "bg-card/80 backdrop-blur-sm text-muted-foreground border border-border/50 hover:border-primary/30 hover:text-foreground"
+        }
+      `}
+      style={active ? {
+        background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)",
+      } : undefined}
+    >
+      {label}
+    </button>
+  );
+}
+
+// Expandable tag section with label
+function TagSection({ title, options, selected, onToggle, maxVisible = 6 }: {
+  title: string;
   options: { value: string; label: string }[];
   selected: string[];
   onToggle: (value: string) => void;
+  maxVisible?: number;
 }) {
-  const isActive = selected.length > 0;
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? options : options.slice(0, maxVisible);
+  const hasMore = options.length > maxVisible;
+
+  if (options.length === 0) return null;
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">{title}</span>
+      {visible.map(opt => (
+        <TagChip key={opt.value} label={opt.label} active={selected.includes(opt.value)} onClick={() => onToggle(opt.value)} />
+      ))}
+      {hasMore && (
         <button
-          className="h-8 px-3 rounded-full text-[11px] font-medium transition-all duration-200 flex items-center gap-1.5"
-          style={{
-            background: isActive ? "#8F2D56" : "rgba(0,0,0,0.03)",
-            color: isActive ? "white" : "#6B7280",
-            border: `1px solid ${isActive ? "#8F2D56" : "rgba(0,0,0,0.06)"}`,
-          }}
+          onClick={() => setExpanded(!expanded)}
+          className="h-7 px-2.5 rounded-full text-[10px] font-medium text-primary hover:bg-primary/5 transition-colors"
         >
-          {label}
-          {isActive && (
-            <span className="w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center" style={{ background: "rgba(255,255,255,0.25)" }}>
-              {selected.length}
-            </span>
-          )}
-          <ChevronDown className="h-3 w-3 ml-0.5" />
+          {expanded ? "Ver menos" : `+${options.length - maxVisible}`}
         </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-48 p-2 z-50 bg-card border border-border shadow-lg rounded-xl" align="start" sideOffset={6}>
-        <div className="space-y-0.5 max-h-56 overflow-y-auto">
-          {options.map(opt => {
-            const active = selected.includes(opt.value);
-            return (
-              <button
-                key={opt.value}
-                onClick={() => onToggle(opt.value)}
-                className="w-full text-left px-3 py-2 rounded-lg text-[12px] font-medium flex items-center justify-between transition-colors hover:bg-muted/50"
-                style={{ color: active ? "#8F2D56" : "#374151" }}
-              >
-                <span>{opt.label}</span>
-                {active && (
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#8F2D56" }}>
-                    <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </span>
-                )}
-              </button>
-            );
-          })}
-          {options.length === 0 && (
-            <p className="text-[11px] text-muted-foreground text-center py-3">Nenhuma opção</p>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 }
 
@@ -321,47 +318,44 @@ export default function CellarPage() {
         </div>
       </div>
 
-      {/* Multi-select filter dropdowns */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <MultiSelectFilter
-          label="Estilo"
+      {/* Tag-based filters */}
+      <div className="space-y-2.5">
+        <TagSection
+          title="Estilo"
           options={styleOptions}
           selected={selectedStyles}
           onToggle={v => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
         />
-        {dynamicOptions.countries.length > 0 && (
-          <MultiSelectFilter
-            label="País"
-            options={dynamicOptions.countries}
-            selected={selectedCountries}
-            onToggle={v => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-          />
-        )}
-        {dynamicOptions.grapes.length > 0 && (
-          <MultiSelectFilter
-            label="Uva"
-            options={dynamicOptions.grapes}
-            selected={selectedGrapes}
-            onToggle={v => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-          />
-        )}
-        <MultiSelectFilter
-          label="Janela"
-          options={drinkWindowOptions}
-          selected={selectedDrinkWindows}
-          onToggle={v => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+        <TagSection
+          title="País"
+          options={dynamicOptions.countries}
+          selected={selectedCountries}
+          onToggle={v => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+          maxVisible={8}
         />
-        <button
-          onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
-          className="h-8 px-3.5 rounded-full text-[11px] font-medium transition-all duration-200"
-          style={{
-            background: lowStock ? "#E07A5F" : "rgba(0,0,0,0.03)",
-            color: lowStock ? "white" : "#6B7280",
-            border: `1px solid ${lowStock ? "transparent" : "rgba(0,0,0,0.06)"}`,
-          }}
-        >
-          Baixo estoque
-        </button>
+        <TagSection
+          title="Uva"
+          options={dynamicOptions.grapes}
+          selected={selectedGrapes}
+          onToggle={v => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+          maxVisible={8}
+        />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">Janela</span>
+          {drinkWindowOptions.map(opt => (
+            <TagChip
+              key={opt.value}
+              label={opt.label}
+              active={selectedDrinkWindows.includes(opt.value)}
+              onClick={() => { setSelectedDrinkWindows(prev => toggleInArray(prev, opt.value)); setActiveSavedFilter(null); }}
+            />
+          ))}
+          <TagChip
+            label="Baixo estoque"
+            active={lowStock}
+            onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
+          />
+        </div>
       </div>
 
       {/* Range Sliders: Safra & Preço */}
