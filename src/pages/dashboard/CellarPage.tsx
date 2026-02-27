@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, MapPin, X, Bookmark, BookmarkCheck, ChevronDown } from "lucide-react";
+import { RangeSliderFilter } from "@/components/RangeSliderFilter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,15 +49,14 @@ interface SavedFilter {
   styles: string[];
   countries: string[];
   grapes: string[];
-  vintages: string[];
   drinkWindows: string[];
   lowStock: boolean;
 }
 
 const defaultSavedFilters: SavedFilter[] = [
-  { name: "Tintos para beber agora", styles: ["tinto"], countries: [], grapes: [], vintages: [], drinkWindows: ["now"], lowStock: false },
-  { name: "Espumantes", styles: ["espumante"], countries: [], grapes: [], vintages: [], drinkWindows: [], lowStock: false },
-  { name: "Baixo estoque", styles: [], countries: [], grapes: [], vintages: [], drinkWindows: [], lowStock: true },
+  { name: "Tintos para beber agora", styles: ["tinto"], countries: [], grapes: [], drinkWindows: ["now"], lowStock: false },
+  { name: "Espumantes", styles: ["espumante"], countries: [], grapes: [], drinkWindows: [], lowStock: false },
+  { name: "Baixo estoque", styles: [], countries: [], grapes: [], drinkWindows: [], lowStock: true },
 ];
 
 // Multi-select chip dropdown component
@@ -130,9 +130,10 @@ export default function CellarPage() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedGrapes, setSelectedGrapes] = useState<string[]>([]);
-  const [selectedVintages, setSelectedVintages] = useState<string[]>([]);
   const [selectedDrinkWindows, setSelectedDrinkWindows] = useState<string[]>([]);
   const [lowStock, setLowStock] = useState(false);
+  const [vintageRange, setVintageRange] = useState<[number, number]>([1980, currentYear]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -142,18 +143,21 @@ export default function CellarPage() {
 
   // Derive dynamic filter options from wine data
   const dynamicOptions = useMemo(() => {
-    if (!wines) return { countries: [], grapes: [], vintages: [] };
+    if (!wines) return { countries: [], grapes: [], maxPrice: 5000, minVintage: 1980, maxVintage: currentYear };
     const countries = [...new Set(wines.map(w => w.country).filter(Boolean) as string[])].sort().map(v => ({ value: v, label: v }));
     const grapes = [...new Set(wines.map(w => w.grape).filter(Boolean) as string[])].sort().map(v => ({ value: v, label: v }));
-    const vintages = [...new Set(wines.map(w => w.vintage).filter(Boolean) as number[])].sort((a, b) => b - a).map(v => ({ value: String(v), label: String(v) }));
-    return { countries, grapes, vintages };
+    const prices = wines.map(w => w.purchase_price ?? 0).filter(p => p > 0);
+    const maxPrice = prices.length > 0 ? Math.ceil(Math.max(...prices) / 100) * 100 : 5000;
+    const vintages = wines.map(w => w.vintage).filter(Boolean) as number[];
+    const minVintage = vintages.length > 0 ? Math.min(...vintages) : 1980;
+    const maxVintage = vintages.length > 0 ? Math.max(...vintages) : currentYear;
+    return { countries, grapes, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
   }, [wines]);
 
   const applySavedFilter = (f: SavedFilter) => {
     setSelectedStyles(f.styles);
     setSelectedCountries(f.countries);
     setSelectedGrapes(f.grapes);
-    setSelectedVintages(f.vintages);
     setSelectedDrinkWindows(f.drinkWindows);
     setLowStock(f.lowStock);
     setActiveSavedFilter(f.name);
@@ -163,14 +167,17 @@ export default function CellarPage() {
     setSelectedStyles([]);
     setSelectedCountries([]);
     setSelectedGrapes([]);
-    setSelectedVintages([]);
     setSelectedDrinkWindows([]);
     setLowStock(false);
+    setVintageRange([dynamicOptions.minVintage, dynamicOptions.maxVintage]);
+    setPriceRange([0, dynamicOptions.maxPrice]);
     setActiveSavedFilter(null);
     setSearch("");
   };
 
-  const activeFilterCount = selectedStyles.length + selectedCountries.length + selectedGrapes.length + selectedVintages.length + selectedDrinkWindows.length + (lowStock ? 1 : 0);
+  const vintageActive = vintageRange[0] !== dynamicOptions.minVintage || vintageRange[1] !== dynamicOptions.maxVintage;
+  const priceActive = priceRange[0] !== 0 || priceRange[1] !== dynamicOptions.maxPrice;
+  const activeFilterCount = selectedStyles.length + selectedCountries.length + selectedGrapes.length + selectedDrinkWindows.length + (lowStock ? 1 : 0) + (vintageActive ? 1 : 0) + (priceActive ? 1 : 0);
   const hasActiveFilters = activeFilterCount > 0 || !!search;
 
   const filtered = useMemo(() => {
@@ -188,7 +195,11 @@ export default function CellarPage() {
     if (selectedStyles.length > 0) list = list.filter(w => w.style && selectedStyles.includes(w.style));
     if (selectedCountries.length > 0) list = list.filter(w => w.country && selectedCountries.includes(w.country));
     if (selectedGrapes.length > 0) list = list.filter(w => w.grape && selectedGrapes.includes(w.grape));
-    if (selectedVintages.length > 0) list = list.filter(w => w.vintage && selectedVintages.includes(String(w.vintage)));
+    if (vintageActive) list = list.filter(w => w.vintage && w.vintage >= vintageRange[0] && w.vintage <= vintageRange[1]);
+    if (priceActive) list = list.filter(w => {
+      const price = w.purchase_price ?? 0;
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
     if (selectedDrinkWindows.length > 0) list = list.filter(w => {
       const s = drinkStatus(w);
       return s && selectedDrinkWindows.includes(s);
@@ -207,7 +218,7 @@ export default function CellarPage() {
       return 0;
     });
     return list;
-  }, [wines, search, sortBy, selectedStyles, selectedCountries, selectedGrapes, selectedVintages, selectedDrinkWindows, lowStock]);
+  }, [wines, search, sortBy, selectedStyles, selectedCountries, selectedGrapes, vintageRange, priceRange, selectedDrinkWindows, lowStock, vintageActive, priceActive]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -241,9 +252,12 @@ export default function CellarPage() {
   selectedGrapes.forEach(g => {
     activeChips.push({ label: g, onRemove: () => setSelectedGrapes(prev => prev.filter(v => v !== g)) });
   });
-  selectedVintages.forEach(v => {
-    activeChips.push({ label: v, onRemove: () => setSelectedVintages(prev => prev.filter(x => x !== v)) });
-  });
+  if (vintageActive) {
+    activeChips.push({ label: `Safra ${vintageRange[0]}–${vintageRange[1]}`, onRemove: () => setVintageRange([dynamicOptions.minVintage, dynamicOptions.maxVintage]) });
+  }
+  if (priceActive) {
+    activeChips.push({ label: `R$ ${priceRange[0]}–${priceRange[1]}`, onRemove: () => setPriceRange([0, dynamicOptions.maxPrice]) });
+  }
   selectedDrinkWindows.forEach(dw => {
     const opt = drinkWindowOptions.find(o => o.value === dw);
     activeChips.push({ label: opt?.label || dw, onRemove: () => setSelectedDrinkWindows(prev => prev.filter(v => v !== dw)) });
@@ -331,14 +345,6 @@ export default function CellarPage() {
             onToggle={v => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
           />
         )}
-        {dynamicOptions.vintages.length > 0 && (
-          <MultiSelectFilter
-            label="Safra"
-            options={dynamicOptions.vintages}
-            selected={selectedVintages}
-            onToggle={v => { setSelectedVintages(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-          />
-        )}
         <MultiSelectFilter
           label="Janela"
           options={drinkWindowOptions}
@@ -356,6 +362,27 @@ export default function CellarPage() {
         >
           Baixo estoque
         </button>
+      </div>
+
+      {/* Range Sliders: Safra & Preço */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 glass-card p-4">
+        <RangeSliderFilter
+          label="Safra"
+          min={dynamicOptions.minVintage}
+          max={dynamicOptions.maxVintage}
+          step={1}
+          value={vintageRange}
+          onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }}
+        />
+        <RangeSliderFilter
+          label="Preço"
+          min={0}
+          max={dynamicOptions.maxPrice}
+          step={10}
+          value={priceRange}
+          onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }}
+          formatValue={v => `R$ ${v}`}
+        />
       </div>
 
       {/* Active filter chips summary */}
