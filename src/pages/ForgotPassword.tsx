@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { supabase } from "@/integrations/supabase/client";
+import { analytics } from "@/lib/analytics";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -24,6 +25,7 @@ export default function ForgotPassword() {
         redirectTo: `${appUrl}/reset-password`,
       });
       if (error) throw error;
+      analytics.track("forgot_password_request_sent");
       setSent(true);
     } catch (err: any) {
       setError(err.message || "Erro ao enviar e-mail de recuperação.");

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { analytics } from "@/lib/analytics";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -49,6 +50,7 @@ export default function Login() {
     setLoading(true);
     try {
       await signIn(email, password);
+      analytics.track("login_success");
     } catch (err: any) {
       const msg =
         err.message === "Invalid login credentials"

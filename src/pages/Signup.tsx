@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { analytics } from "@/lib/analytics";
 
 export default function Signup() {
   const [fullName, setFullName] = useState("");
@@ -35,8 +36,11 @@ export default function Signup() {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
+    analytics.track("signup_started");
+
     try {
       await signUp(email, password, fullName);
+      analytics.track("signup_success");
       setConfirmationEmail(email);
       setAwaitingEmailConfirmation(true);
       toast({

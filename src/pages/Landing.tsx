@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, ShieldCheck, BarChart4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { analytics } from "@/lib/analytics";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 } as const,
@@ -157,7 +159,7 @@ function HeroComposition() {
 
           <div className="relative z-10 mt-7 flex flex-col gap-4 sm:flex-row" style={{ transform: "translateZ(18px)" }}>
             <Button
-              onClick={() => navigate("/signup")}
+              onClick={handleStartFreeClick}
               className="group relative h-[54px] flex-1 overflow-hidden rounded-2xl border border-white/25 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_34px_rgba(122,35,72,0.42)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(122,35,72,0.48)]"
               style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
             >
@@ -178,6 +180,20 @@ function HeroComposition() {
 
 export default function Landing() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    analytics.trackOncePerSession("landing_page_view", "landing");
+  }, []);
+
+  const handleStartFreeClick = () => {
+    analytics.track("landing_cta_start_free_click");
+    navigate("/signup");
+  };
+
+  const handleLoginClick = () => {
+    analytics.track("landing_cta_login_click");
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen overflow-hidden premium-noise selection:bg-[#8F2D56]/20 selection:text-[#0F0F14] bg-[radial-gradient(circle_at_12%_-8%,rgba(173,69,104,0.18),transparent_40%),radial-gradient(circle_at_82%_6%,rgba(255,255,255,0.85),transparent_35%),#f6f3f5] text-[#0F0F14]">
@@ -205,7 +221,7 @@ export default function Landing() {
               <Button
                 variant="ghost"
                 className="inline-flex h-11 sm:h-12 rounded-full px-6 sm:px-7 text-[14px] sm:text-[14.5px] font-semibold text-white bg-gradient-to-br from-[#6F1D42] to-[#A93462] shadow-[0_10px_24px_-14px_rgba(140,32,68,0.5)] transition-all duration-300 hover:from-[#7D2450] hover:to-[#BA3F6E] hover:shadow-[0_14px_28px_-16px_rgba(140,32,68,0.55)]"
-                onClick={() => navigate("/login")}
+                onClick={handleLoginClick}
               >
                 Entrar
               </Button>
@@ -213,7 +229,7 @@ export default function Landing() {
             <MagneticButton>
               <Button
                 className="px-6 sm:px-9 h-11 sm:h-12 text-[13px] sm:text-[13.5px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
-                onClick={() => navigate("/signup")}
+                onClick={handleStartFreeClick}
               >
                 Começar Grátis
               </Button>
@@ -266,7 +282,7 @@ export default function Landing() {
                   <Button
                     className="group relative isolate w-full sm:w-auto px-14 h-[68px] text-[14px] font-black uppercase tracking-[0.16em] rounded-[20px] transition-all text-white hover:-translate-y-1.5 shadow-[0_18px_40px_rgba(122,35,72,0.44)] hover:shadow-[0_24px_52px_rgba(122,35,72,0.52)] border border-white/25"
                     style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
-                    onClick={() => navigate("/signup")}
+                    onClick={handleStartFreeClick}
                   >
                     <span className="pointer-events-none absolute inset-[1px] rounded-[18px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
                     <span className="pointer-events-none absolute -inset-x-5 top-1/2 h-12 -translate-y-1/2 bg-white/20 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -420,7 +436,7 @@ export default function Landing() {
                     ? "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_16px_36px_rgba(20,8,14,0.3)] hover:shadow-[0_20px_38px_rgba(20,8,14,0.35)] hover:-translate-y-0.5"
                     : "bg-[#FAFAFA] text-[#18181B] hover:bg-white shadow-[0_8px_16px_rgba(15,15,20,0.06)] hover:shadow-[0_12px_24px_rgba(15,15,20,0.1)] border border-black/10"
                     }`}
-                  onClick={() => navigate("/signup")}
+                  onClick={handleStartFreeClick}
                 >
                   {plan.cta}
                 </Button>
@@ -466,7 +482,7 @@ export default function Landing() {
           <div className="flex items-center gap-8 text-[13px] font-bold uppercase tracking-widest text-[#6B7280]">
             <a href="#features" className="hover:text-[#0F0F14] transition-colors">Funcionalidades</a>
             <a href="#pricing" className="hover:text-[#0F0F14] transition-colors">Planos</a>
-            <button onClick={() => navigate("/login")} className="hover:text-[#0F0F14] transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest">Acesso Privado</button>
+            <button onClick={handleLoginClick} className="hover:text-[#0F0F14] transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest">Acesso Privado</button>
           </div>
           <p className="text-[13px] font-medium text-[#9CA3AF]">
             © {new Date().getFullYear()} Sommelyx. Inteligência em cada taça.
