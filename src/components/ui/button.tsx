@@ -5,18 +5,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
   {
     variants: {
       variant: {
-        default: "bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-sm hover:-translate-y-px hover:shadow-md active:scale-[0.97] active:shadow-sm font-semibold tracking-[-0.01em]",
+        default: "bg-foreground text-background hover:bg-foreground/92 rounded-2xl shadow-[0_8px_18px_-12px_rgba(15,15,20,0.5)] hover:-translate-y-px hover:shadow-[0_14px_30px_-14px_rgba(15,15,20,0.55)] active:scale-[0.98] active:shadow-sm font-semibold tracking-[-0.01em]",
         destructive: "bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground rounded-full active:scale-[0.97]",
-        outline: "border border-border/60 bg-background/60 backdrop-blur-sm hover:bg-background hover:border-primary/25 text-foreground rounded-full hover:-translate-y-px shadow-sm hover:shadow-md active:scale-[0.97] font-medium",
+        outline: "border border-border/70 bg-background/80 backdrop-blur-sm hover:bg-background hover:border-primary/25 text-foreground rounded-2xl hover:-translate-y-px shadow-[0_3px_10px_-8px_rgba(15,15,20,0.35)] hover:shadow-[0_10px_24px_-16px_rgba(15,15,20,0.4)] active:scale-[0.98] font-medium",
         secondary: "bg-primary/8 text-primary hover:bg-primary/14 rounded-full font-bold uppercase tracking-wider text-[11px] backdrop-blur-sm active:scale-[0.97]",
-        ghost: "hover:bg-primary/5 hover:text-primary text-muted-foreground rounded-full font-medium active:scale-[0.97]",
+        ghost: "hover:bg-primary/6 hover:text-primary text-muted-foreground rounded-2xl font-medium active:scale-[0.98]",
         link: "text-primary underline-offset-4 hover:underline",
-        premium: "btn-premium text-white rounded-full border-0 font-semibold tracking-[-0.01em] shadow-float active:scale-[0.97] active:shadow-sm",
-        glass: "btn-glass rounded-full px-6 font-medium backdrop-blur-xl active:scale-[0.97]",
+        premium: "btn-premium text-white rounded-2xl border-0 font-semibold tracking-[-0.01em] shadow-float active:scale-[0.98] active:shadow-sm",
+        glass: "btn-glass rounded-2xl px-6 font-medium backdrop-blur-xl active:scale-[0.98]",
       },
       size: {
         default: "h-11 px-6 py-2",

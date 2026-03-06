@@ -61,6 +61,7 @@ export default function InventoryPage() {
     const statusFilter = (searchParams.get("status") as StockStatus) || "all";
     const styleFilters = searchParams.getAll("style");
     const countryFilters = searchParams.getAll("country");
+    const regionFilters = searchParams.getAll("region");
     const grapeFilters = searchParams.getAll("grape");
     const vintageFilters = searchParams.getAll("vintage");
     const tagFilters = searchParams.getAll("tag");
@@ -85,10 +86,12 @@ export default function InventoryPage() {
     // Derived dynamic options
     const dynamicOptions = useMemo(() => {
         const countries = [...new Set(wines.map(w => w.country).filter(Boolean) as string[])].sort();
+        const regions = [...new Set(wines.map(w => w.region).filter(Boolean) as string[])].sort();
         const grapes = [...new Set(wines.map(w => w.grape).filter(Boolean) as string[])].sort();
         const vintages = [...new Set(wines.map(w => w.vintage).filter(Boolean) as number[])].sort((a, b) => b - a).map(String);
         return {
             countries: countries.map(c => ({ label: c, value: c })),
+            regions: regions.map(r => ({ label: r, value: r })),
             grapes: grapes.map(g => ({ label: g, value: g })),
             vintages: vintages.map(v => ({ label: v, value: v })),
             styles: STYLES.map(s => ({ label: s, value: s }))
@@ -148,6 +151,9 @@ export default function InventoryPage() {
             // Multi-select Countries
             if (countryFilters.length > 0 && (!wine.country || !countryFilters.includes(wine.country))) return false;
 
+            // Multi-select Regions
+            if (regionFilters.length > 0 && (!wine.region || !regionFilters.includes(wine.region))) return false;
+
             // Multi-select Grapes
             if (grapeFilters.length > 0 && (!wine.grape || !grapeFilters.includes(wine.grape))) return false;
 
@@ -190,9 +196,9 @@ export default function InventoryPage() {
 
             return sortOrder === "asc" ? comparison : -comparison;
         });
-    }, [wines, debouncedSearch, statusFilter, styleFilters, countryFilters, grapeFilters, vintageFilters, tagFilters, vintageRange, priceRange, sortKey, sortOrder]);
+    }, [wines, debouncedSearch, statusFilter, styleFilters, countryFilters, regionFilters, grapeFilters, vintageFilters, tagFilters, vintageRange, priceRange, sortKey, sortOrder]);
 
-    const activeFilterCount = styleFilters.length + countryFilters.length + grapeFilters.length + vintageFilters.length + tagFilters.length + (statusFilter !== "all" ? 1 : 0);
+    const activeFilterCount = styleFilters.length + countryFilters.length + regionFilters.length + grapeFilters.length + vintageFilters.length + tagFilters.length + (statusFilter !== "all" ? 1 : 0);
 
     // --- Handlers ---
     const toggleSelectAll = () => {
@@ -266,15 +272,20 @@ export default function InventoryPage() {
     // MultiSelectDropdown handles its own UI now, so we remove QuickFilterDropdown
 
     return (
-        <div className="space-y-6 max-w-[1400px] pb-24 relative min-h-screen">
+        <div className="space-y-5 max-w-[1440px] pb-20 relative min-h-screen">
 
             {/* --- HEADER --- */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-serif font-black italic tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.04em" }}>
-                        Estoque Comercial
+                        Estoque
                     </h1>
-                    <p className="text-sm mt-1 text-muted-foreground font-medium">Gestão e controle rápido do acervo longo</p>
+                    <p className="text-sm mt-1 text-muted-foreground font-medium">Operação comercial com leitura rápida de disponibilidade, valor e giro.</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-white/70 border-black/10 text-[#4B5563]">{summary.labels} rótulos</Badge>
+                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-white/70 border-black/10 text-[#4B5563]">{summary.bottles} em estoque</Badge>
+                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-white/70 border-black/10 text-[#4B5563]">R$ {summary.totalValue.toLocaleString("pt-BR")} estimado</Badge>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -317,7 +328,8 @@ export default function InventoryPage() {
             </div>
 
             {/* --- QUICK ACTIONS & FILTERS --- */}
-            <div className="flex flex-col lg:flex-row gap-3">
+            <div className="glass-card p-3 md:p-4 border-white/50 space-y-3">
+                <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8C2044]/60 group-focus-within:text-primary transition-colors" />
                     <Input
@@ -352,12 +364,12 @@ export default function InventoryPage() {
 
                     {/* Quick dropdown filters */}
                     <MultiSelectDropdown
-                        title="Estilo"
-                        options={dynamicOptions.styles}
-                        selected={styleFilters}
-                        onChange={(val) => updateParam("style", val, true)}
-                        onClear={() => updateParam("style", null, true)}
-                        searchPlaceholder="Buscar estilo..."
+                        title="Região"
+                        options={dynamicOptions.regions}
+                        selected={regionFilters}
+                        onChange={(val) => updateParam("region", val, true)}
+                        onClear={() => updateParam("region", null, true)}
+                        searchPlaceholder="Buscar região..."
                     />
                     <MultiSelectDropdown
                         title="País"
@@ -368,12 +380,16 @@ export default function InventoryPage() {
                         searchPlaceholder="Buscar país..."
                     />
                     <MultiSelectDropdown
-                        title="Uva"
-                        options={dynamicOptions.grapes}
-                        selected={grapeFilters}
-                        onChange={(val) => updateParam("grape", val, true)}
-                        onClear={() => updateParam("grape", null, true)}
-                        searchPlaceholder="Buscar uva..."
+                        title="Status"
+                        options={[
+                            { label: "Em estoque", value: "in-stock" },
+                            { label: "Baixo estoque", value: "low" },
+                            { label: "Sem estoque", value: "out" },
+                        ]}
+                        selected={statusFilter === "all" ? [] : [statusFilter]}
+                        onChange={(val) => updateParam("status", val)}
+                        onClear={() => updateParam("status", null)}
+                        searchPlaceholder="Buscar status..."
                     />
                     <MultiSelectDropdown
                         title="Safra"
@@ -386,18 +402,23 @@ export default function InventoryPage() {
 
                     <Button variant="outline" size="icon" className="h-10 w-10 rounded-[12px] bg-white/40 border-border/50 hover:border-black/20" onClick={() => setFilterOpen(true)}>
                         <SlidersHorizontal className="h-4 w-4 opacity-70" />
-                        {tagFilters.length > 0 && (
+                        {activeFilterCount > 0 && (
                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#8C2044] text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                                {tagFilters.length}
+                                {activeFilterCount}
                             </span>
                         )}
                     </Button>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground px-0.5">
+                    <p>{filteredWines.length} itens exibidos • {selectedIds.length} selecionados</p>
+                    <p className="hidden md:block">Filtros rápidos para operação comercial</p>
+                </div>
                 </div>
             </div>
 
             {/* --- SELECTED CHIPS --- */}
             <AnimatePresence>
-                {hasActiveFilters() && (
+                {(styleFilters.length > 0 || countryFilters.length > 0 || regionFilters.length > 0 || grapeFilters.length > 0 || vintageFilters.length > 0 || statusFilter !== "all") && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -415,6 +436,11 @@ export default function InventoryPage() {
                                 {c} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("country", c, true)} />
                             </Badge>
                         ))}
+                        {regionFilters.map(r => (
+                            <Badge key={r} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10">
+                                {r} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("region", r, true)} />
+                            </Badge>
+                        ))}
                         {grapeFilters.map(g => (
                             <Badge key={g} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10">
                                 {g} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("grape", g, true)} />
@@ -425,6 +451,11 @@ export default function InventoryPage() {
                                 Safra {v} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("vintage", v, true)} />
                             </Badge>
                         ))}
+                        {statusFilter !== "all" && (
+                            <Badge variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10">
+                                {statusFilter === "low" ? "Baixo estoque" : statusFilter === "out" ? "Sem estoque" : "Em estoque"} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("status", null)} />
+                            </Badge>
+                        )}
                         <button className="text-[10px] font-bold text-red-500 hover:text-red-600 hover:underline border-l border-red-200 pl-2 ml-1 transition-colors" onClick={clearAllFilters}>Limpar tudo</button>
                     </motion.div>
                 )}
@@ -462,32 +493,34 @@ export default function InventoryPage() {
                                     <th className="text-right hidden sm:table-cell cursor-pointer hover:bg-black/5" onClick={() => handleSort("price")}>
                                         <div className="flex items-center justify-end gap-1">PREÇO {sortKey === "price" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
+                                    <th className="text-right hidden xl:table-cell">TOTAL</th>
                                     <th className="w-48 text-right pr-4">AÇÕES</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredWines.map(wine => (
-                                    <tr key={wine.id} className={cn(selectedIds.includes(wine.id) && "selected", "group hover:bg-muted/10 transition-colors cursor-default")} onClick={() => toggleSelect(wine.id)}>
+                                    <tr key={wine.id} className={cn(selectedIds.includes(wine.id) && "selected", "group hover:bg-muted/10 transition-colors cursor-default h-[74px]")} onClick={() => toggleSelect(wine.id)}>
                                         <td onClick={e => e.stopPropagation()}><Checkbox checked={selectedIds.includes(wine.id)} onCheckedChange={() => toggleSelect(wine.id)} /></td>
                                         <td>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-11 h-14 rounded bg-muted/30 flex items-center justify-center shrink-0 border border-black/5 overflow-hidden">
+                                            <div className="flex items-center gap-3 py-1">
+                                                <div className="w-11 h-14 rounded-lg bg-muted/30 flex items-center justify-center shrink-0 border border-black/5 overflow-hidden">
                                                     {wine.image_url ? <img src={wine.image_url} className="w-full h-full object-cover" /> : <Package className="h-5 w-5 text-muted-foreground/50" />}
                                                 </div>
-                                                <div className="min-w-[120px]">
-                                                    <p className="font-bold text-[#0F0F14] hover:text-primary transition-colors cursor-pointer leading-tight">{wine.name}</p>
-                                                    <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.producer || "Produtor não inf."}</p>
+                                                <div className="min-w-[140px]">
+                                                    <p className="font-extrabold text-[14px] text-[#0F0F14] hover:text-primary transition-colors cursor-pointer leading-tight">{wine.name}</p>
+                                                    <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.producer || "Produtor não informado"}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="hidden lg:table-cell">
-                                            <div className="text-[13px] font-medium">{wine.country ? `${wine.country}, ${wine.region}` : wine.region || "—"}</div>
-                                            <div className="text-[11px] font-bold text-primary/60 mt-0.5">{wine.vintage || "NV"}</div>
+                                            <div className="text-[13px] font-medium">{wine.region || "Região não informada"}</div>
+                                            <div className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.country || "País não informado"} • Safra {wine.vintage || "NV"}</div>
                                         </td>
-                                        <td>{renderStockVisual(wine.quantity)}</td>
+                                        <td><div className="flex items-center gap-2.5">{renderStockVisual(wine.quantity)}{wine.quantity > 0 && wine.quantity <= 2 && <Badge className="h-6 rounded-lg bg-red-50 text-red-700 border border-red-200 text-[10px] font-semibold">Baixo estoque</Badge>}</div></td>
                                         <td className="text-right hidden sm:table-cell">
                                             <p className="text-sm font-bold text-[#0F0F14]">R$ {(wine.current_value || wine.purchase_price || 0).toLocaleString("pt-BR")}</p>
                                         </td>
+                                        <td className="text-right hidden xl:table-cell"><p className="text-sm font-extrabold text-[#0F0F14]">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
                                         <td className="text-right pr-4" onClick={e => e.stopPropagation()}>
                                             <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800" title="Registrar Entrada" onClick={() => handleQuickStock(wine.id, 1)}>
@@ -505,6 +538,8 @@ export default function InventoryPage() {
                                                     <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1.5 shadow-float border-white/20 bg-white/95 backdrop-blur-xl">
                                                         <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground">Ações</DropdownMenuLabel>
                                                         <DropdownMenuItem className="rounded-xl group font-medium"><Pencil className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Editar vinho</DropdownMenuItem>
+                                                        <DropdownMenuItem className="rounded-xl group font-medium" onClick={() => handleQuickStock(wine.id, 1)}><Plus className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Ajustar estoque (+1)</DropdownMenuItem>
+                                                        <DropdownMenuItem className="rounded-xl group font-medium" onClick={() => handleQuickStock(wine.id, -1)}><Minus className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Registrar saída (-1)</DropdownMenuItem>
                                                         <DropdownMenuItem className="rounded-xl group font-medium"><History className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Ver histórico</DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -522,11 +557,45 @@ export default function InventoryPage() {
             </div>
 
             {/* --- SIDEBAR FILTERS (Detailed) --- */}
-            {/* ... (Hidden or same as before, preserving standard code) */}
+
+
+            <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+                <SheetContent className="w-[420px] sm:w-[520px]">
+                    <SheetHeader>
+                        <SheetTitle>Filtros avançados</SheetTitle>
+                        <SheetDescription>Refine a visão comercial sem perder agilidade operacional.</SheetDescription>
+                    </SheetHeader>
+                    <ScrollArea className="h-[calc(100vh-180px)] mt-5 pr-3">
+                        <div className="space-y-6">
+                            <div>
+                                <p className="text-xs font-semibold mb-3">Faixa de Safra</p>
+                                <Slider value={vintageRange} min={1980} max={new Date().getFullYear()} step={1} onValueChange={(value) => setVintageRange(value as [number, number])} />
+                                <p className="text-xs mt-2 text-muted-foreground">{vintageRange[0]} — {vintageRange[1]}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold mb-3">Faixa de Preço (R$)</p>
+                                <Slider value={priceRange} min={0} max={5000} step={50} onValueChange={(value) => setPriceRange(value as [number, number])} />
+                                <p className="text-xs mt-2 text-muted-foreground">R$ {priceRange[0]} — R$ {priceRange[1]}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold mb-2">Uvas</p>
+                                <MultiSelectDropdown
+                                    title="Selecionar uvas"
+                                    options={dynamicOptions.grapes}
+                                    selected={grapeFilters}
+                                    onChange={(val) => updateParam("grape", val, true)}
+                                    onClear={() => updateParam("grape", null, true)}
+                                    searchPlaceholder="Buscar uva..."
+                                />
+                            </div>
+                        </div>
+                    </ScrollArea>
+                    <SheetFooter className="pt-4">
+                        <Button variant="outline" onClick={clearAllFilters}>Limpar filtros</Button>
+                        <Button onClick={() => setFilterOpen(false)}>Aplicar</Button>
+                    </SheetFooter>
+                </SheetContent>
+            </Sheet>
         </div>
     );
-
-    function hasActiveFilters() {
-        return styleFilters.length > 0 || countryFilters.length > 0 || grapeFilters.length > 0 || vintageFilters.length > 0;
-    }
 }

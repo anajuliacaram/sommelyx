@@ -93,7 +93,7 @@ export default function DashboardLayout() {
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
                 placeholder="Pesquise vinho, produtor, uva, safra…"
-                className="w-full h-9 pl-9 pr-3 rounded-[12px] text-sm focus:outline-none transition-all"
+                className="w-full h-10 pl-9 pr-3 rounded-2xl text-[13px] font-medium focus:outline-none transition-all"
                 style={{
                   background: searchFocused ? "rgba(0,0,0,0.04)" : "rgba(0,0,0,0.025)",
                   border: `1px solid ${searchFocused ? "rgba(143,45,86,0.15)" : "rgba(0,0,0,0.05)"}`,
@@ -104,18 +104,18 @@ export default function DashboardLayout() {
               {/* Search dropdown */}
               {searchFocused && searchQuery && searchResults.length > 0 && (
                 <div
-                  className="absolute top-full left-0 right-0 mt-1.5 rounded-[14px] overflow-hidden z-50"
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl overflow-hidden z-50"
                   style={{
                     background: "rgba(255,255,255,0.96)",
                     backdropFilter: "blur(20px)",
                     border: "1px solid rgba(0,0,0,0.08)",
-                    boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
+                    boxShadow: "0 24px 50px -30px rgba(15,15,20,0.45), 0 4px 12px rgba(15,15,20,0.08)",
                   }}
                 >
                   {searchResults.map(w => (
                     <button
                       key={w.id}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.03]"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-black/[0.03] focus-visible:outline-none focus-visible:bg-black/[0.04]"
                       onMouseDown={() => { navigate("/dashboard/cellar"); setSearchQuery(""); }}
                     >
                       <div className="flex-1 min-w-0">
@@ -125,7 +125,7 @@ export default function DashboardLayout() {
                           {w.cellar_location ? ` · ${w.cellar_location}` : ""}
                         </p>
                       </div>
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0" style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e" }}>
+                      <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full shrink-0 border" style={{ background: "rgba(34,197,94,0.08)", color: "#16a34a", borderColor: "rgba(34,197,94,0.18)" }}>
                         Em estoque
                       </span>
                     </button>
@@ -134,7 +134,7 @@ export default function DashboardLayout() {
               )}
               {searchFocused && searchQuery && searchResults.length === 0 && (
                 <div
-                  className="absolute top-full left-0 right-0 mt-1.5 rounded-[14px] p-4 text-center z-50"
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl p-4 text-center z-50"
                   style={{ background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}
                 >
                   <p className="text-[12px]" style={{ color: "#9CA3AF" }}>Nenhum resultado para "{searchQuery}"</p>
@@ -145,7 +145,7 @@ export default function DashboardLayout() {
             <div className="flex items-center gap-2">
               {/* Profile badge */}
               <span
-                className="hidden sm:inline-flex items-center h-7 px-2.5 rounded-full text-[10px] font-semibold uppercase tracking-wider"
+                className="hidden sm:inline-flex items-center h-7 px-3 rounded-full text-[10px] font-semibold uppercase tracking-[0.14em]"
                 style={{
                   background: profileType === "commercial" ? "rgba(201,168,106,0.1)" : "rgba(143,45,86,0.06)",
                   color: profileType === "commercial" ? "#C9A86A" : "#8F2D56",
@@ -157,7 +157,7 @@ export default function DashboardLayout() {
 
               <button
                 onClick={() => navigate("/dashboard/alerts")}
-                className="w-9 h-9 rounded-[12px] flex items-center justify-center transition-all duration-200 hover:bg-black/[0.04] relative"
+                className="w-9 h-9 rounded-2xl flex items-center justify-center transition-all duration-200 hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8F2D56]/10 relative"
                 style={{ color: "#9CA3AF" }}
               >
                 <Bell className="h-4 w-4" />
