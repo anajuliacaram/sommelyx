@@ -144,7 +144,7 @@ export default function Login() {
 
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white/60 backdrop-blur-2xl p-8 md:p-10 rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white/40 ring-1 ring-black/[0.02]"
+            className="bg-white/60 backdrop-blur-2xl p-8 md:p-10 rounded-[28px] shadow-[0_24px_64px_-24px_rgba(15,15,20,0.2),0_2px_8px_rgba(15,15,20,0.06)] border border-white/55 ring-1 ring-black/[0.03]"
           >
             {emailConfirmed && (
               <div className="mb-8 p-4 rounded-2xl bg-green-50 border border-green-100 flex items-center gap-3">
@@ -161,7 +161,7 @@ export default function Login() {
                 <Input
                   id="email" type="email" placeholder="nome@exemplo.com"
                   value={email} onChange={(e) => setEmail(e.target.value)} required
-                  className="h-14 rounded-[16px] bg-[#F9FAFB] border-black/5 focus:bg-white focus:border-[#8C2044]/30 focus:ring-4 focus:ring-[#8C2044]/5 transition-all text-[15px] font-medium px-5 shadow-inner shadow-black/[0.01]"
+                  className="h-12 rounded-2xl bg-[#F9FAFB] border-black/10 focus:bg-white focus:border-[#8C2044]/30 focus:ring-4 focus:ring-[#8C2044]/10 transition-all text-[14px] font-medium px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
                 />
               </div>
 
@@ -178,12 +178,12 @@ export default function Login() {
                   <Input
                     id="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
                     value={password} onChange={(e) => setPassword(e.target.value)} required
-                    className="h-14 rounded-[16px] bg-[#F9FAFB] border-black/5 focus:bg-white focus:border-[#8C2044]/30 focus:ring-4 focus:ring-[#8C2044]/5 transition-all text-[15px] font-medium px-5 pr-12 shadow-inner shadow-black/[0.01]"
+                    className="h-12 rounded-2xl bg-[#F9FAFB] border-black/10 focus:bg-white focus:border-[#8C2044]/30 focus:ring-4 focus:ring-[#8C2044]/10 transition-all text-[14px] font-medium px-4 pr-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#0F0F14] transition-colors p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#0F0F14] transition-colors p-1.5 rounded-lg hover:bg-black/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -194,7 +194,7 @@ export default function Login() {
                 <MagneticButton disabled={loading}>
                   <Button
                     type="submit" disabled={loading}
-                    className="w-full h-[64px] rounded-[20px] text-[15px] font-black uppercase tracking-[0.14em] transition-all bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] hover:from-[#202028] hover:to-[#1A1A24] text-white shadow-[0_12px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.25)] border border-white/5 ring-1 ring-black/10"
+                    className="w-full h-12 rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] transition-all bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] hover:from-[#202028] hover:to-[#1A1A24] text-white shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)] border border-white/10 ring-1 ring-black/10"
                   >
                     {loading ? (
                       <span className="flex items-center gap-3">Processando <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-4 h-4 border-[2.5px] border-white/30 border-t-white rounded-full" /></span>

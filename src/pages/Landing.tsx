@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, ShieldCheck, BarChart4, ChevronRight } from "lucide-react";
+import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, ShieldCheck, BarChart4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -165,7 +165,7 @@ export default function Landing() {
             href="/"
             className="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[36px] sm:h-[48px] w-auto object-contain" />
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[44px] sm:h-[58px] w-auto object-contain" />
             <span className="text-[22px] sm:text-[26px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
@@ -175,7 +175,7 @@ export default function Landing() {
             <MagneticButton>
               <Button
                 variant="ghost"
-                className="text-[14px] font-bold px-6 h-12 transition-all hover:bg-black/[0.03] rounded-xl text-muted-foreground hover:text-foreground hidden sm:inline-flex"
+                className="text-[13px] font-semibold px-5 h-11 transition-all hover:bg-black/[0.03] rounded-2xl text-muted-foreground hover:text-foreground inline-flex"
                 onClick={() => navigate("/login")}
               >
                 Entrar
@@ -183,7 +183,7 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_8px_20px_rgba(140,32,68,0.15)] hover:shadow-[0_12px_24px_rgba(140,32,68,0.25)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-6 sm:px-9 h-11 sm:h-12 text-[12px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
                 onClick={() => navigate("/signup")}
               >
                 Começar Grátis
@@ -232,19 +232,13 @@ export default function Landing() {
               >
                 <MagneticButton>
                   <Button
-                    className="w-full sm:w-auto px-12 h-16 text-[14px] font-black uppercase tracking-widest rounded-[18px] transition-all shadow-[0_12px_32px_rgba(140,32,68,0.25)] hover:shadow-[0_16px_40px_rgba(140,32,68,0.35)] text-white hover:-translate-y-1"
+                    className="w-full sm:w-auto px-10 h-12 text-[12px] font-black uppercase tracking-[0.14em] rounded-2xl transition-all shadow-[0_12px_28px_-14px_rgba(140,32,68,0.45)] hover:shadow-[0_18px_36px_-18px_rgba(140,32,68,0.55)] text-white hover:-translate-y-0.5"
                     style={{ background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)" }}
                     onClick={() => navigate("/signup")}
                   >
                     Começar Grátis
                   </Button>
                 </MagneticButton>
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto px-10 h-16 text-[15px] font-bold rounded-[18px] border-black/10 hover:bg-black/5 hover:text-[#0F0F14] transition-all group shadow-sm bg-white"
-                >
-                  Ver Demonstração <ChevronRight className="ml-2 h-4 w-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                </Button>
               </motion.div>
 
               <motion.div
