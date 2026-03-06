@@ -70,6 +70,10 @@ function HeroComposition() {
       <div className="absolute top-[6%] right-[0%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-[#8F2D56]/28 via-[#C44569]/16 to-transparent blur-[92px]" />
       <div className="absolute bottom-[-2%] left-[6%] w-[340px] h-[340px] rounded-full bg-gradient-to-br from-[#8C2044]/24 to-transparent blur-[88px]" />
       <div className="absolute top-[24%] right-[18%] w-[200px] h-[200px] rounded-full bg-white/35 blur-[70px]" />
+      {/* Ambient glowing orbs - Increased intensity for presence */}
+      <div className="absolute top-[6%] right-[2%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-[#8F2D56]/35 via-[#B23A68]/18 to-[#F2C3D4]/5 blur-[96px]" />
+      <div className="absolute bottom-[-6%] left-[2%] w-[340px] h-[340px] rounded-full bg-gradient-to-br from-[#5A1834]/28 via-[#8C2044]/16 to-transparent blur-[90px]" />
+      <div className="absolute inset-x-[16%] bottom-[10%] h-[120px] bg-gradient-to-r from-transparent via-[#B23A68]/20 to-transparent blur-[42px]" />
 
       <motion.div
         animate={{ y: [-12, 12, -12] }}
@@ -86,6 +90,13 @@ function HeroComposition() {
 
           {/* Top Bar of Mockup */}
           <div className="relative z-10 flex items-center justify-between mb-8 border-b border-[#5f1736]/10 pb-5">
+          className="relative rounded-[32px] bg-gradient-to-b from-[#FFF9FC]/95 via-[#FFF5FA]/92 to-[#FAECF3]/90 backdrop-blur-3xl border border-[#8C2044]/16 p-8 shadow-[0_48px_120px_-28px_rgba(92,25,52,0.35)] transform lg:rotate-y-[-12deg] lg:rotate-x-[6deg] translate-z-10 overflow-hidden"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.85),transparent_42%),radial-gradient(circle_at_82%_90%,rgba(178,58,104,0.14),transparent_46%)] pointer-events-none" />
+          <div className="absolute inset-x-8 top-2 h-24 bg-gradient-to-b from-white/70 to-transparent blur-xl pointer-events-none" />
+          {/* Top Bar of Mockup */}
+          <div className="relative z-10 flex items-center justify-between mb-8 border-b border-[#8C2044]/14 pb-5">
             <div className="flex items-center gap-4">
               <div className="flex gap-2 opacity-50">
                 <div className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-sm" />
@@ -97,6 +108,11 @@ function HeroComposition() {
               </div>
             </div>
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7A2348] to-[#4A1028] flex items-center justify-center text-white shadow-lg shadow-[#8C2044]/30">
+              <div className="h-7 px-4 bg-[#8C2044]/8 rounded-full flex items-center border border-[#8C2044]/15">
+                <span className="text-[11px] font-black tracking-widest text-[#5A1834]/75 uppercase">Visão Resumo</span>
+              </div>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#5A1834] to-[#8C2044] flex items-center justify-center text-white shadow-[0_12px_22px_rgba(90,24,52,0.35)]">
               <span className="text-[12px] font-bold tracking-widest">SM</span>
             </div>
           </div>
@@ -105,6 +121,8 @@ function HeroComposition() {
           <div className="grid grid-cols-2 gap-5 mb-5" style={{ transform: "translateZ(40px)" }}>
             <div className="p-6 rounded-[20px] bg-white/85 shadow-[0_15px_30px_-20px_rgba(140,32,68,0.45)] border border-[#8C2044]/10 relative overflow-hidden group backdrop-blur-sm">
               <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/15 to-transparent rounded-bl-[100px] pointer-events-none" />
+            <div className="p-6 rounded-[20px] bg-white/90 shadow-[0_10px_30px_rgba(90,24,52,0.08)] border border-[#8C2044]/10 relative overflow-hidden group">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/5 to-transparent rounded-bl-[100px] pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-[#9CA3AF] block mb-3">Garrafas Acervo</span>
               <span className="text-4xl font-serif font-black text-[#0F0F14] tracking-tight">2.14k</span>
               <span className="text-[13px] font-bold text-[#8C2044] flex items-center gap-1.5 mt-2 bg-[#8C2044]/10 w-fit px-2 py-0.5 rounded-md">+42 entrada</span>
@@ -113,6 +131,8 @@ function HeroComposition() {
             <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#6f1f41] via-[#4f1631] to-[#2f0d1e] shadow-premium shadow-[#2f0d1e]/45 text-white relative overflow-hidden border border-white/15">
               <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/20 to-transparent rounded-bl-[100px] opacity-70 pointer-events-none" />
               <div className="absolute -left-8 -bottom-12 w-28 h-28 rounded-full bg-[#d688a8]/25 blur-2xl" />
+            <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] shadow-[0_16px_40px_rgba(90,24,52,0.35)] text-white relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/25 to-transparent rounded-bl-[100px] opacity-70 pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-white/50 block mb-3">Patrimônio Líquido</span>
               <span className="text-4xl font-serif font-black tracking-tight text-white/95">R$ 142k</span>
               <span className="text-[13px] font-medium text-white/40 flex items-center gap-1.5 mt-2">Atualizado há 2h</span>
@@ -162,6 +182,7 @@ export default function Landing() {
       {/* ─── HEADER ─── */}
       <motion.header
         className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-white/55 backdrop-blur-2xl border-b border-[#8C2044]/10"
+        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -171,7 +192,7 @@ export default function Landing() {
             href="/"
             className="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[36px] sm:h-[48px] w-auto object-contain" />
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[44px] sm:h-[58px] w-auto object-contain" />
             <span className="text-[22px] sm:text-[26px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
@@ -181,7 +202,7 @@ export default function Landing() {
             <MagneticButton>
               <Button
                 variant="ghost"
-                className="text-[14px] font-bold px-6 h-12 transition-all hover:bg-black/[0.03] rounded-xl text-muted-foreground hover:text-foreground hidden sm:inline-flex"
+                className="text-[13px] font-semibold px-5 h-11 transition-all hover:bg-black/[0.03] rounded-2xl text-muted-foreground hover:text-foreground inline-flex"
                 onClick={() => navigate("/login")}
               >
                 Entrar
@@ -189,7 +210,8 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_8px_20px_rgba(140,32,68,0.15)] hover:shadow-[0_12px_24px_rgba(140,32,68,0.25)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_10px_26px_rgba(122,31,71,0.28)] hover:shadow-[0_14px_34px_rgba(122,31,71,0.38)] bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] hover:from-[#6A1C3E] hover:to-[#B13668] text-white border border-[#F4D4E1]/20"
+                className="px-6 sm:px-9 h-11 sm:h-12 text-[12px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
                 onClick={() => navigate("/signup")}
               >
                 Começar Grátis
@@ -201,6 +223,7 @@ export default function Landing() {
 
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative pt-36 lg:pt-48 pb-16 lg:pb-32 px-6 min-h-screen flex items-center overflow-visible">
+        <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         {/* Subtle grid pattern background for density */}
         <div className="absolute inset-0 z-0 opacity-[0.28] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(88,20,46,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(88,20,46,0.07) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
         <div className="absolute top-[-12%] left-[-12%] w-[46vw] h-[46vw] rounded-full bg-[#8C2044]/14 blur-[130px] pointer-events-none" />
@@ -212,7 +235,7 @@ export default function Landing() {
             {/* Headline Block (Left) - Increased size and presence */}
             <div className="flex-1 max-w-2xl pt-10 lg:pt-0">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8 flex items-center gap-3">
-                <div className="h-8 px-4 rounded-full bg-[#8C2044]/5 border border-[#8C2044]/10 flex items-center justify-center">
+                <div className="h-8 px-4 rounded-full bg-[#8C2044]/8 border border-[#8C2044]/18 shadow-[0_8px_18px_rgba(140,32,68,0.08)] flex items-center justify-center">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[#8C2044]">Inteligência Estratégica</span>
                 </div>
               </motion.div>
@@ -247,12 +270,19 @@ export default function Landing() {
                     <span className="pointer-events-none absolute inset-[1px] rounded-[18px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
                     <span className="pointer-events-none absolute -inset-x-5 top-1/2 h-12 -translate-y-1/2 bg-white/20 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity" />
                     Começar Grátis
+                    className="w-full sm:w-auto px-14 h-16 text-[14px] font-black uppercase tracking-widest rounded-[18px] transition-all shadow-[0_18px_40px_rgba(122,31,71,0.38)] hover:shadow-[0_22px_48px_rgba(122,31,71,0.45)] text-white hover:-translate-y-1 border border-[#F4D4E1]/25"
+                    style={{ background: "linear-gradient(135deg, #5A1834 0%, #7A1F47 48%, #B13668 100%)" }}
+                    className="w-full sm:w-auto px-10 h-12 text-[12px] font-black uppercase tracking-[0.14em] rounded-2xl transition-all shadow-[0_12px_28px_-14px_rgba(140,32,68,0.45)] hover:shadow-[0_18px_36px_-18px_rgba(140,32,68,0.55)] text-white hover:-translate-y-0.5"
+                    style={{ background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)" }}
+                    onClick={() => navigate("/signup")}
+                  >
+                    Começar grátis
                   </Button>
                 </MagneticButton>
               </motion.div>
 
               <motion.div
-                className="mt-12 flex items-center gap-6 pt-8 border-t border-black/[0.04]"
+                className="mt-7 flex items-center gap-6 pt-6"
                 initial="hidden" animate="visible" variants={fadeUp} custom={4}
               >
                 <div className="flex -space-x-3">
@@ -263,9 +293,10 @@ export default function Landing() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[14px] font-bold text-[#0F0F14]">Junte-se a gestores e colecionadores</span>
-                  <span className="text-[12px] font-medium text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                    <Check className="h-3.5 w-3.5 text-green-600" /> Sem implantação complexa.
+                  <span className="text-[12px] font-medium text-[#7B6A73] flex items-center gap-1.5 mt-0.5">
+                    <Check className="h-3.5 w-3.5 text-[#8C2044]" /> Sem implantação complexa.
                   </span>
+                  <span className="text-[12px] text-[#8C2044]/75 font-semibold mt-1">Configuração guiada e acesso imediato ao painel.</span>
                 </div>
               </motion.div>
             </div>
@@ -354,26 +385,35 @@ export default function Landing() {
             </h2>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-center">
+          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`relative p-8 md:p-10 rounded-[36px] overflow-hidden ${plan.highlighted ? "lg:py-14" : ""}`}
+                className={`relative p-8 md:p-10 rounded-[36px] overflow-hidden flex flex-col ${plan.highlighted ? "lg:py-14" : ""}`}
                 style={plan.highlighted ? {
-                  background: "linear-gradient(160deg, #0F0F14 0%, #1A1A24 100%)",
-                  boxShadow: "0 40px 80px rgba(0,0,0,0.2)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)",
+                  boxShadow: "0 28px 60px rgba(74,25,50,0.26), 0 1px 0 rgba(255,255,255,0.18) inset",
+                  border: "1px solid rgba(255,255,255,0.16)",
                 } : {
-                  background: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.04)",
-                  boxShadow: "0 12px 40px -10px rgba(0,0,0,0.03)",
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.88) 100%)",
+                  border: "1px solid rgba(15, 15, 20, 0.07)",
+                  boxShadow: "0 16px 42px -16px rgba(15,15,20,0.11), 0 1px 0 rgba(255,255,255,0.7) inset",
                 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -8, transition: { duration: 0.4 } }}
+                whileHover={{ y: -6, transition: { duration: 0.35 } }}
               >
+                <div
+                  className="pointer-events-none absolute inset-x-8 top-0 h-14 rounded-b-[28px]"
+                  style={{
+                    background: plan.highlighted
+                      ? "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 90%)"
+                      : "linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 95%)",
+                  }}
+                />
+
                 {plan.highlighted && (
-                  <div className="absolute top-0 right-0 p-8">
-                    <span className="px-5 py-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r from-[#8F2D56] to-[#C44569] text-white shadow-lg shadow-[#8C2044]/30">
+                  <div className="absolute top-0 right-0 p-7 md:p-8">
+                    <span className="px-[18px] py-2 rounded-full text-[10px] font-black tracking-[0.16em] uppercase bg-gradient-to-r from-[#EAB3C8]/85 via-[#E39AB7]/85 to-[#D1739A]/85 text-[#3B1326] border border-white/45 shadow-[0_10px_24px_rgba(17,7,12,0.25)] backdrop-blur-sm">
                       Recomendado
                     </span>
                   </div>
@@ -385,7 +425,7 @@ export default function Landing() {
                 <p className="text-[15px] mb-8 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.6)" : "#6B7280" }}>
                   {plan.desc}
                 </p>
-                <div className="mb-10 flex items-baseline gap-1.5 border-b border-black/[0.04] pb-8" style={plan.highlighted ? { borderColor: "rgba(255,255,255,0.08)" } : {}}>
+                <div className="mb-8 flex items-baseline gap-1.5 border-b border-black/[0.04] pb-8" style={plan.highlighted ? { borderColor: "rgba(255,255,255,0.15)" } : {}}>
                   <span className="text-6xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
                     {plan.price}
                   </span>
@@ -394,11 +434,11 @@ export default function Landing() {
                   </span>
                 </div>
 
-                <ul className="space-y-4 mb-12 min-h-[160px]">
+                <ul className="space-y-3.5 mb-10 min-h-[188px]">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-3 text-[15px] font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.9)" : "#4B5563" }}>
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(196,69,105,0.2)" : "rgba(140,32,68,0.1)" }}>
-                        <Check className="h-3 w-3" style={{ color: plan.highlighted ? "#ff8ba7" : "#8C2044" }} strokeWidth={3} />
+                    <li key={f} className="flex items-center gap-3 text-[15px] leading-relaxed font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.92)" : "#4B5563" }}>
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(255, 225, 236, 0.2)" : "rgba(140,32,68,0.1)", boxShadow: plan.highlighted ? "0 2px 8px rgba(255,193,218,0.25)" : "none" }}>
+                        <Check className="h-3 w-3" style={{ color: plan.highlighted ? "#FFD3E4" : "#8C2044" }} strokeWidth={3} />
                       </div>
                       {f}
                     </li>
@@ -406,9 +446,9 @@ export default function Landing() {
                 </ul>
 
                 <Button
-                  className={`w-full h-[60px] rounded-[20px] text-[14px] font-black uppercase tracking-[0.1em] transition-all ${plan.highlighted
-                    ? "bg-white text-[#0F0F14] hover:bg-white/90 shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:shadow-white/20 hover:-translate-y-0.5"
-                    : "bg-[#FAFAFA] text-[#0F0F14] hover:bg-black/5 shadow-none border border-black/5"
+                  className={`mt-auto w-full min-h-[60px] md:min-h-[62px] rounded-[20px] px-4 sm:px-5 md:px-6 whitespace-normal sm:whitespace-nowrap text-center text-[11px] sm:text-[11.5px] md:text-[12.5px] font-extrabold tracking-[0.015em] md:tracking-[0.04em] leading-tight transition-all duration-300 ${plan.highlighted
+                    ? "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_16px_36px_rgba(20,8,14,0.3)] hover:shadow-[0_20px_38px_rgba(20,8,14,0.35)] hover:-translate-y-0.5"
+                    : "bg-[#FAFAFA] text-[#18181B] hover:bg-white shadow-[0_8px_16px_rgba(15,15,20,0.06)] hover:shadow-[0_12px_24px_rgba(15,15,20,0.1)] border border-black/10"
                     }`}
                   onClick={() => navigate("/signup")}
                 >
