@@ -58,7 +58,9 @@ const plans = [
 ];
 
 /* ─── Premium Dashboard Representation ─── */
-function HeroComposition({ onStart }: { onStart: () => void }) {
+function HeroComposition() {
+  const navigate = useNavigate();
+
   return (
     <motion.div
       className="relative mt-12 flex h-full min-h-[460px] w-full items-center justify-center lg:mt-0 lg:min-h-[600px] lg:justify-end"
@@ -155,7 +157,7 @@ function HeroComposition({ onStart }: { onStart: () => void }) {
 
           <div className="relative z-10 mt-7 flex flex-col gap-4 sm:flex-row" style={{ transform: "translateZ(18px)" }}>
             <Button
-              onClick={onStart}
+              onClick={() => navigate("/signup")}
               className="group relative h-[54px] flex-1 overflow-hidden rounded-2xl border border-white/25 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_34px_rgba(122,35,72,0.42)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(122,35,72,0.48)]"
               style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
             >
@@ -295,7 +297,7 @@ export default function Landing() {
 
             {/* Visual Composition (Right) */}
             <div className="flex-1 w-full max-w-2xl lg:max-w-none">
-              <HeroComposition onStart={() => navigate("/signup")} />
+              <HeroComposition />
             </div>
 
           </div>
