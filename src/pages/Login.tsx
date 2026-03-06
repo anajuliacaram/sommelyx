@@ -144,6 +144,7 @@ export default function Login() {
 
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
+            className="bg-gradient-to-b from-white/88 via-[#FFF8FB]/92 to-[#FFF3F8]/88 backdrop-blur-2xl p-8 md:p-10 rounded-[32px] shadow-[0_26px_80px_-20px_rgba(90,24,52,0.2)] border border-[#C08AA0]/20 ring-1 ring-[#5E1D3B]/8"
             className="bg-white/60 backdrop-blur-2xl p-8 md:p-10 rounded-[28px] shadow-[0_24px_64px_-24px_rgba(15,15,20,0.2),0_2px_8px_rgba(15,15,20,0.06)] border border-white/55 ring-1 ring-black/[0.03]"
           >
             {emailConfirmed && (
@@ -154,23 +155,24 @@ export default function Login() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-[#6B7280] ml-1">
                   E-mail
                 </Label>
                 <Input
                   id="email" type="email" placeholder="nome@exemplo.com"
                   value={email} onChange={(e) => setEmail(e.target.value)} required
+                  className="h-14 rounded-[16px] bg-[#FFFCFD] border-[#CBA6B5]/35 focus:bg-white focus:border-[#8C2044]/40 focus:ring-4 focus:ring-[#8C2044]/10 transition-all text-[15px] font-medium px-5 shadow-inner shadow-[#8C2044]/[0.04]"
                   className="h-12 rounded-2xl bg-[#F9FAFB] border-black/10 focus:bg-white focus:border-[#8C2044]/30 focus:ring-4 focus:ring-[#8C2044]/10 transition-all text-[14px] font-medium px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
                 />
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center px-1">
                   <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-[#6B7280]">
                     Senha
                   </Label>
-                  <Link to="/forgot-password" title="Recuperar Acesso" className="text-[12px] font-semibold text-[#8C2044] hover:text-[#0F0F14] hover:underline transition-colors">
+                  <Link to="/forgot-password" title="Recuperar Acesso" className="text-[12px] font-semibold text-[#8C2044] hover:text-[#5A1834] hover:underline transition-colors">
                     Esqueceu a senha?
                   </Link>
                 </div>
@@ -178,6 +180,7 @@ export default function Login() {
                   <Input
                     id="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
                     value={password} onChange={(e) => setPassword(e.target.value)} required
+                    className="h-14 rounded-[16px] bg-[#FFFCFD] border-[#CBA6B5]/35 focus:bg-white focus:border-[#8C2044]/40 focus:ring-4 focus:ring-[#8C2044]/10 transition-all text-[15px] font-medium px-5 pr-12 shadow-inner shadow-[#8C2044]/[0.04]"
                     className="h-12 rounded-2xl bg-[#F9FAFB] border-black/10 focus:bg-white focus:border-[#8C2044]/30 focus:ring-4 focus:ring-[#8C2044]/10 transition-all text-[14px] font-medium px-4 pr-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
                   />
                   <button
@@ -194,6 +197,7 @@ export default function Login() {
                 <MagneticButton disabled={loading}>
                   <Button
                     type="submit" disabled={loading}
+                    className="w-full h-[64px] rounded-[20px] text-[15px] font-black uppercase tracking-[0.14em] transition-all bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] hover:from-[#6A1C3E] hover:via-[#862250] hover:to-[#B13668] text-white shadow-[0_14px_34px_rgba(122,31,71,0.35)] hover:shadow-[0_20px_44px_rgba(122,31,71,0.42)] border border-[#F3D6E1]/20 ring-1 ring-[#3E0E24]/25 focus-visible:ring-2 focus-visible:ring-[#F3D6E1]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF3F8]"
                     className="w-full h-12 rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] transition-all bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] hover:from-[#202028] hover:to-[#1A1A24] text-white shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)] border border-white/10 ring-1 ring-black/10"
                   >
                     {loading ? (
@@ -216,8 +220,11 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="mt-12 md:absolute md:bottom-12 md:left-12 flex justify-center md:justify-start">
-            <Link to="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#9CA3AF] hover:text-[#0F0F14] transition-colors group">
+          <div className="mt-10 md:mt-0 md:absolute md:bottom-10 md:left-10 lg:left-12 xl:left-16 flex justify-center md:justify-start w-full md:w-auto">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2.5 px-3 py-2 rounded-full bg-white/70 border border-[#8C2044]/15 text-[11px] font-black uppercase tracking-widest text-[#6D2C47] hover:text-[#4F1830] hover:bg-white transition-all group shadow-[0_6px_16px_rgba(90,24,52,0.12)]"
+            >
               <ChevronLeft className="h-3.5 w-3.5 group-hover:-translate-x-1 transition-transform" /> Retornar
             </Link>
           </div>
