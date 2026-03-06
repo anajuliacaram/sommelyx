@@ -90,19 +90,6 @@ const AnimatedRoutes = () => {
               <Route path="reports" element={<InventoryPlaceholder title="Relatórios" icon="reports" description="BI avançado, impostos, previsão de demanda e valuation de acervo." />} />
               <Route path="plans" element={<Plans />} />
             </Route>
-          <Route path="/select-profile" element={<SelectProfile />} />
-          <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
-            <Route index element={<DashboardIndex />} />
-            <Route path="cellar" element={<CellarPage />} />
-            <Route path="alerts" element={<AlertsPage />} />
-            <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
-            <Route path="stats" element={<Placeholder title="Analytics" />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="sales" element={<InventoryPlaceholder title="Vendas" icon="sales" description="Rastreamento de pedidos, histórico de pagamentos e CRM integrado." />} />
-            <Route path="registers" element={<InventoryPlaceholder title="Cadastros" icon="registers" description="Gestão de fornecedores, produtores e base de clientes VIP." />} />
-            <Route path="reports" element={<InventoryPlaceholder title="Relatórios" icon="reports" description="BI avançado, impostos, previsão de demanda e valuation de acervo." />} />
-            <Route path="plans" element={<Plans />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
