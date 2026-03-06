@@ -4,7 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { PageTransition } from "@/components/PageTransition";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
@@ -24,19 +25,20 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+/**
+ * Top-level routes use AnimatePresence for full-page transitions
+ * (landing ↔ login ↔ signup etc).
+ * Dashboard sub-routes animate via AnimatedOutlet inside DashboardLayout,
+ * so the sidebar/header stay mounted.
+ */
 const AnimatedRoutes = () => {
   const location = useLocation();
+  // Use the first path segment to group dashboard routes under one key
+  const topKey = location.pathname.startsWith("/dashboard") ? "/dashboard" : location.pathname;
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        className="page-transition"
-      >
+      <PageTransition key={topKey}>
         <Routes location={location}>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -59,7 +61,7 @@ const AnimatedRoutes = () => {
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </motion.div>
+      </PageTransition>
     </AnimatePresence>
   );
 };

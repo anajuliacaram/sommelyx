@@ -1,4 +1,5 @@
-import { Outlet, Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { AnimatedOutlet } from "@/components/AnimatedOutlet";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -215,7 +216,7 @@ export default function DashboardLayout() {
             </div>
           </header>
           <div className="flex-1 p-5 md:p-7 lg:p-8">
-            <Outlet />
+            <AnimatedOutlet />
           </div>
         </main>
       </div>
