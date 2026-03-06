@@ -24,6 +24,7 @@ import InventoryPlaceholder from "@/pages/dashboard/InventoryPlaceholder";
 import AlertsPage from "@/pages/dashboard/AlertsPage";
 import SettingsPage from "@/pages/dashboard/SettingsPage";
 import NotFound from "@/pages/NotFound";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -49,19 +50,23 @@ const AnimatedRoutes = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/auth/confirm" element={<AuthConfirm />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/select-profile" element={<SelectProfile />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<DashboardIndex />} />
-            <Route path="cellar" element={<CellarPage />} />
-            <Route path="alerts" element={<AlertsPage />} />
-            <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
-            <Route path="stats" element={<Placeholder title="Analytics" />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="sales" element={<InventoryPlaceholder title="Vendas" icon="sales" description="Rastreamento de pedidos, histórico de pagamentos e CRM integrado." />} />
-            <Route path="registers" element={<InventoryPlaceholder title="Cadastros" icon="registers" description="Gestão de fornecedores, produtores e base de clientes VIP." />} />
-            <Route path="reports" element={<InventoryPlaceholder title="Relatórios" icon="reports" description="BI avançado, impostos, previsão de demanda e valuation de acervo." />} />
-            <Route path="plans" element={<Plans />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/select-profile" element={<SelectProfile />} />
+          </Route>
+          <Route element={<ProtectedRoute requireProfile />}>
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<DashboardIndex />} />
+              <Route path="cellar" element={<CellarPage />} />
+              <Route path="alerts" element={<AlertsPage />} />
+              <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
+              <Route path="stats" element={<Placeholder title="Analytics" />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="inventory" element={<InventoryPage />} />
+              <Route path="sales" element={<InventoryPlaceholder title="Vendas" icon="sales" description="Rastreamento de pedidos, histórico de pagamentos e CRM integrado." />} />
+              <Route path="registers" element={<InventoryPlaceholder title="Cadastros" icon="registers" description="Gestão de fornecedores, produtores e base de clientes VIP." />} />
+              <Route path="reports" element={<InventoryPlaceholder title="Relatórios" icon="reports" description="BI avançado, impostos, previsão de demanda e valuation de acervo." />} />
+              <Route path="plans" element={<Plans />} />
+            </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

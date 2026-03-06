@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AnimatedOutlet } from "@/components/AnimatedOutlet";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function DashboardLayout() {
-  const { user, profileType, loading } = useAuth();
+  const { user, profileType } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
@@ -52,21 +52,6 @@ export default function DashboardLayout() {
     .join("")
     .toUpperCase()
     .slice(0, 2) || "U";
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F7F8" }}>
-        <div className="space-y-3 w-48 animate-pulse">
-          <div className="h-6 w-full rounded-lg" style={{ background: "rgba(0,0,0,0.06)" }} />
-          <div className="h-4 w-3/4 rounded-lg" style={{ background: "rgba(0,0,0,0.04)" }} />
-          <div className="h-4 w-1/2 rounded-lg" style={{ background: "rgba(0,0,0,0.03)" }} />
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) return <Navigate to="/login" replace />;
-  if (!profileType) return <Navigate to="/select-profile" replace />;
 
   return (
     <SidebarProvider>
