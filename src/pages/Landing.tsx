@@ -61,77 +61,82 @@ const plans = [
 function HeroComposition() {
   return (
     <motion.div
-      className="relative w-full h-full min-h-[400px] lg:min-h-[600px] flex items-center justify-center lg:justify-end"
+      className="relative w-full h-full min-h-[460px] lg:min-h-[600px] flex items-center justify-center lg:justify-end mt-12 lg:mt-0"
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Ambient glowing orbs */}
-      <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full bg-gradient-to-tr from-[#8F2D56]/20 to-[#C44569]/5 blur-[80px]" />
-      <div className="absolute bottom-[10%] left-[20%] w-[250px] h-[250px] rounded-full bg-gradient-to-br from-[#8C2044]/15 to-transparent blur-[60px]" />
+      {/* Ambient glowing orbs - Increased intensity for presence */}
+      <div className="absolute top-[10%] right-[0%] w-[350px] h-[350px] rounded-full bg-gradient-to-tr from-[#8F2D56]/30 to-[#C44569]/10 blur-[90px] mix-blend-multiply" />
+      <div className="absolute bottom-[0%] left-[10%] w-[300px] h-[300px] rounded-full bg-gradient-to-br from-[#8C2044]/20 to-transparent blur-[80px]" />
 
       <motion.div
-        animate={{ y: [-8, 8, -8] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="relative z-10 w-full max-w-[600px] perspective-1000"
+        animate={{ y: [-12, 12, -12] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="relative z-10 w-full max-w-[640px] perspective-1000 pl-4 lg:pl-0"
       >
         <div
-          className="relative rounded-[24px] bg-white/80 backdrop-blur-3xl border border-black/[0.04] p-6 shadow-2xl shadow-[#8C2044]/10 transform rotate-y-[-10deg] rotate-x-[5deg] translate-z-10"
+          className="relative rounded-[32px] bg-white/90 backdrop-blur-3xl border border-black/[0.06] p-8 shadow-[0_40px_100px_-20px_rgba(140,32,68,0.25)] transform lg:rotate-y-[-12deg] lg:rotate-x-[6deg] translate-z-10"
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* Top Bar of Mockup */}
-          <div className="flex items-center justify-between mb-8 border-b border-black/[0.04] pb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1.5 opacity-40">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
-                <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
-                <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
+          <div className="flex items-center justify-between mb-8 border-b border-black/[0.06] pb-5">
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2 opacity-50">
+                <div className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-sm" />
+                <div className="w-3 h-3 rounded-full bg-[#FFBD2E] shadow-sm" />
+                <div className="w-3 h-3 rounded-full bg-[#27C93F] shadow-sm" />
               </div>
-              <div className="h-6 px-3 bg-black/[0.03] rounded-full flex items-center">
-                <span className="text-[10px] font-black tracking-widest text-[#0F0F14]/40 uppercase">Adega Principal</span>
+              <div className="h-7 px-4 bg-black/[0.04] rounded-full flex items-center border border-black/[0.02]">
+                <span className="text-[11px] font-black tracking-widest text-[#0F0F14]/60 uppercase">Visão Resumo</span>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#8F2D56] to-[#C44569] flex items-center justify-center text-white shadow-md shadow-[#8F2D56]/20">
-              <span className="text-[11px] font-bold">SO</span>
+            <div className="w-9 h-9 rounded-full bg-[#0F0F14] flex items-center justify-center text-white shadow-lg">
+              <span className="text-[12px] font-bold tracking-widest">SM</span>
             </div>
           </div>
 
           {/* Cards inside Mockup */}
-          <div className="grid grid-cols-2 gap-4 mb-4" style={{ transform: "translateZ(30px)" }}>
-            <div className="p-5 rounded-2xl bg-white shadow-sm border border-black/[0.03] relative overflow-hidden group">
-              <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-[#8F2D56]/5 to-transparent rounded-bl-full pointer-events-none" />
-              <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground block mb-2">Total em Estoque</span>
-              <span className="text-3xl font-serif font-bold text-[#0F0F14] tracking-tight">2.14k</span>
-              <span className="text-[12px] font-medium text-[#8F2D56] flex items-center gap-1 mt-1">+12 garrafas este mês</span>
+          <div className="grid grid-cols-2 gap-5 mb-5" style={{ transform: "translateZ(40px)" }}>
+            <div className="p-6 rounded-[20px] bg-white shadow-sm border border-black/[0.04] relative overflow-hidden group">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/5 to-transparent rounded-bl-[100px] pointer-events-none" />
+              <span className="text-[11px] uppercase font-bold tracking-widest text-[#9CA3AF] block mb-3">Garrafas Acervo</span>
+              <span className="text-4xl font-serif font-black text-[#0F0F14] tracking-tight">2.14k</span>
+              <span className="text-[13px] font-bold text-[#8C2044] flex items-center gap-1.5 mt-2 bg-[#8C2044]/10 w-fit px-2 py-0.5 rounded-md">+42 entrada</span>
             </div>
 
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#0F0F14] shadow-premium shadow-black/20 text-white relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/10 to-transparent rounded-bl-full opacity-50 pointer-events-none" />
-              <span className="text-[10px] uppercase font-bold tracking-widest text-white/50 block mb-2">Patrimônio Líquido</span>
-              <span className="text-3xl font-serif font-bold tracking-tight text-white/95">R$ 142k</span>
-              <span className="text-[12px] font-medium text-white/40 flex items-center gap-1 mt-1">Atualizado hoje</span>
+            <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#1A1A24] to-[#0F0F14] shadow-premium shadow-black/30 text-white relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/10 to-transparent rounded-bl-[100px] opacity-50 pointer-events-none" />
+              <span className="text-[11px] uppercase font-bold tracking-widest text-white/50 block mb-3">Patrimônio Líquido</span>
+              <span className="text-4xl font-serif font-black tracking-tight text-white/95">R$ 142k</span>
+              <span className="text-[13px] font-medium text-white/40 flex items-center gap-1.5 mt-2">Atualizado há 2h</span>
             </div>
           </div>
 
           {/* List Mockup */}
-          <div className="space-y-3" style={{ transform: "translateZ(15px)" }}>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[#0F0F14] block mt-6 mb-2">Janela de Consumo: Beber Agora</span>
+          <div className="space-y-3.5 bg-black/[0.02] p-5 rounded-[20px] border border-black/[0.03]" style={{ transform: "translateZ(20px)" }}>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-[12px] font-black uppercase tracking-widest text-[#0F0F14]">Beber Agora</span>
+              <span className="text-[11px] font-bold text-[#8C2044] hover:underline cursor-pointer">Ver todas</span>
+            </div>
             {[
-              { name: "Château Margaux 2015", tag: "Tinto", alert: "Auge" },
-              { name: "Sassicaia 2018", tag: "Tinto", alert: "Evoluindo" },
-              { name: "Dom Pérignon 2012", tag: "Espumante", alert: "Auge" },
+              { name: "Château Margaux 2015", tag: "Bordeaux, FR", alert: "Auge (1 un)", color: "border-[#8C2044]/30 bg-[#8C2044]/5 text-[#8C2044]" },
+              { name: "Sassicaia 2018", tag: "Toscana, IT", alert: "Evoluindo (3 un)", color: "border-[#0F0F14]/20 bg-white text-[#0F0F14]" },
+              { name: "Dom Pérignon 2012", tag: "Champagne, FR", alert: "Auge (6 un)", color: "border-[#0F0F14]/20 bg-white text-[#0F0F14]" },
             ].map((w, i) => (
-              <div key={i} className="flex items-center justify-between p-3.5 rounded-xl bg-black/[0.02] border border-white/40 shadow-sm hover:bg-black/[0.04] transition-colors cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center border border-black/[0.05]">
-                    <Wine className="w-4 h-4 text-[#8C2044]" />
+              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white border border-black/[0.05] shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-[#8C2044]/20 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#F7F7F8] flex items-center justify-center border border-black/[0.05] group-hover:scale-105 transition-transform">
+                    <Wine className="w-5 h-5 text-[#8C2044]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <span className="block text-[13px] font-bold text-[#0F0F14]">{w.name}</span>
-                    <span className="text-[11px] font-medium text-muted-foreground">{w.tag}</span>
+                    <span className="block text-[14px] font-bold text-[#0F0F14]">{w.name}</span>
+                    <span className="text-[12px] font-medium text-muted-foreground mt-0.5 block">{w.tag}</span>
                   </div>
                 </div>
-                <Badge variant="secondary" className="h-6 text-[9px] bg-[#8C2044]/10 text-[#8C2044] border-none uppercase tracking-wider">{w.alert}</Badge>
+                <div className={`h-7 px-3 text-[10px] font-bold uppercase tracking-wider flex items-center rounded-lg border ${w.color}`}>
+                  {w.alert}
+                </div>
               </div>
             ))}
           </div>
@@ -150,7 +155,7 @@ export default function Landing() {
 
       {/* ─── HEADER ─── */}
       <motion.header
-        className="fixed top-0 w-full z-50 px-6 py-5 bg-white/70 backdrop-blur-2xl border-b border-black/[0.03]"
+        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-white/70 backdrop-blur-2xl border-b border-black/[0.03]"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -160,24 +165,23 @@ export default function Landing() {
             href="/"
             className="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[36px] sm:h-[44px] w-auto object-contain" />
-            <span className="text-[20px] sm:text-[22px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[36px] sm:h-[48px] w-auto object-contain" />
+            <span className="text-[22px] sm:text-[26px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-6">
             <Button
               variant="ghost"
-              className="text-[13px] font-bold px-6 h-11 transition-all hover:bg-black/[0.03] rounded-xl text-muted-foreground hover:text-foreground"
+              className="text-[14px] font-bold px-6 h-12 transition-all hover:bg-black/[0.03] rounded-xl text-muted-foreground hover:text-foreground hidden sm:inline-flex"
               onClick={() => navigate("/login")}
             >
               Entrar
             </Button>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-8 h-11 sm:h-12 text-[12px] sm:text-[13px] font-bold uppercase tracking-widest rounded-xl transition-all shadow-md shadow-[#8F2D56]/15 hover:shadow-lg hover:shadow-[#8F2D56]/25 border border-[#8F2D56]/10 text-white"
-                style={{ background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)" }}
+                className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_8px_20px_rgba(140,32,68,0.15)] hover:shadow-[0_12px_24px_rgba(140,32,68,0.25)] bg-[#0F0F14] hover:bg-[#202028] text-white"
                 onClick={() => navigate("/signup")}
               >
                 Começar Grátis
@@ -188,43 +192,45 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-36 lg:pt-48 pb-16 lg:pb-32 px-6 overflow-hidden min-h-screen flex items-center">
-        {/* Subtle grid pattern background */}
-        <div className="absolute inset-0 z-0 opacity-40 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
+      <section className="relative pt-36 lg:pt-48 pb-16 lg:pb-32 px-6 min-h-screen flex items-center overflow-visible">
+        {/* Subtle grid pattern background for density */}
+        <div className="absolute inset-0 z-0 opacity-[0.35] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
 
         <div className="container mx-auto relative z-10 max-w-7xl">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
 
-            {/* Headline Block (Left) */}
+            {/* Headline Block (Left) - Increased size and presence */}
             <div className="flex-1 max-w-2xl pt-10 lg:pt-0">
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-6 flex items-center gap-3">
-                <Badge variant="outline" className="h-7 px-3 text-[10px] font-bold uppercase tracking-widest border-[#8C2044]/20 text-[#8C2044] bg-[#8C2044]/5">Inteligência Estratégica</Badge>
+              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8 flex items-center gap-3">
+                <div className="h-8 px-4 rounded-full bg-[#8C2044]/5 border border-[#8C2044]/10 flex items-center justify-center">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-[#8C2044]">Inteligência Estratégica</span>
+                </div>
               </motion.div>
 
               <motion.h1
-                className="text-left font-serif font-bold text-[#0F0F14]"
-                style={{ fontSize: "clamp(48px, 6vw, 84px)", lineHeight: 1, letterSpacing: "-0.04em" }}
+                className="text-left font-serif font-black text-[#0F0F14]"
+                style={{ fontSize: "clamp(56px, 7vw, 96px)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
                 initial="hidden" animate="visible" variants={fadeUp} custom={1}
               >
                 Sua adega, <br />
-                <span className="italic text-gradient-wine font-serif block mt-1">inteligente.</span>
+                <span className="italic text-gradient-wine font-serif block mt-2">inteligente.</span>
               </motion.h1>
 
               <motion.p
-                className="text-left text-lg sm:text-[19px] max-w-[560px] mt-8 font-medium text-muted-foreground"
+                className="text-left text-lg sm:text-[20px] max-w-[580px] mt-10 font-medium text-[#4B5563]"
                 style={{ lineHeight: 1.6 }}
                 initial="hidden" animate="visible" variants={fadeUp} custom={2}
               >
-                Gestão técnica, operação comercial e inteligência de estoque em uma plataforma pensada para quem trata o vinho com seriedade e sofisticação.
+                Gestão técnica implacável, operação comercial ágil e inteligência de estoque em um ambiente estruturado para quem trata o vinho com rigor.
               </motion.p>
 
               <motion.div
-                className="mt-10 flex flex-col sm:flex-row items-center gap-4"
+                className="mt-12 flex flex-col sm:flex-row items-center gap-5"
                 initial="hidden" animate="visible" variants={fadeUp} custom={3}
               >
                 <MagneticButton>
                   <Button
-                    className="w-full sm:w-auto px-10 h-14 text-[14px] font-black uppercase tracking-widest rounded-[16px] transition-all shadow-[0_8px_20px_rgba(140,32,68,0.2)] hover:shadow-[0_12px_24px_rgba(140,32,68,0.3)] text-white"
+                    className="w-full sm:w-auto px-12 h-16 text-[14px] font-black uppercase tracking-widest rounded-[18px] transition-all shadow-[0_12px_32px_rgba(140,32,68,0.25)] hover:shadow-[0_16px_40px_rgba(140,32,68,0.35)] text-white hover:-translate-y-1"
                     style={{ background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)" }}
                     onClick={() => navigate("/signup")}
                   >
@@ -233,25 +239,26 @@ export default function Landing() {
                 </MagneticButton>
                 <Button
                   variant="outline"
-                  className="w-full sm:w-auto px-8 h-14 text-[14px] font-bold rounded-[16px] border-black/10 hover:bg-black/5 hover:text-foreground transition-all group"
+                  className="w-full sm:w-auto px-10 h-16 text-[15px] font-bold rounded-[18px] border-black/10 hover:bg-black/5 hover:text-[#0F0F14] transition-all group shadow-sm bg-white"
                 >
-                  Ver Demonstração <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  Ver Demonstração <ChevronRight className="ml-2 h-4 w-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </Button>
               </motion.div>
 
               <motion.div
-                className="mt-10 flex items-center gap-6"
+                className="mt-12 flex items-center gap-6 pt-8 border-t border-black/[0.04]"
                 initial="hidden" animate="visible" variants={fadeUp} custom={4}
               >
                 <div className="flex -space-x-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden"><img src="https://i.pravatar.cc/100?img=1" alt="Avatar" className="w-full h-full object-cover" /></div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-300 overflow-hidden"><img src="https://i.pravatar.cc/100?img=5" alt="Avatar" className="w-full h-full object-cover" /></div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-400 overflow-hidden"><img src="https://i.pravatar.cc/100?img=8" alt="Avatar" className="w-full h-full object-cover" /></div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#FAFAFA] bg-slate-200 overflow-hidden"><img src="https://i.pravatar.cc/100?img=11" alt="Avatar" className="w-full h-full object-cover" /></div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#FAFAFA] bg-slate-300 overflow-hidden"><img src="https://i.pravatar.cc/100?img=12" alt="Avatar" className="w-full h-full object-cover" /></div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#FAFAFA] bg-slate-400 overflow-hidden"><img src="https://i.pravatar.cc/100?img=13" alt="Avatar" className="w-full h-full object-cover" /></div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#FAFAFA] bg-[#0F0F14] flex items-center justify-center text-[10px] font-bold text-white">+2k</div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-bold text-[#0F0F14]">Mais de 12.000 usuários</span>
-                  <span className="text-[12px] font-medium text-muted-foreground flex items-center gap-1">
-                    <Check className="h-3 w-3 text-green-500" /> Sem complicação. Mais controle.
+                  <span className="text-[14px] font-bold text-[#0F0F14]">Junte-se a gestores e colecionadores</span>
+                  <span className="text-[12px] font-medium text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                    <Check className="h-3.5 w-3.5 text-green-600" /> Sem implantação complexa.
                   </span>
                 </div>
               </motion.div>
@@ -267,38 +274,38 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 2. FEATURES ═══════════════ */}
-      <section id="features" className="relative py-24 px-6 border-t border-black/[0.04] bg-white">
+      <section id="features" className="relative py-28 px-6 border-t border-black/[0.04] bg-white">
         <div className="container mx-auto max-w-7xl relative z-10">
-          <motion.div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <div className="max-w-2xl">
+          <motion.div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <div className="max-w-3xl">
               <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block text-[#8C2044]">
-                Arquitetura do Sistema
+                Excelência Operacional
               </span>
-              <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight text-[#0F0F14] leading-[1.1]">
-                Um ecossistema completo <span className="italic text-gradient-wine">para sua coleção</span>
+              <h2 className="text-4xl md:text-6xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05]">
+                Um ecossistema desenhado <br className="hidden md:block" /><span className="italic text-gradient-wine">para a sua coleção</span>
               </h2>
             </div>
-            <p className="text-[16px] text-muted-foreground max-w-md font-medium">Nossa plataforma combina ferramentas de gestão robustas com uma interface elegante e analítica avançada.</p>
+            <p className="text-[17px] text-[#6B7280] max-w-md font-medium leading-relaxed">Nossa plataforma combina ferramentas de gestão robustas com uma interface elegante e analítica avançada.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
-                className="group cursor-default p-8 rounded-[24px] bg-[#FAFAFA] border border-black/[0.04] hover:bg-white transition-colors duration-300 relative overflow-hidden"
+                className="group cursor-default p-10 rounded-[32px] bg-[#FAFAFA] border border-black/[0.04] hover:bg-white transition-colors duration-300 relative overflow-hidden"
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 whileHover={{
-                  y: -4,
-                  boxShadow: "0 24px 48px -12px rgba(0,0,0,0.06)",
-                  borderColor: "rgba(140, 32, 68, 0.15)"
+                  y: -6,
+                  boxShadow: "0 30px 60px -15px rgba(0,0,0,0.08)",
+                  borderColor: "rgba(140, 32, 68, 0.2)"
                 }}
               >
-                <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-[#8F2D56]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-14 h-14 rounded-[18px] flex items-center justify-center mb-6 bg-white shadow-sm border border-black/[0.03] group-hover:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
-                  <f.icon className="h-6 w-6 text-[#8F2D56]" strokeWidth={1.5} />
+                <div className="absolute right-0 top-0 w-40 h-40 bg-gradient-to-bl from-[#8F2D56]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mb-8 bg-white shadow-sm border border-black/[0.04] group-hover:scale-110 group-hover:shadow-md transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
+                  <f.icon className="h-7 w-7 text-[#8C2044]" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-[18px] font-bold mb-3 font-sans tracking-tight text-[#0F0F14]">{f.title}</h3>
-                <p className="text-[15px] leading-[1.6] text-muted-foreground font-medium">{f.desc}</p>
+                <h3 className="text-[20px] font-bold mb-3 font-sans tracking-tight text-[#0F0F14]">{f.title}</h3>
+                <p className="text-[15px] leading-[1.6] text-[#6B7280] font-medium">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -306,25 +313,25 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 4. STATS ═══════════════ */}
-      <section className="relative z-10 py-20 border-y border-black/[0.04] bg-[#0F0F14] text-white overflow-hidden">
+      <section className="relative z-10 py-24 border-y border-black/[0.04] bg-[#0F0F14] text-white overflow-hidden">
         <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
-        <div className="absolute top-[-50%] left-[-10%] w-[50%] h-[200%] bg-gradient-to-br from-[#8C2044]/20 to-transparent blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-50%] right-[-10%] w-[50%] h-[200%] bg-gradient-to-bl from-[#8C2044]/30 to-transparent blur-[140px] pointer-events-none" />
 
         <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-0" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
             {[
-              { label: "Garrafas gerenciadas", value: "248k+" },
-              { label: "Valor em adegas", value: "R$ 42M+" },
-              { label: "Produtores base", value: "14.200" },
-              { label: "Usuários ativos", value: "12.5k" },
+              { label: "Garrafas estocadas", value: "320k+" },
+              { label: "Valor em acervos", value: "R$ 48M+" },
+              { label: "Produtores base", value: "14.2k" },
+              { label: "Decisões seguras", value: "99%" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
                 className="text-center relative md:border-r border-white/10 last:border-0"
                 variants={fadeUp}
               >
-                <p className="text-4xl md:text-5xl font-black font-serif tracking-tight text-white mb-2">{stat.value}</p>
-                <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-white/50">{stat.label}</p>
+                <p className="text-4xl md:text-6xl font-black font-serif tracking-tight text-white mb-3" style={{ textShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>{stat.value}</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-white/50">{stat.label}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -332,12 +339,12 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 5. PRICING ═══════════════ */}
-      <section id="pricing" className="relative py-24 px-6 bg-[#FAFAFA]">
+      <section id="pricing" className="relative py-28 px-6 bg-[#FAFAFA]">
         <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div className="mb-16 text-center max-w-3xl mx-auto" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+          <motion.div className="mb-20 text-center max-w-3xl mx-auto" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block text-[#8C2044]">Acesso Premium</span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight text-[#0F0F14] leading-[1.1]">
-              Planos desenhados <span className="italic text-gradient-wine">para sua coleção</span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05]">
+              Planos desenhados <br className="hidden md:block" /> <span className="italic text-gradient-wine">para sua coleção</span>
             </h2>
           </motion.div>
 
@@ -345,55 +352,57 @@ export default function Landing() {
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`relative p-8 md:p-10 rounded-[32px] overflow-hidden ${plan.highlighted ? "lg:py-14" : ""}`}
+                className={`relative p-8 md:p-10 rounded-[36px] overflow-hidden ${plan.highlighted ? "lg:py-14" : ""}`}
                 style={plan.highlighted ? {
                   background: "linear-gradient(160deg, #0F0F14 0%, #1A1A24 100%)",
-                  boxShadow: "0 30px 60px rgba(0,0,0,0.15)",
+                  boxShadow: "0 40px 80px rgba(0,0,0,0.2)",
                   border: "1px solid rgba(255,255,255,0.08)",
                 } : {
                   background: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.06)",
-                  boxShadow: "0 10px 40px -10px rgba(0,0,0,0.03)",
+                  border: "1px solid rgba(0, 0, 0, 0.04)",
+                  boxShadow: "0 12px 40px -10px rgba(0,0,0,0.03)",
                 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
+                whileHover={{ y: -8, transition: { duration: 0.4 } }}
               >
                 {plan.highlighted && (
                   <div className="absolute top-0 right-0 p-8">
-                    <span className="px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r from-[#8F2D56] to-[#C44569] text-white shadow-lg shadow-[#8C2044]/20">
+                    <span className="px-5 py-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r from-[#8F2D56] to-[#C44569] text-white shadow-lg shadow-[#8C2044]/30">
                       Recomendado
                     </span>
                   </div>
                 )}
 
-                <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
+                <h3 className="text-[28px] font-serif font-black mb-2 tracking-tight" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
                   {plan.name}
                 </h3>
-                <p className="text-[14px] mb-8 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.5)" : "#6B7280" }}>
+                <p className="text-[15px] mb-8 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.6)" : "#6B7280" }}>
                   {plan.desc}
                 </p>
-                <div className="mb-10 flex items-baseline gap-1">
-                  <span className="text-5xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
+                <div className="mb-10 flex items-baseline gap-1.5 border-b border-black/[0.04] pb-8" style={plan.highlighted ? { borderColor: "rgba(255,255,255,0.08)" } : {}}>
+                  <span className="text-6xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
                     {plan.price}
                   </span>
-                  <span className="text-[13px] font-bold uppercase tracking-wider" style={{ color: plan.highlighted ? "rgba(255,255,255,0.4)" : "#9CA3AF" }}>
+                  <span className="text-[14px] font-bold uppercase tracking-wider" style={{ color: plan.highlighted ? "rgba(255,255,255,0.4)" : "#9CA3AF" }}>
                     {plan.period}
                   </span>
                 </div>
 
-                <ul className="space-y-4 mb-10 min-h-[160px]">
+                <ul className="space-y-4 mb-12 min-h-[160px]">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-[14px] font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.8)" : "#4B5563" }}>
-                      <Check className="h-5 w-5 flex-shrink-0" style={{ color: plan.highlighted ? "#C44569" : "#8C2044" }} strokeWidth={2.5} />
+                    <li key={f} className="flex items-center gap-3 text-[15px] font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.9)" : "#4B5563" }}>
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(196,69,105,0.2)" : "rgba(140,32,68,0.1)" }}>
+                        <Check className="h-3 w-3" style={{ color: plan.highlighted ? "#ff8ba7" : "#8C2044" }} strokeWidth={3} />
+                      </div>
                       {f}
                     </li>
                   ))}
                 </ul>
 
                 <Button
-                  className={`w-full h-14 rounded-[16px] text-[13px] font-bold uppercase tracking-[0.1em] transition-all ${plan.highlighted
-                      ? "bg-white text-[#0F0F14] hover:bg-white/90 shadow-[0_8px_20px_rgba(255,255,255,0.1)] hover:shadow-white/20"
-                      : "bg-black/5 text-[#0F0F14] hover:bg-black/10 shadow-none border border-black/5"
+                  className={`w-full h-[60px] rounded-[20px] text-[14px] font-black uppercase tracking-[0.1em] transition-all ${plan.highlighted
+                      ? "bg-white text-[#0F0F14] hover:bg-white/90 shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:shadow-white/20 hover:-translate-y-0.5"
+                      : "bg-[#FAFAFA] text-[#0F0F14] hover:bg-black/5 shadow-none border border-black/5"
                     }`}
                   onClick={() => navigate("/signup")}
                 >
@@ -406,18 +415,18 @@ export default function Landing() {
       </section>
 
       {/* ─── 6. FOOTER ─── */}
-      <footer className="py-12 px-6 relative z-10 bg-white border-t border-black/[0.04]">
+      <footer className="py-14 px-6 relative z-10 bg-white border-t border-black/[0.04]">
         <div className="container mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 w-auto object-contain grayscale opacity-80" />
-            <span className="font-bold text-[18px] font-sans tracking-tight text-[#0F0F14]">Sommelyx</span>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[36px] w-auto object-contain grayscale opacity-60" />
+            <span className="font-black text-[20px] font-sans tracking-tight text-[#0F0F14]">Sommelyx</span>
           </div>
-          <div className="flex items-center gap-8 text-[13px] font-bold uppercase tracking-wider text-muted-foreground">
+          <div className="flex items-center gap-8 text-[13px] font-bold uppercase tracking-widest text-[#6B7280]">
             <a href="#features" className="hover:text-[#0F0F14] transition-colors">Funcionalidades</a>
             <a href="#pricing" className="hover:text-[#0F0F14] transition-colors">Planos</a>
-            <button onClick={() => navigate("/login")} className="hover:text-[#0F0F14] transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-wider">Acesso Privado</button>
+            <button onClick={() => navigate("/login")} className="hover:text-[#0F0F14] transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest">Acesso Privado</button>
           </div>
-          <p className="text-[12px] font-medium text-muted-foreground">
+          <p className="text-[13px] font-medium text-[#9CA3AF]">
             © {new Date().getFullYear()} Sommelyx. Inteligência em cada taça.
           </p>
         </div>

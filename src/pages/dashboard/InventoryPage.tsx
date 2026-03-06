@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -83,7 +84,12 @@ export default function InventoryPage() {
         const countries = [...new Set(wines.map(w => w.country).filter(Boolean) as string[])].sort();
         const grapes = [...new Set(wines.map(w => w.grape).filter(Boolean) as string[])].sort();
         const vintages = [...new Set(wines.map(w => w.vintage).filter(Boolean) as number[])].sort((a, b) => b - a).map(String);
-        return { countries, grapes, vintages };
+        return {
+            countries: countries.map(c => ({ label: c, value: c })),
+            grapes: grapes.map(g => ({ label: g, value: g })),
+            vintages: vintages.map(v => ({ label: v, value: v })),
+            styles: STYLES.map(s => ({ label: s, value: s }))
+        };
     }, [wines]);
 
     // Summary metrics
@@ -254,38 +260,7 @@ export default function InventoryPage() {
         );
     };
 
-    const QuickFilterDropdown = ({ label, paramKey, options }: { label: string, paramKey: string, options: string[] }) => {
-        const activeVals = searchParams.getAll(paramKey);
-        const isActive = activeVals.length > 0;
-        return (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant={isActive ? "secondary" : "outline"} size="sm" className={cn("h-8 px-3 rounded-xl text-[12px] font-bold border-white/20 hover:border-primary/30 transition-all", isActive ? "bg-primary/10 text-primary border-primary/20" : "")}>
-                        {label} <ChevronDown className="ml-1 h-3 w-3" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 p-2 rounded-2xl bg-white/95 backdrop-blur-xl border-white/20 shadow-premium max-h-72 overflow-y-auto">
-                    {options.map(opt => (
-                        <DropdownMenuItem key={opt} className="rounded-xl flex items-center justify-between group" onClick={(e) => { e.preventDefault(); updateParam(paramKey, opt, true); }}>
-                            <span className="text-[13px] font-medium">{opt}</span>
-                            {activeVals.includes(opt) && <Check className="h-4 w-4 text-primary" />}
-                        </DropdownMenuItem>
-                    ))}
-                    {isActive && (
-                        <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="rounded-xl text-red-500 justify-center font-bold text-[12px] uppercase" onClick={(e) => {
-                                e.preventDefault();
-                                const params = new URLSearchParams(searchParams);
-                                params.delete(paramKey);
-                                setSearchParams(params, { replace: true });
-                            }}>Limpar seleção</DropdownMenuItem>
-                        </>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
-        );
-    };
+    // MultiSelectDropdown handles its own UI now, so we remove QuickFilterDropdown
 
     return (
         <div className="space-y-6 max-w-[1400px] pb-24 relative min-h-screen">
@@ -373,15 +348,44 @@ export default function InventoryPage() {
                     <div className="w-[1px] h-6 bg-border mx-1 hidden sm:block" />
 
                     {/* Quick dropdown filters */}
-                    <QuickFilterDropdown label="País" paramKey="country" options={dynamicOptions.countries} />
-                    <QuickFilterDropdown label="Uva" paramKey="grape" options={dynamicOptions.grapes} />
-                    <QuickFilterDropdown label="Safra" paramKey="vintage" options={dynamicOptions.vintages} />
+                    <MultiSelectDropdown
+                        title="Estilo"
+                        options={dynamicOptions.styles}
+                        selected={styleFilters}
+                        onChange={(val) => updateParam("style", val, true)}
+                        onClear={() => updateParam("style", null, true)}
+                        searchPlaceholder="Buscar estilo..."
+                    />
+                    <MultiSelectDropdown
+                        title="País"
+                        options={dynamicOptions.countries}
+                        selected={countryFilters}
+                        onChange={(val) => updateParam("country", val, true)}
+                        onClear={() => updateParam("country", null, true)}
+                        searchPlaceholder="Buscar país..."
+                    />
+                    <MultiSelectDropdown
+                        title="Uva"
+                        options={dynamicOptions.grapes}
+                        selected={grapeFilters}
+                        onChange={(val) => updateParam("grape", val, true)}
+                        onClear={() => updateParam("grape", null, true)}
+                        searchPlaceholder="Buscar uva..."
+                    />
+                    <MultiSelectDropdown
+                        title="Safra"
+                        options={dynamicOptions.vintages}
+                        selected={vintageFilters}
+                        onChange={(val) => updateParam("vintage", val, true)}
+                        onClear={() => updateParam("vintage", null, true)}
+                        searchPlaceholder="Buscar safra..."
+                    />
 
-                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-xl bg-white/40 border-black/5" onClick={() => setFilterOpen(true)}>
-                        <SlidersHorizontal className="h-4 w-4" />
-                        {activeFilterCount > 0 && (
+                    <Button variant="outline" size="icon" className="h-10 w-10 rounded-[12px] bg-white/40 border-border/50 hover:border-black/20" onClick={() => setFilterOpen(true)}>
+                        <SlidersHorizontal className="h-4 w-4 opacity-70" />
+                        {tagFilters.length > 0 && (
                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#8C2044] text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                                {activeFilterCount}
+                                {tagFilters.length}
                             </span>
                         )}
                     </Button>
@@ -398,22 +402,27 @@ export default function InventoryPage() {
                         className="flex flex-wrap gap-2 items-center px-1"
                     >
                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-1">Filtros ativos:</span>
+                        {styleFilters.map(s => (
+                            <Badge key={s} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10">
+                                {s} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("style", s, true)} />
+                            </Badge>
+                        ))}
                         {countryFilters.map(c => (
-                            <Badge key={c} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10">
+                            <Badge key={c} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10">
                                 {c} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("country", c, true)} />
                             </Badge>
                         ))}
                         {grapeFilters.map(g => (
-                            <Badge key={g} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10">
+                            <Badge key={g} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10">
                                 {g} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("grape", g, true)} />
                             </Badge>
                         ))}
                         {vintageFilters.map(v => (
-                            <Badge key={v} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10">
+                            <Badge key={v} variant="secondary" className="pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10">
                                 Safra {v} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("vintage", v, true)} />
                             </Badge>
                         ))}
-                        <button className="text-[10px] font-bold text-red-500 hover:text-red-600 hover:underline border-l border-red-200 pl-2 ml-1" onClick={clearAllFilters}>Limpar tudo</button>
+                        <button className="text-[10px] font-bold text-red-500 hover:text-red-600 hover:underline border-l border-red-200 pl-2 ml-1 transition-colors" onClick={clearAllFilters}>Limpar tudo</button>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -516,6 +525,6 @@ export default function InventoryPage() {
     );
 
     function hasActiveFilters() {
-        return countryFilters.length > 0 || grapeFilters.length > 0 || vintageFilters.length > 0;
+        return styleFilters.length > 0 || countryFilters.length > 0 || grapeFilters.length > 0 || vintageFilters.length > 0;
     }
 }
