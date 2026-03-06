@@ -204,7 +204,7 @@ export default function Landing() {
             <MagneticButton>
               <Button
                 variant="ghost"
-                className="inline-flex h-11 rounded-2xl px-5 text-[14px] sm:text-[15px] font-semibold text-[#5A1834] transition-colors duration-300 hover:bg-[#8C2044]/[0.06] hover:text-[#8C2044]"
+                className="inline-flex h-11 sm:h-12 rounded-full px-6 sm:px-7 text-[14px] sm:text-[14.5px] font-semibold text-white bg-gradient-to-br from-[#6F1D42] to-[#A93462] shadow-[0_10px_24px_-14px_rgba(140,32,68,0.5)] transition-all duration-300 hover:from-[#7D2450] hover:to-[#BA3F6E] hover:shadow-[0_14px_28px_-16px_rgba(140,32,68,0.55)]"
                 onClick={() => navigate("/login")}
               >
                 Entrar
@@ -223,7 +223,7 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-36 lg:pt-48 pb-16 lg:pb-32 px-6 min-h-screen flex items-center overflow-visible">
+      <section className="relative pt-24 lg:pt-32 pb-16 lg:pb-32 px-6 min-h-screen flex items-center overflow-visible">
         <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         {/* Subtle grid pattern background for density */}
         <div className="absolute inset-0 z-0 opacity-[0.28] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(88,20,46,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(88,20,46,0.07) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
@@ -234,7 +234,7 @@ export default function Landing() {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
 
             {/* Headline Block (Left) - Increased size and presence */}
-            <div className="flex-1 max-w-2xl pt-10 lg:pt-0">
+            <div className="flex-1 max-w-2xl pt-6 lg:pt-0">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8 flex items-center gap-3">
                 <div className="h-8 px-4 rounded-full bg-[#8C2044]/8 border border-[#8C2044]/18 shadow-[0_8px_18px_rgba(140,32,68,0.08)] flex items-center justify-center">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[#8C2044]">Inteligência Estratégica</span>
