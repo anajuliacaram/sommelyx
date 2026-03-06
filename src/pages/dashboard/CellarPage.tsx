@@ -335,66 +335,151 @@ export default function CellarPage() {
         </div>
       </div>
 
-      {/* Tag-based filters */}
-      <div className="space-y-2.5">
-        <TagSection
-          title="Estilo"
-          options={styleOptions}
-          selected={selectedStyles}
-          onToggle={v => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-        />
-        <TagSection
-          title="País"
-          options={dynamicOptions.countries}
-          selected={selectedCountries}
-          onToggle={v => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-          maxVisible={8}
-        />
-        <TagSection
-          title="Uva"
-          options={dynamicOptions.grapes}
-          selected={selectedGrapes}
-          onToggle={v => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-          maxVisible={8}
-        />
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">Janela</span>
-          {drinkWindowOptions.map(opt => (
-            <TagChip
-              key={opt.value}
-              label={opt.label}
-              active={selectedDrinkWindows.includes(opt.value)}
-              onClick={() => { setSelectedDrinkWindows(prev => toggleInArray(prev, opt.value)); setActiveSavedFilter(null); }}
-            />
-          ))}
-          <TagChip
-            label="Baixo estoque"
-            active={lowStock}
-            onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
-          />
-        </div>
-      </div>
+      {/* Filter Content - shared between inline and bottom sheet */}
+      {(() => {
+        const filterContent = (
+          <div className="space-y-4">
+            {/* Tag-based filters */}
+            <div className="space-y-2.5">
+              <TagSection
+                title="Estilo"
+                options={styleOptions}
+                selected={selectedStyles}
+                onToggle={v => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+              />
+              <TagSection
+                title="País"
+                options={dynamicOptions.countries}
+                selected={selectedCountries}
+                onToggle={v => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+                maxVisible={8}
+              />
+              <TagSection
+                title="Uva"
+                options={dynamicOptions.grapes}
+                selected={selectedGrapes}
+                onToggle={v => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
+                maxVisible={8}
+              />
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">Janela</span>
+                {drinkWindowOptions.map(opt => (
+                  <TagChip
+                    key={opt.value}
+                    label={opt.label}
+                    active={selectedDrinkWindows.includes(opt.value)}
+                    onClick={() => { setSelectedDrinkWindows(prev => toggleInArray(prev, opt.value)); setActiveSavedFilter(null); }}
+                  />
+                ))}
+                <TagChip
+                  label="Baixo estoque"
+                  active={lowStock}
+                  onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
+                />
+              </div>
+            </div>
 
-      {/* Range Sliders: Safra & Preço */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 glass-card p-4">
-        <RangeSliderFilter
-          label="Safra"
-          min={dynamicOptions.minVintage}
-          max={dynamicOptions.maxVintage}
-          step={1}
-          value={vintageRange}
-          onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }}
-        />
-        <RangeSliderFilter
-          label="Preço"
-          min={0}
-          max={dynamicOptions.maxPrice}
-          step={10}
-          value={priceRange}
-          onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }}
-          formatValue={v => `R$ ${v}`}
-        />
-      </div>
+            {/* Range Sliders */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 glass-card p-4">
+              <RangeSliderFilter
+                label="Safra"
+                min={dynamicOptions.minVintage}
+                max={dynamicOptions.maxVintage}
+                step={1}
+                value={vintageRange}
+                onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }}
+              />
+              <RangeSliderFilter
+                label="Preço"
+                min={0}
+                max={dynamicOptions.maxPrice}
+                step={10}
+                value={priceRange}
+                onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }}
+                formatValue={v => `R$ ${v}`}
+              />
+            </div>
+
+            {/* Saved Filters */}
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-medium uppercase tracking-wider self-center mr-1 text-muted-foreground">Filtros salvos:</span>
+              {defaultSavedFilters.map(f => (
+                <button
+                  key={f.name}
+                  onClick={() => applySavedFilter(f)}
+                  className="h-7 px-3 rounded-full text-[10px] font-medium flex items-center gap-1.5 transition-all duration-200"
+                  style={{
+                    background: activeSavedFilter === f.name ? "rgba(143,45,86,0.08)" : "rgba(0,0,0,0.02)",
+                    color: activeSavedFilter === f.name ? "#8F2D56" : "#6B7280",
+                    border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.2)" : "rgba(0,0,0,0.04)"}`,
+                  }}
+                >
+                  {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
+                  {f.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+        return isMobile ? (
+          <>
+            {/* Mobile: Filter trigger button */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setFilterSheetOpen(true)}
+                className="h-9 px-4 text-[12px] font-semibold gap-1.5"
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                Filtros
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 h-5 min-w-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center text-white" style={{ background: "linear-gradient(135deg, hsl(var(--wine)), hsl(var(--wine-vivid)))" }}>
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+              {activeFilterCount > 0 && (
+                <button onClick={clearFilters} className="h-7 px-2.5 rounded-full text-[10px] font-medium text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-1">
+                  <X className="h-3 w-3" /> Limpar
+                </button>
+              )}
+            </div>
+
+            {/* Mobile Bottom Sheet */}
+            <Drawer open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+              <DrawerContent className="max-h-[90vh] rounded-t-[24px] border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_-20px_60px_rgba(0,0,0,0.15)]">
+                <DrawerHeader className="pb-2">
+                  <DrawerTitle className="text-base font-serif font-bold text-foreground">Filtros</DrawerTitle>
+                </DrawerHeader>
+                <div className="px-4 pb-2 overflow-y-auto flex-1 max-h-[65vh]">
+                  {filterContent}
+                </div>
+                <DrawerFooter className="flex-row gap-3 pt-3 border-t border-border/30">
+                  <Button
+                    variant="ghost"
+                    onClick={() => { clearFilters(); setFilterSheetOpen(false); }}
+                    className="flex-1 h-11 text-[13px] font-semibold text-destructive hover:bg-destructive/10"
+                  >
+                    <X className="h-4 w-4 mr-1.5" /> Limpar filtros
+                  </Button>
+                  <Button
+                    variant="premium"
+                    onClick={() => setFilterSheetOpen(false)}
+                    className="flex-1 h-11 text-[13px] font-bold"
+                  >
+                    Aplicar filtros
+                  </Button>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+          </>
+        ) : (
+          <>
+            {filterContent}
+          </>
+        );
+      })()}
 
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
@@ -416,26 +501,6 @@ export default function CellarPage() {
           </button>
         </div>
       )}
-
-      {/* Saved Filters */}
-      <div className="flex flex-wrap gap-2">
-        <span className="text-[10px] font-medium uppercase tracking-wider self-center mr-1 text-muted-foreground">Filtros salvos:</span>
-        {defaultSavedFilters.map(f => (
-          <button
-            key={f.name}
-            onClick={() => applySavedFilter(f)}
-            className="h-7 px-3 rounded-full text-[10px] font-medium flex items-center gap-1.5 transition-all duration-200"
-            style={{
-              background: activeSavedFilter === f.name ? "rgba(143,45,86,0.08)" : "rgba(0,0,0,0.02)",
-              color: activeSavedFilter === f.name ? "#8F2D56" : "#6B7280",
-              border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.2)" : "rgba(0,0,0,0.04)"}`,
-            }}
-          >
-            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
-            {f.name}
-          </button>
-        ))}
-      </div>
 
       {/* Content */}
       {isLoading ? (
