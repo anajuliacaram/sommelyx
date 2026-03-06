@@ -17,7 +17,8 @@ import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { useToast } from "@/hooks/use-toast";
-
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
+import { cn } from "@/lib/utils";
 const MOBILE_BREAKPOINT = 640;
 function useIsSmallScreen() {
   const [small, setSmall] = useState(false);
@@ -73,60 +74,7 @@ const defaultSavedFilters: SavedFilter[] = [
   { name: "Baixo estoque", styles: [], countries: [], grapes: [], drinkWindows: [], lowStock: true },
 ];
 
-// Premium tag chip component
-function TagChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        h-8 px-3.5 rounded-full text-[11px] font-semibold
-        transition-all duration-200 ease-out
-        hover:scale-[1.04] active:scale-[0.97]
-        ${active
-          ? "text-white shadow-[0_2px_12px_rgba(143,45,86,0.35)]"
-          : "bg-card/80 backdrop-blur-sm text-muted-foreground border border-border/50 hover:border-primary/30 hover:text-foreground"
-        }
-      `}
-      style={active ? {
-        background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)",
-      } : undefined}
-    >
-      {label}
-    </button>
-  );
-}
-
-// Expandable tag section with label
-function TagSection({ title, options, selected, onToggle, maxVisible = 6 }: {
-  title: string;
-  options: { value: string; label: string }[];
-  selected: string[];
-  onToggle: (value: string) => void;
-  maxVisible?: number;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? options : options.slice(0, maxVisible);
-  const hasMore = options.length > maxVisible;
-
-  if (options.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">{title}</span>
-      {visible.map(opt => (
-        <TagChip key={opt.value} label={opt.label} active={selected.includes(opt.value)} onClick={() => onToggle(opt.value)} />
-      ))}
-      {hasMore && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="h-7 px-2.5 rounded-full text-[10px] font-medium text-primary hover:bg-primary/5 transition-colors"
-        >
-          {expanded ? "Ver menos" : `+${options.length - maxVisible}`}
-        </button>
-      )}
-    </div>
-  );
-}
+// Filter components are now using MultiSelectDropdown
 
 function toggleInArray(arr: string[], val: string): string[] {
   return arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
@@ -293,212 +241,115 @@ export default function CellarPage() {
         </Button>
       </div>
 
-      {/* Search + View Toggle */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+      {/* Search + Actions */}
+      <div className="flex flex-col gap-3">
+        {/* Top Row: Search */}
+        <div className="relative w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquise vinho, produtor, uva, safra, localização…"
-            className="pl-10 h-10 text-sm rounded-[14px] bg-muted/30 border-border/40"
+            className="pl-10 h-11 text-sm rounded-[14px] bg-muted/30 border-border/40 w-full"
           />
         </div>
-        <div className="flex gap-2">
-          <div className="flex rounded-[10px] overflow-hidden border border-border/40">
-            <button
-              onClick={() => setViewMode("grid")}
-              className="h-10 w-10 flex items-center justify-center transition-colors"
-              style={{ background: viewMode === "grid" ? "rgba(143,45,86,0.08)" : "transparent", color: viewMode === "grid" ? "#8F2D56" : undefined }}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className="h-10 w-10 flex items-center justify-center transition-colors"
-              style={{ background: viewMode === "list" ? "rgba(143,45,86,0.08)" : "transparent", color: viewMode === "list" ? "#8F2D56" : undefined }}
-            >
-              <List className="h-4 w-4" />
-            </button>
+
+        {/* Bottom Row: Filters & Sort */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <MultiSelectDropdown title="Estilo" options={styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
+            <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
+            <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
+            <MultiSelectDropdown title="Janela" options={drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
           </div>
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            className="h-10 px-3 text-[12px] rounded-[10px] bg-card cursor-pointer border border-border/40 text-muted-foreground"
-          >
-            <option value="drink">Prioridade de consumo</option>
-            <option value="date">Data de entrada</option>
-            <option value="name">Nome A-Z</option>
-            <option value="value">Valor</option>
-            <option value="qty">Quantidade</option>
-          </select>
+
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex rounded-[12px] p-[2px] bg-muted/30 border border-border/40">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn("h-9 w-9 rounded-[10px] flex items-center justify-center transition-colors", viewMode === "grid" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={cn("h-9 w-9 rounded-[10px] flex items-center justify-center transition-colors", viewMode === "list" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="h-10 px-3 pr-8 text-[13px] font-medium rounded-[12px] bg-card cursor-pointer border border-border/40 text-foreground"
+            >
+              <option value="drink">Prioridade de consumo</option>
+              <option value="date">Data de entrada</option>
+              <option value="name">Nome A-Z</option>
+              <option value="value">Valor</option>
+              <option value="qty">Quantidade</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Filter Content - shared between inline and bottom sheet */}
-      {(() => {
-        const filterContent = (
-          <div className="space-y-4">
-            {/* Tag-based filters */}
-            <div className="space-y-2.5">
-              <TagSection
-                title="Estilo"
-                options={styleOptions}
-                selected={selectedStyles}
-                onToggle={v => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-              />
-              <TagSection
-                title="País"
-                options={dynamicOptions.countries}
-                selected={selectedCountries}
-                onToggle={v => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-                maxVisible={8}
-              />
-              <TagSection
-                title="Uva"
-                options={dynamicOptions.grapes}
-                selected={selectedGrapes}
-                onToggle={v => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }}
-                maxVisible={8}
-              />
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">Janela</span>
-                {drinkWindowOptions.map(opt => (
-                  <TagChip
-                    key={opt.value}
-                    label={opt.label}
-                    active={selectedDrinkWindows.includes(opt.value)}
-                    onClick={() => { setSelectedDrinkWindows(prev => toggleInArray(prev, opt.value)); setActiveSavedFilter(null); }}
-                  />
-                ))}
-                <TagChip
-                  label="Baixo estoque"
-                  active={lowStock}
-                  onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
-                />
-              </div>
-            </div>
+      {/* Range Sliders & Saved Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="glass-card p-4">
+          <RangeSliderFilter
+            label="Safra"
+            min={dynamicOptions.minVintage}
+            max={dynamicOptions.maxVintage}
+            step={1}
+            value={vintageRange}
+            onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }}
+          />
+        </div>
+        <div className="glass-card p-4">
+          <RangeSliderFilter
+            label="Preço"
+            min={0}
+            max={dynamicOptions.maxPrice}
+            step={10}
+            value={priceRange}
+            onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }}
+            formatValue={v => `R$ ${v}`}
+          />
+        </div>
+      </div>
 
-            {/* Range Sliders */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 glass-card p-4">
-              <RangeSliderFilter
-                label="Safra"
-                min={dynamicOptions.minVintage}
-                max={dynamicOptions.maxVintage}
-                step={1}
-                value={vintageRange}
-                onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }}
-              />
-              <RangeSliderFilter
-                label="Preço"
-                min={0}
-                max={dynamicOptions.maxPrice}
-                step={10}
-                value={priceRange}
-                onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }}
-                formatValue={v => `R$ ${v}`}
-              />
-            </div>
-
-            {/* Saved Filters */}
-            <div className="flex flex-wrap gap-2">
-              <span className="text-[10px] font-medium uppercase tracking-wider self-center mr-1 text-muted-foreground">Filtros salvos:</span>
-              {defaultSavedFilters.map(f => (
-                <button
-                  key={f.name}
-                  onClick={() => applySavedFilter(f)}
-                  className="h-7 px-3 rounded-full text-[10px] font-medium flex items-center gap-1.5 transition-all duration-200"
-                  style={{
-                    background: activeSavedFilter === f.name ? "rgba(143,45,86,0.08)" : "rgba(0,0,0,0.02)",
-                    color: activeSavedFilter === f.name ? "#8F2D56" : "#6B7280",
-                    border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.2)" : "rgba(0,0,0,0.04)"}`,
-                  }}
-                >
-                  {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
-                  {f.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-
-        return isMobile ? (
-          <>
-            {/* Mobile: Filter trigger button */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setFilterSheetOpen(true)}
-                className="h-9 px-4 text-[12px] font-semibold gap-1.5"
-              >
-                <SlidersHorizontal className="h-3.5 w-3.5" />
-                Filtros
-                {activeFilterCount > 0 && (
-                  <span className="ml-1 h-5 min-w-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center text-white" style={{ background: "linear-gradient(135deg, hsl(var(--wine)), hsl(var(--wine-vivid)))" }}>
-                    {activeFilterCount}
-                  </span>
-                )}
-              </Button>
-              {activeFilterCount > 0 && (
-                <button onClick={clearFilters} className="h-7 px-2.5 rounded-full text-[10px] font-medium text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-1">
-                  <X className="h-3 w-3" /> Limpar
-                </button>
-              )}
-            </div>
-
-            {/* Mobile Bottom Sheet */}
-            <Drawer open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <DrawerContent className="max-h-[90vh] rounded-t-[24px] border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_-20px_60px_rgba(0,0,0,0.15)]">
-                <DrawerHeader className="pb-2">
-                  <DrawerTitle className="text-base font-serif font-bold text-foreground">Filtros</DrawerTitle>
-                </DrawerHeader>
-                <div className="px-4 pb-2 overflow-y-auto flex-1 max-h-[65vh]">
-                  {filterContent}
-                </div>
-                <DrawerFooter className="flex-row gap-3 pt-3 border-t border-border/30">
-                  <Button
-                    variant="ghost"
-                    onClick={() => { clearFilters(); setFilterSheetOpen(false); }}
-                    className="flex-1 h-11 text-[13px] font-semibold text-destructive hover:bg-destructive/10"
-                  >
-                    <X className="h-4 w-4 mr-1.5" /> Limpar filtros
-                  </Button>
-                  <Button
-                    variant="premium"
-                    onClick={() => setFilterSheetOpen(false)}
-                    className="flex-1 h-11 text-[13px] font-bold"
-                  >
-                    Aplicar filtros
-                  </Button>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          </>
-        ) : (
-          <>
-            {filterContent}
-          </>
-        );
-      })()}
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
+        {defaultSavedFilters.map(f => (
+          <button
+            key={f.name}
+            onClick={() => applySavedFilter(f)}
+            className="h-7 px-3 rounded-full text-[10px] font-medium flex items-center gap-1.5 transition-all duration-200"
+            style={{
+              background: activeSavedFilter === f.name ? "rgba(143,45,86,0.08)" : "rgba(0,0,0,0.02)",
+              color: activeSavedFilter === f.name ? "#8F2D56" : "#6B7280",
+              border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.2)" : "rgba(0,0,0,0.04)"}`,
+            }}
+          >
+            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
+            {f.name}
+          </button>
+        ))}
+      </div>
 
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 items-center">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mr-1">Filtros ativos:</span>
+        <div className="flex flex-wrap gap-2 items-center pt-2">
+          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <span
-              key={i}
-              className="h-6 px-2.5 rounded-full text-[10px] font-medium flex items-center gap-1 bg-primary/10 text-primary border border-primary/20"
-            >
+            <Badge key={i} variant="secondary" className="pl-2 pr-1 h-7 text-[11px] rounded-lg group border-primary/10 bg-primary/5 text-primary">
               {chip.label}
-              <button onClick={chip.onRemove} className="hover:text-destructive transition-colors">
-                <X className="h-2.5 w-2.5" />
-              </button>
-            </span>
+              <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={chip.onRemove} />
+            </Badge>
           ))}
-          <button onClick={clearFilters} className="h-6 px-2.5 rounded-full text-[10px] font-medium flex items-center gap-1 text-destructive hover:bg-destructive/10 transition-colors">
-            <X className="h-3 w-3" /> Limpar tudo
-          </button>
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] font-bold text-destructive hover:bg-destructive/10 ml-1">
+            Limpar tudo
+          </Button>
         </div>
       )}
 
