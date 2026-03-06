@@ -102,11 +102,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [fetchProfileType]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    const emailRedirectTo = `${window.location.origin}/auth/confirm`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo,
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -121,6 +123,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+    if (error) throw error;
+  };
+
+  const resendConfirmationEmail = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+      },
+    });
+
     if (error) throw error;
   };
 

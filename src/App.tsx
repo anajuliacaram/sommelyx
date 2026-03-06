@@ -11,6 +11,7 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import AuthConfirm from "@/pages/AuthConfirm";
 import AuthCallback from "@/pages/AuthCallback";
 import SelectProfile from "@/pages/SelectProfile";
 import DashboardLayout from "@/layouts/DashboardLayout";
@@ -46,6 +47,7 @@ const AnimatedRoutes = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/confirm" element={<AuthConfirm />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/select-profile" element={<SelectProfile />} />
           <Route path="/dashboard" element={<DashboardLayout />}>

@@ -16,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const emailConfirmed = searchParams.get("confirmed") === "true";
+  const autoSessionFallback = searchParams.get("auto_session") === "false";
   const { signIn, user, profileType, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -24,10 +25,12 @@ export default function Login() {
     if (emailConfirmed) {
       toast({
         title: "Email confirmado!",
-        description: "Seu email foi verificado com sucesso. Faça login para continuar.",
+        description: autoSessionFallback
+          ? "Sua conta foi confirmada, mas este provedor exige login manual para continuar."
+          : "Seu email foi verificado com sucesso. Faça login para continuar.",
       });
     }
-  }, [emailConfirmed, toast]);
+  }, [emailConfirmed, autoSessionFallback, toast]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -128,7 +131,11 @@ export default function Login() {
             {emailConfirmed && (
               <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                 <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                <p className="text-[13px] font-semibold text-emerald-800">Conta verificada com sucesso!</p>
+                <p className="text-[13px] font-semibold text-emerald-800">
+                  {autoSessionFallback
+                    ? "Conta confirmada! Faça login para concluir seu acesso."
+                    : "Conta verificada com sucesso!"}
+                </p>
               </div>
             )}
 
