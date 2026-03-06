@@ -34,6 +34,9 @@ import { useSearchParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
+import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // --- Types & Constants ---
 type StockStatus = "all" | "in-stock" | "low" | "out" | "aging" | "drink-now";
@@ -293,24 +296,24 @@ export default function InventoryPage() {
 
             {/* --- SUMMARY METRICS --- */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="glass-card-sm p-4 flex items-center justify-between">
+                <PremiumKpiCard className="p-4 flex items-center justify-between">
                     <div>
                         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Rótulos Cadastrados</p>
                         <p className="text-2xl font-black text-[#0F0F14]">{summary.labels}</p>
                     </div>
-                </div>
-                <div className="glass-card-sm p-4 flex items-center justify-between">
+                </PremiumKpiCard>
+                <PremiumKpiCard className="p-4 flex items-center justify-between">
                     <div>
                         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Garrafas em Estoque</p>
                         <p className="text-2xl font-black text-[#0F0F14]">{summary.bottles}</p>
                     </div>
-                </div>
-                <div className="glass-card-sm p-4 flex items-center justify-between">
+                </PremiumKpiCard>
+                <PremiumKpiCard className="p-4 flex items-center justify-between">
                     <div>
                         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Valor Total</p>
                         <p className="text-2xl font-black text-[#0F0F14]">R$ {summary.totalValue.toLocaleString("pt-BR")}</p>
                     </div>
-                </div>
+                </PremiumKpiCard>
             </div>
 
             {/* --- QUICK ACTIONS & FILTERS --- */}
@@ -431,17 +434,16 @@ export default function InventoryPage() {
             <div className="glass-card overflow-hidden border-white/40 ring-1 ring-black/[0.03]">
                 {isLoading ? (
                     <div className="p-8 space-y-4">
-                        {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 rounded-xl shimmer-premium w-full" />)}
+                        {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 w-full" />)}
                     </div>
                 ) : filteredWines.length === 0 ? (
-                    <motion.div className="p-20 text-center relative overflow-hidden group">
-                        <div className="w-20 h-20 rounded-[28px] bg-muted/30 flex items-center justify-center mx-auto mb-6 shadow-sm border border-black/5">
-                            <Search className="h-8 w-8 text-muted-foreground/40" />
-                        </div>
-                        <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Nenhum vinho encontrado</h2>
-                        <p className="text-sm text-muted-foreground mb-6">Ajuste os filtros ou limpe a busca para ver os resultados.</p>
-                        <Button variant="outline" onClick={clearAllFilters} className="rounded-xl px-6 h-10 font-bold border-primary/20 text-primary">Limpar filtros</Button>
-                    </motion.div>
+                    <PremiumEmptyState
+                        icon={Search}
+                        title="Nenhum vinho encontrado"
+                        description="Ajuste os filtros ou limpe a busca para ver os resultados."
+                        secondaryAction={{ label: "Limpar filtros", onClick: clearAllFilters }}
+                        className="rounded-none border-0 bg-transparent shadow-none"
+                    />
                 ) : viewMode === "table" ? (
                     <div className="overflow-x-auto">
                         <table className="table-premium">

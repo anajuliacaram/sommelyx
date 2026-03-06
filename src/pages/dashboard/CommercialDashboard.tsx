@@ -14,6 +14,10 @@ import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { useWineMetrics, useWineEvent } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { MagneticButton } from "@/components/ui/magnetic-button";
+import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
+import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -102,9 +106,11 @@ export default function CommercialDashboard() {
           <Button variant="outline" size="sm" className="h-9 text-[12px] font-bold" onClick={() => setCsvOpen(true)}>
             <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar CSV
           </Button>
-          <Button variant="premium" size="sm" className="h-9 px-4 text-[12px] font-bold" onClick={() => setAddOpen(true)}>
-            <Plus className="h-3.5 w-3.5 mr-1.5" /> Cadastrar produto
-          </Button>
+          <MagneticButton>
+            <Button variant="premium" size="sm" className="h-9 px-4 text-[12px] font-bold" onClick={() => setAddOpen(true)}>
+              <Plus className="h-3.5 w-3.5 mr-1.5" /> Cadastrar produto
+            </Button>
+          </MagneticButton>
         </div>
       </motion.div>
 
@@ -113,27 +119,26 @@ export default function CommercialDashboard() {
         {isLoading ? (
           [1, 2, 3, 4].map((i) => (
             <div key={i} className="glass-card p-5 space-y-3">
-              <div className="w-10 h-10 rounded-xl shimmer-premium" />
-              <div className="h-8 w-16 rounded-lg shimmer-premium" />
-              <div className="h-3 w-24 rounded-lg shimmer-premium" />
+              <Skeleton className="w-10 h-10 rounded-xl" />
+              <Skeleton className="h-8 w-16 rounded-lg" />
+              <Skeleton className="h-3 w-24 rounded-lg" />
             </div>
           ))
         ) : (
           metrics.map((m, i) => (
-            <motion.div
-              key={m.label}
-              className="glass-card p-5 group cursor-pointer border border-white/5 ring-1 ring-black/[0.03]"
-              initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
-              onClick={() => navigate("/dashboard/inventory")}
-              whileHover={{ y: -4, boxShadow: "0 20px 40px -12px rgba(140,32,68,0.12)" }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ background: `${m.color}15` }}>
-                  <m.icon className="h-5 w-5" style={{ color: m.color }} />
+            <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+              <PremiumKpiCard
+                className="p-5 group border border-white/5 ring-1 ring-black/[0.03]"
+                onClick={() => navigate("/dashboard/inventory")}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ background: `${m.color}15` }}>
+                    <m.icon className="h-5 w-5" style={{ color: m.color }} />
+                  </div>
                 </div>
-              </div>
-              <p className="text-2xl font-black font-sans tracking-tight text-[#0F0F14]">{m.value}</p>
-              <p className="text-[12px] mt-1.5 font-bold tracking-tight text-gray-400 group-hover:text-gray-600 transition-colors uppercase tracking-[0.05em]">{m.label}</p>
+                <p className="text-2xl font-black font-sans tracking-tight text-[#0F0F14]">{m.value}</p>
+                <p className="text-[12px] mt-1.5 font-bold tracking-tight text-gray-400 group-hover:text-gray-600 transition-colors uppercase tracking-[0.05em]">{m.label}</p>
+              </PremiumKpiCard>
             </motion.div>
           ))
         )}
@@ -268,56 +273,20 @@ export default function CommercialDashboard() {
 
       {/* Empty State */}
       {totalBottles === 0 && (
-        <motion.div
-          className="glass-card p-16 text-center relative overflow-hidden flex flex-col items-center"
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Ambient radial gradient */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at center, rgba(140,32,68,0.08) 0%, transparent 70%)" }} />
-
-          <WineMesh variant="empty-state" />
-
-          <div className="relative z-10 flex flex-col items-center">
-            {/* Glass Orb Icon Container */}
-            <motion.div
-              className="w-20 h-20 rounded-full flex items-center justify-center mb-8 relative"
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="absolute inset-0 rounded-full bg-white/20 backdrop-blur-xl border border-white/40 shadow-premium" />
-              <div className="absolute inset-0 rounded-full gradient-wine opacity-10" />
-              <Package className="h-9 w-9 text-[#8C2044] relative z-10" />
-            </motion.div>
-
-            <h3 className="text-2xl font-serif font-bold mb-3 tracking-tight text-[#0F0F14]">
-              Gestão comercial simplificada
-            </h3>
-            <p className="text-[15px] mb-10 max-w-sm mx-auto font-medium leading-relaxed text-gray-500">
-              Transforme seu estoque em dados acionáveis. <br /> Cadastre seus primeiros produtos para acompanhar o valor da adega e o giro de estoque em tempo real.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md">
-              <Button
-                variant="premium"
-                size="lg"
-                onClick={() => setAddOpen(true)}
-                className="h-14 px-10 text-[15px] font-bold rounded-2xl flex-1 shadow-float"
-              >
-                <Plus className="h-5 w-5 mr-2" /> Cadastrar produto
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setCsvOpen(true)}
-                className="h-14 px-8 text-[14px] font-bold rounded-2xl flex-1 bg-white/50"
-              >
-                <Upload className="h-4 w-4 mr-2" /> Importar lista
-              </Button>
-            </div>
-          </div>
-        </motion.div>
+        <PremiumEmptyState
+          icon={Package}
+          title="Gestão comercial simplificada"
+          description="Transforme seu estoque em dados acionáveis. Cadastre seus primeiros produtos para acompanhar o valor da adega e o giro de estoque em tempo real."
+          primaryAction={{
+            label: "Cadastrar produto",
+            onClick: () => setAddOpen(true),
+            icon: <Plus className="h-4 w-4" />
+          }}
+          secondaryAction={{
+            label: "Importar lista",
+            onClick: () => setCsvOpen(true)
+          }}
+        />
       )}
 
       {/* FAB */}

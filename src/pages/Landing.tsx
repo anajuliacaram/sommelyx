@@ -172,13 +172,15 @@ export default function Landing() {
           </a>
 
           <div className="flex items-center gap-3 sm:gap-6">
-            <Button
-              variant="ghost"
-              className="text-[14px] font-bold px-6 h-12 transition-all hover:bg-black/[0.03] rounded-xl text-muted-foreground hover:text-foreground hidden sm:inline-flex"
-              onClick={() => navigate("/login")}
-            >
-              Entrar
-            </Button>
+            <MagneticButton>
+              <Button
+                variant="ghost"
+                className="text-[14px] font-bold px-6 h-12 transition-all hover:bg-black/[0.03] rounded-xl text-muted-foreground hover:text-foreground hidden sm:inline-flex"
+                onClick={() => navigate("/login")}
+              >
+                Entrar
+              </Button>
+            </MagneticButton>
             <MagneticButton>
               <Button
                 className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_8px_20px_rgba(140,32,68,0.15)] hover:shadow-[0_12px_24px_rgba(140,32,68,0.25)] bg-[#0F0F14] hover:bg-[#202028] text-white"
@@ -401,8 +403,8 @@ export default function Landing() {
 
                 <Button
                   className={`w-full h-[60px] rounded-[20px] text-[14px] font-black uppercase tracking-[0.1em] transition-all ${plan.highlighted
-                      ? "bg-white text-[#0F0F14] hover:bg-white/90 shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:shadow-white/20 hover:-translate-y-0.5"
-                      : "bg-[#FAFAFA] text-[#0F0F14] hover:bg-black/5 shadow-none border border-black/5"
+                    ? "bg-white text-[#0F0F14] hover:bg-white/90 shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:shadow-white/20 hover:-translate-y-0.5"
+                    : "bg-[#FAFAFA] text-[#0F0F14] hover:bg-black/5 shadow-none border border-black/5"
                     }`}
                   onClick={() => navigate("/signup")}
                 >

@@ -18,6 +18,9 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { useToast } from "@/hooks/use-toast";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
+import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 import { cn } from "@/lib/utils";
 const MOBILE_BREAKPOINT = 640;
 function useIsSmallScreen() {
@@ -236,9 +239,11 @@ export default function CellarPage() {
           <h1 className="text-2xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>Minha Adega</h1>
           <p className="text-sm mt-0.5 text-muted-foreground">{filtered.length} vinho(s) em estoque</p>
         </div>
-        <Button variant="premium" onClick={() => setAddOpen(true)} className="h-10 px-6 text-[13px] font-bold">
-          <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
-        </Button>
+        <MagneticButton>
+          <Button variant="premium" onClick={() => setAddOpen(true)} className="h-10 px-6 text-[13px] font-bold">
+            <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
+          </Button>
+        </MagneticButton>
       </div>
 
       {/* Search + Actions */}
@@ -356,51 +361,25 @@ export default function CellarPage() {
       {/* Content */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {[1, 2, 3].map(i => <div key={i} className="skeleton-premium h-40 rounded-xl" />)}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <motion.div
-          className="glass-card p-20 text-center relative overflow-hidden group"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
-
-          <div className="relative z-10">
-            <div className="w-20 h-20 rounded-[28px] gradient-wine flex items-center justify-center mx-auto mb-8 animate-float shadow-premium rotate-3 group-hover:rotate-0 transition-transform duration-700">
-              <Wine className="h-10 w-10 text-white" />
-            </div>
-
-            <h2 className="text-3xl font-serif font-bold text-foreground mb-4 tracking-tight">
-              Sua jornada começa aqui
-            </h2>
-
-            <p className="text-base text-muted-foreground max-w-md mx-auto mb-10 leading-relaxed font-medium">
-              {hasActiveFilters
-                ? "Não encontramos vinhos com esses critérios. Tente simplificar seus filtros para descobrir novos rótulos."
-                : "Sua adega digital ainda está vazia. Comece a catalogar sua coleção e tenha o controle total do seu acervo na palma da mão."}
-            </p>
-
-            {!hasActiveFilters ? (
-              <Button
-                variant="premium"
-                onClick={() => setAddOpen(true)}
-                className="h-14 px-10 text-sm font-black uppercase tracking-widest rounded-2xl shadow-float active:scale-95 transition-all"
-              >
-                <Plus className="h-5 w-5 mr-3" /> Catalogar meu primeiro vinho
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="h-12 px-8 rounded-2xl border-primary/20 hover:bg-primary/5 text-primary font-bold transition-all"
-              >
-                <X className="h-4 w-4 mr-2" /> Limpar todos os filtros
-              </Button>
-            )}
-          </div>
-        </motion.div>
+        <PremiumEmptyState
+          icon={Wine}
+          title="Sua jornada começa aqui"
+          description={hasActiveFilters
+            ? "Não encontramos vinhos com esses critérios. Tente simplificar seus filtros para descobrir novos rótulos."
+            : "Sua adega digital ainda está vazia. Comece a catalogar sua coleção e tenha o controle total do seu acervo na palma da mão."}
+          primaryAction={!hasActiveFilters ? {
+            label: "Catalogar meu primeiro vinho",
+            icon: <Plus className="h-4 w-4" />,
+            onClick: () => setAddOpen(true)
+          } : undefined}
+          secondaryAction={hasActiveFilters ? {
+            label: "Limpar todos os filtros",
+            onClick: clearFilters
+          } : undefined}
+        />
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((wine, i) => {

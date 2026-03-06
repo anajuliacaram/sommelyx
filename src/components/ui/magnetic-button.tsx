@@ -35,9 +35,9 @@ export function MagneticButton({ children, disabled }: MagneticButtonProps) {
         const middleX = clientX - (left + width / 2);
         const middleY = clientY - (top + height / 2);
 
-        // limit max movement to ~8px
-        x.set(middleX * 0.15);
-        y.set(middleY * 0.15);
+        // Limit to max 8px for a subtle, premium feel
+        x.set(Math.max(-8, Math.min(8, middleX * 0.15)));
+        y.set(Math.max(-8, Math.min(8, middleY * 0.15)));
     };
 
     const reset = () => {
@@ -67,11 +67,11 @@ export function MagneticButton({ children, disabled }: MagneticButtonProps) {
                 y: smoothY,
                 willChange: "transform",
             }}
-            className={`inline-block ${isPressing ? "opacity-90 shadow-none" : ""}`}
+            className={`inline-block ${isPressing ? "saturate-[0.9] opacity-95 transition-opacity duration-150" : ""}`}
         >
             {React.cloneElement(children, {
-                // override native active state if needed to avoid double scaling
-                className: `${children.props.className} active:scale-100 active:shadow-none`
+                // Ensure native active states don't conflict, and drastically reduce shadow on press
+                className: `${children.props.className} active:scale-100 ${isPressing ? 'shadow-none' : ''}`
             })}
         </motion.div>
     );

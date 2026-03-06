@@ -1,0 +1,110 @@
+import * as React from "react";
+import { useRef, useState, useEffect } from "react";
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+interface PremiumKpiCardProps {
+    children: React.ReactNode;
+    className?: string;
+    onClick?: () => void;
+}
+
+export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardProps) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [isPressing, setIsPressing] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
+    const [isFinePointer, setIsFinePointer] = useState(false);
+    const reducedMotion = useReducedMotion();
+
+    const x = useMotionValue(0.5);
+    const y = useMotionValue(0.5);
+
+    const springConfig = { damping: 20, stiffness: 150, mass: 0.5 };
+    const smoothX = useSpring(x, springConfig);
+    const smoothY = useSpring(y, springConfig);
+
+    const rotateX = useTransform(smoothY, [0, 1], [3, -3]);
+    const rotateY = useTransform(smoothX, [0, 1], [-3, 3]);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(pointer: fine)");
+        setIsFinePointer(mediaQuery.matches);
+        const handler = (e: MediaQueryListEvent) => setIsFinePointer(e.matches);
+        mediaQuery.addEventListener("change", handler);
+        return () => mediaQuery.removeEventListener("change", handler);
+    }, []);
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (reducedMotion || !isFinePointer) return;
+        const { clientX, clientY } = e;
+        const { left, top, width, height } = ref.current!.getBoundingClientRect();
+
+        // Calculate normalized position 0 to 1
+        const xPos = (clientX - left) / width;
+        const yPos = (clientY - top) / height;
+
+        x.set(xPos);
+        y.set(yPos);
+    };
+
+    const handlePointerEnter = () => {
+        if (reducedMotion || !isFinePointer) return;
+        setIsHovering(true);
+    };
+
+    const handlePointerLeave = () => {
+        setIsHovering(false);
+        setIsPressing(false);
+        x.set(0.5);
+        y.set(0.5);
+    };
+
+    const interactive = !reducedMotion && isFinePointer;
+
+    return (
+        <motion.div
+            ref={ref}
+            onPointerEnter={handlePointerEnter}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={handlePointerLeave}
+            onPointerDown={() => setIsPressing(true)}
+            onPointerUp={() => setIsPressing(false)}
+            onPointerCancel={handlePointerLeave}
+            onClick={onClick}
+            animate={{
+                scale: isPressing ? 0.98 : 1,
+                y: isHovering && interactive ? -2 : 0,
+                boxShadow: isHovering && interactive
+                    ? "0 20px 40px -15px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)"
+                    : "0 8px 16px -8px rgba(0,0,0,0.03), 0 0 0 1px rgba(0,0,0,0.04)"
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            style={interactive ? {
+                rotateX,
+                rotateY,
+                transformStyle: "preserve-3d",
+                transformPerspective: 1000,
+                willChange: "transform, box-shadow",
+            } : {}}
+            className={cn(
+                "relative rounded-[24px] bg-white p-6 cursor-default transition-colors",
+                onClick && "cursor-pointer hover:bg-slate-50/50",
+                className
+            )}
+        >
+            {interactive && isHovering && (
+                <motion.div
+                    className="pointer-events-none absolute inset-0 z-10 rounded-[24px] opacity-40 mix-blend-overlay"
+                    style={{
+                        background: useTransform(
+                            () => `radial-gradient(150px circle at ${smoothX.get() * 100}% ${smoothY.get() * 100}%, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)`
+                        )
+                    }}
+                />
+            )}
+            <div style={{ transform: interactive ? "translateZ(20px)" : "none" }}>
+                {children}
+            </div>
+        </motion.div>
+    );
+}

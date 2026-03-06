@@ -65,16 +65,28 @@ export default function Login() {
       <div className="hidden md:flex flex-col flex-1 relative p-12 lg:p-20 overflow-hidden bg-white justify-between border-r border-black/[0.04]">
         {/* Abstract elegant background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#8F2D56]/15 to-[#C44569]/5 blur-[120px]" />
-          <div className="absolute bottom-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-gradient-to-tr from-[#8C2044]/5 to-transparent blur-[120px]" />
+          <motion.div
+            animate={{ x: [0, 30, 0], y: [0, -30, 0] }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+            className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-[#8F2D56]/20 to-[#C44569]/10 blur-[140px] mix-blend-multiply"
+          />
+          <motion.div
+            animate={{ x: [0, -40, 0], y: [0, 40, 0] }}
+            transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-[-20%] left-[-10%] w-[90%] h-[90%] rounded-full bg-gradient-to-tr from-[#8C2044]/15 to-transparent blur-[140px]"
+          />
           {/* Subtle grid pattern for density */}
           <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
         </div>
 
-        <div className="relative z-10">
-          <Link to="/" className="inline-flex items-center gap-3 group transition-opacity hover:opacity-80">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[42px] w-auto object-contain" />
-            <span className="text-[24px] font-black tracking-tight font-sans text-[#0F0F14]" style={{ letterSpacing: "-0.05em" }}>
+        <div className="relative z-10 flex flex-col items-center max-w-[fit-content]">
+          <Link to="/" className="inline-flex flex-col items-center gap-3 group transition-opacity hover:opacity-80">
+            <div className="relative">
+              {/* Very subtle rose glow behind logo */}
+              <div className="absolute inset-0 bg-[#8C2044] blur-xl opacity-20 mix-blend-multiply rounded-full pointer-events-none" />
+              <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[52px] w-auto object-contain relative z-10 drop-shadow-sm" />
+            </div>
+            <span className="text-[26px] font-black tracking-tight font-sans text-[#0F0F14]" style={{ letterSpacing: "-0.05em" }}>
               Sommelyx
             </span>
           </Link>
@@ -132,7 +144,7 @@ export default function Login() {
 
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white p-8 md:p-10 rounded-[28px] shadow-[0_8px_40px_rgba(0,0,0,0.03)] border border-black/[0.04]"
+            className="bg-white/60 backdrop-blur-2xl p-8 md:p-10 rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white/40 ring-1 ring-black/[0.02]"
           >
             {emailConfirmed && (
               <div className="mb-8 p-4 rounded-2xl bg-green-50 border border-green-100 flex items-center gap-3">
@@ -182,7 +194,7 @@ export default function Login() {
                 <MagneticButton disabled={loading}>
                   <Button
                     type="submit" disabled={loading}
-                    className="w-full h-[60px] rounded-[18px] text-[14px] font-black uppercase tracking-[0.15em] transition-all bg-[#0F0F14] hover:bg-[#202028] text-white shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_16px_32px_rgba(0,0,0,0.2)]"
+                    className="w-full h-[64px] rounded-[20px] text-[15px] font-black uppercase tracking-[0.14em] transition-all bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] hover:from-[#202028] hover:to-[#1A1A24] text-white shadow-[0_12px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.25)] border border-white/5 ring-1 ring-black/10"
                   >
                     {loading ? (
                       <span className="flex items-center gap-3">Processando <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-4 h-4 border-[2.5px] border-white/30 border-t-white rounded-full" /></span>
