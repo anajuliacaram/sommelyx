@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const initializedRef = useRef(false);
+  const emailRedirectTo = `${window.location.origin}/auth/confirm`;
 
   const fetchProfileType = useCallback(async (userId: string): Promise<ProfileType> => {
     try {
@@ -102,7 +103,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [fetchProfileType]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const emailRedirectTo = `${window.location.origin}/auth/confirm`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        emailRedirectTo,
       },
     });
 
