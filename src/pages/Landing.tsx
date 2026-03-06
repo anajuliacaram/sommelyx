@@ -89,10 +89,6 @@ function HeroComposition() {
           <div className="pointer-events-none absolute -right-14 top-14 h-48 w-32 rotate-[28deg] bg-white/45 blur-xl" />
 
           {/* Top Bar of Mockup */}
-          <div className="relative z-10 flex items-center justify-between mb-8 border-b border-[#5f1736]/10 pb-5">
-          className="relative rounded-[32px] bg-gradient-to-b from-[#FFF9FC]/95 via-[#FFF5FA]/92 to-[#FAECF3]/90 backdrop-blur-3xl border border-[#8C2044]/16 p-8 shadow-[0_48px_120px_-28px_rgba(92,25,52,0.35)] transform lg:rotate-y-[-12deg] lg:rotate-x-[6deg] translate-z-10 overflow-hidden"
-          style={{ transformStyle: "preserve-3d" }}
-        >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.85),transparent_42%),radial-gradient(circle_at_82%_90%,rgba(178,58,104,0.14),transparent_46%)] pointer-events-none" />
           <div className="absolute inset-x-8 top-2 h-24 bg-gradient-to-b from-white/70 to-transparent blur-xl pointer-events-none" />
           {/* Top Bar of Mockup */}
@@ -119,8 +115,6 @@ function HeroComposition() {
 
           {/* Cards inside Mockup */}
           <div className="grid grid-cols-2 gap-5 mb-5" style={{ transform: "translateZ(40px)" }}>
-            <div className="p-6 rounded-[20px] bg-white/85 shadow-[0_15px_30px_-20px_rgba(140,32,68,0.45)] border border-[#8C2044]/10 relative overflow-hidden group backdrop-blur-sm">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/15 to-transparent rounded-bl-[100px] pointer-events-none" />
             <div className="p-6 rounded-[20px] bg-white/90 shadow-[0_10px_30px_rgba(90,24,52,0.08)] border border-[#8C2044]/10 relative overflow-hidden group">
               <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/5 to-transparent rounded-bl-[100px] pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-[#9CA3AF] block mb-3">Garrafas Acervo</span>
@@ -128,9 +122,6 @@ function HeroComposition() {
               <span className="text-[13px] font-bold text-[#8C2044] flex items-center gap-1.5 mt-2 bg-[#8C2044]/10 w-fit px-2 py-0.5 rounded-md">+42 entrada</span>
             </div>
 
-            <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#6f1f41] via-[#4f1631] to-[#2f0d1e] shadow-premium shadow-[#2f0d1e]/45 text-white relative overflow-hidden border border-white/15">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/20 to-transparent rounded-bl-[100px] opacity-70 pointer-events-none" />
-              <div className="absolute -left-8 -bottom-12 w-28 h-28 rounded-full bg-[#d688a8]/25 blur-2xl" />
             <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] shadow-[0_16px_40px_rgba(90,24,52,0.35)] text-white relative overflow-hidden">
               <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/25 to-transparent rounded-bl-[100px] opacity-70 pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-white/50 block mb-3">Patrimônio Líquido</span>
@@ -181,7 +172,6 @@ export default function Landing() {
 
       {/* ─── HEADER ─── */}
       <motion.header
-        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-white/55 backdrop-blur-2xl border-b border-[#8C2044]/10"
         className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -210,7 +200,6 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_10px_26px_rgba(122,31,71,0.28)] hover:shadow-[0_14px_34px_rgba(122,31,71,0.38)] bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] hover:from-[#6A1C3E] hover:to-[#B13668] text-white border border-[#F4D4E1]/20"
                 className="px-6 sm:px-9 h-11 sm:h-12 text-[12px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
                 onClick={() => navigate("/signup")}
               >
@@ -270,13 +259,6 @@ export default function Landing() {
                     <span className="pointer-events-none absolute inset-[1px] rounded-[18px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
                     <span className="pointer-events-none absolute -inset-x-5 top-1/2 h-12 -translate-y-1/2 bg-white/20 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity" />
                     Começar Grátis
-                    className="w-full sm:w-auto px-14 h-16 text-[14px] font-black uppercase tracking-widest rounded-[18px] transition-all shadow-[0_18px_40px_rgba(122,31,71,0.38)] hover:shadow-[0_22px_48px_rgba(122,31,71,0.45)] text-white hover:-translate-y-1 border border-[#F4D4E1]/25"
-                    style={{ background: "linear-gradient(135deg, #5A1834 0%, #7A1F47 48%, #B13668 100%)" }}
-                    className="w-full sm:w-auto px-10 h-12 text-[12px] font-black uppercase tracking-[0.14em] rounded-2xl transition-all shadow-[0_12px_28px_-14px_rgba(140,32,68,0.45)] hover:shadow-[0_18px_36px_-18px_rgba(140,32,68,0.55)] text-white hover:-translate-y-0.5"
-                    style={{ background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)" }}
-                    onClick={() => navigate("/signup")}
-                  >
-                    Começar grátis
                   </Button>
                 </MagneticButton>
               </motion.div>
