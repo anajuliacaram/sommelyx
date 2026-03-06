@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 } as const,
@@ -209,13 +210,15 @@ export default function Landing() {
             >
               Entrar
             </Button>
-            <Button
-              variant="premium"
-              className="px-10 h-14 sm:h-16 text-[15px] font-black uppercase tracking-widest shadow-float"
-              onClick={() => navigate("/signup")}
-            >
-              Começar Grátis
-            </Button>
+            <MagneticButton>
+              <Button
+                variant="premium"
+                className="px-10 h-14 sm:h-16 text-[15px] font-black uppercase tracking-widest shadow-float"
+                onClick={() => navigate("/signup")}
+              >
+                Começar Grátis
+              </Button>
+            </MagneticButton>
           </div>
         </div>
       </motion.header>

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -67,20 +68,24 @@ export default function Login() {
         className="w-full max-w-[460px] z-10"
       >
         <motion.div
-          whileHover={{ y: -4, boxShadow: "0 80px 160px -20px rgba(140, 32, 68, 0.3)" }}
-          className="glass-card p-10 sm:p-16 border-white/20 w-[96%] sm:w-full mx-auto backdrop-blur-[40px] bg-white/[0.12]"
+          whileHover={{ y: -2, boxShadow: "0 40px 120px -20px rgba(140, 32, 68, 0.15)" }}
+          className="glass-card p-10 sm:p-16 w-[96%] sm:w-full mx-auto"
         >
           {/* Internal Specs Highlight */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
           <div className="flex flex-col items-center mb-10">
             <motion.div
-              animate={{ y: [0, -8, 0], rotate: [0, 2, 0, -2, 0] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-[32px] bg-white/15 backdrop-blur-3xl border border-white/30 flex items-center justify-center shadow-premium mb-10 relative group"
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              className="w-[112px] h-[112px] sm:w-[144px] sm:h-[144px] rounded-[32px] bg-white/[0.05] backdrop-blur-[48px] border-[0.5px] border-white/20 flex items-center justify-center shadow-[0_16px_40px_-10px_rgba(0,0,0,0.15)] mb-10 relative group"
             >
-              <div className="absolute inset-0 bg-[#8C2044]/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-              <img src="/logo-sommelyx.png" alt="Logo" className="w-14 h-14 sm:w-20 sm:h-20 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(140,32,68,0.3)]" />
+              <div className="absolute inset-0 bg-[#8C2044]/15 blur-[40px] rounded-[32px] opacity-80" />
+              <img
+                src="/logo-sommelyx.png"
+                alt="Logo"
+                className="w-[66px] h-[66px] sm:w-[94px] sm:h-[94px] object-contain relative z-10 drop-shadow-[0_0_14px_rgba(140,32,68,0.25)] contrast-125 brightness-105"
+              />
             </motion.div>
 
             <h1 className="text-3xl sm:text-5xl font-serif font-black italic text-[#0F0F14] text-center tracking-tight leading-tight">
@@ -136,14 +141,16 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="pt-6">
-              <Button
-                type="submit" disabled={loading}
-                className="w-full h-[64px] rounded-full text-[16px] font-black shadow-float tracking-widest"
-                variant="premium"
-              >
-                {loading ? "ALTAMENTE PROCESSANDO..." : "ENTRAR NA PLATAFORMA"}
-              </Button>
+            <div className="pt-8 w-full">
+              <MagneticButton disabled={loading}>
+                <Button
+                  type="submit" disabled={loading}
+                  className="w-full h-[68px] rounded-full text-[15px] font-black uppercase tracking-[0.25em] shadow-[0_12px_40px_-12px_rgba(140,32,68,0.8)] hover:shadow-[0_16px_60px_-12px_rgba(140,32,68,1)] transition-all duration-500 hover:-translate-y-1 block"
+                  variant="premium"
+                >
+                  {loading ? "PROCESSANDO..." : "ENTRAR NA PLATAFORMA"}
+                </Button>
+              </MagneticButton>
             </div>
           </form>
 
