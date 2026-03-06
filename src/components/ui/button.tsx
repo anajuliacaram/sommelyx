@@ -5,18 +5,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer active:scale-[0.96]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
   {
     variants: {
       variant: {
-        default: "bg-[#0F0F14] text-white hover:bg-[#1A1A1F] rounded-full shadow-premium hover:-translate-y-0.5 hover:shadow-float font-semibold tracking-tight",
-        destructive: "bg-destructive/10 text-destructive hover:bg-destructive hover:text-white rounded-full transition-colors",
-        outline: "border border-[#8C2044]/15 bg-white/40 hover:bg-white/80 hover:border-[#8C2044]/30 text-[#0F0F14] rounded-full backdrop-blur-md hover:-translate-y-0.5 shadow-sm hover:shadow-md transition-all font-semibold",
-        secondary: "bg-[#8C2044]/8 text-[#8C2044] hover:bg-[#8C2044]/15 rounded-full font-bold uppercase tracking-wider text-[11px] backdrop-blur-sm",
-        ghost: "hover:bg-[#8C2044]/5 hover:text-[#8C2044] text-muted-foreground rounded-full transition-colors font-medium",
+        default: "bg-foreground text-background hover:bg-foreground/90 rounded-full shadow-sm hover:-translate-y-px hover:shadow-md active:scale-[0.97] active:shadow-sm font-semibold tracking-[-0.01em]",
+        destructive: "bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground rounded-full active:scale-[0.97]",
+        outline: "border border-border/60 bg-background/60 backdrop-blur-sm hover:bg-background hover:border-primary/25 text-foreground rounded-full hover:-translate-y-px shadow-sm hover:shadow-md active:scale-[0.97] font-medium",
+        secondary: "bg-primary/8 text-primary hover:bg-primary/14 rounded-full font-bold uppercase tracking-wider text-[11px] backdrop-blur-sm active:scale-[0.97]",
+        ghost: "hover:bg-primary/5 hover:text-primary text-muted-foreground rounded-full font-medium active:scale-[0.97]",
         link: "text-primary underline-offset-4 hover:underline",
-        premium: "btn-premium text-white rounded-full border border-white/10 font-black tracking-wide uppercase text-[13px] shadow-float",
-        glass: "btn-glass rounded-full px-6 font-semibold",
+        premium: "btn-premium text-white rounded-full border-0 font-semibold tracking-[-0.01em] shadow-float active:scale-[0.97] active:shadow-sm",
+        glass: "btn-glass rounded-full px-6 font-medium backdrop-blur-xl active:scale-[0.97]",
       },
       size: {
         default: "h-11 px-6 py-2",
