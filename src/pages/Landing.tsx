@@ -204,7 +204,7 @@ export default function Landing() {
             <MagneticButton>
               <Button
                 variant="ghost"
-                className="text-[13px] font-semibold px-5 h-11 transition-all hover:bg-black/[0.03] rounded-2xl text-muted-foreground hover:text-foreground inline-flex"
+                className="inline-flex h-11 rounded-2xl px-5 text-[14px] sm:text-[15px] font-semibold text-[#5A1834] transition-colors duration-300 hover:bg-[#8C2044]/[0.06] hover:text-[#8C2044]"
                 onClick={() => navigate("/login")}
               >
                 Entrar
@@ -212,7 +212,7 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-9 h-11 sm:h-12 text-[12px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-6 sm:px-9 h-11 sm:h-12 text-[13px] sm:text-[13.5px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
                 onClick={() => navigate("/signup")}
               >
                 Começar Grátis
@@ -343,32 +343,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════ 4. STATS ═══════════════ */}
-      <section className="relative z-10 py-24 border-y border-black/[0.04] bg-[#0F0F14] text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
-        <div className="absolute top-[-50%] right-[-10%] w-[50%] h-[200%] bg-gradient-to-bl from-[#8C2044]/30 to-transparent blur-[140px] pointer-events-none" />
-
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-0" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            {[
-              { label: "Garrafas estocadas", value: "320k+" },
-              { label: "Valor em acervos", value: "R$ 48M+" },
-              { label: "Produtores base", value: "14.2k" },
-              { label: "Decisões seguras", value: "99%" },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                className="text-center relative md:border-r border-white/10 last:border-0"
-                variants={fadeUp}
-              >
-                <p className="text-4xl md:text-6xl font-black font-serif tracking-tight text-white mb-3" style={{ textShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>{stat.value}</p>
-                <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-white/50">{stat.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* ═══════════════ 5. PRICING ═══════════════ */}
       <section id="pricing" className="relative py-28 px-6 bg-[#FAFAFA]">
         <div className="container mx-auto max-w-6xl relative z-10">
@@ -451,6 +425,32 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 4. STATS ═══════════════ */}
+      <section className="relative z-10 py-24 border-y border-black/[0.04] bg-[#0F0F14] text-white overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
+        <div className="absolute top-[-50%] right-[-10%] w-[50%] h-[200%] bg-gradient-to-bl from-[#8C2044]/30 to-transparent blur-[140px] pointer-events-none" />
+
+        <div className="container mx-auto max-w-6xl relative z-10">
+          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-0" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            {[
+              { label: "Garrafas estocadas", value: "320k+" },
+              { label: "Valor em acervos", value: "R$ 48M+" },
+              { label: "Produtores base", value: "14.2k" },
+              { label: "Decisões seguras", value: "99%" },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                className="text-center relative md:border-r border-white/10 last:border-0"
+                variants={fadeUp}
+              >
+                <p className="text-4xl md:text-6xl font-black font-serif tracking-tight text-white mb-3" style={{ textShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>{stat.value}</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-white/50">{stat.label}</p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
