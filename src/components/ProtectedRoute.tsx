@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
 interface ProtectedRouteProps {
   requireProfile?: boolean;
@@ -7,7 +7,6 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ requireProfile = false }: ProtectedRouteProps) {
   const { loading, session, user, profileType } = useAuth();
-  const location = useLocation();
 
   if (loading) {
     return (
@@ -22,7 +21,7 @@ export default function ProtectedRoute({ requireProfile = false }: ProtectedRout
   }
 
   if (!session || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requireProfile && !profileType) {

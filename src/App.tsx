@@ -90,6 +90,9 @@ const AnimatedRoutes = () => {
               <Route path="reports" element={<InventoryPlaceholder title="Relatórios" icon="reports" description="BI avançado, impostos, previsão de demanda e valuation de acervo." />} />
               <Route path="plans" element={<Plans />} />
             </Route>
+            <Route path="/inventory" element={<Navigate to="/dashboard/inventory" replace />} />
+            <Route path="/plans" element={<Navigate to="/dashboard/plans" replace />} />
+            <Route path="/settings" element={<Navigate to="/dashboard/settings" replace />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
