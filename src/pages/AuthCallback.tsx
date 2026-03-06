@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { analytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 
 type CallbackStatus = "loading" | "success" | "error";
@@ -50,6 +51,7 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
+          analytics.trackOncePerSession("email_confirmation_success", "auth_callback");
           setStatus("success");
           setMessage("E-mail confirmado com sucesso. Redirecionando...");
           return;

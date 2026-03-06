@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { analytics } from "@/lib/analytics";
 
 const REDIRECT_DELAY = 1800;
 
@@ -50,6 +51,7 @@ export default function AuthConfirm() {
         const session = data.session;
 
         if (session) {
+          analytics.trackOncePerSession("email_confirmation_success", "auth_confirm");
           setStatus("success");
           setTimeout(() => {
             if (!profileType) {
@@ -61,6 +63,7 @@ export default function AuthConfirm() {
           return;
         }
 
+        analytics.trackOncePerSession("email_confirmation_success", "auth_confirm_fallback");
         setStatus("fallback-login");
         setTimeout(() => {
           navigate("/login?confirmed=true&auto_session=false", { replace: true });
