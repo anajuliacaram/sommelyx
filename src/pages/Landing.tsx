@@ -58,7 +58,7 @@ const plans = [
 ];
 
 /* ─── Premium Dashboard Representation ─── */
-function HeroComposition() {
+function HeroComposition({ onStart }: { onStart: () => void }) {
   return (
     <motion.div
       className="relative w-full h-full min-h-[460px] lg:min-h-[600px] flex items-center justify-center lg:justify-end mt-12 lg:mt-0"
@@ -104,9 +104,7 @@ function HeroComposition() {
               </div>
             </div>
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7A2348] to-[#4A1028] flex items-center justify-center text-white shadow-lg shadow-[#8C2044]/30">
-              <div className="h-7 px-4 bg-[#8C2044]/8 rounded-full flex items-center border border-[#8C2044]/15">
-                <span className="text-[11px] font-black tracking-widest text-[#5A1834]/75 uppercase">Visão Resumo</span>
-              </div>
+              <Bell className="w-4 h-4" strokeWidth={2.2} />
             </div>
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#5A1834] to-[#8C2044] flex items-center justify-center text-white shadow-[0_12px_22px_rgba(90,24,52,0.35)]">
               <span className="text-[12px] font-bold tracking-widest">SM</span>
@@ -254,7 +252,7 @@ export default function Landing() {
                   <Button
                     className="group relative isolate w-full sm:w-auto px-14 h-[68px] text-[14px] font-black uppercase tracking-[0.16em] rounded-[20px] transition-all text-white hover:-translate-y-1.5 shadow-[0_18px_40px_rgba(122,35,72,0.44)] hover:shadow-[0_24px_52px_rgba(122,35,72,0.52)] border border-white/25"
                     style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
-                    onClick={() => navigate("/signup")}
+                    onClick={onStart}
                   >
                     <span className="pointer-events-none absolute inset-[1px] rounded-[18px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
                     <span className="pointer-events-none absolute -inset-x-5 top-1/2 h-12 -translate-y-1/2 bg-white/20 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -285,7 +283,7 @@ export default function Landing() {
 
             {/* Visual Composition (Right) */}
             <div className="flex-1 w-full max-w-2xl lg:max-w-none">
-              <HeroComposition />
+              <HeroComposition onStart={() => navigate("/signup")} />
             </div>
 
           </div>
