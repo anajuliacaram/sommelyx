@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ChevronLeft, ArrowRight, Sparkles, ShieldCheck, BarChart3 } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft, ArrowRight, Sparkles, ShieldCheck, BarChart3, MailCheck, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +15,19 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const [resentLoading, setResentLoading] = useState(false);
+  const [awaitingEmailConfirmation, setAwaitingEmailConfirmation] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState("");
+  const { signUp, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (searchParams.get("resend") === "true") {
+      setAwaitingEmailConfirmation(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +35,12 @@ export default function Signup() {
     setLoading(true);
     try {
       await signUp(email, password, fullName);
+      setConfirmationEmail(email);
+      setAwaitingEmailConfirmation(true);
       toast({
         title: "Conta criada!",
-        description: "Verifique seu email para confirmar o cadastro.",
+        description: "Enviamos um link de confirmação para o seu e-mail.",
       });
-      navigate("/login");
     } catch (err: any) {
       toast({
         title: "Erro ao criar conta",
@@ -41,19 +52,48 @@ export default function Signup() {
     }
   };
 
+  const handleResend = async () => {
+    const targetEmail = confirmationEmail || email;
+    if (!targetEmail || resentLoading) {
+      toast({
+        title: "Informe seu e-mail",
+        description: "Digite seu e-mail de cadastro para reenviar a confirmação.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResentLoading(true);
+    try {
+      await resendConfirmationEmail(targetEmail);
+      toast({
+        title: "Novo envio realizado",
+        description: "Verifique sua caixa de entrada e também o spam.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Não foi possível reenviar",
+        description: err.message || "Tente novamente em instantes.",
+        variant: "destructive",
+      });
+    } finally {
+      setResentLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F6F3F2] text-[#17141D] selection:bg-primary/20 selection:text-primary">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-[#8C2044]/20 via-[#B44A72]/10 to-transparent blur-[100px]" />
         <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-[#DBB58E]/18 via-[#C87595]/10 to-transparent blur-[120px]" />
         <div
-            className="absolute inset-0 opacity-[0.3]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(23,20,29,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.035) 1px, transparent 1px)",
-              backgroundSize: "56px 56px",
-            }}
-          />
+          className="absolute inset-0 opacity-[0.3]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(23,20,29,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.035) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
       </div>
 
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">
@@ -109,103 +149,147 @@ export default function Signup() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[560px] rounded-[28px] border border-white/55 bg-white/60 p-8 shadow-[0_24px_64px_-24px_rgba(15,15,20,0.2),0_2px_8px_rgba(15,15,20,0.06)] ring-1 ring-black/[0.03] backdrop-blur-2xl md:p-10"
           >
-            <div className="mb-8">
-              <h2 className="text-[34px] font-serif font-bold italic leading-none tracking-tight text-[#17141D]">Criar conta grátis</h2>
-              <p className="mt-3 text-[15px] font-medium text-[#655E6E]">Preencha os dados para acessar o ecossistema Sommelyx.</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
-                  Nome completo
-                </Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="João Silva"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
-                  E-mail
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="nome@empresa.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
-                  Senha
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Mínimo 8 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 pr-12 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-black/[0.03] hover:text-[#0F0F14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20"
-                  >
-                    {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
-                  </button>
+            {awaitingEmailConfirmation ? (
+              <>
+                <div className="mb-8">
+                  <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#8C2044]/10 text-[#8C2044]">
+                    <MailCheck className="h-7 w-7" />
+                  </div>
+                  <h2 className="text-[34px] font-serif font-bold italic leading-none tracking-tight text-[#17141D]">Confira seu e-mail</h2>
+                  <p className="mt-4 text-[15px] font-medium leading-relaxed text-[#655E6E]">
+                    Enviamos um link de confirmação para o endereço informado.
+                    <br />
+                    Abra sua caixa de entrada e clique no link para ativar sua conta.
+                    <br />
+                    Depois disso, você será direcionado automaticamente para sua área.
+                  </p>
+                  {(confirmationEmail || email) && (
+                    <p className="mt-4 text-[13px] font-semibold text-[#8C2044]">{confirmationEmail || email}</p>
+                  )}
                 </div>
-              </div>
 
-              <div className="pt-2">
-                <MagneticButton disabled={loading}>
+                <div className="space-y-3">
                   <Button
-                    type="submit"
-                    disabled={loading}
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                    onClick={handleResend}
+                    disabled={resentLoading}
+                    className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white"
                   >
-                    {loading ? (
-                      <span className="flex items-center gap-3">
-                        Criando
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                          className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white"
-                        />
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        Criar conta grátis
-                        <ArrowRight className="h-4.5 w-4.5" />
-                      </span>
-                    )}
+                    <span className="flex items-center gap-2">
+                      <RefreshCcw className={`h-4.5 w-4.5 ${resentLoading ? "animate-spin" : ""}`} />
+                      {resentLoading ? "Reenviando" : "Reenviar e-mail"}
+                    </span>
                   </Button>
-                </MagneticButton>
-              </div>
-            </form>
 
-            <div className="mt-7 border-t border-black/[0.06] pt-6 text-center">
-              <p className="text-[14px] font-medium text-[#6D6676]">
-                Já possui cadastro?{" "}
-                <Link to="/login" className="font-bold text-[#17141D] transition-colors hover:text-[#8C2044] hover:underline">
-                  Entrar
-                </Link>
-              </p>
-            </div>
+                  <Button
+                    variant="outline"
+                    className="h-12 w-full rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]"
+                    onClick={() => navigate("/login")}
+                  >
+                    Voltar para login
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-8">
+                  <h2 className="text-[34px] font-serif font-bold italic leading-none tracking-tight text-[#17141D]">Criar conta grátis</h2>
+                  <p className="mt-3 text-[15px] font-medium text-[#655E6E]">Preencha os dados para acessar o ecossistema Sommelyx.</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                      Nome completo
+                    </Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="João Silva"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                      E-mail
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="nome@empresa.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                      Senha
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Mínimo 8 caracteres"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={8}
+                        className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 pr-12 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-black/[0.03] hover:text-[#0F0F14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20"
+                      >
+                        {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <MagneticButton disabled={loading}>
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                      >
+                        {loading ? (
+                          <span className="flex items-center gap-3">
+                            Criando
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                              className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white"
+                            />
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            Criar conta grátis
+                            <ArrowRight className="h-4.5 w-4.5" />
+                          </span>
+                        )}
+                      </Button>
+                    </MagneticButton>
+                  </div>
+                </form>
+
+                <div className="mt-7 border-t border-black/[0.06] pt-6 text-center">
+                  <p className="text-[14px] font-medium text-[#6D6676]">
+                    Já possui cadastro?{" "}
+                    <Link to="/login" className="font-bold text-[#17141D] transition-colors hover:text-[#8C2044] hover:underline">
+                      Entrar
+                    </Link>
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="mt-8 flex justify-center sm:justify-start">
               <Link

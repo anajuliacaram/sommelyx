@@ -12,6 +12,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resendConfirmationEmail: (email: string) => Promise<void>;
   setProfileType: (type: "personal" | "commercial") => Promise<void>;
 }
 
@@ -101,14 +102,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [fetchProfileType]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    const emailRedirectTo = `${window.location.origin}/auth/confirm`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/login?confirmed=true`,
+        emailRedirectTo,
       },
     });
+    if (error) throw error;
+  };
+
+  const resendConfirmationEmail = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+      },
+    });
+
     if (error) throw error;
   };
 
@@ -159,7 +173,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profileType, loading, signUp, signIn, signOut, setProfileType }}>
+    <AuthContext.Provider value={{ session, user, profileType, loading, signUp, signIn, signOut, resendConfirmationEmail, setProfileType }}>
       {children}
     </AuthContext.Provider>
   );
