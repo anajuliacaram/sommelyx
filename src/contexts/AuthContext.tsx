@@ -109,18 +109,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       options: {
         data: { full_name: fullName },
         emailRedirectTo,
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) throw error;
-  };
-
-  const resendConfirmationEmail = async (email: string) => {
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) throw error;
