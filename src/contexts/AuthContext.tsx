@@ -137,8 +137,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setProfileTypeState(null);
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      if (!mountedRef.current) return;
+      setSession(null);
+      setUser(null);
+      setProfileTypeState(null);
+      setLoading(false);
+    }
   };
 
   const setProfileType = async (type: "personal" | "commercial") => {
