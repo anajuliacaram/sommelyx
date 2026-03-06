@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ChevronLeft, ArrowRight, Sparkles, ShieldCheck, BarChart3 } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft, ArrowRight, Sparkles, ShieldCheck, BarChart3, MailCheck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,9 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const [resending, setResending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const { signUp, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -25,11 +27,11 @@ export default function Signup() {
     setLoading(true);
     try {
       await signUp(email, password, fullName);
+      setEmailSent(true);
       toast({
-        title: "Conta criada!",
-        description: "Verifique seu email para confirmar o cadastro.",
+        title: "Quase lá!",
+        description: "Enviamos o link de confirmação para o seu e-mail.",
       });
-      navigate("/login");
     } catch (err: any) {
       toast({
         title: "Erro ao criar conta",
@@ -41,19 +43,39 @@ export default function Signup() {
     }
   };
 
+  const handleResendEmail = async () => {
+    if (resending || !email) return;
+    setResending(true);
+    try {
+      await resendConfirmationEmail(email);
+      toast({
+        title: "E-mail reenviado",
+        description: "Confira sua caixa de entrada e spam para confirmar a conta.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Não foi possível reenviar",
+        description: err.message || "Tente novamente em instantes.",
+        variant: "destructive",
+      });
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F6F3F2] text-[#17141D] selection:bg-primary/20 selection:text-primary">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-[#8C2044]/20 via-[#B44A72]/10 to-transparent blur-[100px]" />
         <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-[#DBB58E]/18 via-[#C87595]/10 to-transparent blur-[120px]" />
         <div
-            className="absolute inset-0 opacity-[0.3]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(23,20,29,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.035) 1px, transparent 1px)",
-              backgroundSize: "56px 56px",
-            }}
-          />
+          className="absolute inset-0 opacity-[0.3]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(23,20,29,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.035) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
       </div>
 
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">
@@ -97,7 +119,7 @@ export default function Signup() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#887F8E]">Escala</p>
-              <p className="mt-1 text-[14px] font-semibold text-[#221E2A]">Comece grátis e expanda quando quiser</p>
+              <p className="mt-1 text-[14px] font-semibold text-[#221E2A]">Pronta para crescer com você</p>
             </article>
           </motion.div>
         </section>
@@ -109,103 +131,156 @@ export default function Signup() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[560px] rounded-[28px] border border-white/55 bg-white/60 p-8 shadow-[0_24px_64px_-24px_rgba(15,15,20,0.2),0_2px_8px_rgba(15,15,20,0.06)] ring-1 ring-black/[0.03] backdrop-blur-2xl md:p-10"
           >
-            <div className="mb-8">
-              <h2 className="text-[34px] font-serif font-bold italic leading-none tracking-tight text-[#17141D]">Criar conta grátis</h2>
-              <p className="mt-3 text-[15px] font-medium text-[#655E6E]">Preencha os dados para acessar o ecossistema Sommelyx.</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
-                  Nome completo
-                </Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="João Silva"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
-                  E-mail
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="nome@empresa.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
-                  Senha
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Mínimo 8 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 pr-12 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-black/[0.03] hover:text-[#0F0F14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20"
-                  >
-                    {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
-                  </button>
+            {!emailSent ? (
+              <>
+                <div className="mb-8">
+                  <h2 className="text-[34px] font-serif font-bold italic leading-none tracking-tight text-[#17141D]">Criar conta grátis</h2>
+                  <p className="mt-3 text-[15px] font-medium text-[#655E6E]">Preencha os dados para acessar o ecossistema Sommelyx.</p>
                 </div>
-              </div>
 
-              <div className="pt-2">
-                <MagneticButton disabled={loading}>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                      Nome completo
+                    </Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="João Silva"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                      E-mail
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="nome@empresa.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                      Senha
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Mínimo 8 caracteres"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={8}
+                        className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 pr-12 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-black/[0.03] hover:text-[#0F0F14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20"
+                      >
+                        {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <MagneticButton disabled={loading}>
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                      >
+                        {loading ? (
+                          <span className="flex items-center gap-3">
+                            Criando
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                              className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white"
+                            />
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            Criar conta grátis
+                            <ArrowRight className="h-4.5 w-4.5" />
+                          </span>
+                        )}
+                      </Button>
+                    </MagneticButton>
+                  </div>
+                </form>
+
+                <div className="mt-7 border-t border-black/[0.06] pt-6 text-center">
+                  <p className="text-[14px] font-medium text-[#6D6676]">
+                    Já possui cadastro?{" "}
+                    <Link to="/login" className="font-bold text-[#17141D] transition-colors hover:text-[#8C2044] hover:underline">
+                      Entrar
+                    </Link>
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-6 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8C2044] to-[#C44569] shadow-[0_12px_30px_rgba(143,45,86,0.25)]">
+                  <MailCheck className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-[34px] font-serif font-bold italic leading-none tracking-tight text-[#17141D]">Tudo certo</h2>
+                  <p className="mx-auto mt-4 max-w-[420px] text-[15px] font-medium leading-relaxed text-[#655E6E]">
+                    Enviamos um link de confirmação para <strong className="text-[#17141D]">{email}</strong>. Abra sua caixa de entrada, clique no link para ativar sua conta e volte para o Sommelyx.
+                  </p>
+                  <p className="mx-auto mt-3 max-w-[420px] text-[14px] text-[#7A7382]">
+                    Depois disso, você será direcionado automaticamente para sua área.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
                   <Button
-                    type="submit"
-                    disabled={loading}
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                    type="button"
+                    onClick={handleResendEmail}
+                    disabled={resending}
+                    variant="outline"
+                    className="h-12 w-full rounded-2xl border-black/10 bg-white/70 text-[13px] font-bold uppercase tracking-[0.1em] text-[#17141D] hover:bg-white"
                   >
-                    {loading ? (
-                      <span className="flex items-center gap-3">
-                        Criando
+                    {resending ? (
+                      <span className="flex items-center gap-2">
+                        Reenviando
                         <motion.div
                           animate={{ rotate: 360 }}
                           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                          className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white"
+                          className="h-4 w-4 rounded-full border-2 border-[#8C2044]/30 border-t-[#8C2044]"
                         />
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
-                        Criar conta grátis
-                        <ArrowRight className="h-4.5 w-4.5" />
+                        <RefreshCw className="h-4 w-4" />
+                        Reenviar e-mail
                       </span>
                     )}
                   </Button>
-                </MagneticButton>
-              </div>
-            </form>
 
-            <div className="mt-7 border-t border-black/[0.06] pt-6 text-center">
-              <p className="text-[14px] font-medium text-[#6D6676]">
-                Já possui cadastro?{" "}
-                <Link to="/login" className="font-bold text-[#17141D] transition-colors hover:text-[#8C2044] hover:underline">
-                  Entrar
-                </Link>
-              </p>
-            </div>
+                  <Button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24]"
+                  >
+                    Voltar para login
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div className="mt-8 flex justify-center sm:justify-start">
               <Link
