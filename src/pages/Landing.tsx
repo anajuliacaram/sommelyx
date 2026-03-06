@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, ShieldCheck, BarChart4, ChevronRight } from "lucide-react";
+import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, ShieldCheck, BarChart4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -67,8 +67,9 @@ function HeroComposition() {
       transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Ambient glowing orbs - Increased intensity for presence */}
-      <div className="absolute top-[10%] right-[0%] w-[350px] h-[350px] rounded-full bg-gradient-to-tr from-[#8F2D56]/30 to-[#C44569]/10 blur-[90px] mix-blend-multiply" />
-      <div className="absolute bottom-[0%] left-[10%] w-[300px] h-[300px] rounded-full bg-gradient-to-br from-[#8C2044]/20 to-transparent blur-[80px]" />
+      <div className="absolute top-[6%] right-[2%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-[#8F2D56]/35 via-[#B23A68]/18 to-[#F2C3D4]/5 blur-[96px]" />
+      <div className="absolute bottom-[-6%] left-[2%] w-[340px] h-[340px] rounded-full bg-gradient-to-br from-[#5A1834]/28 via-[#8C2044]/16 to-transparent blur-[90px]" />
+      <div className="absolute inset-x-[16%] bottom-[10%] h-[120px] bg-gradient-to-r from-transparent via-[#B23A68]/20 to-transparent blur-[42px]" />
 
       <motion.div
         animate={{ y: [-12, 12, -12] }}
@@ -76,37 +77,39 @@ function HeroComposition() {
         className="relative z-10 w-full max-w-[640px] perspective-1000 pl-4 lg:pl-0"
       >
         <div
-          className="relative rounded-[32px] bg-white/90 backdrop-blur-3xl border border-black/[0.06] p-8 shadow-[0_40px_100px_-20px_rgba(140,32,68,0.25)] transform lg:rotate-y-[-12deg] lg:rotate-x-[6deg] translate-z-10"
+          className="relative rounded-[32px] bg-gradient-to-b from-[#FFF9FC]/95 via-[#FFF5FA]/92 to-[#FAECF3]/90 backdrop-blur-3xl border border-[#8C2044]/16 p-8 shadow-[0_48px_120px_-28px_rgba(92,25,52,0.35)] transform lg:rotate-y-[-12deg] lg:rotate-x-[6deg] translate-z-10 overflow-hidden"
           style={{ transformStyle: "preserve-3d" }}
         >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.85),transparent_42%),radial-gradient(circle_at_82%_90%,rgba(178,58,104,0.14),transparent_46%)] pointer-events-none" />
+          <div className="absolute inset-x-8 top-2 h-24 bg-gradient-to-b from-white/70 to-transparent blur-xl pointer-events-none" />
           {/* Top Bar of Mockup */}
-          <div className="flex items-center justify-between mb-8 border-b border-black/[0.06] pb-5">
+          <div className="relative z-10 flex items-center justify-between mb-8 border-b border-[#8C2044]/14 pb-5">
             <div className="flex items-center gap-4">
               <div className="flex gap-2 opacity-50">
                 <div className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-sm" />
                 <div className="w-3 h-3 rounded-full bg-[#FFBD2E] shadow-sm" />
                 <div className="w-3 h-3 rounded-full bg-[#27C93F] shadow-sm" />
               </div>
-              <div className="h-7 px-4 bg-black/[0.04] rounded-full flex items-center border border-black/[0.02]">
-                <span className="text-[11px] font-black tracking-widest text-[#0F0F14]/60 uppercase">Visão Resumo</span>
+              <div className="h-7 px-4 bg-[#8C2044]/8 rounded-full flex items-center border border-[#8C2044]/15">
+                <span className="text-[11px] font-black tracking-widest text-[#5A1834]/75 uppercase">Visão Resumo</span>
               </div>
             </div>
-            <div className="w-9 h-9 rounded-full bg-[#0F0F14] flex items-center justify-center text-white shadow-lg">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#5A1834] to-[#8C2044] flex items-center justify-center text-white shadow-[0_12px_22px_rgba(90,24,52,0.35)]">
               <span className="text-[12px] font-bold tracking-widest">SM</span>
             </div>
           </div>
 
           {/* Cards inside Mockup */}
           <div className="grid grid-cols-2 gap-5 mb-5" style={{ transform: "translateZ(40px)" }}>
-            <div className="p-6 rounded-[20px] bg-white shadow-sm border border-black/[0.04] relative overflow-hidden group">
+            <div className="p-6 rounded-[20px] bg-white/90 shadow-[0_10px_30px_rgba(90,24,52,0.08)] border border-[#8C2044]/10 relative overflow-hidden group">
               <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/5 to-transparent rounded-bl-[100px] pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-[#9CA3AF] block mb-3">Garrafas Acervo</span>
               <span className="text-4xl font-serif font-black text-[#0F0F14] tracking-tight">2.14k</span>
               <span className="text-[13px] font-bold text-[#8C2044] flex items-center gap-1.5 mt-2 bg-[#8C2044]/10 w-fit px-2 py-0.5 rounded-md">+42 entrada</span>
             </div>
 
-            <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#1A1A24] to-[#0F0F14] shadow-premium shadow-black/30 text-white relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/10 to-transparent rounded-bl-[100px] opacity-50 pointer-events-none" />
+            <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] shadow-[0_16px_40px_rgba(90,24,52,0.35)] text-white relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/25 to-transparent rounded-bl-[100px] opacity-70 pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-white/50 block mb-3">Patrimônio Líquido</span>
               <span className="text-4xl font-serif font-black tracking-tight text-white/95">R$ 142k</span>
               <span className="text-[13px] font-medium text-white/40 flex items-center gap-1.5 mt-2">Atualizado há 2h</span>
@@ -155,7 +158,7 @@ export default function Landing() {
 
       {/* ─── HEADER ─── */}
       <motion.header
-        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-white/70 backdrop-blur-2xl border-b border-black/[0.03]"
+        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -183,7 +186,7 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_8px_20px_rgba(140,32,68,0.15)] hover:shadow-[0_12px_24px_rgba(140,32,68,0.25)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-6 sm:px-9 h-12 sm:h-14 text-[13px] font-black uppercase tracking-[0.15em] rounded-xl transition-all shadow-[0_10px_26px_rgba(122,31,71,0.28)] hover:shadow-[0_14px_34px_rgba(122,31,71,0.38)] bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] hover:from-[#6A1C3E] hover:to-[#B13668] text-white border border-[#F4D4E1]/20"
                 onClick={() => navigate("/signup")}
               >
                 Começar Grátis
@@ -195,6 +198,7 @@ export default function Landing() {
 
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative pt-36 lg:pt-48 pb-16 lg:pb-32 px-6 min-h-screen flex items-center overflow-visible">
+        <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         {/* Subtle grid pattern background for density */}
         <div className="absolute inset-0 z-0 opacity-[0.35] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
 
@@ -204,7 +208,7 @@ export default function Landing() {
             {/* Headline Block (Left) - Increased size and presence */}
             <div className="flex-1 max-w-2xl pt-10 lg:pt-0">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8 flex items-center gap-3">
-                <div className="h-8 px-4 rounded-full bg-[#8C2044]/5 border border-[#8C2044]/10 flex items-center justify-center">
+                <div className="h-8 px-4 rounded-full bg-[#8C2044]/8 border border-[#8C2044]/18 shadow-[0_8px_18px_rgba(140,32,68,0.08)] flex items-center justify-center">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[#8C2044]">Inteligência Estratégica</span>
                 </div>
               </motion.div>
@@ -232,23 +236,17 @@ export default function Landing() {
               >
                 <MagneticButton>
                   <Button
-                    className="w-full sm:w-auto px-12 h-16 text-[14px] font-black uppercase tracking-widest rounded-[18px] transition-all shadow-[0_12px_32px_rgba(140,32,68,0.25)] hover:shadow-[0_16px_40px_rgba(140,32,68,0.35)] text-white hover:-translate-y-1"
-                    style={{ background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-vivid)) 100%)" }}
+                    className="w-full sm:w-auto px-14 h-16 text-[14px] font-black uppercase tracking-widest rounded-[18px] transition-all shadow-[0_18px_40px_rgba(122,31,71,0.38)] hover:shadow-[0_22px_48px_rgba(122,31,71,0.45)] text-white hover:-translate-y-1 border border-[#F4D4E1]/25"
+                    style={{ background: "linear-gradient(135deg, #5A1834 0%, #7A1F47 48%, #B13668 100%)" }}
                     onClick={() => navigate("/signup")}
                   >
-                    Começar Grátis
+                    Começar grátis
                   </Button>
                 </MagneticButton>
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto px-10 h-16 text-[15px] font-bold rounded-[18px] border-black/10 hover:bg-black/5 hover:text-[#0F0F14] transition-all group shadow-sm bg-white"
-                >
-                  Ver Demonstração <ChevronRight className="ml-2 h-4 w-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                </Button>
               </motion.div>
 
               <motion.div
-                className="mt-12 flex items-center gap-6 pt-8 border-t border-black/[0.04]"
+                className="mt-7 flex items-center gap-6 pt-6"
                 initial="hidden" animate="visible" variants={fadeUp} custom={4}
               >
                 <div className="flex -space-x-3">
@@ -259,9 +257,10 @@ export default function Landing() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[14px] font-bold text-[#0F0F14]">Junte-se a gestores e colecionadores</span>
-                  <span className="text-[12px] font-medium text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                    <Check className="h-3.5 w-3.5 text-green-600" /> Sem implantação complexa.
+                  <span className="text-[12px] font-medium text-[#7B6A73] flex items-center gap-1.5 mt-0.5">
+                    <Check className="h-3.5 w-3.5 text-[#8C2044]" /> Sem implantação complexa.
                   </span>
+                  <span className="text-[12px] text-[#8C2044]/75 font-semibold mt-1">Configuração guiada e acesso imediato ao painel.</span>
                 </div>
               </motion.div>
             </div>
