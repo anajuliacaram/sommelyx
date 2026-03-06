@@ -2,10 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
+import { useAuth } from "@/contexts/AuthContext";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
@@ -27,6 +28,28 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const getPostAuthTarget = (profileType: "personal" | "commercial" | null) =>
+  profileType ? "/dashboard" : "/select-profile";
+
+const PublicAuthRoute = ({ children }: { children: JSX.Element }) => {
+  const { user, profileType, loading } = useAuth();
+
+  if (loading) return null;
+  if (user) return <Navigate to={getPostAuthTarget(profileType)} replace />;
+
+  return children;
+};
+
+const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+  const { user, profileType, loading } = useAuth();
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!profileType) return <Navigate to="/select-profile" replace />;
+
+  return children;
+};
+
 /**
  * Top-level routes use AnimatePresence for full-page transitions
  * (landing ↔ login ↔ signup etc).
@@ -43,14 +66,14 @@ const AnimatedRoutes = () => {
       <PageTransition key={topKey}>
         <Routes location={location}>
           <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/login" element={<PublicAuthRoute><Login /></PublicAuthRoute>} />
+          <Route path="/signup" element={<PublicAuthRoute><Signup /></PublicAuthRoute>} />
+          <Route path="/forgot-password" element={<PublicAuthRoute><ForgotPassword /></PublicAuthRoute>} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/auth/confirm" element={<AuthConfirm />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/select-profile" element={<SelectProfile />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
             <Route index element={<DashboardIndex />} />
             <Route path="cellar" element={<CellarPage />} />
             <Route path="alerts" element={<AlertsPage />} />
