@@ -305,7 +305,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 2. FEATURES ═══════════════ */}
-      <section id="features" className="relative py-28 px-6 border-t border-black/[0.04] bg-white">
+      <section id="features" className="relative border-t border-black/[0.04] bg-white px-6 pb-14 pt-24 lg:pb-16 lg:pt-28">
         <div className="container mx-auto max-w-7xl relative z-10">
           <motion.div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <div className="max-w-3xl">
@@ -344,10 +344,12 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 5. PRICING ═══════════════ */}
-      <section id="pricing" className="relative py-28 px-6 bg-[#FAFAFA]">
+      <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-24 pt-14 lg:pb-28 lg:pt-16">
         <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div className="mb-20 text-center max-w-3xl mx-auto" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block text-[#8C2044]">Acesso Premium</span>
+          <motion.div className="mx-auto mb-16 max-w-3xl text-center lg:mb-18" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <span className="mb-5 block text-[15px] font-black uppercase tracking-[0.22em] text-[#7A2348] md:text-[17px]">
+              Acesso Premium
+            </span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05]">
               Planos desenhados <br className="hidden md:block" /> <span className="italic text-gradient-wine">para sua coleção</span>
             </h2>
