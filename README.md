@@ -71,3 +71,13 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Development safety checklist
+
+Before changing application code, follow this minimal safety flow:
+
+1. Confirm every function/callback used in JSX is declared in scope or received via props.
+2. Avoid duplicate imports and duplicate JSX blocks.
+3. Validate JSX tags and attributes (no dangling `className`, `onClick`, `style`, etc.).
+4. Keep changes minimal and avoid layout redesign unless explicitly requested.
+5. Run `npm run build` and only finish when it passes.
