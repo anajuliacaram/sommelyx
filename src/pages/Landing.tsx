@@ -352,26 +352,35 @@ export default function Landing() {
             </h2>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-center">
+          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`relative p-8 md:p-10 rounded-[36px] overflow-hidden ${plan.highlighted ? "lg:py-14" : ""}`}
+                className={`relative p-8 md:p-10 rounded-[36px] overflow-hidden flex flex-col ${plan.highlighted ? "lg:py-14" : ""}`}
                 style={plan.highlighted ? {
-                  background: "linear-gradient(160deg, #0F0F14 0%, #1A1A24 100%)",
-                  boxShadow: "0 40px 80px rgba(0,0,0,0.2)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)",
+                  boxShadow: "0 28px 60px rgba(74,25,50,0.26), 0 1px 0 rgba(255,255,255,0.18) inset",
+                  border: "1px solid rgba(255,255,255,0.16)",
                 } : {
-                  background: "white",
-                  border: "1px solid rgba(0, 0, 0, 0.04)",
-                  boxShadow: "0 12px 40px -10px rgba(0,0,0,0.03)",
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.88) 100%)",
+                  border: "1px solid rgba(15, 15, 20, 0.07)",
+                  boxShadow: "0 16px 42px -16px rgba(15,15,20,0.11), 0 1px 0 rgba(255,255,255,0.7) inset",
                 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -8, transition: { duration: 0.4 } }}
+                whileHover={{ y: -6, transition: { duration: 0.35 } }}
               >
+                <div
+                  className="pointer-events-none absolute inset-x-8 top-0 h-14 rounded-b-[28px]"
+                  style={{
+                    background: plan.highlighted
+                      ? "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 90%)"
+                      : "linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 95%)",
+                  }}
+                />
+
                 {plan.highlighted && (
-                  <div className="absolute top-0 right-0 p-8">
-                    <span className="px-5 py-2 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r from-[#8F2D56] to-[#C44569] text-white shadow-lg shadow-[#8C2044]/30">
+                  <div className="absolute top-0 right-0 p-7 md:p-8">
+                    <span className="px-[18px] py-2 rounded-full text-[10px] font-black tracking-[0.16em] uppercase bg-gradient-to-r from-[#EAB3C8]/85 via-[#E39AB7]/85 to-[#D1739A]/85 text-[#3B1326] border border-white/45 shadow-[0_10px_24px_rgba(17,7,12,0.25)] backdrop-blur-sm">
                       Recomendado
                     </span>
                   </div>
@@ -383,7 +392,7 @@ export default function Landing() {
                 <p className="text-[15px] mb-8 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.6)" : "#6B7280" }}>
                   {plan.desc}
                 </p>
-                <div className="mb-10 flex items-baseline gap-1.5 border-b border-black/[0.04] pb-8" style={plan.highlighted ? { borderColor: "rgba(255,255,255,0.08)" } : {}}>
+                <div className="mb-8 flex items-baseline gap-1.5 border-b border-black/[0.04] pb-8" style={plan.highlighted ? { borderColor: "rgba(255,255,255,0.15)" } : {}}>
                   <span className="text-6xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
                     {plan.price}
                   </span>
@@ -392,11 +401,11 @@ export default function Landing() {
                   </span>
                 </div>
 
-                <ul className="space-y-4 mb-12 min-h-[160px]">
+                <ul className="space-y-3.5 mb-10 min-h-[188px]">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-3 text-[15px] font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.9)" : "#4B5563" }}>
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(196,69,105,0.2)" : "rgba(140,32,68,0.1)" }}>
-                        <Check className="h-3 w-3" style={{ color: plan.highlighted ? "#ff8ba7" : "#8C2044" }} strokeWidth={3} />
+                    <li key={f} className="flex items-center gap-3 text-[15px] leading-relaxed font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.92)" : "#4B5563" }}>
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(255, 225, 236, 0.2)" : "rgba(140,32,68,0.1)", boxShadow: plan.highlighted ? "0 2px 8px rgba(255,193,218,0.25)" : "none" }}>
+                        <Check className="h-3 w-3" style={{ color: plan.highlighted ? "#FFD3E4" : "#8C2044" }} strokeWidth={3} />
                       </div>
                       {f}
                     </li>
@@ -404,9 +413,9 @@ export default function Landing() {
                 </ul>
 
                 <Button
-                  className={`w-full h-[60px] rounded-[20px] text-[14px] font-black uppercase tracking-[0.1em] transition-all ${plan.highlighted
-                    ? "bg-white text-[#0F0F14] hover:bg-white/90 shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:shadow-white/20 hover:-translate-y-0.5"
-                    : "bg-[#FAFAFA] text-[#0F0F14] hover:bg-black/5 shadow-none border border-black/5"
+                  className={`mt-auto w-full min-h-[60px] md:min-h-[62px] rounded-[20px] px-4 sm:px-5 md:px-6 whitespace-normal sm:whitespace-nowrap text-center text-[11px] sm:text-[11.5px] md:text-[12.5px] font-extrabold tracking-[0.015em] md:tracking-[0.04em] leading-tight transition-all duration-300 ${plan.highlighted
+                    ? "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_16px_36px_rgba(20,8,14,0.3)] hover:shadow-[0_20px_38px_rgba(20,8,14,0.35)] hover:-translate-y-0.5"
+                    : "bg-[#FAFAFA] text-[#18181B] hover:bg-white shadow-[0_8px_16px_rgba(15,15,20,0.06)] hover:shadow-[0_12px_24px_rgba(15,15,20,0.1)] border border-black/10"
                     }`}
                   onClick={() => navigate("/signup")}
                 >
