@@ -66,6 +66,10 @@ function HeroComposition() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
     >
+      {/* Ambient glowing reflections */}
+      <div className="absolute top-[6%] right-[0%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-[#8F2D56]/28 via-[#C44569]/16 to-transparent blur-[92px]" />
+      <div className="absolute bottom-[-2%] left-[6%] w-[340px] h-[340px] rounded-full bg-gradient-to-br from-[#8C2044]/24 to-transparent blur-[88px]" />
+      <div className="absolute top-[24%] right-[18%] w-[200px] h-[200px] rounded-full bg-white/35 blur-[70px]" />
       {/* Ambient glowing orbs - Increased intensity for presence */}
       <div className="absolute top-[6%] right-[2%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-[#8F2D56]/35 via-[#B23A68]/18 to-[#F2C3D4]/5 blur-[96px]" />
       <div className="absolute bottom-[-6%] left-[2%] w-[340px] h-[340px] rounded-full bg-gradient-to-br from-[#5A1834]/28 via-[#8C2044]/16 to-transparent blur-[90px]" />
@@ -74,9 +78,18 @@ function HeroComposition() {
       <motion.div
         animate={{ y: [-12, 12, -12] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="relative z-10 w-full max-w-[640px] perspective-1000 pl-4 lg:pl-0"
+        className="relative z-10 w-full max-w-[660px] perspective-1000 pl-4 lg:pl-0"
       >
+        <div className="pointer-events-none absolute -inset-x-12 bottom-[-70px] h-24 bg-gradient-to-r from-transparent via-[#8C2044]/25 to-transparent blur-2xl" />
         <div
+          className="relative overflow-hidden rounded-[34px] bg-gradient-to-br from-white/88 via-[#fffafc]/80 to-[#f8f5f7]/88 backdrop-blur-3xl border border-white/60 p-8 shadow-[0_55px_120px_-30px_rgba(140,32,68,0.36)] transform lg:rotate-y-[-12deg] lg:rotate-x-[7deg] translate-z-10"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 to-transparent" />
+          <div className="pointer-events-none absolute -right-14 top-14 h-48 w-32 rotate-[28deg] bg-white/45 blur-xl" />
+
+          {/* Top Bar of Mockup */}
+          <div className="relative z-10 flex items-center justify-between mb-8 border-b border-[#5f1736]/10 pb-5">
           className="relative rounded-[32px] bg-gradient-to-b from-[#FFF9FC]/95 via-[#FFF5FA]/92 to-[#FAECF3]/90 backdrop-blur-3xl border border-[#8C2044]/16 p-8 shadow-[0_48px_120px_-28px_rgba(92,25,52,0.35)] transform lg:rotate-y-[-12deg] lg:rotate-x-[6deg] translate-z-10 overflow-hidden"
           style={{ transformStyle: "preserve-3d" }}
         >
@@ -90,6 +103,11 @@ function HeroComposition() {
                 <div className="w-3 h-3 rounded-full bg-[#FFBD2E] shadow-sm" />
                 <div className="w-3 h-3 rounded-full bg-[#27C93F] shadow-sm" />
               </div>
+              <div className="h-7 px-4 bg-white/70 rounded-full flex items-center border border-[#8C2044]/10 shadow-inner">
+                <span className="text-[11px] font-black tracking-widest text-[#461326]/70 uppercase">Visão Resumo</span>
+              </div>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7A2348] to-[#4A1028] flex items-center justify-center text-white shadow-lg shadow-[#8C2044]/30">
               <div className="h-7 px-4 bg-[#8C2044]/8 rounded-full flex items-center border border-[#8C2044]/15">
                 <span className="text-[11px] font-black tracking-widest text-[#5A1834]/75 uppercase">Visão Resumo</span>
               </div>
@@ -101,6 +119,8 @@ function HeroComposition() {
 
           {/* Cards inside Mockup */}
           <div className="grid grid-cols-2 gap-5 mb-5" style={{ transform: "translateZ(40px)" }}>
+            <div className="p-6 rounded-[20px] bg-white/85 shadow-[0_15px_30px_-20px_rgba(140,32,68,0.45)] border border-[#8C2044]/10 relative overflow-hidden group backdrop-blur-sm">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/15 to-transparent rounded-bl-[100px] pointer-events-none" />
             <div className="p-6 rounded-[20px] bg-white/90 shadow-[0_10px_30px_rgba(90,24,52,0.08)] border border-[#8C2044]/10 relative overflow-hidden group">
               <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#8F2D56]/5 to-transparent rounded-bl-[100px] pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-[#9CA3AF] block mb-3">Garrafas Acervo</span>
@@ -108,6 +128,9 @@ function HeroComposition() {
               <span className="text-[13px] font-bold text-[#8C2044] flex items-center gap-1.5 mt-2 bg-[#8C2044]/10 w-fit px-2 py-0.5 rounded-md">+42 entrada</span>
             </div>
 
+            <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#6f1f41] via-[#4f1631] to-[#2f0d1e] shadow-premium shadow-[#2f0d1e]/45 text-white relative overflow-hidden border border-white/15">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/20 to-transparent rounded-bl-[100px] opacity-70 pointer-events-none" />
+              <div className="absolute -left-8 -bottom-12 w-28 h-28 rounded-full bg-[#d688a8]/25 blur-2xl" />
             <div className="p-6 rounded-[20px] bg-gradient-to-br from-[#5A1834] via-[#7A1F47] to-[#A02E5C] shadow-[0_16px_40px_rgba(90,24,52,0.35)] text-white relative overflow-hidden">
               <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-white/25 to-transparent rounded-bl-[100px] opacity-70 pointer-events-none" />
               <span className="text-[11px] uppercase font-bold tracking-widest text-white/50 block mb-3">Patrimônio Líquido</span>
@@ -117,7 +140,7 @@ function HeroComposition() {
           </div>
 
           {/* List Mockup */}
-          <div className="space-y-3.5 bg-black/[0.02] p-5 rounded-[20px] border border-black/[0.03]" style={{ transform: "translateZ(20px)" }}>
+          <div className="space-y-3.5 bg-white/55 p-5 rounded-[20px] border border-[#8C2044]/10 backdrop-blur-sm" style={{ transform: "translateZ(20px)" }}>
             <div className="flex justify-between items-center mb-4">
               <span className="text-[12px] font-black uppercase tracking-widest text-[#0F0F14]">Beber Agora</span>
               <span className="text-[11px] font-bold text-[#8C2044] hover:underline cursor-pointer">Ver todas</span>
@@ -127,9 +150,9 @@ function HeroComposition() {
               { name: "Sassicaia 2018", tag: "Toscana, IT", alert: "Evoluindo (3 un)", color: "border-[#0F0F14]/20 bg-white text-[#0F0F14]" },
               { name: "Dom Pérignon 2012", tag: "Champagne, FR", alert: "Auge (6 un)", color: "border-[#0F0F14]/20 bg-white text-[#0F0F14]" },
             ].map((w, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white border border-black/[0.05] shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-[#8C2044]/20 transition-colors cursor-pointer group">
+              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/80 border border-[#8C2044]/10 shadow-[0_6px_20px_rgba(112,31,62,0.12)] hover:border-[#8C2044]/35 transition-colors cursor-pointer group">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#F7F7F8] flex items-center justify-center border border-black/[0.05] group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-[#fbf5f8] flex items-center justify-center border border-[#8C2044]/10 group-hover:scale-105 transition-transform">
                     <Wine className="w-5 h-5 text-[#8C2044]" strokeWidth={1.5} />
                   </div>
                   <div>
@@ -154,10 +177,11 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-hidden premium-noise selection:bg-[#8F2D56]/20 selection:text-[#0F0F14] bg-[#FAFAFA] text-[#0F0F14]">
+    <div className="min-h-screen overflow-hidden premium-noise selection:bg-[#8F2D56]/20 selection:text-[#0F0F14] bg-[radial-gradient(circle_at_12%_-8%,rgba(173,69,104,0.18),transparent_40%),radial-gradient(circle_at_82%_6%,rgba(255,255,255,0.85),transparent_35%),#f6f3f5] text-[#0F0F14]">
 
       {/* ─── HEADER ─── */}
       <motion.header
+        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-white/55 backdrop-blur-2xl border-b border-[#8C2044]/10"
         className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -201,7 +225,9 @@ export default function Landing() {
       <section className="relative pt-36 lg:pt-48 pb-16 lg:pb-32 px-6 min-h-screen flex items-center overflow-visible">
         <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         {/* Subtle grid pattern background for density */}
-        <div className="absolute inset-0 z-0 opacity-[0.35] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        <div className="absolute inset-0 z-0 opacity-[0.28] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(88,20,46,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(88,20,46,0.07) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
+        <div className="absolute top-[-12%] left-[-12%] w-[46vw] h-[46vw] rounded-full bg-[#8C2044]/14 blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-[-30%] right-[-10%] w-[44vw] h-[44vw] rounded-full bg-[#e8cfda]/35 blur-[140px] pointer-events-none" />
 
         <div className="container mx-auto relative z-10 max-w-7xl">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
@@ -237,6 +263,13 @@ export default function Landing() {
               >
                 <MagneticButton>
                   <Button
+                    className="group relative isolate w-full sm:w-auto px-14 h-[68px] text-[14px] font-black uppercase tracking-[0.16em] rounded-[20px] transition-all text-white hover:-translate-y-1.5 shadow-[0_18px_40px_rgba(122,35,72,0.44)] hover:shadow-[0_24px_52px_rgba(122,35,72,0.52)] border border-white/25"
+                    style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
+                    onClick={() => navigate("/signup")}
+                  >
+                    <span className="pointer-events-none absolute inset-[1px] rounded-[18px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
+                    <span className="pointer-events-none absolute -inset-x-5 top-1/2 h-12 -translate-y-1/2 bg-white/20 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity" />
+                    Começar Grátis
                     className="w-full sm:w-auto px-14 h-16 text-[14px] font-black uppercase tracking-widest rounded-[18px] transition-all shadow-[0_18px_40px_rgba(122,31,71,0.38)] hover:shadow-[0_22px_48px_rgba(122,31,71,0.45)] text-white hover:-translate-y-1 border border-[#F4D4E1]/25"
                     style={{ background: "linear-gradient(135deg, #5A1834 0%, #7A1F47 48%, #B13668 100%)" }}
                     className="w-full sm:w-auto px-10 h-12 text-[12px] font-black uppercase tracking-[0.14em] rounded-2xl transition-all shadow-[0_12px_28px_-14px_rgba(140,32,68,0.45)] hover:shadow-[0_18px_36px_-18px_rgba(140,32,68,0.55)] text-white hover:-translate-y-0.5"
