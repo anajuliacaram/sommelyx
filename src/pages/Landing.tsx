@@ -322,38 +322,48 @@ export default function Landing() {
       {/* ═══════════════ 2. FEATURES ═══════════════ */}
       <section id="features" className="relative border-t border-black/[0.04] bg-white px-6 pb-14 pt-24 lg:pb-16 lg:pt-28">
         <div className="container mx-auto max-w-7xl relative z-10">
-          <motion.div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <div className="max-w-3xl">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block text-[#8C2044]">
-                Excelência Operacional
-              </span>
-              <h2 className="text-4xl md:text-6xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05]">
-                Um ecossistema desenhado <br className="hidden md:block" /><span className="italic text-gradient-wine">para a sua coleção</span>
-              </h2>
-            </div>
-            <p className="text-[17px] text-[#6B7280] max-w-md font-medium leading-relaxed">Nossa plataforma combina ferramentas de gestão robustas com uma interface elegante e analítica avançada.</p>
-          </motion.div>
+          <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-start">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                className="group cursor-default p-10 rounded-[32px] bg-[#FAFAFA] border border-black/[0.04] hover:bg-white transition-colors duration-300 relative overflow-hidden"
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{
-                  y: -6,
-                  boxShadow: "0 30px 60px -15px rgba(0,0,0,0.08)",
-                  borderColor: "rgba(140, 32, 68, 0.2)"
-                }}
-              >
-                <div className="absolute right-0 top-0 w-40 h-40 bg-gradient-to-bl from-[#8F2D56]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mb-8 bg-white shadow-sm border border-black/[0.04] group-hover:scale-110 group-hover:shadow-md transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
-                  <f.icon className="h-7 w-7 text-[#8C2044]" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-[20px] font-bold mb-3 font-sans tracking-tight text-[#0F0F14]">{f.title}</h3>
-                <p className="text-[15px] leading-[1.6] text-[#6B7280] font-medium">{f.desc}</p>
+            {/* Left: Header + Feature Cards */}
+            <div className="flex-1 min-w-0">
+              <motion.div className="mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block text-[#8C2044]">
+                  Excelência Operacional
+                </span>
+                <h2 className="text-4xl md:text-5xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05] mb-6">
+                  Um ecossistema desenhado <br className="hidden md:block" /><span className="italic text-gradient-wine">para a sua coleção</span>
+                </h2>
+                <p className="text-[17px] text-[#6B7280] max-w-md font-medium leading-relaxed">Nossa plataforma combina ferramentas de gestão robustas com uma interface elegante e analítica avançada.</p>
               </motion.div>
-            ))}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {features.map((f, i) => (
+                  <motion.div
+                    key={f.title}
+                    className="group cursor-default p-7 rounded-[24px] bg-[#FAFAFA] border border-black/[0.04] hover:bg-white transition-colors duration-300 relative overflow-hidden"
+                    initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
+                    whileHover={{
+                      y: -4,
+                      boxShadow: "0 24px 48px -12px rgba(0,0,0,0.07)",
+                      borderColor: "rgba(140, 32, 68, 0.2)"
+                    }}
+                  >
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-[#8F2D56]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-5 bg-white shadow-sm border border-black/[0.04] group-hover:scale-110 group-hover:shadow-md transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
+                      <f.icon className="h-5 w-5 text-[#8C2044]" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-[17px] font-bold mb-2 font-sans tracking-tight text-[#0F0F14]">{f.title}</h3>
+                    <p className="text-[14px] leading-[1.6] text-[#6B7280] font-medium">{f.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Dashboard Simulation */}
+            <div className="flex-1 w-full lg:sticky lg:top-32 lg:pt-16">
+              <HeroComposition onStartFreeClick={handleStartFreeClick} />
+            </div>
+
           </div>
         </div>
       </section>
