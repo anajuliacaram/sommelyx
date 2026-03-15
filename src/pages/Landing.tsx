@@ -246,10 +246,10 @@ export default function Landing() {
         <div className="absolute bottom-[-30%] right-[-10%] w-[44vw] h-[44vw] rounded-full bg-[#e8cfda]/35 blur-[140px] pointer-events-none" />
 
         <div className="container mx-auto relative z-10 max-w-7xl">
-          <div className="flex flex-col items-center lg:items-start max-w-4xl mx-auto lg:mx-0 w-full">
+          <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-start w-full">
 
-            {/* Headline Block - Centered */}
-            <div className="pt-6 lg:pt-0">
+            {/* ── Left: Headline ── */}
+            <div className="flex-1 min-w-0 pt-6 lg:pt-0">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8 flex items-center gap-3">
                 <div className="h-8 px-4 rounded-full bg-[#8C2044]/8 border border-[#8C2044]/18 shadow-[0_8px_18px_rgba(140,32,68,0.08)] flex items-center justify-center">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[#8C2044]">Inteligência Estratégica</span>
@@ -258,7 +258,7 @@ export default function Landing() {
 
               <motion.h1
                 className="text-left font-serif font-black text-[#0F0F14]"
-                style={{ fontSize: "clamp(56px, 7vw, 96px)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
+                style={{ fontSize: "clamp(48px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
                 initial="hidden" animate="visible" variants={fadeUp} custom={1}
               >
                 Sua adega, <br />
@@ -310,32 +310,23 @@ export default function Landing() {
               </motion.div>
             </div>
 
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════ 2. FEATURES ═══════════════ */}
-      <section id="features" className="relative border-t border-black/[0.04] bg-white px-6 pb-14 pt-24 lg:pb-16 lg:pt-28">
-        <div className="container mx-auto max-w-7xl relative z-10">
-          <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-start">
-
-            {/* Left: Header + Feature Cards */}
-            <div className="flex-1 min-w-0">
-              <motion.div className="mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            {/* ── Right: Excelência Operacional + Feature Cards ── */}
+            <div className="flex-1 min-w-0 lg:pt-4">
+              <motion.div className="mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 block text-[#8C2044]">
                   Excelência Operacional
                 </span>
-                <h2 className="text-4xl md:text-5xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05] mb-6">
-                  Um ecossistema desenhado <br className="hidden md:block" /><span className="italic text-gradient-wine">para a sua coleção</span>
+                <h2 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05] mb-4">
+                  Um ecossistema desenhado <span className="italic text-gradient-wine">para a sua coleção</span>
                 </h2>
-                <p className="text-[17px] text-[#6B7280] max-w-md font-medium leading-relaxed">Nossa plataforma combina ferramentas de gestão robustas com uma interface elegante e analítica avançada.</p>
+                <p className="text-[15px] text-[#6B7280] max-w-md font-medium leading-relaxed">Nossa plataforma combina ferramentas de gestão robustas com uma interface elegante e analítica avançada.</p>
               </motion.div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {features.map((f, i) => (
                   <motion.div
                     key={f.title}
-                    className="group cursor-default p-7 rounded-[24px] bg-[#FAFAFA] border border-black/[0.04] hover:bg-white transition-colors duration-300 relative overflow-hidden"
+                    className="group cursor-default p-5 rounded-[20px] bg-[#FAFAFA] border border-black/[0.04] hover:bg-white transition-colors duration-300 relative overflow-hidden"
                     initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                     whileHover={{
                       y: -4,
@@ -343,26 +334,27 @@ export default function Landing() {
                       borderColor: "rgba(140, 32, 68, 0.2)"
                     }}
                   >
-                    <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-bl from-[#8F2D56]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-5 bg-white shadow-sm border border-black/[0.04] group-hover:scale-110 group-hover:shadow-md transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
-                      <f.icon className="h-5 w-5 text-[#8C2044]" strokeWidth={1.5} />
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-gradient-to-bl from-[#8F2D56]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="w-10 h-10 rounded-[12px] flex items-center justify-center mb-3 bg-white shadow-sm border border-black/[0.04] group-hover:scale-110 group-hover:shadow-md transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
+                      <f.icon className="h-4 w-4 text-[#8C2044]" strokeWidth={1.5} />
                     </div>
-                    <h3 className="text-[17px] font-bold mb-2 font-sans tracking-tight text-[#0F0F14]">{f.title}</h3>
-                    <p className="text-[14px] leading-[1.6] text-[#6B7280] font-medium">{f.desc}</p>
+                    <h3 className="text-[15px] font-bold mb-1 font-sans tracking-tight text-[#0F0F14]">{f.title}</h3>
+                    <p className="text-[13px] leading-[1.5] text-[#6B7280] font-medium">{f.desc}</p>
                   </motion.div>
                 ))}
               </div>
-            </div>
-
-            {/* Right: Dashboard Simulation */}
-            <div className="flex-1 w-full lg:sticky lg:top-32 lg:pt-16">
-              <HeroComposition onStartFreeClick={handleStartFreeClick} />
             </div>
 
           </div>
         </div>
       </section>
 
+      {/* ═══════════════ DASHBOARD SIMULATION ═══════════════ */}
+      <section className="relative bg-white px-6 pb-14 pt-8 lg:pb-16 lg:pt-12 border-t border-black/[0.04]">
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <HeroComposition onStartFreeClick={handleStartFreeClick} />
+        </div>
+      </section>
       {/* ═══════════════ 5. PRICING ═══════════════ */}
       <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-24 pt-14 lg:pb-28 lg:pt-16">
         <div className="container mx-auto max-w-6xl relative z-10">
