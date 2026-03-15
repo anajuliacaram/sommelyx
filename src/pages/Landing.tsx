@@ -218,8 +218,8 @@ export default function Landing() {
           <div className="flex items-center gap-3 sm:gap-6">
             <MagneticButton>
               <Button
-                variant="ghost"
-                className="inline-flex h-11 sm:h-12 rounded-full px-6 sm:px-7 text-[14px] sm:text-[14.5px] font-semibold text-white bg-gradient-to-br from-[#6F1D42] to-[#A93462] shadow-[0_10px_24px_-14px_rgba(140,32,68,0.5)] transition-all duration-300 hover:from-[#7D2450] hover:to-[#BA3F6E] hover:shadow-[0_14px_28px_-16px_rgba(140,32,68,0.55)]"
+                variant="outline"
+                className="inline-flex h-11 sm:h-12 rounded-full px-6 sm:px-7 text-[14px] sm:text-[14.5px] font-semibold text-foreground bg-transparent border border-border/60 shadow-none transition-all duration-300 hover:bg-muted/40 hover:border-border"
                 onClick={handleLoginClick}
               >
                 Entrar
