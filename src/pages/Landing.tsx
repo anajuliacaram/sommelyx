@@ -246,10 +246,10 @@ export default function Landing() {
         <div className="absolute bottom-[-30%] right-[-10%] w-[44vw] h-[44vw] rounded-full bg-[#e8cfda]/35 blur-[140px] pointer-events-none" />
 
         <div className="container mx-auto relative z-10 max-w-7xl">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+          <div className="flex flex-col items-center lg:items-start max-w-3xl mx-auto lg:mx-0">
 
-            {/* Headline Block (Left) - Increased size and presence */}
-            <div className="flex-1 max-w-2xl pt-6 lg:pt-0">
+            {/* Headline Block - Centered */}
+            <div className="pt-6 lg:pt-0">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8 flex items-center gap-3">
                 <div className="h-8 px-4 rounded-full bg-[#8C2044]/8 border border-[#8C2044]/18 shadow-[0_8px_18px_rgba(140,32,68,0.08)] flex items-center justify-center">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[#8C2044]">Inteligência Estratégica</span>
@@ -308,11 +308,6 @@ export default function Landing() {
                   <span className="text-[12px] text-[#8C2044]/75 font-semibold mt-1">Configuração guiada e acesso imediato ao painel.</span>
                 </div>
               </motion.div>
-            </div>
-
-            {/* Visual Composition (Right) */}
-            <div className="flex-1 w-full max-w-2xl lg:max-w-none">
-              <HeroComposition onStartFreeClick={handleStartFreeClick} />
             </div>
 
           </div>
