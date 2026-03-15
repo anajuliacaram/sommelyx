@@ -246,7 +246,7 @@ export default function Landing() {
         <div className="absolute bottom-[-30%] right-[-10%] w-[44vw] h-[44vw] rounded-full bg-[#e8cfda]/35 blur-[140px] pointer-events-none" />
 
         <div className="container mx-auto relative z-10 max-w-7xl">
-          <div className="flex flex-col items-center lg:items-start max-w-3xl mx-auto lg:mx-0">
+          <div className="flex flex-col items-center lg:items-start max-w-4xl mx-auto lg:mx-0 w-full">
 
             {/* Headline Block - Centered */}
             <div className="pt-6 lg:pt-0">
