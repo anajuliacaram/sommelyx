@@ -421,7 +421,7 @@ export default function Landing() {
       {/* ═══════════════ DASHBOARD SIMULATION ═══════════════ */}
       <section className="relative bg-white px-6 pb-14 pt-8 lg:pb-16 lg:pt-12 border-t border-black/[0.04]">
         <div className="container mx-auto max-w-6xl relative z-10">
-          <HeroComposition onStartFreeClick={handleStartFreeClick} />
+          <HeroComposition />
         </div>
       </section>
 
