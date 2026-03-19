@@ -75,15 +75,28 @@ export function AppSidebar() {
 
           {/* CTA Adicionar Vinho Premium */}
           <div className="px-0 pb-4">
-            <Button
-              variant="premium"
-              onClick={() => setAddOpen(true)}
-              className="w-full h-12 text-[13px] font-black uppercase tracking-wider rounded-[18px] shadow-float border border-white/20 active:scale-95 transition-all group overflow-hidden relative"
-            >
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Plus className="h-4 w-4 mr-2 relative z-10" />
-              <span className="relative z-10">{profileType === "commercial" ? "CADASTRAR VINHO" : "ADICIONAR VINHO"}</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="premium"
+                  className="w-full h-12 text-[13px] font-black uppercase tracking-wider rounded-[18px] shadow-float border border-white/20 active:scale-95 transition-all group overflow-hidden relative"
+                >
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Plus className="h-4 w-4 mr-2 relative z-10" />
+                  <span className="relative z-10">{profileType === "commercial" ? "CADASTRAR VINHO" : "ADICIONAR VINHO"}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] rounded-xl">
+                <DropdownMenuItem onClick={() => setAddOpen(true)} className="py-3 px-4 cursor-pointer">
+                  <PenLine className="h-4 w-4 mr-3 text-muted-foreground" />
+                  <span className="font-medium text-[13px]">Cadastro Manual</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setScanOpen(true)} className="py-3 px-4 cursor-pointer">
+                  <Camera className="h-4 w-4 mr-3 text-muted-foreground" />
+                  <span className="font-medium text-[13px]">Escanear Rótulo</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </SidebarHeader>
 
