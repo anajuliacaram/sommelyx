@@ -60,7 +60,7 @@ const plans = [
 ];
 
 /* ─── Premium Dashboard Representation ─── */
-function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void }) {
+function HeroComposition() {
 
   return (
     <motion.div
