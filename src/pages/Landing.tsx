@@ -64,19 +64,17 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
 
   return (
     <motion.div
-      className="relative mt-12 flex h-full min-h-[460px] w-full items-center justify-center lg:mt-0 lg:min-h-[600px] lg:justify-end"
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex w-full items-center justify-center"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="absolute right-[2%] top-[6%] h-[380px] w-[380px] rounded-full bg-gradient-to-tr from-[#8F2D56]/35 via-[#B23A68]/18 to-[#F2C3D4]/5 blur-[96px]" />
-      <div className="absolute bottom-[-6%] left-[2%] h-[340px] w-[340px] rounded-full bg-gradient-to-br from-[#5A1834]/28 via-[#8C2044]/16 to-transparent blur-[90px]" />
-      <div className="absolute inset-x-[16%] bottom-[10%] h-[120px] bg-gradient-to-r from-transparent via-[#B23A68]/20 to-transparent blur-[42px]" />
+      <div className="absolute right-[2%] top-[6%] h-[240px] w-[240px] rounded-full bg-gradient-to-tr from-[#8F2D56]/25 via-[#B23A68]/12 to-[#F2C3D4]/5 blur-[80px]" />
+      <div className="absolute bottom-[-6%] left-[2%] h-[200px] w-[200px] rounded-full bg-gradient-to-br from-[#5A1834]/20 via-[#8C2044]/10 to-transparent blur-[70px]" />
 
-      <motion.div
-        animate={{ y: [-12, 12, -12] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="relative z-10 w-full max-w-[660px] pl-4 [perspective:1000px] lg:pl-0"
+      <div
+        className="relative z-10 w-full max-w-[900px] [perspective:1000px]"
       >
         <div className="pointer-events-none absolute -inset-x-12 bottom-[-70px] h-24 bg-gradient-to-r from-transparent via-[#8C2044]/25 to-transparent blur-2xl" />
 
