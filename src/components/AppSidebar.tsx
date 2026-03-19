@@ -86,7 +86,7 @@ export function AppSidebar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] rounded-xl">
-                <DropdownMenuItem onClick={() => setAddOpen(true)} className="py-3 px-4 cursor-pointer">
+                <DropdownMenuItem onClick={() => { setAddWithScan(false); setAddOpen(true); }} className="py-3 px-4 cursor-pointer">
                   <PenLine className="h-4 w-4 mr-3 text-muted-foreground" />
                   <span className="font-medium text-[13px]">Cadastro Manual</span>
                 </DropdownMenuItem>
