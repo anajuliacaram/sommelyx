@@ -349,12 +349,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════ DASHBOARD SIMULATION ═══════════════ */}
-      <section className="relative bg-white px-6 pb-14 pt-8 lg:pb-16 lg:pt-12 border-t border-black/[0.04]">
-        <div className="container mx-auto max-w-5xl relative z-10">
-          <HeroComposition onStartFreeClick={handleStartFreeClick} />
-        </div>
-      </section>
       {/* ═══════════════ 5. PRICING ═══════════════ */}
       <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-24 pt-14 lg:pb-28 lg:pt-16">
         <div className="container mx-auto max-w-6xl relative z-10">
@@ -439,6 +433,13 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ DASHBOARD SIMULATION ═══════════════ */}
+      <section className="relative bg-white px-6 pb-14 pt-8 lg:pb-16 lg:pt-12 border-t border-black/[0.04]">
+        <div className="container mx-auto max-w-6xl relative z-10">
+          <HeroComposition onStartFreeClick={handleStartFreeClick} />
         </div>
       </section>
 
