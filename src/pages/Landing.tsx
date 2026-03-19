@@ -122,7 +122,7 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
             </div>
           </div>
 
-          <div className="space-y-3.5 rounded-[20px] border border-[#8C2044]/10 bg-white/55 p-5 backdrop-blur-sm" style={{ transform: "translateZ(20px)" }}>
+          <div className="space-y-3 rounded-[20px] border border-[#8C2044]/10 bg-white/55 p-4 backdrop-blur-sm">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-[12px] font-black uppercase tracking-widest text-[#0F0F14]">Beber Agora</span>
               <span className="cursor-pointer text-[11px] font-bold text-[#8C2044] hover:underline">Ver todas</span>
