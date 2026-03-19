@@ -153,21 +153,6 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
             ))}
           </div>
 
-          <div className="relative z-10 mt-7 flex flex-col gap-4 sm:flex-row" style={{ transform: "translateZ(18px)" }}>
-            <Button
-              onClick={onStartFreeClick}
-              className="group relative h-[54px] flex-1 overflow-hidden rounded-2xl border border-white/25 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_34px_rgba(122,35,72,0.42)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(122,35,72,0.48)]"
-              style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
-            >
-              <span className="pointer-events-none absolute inset-[1px] rounded-[14px] bg-gradient-to-b from-white/28 via-transparent to-transparent" />
-              <span className="pointer-events-none absolute -inset-x-5 top-1/2 h-12 -translate-y-1/2 bg-white/20 opacity-65 blur-2xl transition-opacity group-hover:opacity-100" />
-              Começar Grátis
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <div className="flex h-[54px] flex-1 items-center justify-center rounded-2xl border border-[#8C2044]/16 bg-white/75 px-4 text-[12px] font-semibold text-[#5B4050] shadow-[0_8px_24px_rgba(15,15,20,0.06)]">
-              Atualização em tempo real • Insights de coleção
-            </div>
-          </div>
         </div>
       </div>
     </motion.div>
