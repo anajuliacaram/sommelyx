@@ -191,8 +191,8 @@ export default function Landing() {
             href="/"
             className="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[56px] sm:h-[72px] w-auto object-contain" />
-            <span className="text-[26px] sm:text-[32px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[68px] sm:h-[90px] w-auto object-contain" />
+            <span className="text-[30px] sm:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
