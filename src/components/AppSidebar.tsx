@@ -90,7 +90,7 @@ export function AppSidebar() {
                   <PenLine className="h-4 w-4 mr-3 text-muted-foreground" />
                   <span className="font-medium text-[13px]">Cadastro Manual</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setScanOpen(true)} className="py-3 px-4 cursor-pointer">
+                <DropdownMenuItem onClick={() => { setAddWithScan(true); setAddOpen(true); }} className="py-3 px-4 cursor-pointer">
                   <Camera className="h-4 w-4 mr-3 text-muted-foreground" />
                   <span className="font-medium text-[13px]">Escanear Rótulo</span>
                 </DropdownMenuItem>
