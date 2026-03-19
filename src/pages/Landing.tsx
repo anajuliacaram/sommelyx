@@ -60,29 +60,26 @@ const plans = [
 ];
 
 /* ─── Premium Dashboard Representation ─── */
-function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void }) {
+function HeroComposition() {
 
   return (
     <motion.div
-      className="relative mt-12 flex h-full min-h-[460px] w-full items-center justify-center lg:mt-0 lg:min-h-[600px] lg:justify-end"
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex w-full items-center justify-center"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="absolute right-[2%] top-[6%] h-[380px] w-[380px] rounded-full bg-gradient-to-tr from-[#8F2D56]/35 via-[#B23A68]/18 to-[#F2C3D4]/5 blur-[96px]" />
-      <div className="absolute bottom-[-6%] left-[2%] h-[340px] w-[340px] rounded-full bg-gradient-to-br from-[#5A1834]/28 via-[#8C2044]/16 to-transparent blur-[90px]" />
-      <div className="absolute inset-x-[16%] bottom-[10%] h-[120px] bg-gradient-to-r from-transparent via-[#B23A68]/20 to-transparent blur-[42px]" />
+      <div className="absolute right-[2%] top-[6%] h-[240px] w-[240px] rounded-full bg-gradient-to-tr from-[#8F2D56]/25 via-[#B23A68]/12 to-[#F2C3D4]/5 blur-[80px]" />
+      <div className="absolute bottom-[-6%] left-[2%] h-[200px] w-[200px] rounded-full bg-gradient-to-br from-[#5A1834]/20 via-[#8C2044]/10 to-transparent blur-[70px]" />
 
-      <motion.div
-        animate={{ y: [-12, 12, -12] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="relative z-10 w-full max-w-[660px] pl-4 [perspective:1000px] lg:pl-0"
+      <div
+        className="relative z-10 w-full max-w-[900px] [perspective:1000px]"
       >
         <div className="pointer-events-none absolute -inset-x-12 bottom-[-70px] h-24 bg-gradient-to-r from-transparent via-[#8C2044]/25 to-transparent blur-2xl" />
 
         <div
-          className="relative translate-z-10 overflow-hidden rounded-[34px] border border-white/60 bg-gradient-to-br from-white/88 via-[#fffafc]/80 to-[#f8f5f7]/88 p-8 shadow-[0_55px_120px_-30px_rgba(140,32,68,0.36)] backdrop-blur-3xl lg:rotate-x-[7deg] lg:rotate-y-[-12deg]"
-          style={{ transformStyle: "preserve-3d" }}
+          className="relative overflow-hidden rounded-[28px] border border-white/60 bg-gradient-to-br from-white/88 via-[#fffafc]/80 to-[#f8f5f7]/88 p-6 lg:p-8 shadow-[0_30px_80px_-20px_rgba(140,32,68,0.22)] backdrop-blur-3xl"
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.85),transparent_42%),radial-gradient(circle_at_82%_90%,rgba(178,58,104,0.14),transparent_46%)]" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 to-transparent" />
@@ -109,7 +106,7 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
             </div>
           </div>
 
-          <div className="mb-5 grid grid-cols-2 gap-5" style={{ transform: "translateZ(40px)" }}>
+          <div className="mb-5 grid grid-cols-2 gap-4">
             <div className="group relative overflow-hidden rounded-[20px] border border-[#8C2044]/10 bg-white/90 p-6 shadow-[0_10px_30px_rgba(90,24,52,0.08)]">
               <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-bl-[100px] bg-gradient-to-br from-[#8F2D56]/5 to-transparent" />
               <span className="mb-3 block text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF]">Garrafas Acervo</span>
@@ -125,7 +122,7 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
             </div>
           </div>
 
-          <div className="space-y-3.5 rounded-[20px] border border-[#8C2044]/10 bg-white/55 p-5 backdrop-blur-sm" style={{ transform: "translateZ(20px)" }}>
+          <div className="space-y-3 rounded-[20px] border border-[#8C2044]/10 bg-white/55 p-4 backdrop-blur-sm">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-[12px] font-black uppercase tracking-widest text-[#0F0F14]">Beber Agora</span>
               <span className="cursor-pointer text-[11px] font-bold text-[#8C2044] hover:underline">Ver todas</span>
@@ -156,23 +153,8 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
             ))}
           </div>
 
-          <div className="relative z-10 mt-7 flex flex-col gap-4 sm:flex-row" style={{ transform: "translateZ(18px)" }}>
-            <Button
-              onClick={onStartFreeClick}
-              className="group relative h-[54px] flex-1 overflow-hidden rounded-2xl border border-white/25 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-[0_16px_34px_rgba(122,35,72,0.42)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(122,35,72,0.48)]"
-              style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
-            >
-              <span className="pointer-events-none absolute inset-[1px] rounded-[14px] bg-gradient-to-b from-white/28 via-transparent to-transparent" />
-              <span className="pointer-events-none absolute -inset-x-5 top-1/2 h-12 -translate-y-1/2 bg-white/20 opacity-65 blur-2xl transition-opacity group-hover:opacity-100" />
-              Começar Grátis
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <div className="flex h-[54px] flex-1 items-center justify-center rounded-2xl border border-[#8C2044]/16 bg-white/75 px-4 text-[12px] font-semibold text-[#5B4050] shadow-[0_8px_24px_rgba(15,15,20,0.06)]">
-              Atualização em tempo real • Insights de coleção
-            </div>
-          </div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -349,12 +331,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════ DASHBOARD SIMULATION ═══════════════ */}
-      <section className="relative bg-white px-6 pb-14 pt-8 lg:pb-16 lg:pt-12 border-t border-black/[0.04]">
-        <div className="container mx-auto max-w-5xl relative z-10">
-          <HeroComposition onStartFreeClick={handleStartFreeClick} />
-        </div>
-      </section>
       {/* ═══════════════ 5. PRICING ═══════════════ */}
       <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-24 pt-14 lg:pb-28 lg:pt-16">
         <div className="container mx-auto max-w-6xl relative z-10">
@@ -439,6 +415,13 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ DASHBOARD SIMULATION ═══════════════ */}
+      <section className="relative bg-white px-6 pb-14 pt-8 lg:pb-16 lg:pt-12 border-t border-black/[0.04]">
+        <div className="container mx-auto max-w-6xl relative z-10">
+          <HeroComposition />
         </div>
       </section>
 
