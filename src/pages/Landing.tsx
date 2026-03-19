@@ -106,7 +106,7 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
             </div>
           </div>
 
-          <div className="mb-5 grid grid-cols-2 gap-5" style={{ transform: "translateZ(40px)" }}>
+          <div className="mb-5 grid grid-cols-2 gap-4">
             <div className="group relative overflow-hidden rounded-[20px] border border-[#8C2044]/10 bg-white/90 p-6 shadow-[0_10px_30px_rgba(90,24,52,0.08)]">
               <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-bl-[100px] bg-gradient-to-br from-[#8F2D56]/5 to-transparent" />
               <span className="mb-3 block text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF]">Garrafas Acervo</span>
