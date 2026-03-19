@@ -196,16 +196,13 @@ export function AppSidebar() {
           </div>
         </SidebarFooter>
       </Sidebar>
-      <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
-      <ScanWineLabelDialog
-        open={scanOpen}
-        onOpenChange={setScanOpen}
-        onScanComplete={(data) => {
-          setScanOpen(false);
-          setAddOpen(true);
-          // Small delay to let AddWineDialog open, then it will receive scanned data
-          // For now, we open AddWineDialog - the scan data flows through AddWineDialog's own scan
+      <AddWineDialog
+        open={addOpen}
+        onOpenChange={(v) => {
+          setAddOpen(v);
+          if (!v) setAddWithScan(false);
         }}
+        initialScan={addWithScan}
       />
     </>
   );
