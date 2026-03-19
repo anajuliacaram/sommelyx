@@ -46,7 +46,7 @@ interface MenuItem {
 export function AppSidebar() {
   const { profileType, signOut, user } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
-  const [scanOpen, setScanOpen] = useState(false);
+  const [addWithScan, setAddWithScan] = useState(false);
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const initials = user?.user_metadata?.full_name
     ?.split(" ")
