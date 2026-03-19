@@ -27,7 +27,7 @@ const styles = [
   { value: "fortificado", label: "Fortificado" },
 ];
 
-export function AddWineDialog({ open, onOpenChange }: AddWineDialogProps) {
+export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
   const [name, setName] = useState("");
   const [producer, setProducer] = useState("");
   const [quantity, setQuantity] = useState("1");
