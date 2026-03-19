@@ -170,7 +170,7 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
