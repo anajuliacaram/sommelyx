@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 interface AddWineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialScan?: boolean;
 }
 
 const styles = [
@@ -26,7 +27,7 @@ const styles = [
   { value: "fortificado", label: "Fortificado" },
 ];
 
-export function AddWineDialog({ open, onOpenChange }: AddWineDialogProps) {
+export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
   const [name, setName] = useState("");
   const [producer, setProducer] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -47,6 +48,12 @@ export function AddWineDialog({ open, onOpenChange }: AddWineDialogProps) {
 
   const addWine = useAddWine();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (open && initialScan) {
+      setScanOpen(true);
+    }
+  }, [open, initialScan]);
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
