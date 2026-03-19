@@ -79,8 +79,7 @@ function HeroComposition({ onStartFreeClick }: { onStartFreeClick: () => void })
         <div className="pointer-events-none absolute -inset-x-12 bottom-[-70px] h-24 bg-gradient-to-r from-transparent via-[#8C2044]/25 to-transparent blur-2xl" />
 
         <div
-          className="relative translate-z-10 overflow-hidden rounded-[34px] border border-white/60 bg-gradient-to-br from-white/88 via-[#fffafc]/80 to-[#f8f5f7]/88 p-8 shadow-[0_55px_120px_-30px_rgba(140,32,68,0.36)] backdrop-blur-3xl lg:rotate-x-[7deg] lg:rotate-y-[-12deg]"
-          style={{ transformStyle: "preserve-3d" }}
+          className="relative overflow-hidden rounded-[28px] border border-white/60 bg-gradient-to-br from-white/88 via-[#fffafc]/80 to-[#f8f5f7]/88 p-6 lg:p-8 shadow-[0_30px_80px_-20px_rgba(140,32,68,0.22)] backdrop-blur-3xl"
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.85),transparent_42%),radial-gradient(circle_at_82%_90%,rgba(178,58,104,0.14),transparent_46%)]" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 to-transparent" />
