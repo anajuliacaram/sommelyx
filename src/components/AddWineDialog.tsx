@@ -15,6 +15,7 @@ import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 interface AddWineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialScan?: boolean;
 }
 
 const styles = [
