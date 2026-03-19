@@ -49,6 +49,12 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const addWine = useAddWine();
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (open && initialScan) {
+      setScanOpen(true);
+    }
+  }, [open, initialScan]);
+
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setPrice(""); setLocation("");
