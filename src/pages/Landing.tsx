@@ -332,7 +332,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 5. PRICING ═══════════════ */}
-      <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-24 pt-14 lg:pb-28 lg:pt-16">
+      <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-24 pt-8 lg:pb-28 lg:pt-10">
         <div className="container mx-auto max-w-6xl relative z-10">
           <motion.div className="mx-auto mb-16 max-w-3xl text-center lg:mb-18" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="mb-5 block text-[15px] font-black uppercase tracking-[0.22em] text-[#7A2348] md:text-[17px]">
