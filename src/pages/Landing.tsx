@@ -332,71 +332,67 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 5. PRICING ═══════════════ */}
-      <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-24 pt-8 lg:pb-28 lg:pt-10">
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div className="mx-auto mb-16 max-w-3xl text-center lg:mb-18" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <span className="mb-5 block text-[15px] font-black uppercase tracking-[0.22em] text-[#7A2348] md:text-[17px]">
+      <section id="pricing" className="relative bg-[#FAFAFA] px-6 pb-16 pt-8 lg:pb-20 lg:pt-10">
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <motion.div className="mx-auto mb-10 max-w-2xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <span className="mb-4 block text-[13px] font-black uppercase tracking-[0.22em] text-primary">
               Acesso Premium
             </span>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.05]">
-              Planos desenhados <br className="hidden md:block" /> <span className="italic text-gradient-wine">para sua coleção</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-black tracking-tight text-foreground leading-[1.08]">
+              Planos para <span className="italic text-gradient-wine">sua coleção</span>
             </h2>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+          <div className="grid lg:grid-cols-3 gap-4 lg:gap-5 items-center">
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`relative p-8 md:p-10 rounded-[36px] overflow-hidden flex flex-col ${plan.highlighted ? "lg:py-14" : ""}`}
+                className={`relative rounded-[24px] overflow-hidden flex flex-col ${
+                  plan.highlighted
+                    ? "p-6 md:p-8 lg:scale-[1.06] z-10"
+                    : "p-6 md:p-7"
+                }`}
                 style={plan.highlighted ? {
                   background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)",
-                  boxShadow: "0 28px 60px rgba(74,25,50,0.26), 0 1px 0 rgba(255,255,255,0.18) inset",
-                  border: "1px solid rgba(255,255,255,0.16)",
+                  boxShadow: "0 24px 48px rgba(74,25,50,0.3), 0 0 0 1px rgba(255,255,255,0.12) inset, 0 0 80px rgba(140,32,68,0.15)",
+                  border: "1px solid rgba(255,255,255,0.14)",
                 } : {
-                  background: "linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.88) 100%)",
-                  border: "1px solid rgba(15, 15, 20, 0.07)",
-                  boxShadow: "0 16px 42px -16px rgba(15,15,20,0.11), 0 1px 0 rgba(255,255,255,0.7) inset",
+                  background: "rgba(255,255,255,0.92)",
+                  border: "1px solid rgba(15, 15, 20, 0.06)",
+                  boxShadow: "0 8px 24px -12px rgba(15,15,20,0.08), 0 1px 0 rgba(255,255,255,0.7) inset",
                 }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -6, transition: { duration: 0.35 } }}
+                whileHover={{ y: -4, transition: { duration: 0.3 } }}
               >
-                <div
-                  className="pointer-events-none absolute inset-x-8 top-0 h-14 rounded-b-[28px]"
-                  style={{
-                    background: plan.highlighted
-                      ? "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 90%)"
-                      : "linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 95%)",
-                  }}
-                />
-
                 {plan.highlighted && (
-                  <div className="absolute top-0 right-0 p-7 md:p-8">
-                    <span className="px-[18px] py-2 rounded-full text-[10px] font-black tracking-[0.16em] uppercase bg-gradient-to-r from-[#EAB3C8]/85 via-[#E39AB7]/85 to-[#D1739A]/85 text-[#3B1326] border border-white/45 shadow-[0_10px_24px_rgba(17,7,12,0.25)] backdrop-blur-sm">
+                  <div className="absolute top-0 right-0 p-5">
+                    <span className="px-3 py-1.5 rounded-full text-[9px] font-black tracking-[0.14em] uppercase bg-gradient-to-r from-[#EAB3C8]/80 to-[#D1739A]/80 text-[#3B1326] border border-white/40 shadow-sm backdrop-blur-sm">
                       Recomendado
                     </span>
                   </div>
                 )}
 
-                <h3 className="text-[28px] font-serif font-black mb-2 tracking-tight" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
+                <h3 className="text-lg font-serif font-black tracking-tight" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
                   {plan.name}
                 </h3>
-                <p className="text-[15px] mb-8 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.6)" : "#6B7280" }}>
+                <p className="text-[12px] mb-4 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>
                   {plan.desc}
                 </p>
-                <div className="mb-8 flex items-baseline gap-1.5 border-b border-black/[0.04] pb-8" style={plan.highlighted ? { borderColor: "rgba(255,255,255,0.15)" } : {}}>
-                  <span className="text-6xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
+
+                <div className="mb-5 flex items-baseline gap-1 border-b pb-5" style={{ borderColor: plan.highlighted ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.04)" }}>
+                  <span className="text-4xl md:text-5xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
                     {plan.price}
                   </span>
-                  <span className="text-[14px] font-bold uppercase tracking-wider" style={{ color: plan.highlighted ? "rgba(255,255,255,0.4)" : "#9CA3AF" }}>
+                  <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: plan.highlighted ? "rgba(255,255,255,0.35)" : "#9CA3AF" }}>
                     {plan.period}
                   </span>
                 </div>
 
-                <ul className="space-y-3.5 mb-10 min-h-[188px]">
+                <ul className="space-y-2.5 mb-6">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-3 text-[15px] leading-relaxed font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.92)" : "#4B5563" }}>
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(255, 225, 236, 0.2)" : "rgba(140,32,68,0.1)", boxShadow: plan.highlighted ? "0 2px 8px rgba(255,193,218,0.25)" : "none" }}>
-                        <Check className="h-3 w-3" style={{ color: plan.highlighted ? "#FFD3E4" : "#8C2044" }} strokeWidth={3} />
+                    <li key={f} className="flex items-center gap-2.5 text-[13px] leading-snug font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.88)" : "#4B5563" }}>
+                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(255,225,236,0.18)" : "rgba(140,32,68,0.08)" }}>
+                        <Check className="h-2.5 w-2.5" style={{ color: plan.highlighted ? "#FFD3E4" : "#8C2044" }} strokeWidth={3} />
                       </div>
                       {f}
                     </li>
@@ -404,9 +400,9 @@ export default function Landing() {
                 </ul>
 
                 <Button
-                  className={`mt-auto w-full min-h-[60px] md:min-h-[62px] rounded-[20px] px-4 sm:px-5 md:px-6 whitespace-normal sm:whitespace-nowrap text-center text-[11px] sm:text-[11.5px] md:text-[12.5px] font-extrabold tracking-[0.015em] md:tracking-[0.04em] leading-tight transition-all duration-300 ${plan.highlighted
-                    ? "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_16px_36px_rgba(20,8,14,0.3)] hover:shadow-[0_20px_38px_rgba(20,8,14,0.35)] hover:-translate-y-0.5"
-                    : "bg-[#FAFAFA] text-[#18181B] hover:bg-white shadow-[0_8px_16px_rgba(15,15,20,0.06)] hover:shadow-[0_12px_24px_rgba(15,15,20,0.1)] border border-black/10"
+                  className={`mt-auto w-full h-11 rounded-2xl text-[12px] font-bold tracking-wide transition-all duration-300 ${plan.highlighted
+                    ? "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_12px_28px_rgba(20,8,14,0.25)] hover:shadow-[0_16px_32px_rgba(20,8,14,0.3)] hover:-translate-y-0.5"
+                    : "bg-[#F5F5F5] text-[#18181B] hover:bg-white shadow-[0_4px_12px_rgba(15,15,20,0.05)] hover:shadow-[0_8px_20px_rgba(15,15,20,0.08)] border border-black/[0.06]"
                     }`}
                   onClick={handleStartFreeClick}
                 >
