@@ -110,6 +110,17 @@
     --sidebar-accent-foreground: 220 12% 92%;
     --sidebar-border: 240 8% 10%;
     --sidebar-ring: 340 54% 52%;
+    --wine: 340 54% 52%;
+    --wine-foreground: 0 0% 100%;
+    --wine-light: 340 40% 85%;
+    --wine-vivid: 340 60% 58%;
+
+    --gold: 37 56% 58%;
+    --gold-foreground: 0 0% 100%;
+    --gold-light: 37 50% 75%;
+
+    --cream: 30 20% 12%;
+    --cream-dark: 30 15% 8%;
   }
 }
 
