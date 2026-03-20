@@ -248,7 +248,7 @@ export default function PersonalDashboard() {
             </motion.div>
           )}
 
-          {/* Recent wines table */}
+          {/* Recent wines */}
           {recentWines.length > 0 && (
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
               <div className="flex items-center justify-between mb-1.5">
@@ -259,12 +259,13 @@ export default function PersonalDashboard() {
                   Ver todos →
                 </button>
               </div>
-              <div className="glass-card overflow-hidden">
+              {/* Desktop table */}
+              <div className="glass-card overflow-hidden hidden sm:block">
                 <table className="w-full">
                   <thead>
                     <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
                       <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Vinho</th>
-                      <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden sm:table-cell text-muted-foreground">Estilo</th>
+                      <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Estilo</th>
                       <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Qtd</th>
                     </tr>
                   </thead>
@@ -280,7 +281,7 @@ export default function PersonalDashboard() {
                           <p className="text-[11px] font-semibold truncate max-w-[160px] text-foreground">{w.name}</p>
                           <p className="text-[9px] text-muted-foreground">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
                         </td>
-                        <td className="px-3 py-2 hidden sm:table-cell">
+                        <td className="px-3 py-2">
                           <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>
                             {w.style || "—"}
                           </span>
@@ -292,6 +293,28 @@ export default function PersonalDashboard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              {/* Mobile card list */}
+              <div className="space-y-1.5 sm:hidden">
+                {recentWines.map((w) => (
+                  <div
+                    key={w.id}
+                    className="glass-card p-2.5 flex items-center gap-2.5 cursor-pointer active:scale-[0.98] transition-transform"
+                    onClick={() => navigate("/dashboard/cellar")}
+                  >
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
+                      <Wine className="h-3.5 w-3.5" style={{ color: "#8F2D56" }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
+                      <p className="text-[9px] text-muted-foreground">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-[11px] font-bold text-foreground">{w.quantity}</span>
+                      <p className="text-[8px] text-muted-foreground">un.</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </motion.div>
           )}

@@ -9,6 +9,7 @@ import { useState, useMemo } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { useWineMetrics, useWines } from "@/hooks/useWines";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ export default function DashboardLayout() {
   const { drinkNow, lowStock } = useWineMetrics();
   const { data: wines } = useWines();
   const alertCount = drinkNow + lowStock;
+  const isMobile = useIsMobile();
 
   const searchResults = useMemo(() => {
     if (!searchQuery || !wines) return [];
@@ -54,22 +56,22 @@ export default function DashboardLayout() {
     .slice(0, 2) || "U";
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full" style={{ background: "#F7F7F8" }}>
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
           <header
-            className="h-[56px] flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30"
+            className="h-12 md:h-[56px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30"
             style={{
               background: "rgba(247,247,248,0.82)",
               backdropFilter: "blur(16px) saturate(1.5)",
               borderBottom: "1px solid rgba(0,0,0,0.05)",
             }}
           >
-            <SidebarTrigger className="transition-colors" style={{ color: "#9CA3AF" }} />
+            <SidebarTrigger className="transition-colors shrink-0" style={{ color: "#9CA3AF" }} />
             
-            {/* Search */}
-            <div className="flex-1 max-w-lg relative">
+            {/* Search — hidden on very small screens, icon-only trigger could be added */}
+            <div className="flex-1 max-w-lg relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "#9CA3AF" }} />
               <input
                 type="text"
@@ -77,8 +79,8 @@ export default function DashboardLayout() {
                 onChange={e => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-                placeholder="Pesquise vinho, produtor, uva, safra…"
-                className="w-full h-10 pl-9 pr-3 rounded-2xl text-[13px] font-medium focus:outline-none transition-all"
+                placeholder="Pesquise vinho, produtor, uva…"
+                className="w-full h-9 pl-9 pr-3 rounded-2xl text-[12px] font-medium focus:outline-none transition-all"
                 style={{
                   background: searchFocused ? "rgba(0,0,0,0.04)" : "rgba(0,0,0,0.025)",
                   border: `1px solid ${searchFocused ? "rgba(143,45,86,0.15)" : "rgba(0,0,0,0.05)"}`,
@@ -86,7 +88,6 @@ export default function DashboardLayout() {
                   boxShadow: searchFocused ? "0 0 0 3px rgba(143,45,86,0.08)" : "none",
                 }}
               />
-              {/* Search dropdown */}
               {searchFocused && searchQuery && searchResults.length > 0 && (
                 <div
                   className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl overflow-hidden z-50"
@@ -100,17 +101,16 @@ export default function DashboardLayout() {
                   {searchResults.map(w => (
                     <button
                       key={w.id}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-black/[0.03] focus-visible:outline-none focus-visible:bg-black/[0.04]"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.03]"
                       onMouseDown={() => { navigate("/dashboard/cellar"); setSearchQuery(""); }}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-semibold truncate" style={{ color: "#0F0F14" }}>{w.name}</p>
-                        <p className="text-[10px]" style={{ color: "#9CA3AF" }}>
+                        <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
+                        <p className="text-[9px] text-muted-foreground">
                           {[w.producer, w.vintage, w.country].filter(Boolean).join(" · ")} · {w.quantity} un.
-                          {w.cellar_location ? ` · ${w.cellar_location}` : ""}
                         </p>
                       </div>
-                      <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full shrink-0 border" style={{ background: "rgba(34,197,94,0.08)", color: "#16a34a", borderColor: "rgba(34,197,94,0.18)" }}>
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: "rgba(34,197,94,0.08)", color: "#16a34a" }}>
                         Em estoque
                       </span>
                     </button>
@@ -119,18 +119,33 @@ export default function DashboardLayout() {
               )}
               {searchFocused && searchQuery && searchResults.length === 0 && (
                 <div
-                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl p-4 text-center z-50"
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl p-3 text-center z-50"
                   style={{ background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}
                 >
-                  <p className="text-[12px]" style={{ color: "#9CA3AF" }}>Nenhum resultado para "{searchQuery}"</p>
+                  <p className="text-[11px] text-muted-foreground">Nenhum resultado para "{searchQuery}"</p>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Profile badge */}
+            {/* Mobile search icon */}
+            <div className="flex-1 sm:hidden" />
+
+            <div className="flex items-center gap-1.5 md:gap-2">
+              {/* Mobile search toggle */}
+              <button
+                className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center hover:bg-black/[0.04]"
+                style={{ color: "#9CA3AF" }}
+                onClick={() => {
+                  const el = document.getElementById('mobile-search');
+                  if (el) el.classList.toggle('hidden');
+                }}
+              >
+                <Search className="h-4 w-4" />
+              </button>
+
+              {/* Profile badge — desktop only */}
               <span
-                className="hidden sm:inline-flex items-center h-7 px-3 rounded-full text-[10px] font-semibold uppercase tracking-[0.14em]"
+                className="hidden md:inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-semibold uppercase tracking-[0.14em]"
                 style={{
                   background: profileType === "commercial" ? "rgba(201,168,106,0.1)" : "rgba(143,45,86,0.06)",
                   color: profileType === "commercial" ? "#C9A86A" : "#8F2D56",
@@ -142,12 +157,12 @@ export default function DashboardLayout() {
 
               <button
                 onClick={() => navigate("/dashboard/alerts")}
-                className="w-9 h-9 rounded-2xl flex items-center justify-center transition-all duration-200 hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8F2D56]/10 relative"
+                className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:bg-black/[0.04] relative"
                 style={{ color: "#9CA3AF" }}
               >
                 <Bell className="h-4 w-4" />
                 {alertCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white" style={{ background: "#E07A5F" }}>
+                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-[8px] font-bold flex items-center justify-center text-white" style={{ background: "#E07A5F" }}>
                     {alertCount}
                   </span>
                 )}
@@ -158,41 +173,41 @@ export default function DashboardLayout() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     size="sm"
-                    className="gradient-wine text-white btn-glow h-9 px-4 text-[12px] font-semibold border-0"
+                    className="gradient-wine text-white btn-glow h-8 px-3 text-[11px] font-semibold border-0"
                   >
-                    <Plus className="h-3.5 w-3.5 mr-1" />
-                    <span className="hidden sm:inline">{profileType === "commercial" ? "Cadastrar" : "Adicionar"}</span>
+                    <Plus className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline ml-1">{profileType === "commercial" ? "Cadastrar" : "Adicionar"}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
                   <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
                     <Wine className="h-4 w-4 mr-2" style={{ color: "#8F2D56" }} />
-                    <span className="text-[13px]">Adicionar garrafa</span>
+                    <span className="text-[12px]">Adicionar garrafa</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => { setManageTab("open"); setManageOpen(true); }} className="cursor-pointer">
                     <GlassWater className="h-4 w-4 mr-2" style={{ color: "#22c55e" }} />
-                    <span className="text-[13px]">Registrar abertura</span>
+                    <span className="text-[12px]">Registrar abertura</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => { setManageTab("exit"); setManageOpen(true); }} className="cursor-pointer">
                     <ArrowDownRight className="h-4 w-4 mr-2" style={{ color: "#E07A5F" }} />
-                    <span className="text-[13px]">Registrar saída</span>
+                    <span className="text-[12px]">Registrar saída</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
                         <Camera className="h-4 w-4 mr-2" />
-                        <span className="text-[13px]">Adicionar via foto</span>
-                        <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(143,45,86,0.08)", color: "#8F2D56" }}>Em breve</span>
+                        <span className="text-[12px]">Adicionar via foto</span>
+                        <span className="ml-auto text-[8px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(143,45,86,0.08)", color: "#8F2D56" }}>Em breve</span>
                       </DropdownMenuItem>
                     </TooltipTrigger>
-                    <TooltipContent side="left"><p className="text-xs">Reconhecimento de rótulo por foto será lançado em breve.</p></TooltipContent>
+                    <TooltipContent side="left"><p className="text-xs">Em breve</p></TooltipContent>
                   </Tooltip>
                 </DropdownMenuContent>
               </DropdownMenu>
 
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105"
+                className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 cursor-pointer"
                 style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)" }}
                 onClick={() => navigate("/dashboard/settings")}
               >
@@ -200,7 +215,23 @@ export default function DashboardLayout() {
               </div>
             </div>
           </header>
-          <div className="flex-1 p-5 md:p-7 lg:p-8">
+
+          {/* Mobile search bar — togglable */}
+          <div id="mobile-search" className="hidden sm:hidden px-3 py-2 sticky top-12 z-20" style={{ background: "rgba(247,247,248,0.95)", backdropFilter: "blur(12px)" }}>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "#9CA3AF" }} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Pesquisar…"
+                className="w-full h-9 pl-9 pr-3 rounded-xl text-[12px] font-medium focus:outline-none"
+                style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.06)", color: "#0F0F14" }}
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 p-3 md:p-5 lg:p-8">
             <AnimatedOutlet />
           </div>
         </main>

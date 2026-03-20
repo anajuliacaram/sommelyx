@@ -181,7 +181,7 @@ export default function Landing() {
 
       {/* ─── HEADER ─── */}
       <motion.header
-        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
+        className="fixed top-0 w-full z-50 px-4 sm:px-6 py-3 sm:py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -189,19 +189,19 @@ export default function Landing() {
         <div className="container mx-auto flex items-center justify-between max-w-7xl">
           <a
             href="/"
-            className="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80"
+            className="flex items-center gap-2 sm:gap-3 transition-opacity duration-300 hover:opacity-80"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[68px] sm:h-[90px] w-auto object-contain" />
-            <span className="text-[30px] sm:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 sm:h-[68px] md:h-[90px] w-auto object-contain" />
+            <span className="text-xl sm:text-[30px] md:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
 
-          <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-6">
             <MagneticButton>
               <Button
                 variant="outline"
-                className="inline-flex h-11 sm:h-12 rounded-full px-6 sm:px-7 text-[14px] sm:text-[14.5px] font-semibold text-foreground bg-transparent border border-border/60 shadow-none transition-all duration-300 hover:bg-muted/40 hover:border-border"
+                className="inline-flex h-9 sm:h-11 md:h-12 rounded-full px-4 sm:px-6 md:px-7 text-[12px] sm:text-[14px] font-semibold text-foreground bg-transparent border border-border/60 shadow-none transition-all duration-300 hover:bg-muted/40 hover:border-border"
                 onClick={handleLoginClick}
               >
                 Entrar
@@ -209,7 +209,7 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-9 h-11 sm:h-12 text-[13px] sm:text-[13.5px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-4 sm:px-6 md:px-9 h-9 sm:h-11 md:h-12 text-[11px] sm:text-[13px] font-black uppercase tracking-[0.1em] sm:tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
                 onClick={handleStartFreeClick}
               >
                 Começar Grátis
@@ -220,7 +220,7 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section id="features" className="relative pt-32 lg:pt-40 pb-10 lg:pb-14 px-6 flex items-center overflow-visible">
+      <section id="features" className="relative pt-24 sm:pt-32 lg:pt-40 pb-8 lg:pb-14 px-4 sm:px-6 flex items-center overflow-visible">
         <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         {/* Subtle grid pattern background for density */}
         <div className="absolute inset-0 z-0 opacity-[0.28] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(88,20,46,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(88,20,46,0.07) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
@@ -228,7 +228,7 @@ export default function Landing() {
         <div className="absolute bottom-[-30%] right-[-10%] w-[44vw] h-[44vw] rounded-full bg-[#e8cfda]/35 blur-[140px] pointer-events-none" />
 
         <div className="container mx-auto relative z-10 max-w-7xl">
-          <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-start w-full">
+          <div className="flex flex-col lg:flex-row gap-10 lg:gap-20 items-start w-full">
 
             {/* ── Left: Headline ── */}
             <div className="flex-1 min-w-0 pt-6 lg:pt-0">
@@ -240,7 +240,7 @@ export default function Landing() {
 
               <motion.h1
                 className="text-left font-serif font-black text-[#0F0F14]"
-                style={{ fontSize: "clamp(48px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
+                style={{ fontSize: "clamp(36px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
                 initial="hidden" animate="visible" variants={fadeUp} custom={1}
               >
                 Sua adega, <br />
@@ -448,19 +448,19 @@ export default function Landing() {
       </section>
 
       {/* ─── 6. FOOTER ─── */}
-      <footer className="py-14 px-6 relative z-10 bg-white border-t border-black/[0.04]">
-        <div className="container mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-3">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[36px] w-auto object-contain grayscale opacity-60" />
-            <span className="font-black text-[20px] font-sans tracking-tight text-[#0F0F14]">Sommelyx</span>
+      <footer className="py-8 sm:py-14 px-4 sm:px-6 relative z-10 bg-white border-t border-black/[0.04]">
+        <div className="container mx-auto max-w-7xl flex flex-col items-center gap-6 md:flex-row md:justify-between md:gap-8">
+          <div className="flex items-center gap-2.5">
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-7 sm:h-9 w-auto object-contain grayscale opacity-60" />
+            <span className="font-black text-base sm:text-[20px] font-sans tracking-tight text-foreground">Sommelyx</span>
           </div>
-          <div className="flex items-center gap-8 text-[13px] font-bold uppercase tracking-widest text-[#6B7280]">
-            <a href="#features" className="hover:text-[#0F0F14] transition-colors">Funcionalidades</a>
-            <a href="#pricing" className="hover:text-[#0F0F14] transition-colors">Planos</a>
-            <button onClick={handleLoginClick} className="hover:text-[#0F0F14] transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest">Acesso Privado</button>
+          <div className="flex items-center gap-5 sm:gap-8 text-[11px] sm:text-[13px] font-bold uppercase tracking-widest text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Funcionalidades</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Planos</a>
+            <button onClick={handleLoginClick} className="hover:text-foreground transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest text-[11px] sm:text-[13px]">Acesso</button>
           </div>
-          <p className="text-[13px] font-medium text-[#9CA3AF]">
-            © {new Date().getFullYear()} Sommelyx. Inteligência em cada taça.
+          <p className="text-[11px] sm:text-[13px] font-medium text-muted-foreground text-center">
+            © {new Date().getFullYear()} Sommelyx
           </p>
         </div>
       </footer>
