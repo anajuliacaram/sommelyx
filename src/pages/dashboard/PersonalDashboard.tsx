@@ -325,8 +325,8 @@ export default function PersonalDashboard() {
           {/* Drink Window */}
           {totalBottles > 0 && drinkWindowData.length > 0 && (
             <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-              <h3 className="text-[12px] font-semibold font-sans text-foreground mb-0.5">Drink Window</h3>
-              <p className="text-[9px] text-muted-foreground mb-2">Janela de consumo</p>
+              <h3 className="text-[12px] font-semibold font-sans text-foreground mb-0.5">Janela de Consumo</h3>
+              <p className="text-[9px] text-muted-foreground mb-2">Quando abrir cada garrafa</p>
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
                   <Pie data={drinkWindowData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
