@@ -43,14 +43,10 @@ export default function Signup() {
       analytics.track("signup_success");
       setConfirmationEmail(email);
       setAwaitingEmailConfirmation(true);
+      setEmailSent(true);
       toast({
         title: "Conta criada!",
         description: "Enviamos um link de confirmação para o seu e-mail.",
-      });
-      setEmailSent(true);
-      toast({
-        title: "Quase lá!",
-        description: "Enviamos o link de confirmação para o seu e-mail.",
       });
     } catch (err: any) {
       toast({
