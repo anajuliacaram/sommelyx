@@ -16,7 +16,7 @@ export default function Placeholder({ title }: { title: string }) {
           <Construction className="h-5 w-5 text-muted-foreground" />
         </div>
         <h2 className="text-sm font-semibold text-foreground font-sans tracking-tight mb-1">{title}</h2>
-        <p className="text-xs text-muted-foreground">Em breve — esta funcionalidade está sendo desenvolvida.</p>
+        <p className="text-xs text-muted-foreground">Esta seção está sendo finalizada e estará disponível em breve.</p>
       </div>
     </motion.div>
   );
