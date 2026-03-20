@@ -257,36 +257,29 @@ export default function CellarPage() {
         </div>
 
         {/* Bottom Row: Filters & Sort */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <MultiSelectDropdown title="Estilo" options={styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
             <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
             <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
             <MultiSelectDropdown title="Janela" options={drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex rounded-[12px] p-[2px] bg-muted/30 border border-border/40">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn("h-9 w-9 rounded-[10px] flex items-center justify-center transition-colors", viewMode === "grid" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
-              >
-                <LayoutGrid className="h-4 w-4" />
+          <div className="flex items-center gap-1.5">
+            <div className="hidden sm:flex rounded-lg p-[2px] bg-muted/30 border border-border/40">
+              <button onClick={() => setViewMode("grid")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-colors", viewMode === "grid" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}>
+                <LayoutGrid className="h-3.5 w-3.5" />
               </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn("h-9 w-9 rounded-[10px] flex items-center justify-center transition-colors", viewMode === "list" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
-              >
-                <List className="h-4 w-4" />
+              <button onClick={() => setViewMode("list")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-colors", viewMode === "list" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}>
+                <List className="h-3.5 w-3.5" />
               </button>
             </div>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="h-10 px-3 pr-8 text-[13px] font-medium rounded-[12px] bg-card cursor-pointer border border-border/40 text-foreground"
+              className="h-8 px-2.5 pr-7 text-[11px] font-medium rounded-lg bg-card cursor-pointer border border-border/40 text-foreground"
             >
-              <option value="drink">Prioridade de consumo</option>
-              <option value="date">Data de entrada</option>
+              <option value="drink">Prioridade</option>
+              <option value="date">Recentes</option>
               <option value="name">Nome A-Z</option>
               <option value="value">Valor</option>
               <option value="qty">Quantidade</option>
