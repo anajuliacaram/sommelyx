@@ -240,7 +240,7 @@ export default function Landing() {
 
               <motion.h1
                 className="text-left font-serif font-black text-[#0F0F14]"
-                style={{ fontSize: "clamp(48px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
+                style={{ fontSize: "clamp(36px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
                 initial="hidden" animate="visible" variants={fadeUp} custom={1}
               >
                 Sua adega, <br />
