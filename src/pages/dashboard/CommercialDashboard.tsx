@@ -24,10 +24,10 @@ import {
 } from "recharts";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 10 } as const,
+  hidden: { opacity: 0, y: 8 } as const,
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -45,7 +45,6 @@ export default function CommercialDashboard() {
 
   const lowStockWines = wines.filter(w => w.quantity > 0 && w.quantity <= 2).slice(0, 6);
 
-  // ABC Curve (by value)
   const abcData = useMemo(() => {
     const sorted = wines.filter(w => w.quantity > 0).map(w => ({
       name: w.name,
@@ -63,7 +62,6 @@ export default function CommercialDashboard() {
     });
   }, [wines]);
 
-  // Stock by style
   const styleData = useMemo(() => {
     const map: Record<string, number> = {};
     wines.filter(w => w.quantity > 0).forEach(w => {
@@ -76,7 +74,6 @@ export default function CommercialDashboard() {
       .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
   }, [wines]);
 
-  // Stock turnover estimate (items updated recently vs total)
   const turnover = useMemo(() => {
     const recently = wines.filter(w => {
       const d = new Date(w.updated_at);
@@ -86,189 +83,193 @@ export default function CommercialDashboard() {
   }, [wines]);
 
   const metrics = [
-    { label: "Estoque total", value: `${totalBottles} un.`, icon: Package, color: "#8F2D56" },
-    { label: "Valor em estoque", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: DollarSign, color: "#C9A86A" },
-    { label: "Giro de estoque", value: `${turnover}%`, icon: TrendingUp, color: "#22c55e" },
-    { label: "Itens baixo estoque", value: lowStock.toString(), icon: AlertTriangle, color: "#E07A5F" },
+    { label: "Estoque", value: `${totalBottles} un.`, icon: Package, color: "#8F2D56" },
+    { label: "Valor", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: DollarSign, color: "#C9A86A" },
+    { label: "Giro", value: `${turnover}%`, icon: TrendingUp, color: "#22c55e" },
+    { label: "Baixo estoque", value: lowStock.toString(), icon: AlertTriangle, color: "#E07A5F" },
   ];
 
   return (
-    <div className="space-y-6 max-w-[1200px] relative">
-      {/* Header */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+    <div className="space-y-4 max-w-[1200px] relative">
+      {/* Header — compact */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl md:text-3xl font-serif font-black italic tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.04em" }}>
+          <h1 className="text-lg md:text-xl font-serif font-black italic tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-sm mt-1 font-medium" style={{ color: "#6B7280" }}>Operação Premium Sommelyx</p>
+          <p className="text-[11px] text-muted-foreground font-medium">Operação Premium Sommelyx</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-9 text-[12px] font-bold" onClick={() => setCsvOpen(true)}>
-            <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar CSV
+          <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold" onClick={() => setCsvOpen(true)}>
+            <Upload className="h-3 w-3 mr-1" /> Importar
           </Button>
           <MagneticButton>
-            <Button variant="premium" size="sm" className="h-9 px-4 text-[12px] font-bold" onClick={() => setAddOpen(true)}>
-              <Plus className="h-3.5 w-3.5 mr-1.5" /> Cadastrar produto
+            <Button variant="premium" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setAddOpen(true)}>
+              <Plus className="h-3 w-3 mr-1" /> Cadastrar
             </Button>
           </MagneticButton>
         </div>
       </motion.div>
 
-      {/* KPI Cards — Commercial focus */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {isLoading ? (
           [1, 2, 3, 4].map((i) => (
-            <div key={i} className="glass-card p-5 space-y-3">
-              <Skeleton className="w-10 h-10 rounded-xl" />
-              <Skeleton className="h-8 w-16 rounded-lg" />
-              <Skeleton className="h-3 w-24 rounded-lg" />
+            <div key={i} className="glass-card p-3 space-y-2">
+              <Skeleton className="w-8 h-8 rounded-lg" />
+              <Skeleton className="h-6 w-14 rounded" />
+              <Skeleton className="h-2.5 w-16 rounded" />
             </div>
           ))
         ) : (
           metrics.map((m, i) => (
             <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
               <PremiumKpiCard
-                className="p-5 group border border-white/5 ring-1 ring-black/[0.03]"
+                className="p-3 group border border-white/5 ring-1 ring-black/[0.03]"
                 onClick={() => navigate("/dashboard/inventory")}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ background: `${m.color}15` }}>
-                    <m.icon className="h-5 w-5" style={{ color: m.color }} />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${m.color}12` }}>
+                    <m.icon className="h-4 w-4" style={{ color: m.color }} />
                   </div>
                 </div>
-                <p className="text-2xl font-black font-sans tracking-tight text-[#0F0F14]">{m.value}</p>
-                <p className="text-[12px] mt-1.5 font-bold tracking-tight text-gray-400 group-hover:text-gray-600 transition-colors uppercase tracking-[0.05em]">{m.label}</p>
+                <p className="text-xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
               </PremiumKpiCard>
             </motion.div>
           ))
         )}
       </div>
 
-      {/* Low stock + ABC side by side */}
+      {/* Main 2-column grid */}
       {totalBottles > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Low Stock */}
-          {lowStockWines.length > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-[13px] font-semibold font-sans" style={{ color: "#0F0F14" }}>⚠️ Baixo estoque</h2>
-                  <p className="text-[10px] mt-0.5" style={{ color: "#9CA3AF" }}>Produtos com ≤ 2 unidades</p>
-                </div>
-                <Badge variant="secondary" className="text-[10px]" style={{ background: "rgba(224,122,95,0.08)", color: "#E07A5F" }}>
-                  {lowStock} itens
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                {lowStockWines.map(w => (
-                  <div key={w.id} className="flex items-center gap-3 p-2.5 rounded-[12px] transition-colors hover:bg-black/[0.02]" style={{ border: "1px solid rgba(0,0,0,0.04)" }}>
-                    <div className="w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.08)" }}>
-                      <ArrowDownRight className="h-3.5 w-3.5" style={{ color: "#f59e0b" }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold truncate" style={{ color: "#0F0F14" }}>{w.name}</p>
-                      <p className="text-[10px]" style={{ color: "#9CA3AF" }}>{w.producer || "—"}</p>
-                    </div>
-                    <span className="text-[12px] font-bold" style={{ color: "#E07A5F" }}>{w.quantity} un.</span>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+          {/* LEFT (3/5) — lists */}
+          <div className="lg:col-span-3 space-y-3">
+            {/* Low Stock */}
+            {lowStockWines.length > 0 && (
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h2 className="text-[13px] font-semibold font-sans text-foreground">⚠️ Baixo estoque</h2>
+                    <p className="text-[9px] text-muted-foreground">Produtos com ≤ 2 unidades</p>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* ABC Curve */}
-          {abcData.length > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <div className="flex items-center gap-2 mb-4">
-                <Layers className="h-3.5 w-3.5" style={{ color: "#9CA3AF" }} />
-                <div>
-                  <h2 className="text-[13px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Curva ABC</h2>
-                  <p className="text-[10px] mt-0.5" style={{ color: "#9CA3AF" }}>Top 10 por valor em estoque</p>
+                  <Badge variant="secondary" className="text-[9px] h-5" style={{ background: "rgba(224,122,95,0.08)", color: "#E07A5F" }}>
+                    {lowStock} itens
+                  </Badge>
                 </div>
-              </div>
-              <div className="space-y-2">
-                {abcData.map((w, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className={`text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${w.cls === "A" ? "bg-green-100 text-green-700" : w.cls === "B" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
-                      }`}>{w.cls}</span>
-                    <span className="text-[11px] font-medium flex-1 truncate" style={{ color: "#0F0F14" }}>{w.name}</span>
-                    <span className="text-[10px] font-medium" style={{ color: "#6B7280" }}>R$ {w.value.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</span>
-                    <span className="text-[9px] font-bold w-10 text-right" style={{ color: "#9CA3AF" }}>{w.cumPct}%</span>
+                <div className="space-y-1.5">
+                  {lowStockWines.map(w => (
+                    <div key={w.id} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-black/[0.015]" style={{ border: "1px solid rgba(0,0,0,0.04)" }}>
+                      <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.08)" }}>
+                        <ArrowDownRight className="h-3 w-3" style={{ color: "#f59e0b" }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
+                        <p className="text-[9px] text-muted-foreground">{w.producer || "—"}</p>
+                      </div>
+                      <span className="text-[11px] font-bold" style={{ color: "#E07A5F" }}>{w.quantity} un.</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ABC Curve */}
+            {abcData.length > 0 && (
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Layers className="h-3 w-3 text-muted-foreground" />
+                  <div>
+                    <h2 className="text-[13px] font-semibold font-sans text-foreground">Curva ABC</h2>
+                    <p className="text-[9px] text-muted-foreground">Top 10 por valor em estoque</p>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </div>
-      )}
-
-      {/* Charts */}
-      {totalBottles > 0 && styleData.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Stock by style bar chart */}
-          <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-[13px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Estoque por estilo</h3>
-                <p className="text-[10px] mt-0.5" style={{ color: "#9CA3AF" }}>Distribuição atual</p>
-              </div>
-              <BarChart3 className="h-3.5 w-3.5" style={{ color: "#9CA3AF" }} />
-            </div>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={styleData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={24} />
-                <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 10, fontSize: 11, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {styleData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </motion.div>
-
-          {/* Composition pie */}
-          <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
-            <h3 className="text-[13px] font-semibold font-sans mb-1" style={{ color: "#0F0F14" }}>Composição do estoque</h3>
-            <p className="text-[10px] mb-3" style={{ color: "#9CA3AF" }}>Por estilo de vinho</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <PieChart>
-                <Pie data={styleData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={3} dataKey="value">
-                  {styleData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 10, fontSize: 11, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap justify-center gap-3 mt-2">
-              {styleData.map((d, i) => (
-                <div key={d.name} className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                  <span className="text-[10px] font-medium" style={{ color: "#6B7280" }}>{d.name}</span>
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      )}
+                <div className="space-y-1.5">
+                  {abcData.map((w, i) => (
+                    <div key={i} className="flex items-center gap-2.5">
+                      <span className={`text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${w.cls === "A" ? "bg-green-100 text-green-700" : w.cls === "B" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{w.cls}</span>
+                      <span className="text-[10px] font-medium flex-1 truncate text-foreground">{w.name}</span>
+                      <span className="text-[9px] font-medium text-muted-foreground">R$ {w.value.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</span>
+                      <span className="text-[8px] font-bold w-8 text-right text-muted-foreground">{w.cumPct}%</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-      {/* Alertas operacionais */}
-      {lowStock > 0 && (
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={9}>
-          <h2 className="text-[12px] font-semibold font-sans uppercase tracking-[0.08em] mb-2.5" style={{ color: "#9CA3AF" }}>
-            Alertas operacionais
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="glass-card p-4 flex items-center gap-3 cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
-              <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: "rgba(224,122,95,0.07)" }}>
-                <AlertTriangle className="h-4 w-4" style={{ color: "#E07A5F" }} />
-              </div>
-              <div>
-                <p className="text-[12px] font-semibold" style={{ color: "#0F0F14" }}>{lowStock}</p>
-                <p className="text-[10px] font-medium" style={{ color: "#E07A5F" }}>Baixo estoque</p>
-              </div>
-            </div>
+            {/* Operational alerts */}
+            {lowStock > 0 && (
+              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+                <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-1.5 text-muted-foreground">
+                  Alertas operacionais
+                </h2>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="glass-card p-3 flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(224,122,95,0.07)" }}>
+                      <AlertTriangle className="h-3.5 w-3.5" style={{ color: "#E07A5F" }} />
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-bold text-foreground">{lowStock}</p>
+                      <p className="text-[9px] font-medium" style={{ color: "#E07A5F" }}>Baixo estoque</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
-        </motion.div>
+
+          {/* RIGHT (2/5) — charts */}
+          <div className="lg:col-span-2 space-y-3">
+            {/* Bar chart */}
+            {styleData.length > 0 && (
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-[12px] font-semibold font-sans text-foreground">Estoque por estilo</h3>
+                    <p className="text-[9px] text-muted-foreground">Distribuição atual</p>
+                  </div>
+                  <BarChart3 className="h-3 w-3 text-muted-foreground" />
+                </div>
+                <ResponsiveContainer width="100%" height={140}>
+                  <BarChart data={styleData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={20} />
+                    <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }} />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                      {styleData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </motion.div>
+            )}
+
+            {/* Pie chart */}
+            {styleData.length > 0 && (
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+                <h3 className="text-[12px] font-semibold font-sans text-foreground mb-0.5">Composição</h3>
+                <p className="text-[9px] text-muted-foreground mb-2">Por estilo de vinho</p>
+                <ResponsiveContainer width="100%" height={120}>
+                  <PieChart>
+                    <Pie data={styleData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
+                      {styleData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-wrap justify-center gap-2 mt-1.5">
+                  {styleData.map((d, i) => (
+                    <div key={d.name} className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                      <span className="text-[9px] font-medium text-muted-foreground">{d.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Empty State */}
@@ -276,7 +277,7 @@ export default function CommercialDashboard() {
         <PremiumEmptyState
           icon={Package}
           title="Gestão comercial simplificada"
-          description="Transforme seu estoque em dados acionáveis. Cadastre seus primeiros produtos para acompanhar o valor da adega e o giro de estoque em tempo real."
+          description="Cadastre seus primeiros produtos para acompanhar valor e giro de estoque em tempo real."
           primaryAction={{
             label: "Cadastrar produto",
             onClick: () => setAddOpen(true),
@@ -292,19 +293,18 @@ export default function CommercialDashboard() {
       {/* FAB */}
       <motion.button
         onClick={() => setAddOpen(true)}
-        className="fixed bottom-6 right-6 z-40 rounded-full flex items-center justify-center text-white cursor-pointer"
+        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full flex items-center justify-center text-white cursor-pointer"
         style={{
           background: "linear-gradient(135deg, #8F2D56, #C44569)",
-          boxShadow: "0 8px 24px rgba(143,45,86,0.3), 0 2px 8px rgba(0,0,0,0.1)",
-          width: 52, height: 52,
+          boxShadow: "0 6px 20px rgba(143,45,86,0.3)",
         }}
         whileHover={{ scale: 1.08, y: -2 }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.6, type: "spring", stiffness: 200, damping: 15 }}
+        transition={{ delay: 0.5, type: "spring", stiffness: 200, damping: 15 }}
       >
-        <Plus className="h-5 w-5" />
+        <Plus className="h-4.5 w-4.5" />
       </motion.button>
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
