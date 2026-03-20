@@ -448,19 +448,19 @@ export default function Landing() {
       </section>
 
       {/* ─── 6. FOOTER ─── */}
-      <footer className="py-14 px-6 relative z-10 bg-white border-t border-black/[0.04]">
-        <div className="container mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-3">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[36px] w-auto object-contain grayscale opacity-60" />
-            <span className="font-black text-[20px] font-sans tracking-tight text-[#0F0F14]">Sommelyx</span>
+      <footer className="py-8 sm:py-14 px-4 sm:px-6 relative z-10 bg-white border-t border-black/[0.04]">
+        <div className="container mx-auto max-w-7xl flex flex-col items-center gap-6 md:flex-row md:justify-between md:gap-8">
+          <div className="flex items-center gap-2.5">
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-7 sm:h-9 w-auto object-contain grayscale opacity-60" />
+            <span className="font-black text-base sm:text-[20px] font-sans tracking-tight text-foreground">Sommelyx</span>
           </div>
-          <div className="flex items-center gap-8 text-[13px] font-bold uppercase tracking-widest text-[#6B7280]">
-            <a href="#features" className="hover:text-[#0F0F14] transition-colors">Funcionalidades</a>
-            <a href="#pricing" className="hover:text-[#0F0F14] transition-colors">Planos</a>
-            <button onClick={handleLoginClick} className="hover:text-[#0F0F14] transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest">Acesso Privado</button>
+          <div className="flex items-center gap-5 sm:gap-8 text-[11px] sm:text-[13px] font-bold uppercase tracking-widest text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Funcionalidades</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Planos</a>
+            <button onClick={handleLoginClick} className="hover:text-foreground transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest text-[11px] sm:text-[13px]">Acesso</button>
           </div>
-          <p className="text-[13px] font-medium text-[#9CA3AF]">
-            © {new Date().getFullYear()} Sommelyx. Inteligência em cada taça.
+          <p className="text-[11px] sm:text-[13px] font-medium text-muted-foreground text-center">
+            © {new Date().getFullYear()} Sommelyx
           </p>
         </div>
       </footer>
