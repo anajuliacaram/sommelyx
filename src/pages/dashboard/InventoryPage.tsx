@@ -55,6 +55,7 @@ export default function InventoryPage() {
     const [search, setSearch] = useState(searchParams.get("q") || "");
     const [debouncedSearch, setDebouncedSearch] = useState(search);
     const [filterOpen, setFilterOpen] = useState(false);
+    const [addWineOpen, setAddWineOpen] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
