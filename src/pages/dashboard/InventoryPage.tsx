@@ -37,6 +37,7 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AddWineDialog } from "@/components/AddWineDialog";
 
 // --- Types & Constants ---
 type StockStatus = "all" | "in-stock" | "low" | "out" | "aging" | "drink-now";
@@ -54,6 +55,7 @@ export default function InventoryPage() {
     const [search, setSearch] = useState(searchParams.get("q") || "");
     const [debouncedSearch, setDebouncedSearch] = useState(search);
     const [filterOpen, setFilterOpen] = useState(false);
+    const [addWineOpen, setAddWineOpen] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
@@ -298,7 +300,7 @@ export default function InventoryPage() {
                         </Button>
                     </div>
                     <MagneticButton>
-                        <Button variant="premium" className="h-[46px] px-6 rounded-2xl shadow-float font-black text-[13px] uppercase tracking-widest">
+                        <Button variant="premium" className="h-[46px] px-6 rounded-2xl shadow-float font-black text-[13px] uppercase tracking-widest" onClick={() => setAddWineOpen(true)}>
                             <Plus className="h-4 w-4 mr-1.5" /> Adicionar Vinho
                         </Button>
                     </MagneticButton>
@@ -596,6 +598,7 @@ export default function InventoryPage() {
                     </SheetFooter>
                 </SheetContent>
             </Sheet>
+            <AddWineDialog open={addWineOpen} onOpenChange={setAddWineOpen} />
         </div>
     );
 }

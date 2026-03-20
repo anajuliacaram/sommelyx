@@ -15,7 +15,7 @@ const NotFound = () => {
         <p className="mb-6 text-base" style={{ color: "#6B7280" }}>Página não encontrada</p>
         <Link
           to="/"
-          className="inline-flex h-11 px-6 items-center rounded-[14px] text-[13px] font-semibold text-white cta-primary-btn"
+          className="inline-flex h-11 px-6 items-center rounded-2xl text-[13px] font-semibold text-white gradient-wine"
         >
           Voltar ao início
         </Link>
