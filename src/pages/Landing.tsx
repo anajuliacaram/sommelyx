@@ -220,7 +220,7 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section id="features" className="relative pt-32 lg:pt-40 pb-10 lg:pb-14 px-6 flex items-center overflow-visible">
+      <section id="features" className="relative pt-24 sm:pt-32 lg:pt-40 pb-8 lg:pb-14 px-4 sm:px-6 flex items-center overflow-visible">
         <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         {/* Subtle grid pattern background for density */}
         <div className="absolute inset-0 z-0 opacity-[0.28] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(88,20,46,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(88,20,46,0.07) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
