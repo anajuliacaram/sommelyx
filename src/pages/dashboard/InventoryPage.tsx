@@ -37,6 +37,7 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AddWineDialog } from "@/components/AddWineDialog";
 
 // --- Types & Constants ---
 type StockStatus = "all" | "in-stock" | "low" | "out" | "aging" | "drink-now";
