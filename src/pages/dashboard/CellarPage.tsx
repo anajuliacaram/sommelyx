@@ -356,54 +356,57 @@ export default function CellarPage() {
           } : undefined}
         />
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           {filtered.map((wine, i) => {
             const status = drinkStatus(wine);
             return (
               <motion.div
                 key={wine.id}
-                className="glass-card p-5 group"
-                initial={{ opacity: 0, y: 8 }}
+                className="glass-card p-3 group relative"
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.02, duration: 0.35 }}
+                transition={{ delay: i * 0.015, duration: 0.3 }}
               >
-                <div className="flex items-start justify-between mb-3">
+                {/* Top: Name + Status */}
+                <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold truncate text-foreground">{wine.name}</h3>
-                    <p className="text-[11px] truncate text-muted-foreground">
+                    <h3 className="text-[12px] font-bold truncate text-foreground leading-tight">{wine.name}</h3>
+                    <p className="text-[9px] truncate text-muted-foreground">
                       {[wine.producer, wine.vintage].filter(Boolean).join(" · ") || "—"}
                     </p>
                   </div>
                   {status && (
-                    <Badge variant="secondary" className={`text-[10px] ml-2 shrink-0 ${statusColor[status]}`}>
+                    <Badge variant="secondary" className={`text-[8px] px-1.5 py-0 h-4 shrink-0 font-bold ${statusColor[status]}`}>
                       {statusLabel[status]}
                     </Badge>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground mb-3">
-                  <span className="font-semibold text-foreground">{wine.quantity} un.</span>
-                  {wine.style && <span className="capitalize">{wine.style}</span>}
-                  {wine.purchase_price && <span>R$ {wine.purchase_price.toFixed(0)}</span>}
+
+                {/* Info row */}
+                <div className="flex items-center gap-1.5 flex-wrap text-[9px] text-muted-foreground mb-2">
+                  <span className="font-bold text-foreground bg-muted/40 px-1.5 py-0.5 rounded">{wine.quantity} un.</span>
+                  {wine.purchase_price != null && wine.purchase_price > 0 && (
+                    <span className="font-semibold" style={{ color: "hsl(var(--gold))" }}>R$ {wine.purchase_price.toFixed(0)}</span>
+                  )}
+                  {wine.style && <span className="capitalize bg-primary/5 text-primary px-1.5 py-0.5 rounded font-medium">{wine.style}</span>}
                   {wine.country && <span>{wine.country}</span>}
                   {wine.cellar_location && (
-                    <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" />{wine.cellar_location}</span>
+                    <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{wine.cellar_location}</span>
                   )}
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+
+                {/* Actions — always visible */}
+                <div className="flex gap-1.5 border-t border-border/30 pt-2">
                   {status === "now" && (
-                    <Button
-                      size="sm" variant="outline"
-                      className="h-7 text-[10px] px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700"
-                      onClick={() => handleOpen(wine)}
-                    >
-                      <GlassWater className="h-3 w-3 mr-1" /> Abrir
+                    <Button size="sm" variant="outline" className="h-6 text-[9px] px-2 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700" onClick={() => handleOpen(wine)}>
+                      <GlassWater className="h-2.5 w-2.5 mr-0.5" /> Abrir
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 flex-1" onClick={() => setEditWine(wine)}>
-                    <Pencil className="h-3 w-3 mr-1" /> Editar
+                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 flex-1" onClick={() => setEditWine(wine)}>
+                    <Pencil className="h-2.5 w-2.5 mr-0.5" /> Editar
                   </Button>
-                  <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(wine)}>
-                    <Trash2 className="h-3 w-3" />
+                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 text-destructive hover:text-destructive hover:bg-destructive/5" onClick={() => setDeleteTarget(wine)}>
+                    <Trash2 className="h-2.5 w-2.5" />
                   </Button>
                 </div>
               </motion.div>
