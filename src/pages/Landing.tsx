@@ -181,7 +181,7 @@ export default function Landing() {
 
       {/* ─── HEADER ─── */}
       <motion.header
-        className="fixed top-0 w-full z-50 px-6 py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
+        className="fixed top-0 w-full z-50 px-4 sm:px-6 py-3 sm:py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -189,19 +189,19 @@ export default function Landing() {
         <div className="container mx-auto flex items-center justify-between max-w-7xl">
           <a
             href="/"
-            className="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80"
+            className="flex items-center gap-2 sm:gap-3 transition-opacity duration-300 hover:opacity-80"
           >
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-[68px] sm:h-[90px] w-auto object-contain" />
-            <span className="text-[30px] sm:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 sm:h-[68px] md:h-[90px] w-auto object-contain" />
+            <span className="text-xl sm:text-[30px] md:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
 
-          <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-6">
             <MagneticButton>
               <Button
                 variant="outline"
-                className="inline-flex h-11 sm:h-12 rounded-full px-6 sm:px-7 text-[14px] sm:text-[14.5px] font-semibold text-foreground bg-transparent border border-border/60 shadow-none transition-all duration-300 hover:bg-muted/40 hover:border-border"
+                className="inline-flex h-9 sm:h-11 md:h-12 rounded-full px-4 sm:px-6 md:px-7 text-[12px] sm:text-[14px] font-semibold text-foreground bg-transparent border border-border/60 shadow-none transition-all duration-300 hover:bg-muted/40 hover:border-border"
                 onClick={handleLoginClick}
               >
                 Entrar
@@ -209,7 +209,7 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-6 sm:px-9 h-11 sm:h-12 text-[13px] sm:text-[13.5px] font-black uppercase tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-4 sm:px-6 md:px-9 h-9 sm:h-11 md:h-12 text-[11px] sm:text-[13px] font-black uppercase tracking-[0.1em] sm:tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
                 onClick={handleStartFreeClick}
               >
                 Começar Grátis
