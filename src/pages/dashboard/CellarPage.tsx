@@ -289,27 +289,12 @@ export default function CellarPage() {
       </div>
 
       {/* Range Sliders & Saved Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-card p-4">
-          <RangeSliderFilter
-            label="Safra"
-            min={dynamicOptions.minVintage}
-            max={dynamicOptions.maxVintage}
-            step={1}
-            value={vintageRange}
-            onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }}
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="glass-card p-3">
+          <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
         </div>
-        <div className="glass-card p-4">
-          <RangeSliderFilter
-            label="Preço"
-            min={0}
-            max={dynamicOptions.maxPrice}
-            step={10}
-            value={priceRange}
-            onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }}
-            formatValue={v => `R$ ${v}`}
-          />
+        <div className="glass-card p-3">
+          <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
         </div>
       </div>
 
