@@ -232,64 +232,54 @@ export default function CellarPage() {
   }
 
   return (
-    <div className="space-y-5 max-w-[1200px]">
+    <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>Minha Adega</h1>
-          <p className="text-sm mt-0.5 text-muted-foreground">{filtered.length} vinho(s) em estoque</p>
+          <h1 className="text-lg md:text-xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
+          <p className="text-[11px] text-muted-foreground">{filtered.length} vinho{filtered.length !== 1 ? "s" : ""} em estoque</p>
         </div>
-        <MagneticButton>
-          <Button variant="premium" onClick={() => setAddOpen(true)} className="h-10 px-6 text-[13px] font-bold">
-            <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
-          </Button>
-        </MagneticButton>
+        <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-8 px-4 text-[11px] font-bold">
+          <Plus className="h-3 w-3 mr-1" /> Adicionar vinho
+        </Button>
       </div>
 
       {/* Search + Actions */}
-      <div className="flex flex-col gap-3">
-        {/* Top Row: Search */}
+      <div className="flex flex-col gap-2">
         <div className="relative w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Pesquise vinho, produtor, uva, safra, localização…"
-            className="pl-10 h-11 text-sm rounded-[14px] bg-muted/30 border-border/40 w-full"
+            placeholder="Pesquise vinho, produtor, uva, safra…"
+            className="pl-9 h-9 text-[12px] rounded-xl bg-muted/30 border-border/40 w-full"
           />
         </div>
 
         {/* Bottom Row: Filters & Sort */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <MultiSelectDropdown title="Estilo" options={styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
             <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
             <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
             <MultiSelectDropdown title="Janela" options={drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex rounded-[12px] p-[2px] bg-muted/30 border border-border/40">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn("h-9 w-9 rounded-[10px] flex items-center justify-center transition-colors", viewMode === "grid" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
-              >
-                <LayoutGrid className="h-4 w-4" />
+          <div className="flex items-center gap-1.5">
+            <div className="hidden sm:flex rounded-lg p-[2px] bg-muted/30 border border-border/40">
+              <button onClick={() => setViewMode("grid")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-colors", viewMode === "grid" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}>
+                <LayoutGrid className="h-3.5 w-3.5" />
               </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn("h-9 w-9 rounded-[10px] flex items-center justify-center transition-colors", viewMode === "list" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
-              >
-                <List className="h-4 w-4" />
+              <button onClick={() => setViewMode("list")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-colors", viewMode === "list" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}>
+                <List className="h-3.5 w-3.5" />
               </button>
             </div>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="h-10 px-3 pr-8 text-[13px] font-medium rounded-[12px] bg-card cursor-pointer border border-border/40 text-foreground"
+              className="h-8 px-2.5 pr-7 text-[11px] font-medium rounded-lg bg-card cursor-pointer border border-border/40 text-foreground"
             >
-              <option value="drink">Prioridade de consumo</option>
-              <option value="date">Data de entrada</option>
+              <option value="drink">Prioridade</option>
+              <option value="date">Recentes</option>
               <option value="name">Nome A-Z</option>
               <option value="value">Valor</option>
               <option value="qty">Quantidade</option>
@@ -299,27 +289,12 @@ export default function CellarPage() {
       </div>
 
       {/* Range Sliders & Saved Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-card p-4">
-          <RangeSliderFilter
-            label="Safra"
-            min={dynamicOptions.minVintage}
-            max={dynamicOptions.maxVintage}
-            step={1}
-            value={vintageRange}
-            onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }}
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="glass-card p-3">
+          <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
         </div>
-        <div className="glass-card p-4">
-          <RangeSliderFilter
-            label="Preço"
-            min={0}
-            max={dynamicOptions.maxPrice}
-            step={10}
-            value={priceRange}
-            onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }}
-            formatValue={v => `R$ ${v}`}
-          />
+        <div className="glass-card p-3">
+          <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
         </div>
       </div>
 
@@ -381,54 +356,57 @@ export default function CellarPage() {
           } : undefined}
         />
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           {filtered.map((wine, i) => {
             const status = drinkStatus(wine);
             return (
               <motion.div
                 key={wine.id}
-                className="glass-card p-5 group"
-                initial={{ opacity: 0, y: 8 }}
+                className="glass-card p-3 group relative"
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.02, duration: 0.35 }}
+                transition={{ delay: i * 0.015, duration: 0.3 }}
               >
-                <div className="flex items-start justify-between mb-3">
+                {/* Top: Name + Status */}
+                <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold truncate text-foreground">{wine.name}</h3>
-                    <p className="text-[11px] truncate text-muted-foreground">
+                    <h3 className="text-[12px] font-bold truncate text-foreground leading-tight">{wine.name}</h3>
+                    <p className="text-[9px] truncate text-muted-foreground">
                       {[wine.producer, wine.vintage].filter(Boolean).join(" · ") || "—"}
                     </p>
                   </div>
                   {status && (
-                    <Badge variant="secondary" className={`text-[10px] ml-2 shrink-0 ${statusColor[status]}`}>
+                    <Badge variant="secondary" className={`text-[8px] px-1.5 py-0 h-4 shrink-0 font-bold ${statusColor[status]}`}>
                       {statusLabel[status]}
                     </Badge>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground mb-3">
-                  <span className="font-semibold text-foreground">{wine.quantity} un.</span>
-                  {wine.style && <span className="capitalize">{wine.style}</span>}
-                  {wine.purchase_price && <span>R$ {wine.purchase_price.toFixed(0)}</span>}
+
+                {/* Info row */}
+                <div className="flex items-center gap-1.5 flex-wrap text-[9px] text-muted-foreground mb-2">
+                  <span className="font-bold text-foreground bg-muted/40 px-1.5 py-0.5 rounded">{wine.quantity} un.</span>
+                  {wine.purchase_price != null && wine.purchase_price > 0 && (
+                    <span className="font-semibold" style={{ color: "hsl(var(--gold))" }}>R$ {wine.purchase_price.toFixed(0)}</span>
+                  )}
+                  {wine.style && <span className="capitalize bg-primary/5 text-primary px-1.5 py-0.5 rounded font-medium">{wine.style}</span>}
                   {wine.country && <span>{wine.country}</span>}
                   {wine.cellar_location && (
-                    <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" />{wine.cellar_location}</span>
+                    <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{wine.cellar_location}</span>
                   )}
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+
+                {/* Actions — always visible */}
+                <div className="flex gap-1.5 border-t border-border/30 pt-2">
                   {status === "now" && (
-                    <Button
-                      size="sm" variant="outline"
-                      className="h-7 text-[10px] px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700"
-                      onClick={() => handleOpen(wine)}
-                    >
-                      <GlassWater className="h-3 w-3 mr-1" /> Abrir
+                    <Button size="sm" variant="outline" className="h-6 text-[9px] px-2 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700" onClick={() => handleOpen(wine)}>
+                      <GlassWater className="h-2.5 w-2.5 mr-0.5" /> Abrir
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 flex-1" onClick={() => setEditWine(wine)}>
-                    <Pencil className="h-3 w-3 mr-1" /> Editar
+                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 flex-1" onClick={() => setEditWine(wine)}>
+                    <Pencil className="h-2.5 w-2.5 mr-0.5" /> Editar
                   </Button>
-                  <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(wine)}>
-                    <Trash2 className="h-3 w-3" />
+                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 text-destructive hover:text-destructive hover:bg-destructive/5" onClick={() => setDeleteTarget(wine)}>
+                    <Trash2 className="h-2.5 w-2.5" />
                   </Button>
                 </div>
               </motion.div>
@@ -440,51 +418,49 @@ export default function CellarPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border/40">
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Vinho</th>
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden sm:table-cell text-muted-foreground">Estilo</th>
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell text-muted-foreground">Local</th>
-                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Qtd</th>
-                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell text-muted-foreground">Status</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Ações</th>
+                <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Vinho</th>
+                <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden sm:table-cell text-muted-foreground">Estilo</th>
+                <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden md:table-cell text-muted-foreground">Preço</th>
+                <th className="text-center text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Qtd</th>
+                <th className="text-center text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden md:table-cell text-muted-foreground">Status</th>
+                <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((wine, i) => {
+              {filtered.map((wine) => {
                 const status = drinkStatus(wine);
                 return (
-                  <tr key={wine.id} className="transition-colors hover:bg-muted/30 group border-b border-border/20 last:border-0">
-                    <td className="px-4 py-3">
-                      <p className="text-[12px] font-semibold text-foreground">{wine.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{[wine.producer, wine.vintage, wine.country].filter(Boolean).join(" · ")}</p>
+                  <tr key={wine.id} className="transition-colors hover:bg-muted/20 border-b border-border/15 last:border-0">
+                    <td className="px-3 py-2">
+                      <p className="text-[11px] font-bold text-foreground truncate max-w-[200px]">{wine.name}</p>
+                      <p className="text-[9px] text-muted-foreground">{[wine.producer, wine.vintage, wine.country].filter(Boolean).join(" · ")}</p>
                     </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize bg-primary/5 text-primary">
-                        {wine.style || "—"}
-                      </span>
+                    <td className="px-3 py-2 hidden sm:table-cell">
+                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded capitalize bg-primary/5 text-primary">{wine.style || "—"}</span>
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-[10px] text-muted-foreground">{wine.cellar_location || "—"}</span>
+                    <td className="px-3 py-2 text-right hidden md:table-cell">
+                      <span className="text-[10px] font-semibold text-muted-foreground">{wine.purchase_price ? `R$ ${wine.purchase_price.toFixed(0)}` : "—"}</span>
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="text-[12px] font-bold text-foreground">{wine.quantity}</span>
+                    <td className="px-3 py-2 text-center">
+                      <span className="text-[11px] font-bold text-foreground">{wine.quantity}</span>
                     </td>
-                    <td className="px-4 py-3 text-center hidden md:table-cell">
+                    <td className="px-3 py-2 text-center hidden md:table-cell">
                       {status ? (
-                        <Badge variant="secondary" className={`text-[9px] ${statusColor[status]}`}>{statusLabel[status]}</Badge>
-                      ) : <span className="text-[10px] text-muted-foreground">—</span>}
+                        <Badge variant="secondary" className={`text-[8px] h-4 px-1.5 ${statusColor[status]}`}>{statusLabel[status]}</Badge>
+                      ) : <span className="text-[9px] text-muted-foreground">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-3 py-2 text-right">
+                      <div className="flex gap-0.5 justify-end">
                         {status === "now" && (
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleOpen(wine)}>
-                            <GlassWater className="h-3.5 w-3.5 text-green-600" />
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleOpen(wine)}>
+                            <GlassWater className="h-3 w-3 text-green-600" />
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditWine(wine)}>
-                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setEditWine(wine)}>
+                          <Pencil className="h-3 w-3 text-muted-foreground" />
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setDeleteTarget(wine)}>
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setDeleteTarget(wine)}>
+                          <Trash2 className="h-3 w-3 text-destructive" />
                         </Button>
                       </div>
                     </td>
