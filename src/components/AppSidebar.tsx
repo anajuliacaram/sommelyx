@@ -57,7 +57,7 @@ export function AppSidebar() {
 
   return (
     <>
-      <Sidebar className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)", background: "#FDFDFD" }}>
+      <Sidebar collapsible="offcanvas" className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)", background: "#FDFDFD" }}>
         <SidebarHeader className="pt-8 px-4">
           <div className="flex items-center gap-3.5 px-2 py-2 group cursor-default mb-6">
             <div className="relative">
