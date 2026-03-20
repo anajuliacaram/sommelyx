@@ -97,7 +97,7 @@ export default function CommercialDashboard() {
           <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-[11px] text-muted-foreground">Visão geral da sua operação</p>
+          <p className="text-[11px] text-muted-foreground">Estoque, vendas e performance da operação</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold" onClick={() => setCsvOpen(true)}>

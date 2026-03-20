@@ -428,35 +428,30 @@
 
   /* ── Sidebar Premium ── */
   .sidebar-item {
-    @apply flex items-center gap-3 h-[46px] px-4 rounded-[16px] transition-all duration-300 relative cursor-pointer outline-none;
-    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    color: #6B7280;
-    font-size: 13px;
+    @apply flex items-center gap-2.5 h-[40px] px-3 rounded-xl transition-all duration-200 relative cursor-pointer outline-none;
+    background: transparent;
+    border: 1px solid transparent;
+    color: hsl(var(--muted-foreground));
+    font-size: 12px;
     font-weight: 500;
   }
 
   .sidebar-item:hover,
   .sidebar-item:focus-visible {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.35);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    color: #0F0F14;
+    background: hsl(var(--muted) / 0.5);
+    border-color: hsl(var(--border) / 0.4);
+    color: hsl(var(--foreground));
   }
 
   .sidebar-item:focus-visible {
-    @apply ring-2 ring-[#8C2044]/40 ring-offset-2 ring-offset-white;
+    @apply ring-2 ring-primary/30 ring-offset-1;
   }
 
   .sidebar-item--active {
-    background: rgba(140, 32, 68, 0.08);
-    border-color: rgba(140, 32, 68, 0.25);
-    color: #0F0F14;
+    background: hsl(var(--primary) / 0.06);
+    border-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--foreground));
     font-weight: 600;
-    box-shadow: 0 8px 16px -4px rgba(140, 32, 68, 0.15);
   }
 
   .sidebar-item--active::after {
@@ -466,8 +461,8 @@
     top: 25%;
     height: 50%;
     width: 3px;
-    background: linear-gradient(to bottom, #8C2044, #C44569);
-    border-radius: 0 4px 4px 0;
+    background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--wine-vivid)));
+    border-radius: 0 3px 3px 0;
   }
 
   .sidebar-badge {

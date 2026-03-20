@@ -143,13 +143,13 @@ export default function DashboardLayout() {
                 <Search className="h-4 w-4" />
               </button>
 
-              {/* Profile badge — desktop only */}
+              {/* Mode indicator — always visible */}
               <span
-                className="hidden md:inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-semibold uppercase tracking-[0.14em]"
+                className="inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] shrink-0"
                 style={{
-                  background: profileType === "commercial" ? "rgba(201,168,106,0.1)" : "rgba(143,45,86,0.06)",
-                  color: profileType === "commercial" ? "#C9A86A" : "#8F2D56",
-                  border: `1px solid ${profileType === "commercial" ? "rgba(201,168,106,0.2)" : "rgba(143,45,86,0.12)"}`,
+                  background: profileType === "commercial" ? "hsl(var(--gold) / 0.1)" : "hsl(var(--primary) / 0.06)",
+                  color: profileType === "commercial" ? "hsl(var(--gold))" : "hsl(var(--primary))",
+                  border: `1px solid ${profileType === "commercial" ? "hsl(var(--gold) / 0.2)" : "hsl(var(--primary) / 0.12)"}`,
                 }}
               >
                 {profileType === "commercial" ? "Comercial" : "Pessoal"}
