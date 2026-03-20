@@ -228,7 +228,7 @@ export default function Landing() {
         <div className="absolute bottom-[-30%] right-[-10%] w-[44vw] h-[44vw] rounded-full bg-[#e8cfda]/35 blur-[140px] pointer-events-none" />
 
         <div className="container mx-auto relative z-10 max-w-7xl">
-          <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-start w-full">
+          <div className="flex flex-col lg:flex-row gap-10 lg:gap-20 items-start w-full">
 
             {/* ── Left: Headline ── */}
             <div className="flex-1 min-w-0 pt-6 lg:pt-0">
