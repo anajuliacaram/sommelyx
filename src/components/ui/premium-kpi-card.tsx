@@ -1,12 +1,20 @@
 import * as React from "react";
-import { useRef, useState, useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import { useRef, useState, useEffect, useMemo } from "react";
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion, MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface PremiumKpiCardProps {
     children: React.ReactNode;
     className?: string;
     onClick?: () => void;
+}
+
+function useRadialGradient(smoothX: MotionValue<number>, smoothY: MotionValue<number>) {
+    return useTransform(
+        [smoothX, smoothY],
+        ([x, y]: number[]) =>
+            `radial-gradient(150px circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)`
+    );
 }
 
 export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardProps) {
@@ -25,6 +33,7 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
 
     const rotateX = useTransform(smoothY, [0, 1], [3, -3]);
     const rotateY = useTransform(smoothX, [0, 1], [-3, 3]);
+    const gradientBg = useRadialGradient(smoothX, smoothY);
 
     useEffect(() => {
         const mediaQuery = window.matchMedia("(pointer: fine)");
@@ -38,13 +47,8 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
         if (reducedMotion || !isFinePointer) return;
         const { clientX, clientY } = e;
         const { left, top, width, height } = ref.current!.getBoundingClientRect();
-
-        // Calculate normalized position 0 to 1
-        const xPos = (clientX - left) / width;
-        const yPos = (clientY - top) / height;
-
-        x.set(xPos);
-        y.set(yPos);
+        x.set((clientX - left) / width);
+        y.set((clientY - top) / height);
     };
 
     const handlePointerEnter = () => {
@@ -95,11 +99,7 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
             {interactive && isHovering && (
                 <motion.div
                     className="pointer-events-none absolute inset-0 z-10 rounded-[24px] opacity-40 mix-blend-overlay"
-                    style={{
-                        background: useTransform(
-                            () => `radial-gradient(150px circle at ${smoothX.get() * 100}% ${smoothY.get() * 100}%, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)`
-                        )
-                    }}
+                    style={{ background: gradientBg }}
                 />
             )}
             <div style={{ transform: interactive ? "translateZ(20px)" : "none" }}>
