@@ -49,7 +49,7 @@ export default function InventoryPlaceholder({ title, icon, description }: Place
 
                 <h1 className="text-3xl font-serif font-black italic tracking-tight mb-4 text-[#0F0F14]">{title}</h1>
                 <p className="text-gray-500 font-medium leading-relaxed mb-10">
-                    Esta funcionalidade é exclusiva para o plano **Sommelyx Pro** e está sendo preparada para revolucionar sua operação. <br /><br /> {description}
+                    Esta funcionalidade é exclusiva para o plano <span className="font-bold text-primary">Sommelyx Pro</span> e está sendo preparada para revolucionar sua operação. <br /><br /> {description}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full">
