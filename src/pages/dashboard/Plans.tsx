@@ -59,10 +59,10 @@ export default function Plans() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-foreground font-sans tracking-tight">Plano Free</h3>
+              <h3 className="text-sm font-semibold text-foreground font-sans tracking-tight">Plano atual</h3>
               <Badge variant="outline" className="text-[10px] h-5 border-border/60 text-muted-foreground">Ativo</Badge>
             </div>
-            <p className="text-xs text-muted-foreground">Trial de 14 dias do Pro disponível</p>
+            <p className="text-xs text-muted-foreground">Você está no plano gratuito</p>
           </div>
         </div>
         <Button className="gradient-gold text-gold-foreground rounded-lg h-8 text-[11px] font-medium btn-gold-glow px-4">
