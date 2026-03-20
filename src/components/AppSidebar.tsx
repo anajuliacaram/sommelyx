@@ -21,18 +21,18 @@ import {
 
 const personalMenu: MenuItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater, badge: "Cellar", badgeType: "novo" },
+  { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater },
   { title: "Alertas", url: "/dashboard/alerts", icon: Bell },
   { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart },
-  { title: "Relatórios", url: "/dashboard/stats", icon: BarChart3, badge: "Pro", badgeType: "pro" },
+  { title: "Relatórios", url: "/dashboard/stats", icon: BarChart3 },
 ];
 
 const commercialMenu: MenuItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Estoque", url: "/dashboard/inventory", icon: Package, badge: "Beta", badgeType: "beta" },
+  { title: "Estoque", url: "/dashboard/inventory", icon: Package },
   { title: "Vendas", url: "/dashboard/sales", icon: ShoppingCart },
-  { title: "Cadastros", url: "/dashboard/registers", icon: Users, badge: "Novo", badgeType: "novo" },
-  { title: "Relatórios", url: "/dashboard/reports", icon: FileText, badge: "Pro", badgeType: "pro" },
+  { title: "Cadastros", url: "/dashboard/registers", icon: Users },
+  { title: "Relatórios", url: "/dashboard/reports", icon: FileText },
 ];
 
 interface MenuItem {

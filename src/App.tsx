@@ -18,12 +18,14 @@ import SelectProfile from "@/pages/SelectProfile";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardIndex from "@/pages/dashboard/DashboardIndex";
 import Plans from "@/pages/dashboard/Plans";
-import Placeholder from "@/pages/dashboard/Placeholder";
 import CellarPage from "@/pages/dashboard/CellarPage";
 import InventoryPage from "@/pages/dashboard/InventoryPage";
-import InventoryPlaceholder from "@/pages/dashboard/InventoryPlaceholder";
 import AlertsPage from "@/pages/dashboard/AlertsPage";
 import SettingsPage from "@/pages/dashboard/SettingsPage";
+import WishlistPage from "@/pages/dashboard/WishlistPage";
+import StatsPage from "@/pages/dashboard/StatsPage";
+import SalesPage from "@/pages/dashboard/SalesPage";
+import RegistersPage from "@/pages/dashboard/RegistersPage";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -34,32 +36,21 @@ const getPostAuthTarget = (profileType: "personal" | "commercial" | null) =>
 
 const PublicAuthRoute = ({ children }: { children: JSX.Element }) => {
   const { user, profileType, loading } = useAuth();
-
   if (loading) return null;
   if (user) return <Navigate to={getPostAuthTarget(profileType)} replace />;
-
   return children;
 };
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user, profileType, loading } = useAuth();
-
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
   if (!profileType) return <Navigate to="/select-profile" replace />;
-
   return children;
 };
 
-/**
- * Top-level routes use AnimatePresence for full-page transitions
- * (landing ↔ login ↔ signup etc).
- * Dashboard sub-routes animate via AnimatedOutlet inside DashboardLayout,
- * so the sidebar/header stay mounted.
- */
 const AnimatedRoutes = () => {
   const location = useLocation();
-  // Use the first path segment to group dashboard routes under one key
   const topKey = location.pathname.startsWith("/dashboard") ? "/dashboard" : location.pathname;
 
   return (
@@ -81,13 +72,13 @@ const AnimatedRoutes = () => {
               <Route index element={<DashboardIndex />} />
               <Route path="cellar" element={<CellarPage />} />
               <Route path="alerts" element={<AlertsPage />} />
-              <Route path="wishlist" element={<Placeholder title="Wishlist" />} />
-              <Route path="stats" element={<Placeholder title="Analytics" />} />
+              <Route path="wishlist" element={<WishlistPage />} />
+              <Route path="stats" element={<StatsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="inventory" element={<InventoryPage />} />
-              <Route path="sales" element={<InventoryPlaceholder title="Vendas" icon="sales" description="Rastreamento de pedidos, histórico de pagamentos e CRM integrado." />} />
-              <Route path="registers" element={<InventoryPlaceholder title="Cadastros" icon="registers" description="Gestão de fornecedores, produtores e base de clientes VIP." />} />
-              <Route path="reports" element={<InventoryPlaceholder title="Relatórios" icon="reports" description="BI avançado, impostos, previsão de demanda e valuation de acervo." />} />
+              <Route path="sales" element={<SalesPage />} />
+              <Route path="registers" element={<RegistersPage />} />
+              <Route path="reports" element={<StatsPage />} />
               <Route path="plans" element={<Plans />} />
             </Route>
             <Route path="/inventory" element={<Navigate to="/dashboard/inventory" replace />} />
