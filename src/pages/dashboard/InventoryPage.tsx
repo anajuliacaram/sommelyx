@@ -598,6 +598,7 @@ export default function InventoryPage() {
                     </SheetFooter>
                 </SheetContent>
             </Sheet>
+            <AddWineDialog open={addWineOpen} onOpenChange={setAddWineOpen} />
         </div>
     );
 }
