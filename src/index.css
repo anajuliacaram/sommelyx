@@ -54,6 +54,19 @@
     --sidebar-accent-foreground: 240 10% 8%;
     --sidebar-border: 220 10% 91%;
     --sidebar-ring: 340 54% 36%;
+
+    /* ── Wine palette tokens ── */
+    --wine: 340 54% 36%;
+    --wine-foreground: 0 0% 100%;
+    --wine-light: 340 40% 92%;
+    --wine-vivid: 340 60% 48%;
+
+    --gold: 37 56% 52%;
+    --gold-foreground: 0 0% 100%;
+    --gold-light: 37 50% 72%;
+
+    --cream: 30 30% 96%;
+    --cream-dark: 30 20% 88%;
   }
 
   .dark {
