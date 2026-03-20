@@ -245,15 +245,14 @@ export default function CellarPage() {
       </div>
 
       {/* Search + Actions */}
-      <div className="flex flex-col gap-3">
-        {/* Top Row: Search */}
+      <div className="flex flex-col gap-2">
         <div className="relative w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Pesquise vinho, produtor, uva, safra, localização…"
-            className="pl-10 h-11 text-sm rounded-[14px] bg-muted/30 border-border/40 w-full"
+            placeholder="Pesquise vinho, produtor, uva, safra…"
+            className="pl-9 h-9 text-[12px] rounded-xl bg-muted/30 border-border/40 w-full"
           />
         </div>
 
