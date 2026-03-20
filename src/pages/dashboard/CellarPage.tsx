@@ -418,51 +418,49 @@ export default function CellarPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border/40">
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Vinho</th>
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden sm:table-cell text-muted-foreground">Estilo</th>
-                <th className="text-left text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell text-muted-foreground">Local</th>
-                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Qtd</th>
-                <th className="text-center text-[10px] font-semibold uppercase tracking-wider px-4 py-3 hidden md:table-cell text-muted-foreground">Status</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-wider px-4 py-3 text-muted-foreground">Ações</th>
+                <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Vinho</th>
+                <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden sm:table-cell text-muted-foreground">Estilo</th>
+                <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden md:table-cell text-muted-foreground">Preço</th>
+                <th className="text-center text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Qtd</th>
+                <th className="text-center text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden md:table-cell text-muted-foreground">Status</th>
+                <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((wine, i) => {
+              {filtered.map((wine) => {
                 const status = drinkStatus(wine);
                 return (
-                  <tr key={wine.id} className="transition-colors hover:bg-muted/30 group border-b border-border/20 last:border-0">
-                    <td className="px-4 py-3">
-                      <p className="text-[12px] font-semibold text-foreground">{wine.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{[wine.producer, wine.vintage, wine.country].filter(Boolean).join(" · ")}</p>
+                  <tr key={wine.id} className="transition-colors hover:bg-muted/20 border-b border-border/15 last:border-0">
+                    <td className="px-3 py-2">
+                      <p className="text-[11px] font-bold text-foreground truncate max-w-[200px]">{wine.name}</p>
+                      <p className="text-[9px] text-muted-foreground">{[wine.producer, wine.vintage, wine.country].filter(Boolean).join(" · ")}</p>
                     </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize bg-primary/5 text-primary">
-                        {wine.style || "—"}
-                      </span>
+                    <td className="px-3 py-2 hidden sm:table-cell">
+                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded capitalize bg-primary/5 text-primary">{wine.style || "—"}</span>
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-[10px] text-muted-foreground">{wine.cellar_location || "—"}</span>
+                    <td className="px-3 py-2 text-right hidden md:table-cell">
+                      <span className="text-[10px] font-semibold text-muted-foreground">{wine.purchase_price ? `R$ ${wine.purchase_price.toFixed(0)}` : "—"}</span>
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="text-[12px] font-bold text-foreground">{wine.quantity}</span>
+                    <td className="px-3 py-2 text-center">
+                      <span className="text-[11px] font-bold text-foreground">{wine.quantity}</span>
                     </td>
-                    <td className="px-4 py-3 text-center hidden md:table-cell">
+                    <td className="px-3 py-2 text-center hidden md:table-cell">
                       {status ? (
-                        <Badge variant="secondary" className={`text-[9px] ${statusColor[status]}`}>{statusLabel[status]}</Badge>
-                      ) : <span className="text-[10px] text-muted-foreground">—</span>}
+                        <Badge variant="secondary" className={`text-[8px] h-4 px-1.5 ${statusColor[status]}`}>{statusLabel[status]}</Badge>
+                      ) : <span className="text-[9px] text-muted-foreground">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-3 py-2 text-right">
+                      <div className="flex gap-0.5 justify-end">
                         {status === "now" && (
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleOpen(wine)}>
-                            <GlassWater className="h-3.5 w-3.5 text-green-600" />
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleOpen(wine)}>
+                            <GlassWater className="h-3 w-3 text-green-600" />
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditWine(wine)}>
-                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setEditWine(wine)}>
+                          <Pencil className="h-3 w-3 text-muted-foreground" />
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setDeleteTarget(wine)}>
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setDeleteTarget(wine)}>
+                          <Trash2 className="h-3 w-3 text-destructive" />
                         </Button>
                       </div>
                     </td>
