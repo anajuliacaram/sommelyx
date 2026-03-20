@@ -192,17 +192,10 @@ export default function DashboardLayout() {
                     <ArrowDownRight className="h-4 w-4 mr-2" style={{ color: "#E07A5F" }} />
                     <span className="text-[12px]">Registrar saída</span>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                        <Camera className="h-4 w-4 mr-2" />
-                        <span className="text-[12px]">Adicionar via foto</span>
-                        <span className="ml-auto text-[8px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(143,45,86,0.08)", color: "#8F2D56" }}>Em breve</span>
-                      </DropdownMenuItem>
-                    </TooltipTrigger>
-                    <TooltipContent side="left"><p className="text-xs">Em breve</p></TooltipContent>
-                  </Tooltip>
+                  <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
+                    <Camera className="h-4 w-4 mr-2" style={{ color: "#8F2D56" }} />
+                    <span className="text-[12px]">Adicionar via foto</span>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
