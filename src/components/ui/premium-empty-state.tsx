@@ -54,10 +54,10 @@ export function PremiumEmptyState({
                 </div>
             </motion.div>
 
-            <h3 className="text-[28px] font-serif font-black text-[#0F0F14] tracking-tight mb-3">
+            <h3 className="text-[28px] font-serif font-black text-foreground tracking-tight mb-3">
                 {title}
             </h3>
-            <p className="text-[15px] text-[#6B7280] font-medium max-w-[400px] leading-relaxed mb-10">
+            <p className="text-[16px] text-muted-foreground font-medium max-w-[400px] leading-relaxed mb-10">
                 {description}
             </p>
 
