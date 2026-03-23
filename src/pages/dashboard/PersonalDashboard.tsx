@@ -348,13 +348,13 @@ export default function PersonalDashboard() {
 
           {/* Collection evolution */}
           {totalBottles > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <div className="flex items-center justify-between mb-2">
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className="text-[12px] font-semibold font-sans text-foreground">Evolução</h3>
-                  <p className="text-[9px] text-muted-foreground">Garrafas ao longo do tempo</p>
+                  <h3 className="text-sm font-bold font-sans text-foreground">Evolução</h3>
+                  <p className="text-xs text-muted-foreground font-medium">Sua coleção ao longo do tempo</p>
                 </div>
-                <BarChart3 className="h-3 w-3 text-muted-foreground" />
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </div>
               <ResponsiveContainer width="100%" height={120}>
                 <AreaChart data={collectionData}>
