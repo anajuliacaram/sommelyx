@@ -320,14 +320,14 @@ export default function CellarPage() {
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center pt-2">
-          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground mr-1">Filtros ativos:</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-2 pr-1 h-7 text-[11px] rounded-lg group border-primary/10 bg-primary/5 text-primary">
+            <Badge key={i} variant="secondary" className="pl-2.5 pr-1.5 h-8 text-xs rounded-lg group border-primary/10 bg-primary/5 text-primary font-semibold">
               {chip.label}
               <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={chip.onRemove} />
             </Badge>
           ))}
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] font-bold text-destructive hover:bg-destructive/10 ml-1">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs font-bold text-destructive hover:bg-destructive/10 ml-1">
             Limpar tudo
           </Button>
         </div>
