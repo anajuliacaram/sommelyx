@@ -65,7 +65,7 @@ export function PremiumEmptyState({
                 {primaryAction && (
                     <Button
                         onClick={primaryAction.onClick}
-                        className="h-12 px-8 rounded-xl text-[13px] font-black uppercase tracking-widest bg-[#0F0F14] hover:bg-[#202028] text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.3)] transition-all"
+                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider gradient-wine text-white shadow-float transition-all hover:shadow-wine"
                     >
                         {primaryAction.icon && <span className="mr-2">{primaryAction.icon}</span>}
                         {primaryAction.label}
