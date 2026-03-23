@@ -411,13 +411,13 @@ export default function PersonalDashboard() {
                 <Globe className="h-4 w-4 text-muted-foreground" />
                 <h3 className="text-sm font-bold font-sans text-foreground">Por país</h3>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {countryData.map((d, i) => {
                   const pct = totalBottles > 0 ? Math.round((d.value / totalBottles) * 100) : 0;
                   return (
-                    <div key={d.name} className="flex items-center gap-2">
-                      <span className="text-[10px] font-medium w-16 truncate text-muted-foreground">{d.name}</span>
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-black/[0.04]">
+                    <div key={d.name} className="flex items-center gap-2.5">
+                      <span className="text-xs font-medium w-20 truncate text-muted-foreground">{d.name}</span>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden bg-black/[0.04]">
                         <motion.div
                           className="h-full rounded-full"
                           style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
@@ -426,7 +426,7 @@ export default function PersonalDashboard() {
                           transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }}
                         />
                       </div>
-                      <span className="text-[9px] font-bold w-7 text-right text-foreground">{pct}%</span>
+                      <span className="text-xs font-bold w-8 text-right text-foreground">{pct}%</span>
                     </div>
                   );
                 })}
