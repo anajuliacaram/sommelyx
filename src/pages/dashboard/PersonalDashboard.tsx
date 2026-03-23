@@ -277,17 +277,17 @@ export default function PersonalDashboard() {
                         style={{ borderBottom: i < recentWines.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none" }}
                         onClick={() => navigate("/dashboard/cellar")}
                       >
-                        <td className="px-3 py-2">
-                          <p className="text-[11px] font-semibold truncate max-w-[160px] text-foreground">{w.name}</p>
-                          <p className="text-[9px] text-muted-foreground">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
+                        <td className="px-3 py-2.5">
+                          <p className="text-sm font-semibold truncate max-w-[180px] text-foreground">{w.name}</p>
+                          <p className="text-xs text-muted-foreground font-medium">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
                         </td>
-                        <td className="px-3 py-2">
-                          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>
+                        <td className="px-3 py-2.5">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>
                             {w.style || "—"}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-right">
-                          <span className="text-[11px] font-bold text-foreground">{w.quantity}</span>
+                        <td className="px-3 py-2.5 text-right">
+                          <span className="text-sm font-bold text-foreground">{w.quantity}</span>
                         </td>
                       </tr>
                     ))}
