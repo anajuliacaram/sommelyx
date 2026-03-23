@@ -362,7 +362,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="glass-card p-3 group relative"
+              className="glass-card p-3.5 group relative"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.015, duration: 0.3 }}
