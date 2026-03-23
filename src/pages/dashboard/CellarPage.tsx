@@ -370,8 +370,8 @@ export default function CellarPage() {
                 {/* Top: Name + Status */}
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[12px] font-bold truncate text-foreground leading-tight">{wine.name}</h3>
-                    <p className="text-[9px] truncate text-muted-foreground">
+                    <h3 className="text-sm font-bold truncate text-foreground leading-tight">{wine.name}</h3>
+                    <p className="text-xs truncate text-muted-foreground font-medium">
                       {[wine.producer, wine.vintage].filter(Boolean).join(" · ") || "—"}
                     </p>
                   </div>
