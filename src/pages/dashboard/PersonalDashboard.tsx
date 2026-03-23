@@ -229,18 +229,18 @@ export default function PersonalDashboard() {
           {/* Alerts */}
           {alerts.length > 0 && (
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-1.5 text-muted-foreground">
-                Alertas
+              <h2 className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">
+                Atenção
               </h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {alerts.map((a) => (
-                  <div key={a.label} className="glass-card p-3 flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/dashboard/alerts")}>
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.bg }}>
-                      <a.icon className="h-3.5 w-3.5" style={{ color: a.color }} />
+                  <div key={a.label} className="glass-card p-3.5 flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/dashboard/alerts")}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.bg }}>
+                      <a.icon className="h-4 w-4" style={{ color: a.color }} />
                     </div>
                     <div>
-                      <p className="text-[12px] font-bold text-foreground">{a.count}</p>
-                      <p className="text-[9px] font-medium" style={{ color: a.color }}>{a.label}</p>
+                      <p className="text-lg font-black text-foreground">{a.count}</p>
+                      <p className="text-xs font-semibold" style={{ color: a.color }}>{a.label}</p>
                     </div>
                   </div>
                 ))}
