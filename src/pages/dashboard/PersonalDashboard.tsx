@@ -162,7 +162,7 @@ export default function PersonalDashboard() {
           metrics.map((m, i) => (
             <motion.div
               key={m.label}
-              className="glass-card p-3 group cursor-pointer border border-white/5 ring-1 ring-black/[0.03]"
+              className="glass-card p-4 group cursor-pointer border border-white/5 ring-1 ring-black/[0.03]"
               onClick={m.onClick}
               initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
               whileHover={{ y: -2, boxShadow: "0 12px 28px -8px rgba(140,32,68,0.1)" }}
