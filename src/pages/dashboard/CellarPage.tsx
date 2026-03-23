@@ -299,19 +299,19 @@ export default function CellarPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
         {defaultSavedFilters.map(f => (
           <button
             key={f.name}
             onClick={() => applySavedFilter(f)}
-            className="h-7 px-3 rounded-full text-[10px] font-medium flex items-center gap-1.5 transition-all duration-200"
+            className="h-8 px-3.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-200"
             style={{
-              background: activeSavedFilter === f.name ? "rgba(143,45,86,0.08)" : "rgba(0,0,0,0.02)",
-              color: activeSavedFilter === f.name ? "#8F2D56" : "#6B7280",
-              border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.2)" : "rgba(0,0,0,0.04)"}`,
+              background: activeSavedFilter === f.name ? "rgba(143,45,86,0.10)" : "rgba(0,0,0,0.02)",
+              color: activeSavedFilter === f.name ? "#8F2D56" : undefined,
+              border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.25)" : "rgba(0,0,0,0.06)"}`,
             }}
           >
-            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
+            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
             {f.name}
           </button>
         ))}
