@@ -129,21 +129,21 @@ export default function PersonalDashboard() {
   };
 
   return (
-    <div className="space-y-4 max-w-[1200px] relative">
-      {/* Header — compact */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div className="space-y-5 max-w-[1200px] relative">
+      {/* Header — warm & personal */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-sm text-muted-foreground">Sua adega pessoal — o que abrir, guardar e explorar</p>
+          <p className="text-sm text-muted-foreground font-medium mt-0.5">Sua coleção ganha vida a cada garrafa</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-8 text-[11px] font-semibold" onClick={() => setCsvOpen(true)}>
-            <Upload className="h-3 w-3 mr-1" /> Importar
+        <div className="flex gap-2.5">
+          <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-semibold" onClick={() => setCsvOpen(true)}>
+            <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar
           </Button>
-          <Button variant="premium" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setAddOpen(true)}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar
+          <Button variant="premium" size="sm" className="h-9 px-5 text-xs font-bold" onClick={() => setAddOpen(true)}>
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
           </Button>
         </div>
       </motion.div>
