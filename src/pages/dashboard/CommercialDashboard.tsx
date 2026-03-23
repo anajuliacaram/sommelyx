@@ -128,9 +128,9 @@ export default function CommercialDashboard() {
                 className="p-4 group border border-white/5 ring-1 ring-black/[0.03]"
                 onClick={() => navigate("/dashboard/inventory")}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${m.color}12` }}>
-                    <m.icon className="h-4 w-4" style={{ color: m.color }} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${m.color}14` }}>
+                    <m.icon className="h-5 w-5" style={{ color: m.color }} />
                   </div>
                 </div>
                 <p className="text-xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
