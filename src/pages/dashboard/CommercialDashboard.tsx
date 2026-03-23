@@ -112,7 +112,7 @@ export default function CommercialDashboard() {
       </motion.div>
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (
           [1, 2, 3, 4].map((i) => (
             <div key={i} className="glass-card p-3 space-y-2">
