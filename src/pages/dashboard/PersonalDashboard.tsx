@@ -251,11 +251,11 @@ export default function PersonalDashboard() {
           {/* Recent wines */}
           {recentWines.length > 0 && (
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-              <div className="flex items-center justify-between mb-1.5">
-                <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  <Clock className="inline h-3 w-3 mr-1 -mt-0.5" /> Recentes
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" /> Adicionados recentemente
                 </h2>
-                <button className="text-[10px] font-semibold text-primary" onClick={() => navigate("/dashboard/cellar")}>
+                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>
                   Ver todos →
                 </button>
               </div>
