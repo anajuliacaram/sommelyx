@@ -376,7 +376,7 @@ export default function CellarPage() {
                     </p>
                   </div>
                   {status && (
-                    <Badge variant="secondary" className={`text-[8px] px-1.5 py-0 h-4 shrink-0 font-bold ${statusColor[status]}`}>
+                  <Badge variant="secondary" className={`text-[9px] px-2 py-0 h-5 shrink-0 font-bold ${statusColor[status]}`}>
                       {statusLabel[status]}
                     </Badge>
                   )}
