@@ -341,12 +341,12 @@ export default function CellarPage() {
       ) : filtered.length === 0 ? (
         <PremiumEmptyState
           icon={Wine}
-          title="Sua jornada começa aqui"
+          title="Sua coleção começa aqui"
           description={hasActiveFilters
-            ? "Não encontramos vinhos com esses critérios. Tente simplificar seus filtros para descobrir novos rótulos."
-            : "Sua adega digital ainda está vazia. Comece a catalogar sua coleção e tenha o controle total do seu acervo na palma da mão."}
+            ? "Não encontramos vinhos com esses critérios. Tente simplificar seus filtros para explorar novos rótulos."
+            : "Cada garrafa conta uma história. Comece a catalogar seu acervo e tenha controle total da sua adega na palma da mão."}
           primaryAction={!hasActiveFilters ? {
-            label: "Catalogar meu primeiro vinho",
+            label: "Adicionar primeiro vinho",
             icon: <Plus className="h-4 w-4" />,
             onClick: () => setAddOpen(true)
           } : undefined}
