@@ -406,10 +406,10 @@ export default function PersonalDashboard() {
 
           {/* By country */}
           {totalBottles > 0 && countryData.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Globe className="h-3 w-3 text-muted-foreground" />
-                <h3 className="text-[12px] font-semibold font-sans text-foreground">Por país</h3>
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-bold font-sans text-foreground">Por país</h3>
               </div>
               <div className="space-y-2">
                 {countryData.map((d, i) => {
