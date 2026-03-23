@@ -383,15 +383,15 @@ export default function CellarPage() {
                 </div>
 
                 {/* Info row */}
-                <div className="flex items-center gap-1.5 flex-wrap text-[9px] text-muted-foreground mb-2">
-                  <span className="font-bold text-foreground bg-muted/40 px-1.5 py-0.5 rounded">{wine.quantity} un.</span>
+                <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground mb-2.5">
+                  <span className="font-bold text-foreground bg-muted/40 px-2 py-0.5 rounded text-xs">{wine.quantity} un.</span>
                   {wine.purchase_price != null && wine.purchase_price > 0 && (
                     <span className="font-semibold" style={{ color: "hsl(var(--gold))" }}>R$ {wine.purchase_price.toFixed(0)}</span>
                   )}
-                  {wine.style && <span className="capitalize bg-primary/5 text-primary px-1.5 py-0.5 rounded font-medium">{wine.style}</span>}
-                  {wine.country && <span>{wine.country}</span>}
+                  {wine.style && <span className="capitalize bg-primary/5 text-primary px-2 py-0.5 rounded font-semibold text-[11px]">{wine.style}</span>}
+                  {wine.country && <span className="font-medium">{wine.country}</span>}
                   {wine.cellar_location && (
-                    <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{wine.cellar_location}</span>
+                    <span className="flex items-center gap-0.5 font-medium"><MapPin className="h-3 w-3" />{wine.cellar_location}</span>
                   )}
                 </div>
 
