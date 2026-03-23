@@ -10,7 +10,9 @@ import {
   Heading,
   Html,
   Preview,
+  Section,
   Text,
+  Hr,
 } from 'npm:@react-email/components@0.0.22'
 
 interface RecoveryEmailProps {
@@ -22,23 +24,33 @@ export const RecoveryEmail = ({
   siteName,
   confirmationUrl,
 }: RecoveryEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Reset your password for {siteName}</Preview>
+    <Preview>Redefinição de senha — Sommelyx</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Reset your password</Heading>
+        <Section style={logoSection}>
+          <Text style={logoText}>Sommelyx</Text>
+          <Text style={logoTagline}>sua adega inteligente</Text>
+        </Section>
+        <Hr style={divider} />
+        <Heading style={h1}>Redefinir senha</Heading>
         <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
+          Recebemos uma solicitação para redefinir a senha da sua conta na Sommelyx.
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Reset Password
-        </Button>
+        <Text style={text}>
+          Clique no botão abaixo para criar uma nova senha:
+        </Text>
+        <Section style={buttonSection}>
+          <Button style={button} href={confirmationUrl}>
+            Redefinir senha
+          </Button>
+        </Section>
         <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
+          Se você não solicitou essa alteração, pode ignorar este email com segurança. Sua senha não será modificada.
         </Text>
+        <Hr style={dividerLight} />
+        <Text style={brand}>Sommelyx — sua adega inteligente.</Text>
       </Container>
     </Body>
   </Html>
@@ -46,26 +58,72 @@ export const RecoveryEmail = ({
 
 export default RecoveryEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
+const main = {
+  backgroundColor: '#F6F3F2',
+  fontFamily: "'Georgia', 'Times New Roman', serif",
+  padding: '40px 0',
+}
+const container = {
+  backgroundColor: '#ffffff',
+  padding: '40px 36px 32px',
+  maxWidth: '520px',
+  margin: '0 auto',
+  borderRadius: '16px',
+  border: '1px solid #E8E4E2',
+}
+const logoSection = { textAlign: 'center' as const, marginBottom: '8px' }
+const logoText = {
+  fontSize: '28px',
   fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+  fontStyle: 'italic' as const,
+  color: '#7B1E3A',
+  margin: '0',
+  letterSpacing: '-0.5px',
+}
+const logoTagline = {
+  fontSize: '11px',
+  color: '#9B8A8A',
+  margin: '2px 0 0',
+  letterSpacing: '2px',
+  textTransform: 'uppercase' as const,
+}
+const divider = { borderColor: '#E8E4E2', margin: '20px 0 28px' }
+const dividerLight = { borderColor: '#F0ECEB', margin: '28px 0 16px' }
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 'bold' as const,
+  color: '#1A1A24',
+  margin: '0 0 16px',
+  textAlign: 'center' as const,
 }
 const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  fontSize: '15px',
+  color: '#5B5564',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
+  textAlign: 'center' as const,
 }
+const buttonSection = { textAlign: 'center' as const, margin: '28px 0' }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#7B1E3A',
   color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  fontSize: '15px',
+  fontWeight: 'bold' as const,
+  borderRadius: '10px',
+  padding: '14px 32px',
   textDecoration: 'none',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const footer = {
+  fontSize: '13px',
+  color: '#9B8A8A',
+  margin: '0',
+  textAlign: 'center' as const,
+  lineHeight: '1.5',
+}
+const brand = {
+  fontSize: '11px',
+  color: '#BEB3B3',
+  textAlign: 'center' as const,
+  margin: '0',
+  fontStyle: 'italic' as const,
+}

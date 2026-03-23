@@ -10,7 +10,9 @@ import {
   Heading,
   Html,
   Preview,
+  Section,
   Text,
+  Hr,
 } from 'npm:@react-email/components@0.0.22'
 
 interface MagicLinkEmailProps {
@@ -22,22 +24,30 @@ export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
 }: MagicLinkEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Your login link for {siteName}</Preview>
+    <Preview>Seu link de acesso — Sommelyx</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
+        <Section style={logoSection}>
+          <Text style={logoText}>Sommelyx</Text>
+          <Text style={logoTagline}>sua adega inteligente</Text>
+        </Section>
+        <Hr style={divider} />
+        <Heading style={h1}>Seu link de acesso</Heading>
         <Text style={text}>
-          Click the button below to log in to {siteName}. This link will expire
-          shortly.
+          Clique no botão abaixo para acessar sua conta na Sommelyx. Este link expira em breve.
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Log In
-        </Button>
+        <Section style={buttonSection}>
+          <Button style={button} href={confirmationUrl}>
+            Acessar minha conta
+          </Button>
+        </Section>
         <Text style={footer}>
-          If you didn't request this link, you can safely ignore this email.
+          Se você não solicitou este link, pode ignorar este email com segurança.
         </Text>
+        <Hr style={dividerLight} />
+        <Text style={brand}>Sommelyx — sua adega inteligente.</Text>
       </Container>
     </Body>
   </Html>
@@ -45,26 +55,72 @@ export const MagicLinkEmail = ({
 
 export default MagicLinkEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
+const main = {
+  backgroundColor: '#F6F3F2',
+  fontFamily: "'Georgia', 'Times New Roman', serif",
+  padding: '40px 0',
+}
+const container = {
+  backgroundColor: '#ffffff',
+  padding: '40px 36px 32px',
+  maxWidth: '520px',
+  margin: '0 auto',
+  borderRadius: '16px',
+  border: '1px solid #E8E4E2',
+}
+const logoSection = { textAlign: 'center' as const, marginBottom: '8px' }
+const logoText = {
+  fontSize: '28px',
   fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+  fontStyle: 'italic' as const,
+  color: '#7B1E3A',
+  margin: '0',
+  letterSpacing: '-0.5px',
+}
+const logoTagline = {
+  fontSize: '11px',
+  color: '#9B8A8A',
+  margin: '2px 0 0',
+  letterSpacing: '2px',
+  textTransform: 'uppercase' as const,
+}
+const divider = { borderColor: '#E8E4E2', margin: '20px 0 28px' }
+const dividerLight = { borderColor: '#F0ECEB', margin: '28px 0 16px' }
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 'bold' as const,
+  color: '#1A1A24',
+  margin: '0 0 16px',
+  textAlign: 'center' as const,
 }
 const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  fontSize: '15px',
+  color: '#5B5564',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
+  textAlign: 'center' as const,
 }
+const buttonSection = { textAlign: 'center' as const, margin: '28px 0' }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#7B1E3A',
   color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  fontSize: '15px',
+  fontWeight: 'bold' as const,
+  borderRadius: '10px',
+  padding: '14px 32px',
   textDecoration: 'none',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const footer = {
+  fontSize: '13px',
+  color: '#9B8A8A',
+  margin: '0',
+  textAlign: 'center' as const,
+  lineHeight: '1.5',
+}
+const brand = {
+  fontSize: '11px',
+  color: '#BEB3B3',
+  textAlign: 'center' as const,
+  margin: '0',
+  fontStyle: 'italic' as const,
+}
