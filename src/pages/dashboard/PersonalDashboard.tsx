@@ -177,8 +177,8 @@ export default function PersonalDashboard() {
                   </span>
                 )}
               </div>
-              <p className="text-2xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
+              <p className="text-3xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
             </motion.div>
           ))
         )}

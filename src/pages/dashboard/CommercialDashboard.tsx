@@ -133,8 +133,8 @@ export default function CommercialDashboard() {
                     <m.icon className="h-5 w-5" style={{ color: m.color }} />
                   </div>
                 </div>
-                <p className="text-xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
+                <p className="text-2xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
               </PremiumKpiCard>
             </motion.div>
           ))
