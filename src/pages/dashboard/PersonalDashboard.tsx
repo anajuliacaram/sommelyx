@@ -167,9 +167,9 @@ export default function PersonalDashboard() {
               initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
               whileHover={{ y: -2, boxShadow: "0 12px 28px -8px rgba(140,32,68,0.1)" }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${m.color}12` }}>
-                  <m.icon className="h-4 w-4" style={{ color: m.color }} />
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${m.color}14` }}>
+                  <m.icon className="h-5 w-5" style={{ color: m.color }} />
                 </div>
                 {m.badge && (
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: m.color }}>
