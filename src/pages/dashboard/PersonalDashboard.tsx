@@ -200,21 +200,21 @@ export default function PersonalDashboard() {
                   Ver todos →
                 </button>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {suggestions.map((w) => (
-                  <div key={w.id} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-black/[0.015]" style={{ border: "1px solid rgba(0,0,0,0.04)" }}>
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.08)" }}>
-                      <GlassWater className="h-3.5 w-3.5" style={{ color: "#22c55e" }} />
+                  <div key={w.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/[0.02] transition-colors" style={{ border: "1px solid rgba(0,0,0,0.05)" }}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.08)" }}>
+                      <GlassWater className="h-4 w-4" style={{ color: "#22c55e" }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                      <p className="text-[9px] text-muted-foreground">
+                      <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
+                      <p className="text-xs text-muted-foreground font-medium">
                         {[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.
                       </p>
                     </div>
                     <Button
                       size="sm" variant="outline"
-                      className="h-6 text-[9px] px-2 shrink-0 hover:bg-green-50 hover:border-green-200 hover:text-green-700"
+                      className="h-7 text-xs px-3 shrink-0 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold"
                       onClick={() => handleOpenBottle(w.id, w.name)}
                       disabled={wineEvent.isPending}
                     >
