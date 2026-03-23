@@ -506,6 +506,15 @@
 }
 
 @layer utilities {
+  /* ── Scrollbar hide for carousels ── */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* ── Missing utility classes ── */
   .card-depth {
     @apply rounded-2xl bg-card border border-border/40 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.06)] transition-all duration-300;
