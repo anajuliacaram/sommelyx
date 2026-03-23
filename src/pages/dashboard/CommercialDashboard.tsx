@@ -94,10 +94,10 @@ export default function CommercialDashboard() {
       {/* Header — compact */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">
+          <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-[11px] text-muted-foreground">Estoque, vendas e performance da operação</p>
+          <p className="text-sm text-muted-foreground">Estoque, vendas e performance da operação</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold" onClick={() => setCsvOpen(true)}>
@@ -112,7 +112,7 @@ export default function CommercialDashboard() {
       </motion.div>
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (
           [1, 2, 3, 4].map((i) => (
             <div key={i} className="glass-card p-3 space-y-2">
@@ -125,16 +125,16 @@ export default function CommercialDashboard() {
           metrics.map((m, i) => (
             <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
               <PremiumKpiCard
-                className="p-3 group border border-white/5 ring-1 ring-black/[0.03]"
+                className="p-4 group border border-white/5 ring-1 ring-black/[0.03]"
                 onClick={() => navigate("/dashboard/inventory")}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${m.color}12` }}>
-                    <m.icon className="h-4 w-4" style={{ color: m.color }} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${m.color}14` }}>
+                    <m.icon className="h-5 w-5" style={{ color: m.color }} />
                   </div>
                 </div>
-                <p className="text-xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
+                <p className="text-2xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
               </PremiumKpiCard>
             </motion.div>
           ))

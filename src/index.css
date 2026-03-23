@@ -24,7 +24,7 @@
     --secondary-foreground: 240 6% 28%;
 
     --muted: 240 5% 92%;
-    --muted-foreground: 220 8% 46%;
+    --muted-foreground: 220 8% 38%;
 
     --accent: 18 68% 58%;
     --accent-foreground: 0 0% 100%;
@@ -132,6 +132,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+    font-size: 16px;
     letter-spacing: -0.015em;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -147,6 +148,7 @@
     font-family: 'Playfair Display', serif;
     letter-spacing: -0.035em;
     line-height: 1.15;
+    font-weight: 700;
   }
 }
 
@@ -281,7 +283,7 @@
   }
 
   .table-premium th {
-    @apply px-4 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 first:rounded-tl-xl last:rounded-tr-xl border-b;
+    @apply px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 first:rounded-tl-xl last:rounded-tr-xl border-b;
   }
 
   .table-premium td {
@@ -428,18 +430,18 @@
 
   /* ── Sidebar Premium ── */
   .sidebar-item {
-    @apply flex items-center gap-2.5 h-[40px] px-3 rounded-xl transition-all duration-200 relative cursor-pointer outline-none;
+    @apply flex items-center gap-2.5 h-[42px] px-3 rounded-xl transition-all duration-200 relative cursor-pointer outline-none;
     background: transparent;
     border: 1px solid transparent;
     color: hsl(var(--muted-foreground));
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
   }
 
   .sidebar-item:hover,
   .sidebar-item:focus-visible {
-    background: hsl(var(--muted) / 0.5);
-    border-color: hsl(var(--border) / 0.4);
+    background: hsl(var(--primary) / 0.06);
+    border-color: hsl(var(--primary) / 0.10);
     color: hsl(var(--foreground));
   }
 
@@ -448,21 +450,21 @@
   }
 
   .sidebar-item--active {
-    background: hsl(var(--primary) / 0.06);
-    border-color: hsl(var(--primary) / 0.15);
-    color: hsl(var(--foreground));
-    font-weight: 600;
+    background: hsl(var(--primary) / 0.10);
+    border-color: hsl(var(--primary) / 0.20);
+    color: hsl(var(--primary));
+    font-weight: 700;
   }
 
   .sidebar-item--active::after {
     content: '';
     position: absolute;
     left: 0;
-    top: 25%;
-    height: 50%;
-    width: 3px;
+    top: 20%;
+    height: 60%;
+    width: 3.5px;
     background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--wine-vivid)));
-    border-radius: 0 3px 3px 0;
+    border-radius: 0 4px 4px 0;
   }
 
   .sidebar-badge {

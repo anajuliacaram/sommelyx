@@ -54,10 +54,10 @@ export function PremiumEmptyState({
                 </div>
             </motion.div>
 
-            <h3 className="text-[28px] font-serif font-black text-[#0F0F14] tracking-tight mb-3">
+            <h3 className="text-[28px] font-serif font-black text-foreground tracking-tight mb-3">
                 {title}
             </h3>
-            <p className="text-[15px] text-[#6B7280] font-medium max-w-[400px] leading-relaxed mb-10">
+            <p className="text-[16px] text-muted-foreground font-medium max-w-[400px] leading-relaxed mb-10">
                 {description}
             </p>
 
@@ -65,7 +65,7 @@ export function PremiumEmptyState({
                 {primaryAction && (
                     <Button
                         onClick={primaryAction.onClick}
-                        className="h-12 px-8 rounded-xl text-[13px] font-black uppercase tracking-widest bg-[#0F0F14] hover:bg-[#202028] text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.3)] transition-all"
+                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider gradient-wine text-white shadow-float transition-all hover:shadow-wine"
                     >
                         {primaryAction.icon && <span className="mr-2">{primaryAction.icon}</span>}
                         {primaryAction.label}
@@ -75,7 +75,7 @@ export function PremiumEmptyState({
                     <Button
                         variant="outline"
                         onClick={secondaryAction.onClick}
-                        className="h-12 px-8 rounded-xl text-[13px] font-bold uppercase tracking-widest border-black/[0.08] hover:bg-black/5 bg-white shadow-sm transition-all text-[#4B5563] hover:text-[#0F0F14]"
+                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider border-border hover:bg-foreground hover:text-background shadow-sm transition-all"
                     >
                         {secondaryAction.label}
                     </Button>

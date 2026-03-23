@@ -110,7 +110,7 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
-                        className="sidebar-item !h-[40px] !text-[12px]"
+                        className="sidebar-item !h-[42px] !text-[13px]"
                         activeClassName="sidebar-item--active"
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
@@ -131,7 +131,7 @@ export function AppSidebar() {
               <SidebarMenu className="gap-1">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/settings" className="sidebar-item !h-[40px] !text-[12px]" activeClassName="sidebar-item--active">
+                    <NavLink to="/dashboard/settings" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active">
                       <Settings className="h-4 w-4 shrink-0" />
                       <span>Preferências</span>
                     </NavLink>
@@ -139,7 +139,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/plans" className="sidebar-item !h-[40px] !text-[12px]" activeClassName="sidebar-item--active">
+                    <NavLink to="/dashboard/plans" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active">
                       <CreditCard className="h-4 w-4 shrink-0" />
                       <span>Meu Plano</span>
                     </NavLink>
