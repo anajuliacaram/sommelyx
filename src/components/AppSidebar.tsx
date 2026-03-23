@@ -110,7 +110,7 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
-                        className="sidebar-item !h-[40px] !text-[12px]"
+                        className="sidebar-item !h-[42px] !text-[13px]"
                         activeClassName="sidebar-item--active"
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
