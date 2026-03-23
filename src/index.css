@@ -283,7 +283,7 @@
   }
 
   .table-premium th {
-    @apply px-4 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 first:rounded-tl-xl last:rounded-tr-xl border-b;
+    @apply px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 first:rounded-tl-xl last:rounded-tr-xl border-b;
   }
 
   .table-premium td {
