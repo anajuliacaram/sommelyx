@@ -117,8 +117,8 @@ Rules:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", errorText);
-      throw new Error(`AI Gateway error: ${response.status}`);
+      console.error("AI Gateway error:", response.status, errorText);
+      throw new Error("Label analysis service unavailable");
     }
 
     const data = await response.json();
