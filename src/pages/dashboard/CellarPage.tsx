@@ -234,25 +234,25 @@ export default function CellarPage() {
   return (
     <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg md:text-xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
-          <p className="text-[11px] text-muted-foreground">{filtered.length} vinho{filtered.length !== 1 ? "s" : ""} em estoque</p>
+          <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
+          <p className="text-sm text-muted-foreground font-medium">{filtered.length} vinho{filtered.length !== 1 ? "s" : ""} em estoque</p>
         </div>
-        <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-8 px-4 text-[11px] font-bold">
-          <Plus className="h-3 w-3 mr-1" /> Adicionar vinho
+        <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-9 px-5 text-xs font-bold">
+          <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
         </Button>
       </div>
 
       {/* Search + Actions */}
       <div className="flex flex-col gap-2">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquise vinho, produtor, uva, safra…"
-            className="pl-9 h-9 text-[12px] rounded-xl bg-muted/30 border-border/40 w-full"
+            className="pl-10 h-10 text-sm rounded-xl bg-muted/30 border-border/40 w-full"
           />
         </div>
 
@@ -273,10 +273,10 @@ export default function CellarPage() {
                 <List className="h-3.5 w-3.5" />
               </button>
             </div>
-            <select
+              <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="h-8 px-2.5 pr-7 text-[11px] font-medium rounded-lg bg-card cursor-pointer border border-border/40 text-foreground"
+              className="h-9 px-3 pr-8 text-xs font-semibold rounded-lg bg-card cursor-pointer border border-border/40 text-foreground"
             >
               <option value="drink">Prioridade</option>
               <option value="date">Recentes</option>
@@ -299,19 +299,19 @@ export default function CellarPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
         {defaultSavedFilters.map(f => (
           <button
             key={f.name}
             onClick={() => applySavedFilter(f)}
-            className="h-7 px-3 rounded-full text-[10px] font-medium flex items-center gap-1.5 transition-all duration-200"
+            className="h-8 px-3.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-200"
             style={{
-              background: activeSavedFilter === f.name ? "rgba(143,45,86,0.08)" : "rgba(0,0,0,0.02)",
-              color: activeSavedFilter === f.name ? "#8F2D56" : "#6B7280",
-              border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.2)" : "rgba(0,0,0,0.04)"}`,
+              background: activeSavedFilter === f.name ? "rgba(143,45,86,0.10)" : "rgba(0,0,0,0.02)",
+              color: activeSavedFilter === f.name ? "#8F2D56" : undefined,
+              border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.25)" : "rgba(0,0,0,0.06)"}`,
             }}
           >
-            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
+            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
             {f.name}
           </button>
         ))}
@@ -320,14 +320,14 @@ export default function CellarPage() {
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center pt-2">
-          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground mr-1">Filtros ativos:</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-2 pr-1 h-7 text-[11px] rounded-lg group border-primary/10 bg-primary/5 text-primary">
+            <Badge key={i} variant="secondary" className="pl-2.5 pr-1.5 h-8 text-xs rounded-lg group border-primary/10 bg-primary/5 text-primary font-semibold">
               {chip.label}
               <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={chip.onRemove} />
             </Badge>
           ))}
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] font-bold text-destructive hover:bg-destructive/10 ml-1">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs font-bold text-destructive hover:bg-destructive/10 ml-1">
             Limpar tudo
           </Button>
         </div>
@@ -341,12 +341,12 @@ export default function CellarPage() {
       ) : filtered.length === 0 ? (
         <PremiumEmptyState
           icon={Wine}
-          title="Sua jornada começa aqui"
+          title="Sua coleção começa aqui"
           description={hasActiveFilters
-            ? "Não encontramos vinhos com esses critérios. Tente simplificar seus filtros para descobrir novos rótulos."
-            : "Sua adega digital ainda está vazia. Comece a catalogar sua coleção e tenha o controle total do seu acervo na palma da mão."}
+            ? "Não encontramos vinhos com esses critérios. Tente simplificar seus filtros para explorar novos rótulos."
+            : "Cada garrafa conta uma história. Comece a catalogar seu acervo e tenha controle total da sua adega na palma da mão."}
           primaryAction={!hasActiveFilters ? {
-            label: "Catalogar meu primeiro vinho",
+            label: "Adicionar primeiro vinho",
             icon: <Plus className="h-4 w-4" />,
             onClick: () => setAddOpen(true)
           } : undefined}
@@ -362,7 +362,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="glass-card p-3 group relative"
+              className="glass-card p-3.5 group relative"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.015, duration: 0.3 }}
@@ -370,43 +370,43 @@ export default function CellarPage() {
                 {/* Top: Name + Status */}
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[12px] font-bold truncate text-foreground leading-tight">{wine.name}</h3>
-                    <p className="text-[9px] truncate text-muted-foreground">
+                    <h3 className="text-sm font-bold truncate text-foreground leading-tight">{wine.name}</h3>
+                    <p className="text-xs truncate text-muted-foreground font-medium">
                       {[wine.producer, wine.vintage].filter(Boolean).join(" · ") || "—"}
                     </p>
                   </div>
                   {status && (
-                    <Badge variant="secondary" className={`text-[8px] px-1.5 py-0 h-4 shrink-0 font-bold ${statusColor[status]}`}>
+                  <Badge variant="secondary" className={`text-[9px] px-2 py-0 h-5 shrink-0 font-bold ${statusColor[status]}`}>
                       {statusLabel[status]}
                     </Badge>
                   )}
                 </div>
 
                 {/* Info row */}
-                <div className="flex items-center gap-1.5 flex-wrap text-[9px] text-muted-foreground mb-2">
-                  <span className="font-bold text-foreground bg-muted/40 px-1.5 py-0.5 rounded">{wine.quantity} un.</span>
+                <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground mb-2.5">
+                  <span className="font-bold text-foreground bg-muted/40 px-2 py-0.5 rounded text-xs">{wine.quantity} un.</span>
                   {wine.purchase_price != null && wine.purchase_price > 0 && (
                     <span className="font-semibold" style={{ color: "hsl(var(--gold))" }}>R$ {wine.purchase_price.toFixed(0)}</span>
                   )}
-                  {wine.style && <span className="capitalize bg-primary/5 text-primary px-1.5 py-0.5 rounded font-medium">{wine.style}</span>}
-                  {wine.country && <span>{wine.country}</span>}
+                  {wine.style && <span className="capitalize bg-primary/5 text-primary px-2 py-0.5 rounded font-semibold text-[11px]">{wine.style}</span>}
+                  {wine.country && <span className="font-medium">{wine.country}</span>}
                   {wine.cellar_location && (
-                    <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{wine.cellar_location}</span>
+                    <span className="flex items-center gap-0.5 font-medium"><MapPin className="h-3 w-3" />{wine.cellar_location}</span>
                   )}
                 </div>
 
                 {/* Actions — always visible */}
-                <div className="flex gap-1.5 border-t border-border/30 pt-2">
+                <div className="flex gap-1.5 border-t border-border/30 pt-2.5">
                   {status === "now" && (
-                    <Button size="sm" variant="outline" className="h-6 text-[9px] px-2 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700" onClick={() => handleOpen(wine)}>
-                      <GlassWater className="h-2.5 w-2.5 mr-0.5" /> Abrir
+                    <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpen(wine)}>
+                      <GlassWater className="h-3 w-3 mr-1" /> Abrir
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 flex-1" onClick={() => setEditWine(wine)}>
-                    <Pencil className="h-2.5 w-2.5 mr-0.5" /> Editar
+                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 flex-1 font-semibold" onClick={() => setEditWine(wine)}>
+                    <Pencil className="h-3 w-3 mr-1" /> Editar
                   </Button>
-                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 text-destructive hover:text-destructive hover:bg-destructive/5" onClick={() => setDeleteTarget(wine)}>
-                    <Trash2 className="h-2.5 w-2.5" />
+                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 text-destructive hover:text-destructive hover:bg-destructive/5 font-semibold" onClick={() => setDeleteTarget(wine)}>
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </motion.div>

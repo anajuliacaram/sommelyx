@@ -129,21 +129,21 @@ export default function PersonalDashboard() {
   };
 
   return (
-    <div className="space-y-4 max-w-[1200px] relative">
-      {/* Header — compact */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div className="space-y-5 max-w-[1200px] relative">
+      {/* Header — warm & personal */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-sm text-muted-foreground">Sua adega pessoal — o que abrir, guardar e explorar</p>
+          <p className="text-sm text-muted-foreground font-medium mt-0.5">Sua coleção ganha vida a cada garrafa</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-8 text-[11px] font-semibold" onClick={() => setCsvOpen(true)}>
-            <Upload className="h-3 w-3 mr-1" /> Importar
+        <div className="flex gap-2.5">
+          <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-semibold" onClick={() => setCsvOpen(true)}>
+            <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar
           </Button>
-          <Button variant="premium" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setAddOpen(true)}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar
+          <Button variant="premium" size="sm" className="h-9 px-5 text-xs font-bold" onClick={() => setAddOpen(true)}>
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
           </Button>
         </div>
       </motion.div>
@@ -152,69 +152,69 @@ export default function PersonalDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (
           [1, 2, 3, 4].map((i) => (
-            <div key={i} className="glass-card p-3 space-y-2">
-              <div className="w-8 h-8 rounded-lg shimmer-premium" />
-              <div className="h-6 w-12 rounded shimmer-premium" />
-              <div className="h-2.5 w-16 rounded shimmer-premium" />
+            <div key={i} className="glass-card p-5 space-y-3">
+              <div className="w-10 h-10 rounded-xl shimmer-premium" />
+              <div className="h-8 w-16 rounded shimmer-premium" />
+              <div className="h-3 w-20 rounded shimmer-premium" />
             </div>
           ))
         ) : (
           metrics.map((m, i) => (
             <motion.div
               key={m.label}
-              className="glass-card p-4 group cursor-pointer border border-white/5 ring-1 ring-black/[0.03]"
+              className="glass-card p-5 group cursor-pointer border border-white/5 ring-1 ring-black/[0.03]"
               onClick={m.onClick}
               initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
-              whileHover={{ y: -2, boxShadow: "0 12px 28px -8px rgba(140,32,68,0.1)" }}
+              whileHover={{ y: -3, boxShadow: "0 16px 32px -10px rgba(140,32,68,0.12)" }}
             >
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${m.color}14` }}>
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${m.color}14` }}>
                   <m.icon className="h-5 w-5" style={{ color: m.color }} />
                 </div>
                 {m.badge && (
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: m.color }}>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full text-white" style={{ background: m.color }}>
                     {m.badge}
                   </span>
                 )}
               </div>
-              <p className="text-3xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
+              <p className="text-3xl lg:text-4xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{m.label}</p>
             </motion.div>
           ))
         )}
       </div>
 
       {/* ─── Main 2-column grid ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* LEFT column (3/5) — lists & alerts */}
-        <div className="lg:col-span-3 space-y-3">
+        <div className="lg:col-span-3 space-y-4">
           {/* What to open */}
           {suggestions.length > 0 && (
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5} className="glass-card p-4">
-              <div className="flex items-center justify-between mb-3">
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5} className="glass-card p-5">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-[13px] font-semibold font-sans text-foreground">🍷 O que abrir hoje?</h2>
-                  <p className="text-[10px] text-muted-foreground">Janela ideal de consumo</p>
+                  <h2 className="text-sm font-bold font-sans text-foreground">🍷 Prontos para abrir</h2>
+                  <p className="text-xs text-muted-foreground font-medium">Na janela ideal de consumo</p>
                 </div>
-                <button className="text-[10px] font-semibold text-primary" onClick={() => navigate("/dashboard/cellar")}>
+                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>
                   Ver todos →
                 </button>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {suggestions.map((w) => (
-                  <div key={w.id} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-black/[0.015]" style={{ border: "1px solid rgba(0,0,0,0.04)" }}>
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.08)" }}>
-                      <GlassWater className="h-3.5 w-3.5" style={{ color: "#22c55e" }} />
+                  <div key={w.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/[0.02] transition-colors" style={{ border: "1px solid rgba(0,0,0,0.05)" }}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.08)" }}>
+                      <GlassWater className="h-4 w-4" style={{ color: "#22c55e" }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                      <p className="text-[9px] text-muted-foreground">
+                      <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
+                      <p className="text-xs text-muted-foreground font-medium">
                         {[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.
                       </p>
                     </div>
                     <Button
                       size="sm" variant="outline"
-                      className="h-6 text-[9px] px-2 shrink-0 hover:bg-green-50 hover:border-green-200 hover:text-green-700"
+                      className="h-7 text-xs px-3 shrink-0 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold"
                       onClick={() => handleOpenBottle(w.id, w.name)}
                       disabled={wineEvent.isPending}
                     >
@@ -229,18 +229,18 @@ export default function PersonalDashboard() {
           {/* Alerts */}
           {alerts.length > 0 && (
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-1.5 text-muted-foreground">
-                Alertas
+              <h2 className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">
+                Atenção
               </h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {alerts.map((a) => (
-                  <div key={a.label} className="glass-card p-3 flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/dashboard/alerts")}>
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.bg }}>
-                      <a.icon className="h-3.5 w-3.5" style={{ color: a.color }} />
+                  <div key={a.label} className="glass-card p-3.5 flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/dashboard/alerts")}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.bg }}>
+                      <a.icon className="h-4 w-4" style={{ color: a.color }} />
                     </div>
                     <div>
-                      <p className="text-[12px] font-bold text-foreground">{a.count}</p>
-                      <p className="text-[9px] font-medium" style={{ color: a.color }}>{a.label}</p>
+                      <p className="text-lg font-black text-foreground">{a.count}</p>
+                      <p className="text-xs font-semibold" style={{ color: a.color }}>{a.label}</p>
                     </div>
                   </div>
                 ))}
@@ -251,11 +251,11 @@ export default function PersonalDashboard() {
           {/* Recent wines */}
           {recentWines.length > 0 && (
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-              <div className="flex items-center justify-between mb-1.5">
-                <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  <Clock className="inline h-3 w-3 mr-1 -mt-0.5" /> Recentes
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" /> Adicionados recentemente
                 </h2>
-                <button className="text-[10px] font-semibold text-primary" onClick={() => navigate("/dashboard/cellar")}>
+                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>
                   Ver todos →
                 </button>
               </div>
@@ -263,10 +263,10 @@ export default function PersonalDashboard() {
               <div className="glass-card overflow-hidden hidden sm:block">
                 <table className="w-full">
                   <thead>
-                    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-                      <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Vinho</th>
-                      <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Estilo</th>
-                      <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Qtd</th>
+                     <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                      <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Vinho</th>
+                      <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Estilo</th>
+                      <th className="text-right text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Qtd</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -277,17 +277,17 @@ export default function PersonalDashboard() {
                         style={{ borderBottom: i < recentWines.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none" }}
                         onClick={() => navigate("/dashboard/cellar")}
                       >
-                        <td className="px-3 py-2">
-                          <p className="text-[11px] font-semibold truncate max-w-[160px] text-foreground">{w.name}</p>
-                          <p className="text-[9px] text-muted-foreground">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
+                        <td className="px-3 py-2.5">
+                          <p className="text-sm font-semibold truncate max-w-[180px] text-foreground">{w.name}</p>
+                          <p className="text-xs text-muted-foreground font-medium">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
                         </td>
-                        <td className="px-3 py-2">
-                          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>
+                        <td className="px-3 py-2.5">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>
                             {w.style || "—"}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-right">
-                          <span className="text-[11px] font-bold text-foreground">{w.quantity}</span>
+                        <td className="px-3 py-2.5 text-right">
+                          <span className="text-sm font-bold text-foreground">{w.quantity}</span>
                         </td>
                       </tr>
                     ))}
@@ -295,23 +295,23 @@ export default function PersonalDashboard() {
                 </table>
               </div>
               {/* Mobile card list */}
-              <div className="space-y-1.5 sm:hidden">
+              <div className="space-y-2 sm:hidden">
                 {recentWines.map((w) => (
                   <div
                     key={w.id}
-                    className="glass-card p-2.5 flex items-center gap-2.5 cursor-pointer active:scale-[0.98] transition-transform"
+                    className="glass-card p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
                     onClick={() => navigate("/dashboard/cellar")}
                   >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
-                      <Wine className="h-3.5 w-3.5" style={{ color: "#8F2D56" }} />
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
+                      <Wine className="h-4 w-4" style={{ color: "#8F2D56" }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                      <p className="text-[9px] text-muted-foreground">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
+                      <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
+                      <p className="text-xs text-muted-foreground font-medium">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-[11px] font-bold text-foreground">{w.quantity}</span>
-                      <p className="text-[8px] text-muted-foreground">un.</p>
+                      <span className="text-sm font-bold text-foreground">{w.quantity}</span>
+                      <p className="text-[10px] text-muted-foreground">un.</p>
                     </div>
                   </div>
                 ))}
@@ -321,12 +321,12 @@ export default function PersonalDashboard() {
         </div>
 
         {/* RIGHT column (2/5) — charts */}
-        <div className="lg:col-span-2 space-y-3">
+        <div className="lg:col-span-2 space-y-4">
           {/* Drink Window */}
           {totalBottles > 0 && drinkWindowData.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-              <h3 className="text-[12px] font-semibold font-sans text-foreground mb-0.5">Janela de Consumo</h3>
-              <p className="text-[9px] text-muted-foreground mb-2">Quando abrir cada garrafa</p>
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+              <h3 className="text-sm font-bold font-sans text-foreground mb-0.5">Janela de Consumo</h3>
+              <p className="text-xs text-muted-foreground font-medium mb-3">Quando cada garrafa atinge seu melhor momento</p>
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
                   <Pie data={drinkWindowData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
@@ -335,11 +335,11 @@ export default function PersonalDashboard() {
                   <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-3 mt-1.5">
+              <div className="flex justify-center gap-4 mt-2">
                 {drinkWindowData.map(d => (
-                  <div key={d.name} className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: d.color }} />
-                    <span className="text-[9px] font-medium text-muted-foreground">{d.name} ({d.value})</span>
+                  <div key={d.name} className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full" style={{ background: d.color }} />
+                    <span className="text-xs font-medium text-muted-foreground">{d.name} ({d.value})</span>
                   </div>
                 ))}
               </div>
@@ -348,13 +348,13 @@ export default function PersonalDashboard() {
 
           {/* Collection evolution */}
           {totalBottles > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <div className="flex items-center justify-between mb-2">
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className="text-[12px] font-semibold font-sans text-foreground">Evolução</h3>
-                  <p className="text-[9px] text-muted-foreground">Garrafas ao longo do tempo</p>
+                  <h3 className="text-sm font-bold font-sans text-foreground">Evolução</h3>
+                  <p className="text-xs text-muted-foreground font-medium">Sua coleção ao longo do tempo</p>
                 </div>
-                <BarChart3 className="h-3 w-3 text-muted-foreground" />
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </div>
               <ResponsiveContainer width="100%" height={120}>
                 <AreaChart data={collectionData}>
@@ -376,18 +376,18 @@ export default function PersonalDashboard() {
 
           {/* By style */}
           {totalBottles > 0 && compositionData.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Grape className="h-3 w-3 text-muted-foreground" />
-                <h3 className="text-[12px] font-semibold font-sans text-foreground">Por estilo</h3>
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+              <div className="flex items-center gap-2 mb-3">
+                <Grape className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-bold font-sans text-foreground">Por estilo</h3>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {compositionData.map((d, i) => {
                   const pct = totalBottles > 0 ? Math.round((d.value / totalBottles) * 100) : 0;
                   return (
-                    <div key={d.name} className="flex items-center gap-2">
-                      <span className="text-[10px] font-medium w-16 truncate text-muted-foreground">{d.name}</span>
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-black/[0.04]">
+                    <div key={d.name} className="flex items-center gap-2.5">
+                      <span className="text-xs font-medium w-20 truncate text-muted-foreground">{d.name}</span>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden bg-black/[0.04]">
                         <motion.div
                           className="h-full rounded-full"
                           style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
@@ -396,7 +396,7 @@ export default function PersonalDashboard() {
                           transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }}
                         />
                       </div>
-                      <span className="text-[9px] font-bold w-7 text-right text-foreground">{pct}%</span>
+                      <span className="text-xs font-bold w-8 text-right text-foreground">{pct}%</span>
                     </div>
                   );
                 })}
@@ -406,18 +406,18 @@ export default function PersonalDashboard() {
 
           {/* By country */}
           {totalBottles > 0 && countryData.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Globe className="h-3 w-3 text-muted-foreground" />
-                <h3 className="text-[12px] font-semibold font-sans text-foreground">Por país</h3>
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-bold font-sans text-foreground">Por país</h3>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {countryData.map((d, i) => {
                   const pct = totalBottles > 0 ? Math.round((d.value / totalBottles) * 100) : 0;
                   return (
-                    <div key={d.name} className="flex items-center gap-2">
-                      <span className="text-[10px] font-medium w-16 truncate text-muted-foreground">{d.name}</span>
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-black/[0.04]">
+                    <div key={d.name} className="flex items-center gap-2.5">
+                      <span className="text-xs font-medium w-20 truncate text-muted-foreground">{d.name}</span>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden bg-black/[0.04]">
                         <motion.div
                           className="h-full rounded-full"
                           style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
@@ -426,7 +426,7 @@ export default function PersonalDashboard() {
                           transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }}
                         />
                       </div>
-                      <span className="text-[9px] font-bold w-7 text-right text-foreground">{pct}%</span>
+                      <span className="text-xs font-bold w-8 text-right text-foreground">{pct}%</span>
                     </div>
                   );
                 })}
@@ -456,18 +456,18 @@ export default function PersonalDashboard() {
               <div className="absolute inset-0 rounded-full gradient-wine opacity-10" />
               <Wine className="h-7 w-7 text-primary relative z-10" />
             </motion.div>
-            <h3 className="text-xl font-serif font-bold mb-2 tracking-tight text-foreground">
-              Sua jornada vinícola começa aqui
+             <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight text-foreground">
+              Sua coleção começa a ganhar vida aqui
             </h3>
-            <p className="text-[13px] mb-8 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
-              Adicione um vinho para desbloquear estatísticas e insights sobre sua coleção.
+            <p className="text-sm mb-8 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
+              Cada garrafa conta uma história. Adicione seu primeiro vinho e comece a construir um acervo que reflete o seu paladar.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-10 px-6 text-[12px] font-bold">
-                <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
+              <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-11 px-7 text-sm font-bold">
+                <Plus className="h-4 w-4 mr-1.5" /> Começar minha adega
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setCsvOpen(true)} className="h-10 px-5 text-[12px] font-bold">
-                <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar
+              <Button variant="outline" size="sm" onClick={() => setCsvOpen(true)} className="h-11 px-5 text-sm font-bold">
+                <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar lista
               </Button>
             </div>
           </div>
