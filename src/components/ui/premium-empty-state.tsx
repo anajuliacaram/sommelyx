@@ -75,7 +75,7 @@ export function PremiumEmptyState({
                     <Button
                         variant="outline"
                         onClick={secondaryAction.onClick}
-                        className="h-12 px-8 rounded-xl text-[13px] font-bold uppercase tracking-widest border-black/[0.08] hover:bg-black/5 bg-white shadow-sm transition-all text-[#4B5563] hover:text-[#0F0F14]"
+                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider border-border hover:bg-foreground hover:text-background shadow-sm transition-all"
                     >
                         {secondaryAction.label}
                     </Button>
