@@ -185,18 +185,18 @@ export default function PersonalDashboard() {
       </div>
 
       {/* ─── Main 2-column grid ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* LEFT column (3/5) — lists & alerts */}
-        <div className="lg:col-span-3 space-y-3">
+        <div className="lg:col-span-3 space-y-4">
           {/* What to open */}
           {suggestions.length > 0 && (
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5} className="glass-card p-4">
-              <div className="flex items-center justify-between mb-3">
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5} className="glass-card p-5">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-[13px] font-semibold font-sans text-foreground">🍷 O que abrir hoje?</h2>
-                  <p className="text-[10px] text-muted-foreground">Janela ideal de consumo</p>
+                  <h2 className="text-sm font-bold font-sans text-foreground">🍷 Prontos para abrir</h2>
+                  <p className="text-xs text-muted-foreground font-medium">Na janela ideal de consumo</p>
                 </div>
-                <button className="text-[10px] font-semibold text-primary" onClick={() => navigate("/dashboard/cellar")}>
+                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>
                   Ver todos →
                 </button>
               </div>
