@@ -234,13 +234,13 @@ export default function CellarPage() {
   return (
     <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg md:text-xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
-          <p className="text-[11px] text-muted-foreground">{filtered.length} vinho{filtered.length !== 1 ? "s" : ""} em estoque</p>
+          <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
+          <p className="text-sm text-muted-foreground font-medium">{filtered.length} vinho{filtered.length !== 1 ? "s" : ""} em estoque</p>
         </div>
-        <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-8 px-4 text-[11px] font-bold">
-          <Plus className="h-3 w-3 mr-1" /> Adicionar vinho
+        <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-9 px-5 text-xs font-bold">
+          <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
         </Button>
       </div>
 
