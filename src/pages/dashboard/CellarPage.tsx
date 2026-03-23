@@ -273,10 +273,10 @@ export default function CellarPage() {
                 <List className="h-3.5 w-3.5" />
               </button>
             </div>
-            <select
+              <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="h-8 px-2.5 pr-7 text-[11px] font-medium rounded-lg bg-card cursor-pointer border border-border/40 text-foreground"
+              className="h-9 px-3 pr-8 text-xs font-semibold rounded-lg bg-card cursor-pointer border border-border/40 text-foreground"
             >
               <option value="drink">Prioridade</option>
               <option value="date">Recentes</option>
