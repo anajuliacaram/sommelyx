@@ -263,10 +263,10 @@ export default function PersonalDashboard() {
               <div className="glass-card overflow-hidden hidden sm:block">
                 <table className="w-full">
                   <thead>
-                    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-                      <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Vinho</th>
-                      <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Estilo</th>
-                      <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Qtd</th>
+                     <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                      <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Vinho</th>
+                      <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Estilo</th>
+                      <th className="text-right text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Qtd</th>
                     </tr>
                   </thead>
                   <tbody>
