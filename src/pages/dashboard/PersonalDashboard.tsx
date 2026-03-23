@@ -335,11 +335,11 @@ export default function PersonalDashboard() {
                   <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-3 mt-1.5">
+              <div className="flex justify-center gap-4 mt-2">
                 {drinkWindowData.map(d => (
-                  <div key={d.name} className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: d.color }} />
-                    <span className="text-[9px] font-medium text-muted-foreground">{d.name} ({d.value})</span>
+                  <div key={d.name} className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full" style={{ background: d.color }} />
+                    <span className="text-xs font-medium text-muted-foreground">{d.name} ({d.value})</span>
                   </div>
                 ))}
               </div>
