@@ -456,18 +456,18 @@ export default function PersonalDashboard() {
               <div className="absolute inset-0 rounded-full gradient-wine opacity-10" />
               <Wine className="h-7 w-7 text-primary relative z-10" />
             </motion.div>
-            <h3 className="text-xl font-serif font-bold mb-2 tracking-tight text-foreground">
-              Sua jornada vinícola começa aqui
+             <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight text-foreground">
+              Sua coleção começa a ganhar vida aqui
             </h3>
-            <p className="text-[13px] mb-8 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
-              Adicione um vinho para desbloquear estatísticas e insights sobre sua coleção.
+            <p className="text-sm mb-8 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
+              Cada garrafa conta uma história. Adicione seu primeiro vinho e comece a construir um acervo que reflete o seu paladar.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-10 px-6 text-[12px] font-bold">
-                <Plus className="h-4 w-4 mr-1.5" /> Adicionar vinho
+              <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-11 px-7 text-sm font-bold">
+                <Plus className="h-4 w-4 mr-1.5" /> Começar minha adega
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setCsvOpen(true)} className="h-10 px-5 text-[12px] font-bold">
-                <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar
+              <Button variant="outline" size="sm" onClick={() => setCsvOpen(true)} className="h-11 px-5 text-sm font-bold">
+                <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar lista
               </Button>
             </div>
           </div>

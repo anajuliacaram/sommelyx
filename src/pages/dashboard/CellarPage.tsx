@@ -396,17 +396,17 @@ export default function CellarPage() {
                 </div>
 
                 {/* Actions — always visible */}
-                <div className="flex gap-1.5 border-t border-border/30 pt-2">
+                <div className="flex gap-1.5 border-t border-border/30 pt-2.5">
                   {status === "now" && (
-                    <Button size="sm" variant="outline" className="h-6 text-[9px] px-2 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700" onClick={() => handleOpen(wine)}>
-                      <GlassWater className="h-2.5 w-2.5 mr-0.5" /> Abrir
+                    <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpen(wine)}>
+                      <GlassWater className="h-3 w-3 mr-1" /> Abrir
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 flex-1" onClick={() => setEditWine(wine)}>
-                    <Pencil className="h-2.5 w-2.5 mr-0.5" /> Editar
+                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 flex-1 font-semibold" onClick={() => setEditWine(wine)}>
+                    <Pencil className="h-3 w-3 mr-1" /> Editar
                   </Button>
-                  <Button variant="outline" size="sm" className="h-6 text-[9px] px-2 text-destructive hover:text-destructive hover:bg-destructive/5" onClick={() => setDeleteTarget(wine)}>
-                    <Trash2 className="h-2.5 w-2.5" />
+                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 text-destructive hover:text-destructive hover:bg-destructive/5 font-semibold" onClick={() => setDeleteTarget(wine)}>
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </motion.div>
