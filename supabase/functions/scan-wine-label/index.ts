@@ -143,7 +143,7 @@ Rules:
   } catch (error) {
     console.error("Error in scan-wine-label:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Failed to scan label" }),
+      JSON.stringify({ error: "Falha ao analisar o rótulo. Tente novamente." }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
