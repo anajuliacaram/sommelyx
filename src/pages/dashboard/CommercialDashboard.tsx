@@ -125,7 +125,7 @@ export default function CommercialDashboard() {
           metrics.map((m, i) => (
             <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
               <PremiumKpiCard
-                className="p-3 group border border-white/5 ring-1 ring-black/[0.03]"
+                className="p-4 group border border-white/5 ring-1 ring-black/[0.03]"
                 onClick={() => navigate("/dashboard/inventory")}
               >
                 <div className="flex items-center justify-between mb-2">
