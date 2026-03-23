@@ -49,7 +49,8 @@ serve(async (req) => {
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) {
-      throw new Error("LOVABLE_API_KEY not configured");
+      console.error("Missing required API key configuration");
+      throw new Error("Service configuration error");
     }
 
     const response = await fetch(
