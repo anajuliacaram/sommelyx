@@ -49,7 +49,8 @@ serve(async (req) => {
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) {
-      throw new Error("LOVABLE_API_KEY not configured");
+      console.error("Missing required API key configuration");
+      throw new Error("Service configuration error");
     }
 
     const response = await fetch(
@@ -116,8 +117,8 @@ Rules:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", errorText);
-      throw new Error(`AI Gateway error: ${response.status}`);
+      console.error("AI Gateway error:", response.status, errorText);
+      throw new Error("Label analysis service unavailable");
     }
 
     const data = await response.json();
@@ -143,7 +144,7 @@ Rules:
   } catch (error) {
     console.error("Error in scan-wine-label:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Failed to scan label" }),
+      JSON.stringify({ error: "Falha ao analisar o rótulo. Tente novamente." }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
