@@ -295,23 +295,23 @@ export default function PersonalDashboard() {
                 </table>
               </div>
               {/* Mobile card list */}
-              <div className="space-y-1.5 sm:hidden">
+              <div className="space-y-2 sm:hidden">
                 {recentWines.map((w) => (
                   <div
                     key={w.id}
-                    className="glass-card p-2.5 flex items-center gap-2.5 cursor-pointer active:scale-[0.98] transition-transform"
+                    className="glass-card p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
                     onClick={() => navigate("/dashboard/cellar")}
                   >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
-                      <Wine className="h-3.5 w-3.5" style={{ color: "#8F2D56" }} />
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
+                      <Wine className="h-4 w-4" style={{ color: "#8F2D56" }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                      <p className="text-[9px] text-muted-foreground">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
+                      <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
+                      <p className="text-xs text-muted-foreground font-medium">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-[11px] font-bold text-foreground">{w.quantity}</span>
-                      <p className="text-[8px] text-muted-foreground">un.</p>
+                      <span className="text-sm font-bold text-foreground">{w.quantity}</span>
+                      <p className="text-[10px] text-muted-foreground">un.</p>
                     </div>
                   </div>
                 ))}
