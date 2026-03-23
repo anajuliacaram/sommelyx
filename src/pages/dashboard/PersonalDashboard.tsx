@@ -133,10 +133,10 @@ export default function PersonalDashboard() {
       {/* Header — compact */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">
+          <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-[11px] text-muted-foreground">Sua adega pessoal — o que abrir, guardar e explorar</p>
+          <p className="text-sm text-muted-foreground">Sua adega pessoal — o que abrir, guardar e explorar</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="h-8 text-[11px] font-semibold" onClick={() => setCsvOpen(true)}>
