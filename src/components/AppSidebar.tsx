@@ -88,7 +88,7 @@ export function AppSidebar() {
                   className="w-full h-10 text-[11px] font-bold uppercase tracking-wider rounded-xl shadow-float border border-white/20 active:scale-[0.97] transition-all"
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  {isCommercial ? "Cadastrar" : "Adicionar vinho"}
+                  {isCommercial ? "Cadastrar" : "Adicionar vinho na adega"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] rounded-xl">
