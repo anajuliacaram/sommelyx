@@ -106,18 +106,27 @@ export default function DashboardLayout() {
                   {searchResults.map(w => (
                     <button
                       key={w.id}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.03]"
-                      onMouseDown={() => { navigate("/dashboard/cellar"); setSearchQuery(""); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-black/[0.04]"
+                      onMouseDown={() => { 
+                        navigate(profileType === "commercial" ? "/dashboard/inventory" : "/dashboard/cellar"); 
+                        setSearchQuery(""); 
+                      }}
                     >
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                        <Wine className="h-4 w-4" style={{ color: "hsl(var(--primary))" }} />
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                        <p className="text-[9px] text-muted-foreground">
-                          {[w.producer, w.vintage, w.country].filter(Boolean).join(" · ")} · {w.quantity} un.
+                        <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ")}
                         </p>
                       </div>
-                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: "rgba(34,197,94,0.08)", color: "#16a34a" }}>
-                        Em estoque
-                      </span>
+                      <div className="text-right shrink-0">
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${w.quantity > 0 ? "text-green-700" : "text-muted-foreground"}`} 
+                          style={{ background: w.quantity > 0 ? "rgba(34,197,94,0.1)" : "rgba(0,0,0,0.05)" }}>
+                          {w.quantity > 0 ? `${w.quantity} un.` : "Esgotado"}
+                        </span>
+                      </div>
                     </button>
                   ))}
                 </div>
