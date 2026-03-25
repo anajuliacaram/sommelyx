@@ -79,8 +79,7 @@ export default function ConsumptionPage() {
           icon={Wine}
           title="Nenhum consumo registrado"
           description={filter === "all" ? "Registre vinhos que você experimentou para manter um histórico pessoal" : filter === "cellar" ? "Nenhum consumo da adega registrado" : "Nenhum consumo externo registrado"}
-          actionLabel="Registrar Consumo"
-          onAction={() => setAddOpen(true)}
+          primaryAction={{ label: "Registrar Consumo", onClick: () => setAddOpen(true) }}
         />
       ) : (
         <AnimatePresence mode="popLayout">
