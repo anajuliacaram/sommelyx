@@ -134,7 +134,7 @@ export default function CommercialDashboard() {
                   </div>
                 </div>
                 <p className="text-2xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.06em] whitespace-nowrap">{m.label}</p>
               </PremiumKpiCard>
             </motion.div>
           ))
