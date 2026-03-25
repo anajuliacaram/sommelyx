@@ -226,8 +226,8 @@ export default function CommercialDashboard() {
               <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h3 className="text-[12px] font-semibold font-sans text-foreground">Estoque por estilo</h3>
-                    <p className="text-[9px] text-muted-foreground">Distribuição atual</p>
+                    <h3 className="text-sm font-semibold font-sans text-foreground">Estoque por estilo</h3>
+                    <p className="text-[11px] text-muted-foreground">Distribuição atual</p>
                   </div>
                   <BarChart3 className="h-3 w-3 text-muted-foreground" />
                 </div>
