@@ -16,7 +16,9 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MenuItem {
   title: string;
@@ -42,10 +44,16 @@ const commercialMenu: MenuItem[] = [
 
 export function AppSidebar() {
   const { profileType, signOut, user } = useAuth();
+  const { setOpenMobile } = useSidebar();
+  const isMobile = useIsMobile();
   const [addOpen, setAddOpen] = useState(false);
   const [addWithScan, setAddWithScan] = useState(false);
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const isCommercial = profileType === "commercial";
+
+  const closeMobileSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
   const initials = user?.user_metadata?.full_name
     ?.split(" ")
     .map((n: string) => n[0])
@@ -112,6 +120,7 @@ export function AppSidebar() {
                         end={item.url === "/dashboard"}
                         className="sidebar-item !h-[42px] !text-[13px]"
                         activeClassName="sidebar-item--active"
+                        onClick={closeMobileSidebar}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span className="flex-1">{item.title}</span>
@@ -131,7 +140,7 @@ export function AppSidebar() {
               <SidebarMenu className="gap-1">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/settings" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active">
+                    <NavLink to="/dashboard/settings" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <Settings className="h-4 w-4 shrink-0" />
                       <span>Preferências</span>
                     </NavLink>
@@ -139,7 +148,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/plans" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active">
+                    <NavLink to="/dashboard/plans" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <CreditCard className="h-4 w-4 shrink-0" />
                       <span>Meu Plano</span>
                     </NavLink>
