@@ -38,14 +38,19 @@ export default function DashboardLayout() {
 
   const searchResults = useMemo(() => {
     if (!searchQuery || !wines) return [];
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
+    if (q.length < 1) return [];
     return wines
-      .filter(w => w.quantity > 0 && (
-        w.name.toLowerCase().includes(q) || w.producer?.toLowerCase().includes(q) ||
-        w.grape?.toLowerCase().includes(q) || w.country?.toLowerCase().includes(q) ||
+      .filter(w => 
+        w.name.toLowerCase().includes(q) || 
+        w.producer?.toLowerCase().includes(q) ||
+        w.grape?.toLowerCase().includes(q) || 
+        w.country?.toLowerCase().includes(q) ||
+        w.region?.toLowerCase().includes(q) ||
+        w.style?.toLowerCase().includes(q) ||
         String(w.vintage).includes(q)
-      ))
-      .slice(0, 6);
+      )
+      .slice(0, 8);
   }, [searchQuery, wines]);
 
   const initials = user?.user_metadata?.full_name
@@ -101,28 +106,37 @@ export default function DashboardLayout() {
                   {searchResults.map(w => (
                     <button
                       key={w.id}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.03]"
-                      onMouseDown={() => { navigate("/dashboard/cellar"); setSearchQuery(""); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-black/[0.04]"
+                      onMouseDown={() => { 
+                        navigate(profileType === "commercial" ? "/dashboard/inventory" : "/dashboard/cellar"); 
+                        setSearchQuery(""); 
+                      }}
                     >
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                        <Wine className="h-4 w-4" style={{ color: "hsl(var(--primary))" }} />
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                        <p className="text-[9px] text-muted-foreground">
-                          {[w.producer, w.vintage, w.country].filter(Boolean).join(" · ")} · {w.quantity} un.
+                        <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ")}
                         </p>
                       </div>
-                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: "rgba(34,197,94,0.08)", color: "#16a34a" }}>
-                        Em estoque
-                      </span>
+                      <div className="text-right shrink-0">
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${w.quantity > 0 ? "text-green-700" : "text-muted-foreground"}`} 
+                          style={{ background: w.quantity > 0 ? "rgba(34,197,94,0.1)" : "rgba(0,0,0,0.05)" }}>
+                          {w.quantity > 0 ? `${w.quantity} un.` : "Esgotado"}
+                        </span>
+                      </div>
                     </button>
                   ))}
                 </div>
               )}
               {searchFocused && searchQuery && searchResults.length === 0 && (
                 <div
-                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl p-3 text-center z-50"
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl p-4 text-center z-50"
                   style={{ background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}
                 >
-                  <p className="text-[11px] text-muted-foreground">Nenhum resultado para "{searchQuery}"</p>
+                  <p className="text-sm text-muted-foreground">Nenhum resultado para "<span className="font-semibold text-foreground">{searchQuery}</span>"</p>
                 </div>
               )}
             </div>
