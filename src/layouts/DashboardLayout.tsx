@@ -133,10 +133,10 @@ export default function DashboardLayout() {
               )}
               {searchFocused && searchQuery && searchResults.length === 0 && (
                 <div
-                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl p-3 text-center z-50"
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl p-4 text-center z-50"
                   style={{ background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}
                 >
-                  <p className="text-[11px] text-muted-foreground">Nenhum resultado para "{searchQuery}"</p>
+                  <p className="text-sm text-muted-foreground">Nenhum resultado para "<span className="font-semibold text-foreground">{searchQuery}</span>"</p>
                 </div>
               )}
             </div>
