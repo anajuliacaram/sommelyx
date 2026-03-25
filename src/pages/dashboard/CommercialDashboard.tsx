@@ -188,10 +188,10 @@ export default function CommercialDashboard() {
                 <div className="space-y-1.5">
                   {abcData.map((w, i) => (
                     <div key={i} className="flex items-center gap-2.5">
-                      <span className={`text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${w.cls === "A" ? "bg-green-100 text-green-700" : w.cls === "B" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{w.cls}</span>
-                      <span className="text-[10px] font-medium flex-1 truncate text-foreground">{w.name}</span>
-                      <span className="text-[9px] font-medium text-muted-foreground">R$ {w.value.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</span>
-                      <span className="text-[8px] font-bold w-8 text-right text-muted-foreground">{w.cumPct}%</span>
+                      <span className={`text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${w.cls === "A" ? "bg-green-100 text-green-700" : w.cls === "B" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{w.cls}</span>
+                      <span className="text-[13px] font-medium flex-1 truncate text-foreground">{w.name}</span>
+                      <span className="text-[12px] font-medium text-muted-foreground">R$ {w.value.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</span>
+                      <span className="text-[11px] font-bold w-10 text-right text-muted-foreground">{w.cumPct}%</span>
                     </div>
                   ))}
                 </div>
