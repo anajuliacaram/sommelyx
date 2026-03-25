@@ -24,8 +24,46 @@ interface Sale {
 
 const STORAGE_KEY = "sommelyx_sales";
 
+function generateDemoSales(): Sale[] {
+  const now = new Date();
+  const wines = [
+    { name: "Château Margaux 2015", customer: "João Silva", price: 1200 },
+    { name: "Opus One 2018", customer: "Maria Santos", price: 1800 },
+    { name: "Dom Pérignon 2012", customer: "Carlos Oliveira", price: 1400 },
+    { name: "Almaviva 2019", customer: "Restaurante Bela Vista", price: 520 },
+    { name: "Cloudy Bay Sauvignon Blanc 2022", customer: "Ana Paula", price: 200 },
+    { name: "Vega Sicilia Único 2011", customer: "Pedro Mendes", price: 1100 },
+    { name: "Barolo Monfortino 2014", customer: "Wine Bar Central", price: 3500 },
+    { name: "Penfolds Grange 2017", customer: "Lucas Ferreira", price: 2800 },
+  ];
+  const salesPerDay = [3, 2, 3, 1, 2];
+  const result: Sale[] = [];
+  let idx = 0;
+  for (let d = 0; d < 5; d++) {
+    for (let i = 0; i < salesPerDay[d]; i++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - d);
+      date.setHours(9 + Math.floor(Math.random() * 10), Math.floor(Math.random() * 60), 0, 0);
+      const w = wines[idx % wines.length];
+      result.push({
+        id: `demo-${d}-${i}`,
+        wineName: w.name,
+        quantity: Math.floor(Math.random() * 3) + 1,
+        unitPrice: w.price,
+        customer: w.customer,
+        date: date.toISOString(),
+      });
+      idx++;
+    }
+  }
+  return result;
+}
+
 function loadSales(): Sale[] {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return stored.length > 0 ? stored : generateDemoSales();
+  } catch { return generateDemoSales(); }
 }
 function saveSales(items: Sale[]) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
 
