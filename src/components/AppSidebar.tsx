@@ -148,7 +148,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/plans" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active">
+                    <NavLink to="/dashboard/plans" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <CreditCard className="h-4 w-4 shrink-0" />
                       <span>Meu Plano</span>
                     </NavLink>
