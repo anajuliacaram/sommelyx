@@ -49,6 +49,8 @@ export function AppSidebar() {
   const isMobile = useIsMobile();
   const [addOpen, setAddOpen] = useState(false);
   const [addWithScan, setAddWithScan] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const isCommercial = profileType === "commercial";
 
