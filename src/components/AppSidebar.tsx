@@ -44,10 +44,16 @@ const commercialMenu: MenuItem[] = [
 
 export function AppSidebar() {
   const { profileType, signOut, user } = useAuth();
+  const { setOpenMobile } = useSidebar();
+  const isMobile = useIsMobile();
   const [addOpen, setAddOpen] = useState(false);
   const [addWithScan, setAddWithScan] = useState(false);
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const isCommercial = profileType === "commercial";
+
+  const closeMobileSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
   const initials = user?.user_metadata?.full_name
     ?.split(" ")
     .map((n: string) => n[0])
