@@ -43,6 +43,7 @@ const commercialMenu: MenuItem[] = [
   { title: "Vendas", url: "/dashboard/sales", icon: ShoppingCart },
   { title: "Cadastros", url: "/dashboard/registers", icon: Users },
   { title: "Relatórios", url: "/dashboard/reports", icon: FileText },
+  { title: "Log", url: "/dashboard/log", icon: ClipboardList },
 ];
 
 export function AppSidebar() {
