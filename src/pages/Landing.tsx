@@ -37,7 +37,7 @@ const plans = [
     desc: "Organize sua coleção",
     features: ["Até 50 garrafas", "Dashboard básico", "Notas de degustação", "1 usuário"],
     cta: "Começar Grátis",
-    highlighted: false,
+    tier: "free" as const,
   },
   {
     name: "Pro",
@@ -46,7 +46,7 @@ const plans = [
     desc: "Para colecionadores sérios",
     features: ["Garrafas ilimitadas", "Analytics avançado", "Wishlist & harmonização", "Alertas inteligentes", "Exportação CSV"],
     cta: "Assinar Pro",
-    highlighted: true,
+    tier: "pro" as const,
   },
   {
     name: "Business",
@@ -55,9 +55,33 @@ const plans = [
     desc: "Operações comerciais",
     features: ["Tudo do Pro", "Multiusuário (até 10)", "Gestão de vendas", "Relatórios financeiros"],
     cta: "Falar com Comercial",
-    highlighted: false,
+    tier: "business" as const,
   },
 ];
+
+const tierStyle = (tier: "free" | "pro" | "business") => {
+  if (tier === "business") return {
+    bg: { background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)", boxShadow: "0 16px 32px rgba(74,25,50,0.25), 0 0 0 1px rgba(255,255,255,0.12) inset", border: "1px solid rgba(255,255,255,0.14)" },
+    text: "white", sub: "rgba(255,255,255,0.55)", price: "white", period: "rgba(255,255,255,0.35)", feat: "rgba(255,255,255,0.88)", border: "rgba(255,255,255,0.12)",
+    checkBg: "rgba(255,225,236,0.18)", checkColor: "#FFD3E4",
+    btn: "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_8px_20px_rgba(20,8,14,0.2)]",
+    badge: true,
+  };
+  if (tier === "pro") return {
+    bg: { background: "linear-gradient(160deg, #8C2044 0%, #B5436A 52%, #D4638A 100%)", boxShadow: "0 12px 28px rgba(140,32,68,0.2), 0 0 0 1px rgba(255,255,255,0.15) inset", border: "1px solid rgba(255,255,255,0.18)" },
+    text: "white", sub: "rgba(255,255,255,0.6)", price: "white", period: "rgba(255,255,255,0.4)", feat: "rgba(255,255,255,0.9)", border: "rgba(255,255,255,0.15)",
+    checkBg: "rgba(255,255,255,0.2)", checkColor: "#FFE0EC",
+    btn: "bg-white text-[#8C2044] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_8px_20px_rgba(140,32,68,0.15)]",
+    badge: true,
+  };
+  return {
+    bg: { background: "rgba(255,255,255,0.92)", border: "1px solid rgba(15,15,20,0.06)", boxShadow: "0 4px 16px -8px rgba(15,15,20,0.08)" },
+    text: "#0F0F14", sub: "#9CA3AF", price: "#0F0F14", period: "#9CA3AF", feat: "#4B5563", border: "rgba(0,0,0,0.04)",
+    checkBg: "rgba(140,32,68,0.08)", checkColor: "#8C2044",
+    btn: "bg-[#F5F5F5] text-[#18181B] hover:bg-white shadow-[0_2px_8px_rgba(15,15,20,0.04)] border border-black/[0.06]",
+    badge: false,
+  };
+};
 
 export default function Landing() {
   const navigate = useNavigate();
