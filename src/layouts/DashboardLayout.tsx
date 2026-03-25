@@ -168,36 +168,38 @@ export default function DashboardLayout() {
                 )}
               </button>
 
-              {/* Add wine dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    className="gradient-wine text-white btn-glow h-8 px-3 text-[11px] font-semibold border-0"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline ml-1">{profileType === "commercial" ? "Cadastrar" : "Adicionar"}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
-                    <Wine className="h-4 w-4 mr-2" style={{ color: "#8F2D56" }} />
-                    <span className="text-[12px]">Adicionar garrafa</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { setManageTab("open"); setManageOpen(true); }} className="cursor-pointer">
-                    <GlassWater className="h-4 w-4 mr-2" style={{ color: "#22c55e" }} />
-                    <span className="text-[12px]">Registrar abertura</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { setManageTab("exit"); setManageOpen(true); }} className="cursor-pointer">
-                    <ArrowDownRight className="h-4 w-4 mr-2" style={{ color: "#E07A5F" }} />
-                    <span className="text-[12px]">Registrar saída</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
-                    <Camera className="h-4 w-4 mr-2" style={{ color: "#8F2D56" }} />
-                    <span className="text-[12px]">Adicionar via foto</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Add wine button — personal mode only (commercial uses sidebar) */}
+              {profileType !== "commercial" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="gradient-wine text-white btn-glow h-8 px-3 text-[11px] font-semibold border-0"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline ml-1">Adicionar</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
+                      <Wine className="h-4 w-4 mr-2" style={{ color: "#8F2D56" }} />
+                      <span className="text-[12px]">Adicionar garrafa</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { setManageTab("open"); setManageOpen(true); }} className="cursor-pointer">
+                      <GlassWater className="h-4 w-4 mr-2" style={{ color: "#22c55e" }} />
+                      <span className="text-[12px]">Registrar abertura</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { setManageTab("exit"); setManageOpen(true); }} className="cursor-pointer">
+                      <ArrowDownRight className="h-4 w-4 mr-2" style={{ color: "#E07A5F" }} />
+                      <span className="text-[12px]">Registrar saída</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
+                      <Camera className="h-4 w-4 mr-2" style={{ color: "#8F2D56" }} />
+                      <span className="text-[12px]">Adicionar via foto</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
               <div
                 className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 cursor-pointer"
