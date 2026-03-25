@@ -27,6 +27,7 @@ import StatsPage from "@/pages/dashboard/StatsPage";
 import SalesPage from "@/pages/dashboard/SalesPage";
 import RegistersPage from "@/pages/dashboard/RegistersPage";
 import ReportsPage from "@/pages/dashboard/ReportsPage";
+import ActivityLogPage from "@/pages/dashboard/ActivityLogPage";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
