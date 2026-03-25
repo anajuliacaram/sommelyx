@@ -266,7 +266,9 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                           </Badge>
                           <div className="flex-1 min-w-0">
                             <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
-                            <p className="text-[9px] text-muted-foreground">{item.quantity} un.</p>
+                            <p className="text-[9px] text-muted-foreground">
+                              {item.quantity} un.{item.rating ? ` · ${item.rating === 1 ? "Ruim" : item.rating === 2 ? "Regular" : item.rating === 3 ? "Bom" : item.rating === 4 ? "Muito bom" : "Excelente"}` : ""}
+                            </p>
                           </div>
                           <button
                             type="button"
