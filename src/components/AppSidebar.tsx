@@ -101,7 +101,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl active:scale-[0.97] transition-all"
+                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl active:scale-[0.97] transition-all bg-emerald-500/10 text-emerald-700 border-emerald-500/20 hover:bg-emerald-500/20 hover:text-emerald-800 hover:border-emerald-500/30"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
