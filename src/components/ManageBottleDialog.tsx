@@ -465,6 +465,33 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                   </div>
                 </div>
 
+                {/* Rating */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Star className="h-3 w-3" /> Avaliação
+                  </Label>
+                  <div className="flex gap-1 flex-wrap">
+                    {([
+                      { value: 1, label: "Ruim" },
+                      { value: 2, label: "Regular" },
+                      { value: 3, label: "Bom" },
+                      { value: 4, label: "Muito bom" },
+                      { value: 5, label: "Excelente" },
+                    ] as const).map((opt) => (
+                      <Button
+                        key={opt.value}
+                        type="button"
+                        variant={rating === opt.value ? "default" : "outline"}
+                        size="sm"
+                        className="text-[10px] px-2.5 h-7"
+                        onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
+                      >
+                        {opt.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Add to list button */}
                 <Button
                   type="button"
