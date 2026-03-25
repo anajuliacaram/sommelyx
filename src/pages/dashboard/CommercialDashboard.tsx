@@ -165,10 +165,10 @@ export default function CommercialDashboard() {
                         <ArrowDownRight className="h-3 w-3" style={{ color: "#f59e0b" }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                        <p className="text-[9px] text-muted-foreground">{w.producer || "—"}</p>
+                        <p className="text-[13px] font-semibold truncate text-foreground">{w.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{w.producer || "—"}</p>
                       </div>
-                      <span className="text-[11px] font-bold" style={{ color: "#E07A5F" }}>{w.quantity} un.</span>
+                      <span className="text-[13px] font-bold" style={{ color: "#E07A5F" }}>{w.quantity} un.</span>
                     </div>
                   ))}
                 </div>
