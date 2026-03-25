@@ -56,24 +56,26 @@ const commercialBenefits: Benefit[] = [
 interface Props {
   profileType: "personal" | "commercial";
   onComplete: () => void;
+  storageKey?: string;
 }
 
-export function OnboardingWizard({ profileType, onComplete }: Props) {
+export function OnboardingWizard({ profileType, onComplete, storageKey }: Props) {
   const [step, setStep] = useState(0);
   const benefits = profileType === "personal" ? personalBenefits : commercialBenefits;
+  const key = storageKey || `sommelyx_onboarding_done_${profileType}`;
   const totalSteps = benefits.length;
 
   const handleNext = () => {
     if (step < totalSteps - 1) {
       setStep(step + 1);
     } else {
-      localStorage.setItem("sommelyx_onboarding_done", "true");
+      localStorage.setItem(key, "true");
       onComplete();
     }
   };
 
   const handleSkip = () => {
-    localStorage.setItem("sommelyx_onboarding_done", "true");
+    localStorage.setItem(key, "true");
     onComplete();
   };
 
