@@ -125,11 +125,9 @@ export default function ConsumptionPage() {
                           </span>
                         )}
                         {entry.rating && (
-                          <span className="flex items-center gap-0.5">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <Star key={s} className={`h-3 w-3 ${s <= entry.rating! ? "fill-amber-400 text-amber-400" : "text-muted-foreground/20"}`} />
-                            ))}
-                          </span>
+                          <Badge variant="outline" className="text-[10px]">
+                            {entry.rating === 1 ? "Ruim" : entry.rating === 2 ? "Regular" : entry.rating === 3 ? "Bom" : entry.rating === 4 ? "Muito bom" : "Excelente"}
+                          </Badge>
                         )}
                       </div>
 

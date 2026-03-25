@@ -185,18 +185,24 @@ export function AddConsumptionDialog({ open, onOpenChange }: AddConsumptionDialo
           {/* Rating */}
           <div className="space-y-1.5">
             <Label className="text-xs flex items-center gap-1"><Star className="h-3 w-3" />Avaliação</Label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <button
-                  key={s}
+            <div className="flex gap-1 flex-wrap">
+              {([
+                { value: 1, label: "Ruim" },
+                { value: 2, label: "Regular" },
+                { value: 3, label: "Bom" },
+                { value: 4, label: "Muito bom" },
+                { value: 5, label: "Excelente" },
+              ] as const).map((opt) => (
+                <Button
+                  key={opt.value}
                   type="button"
-                  onClick={() => setRating(s === rating ? 0 : s)}
-                  className="p-1 transition-colors"
+                  variant={rating === opt.value ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs px-3"
+                  onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
                 >
-                  <Star
-                    className={`h-5 w-5 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`}
-                  />
-                </button>
+                  {opt.label}
+                </Button>
               ))}
             </div>
           </div>
