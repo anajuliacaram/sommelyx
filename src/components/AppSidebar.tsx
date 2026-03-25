@@ -35,7 +35,6 @@ const personalMenu: MenuItem[] = [
   { title: "Meu Consumo", url: "/dashboard/consumption", icon: Wine },
   { title: "Alertas", url: "/dashboard/alerts", icon: Bell },
   { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart },
-  { title: "Relatórios", url: "/dashboard/stats", icon: BarChart3 },
 ];
 
 const commercialMenu: MenuItem[] = [
