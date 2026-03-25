@@ -171,7 +171,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
           vintage: item.vintage ? parseInt(item.vintage) : null,
           location: item.location || null,
           tasting_notes: item.notes || null,
-          rating: null,
+          rating: item.rating || null,
           consumed_at: new Date().toISOString().split("T")[0],
         });
       }
