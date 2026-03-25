@@ -504,5 +504,6 @@ export default function PersonalDashboard() {
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
       <ImportCsvDialog open={csvOpen} onOpenChange={setCsvOpen} />
     </div>
+    </>
   );
 }
