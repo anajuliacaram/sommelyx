@@ -14,6 +14,7 @@ interface SaleItem {
   id: string;
   wineId: string;
   wineName: string;
+  wineDetails: string; // producer · vintage · grape · country
   quantity: number;
   unitPrice: number;
 }
