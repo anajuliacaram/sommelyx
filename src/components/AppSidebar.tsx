@@ -140,7 +140,7 @@ export function AppSidebar() {
               <SidebarMenu className="gap-1">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/settings" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active">
+                    <NavLink to="/dashboard/settings" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <Settings className="h-4 w-4 shrink-0" />
                       <span>Preferências</span>
                     </NavLink>
