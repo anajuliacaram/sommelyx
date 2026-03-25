@@ -68,7 +68,7 @@ export default function DashboardLayout() {
               borderBottom: "1px solid rgba(0,0,0,0.05)",
             }}
           >
-            <SidebarTrigger className="transition-colors shrink-0" style={{ color: "#9CA3AF" }} />
+            <SidebarTrigger className="shrink-0 h-9 w-9 md:h-8 md:w-8 rounded-xl border border-border/50 shadow-sm transition-all hover:bg-accent [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4" />
             
             {/* Search — hidden on very small screens, icon-only trigger could be added */}
             <div className="flex-1 max-w-lg relative hidden sm:block">
