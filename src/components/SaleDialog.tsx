@@ -249,7 +249,10 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                 {items.map(item => (
                   <div key={item.id} className="rounded-xl border border-border/50 p-3 space-y-2">
                     <div className="flex items-center gap-2">
-                      <p className="text-[11px] font-semibold text-foreground flex-1 truncate">{item.wineName}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
+                        {item.wineDetails && <p className="text-[9px] text-muted-foreground truncate">{item.wineDetails}</p>}
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeItem(item.id)}
