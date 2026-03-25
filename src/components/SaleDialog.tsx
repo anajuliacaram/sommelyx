@@ -14,6 +14,7 @@ interface SaleItem {
   id: string;
   wineId: string;
   wineName: string;
+  wineDetails: string; // producer · vintage · grape · country
   quantity: number;
   unitPrice: number;
 }
@@ -66,10 +67,12 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
     if (existing) {
       setItems(items.map(i => i.wineId === wine.id ? { ...i, quantity: i.quantity + 1 } : i));
     } else {
+      const details = [wine.producer, wine.vintage, wine.grape, wine.country].filter(Boolean).join(" · ");
       setItems([...items, {
         id: crypto.randomUUID(),
         wineId: wine.id,
         wineName: wine.name,
+        wineDetails: details,
         quantity: 1,
         unitPrice: wine.current_value ?? wine.purchase_price ?? 0,
       }]);
@@ -211,10 +214,15 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[11px] font-semibold text-foreground truncate">{w.name}</p>
                                   <p className="text-[9px] text-muted-foreground truncate">
-                                    {[w.producer, w.vintage, w.country].filter(Boolean).join(" · ")}
+                                    {[w.producer, w.vintage, w.grape, w.country].filter(Boolean).join(" · ")}
                                   </p>
                                 </div>
-                                <span className="text-[10px] font-bold text-muted-foreground shrink-0">{w.quantity} un.</span>
+                                <div className="text-right shrink-0">
+                                  <span className="text-[10px] font-bold text-muted-foreground">{w.quantity} un.</span>
+                                  {(w.current_value ?? w.purchase_price) ? (
+                                    <p className="text-[9px] text-muted-foreground">R$ {(w.current_value ?? w.purchase_price ?? 0).toLocaleString("pt-BR")}</p>
+                                  ) : null}
+                                </div>
                               </button>
                             ))}
                           </div>
@@ -241,7 +249,10 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                 {items.map(item => (
                   <div key={item.id} className="rounded-xl border border-border/50 p-3 space-y-2">
                     <div className="flex items-center gap-2">
-                      <p className="text-[11px] font-semibold text-foreground flex-1 truncate">{item.wineName}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
+                        {item.wineDetails && <p className="text-[9px] text-muted-foreground truncate">{item.wineDetails}</p>}
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeItem(item.id)}
