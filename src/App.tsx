@@ -26,6 +26,7 @@ import WishlistPage from "@/pages/dashboard/WishlistPage";
 import StatsPage from "@/pages/dashboard/StatsPage";
 import SalesPage from "@/pages/dashboard/SalesPage";
 import RegistersPage from "@/pages/dashboard/RegistersPage";
+import ReportsPage from "@/pages/dashboard/ReportsPage";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -78,7 +79,7 @@ const AnimatedRoutes = () => {
               <Route path="inventory" element={<InventoryPage />} />
               <Route path="sales" element={<SalesPage />} />
               <Route path="registers" element={<RegistersPage />} />
-              <Route path="reports" element={<StatsPage />} />
+              <Route path="reports" element={<ReportsPage />} />
               <Route path="plans" element={<Plans />} />
             </Route>
             <Route path="/inventory" element={<Navigate to="/dashboard/inventory" replace />} />
