@@ -19,12 +19,12 @@ import {
 const COLORS = ["#8F2D56", "#C44569", "#E07A5F", "#C9A86A", "#6B7280", "#22c55e", "#3b82f6", "#a855f7"];
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0, y: 8 } as const,
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+    transition: { delay: i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
-};
+} as const;
 
 const ratingLabel = (r: number) =>
   r === 1 ? "Ruim" : r === 2 ? "Regular" : r === 3 ? "Bom" : r === 4 ? "Muito bom" : "Excelente";
