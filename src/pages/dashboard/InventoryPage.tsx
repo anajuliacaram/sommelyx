@@ -87,17 +87,42 @@ export default function InventoryPage() {
 
     // Derived dynamic options
     const dynamicOptions = useMemo(() => {
-        const countries = [...new Set(wines.map(w => w.country).filter(Boolean) as string[])].sort();
-        const regions = [...new Set(wines.map(w => w.region).filter(Boolean) as string[])].sort();
-        const grapes = [...new Set(wines.map(w => w.grape).filter(Boolean) as string[])].sort();
-        const vintages = [...new Set(wines.map(w => w.vintage).filter(Boolean) as number[])].sort((a, b) => b - a).map(String);
-        return {
-            countries: countries.map(c => ({ label: c, value: c })),
-            regions: regions.map(r => ({ label: r, value: r })),
-            grapes: grapes.map(g => ({ label: g, value: g })),
-            vintages: vintages.map(v => ({ label: v, value: v })),
-            styles: STYLES.map(s => ({ label: s, value: s }))
-        };
+        // Countries with counts
+        const countryMap: Record<string, number> = {};
+        wines.forEach(w => { if (w.country) countryMap[w.country] = (countryMap[w.country] || 0) + w.quantity; });
+        const countries = Object.entries(countryMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ label: v, value: v, count: c }));
+
+        // Regions with counts
+        const regionMap: Record<string, number> = {};
+        wines.forEach(w => { if (w.region) regionMap[w.region] = (regionMap[w.region] || 0) + w.quantity; });
+        const regions = Object.entries(regionMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ label: v, value: v, count: c }));
+
+        // Grapes with counts
+        const grapeMap: Record<string, number> = {};
+        wines.forEach(w => { if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity; });
+        const grapes = Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ label: v, value: v, count: c }));
+
+        // Vintages with counts
+        const vintageMap: Record<string, number> = {};
+        wines.forEach(w => { if (w.vintage) vintageMap[String(w.vintage)] = (vintageMap[String(w.vintage)] || 0) + w.quantity; });
+        const vintages = Object.entries(vintageMap).sort(([a], [b]) => b.localeCompare(a)).map(([v, c]) => ({ label: v, value: v, count: c }));
+
+        // Styles with counts
+        const styleMap: Record<string, number> = {};
+        wines.forEach(w => { if (w.style) styleMap[w.style] = (styleMap[w.style] || 0) + w.quantity; });
+        const styles = STYLES.map(s => ({ label: s, value: s, count: styleMap[s] || 0 }));
+
+        // Status counts
+        const inStock = wines.filter(w => w.quantity > 0).reduce((s, w) => s + w.quantity, 0);
+        const low = wines.filter(w => w.quantity > 0 && w.quantity <= 2).reduce((s, w) => s + w.quantity, 0);
+        const out = wines.filter(w => w.quantity === 0).length;
+        const statusOptions = [
+            { label: "Em estoque", value: "in-stock", count: inStock },
+            { label: "Baixo estoque", value: "low", count: low },
+            { label: "Sem estoque", value: "out", count: out },
+        ];
+
+        return { countries, regions, grapes, vintages, styles, statusOptions };
     }, [wines]);
 
     // Summary metrics
