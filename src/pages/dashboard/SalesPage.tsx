@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Plus, Trash2, DollarSign, Package } from "lucide-react";
+import { ShoppingCart, Trash2, DollarSign, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 
 const fadeUp = {
@@ -31,31 +30,9 @@ function saveSales(items: Sale[]) { localStorage.setItem(STORAGE_KEY, JSON.strin
 
 export default function SalesPage() {
   const [sales, setSales] = useState<Sale[]>(loadSales);
-  const [showForm, setShowForm] = useState(false);
-  const [wineName, setWineName] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [unitPrice, setUnitPrice] = useState("");
-  const [customer, setCustomer] = useState("");
 
   const totalRevenue = sales.reduce((s, sale) => s + sale.quantity * sale.unitPrice, 0);
   const totalUnits = sales.reduce((s, sale) => s + sale.quantity, 0);
-
-  const handleAdd = () => {
-    if (!wineName.trim()) return;
-    const newSale: Sale = {
-      id: crypto.randomUUID(),
-      wineName: wineName.trim(),
-      quantity: Number(quantity) || 1,
-      unitPrice: Number(unitPrice) || 0,
-      customer: customer.trim(),
-      date: new Date().toISOString(),
-    };
-    const updated = [newSale, ...sales];
-    setSales(updated);
-    saveSales(updated);
-    setWineName(""); setQuantity(""); setUnitPrice(""); setCustomer("");
-    setShowForm(false);
-  };
 
   const handleRemove = (id: string) => {
     const updated = sales.filter(s => s.id !== id);
@@ -65,14 +42,9 @@ export default function SalesPage() {
 
   return (
     <div className="space-y-4 max-w-[1000px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Vendas</h1>
-          <p className="text-[11px] text-muted-foreground">Registre e acompanhe suas vendas</p>
-        </div>
-        <Button variant="premium" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-3 w-3 mr-1" /> Registrar venda
-        </Button>
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+        <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Vendas</h1>
+        <p className="text-[11px] text-muted-foreground">Acompanhe o histórico de vendas</p>
       </motion.div>
 
       {/* KPIs */}
@@ -92,21 +64,6 @@ export default function SalesPage() {
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">Unidades vendidas</p>
         </motion.div>
       </div>
-
-      {showForm && (
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="glass-card p-4 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input placeholder="Vinho vendido *" value={wineName} onChange={e => setWineName(e.target.value)} className="h-9 text-[12px]" />
-            <Input placeholder="Cliente" value={customer} onChange={e => setCustomer(e.target.value)} className="h-9 text-[12px]" />
-            <Input placeholder="Quantidade" type="number" value={quantity} onChange={e => setQuantity(e.target.value)} className="h-9 text-[12px]" />
-            <Input placeholder="Preço unitário (R$)" type="number" value={unitPrice} onChange={e => setUnitPrice(e.target.value)} className="h-9 text-[12px]" />
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="h-8 text-[11px]" onClick={handleAdd} disabled={!wineName.trim()}>Salvar</Button>
-            <Button size="sm" variant="ghost" className="h-8 text-[11px]" onClick={() => setShowForm(false)}>Cancelar</Button>
-          </div>
-        </motion.div>
-      )}
 
       {sales.length > 0 ? (
         <div className="space-y-1.5">
@@ -144,9 +101,8 @@ export default function SalesPage() {
       ) : (
         <PremiumEmptyState
           icon={ShoppingCart}
-          title="Gestão de vendas"
-          description="Registre vendas de vinhos, acompanhe receita e histórico de clientes."
-          primaryAction={{ label: "Registrar venda", onClick: () => setShowForm(true), icon: <Plus className="h-4 w-4" /> }}
+          title="Nenhuma venda registrada"
+          description="Use o botão 'Adicionar Venda' na barra lateral para registrar suas vendas."
         />
       )}
     </div>
