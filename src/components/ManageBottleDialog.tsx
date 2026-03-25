@@ -65,6 +65,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   const [extVintage, setExtVintage] = useState("");
   const [extLocation, setExtLocation] = useState("");
   const [scanOpen, setScanOpen] = useState(false);
+  const [rating, setRating] = useState(0);
 
   const { data: wines } = useWines();
   const wineEvent = useWineEvent();
@@ -76,6 +77,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
     setShowFilters(false); setSelectedCountries([]); setSelectedGrapes([]);
     setExtWineName(""); setExtProducer(""); setExtCountry(""); setExtRegion("");
     setExtGrape(""); setExtStyle(""); setExtVintage(""); setExtLocation("");
+    setRating(0);
   };
 
   const resetAll = () => {
