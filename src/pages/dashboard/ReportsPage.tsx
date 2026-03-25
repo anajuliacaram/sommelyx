@@ -369,8 +369,25 @@ export default function ReportsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {/* Top Rótulos em Estoque — FIRST */}
+            {byLabel.length > 0 && (
+              <motion.div className="glass-card p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+                <h3 className="text-[12px] font-semibold text-foreground mb-1">Top Rótulos em Estoque</h3>
+                <div className="space-y-1.5">
+                  {byLabel.map((w, i) => (
+                    <div key={i} className="flex items-center gap-2.5">
+                      <span className="text-[10px] font-bold w-5 text-muted-foreground shrink-0">#{i + 1}</span>
+                      <div className="flex-1 min-w-0"><p className="text-[11px] font-semibold truncate text-foreground">{w.fullName}</p></div>
+                      <span className="text-[10px] font-bold text-primary shrink-0">{w.qty} un.</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0 w-24 text-right">R$ {w.value.toLocaleString("pt-BR")}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {byCountry.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
                 <h3 className="text-[12px] font-semibold text-foreground mb-1">Estoque por País</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
@@ -392,7 +409,7 @@ export default function ReportsPage() {
             )}
 
             {byGrape.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
                 <h3 className="text-[12px] font-semibold text-foreground mb-1">Estoque por Uva</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={byGrape.slice(0, 8)} layout="vertical">
@@ -409,7 +426,7 @@ export default function ReportsPage() {
             )}
 
             {byStyle.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
                 <h3 className="text-[12px] font-semibold text-foreground mb-1">Estoque por Estilo</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={byStyle.slice(0, 8)}>
@@ -426,7 +443,7 @@ export default function ReportsPage() {
             )}
 
             {byVintage.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
                 <h3 className="text-[12px] font-semibold text-foreground mb-1">Estoque por Safra</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={byVintage}>
@@ -437,22 +454,6 @@ export default function ReportsPage() {
                     <Bar dataKey="value" fill="#8F2D56" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
-              </motion.div>
-            )}
-
-            {byLabel.length > 0 && (
-              <motion.div className="glass-card p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
-                <h3 className="text-[12px] font-semibold text-foreground mb-1">Top Rótulos em Estoque</h3>
-                <div className="space-y-1.5">
-                  {byLabel.map((w, i) => (
-                    <div key={i} className="flex items-center gap-2.5">
-                      <span className="text-[10px] font-bold w-5 text-muted-foreground shrink-0">#{i + 1}</span>
-                      <div className="flex-1 min-w-0"><p className="text-[11px] font-semibold truncate text-foreground">{w.fullName}</p></div>
-                      <span className="text-[10px] font-bold text-primary shrink-0">{w.qty} un.</span>
-                      <span className="text-[10px] text-muted-foreground shrink-0 w-24 text-right">R$ {w.value.toLocaleString("pt-BR")}</span>
-                    </div>
-                  ))}
-                </div>
               </motion.div>
             )}
           </div>
