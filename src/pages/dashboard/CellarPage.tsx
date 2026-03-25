@@ -108,15 +108,34 @@ export default function CellarPage() {
 
   // Derive dynamic filter options from wine data
   const dynamicOptions = useMemo(() => {
-    if (!wines) return { countries: [], grapes: [], maxPrice: 5000, minVintage: 1980, maxVintage: currentYear };
-    const countries = [...new Set(wines.map(w => w.country).filter(Boolean) as string[])].sort().map(v => ({ value: v, label: v }));
-    const grapes = [...new Set(wines.map(w => w.grape).filter(Boolean) as string[])].sort().map(v => ({ value: v, label: v }));
+    if (!wines) return { countries: [], grapes: [], styles: [], maxPrice: 5000, minVintage: 1980, maxVintage: currentYear };
+    
+    // Count wines per country
+    const countryMap: Record<string, number> = {};
+    wines.forEach(w => { if (w.country) countryMap[w.country] = (countryMap[w.country] || 0) + w.quantity; });
+    const countries = Object.entries(countryMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c }));
+    
+    // Count wines per grape
+    const grapeMap: Record<string, number> = {};
+    wines.forEach(w => { if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity; });
+    const grapes = Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c }));
+    
+    // Count wines per style
+    const styleMap: Record<string, number> = {};
+    wines.forEach(w => { if (w.style) styleMap[w.style] = (styleMap[w.style] || 0) + w.quantity; });
+    const styles = styleOptions.map(s => ({ ...s, count: styleMap[s.value] || 0 }));
+    
+    // Count wines per drink window
+    const dwMap: Record<string, number> = {};
+    wines.forEach(w => { const s = drinkStatus(w); if (s) dwMap[s] = (dwMap[s] || 0) + w.quantity; });
+    const drinkWindows = drinkWindowOptions.map(d => ({ ...d, count: dwMap[d.value] || 0 }));
+    
     const prices = wines.map(w => w.purchase_price ?? 0).filter(p => p > 0);
     const maxPrice = prices.length > 0 ? Math.ceil(Math.max(...prices) / 100) * 100 : 5000;
     const vintages = wines.map(w => w.vintage).filter(Boolean) as number[];
     const minVintage = vintages.length > 0 ? Math.min(...vintages) : 1980;
     const maxVintage = vintages.length > 0 ? Math.max(...vintages) : currentYear;
-    return { countries, grapes, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
+    return { countries, grapes, styles, drinkWindows, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
   }, [wines]);
 
   const applySavedFilter = (f: SavedFilter) => {
