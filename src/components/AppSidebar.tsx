@@ -120,6 +120,7 @@ export function AppSidebar() {
                         end={item.url === "/dashboard"}
                         className="sidebar-item !h-[42px] !text-[13px]"
                         activeClassName="sidebar-item--active"
+                        onClick={closeMobileSidebar}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span className="flex-1">{item.title}</span>
