@@ -38,14 +38,19 @@ export default function DashboardLayout() {
 
   const searchResults = useMemo(() => {
     if (!searchQuery || !wines) return [];
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
+    if (q.length < 1) return [];
     return wines
-      .filter(w => w.quantity > 0 && (
-        w.name.toLowerCase().includes(q) || w.producer?.toLowerCase().includes(q) ||
-        w.grape?.toLowerCase().includes(q) || w.country?.toLowerCase().includes(q) ||
+      .filter(w => 
+        w.name.toLowerCase().includes(q) || 
+        w.producer?.toLowerCase().includes(q) ||
+        w.grape?.toLowerCase().includes(q) || 
+        w.country?.toLowerCase().includes(q) ||
+        w.region?.toLowerCase().includes(q) ||
+        w.style?.toLowerCase().includes(q) ||
         String(w.vintage).includes(q)
-      ))
-      .slice(0, 6);
+      )
+      .slice(0, 8);
   }, [searchQuery, wines]);
 
   const initials = user?.user_metadata?.full_name
