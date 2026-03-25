@@ -193,6 +193,9 @@ export default function PersonalDashboard() {
         )}
       </div>
 
+      {/* Personalized Notifications */}
+      {wines.length > 0 && <PersonalizedNotifications wines={wines} />}
+
       {/* ─── Main 2-column grid ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* LEFT column (3/5) — lists & alerts */}
