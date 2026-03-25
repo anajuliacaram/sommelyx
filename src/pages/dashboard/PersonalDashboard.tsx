@@ -42,7 +42,7 @@ export default function PersonalDashboard() {
   const [csvOpen, setCsvOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const wineEvent = useWineEvent();
-  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done"));
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_personal"));
 
   const suggestions = useMemo(() => {
     return wines
