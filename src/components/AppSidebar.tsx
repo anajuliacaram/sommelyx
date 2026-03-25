@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
+import { BreakageDialog } from "@/components/BreakageDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
