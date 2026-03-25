@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Wine, TrendingUp, GlassWater, Plus, AlertTriangle, ArrowDownRight,
   BarChart3, Star, Upload, ShoppingCart, Clock, Globe, Grape, MapPin
@@ -12,6 +12,8 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { useWineMetrics, useWineEvent } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { PersonalizedNotifications } from "@/components/PersonalizedNotifications";
 import { useToast } from "@/hooks/use-toast";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -40,6 +42,7 @@ export default function PersonalDashboard() {
   const [csvOpen, setCsvOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const wineEvent = useWineEvent();
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done"));
 
   const suggestions = useMemo(() => {
     return wines
