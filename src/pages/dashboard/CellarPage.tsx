@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, MapPin, X, Bookmark, BookmarkCheck, SlidersHorizontal } from "lucide-react";
+import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, Bookmark, BookmarkCheck, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -390,23 +390,20 @@ export default function CellarPage() {
                   )}
                   {wine.style && <span className="capitalize bg-primary/5 text-primary px-2 py-0.5 rounded font-semibold text-[11px]">{wine.style}</span>}
                   {wine.country && <span className="font-medium">{wine.country}</span>}
-                  {wine.cellar_location && (
-                    <span className="flex items-center gap-0.5 font-medium"><MapPin className="h-3 w-3" />{wine.cellar_location}</span>
-                  )}
                 </div>
 
-                {/* Actions — always visible */}
+                {/* Actions — minimal */}
                 <div className="flex gap-1.5 border-t border-border/30 pt-2.5">
                   {status === "now" && (
                     <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpen(wine)}>
                       <GlassWater className="h-3 w-3 mr-1" /> Abrir
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 flex-1 font-semibold" onClick={() => setEditWine(wine)}>
-                    <Pencil className="h-3 w-3 mr-1" /> Editar
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground/50 hover:text-foreground" onClick={() => setEditWine(wine)}>
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="outline" size="sm" className="h-7 text-xs px-2.5 text-destructive hover:text-destructive hover:bg-destructive/5 font-semibold" onClick={() => setDeleteTarget(wine)}>
-                    <Trash2 className="h-3 w-3" />
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground/50 hover:text-destructive" onClick={() => setDeleteTarget(wine)}>
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </motion.div>
