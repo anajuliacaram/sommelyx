@@ -54,6 +54,7 @@ export function AppSidebar() {
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const [breakageOpen, setBreakageOpen] = useState(false);
+  const [saleOpen, setSaleOpen] = useState(false);
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const isCommercial = profileType === "commercial";
 
