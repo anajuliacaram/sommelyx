@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
+import { BreakageDialog } from "@/components/BreakageDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
@@ -51,6 +52,7 @@ export function AppSidebar() {
   const [addWithScan, setAddWithScan] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
+  const [breakageOpen, setBreakageOpen] = useState(false);
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const isCommercial = profileType === "commercial";
 
@@ -105,7 +107,7 @@ export function AppSidebar() {
                 <Button
                   variant="outline"
                   className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl active:scale-[0.97] transition-all text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/20"
-                  onClick={() => { setManageTab("exit"); setManageOpen(true); closeMobileSidebar(); }}
+                  onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
                   Adicionar Ruptura
@@ -231,6 +233,10 @@ export function AppSidebar() {
         open={manageOpen}
         onOpenChange={setManageOpen}
         defaultTab={manageTab}
+      />
+      <BreakageDialog
+        open={breakageOpen}
+        onOpenChange={setBreakageOpen}
       />
     </>
   );
