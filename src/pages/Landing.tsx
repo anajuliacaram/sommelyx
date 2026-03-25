@@ -266,143 +266,104 @@ export default function Landing() {
           </motion.div>
 
           {/* Mobile: horizontal scroll carousel */}
-          <div className="flex lg:hidden overflow-x-auto snap-x snap-mandatory gap-3 pb-4 -mx-4 px-4 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
-            {plans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                className={`snap-center shrink-0 w-[78vw] max-w-[300px] rounded-2xl overflow-hidden flex flex-col ${
-                  plan.highlighted ? "p-4" : "p-4"
-                }`}
-                style={plan.highlighted ? {
-                  background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)",
-                  boxShadow: "0 16px 32px rgba(74,25,50,0.25), 0 0 0 1px rgba(255,255,255,0.12) inset",
-                  border: "1px solid rgba(255,255,255,0.14)",
-                } : {
-                  background: "rgba(255,255,255,0.92)",
-                  border: "1px solid rgba(15, 15, 20, 0.06)",
-                  boxShadow: "0 4px 16px -8px rgba(15,15,20,0.08)",
-                }}
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-              >
-                {plan.highlighted && (
-                  <div className="flex justify-end mb-2">
-                    <span className="px-2.5 py-1 rounded-full text-[8px] font-black tracking-[0.12em] uppercase bg-gradient-to-r from-[#EAB3C8]/80 to-[#D1739A]/80 text-[#3B1326] border border-white/40 shadow-sm">
-                      Recomendado
-                    </span>
-                  </div>
-                )}
-
-                <h3 className="text-base font-serif font-black tracking-tight" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
-                  {plan.name}
-                </h3>
-                <p className="text-[11px] mb-2 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>
-                  {plan.desc}
-                </p>
-
-                <div className="mb-3 flex items-baseline gap-1 border-b pb-3" style={{ borderColor: plan.highlighted ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.04)" }}>
-                  <span className="text-3xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
-                    {plan.price}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: plan.highlighted ? "rgba(255,255,255,0.35)" : "#9CA3AF" }}>
-                    {plan.period}
-                  </span>
-                </div>
-
-                <ul className="space-y-1.5 mb-4">
-                  {plan.features.slice(0, 4).map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-[11px] leading-snug font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.88)" : "#4B5563" }}>
-                      <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(255,225,236,0.18)" : "rgba(140,32,68,0.08)" }}>
-                        <Check className="h-2 w-2" style={{ color: plan.highlighted ? "#FFD3E4" : "#8C2044" }} strokeWidth={3} />
-                      </div>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  className={`mt-auto w-full h-9 rounded-xl text-[11px] font-bold tracking-wide transition-all duration-300 ${plan.highlighted
-                    ? "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_8px_20px_rgba(20,8,14,0.2)]"
-                    : "bg-[#F5F5F5] text-[#18181B] hover:bg-white shadow-[0_2px_8px_rgba(15,15,20,0.04)] border border-black/[0.06]"
-                    }`}
-                  onClick={handleStartFreeClick}
+          <div className="flex lg:hidden overflow-x-auto snap-x snap-mandatory gap-2.5 pb-3 -mx-4 px-4 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}>
+            {plans.map((plan, i) => {
+              const s = tierStyle(plan.tier);
+              return (
+                <motion.div
+                  key={plan.name}
+                  className="snap-center shrink-0 w-[72vw] max-w-[260px] rounded-2xl overflow-hidden flex flex-col p-3.5"
+                  style={s.bg}
+                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 >
-                  {plan.cta}
-                </Button>
-              </motion.div>
-            ))}
+                  {s.badge && (
+                    <div className="flex justify-end mb-1.5">
+                      <span className="px-2 py-0.5 rounded-full text-[7px] font-black tracking-[0.12em] uppercase bg-gradient-to-r from-[#EAB3C8]/80 to-[#D1739A]/80 text-[#3B1326] border border-white/40 shadow-sm">
+                        {plan.tier === "pro" ? "Adega Pessoal" : "Recomendado"}
+                      </span>
+                    </div>
+                  )}
+
+                  <h3 className="text-sm font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
+                  <p className="text-[10px] mb-1.5 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
+
+                  <div className="mb-2 flex items-baseline gap-1 border-b pb-2" style={{ borderColor: s.border }}>
+                    <span className="text-2xl font-black font-sans tracking-tighter" style={{ color: s.price }}>{plan.price}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
+                  </div>
+
+                  <ul className="space-y-1 mb-3">
+                    {plan.features.slice(0, 4).map((f) => (
+                      <li key={f} className="flex items-center gap-1.5 text-[10px] leading-snug font-medium" style={{ color: s.feat }}>
+                        <div className="w-3 h-3 rounded-full flex items-center justify-center shrink-0" style={{ background: s.checkBg }}>
+                          <Check className="h-1.5 w-1.5" style={{ color: s.checkColor }} strokeWidth={3} />
+                        </div>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className={`mt-auto w-full h-8 rounded-xl text-[10px] font-bold tracking-wide transition-all duration-300 ${s.btn}`}
+                    onClick={handleStartFreeClick}
+                  >
+                    {plan.cta}
+                  </Button>
+                </motion.div>
+              );
+            })}
           </div>
 
           {/* Desktop: grid layout */}
           <div className="hidden lg:grid lg:grid-cols-3 gap-4 lg:gap-5 items-center">
-            {plans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                className={`relative rounded-[24px] overflow-hidden flex flex-col ${
-                  plan.highlighted
-                    ? "p-6 md:p-8 lg:scale-[1.06] z-10"
-                    : "p-6 md:p-7"
-                }`}
-                style={plan.highlighted ? {
-                  background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)",
-                  boxShadow: "0 24px 48px rgba(74,25,50,0.3), 0 0 0 1px rgba(255,255,255,0.12) inset, 0 0 80px rgba(140,32,68,0.15)",
-                  border: "1px solid rgba(255,255,255,0.14)",
-                } : {
-                  background: "rgba(255,255,255,0.92)",
-                  border: "1px solid rgba(15, 15, 20, 0.06)",
-                  boxShadow: "0 8px 24px -12px rgba(15,15,20,0.08), 0 1px 0 rgba(255,255,255,0.7) inset",
-                }}
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -4, transition: { duration: 0.3 } }}
-              >
-                {plan.highlighted && (
-                  <div className="absolute top-0 right-0 p-5">
-                    <span className="px-3 py-1.5 rounded-full text-[9px] font-black tracking-[0.14em] uppercase bg-gradient-to-r from-[#EAB3C8]/80 to-[#D1739A]/80 text-[#3B1326] border border-white/40 shadow-sm backdrop-blur-sm">
-                      Recomendado
-                    </span>
-                  </div>
-                )}
-
-                <h3 className="text-lg font-serif font-black tracking-tight" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
-                  {plan.name}
-                </h3>
-                <p className="text-[12px] mb-4 font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>
-                  {plan.desc}
-                </p>
-
-                <div className="mb-5 flex items-baseline gap-1 border-b pb-5" style={{ borderColor: plan.highlighted ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.04)" }}>
-                  <span className="text-4xl md:text-5xl font-black font-sans tracking-tighter" style={{ color: plan.highlighted ? "white" : "#0F0F14" }}>
-                    {plan.price}
-                  </span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: plan.highlighted ? "rgba(255,255,255,0.35)" : "#9CA3AF" }}>
-                    {plan.period}
-                  </span>
-                </div>
-
-                <ul className="space-y-2.5 mb-6">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-[13px] leading-snug font-medium" style={{ color: plan.highlighted ? "rgba(255,255,255,0.88)" : "#4B5563" }}>
-                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: plan.highlighted ? "rgba(255,225,236,0.18)" : "rgba(140,32,68,0.08)" }}>
-                        <Check className="h-2.5 w-2.5" style={{ color: plan.highlighted ? "#FFD3E4" : "#8C2044" }} strokeWidth={3} />
-                      </div>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  className={`mt-auto w-full h-11 rounded-2xl text-[12px] font-bold tracking-wide transition-all duration-300 ${plan.highlighted
-                    ? "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_12px_28px_rgba(20,8,14,0.25)] hover:shadow-[0_16px_32px_rgba(20,8,14,0.3)] hover:-translate-y-0.5"
-                    : "bg-[#F5F5F5] text-[#18181B] hover:bg-white shadow-[0_4px_12px_rgba(15,15,20,0.05)] hover:shadow-[0_8px_20px_rgba(15,15,20,0.08)] border border-black/[0.06]"
-                    }`}
-                  onClick={handleStartFreeClick}
+            {plans.map((plan, i) => {
+              const s = tierStyle(plan.tier);
+              const isScaled = plan.tier !== "free";
+              return (
+                <motion.div
+                  key={plan.name}
+                  className={`relative rounded-[24px] overflow-hidden flex flex-col ${isScaled ? "p-6 md:p-8 z-10" : "p-6 md:p-7"}`}
+                  style={{ ...s.bg, ...(plan.tier === "business" ? { transform: "scale(1.06)" } : {}) }}
+                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
+                  whileHover={{ y: -4, transition: { duration: 0.3 } }}
                 >
-                  {plan.cta}
-                </Button>
-              </motion.div>
-            ))}
+                  {s.badge && (
+                    <div className="absolute top-0 right-0 p-5">
+                      <span className="px-3 py-1.5 rounded-full text-[9px] font-black tracking-[0.14em] uppercase bg-gradient-to-r from-[#EAB3C8]/80 to-[#D1739A]/80 text-[#3B1326] border border-white/40 shadow-sm backdrop-blur-sm">
+                        {plan.tier === "pro" ? "Adega Pessoal" : "Recomendado"}
+                      </span>
+                    </div>
+                  )}
+
+                  <h3 className="text-lg font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
+                  <p className="text-[12px] mb-4 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
+
+                  <div className="mb-5 flex items-baseline gap-1 border-b pb-5" style={{ borderColor: s.border }}>
+                    <span className="text-4xl md:text-5xl font-black font-sans tracking-tighter" style={{ color: s.price }}>{plan.price}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
+                  </div>
+
+                  <ul className="space-y-2.5 mb-6">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2.5 text-[13px] leading-snug font-medium" style={{ color: s.feat }}>
+                        <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: s.checkBg }}>
+                          <Check className="h-2.5 w-2.5" style={{ color: s.checkColor }} strokeWidth={3} />
+                        </div>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className={`mt-auto w-full h-11 rounded-2xl text-[12px] font-bold tracking-wide transition-all duration-300 ${s.btn}`}
+                    onClick={handleStartFreeClick}
+                  >
+                    {plan.cta}
+                  </Button>
+                </motion.div>
+              );
+            })}
           </div>
-        </div>
-      </section>
 
       {/* ═══════════════ STATS ═══════════════ */}
       <section className="relative z-10 py-12 sm:py-24 border-y border-black/[0.04] bg-[#0F0F14] text-white overflow-hidden">
