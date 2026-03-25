@@ -364,6 +364,8 @@ export default function Landing() {
               );
             })}
           </div>
+        </div>
+      </section>
 
       {/* ═══════════════ STATS ═══════════════ */}
       <section className="relative z-10 py-12 sm:py-24 border-y border-black/[0.04] bg-[#0F0F14] text-white overflow-hidden">
