@@ -278,10 +278,21 @@ export default function CellarPage() {
         {/* Bottom Row: Filters & Sort */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <MultiSelectDropdown title="Estilo" options={styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
+            <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
             <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
             <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
-            <MultiSelectDropdown title="Janela" options={drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
+            <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
+            <button
+              onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
+              className={cn(
+                "h-9 px-3 rounded-xl text-[12px] font-semibold flex items-center gap-1.5 transition-all border",
+                lowStock
+                  ? "bg-orange-500/10 text-orange-700 border-orange-500/20 shadow-sm"
+                  : "bg-card/80 hover:bg-card border-border/50 text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Baixo estoque
+            </button>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="hidden sm:flex rounded-lg p-[2px] bg-muted/30 border border-border/40">
