@@ -114,6 +114,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
         vintage: wine.vintage ? String(wine.vintage) : undefined,
         quantity: parseInt(quantity) || 1,
         notes: notes || undefined,
+        rating: rating > 0 ? rating : undefined,
       }]);
     } else {
       if (!extWineName.trim()) {
@@ -133,6 +134,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
         location: extLocation || undefined,
         quantity: parseInt(quantity) || 1,
         notes: notes || undefined,
+        rating: rating > 0 ? rating : undefined,
       }]);
     }
     resetCurrentItem();
