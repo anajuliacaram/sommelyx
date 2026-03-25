@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DollarSign, Package, AlertTriangle, ShoppingCart, TrendingUp, Plus,
   ArrowDownRight, BarChart3, Upload, Clock, Layers
@@ -15,6 +15,7 @@ import { useWineMetrics, useWineEvent } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -42,7 +43,7 @@ export default function CommercialDashboard() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
-
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_commercial"));
   const lowStockWines = wines.filter(w => w.quantity > 0 && w.quantity <= 2).slice(0, 6);
 
   const abcData = useMemo(() => {
