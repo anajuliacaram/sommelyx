@@ -151,10 +151,10 @@ export default function CommercialDashboard() {
               <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h2 className="text-[13px] font-semibold font-sans text-foreground">⚠️ Baixo estoque</h2>
-                    <p className="text-[9px] text-muted-foreground">Produtos com ≤ 2 unidades</p>
+                    <h2 className="text-sm font-semibold font-sans text-foreground">⚠️ Baixo estoque</h2>
+                    <p className="text-[11px] text-muted-foreground">Produtos com ≤ 2 unidades</p>
                   </div>
-                  <Badge variant="secondary" className="text-[9px] h-5" style={{ background: "rgba(224,122,95,0.08)", color: "#E07A5F" }}>
+                  <Badge variant="secondary" className="text-[11px] h-6" style={{ background: "rgba(224,122,95,0.08)", color: "#E07A5F" }}>
                     {lowStock} itens
                   </Badge>
                 </div>
