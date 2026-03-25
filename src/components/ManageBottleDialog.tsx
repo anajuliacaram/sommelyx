@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2 } from "lucide-react";
+import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2, Star } from "lucide-react";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
@@ -22,9 +22,9 @@ interface ManageBottleDialogProps {
 }
 
 interface ConsumptionItem {
-  id: string; // local ID
+  id: string;
   source: "cellar" | "external";
-  wineId?: string; // cellar wine ID
+  wineId?: string;
   wineName: string;
   producer?: string;
   country?: string;
@@ -35,6 +35,7 @@ interface ConsumptionItem {
   location?: string;
   quantity: number;
   notes?: string;
+  rating?: number;
 }
 
 let itemCounter = 0;
