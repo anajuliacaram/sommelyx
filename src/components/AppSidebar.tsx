@@ -234,6 +234,10 @@ export function AppSidebar() {
         onOpenChange={setManageOpen}
         defaultTab={manageTab}
       />
+      <BreakageDialog
+        open={breakageOpen}
+        onOpenChange={setBreakageOpen}
+      />
     </>
   );
 }
