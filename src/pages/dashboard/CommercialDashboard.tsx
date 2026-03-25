@@ -248,8 +248,8 @@ export default function CommercialDashboard() {
             {/* Pie chart */}
             {styleData.length > 0 && (
               <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-                <h3 className="text-[12px] font-semibold font-sans text-foreground mb-0.5">Composição</h3>
-                <p className="text-[9px] text-muted-foreground mb-2">Por estilo de vinho</p>
+                <h3 className="text-sm font-semibold font-sans text-foreground mb-0.5">Composição</h3>
+                <p className="text-[11px] text-muted-foreground mb-2">Por estilo de vinho</p>
                 <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
                     <Pie data={styleData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
