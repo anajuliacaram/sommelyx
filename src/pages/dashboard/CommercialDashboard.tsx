@@ -201,17 +201,17 @@ export default function CommercialDashboard() {
             {/* Operational alerts */}
             {lowStock > 0 && (
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-                <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-1.5 text-muted-foreground">
+                <h2 className="text-[12px] font-semibold uppercase tracking-[0.08em] mb-2 text-muted-foreground">
                   Alertas operacionais
                 </h2>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="glass-card p-3 flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(224,122,95,0.07)" }}>
-                      <AlertTriangle className="h-3.5 w-3.5" style={{ color: "#E07A5F" }} />
+                  <div className="glass-card p-4 flex items-center gap-3 cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(224,122,95,0.07)" }}>
+                      <AlertTriangle className="h-4 w-4" style={{ color: "#E07A5F" }} />
                     </div>
                     <div>
-                      <p className="text-[12px] font-bold text-foreground">{lowStock}</p>
-                      <p className="text-[9px] font-medium" style={{ color: "#E07A5F" }}>Baixo estoque</p>
+                      <p className="text-base font-bold text-foreground">{lowStock}</p>
+                      <p className="text-[12px] font-medium" style={{ color: "#E07A5F" }}>Baixo estoque</p>
                     </div>
                   </div>
                 </div>
