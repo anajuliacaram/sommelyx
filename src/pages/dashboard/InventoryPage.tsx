@@ -308,24 +308,18 @@ export default function InventoryPage() {
             </div>
 
             {/* --- SUMMARY METRICS --- */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <PremiumKpiCard className="p-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Rótulos Cadastrados</p>
-                        <p className="text-2xl font-black text-[#0F0F14]">{summary.labels}</p>
-                    </div>
+            <div className="grid grid-cols-3 gap-2 md:gap-3">
+                <PremiumKpiCard className="p-3 md:p-4">
+                    <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Rótulos Cadastrados</p>
+                    <p className="text-lg md:text-xl font-black text-foreground">{summary.labels}</p>
                 </PremiumKpiCard>
-                <PremiumKpiCard className="p-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Garrafas em Estoque</p>
-                        <p className="text-2xl font-black text-[#0F0F14]">{summary.bottles}</p>
-                    </div>
+                <PremiumKpiCard className="p-3 md:p-4">
+                    <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Garrafas em Estoque</p>
+                    <p className="text-lg md:text-xl font-black text-foreground">{summary.bottles}</p>
                 </PremiumKpiCard>
-                <PremiumKpiCard className="p-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Valor Total</p>
-                        <p className="text-2xl font-black text-[#0F0F14]">R$ {summary.totalValue.toLocaleString("pt-BR")}</p>
-                    </div>
+                <PremiumKpiCard className="p-3 md:p-4">
+                    <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Valor Total</p>
+                    <p className="text-lg md:text-xl font-black text-foreground">R$ {summary.totalValue.toLocaleString("pt-BR")}</p>
                 </PremiumKpiCard>
             </div>
 
