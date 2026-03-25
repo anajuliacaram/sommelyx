@@ -18,6 +18,26 @@ import {
 
 const COLORS = ["#8F2D56", "#C44569", "#E07A5F", "#C9A86A", "#6B7280", "#22c55e", "#3b82f6", "#a855f7"];
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg">
+      <p className="text-[13px] font-semibold text-foreground">{label || payload[0]?.name}</p>
+      <p className="text-[12px] text-muted-foreground">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
+    </div>
+  );
+};
+
+const CustomPieTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg">
+      <p className="text-[13px] font-semibold text-foreground">{payload[0]?.name}</p>
+      <p className="text-[12px] text-muted-foreground">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
+    </div>
+  );
+};
+
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
   visible: (i: number) => ({
@@ -200,23 +220,23 @@ export default function ConsumptionPage() {
           {/* By Country */}
           {topCountries.length > 0 && (
             <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <h3 className="text-[12px] font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <Globe className="h-4 w-4 text-muted-foreground" />
                 Por país
               </h3>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
-                  <Pie data={topCountries} cx="50%" cy="50%" innerRadius={35} outerRadius={60} paddingAngle={2} dataKey="value">
+                  <Pie data={topCountries} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value" label={({ name, value }) => `${name} (${value})`} labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}>
                     {topCountries.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10 }} />
+                  <Tooltip content={<CustomPieTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-2 mt-1">
+              <div className="flex flex-wrap justify-center gap-3 mt-2">
                 {topCountries.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
-                    <span className="text-[9px] text-muted-foreground">{d.name} ({d.value})</span>
+                  <div key={d.name} className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+                    <span className="text-xs text-foreground font-medium">{d.name} ({d.value})</span>
                   </div>
                 ))}
               </div>
@@ -226,17 +246,17 @@ export default function ConsumptionPage() {
           {/* Rating distribution */}
           {ratingDistribution.length > 0 && (
             <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-              <h3 className="text-[12px] font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <Star className="h-3.5 w-3.5 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <Star className="h-4 w-4 text-muted-foreground" />
                 Distribuição de avaliações
               </h3>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={ratingDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10 }} />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={25} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                     {ratingDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Bar>
                 </BarChart>
@@ -247,17 +267,17 @@ export default function ConsumptionPage() {
           {/* Top grapes */}
           {topGrapes.length > 0 && (
             <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
-              <h3 className="text-[12px] font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <Grape className="h-3.5 w-3.5 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <Grape className="h-4 w-4 text-muted-foreground" />
                 Uvas mais consumidas
               </h3>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={topGrapes} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={90} />
-                  <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10 }} />
-                  <Bar dataKey="value" fill="#8F2D56" radius={[0, 6, 6, 0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 13, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} width={110} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="value" fill="#8F2D56" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
@@ -266,22 +286,22 @@ export default function ConsumptionPage() {
           {/* Top wines */}
           {topWines.length > 0 && (
             <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={9}>
-              <h3 className="text-[12px] font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 Mais consumidos
               </h3>
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {topWines.map(([name, data], i) => (
-                  <div key={name} className="flex items-center gap-2.5">
-                    <span className="text-[11px] font-black w-5 text-muted-foreground/40">#{i + 1}</span>
+                  <div key={name} className="flex items-center gap-3">
+                    <span className="text-sm font-black w-6 text-muted-foreground/50">#{i + 1}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold truncate text-foreground">{name}</p>
-                      <p className="text-[9px] text-muted-foreground">{data.producer || "—"}</p>
+                      <p className="text-sm font-semibold truncate text-foreground">{name}</p>
+                      <p className="text-xs text-muted-foreground">{data.producer || "—"}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[12px] font-black text-foreground">{data.count}×</p>
+                      <p className="text-sm font-black text-foreground">{data.count}×</p>
                       {data.rating && (
-                        <p className={`text-[9px] font-semibold ${ratingColor(data.rating)}`}>{ratingLabel(data.rating)}</p>
+                        <p className={`text-xs font-semibold ${ratingColor(data.rating)}`}>{ratingLabel(data.rating)}</p>
                       )}
                     </div>
                   </div>
