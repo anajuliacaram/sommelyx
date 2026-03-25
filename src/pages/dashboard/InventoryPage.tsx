@@ -402,15 +402,10 @@ export default function InventoryPage() {
                     />
                     <MultiSelectDropdown
                         title="Status"
-                        options={[
-                            { label: "Em estoque", value: "in-stock" },
-                            { label: "Baixo estoque", value: "low" },
-                            { label: "Sem estoque", value: "out" },
-                        ]}
+                        options={dynamicOptions.statusOptions}
                         selected={statusFilter === "all" ? [] : [statusFilter]}
                         onChange={(val) => updateParam("status", val)}
                         onClear={() => updateParam("status", null)}
-                        searchPlaceholder="Buscar status..."
                     />
                     <MultiSelectDropdown
                         title="Safra"
