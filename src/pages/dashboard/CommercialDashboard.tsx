@@ -324,5 +324,6 @@ export default function CommercialDashboard() {
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab="exit" />
       <ImportCsvDialog open={csvOpen} onOpenChange={setCsvOpen} />
     </div>
+    </>
   );
 }
