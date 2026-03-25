@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Wine, TrendingUp, GlassWater, Plus, AlertTriangle, ArrowDownRight,
   BarChart3, Star, Upload, ShoppingCart, Clock, Globe, Grape, MapPin
@@ -12,6 +12,8 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { useWineMetrics, useWineEvent } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { PersonalizedNotifications } from "@/components/PersonalizedNotifications";
 import { useToast } from "@/hooks/use-toast";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -40,6 +42,7 @@ export default function PersonalDashboard() {
   const [csvOpen, setCsvOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const wineEvent = useWineEvent();
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_personal"));
 
   const suggestions = useMemo(() => {
     return wines
@@ -129,6 +132,12 @@ export default function PersonalDashboard() {
   };
 
   return (
+    <>
+      <AnimatePresence>
+        {showOnboarding && (
+          <OnboardingWizard profileType="personal" onComplete={() => setShowOnboarding(false)} />
+        )}
+      </AnimatePresence>
     <div className="space-y-5 max-w-[1200px] relative">
       {/* Header — warm & personal */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -183,6 +192,9 @@ export default function PersonalDashboard() {
           ))
         )}
       </div>
+
+      {/* Personalized Notifications */}
+      {wines.length > 0 && <PersonalizedNotifications wines={wines} />}
 
       {/* ─── Main 2-column grid ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -495,5 +507,6 @@ export default function PersonalDashboard() {
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
       <ImportCsvDialog open={csvOpen} onOpenChange={setCsvOpen} />
     </div>
+    </>
   );
 }
