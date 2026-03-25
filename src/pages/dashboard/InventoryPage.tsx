@@ -300,8 +300,8 @@ export default function InventoryPage() {
                         </Button>
                     </div>
                     <MagneticButton>
-                        <Button variant="premium" className="h-[46px] px-6 rounded-2xl shadow-float font-black text-[13px] uppercase tracking-widest" onClick={() => setAddWineOpen(true)}>
-                            <Plus className="h-4 w-4 mr-1.5" /> Adicionar Vinho
+                        <Button variant="premium" className="h-10 px-4 rounded-2xl shadow-float font-bold text-[12px] uppercase tracking-wider" onClick={() => setAddWineOpen(true)}>
+                            <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar Vinho
                         </Button>
                     </MagneticButton>
                 </div>
