@@ -1,22 +1,20 @@
 import { useState } from "react";
 import { useConsumption, useDeleteConsumption } from "@/hooks/useConsumption";
-import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Wine, MapPin, Star, Trash2, Calendar, GlassWater } from "lucide-react";
+import { Wine, MapPin, Trash2, Calendar, GlassWater } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 
 export default function ConsumptionPage() {
   const { data: entries, isLoading } = useConsumption();
   const deleteConsumption = useDeleteConsumption();
-  const [addOpen, setAddOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "cellar" | "external">("all");
 
   const filtered = entries?.filter((e) => {
@@ -26,6 +24,9 @@ export default function ConsumptionPage() {
 
   const cellarCount = entries?.filter(e => e.source === "cellar").length ?? 0;
   const externalCount = entries?.filter(e => e.source === "external").length ?? 0;
+
+  const ratingLabel = (r: number) =>
+    r === 1 ? "Ruim" : r === 2 ? "Regular" : r === 3 ? "Bom" : r === 4 ? "Muito bom" : "Excelente";
 
   const handleDelete = async (id: string) => {
     try {
@@ -39,17 +40,11 @@ export default function ConsumptionPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Meu Consumo</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Registre vinhos que você tomou, dentro ou fora da adega
-          </p>
-        </div>
-        <Button onClick={() => setAddOpen(true)} className="shrink-0">
-          <Plus className="h-4 w-4 mr-1.5" />
-          Registrar Consumo
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Meu Consumo</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Registre vinhos que você tomou, dentro ou fora da adega
+        </p>
       </div>
 
       {/* Tabs */}
@@ -78,8 +73,7 @@ export default function ConsumptionPage() {
         <PremiumEmptyState
           icon={Wine}
           title="Nenhum consumo registrado"
-          description={filter === "all" ? "Registre vinhos que você experimentou para manter um histórico pessoal" : filter === "cellar" ? "Nenhum consumo da adega registrado" : "Nenhum consumo externo registrado"}
-          primaryAction={{ label: "Registrar Consumo", onClick: () => setAddOpen(true) }}
+          description={filter === "all" ? "Use o botão 'Adicionar Consumo' na barra lateral para registrar" : filter === "cellar" ? "Nenhum consumo da adega registrado" : "Nenhum consumo externo registrado"}
         />
       ) : (
         <AnimatePresence mode="popLayout">
@@ -126,7 +120,7 @@ export default function ConsumptionPage() {
                         )}
                         {entry.rating && (
                           <Badge variant="outline" className="text-[10px]">
-                            {entry.rating === 1 ? "Ruim" : entry.rating === 2 ? "Regular" : entry.rating === 3 ? "Bom" : entry.rating === 4 ? "Muito bom" : "Excelente"}
+                            {ratingLabel(entry.rating)}
                           </Badge>
                         )}
                       </div>
@@ -153,8 +147,6 @@ export default function ConsumptionPage() {
           </div>
         </AnimatePresence>
       )}
-
-      <AddConsumptionDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   );
 }
