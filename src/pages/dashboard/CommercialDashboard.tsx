@@ -91,6 +91,18 @@ export default function CommercialDashboard() {
   ];
 
   return (
+    <>
+      <AnimatePresence>
+        {showOnboarding && (
+          <OnboardingWizard
+            profileType="commercial"
+            onComplete={() => {
+              localStorage.setItem("sommelyx_onboarding_done_commercial", "true");
+              setShowOnboarding(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
     <div className="space-y-4 max-w-[1200px] relative">
       {/* Header — compact */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
