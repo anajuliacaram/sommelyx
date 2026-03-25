@@ -32,6 +32,7 @@ interface MenuItem {
 const personalMenu: MenuItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater },
+  { title: "Meu Consumo", url: "/dashboard/consumption", icon: Wine },
   { title: "Alertas", url: "/dashboard/alerts", icon: Bell },
   { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart },
   { title: "Relatórios", url: "/dashboard/stats", icon: BarChart3 },

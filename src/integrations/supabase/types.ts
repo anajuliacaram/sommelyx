@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      consumption_log: {
+        Row: {
+          consumed_at: string
+          country: string | null
+          created_at: string
+          grape: string | null
+          id: string
+          location: string | null
+          producer: string | null
+          rating: number | null
+          region: string | null
+          source: string
+          style: string | null
+          tasting_notes: string | null
+          user_id: string
+          vintage: number | null
+          wine_id: string | null
+          wine_name: string
+        }
+        Insert: {
+          consumed_at?: string
+          country?: string | null
+          created_at?: string
+          grape?: string | null
+          id?: string
+          location?: string | null
+          producer?: string | null
+          rating?: number | null
+          region?: string | null
+          source?: string
+          style?: string | null
+          tasting_notes?: string | null
+          user_id: string
+          vintage?: number | null
+          wine_id?: string | null
+          wine_name: string
+        }
+        Update: {
+          consumed_at?: string
+          country?: string | null
+          created_at?: string
+          grape?: string | null
+          id?: string
+          location?: string | null
+          producer?: string | null
+          rating?: number | null
+          region?: string | null
+          source?: string
+          style?: string | null
+          tasting_notes?: string | null
+          user_id?: string
+          vintage?: number | null
+          wine_id?: string | null
+          wine_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumption_log_wine_id_fkey"
+            columns: ["wine_id"]
+            isOneToOne: false
+            referencedRelation: "wines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
