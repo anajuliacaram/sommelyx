@@ -67,10 +67,12 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
     if (existing) {
       setItems(items.map(i => i.wineId === wine.id ? { ...i, quantity: i.quantity + 1 } : i));
     } else {
+      const details = [wine.producer, wine.vintage, wine.grape, wine.country].filter(Boolean).join(" · ");
       setItems([...items, {
         id: crypto.randomUUID(),
         wineId: wine.id,
         wineName: wine.name,
+        wineDetails: details,
         quantity: 1,
         unitPrice: wine.current_value ?? wine.purchase_price ?? 0,
       }]);
