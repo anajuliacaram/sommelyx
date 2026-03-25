@@ -240,6 +240,10 @@ export function AppSidebar() {
         open={breakageOpen}
         onOpenChange={setBreakageOpen}
       />
+      <SaleDialog
+        open={saleOpen}
+        onOpenChange={setSaleOpen}
+      />
     </>
   );
 }
