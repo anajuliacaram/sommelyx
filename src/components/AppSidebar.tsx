@@ -101,7 +101,7 @@ export function AppSidebar() {
                 <Button
                   variant="outline"
                   className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl active:scale-[0.97] transition-all"
-                  onClick={() => { setManageTab("exit"); setManageOpen(true); closeMobileSidebar(); }}
+                  onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                   Adicionar Venda
