@@ -214,10 +214,15 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[11px] font-semibold text-foreground truncate">{w.name}</p>
                                   <p className="text-[9px] text-muted-foreground truncate">
-                                    {[w.producer, w.vintage, w.country].filter(Boolean).join(" · ")}
+                                    {[w.producer, w.vintage, w.grape, w.country].filter(Boolean).join(" · ")}
                                   </p>
                                 </div>
-                                <span className="text-[10px] font-bold text-muted-foreground shrink-0">{w.quantity} un.</span>
+                                <div className="text-right shrink-0">
+                                  <span className="text-[10px] font-bold text-muted-foreground">{w.quantity} un.</span>
+                                  {(w.current_value ?? w.purchase_price) ? (
+                                    <p className="text-[9px] text-muted-foreground">R$ {(w.current_value ?? w.purchase_price ?? 0).toLocaleString("pt-BR")}</p>
+                                  ) : null}
+                                </div>
                               </button>
                             ))}
                           </div>
