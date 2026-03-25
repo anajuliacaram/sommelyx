@@ -227,6 +227,11 @@ export function AppSidebar() {
         }}
         initialScan={addWithScan}
       />
+      <ManageBottleDialog
+        open={manageOpen}
+        onOpenChange={setManageOpen}
+        defaultTab={manageTab}
+      />
     </>
   );
 }
