@@ -262,7 +262,7 @@ export default function CommercialDashboard() {
                   {styleData.map((d, i) => (
                     <div key={d.name} className="flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                      <span className="text-[9px] font-medium text-muted-foreground">{d.name}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">{d.name}</span>
                     </div>
                   ))}
                 </div>
