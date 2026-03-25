@@ -151,10 +151,10 @@ export default function CommercialDashboard() {
               <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h2 className="text-[13px] font-semibold font-sans text-foreground">⚠️ Baixo estoque</h2>
-                    <p className="text-[9px] text-muted-foreground">Produtos com ≤ 2 unidades</p>
+                    <h2 className="text-sm font-semibold font-sans text-foreground">⚠️ Baixo estoque</h2>
+                    <p className="text-[11px] text-muted-foreground">Produtos com ≤ 2 unidades</p>
                   </div>
-                  <Badge variant="secondary" className="text-[9px] h-5" style={{ background: "rgba(224,122,95,0.08)", color: "#E07A5F" }}>
+                  <Badge variant="secondary" className="text-[11px] h-6" style={{ background: "rgba(224,122,95,0.08)", color: "#E07A5F" }}>
                     {lowStock} itens
                   </Badge>
                 </div>
@@ -165,10 +165,10 @@ export default function CommercialDashboard() {
                         <ArrowDownRight className="h-3 w-3" style={{ color: "#f59e0b" }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p>
-                        <p className="text-[9px] text-muted-foreground">{w.producer || "—"}</p>
+                        <p className="text-[13px] font-semibold truncate text-foreground">{w.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{w.producer || "—"}</p>
                       </div>
-                      <span className="text-[11px] font-bold" style={{ color: "#E07A5F" }}>{w.quantity} un.</span>
+                      <span className="text-[13px] font-bold" style={{ color: "#E07A5F" }}>{w.quantity} un.</span>
                     </div>
                   ))}
                 </div>
@@ -181,17 +181,17 @@ export default function CommercialDashboard() {
                 <div className="flex items-center gap-1.5 mb-3">
                   <Layers className="h-3 w-3 text-muted-foreground" />
                   <div>
-                    <h2 className="text-[13px] font-semibold font-sans text-foreground">Curva ABC</h2>
-                    <p className="text-[9px] text-muted-foreground">Top 10 por valor em estoque</p>
+                    <h2 className="text-sm font-semibold font-sans text-foreground">Curva ABC</h2>
+                    <p className="text-[11px] text-muted-foreground">Top 10 por valor em estoque</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   {abcData.map((w, i) => (
                     <div key={i} className="flex items-center gap-2.5">
-                      <span className={`text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${w.cls === "A" ? "bg-green-100 text-green-700" : w.cls === "B" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{w.cls}</span>
-                      <span className="text-[10px] font-medium flex-1 truncate text-foreground">{w.name}</span>
-                      <span className="text-[9px] font-medium text-muted-foreground">R$ {w.value.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</span>
-                      <span className="text-[8px] font-bold w-8 text-right text-muted-foreground">{w.cumPct}%</span>
+                      <span className={`text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${w.cls === "A" ? "bg-green-100 text-green-700" : w.cls === "B" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{w.cls}</span>
+                      <span className="text-[13px] font-medium flex-1 truncate text-foreground">{w.name}</span>
+                      <span className="text-[12px] font-medium text-muted-foreground">R$ {w.value.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</span>
+                      <span className="text-[11px] font-bold w-10 text-right text-muted-foreground">{w.cumPct}%</span>
                     </div>
                   ))}
                 </div>
@@ -201,17 +201,17 @@ export default function CommercialDashboard() {
             {/* Operational alerts */}
             {lowStock > 0 && (
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-                <h2 className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-1.5 text-muted-foreground">
+                <h2 className="text-[12px] font-semibold uppercase tracking-[0.08em] mb-2 text-muted-foreground">
                   Alertas operacionais
                 </h2>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="glass-card p-3 flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(224,122,95,0.07)" }}>
-                      <AlertTriangle className="h-3.5 w-3.5" style={{ color: "#E07A5F" }} />
+                  <div className="glass-card p-4 flex items-center gap-3 cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(224,122,95,0.07)" }}>
+                      <AlertTriangle className="h-4 w-4" style={{ color: "#E07A5F" }} />
                     </div>
                     <div>
-                      <p className="text-[12px] font-bold text-foreground">{lowStock}</p>
-                      <p className="text-[9px] font-medium" style={{ color: "#E07A5F" }}>Baixo estoque</p>
+                      <p className="text-base font-bold text-foreground">{lowStock}</p>
+                      <p className="text-[12px] font-medium" style={{ color: "#E07A5F" }}>Baixo estoque</p>
                     </div>
                   </div>
                 </div>
@@ -226,16 +226,16 @@ export default function CommercialDashboard() {
               <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h3 className="text-[12px] font-semibold font-sans text-foreground">Estoque por estilo</h3>
-                    <p className="text-[9px] text-muted-foreground">Distribuição atual</p>
+                    <h3 className="text-sm font-semibold font-sans text-foreground">Estoque por estilo</h3>
+                    <p className="text-[11px] text-muted-foreground">Distribuição atual</p>
                   </div>
                   <BarChart3 className="h-3 w-3 text-muted-foreground" />
                 </div>
                 <ResponsiveContainer width="100%" height={140}>
                   <BarChart data={styleData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={20} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={24} />
                     <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }} />
                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                       {styleData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
@@ -248,8 +248,8 @@ export default function CommercialDashboard() {
             {/* Pie chart */}
             {styleData.length > 0 && (
               <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-                <h3 className="text-[12px] font-semibold font-sans text-foreground mb-0.5">Composição</h3>
-                <p className="text-[9px] text-muted-foreground mb-2">Por estilo de vinho</p>
+                <h3 className="text-sm font-semibold font-sans text-foreground mb-0.5">Composição</h3>
+                <p className="text-[11px] text-muted-foreground mb-2">Por estilo de vinho</p>
                 <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
                     <Pie data={styleData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
@@ -262,7 +262,7 @@ export default function CommercialDashboard() {
                   {styleData.map((d, i) => (
                     <div key={d.name} className="flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                      <span className="text-[9px] font-medium text-muted-foreground">{d.name}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">{d.name}</span>
                     </div>
                   ))}
                 </div>
