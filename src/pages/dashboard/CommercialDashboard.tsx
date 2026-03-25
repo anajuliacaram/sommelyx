@@ -181,8 +181,8 @@ export default function CommercialDashboard() {
                 <div className="flex items-center gap-1.5 mb-3">
                   <Layers className="h-3 w-3 text-muted-foreground" />
                   <div>
-                    <h2 className="text-[13px] font-semibold font-sans text-foreground">Curva ABC</h2>
-                    <p className="text-[9px] text-muted-foreground">Top 10 por valor em estoque</p>
+                    <h2 className="text-sm font-semibold font-sans text-foreground">Curva ABC</h2>
+                    <p className="text-[11px] text-muted-foreground">Top 10 por valor em estoque</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
