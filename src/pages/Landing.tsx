@@ -266,13 +266,13 @@ export default function Landing() {
           </motion.div>
 
           {/* Mobile: horizontal scroll carousel */}
-          <div className="flex lg:hidden overflow-x-auto snap-x snap-mandatory gap-2.5 pb-3 -mx-4 px-4 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}>
+          <div className="flex lg:hidden overflow-x-auto snap-x snap-mandatory gap-3 pb-4 -mx-4 px-4 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth", scrollPaddingLeft: "16px" }}>
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier);
               return (
                 <motion.div
                   key={plan.name}
-                  className="snap-center shrink-0 w-[72vw] max-w-[260px] rounded-2xl overflow-hidden flex flex-col p-3.5"
+                  className="snap-start shrink-0 w-[75vw] max-w-[280px] rounded-2xl overflow-hidden flex flex-col p-3.5"
                   style={s.bg}
                   initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 >
