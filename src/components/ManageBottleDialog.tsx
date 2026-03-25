@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2 } from "lucide-react";
+import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2, Star } from "lucide-react";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
@@ -22,9 +22,9 @@ interface ManageBottleDialogProps {
 }
 
 interface ConsumptionItem {
-  id: string; // local ID
+  id: string;
   source: "cellar" | "external";
-  wineId?: string; // cellar wine ID
+  wineId?: string;
   wineName: string;
   producer?: string;
   country?: string;
@@ -35,6 +35,7 @@ interface ConsumptionItem {
   location?: string;
   quantity: number;
   notes?: string;
+  rating?: number;
 }
 
 let itemCounter = 0;
@@ -64,6 +65,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   const [extVintage, setExtVintage] = useState("");
   const [extLocation, setExtLocation] = useState("");
   const [scanOpen, setScanOpen] = useState(false);
+  const [rating, setRating] = useState(0);
 
   const { data: wines } = useWines();
   const wineEvent = useWineEvent();
@@ -75,6 +77,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
     setShowFilters(false); setSelectedCountries([]); setSelectedGrapes([]);
     setExtWineName(""); setExtProducer(""); setExtCountry(""); setExtRegion("");
     setExtGrape(""); setExtStyle(""); setExtVintage(""); setExtLocation("");
+    setRating(0);
   };
 
   const resetAll = () => {
@@ -111,6 +114,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
         vintage: wine.vintage ? String(wine.vintage) : undefined,
         quantity: parseInt(quantity) || 1,
         notes: notes || undefined,
+        rating: rating > 0 ? rating : undefined,
       }]);
     } else {
       if (!extWineName.trim()) {
@@ -130,6 +134,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
         location: extLocation || undefined,
         quantity: parseInt(quantity) || 1,
         notes: notes || undefined,
+        rating: rating > 0 ? rating : undefined,
       }]);
     }
     resetCurrentItem();
@@ -166,7 +171,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
           vintage: item.vintage ? parseInt(item.vintage) : null,
           location: item.location || null,
           tasting_notes: item.notes || null,
-          rating: null,
+          rating: item.rating || null,
           consumed_at: new Date().toISOString().split("T")[0],
         });
       }
@@ -261,7 +266,9 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                           </Badge>
                           <div className="flex-1 min-w-0">
                             <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
-                            <p className="text-[9px] text-muted-foreground">{item.quantity} un.</p>
+                            <p className="text-[9px] text-muted-foreground">
+                              {item.quantity} un.{item.rating ? ` · ${item.rating === 1 ? "Ruim" : item.rating === 2 ? "Regular" : item.rating === 3 ? "Bom" : item.rating === 4 ? "Muito bom" : "Excelente"}` : ""}
+                            </p>
                           </div>
                           <button
                             type="button"
@@ -457,6 +464,33 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                   <div>
                     <Label className="text-xs text-muted-foreground">Observações</Label>
                     <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Opcional..." className="h-9 text-[12px] rounded-xl" />
+                  </div>
+                </div>
+
+                {/* Rating */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Star className="h-3 w-3" /> Avaliação
+                  </Label>
+                  <div className="flex gap-1 flex-wrap">
+                    {([
+                      { value: 1, label: "Ruim" },
+                      { value: 2, label: "Regular" },
+                      { value: 3, label: "Bom" },
+                      { value: 4, label: "Muito bom" },
+                      { value: 5, label: "Excelente" },
+                    ] as const).map((opt) => (
+                      <Button
+                        key={opt.value}
+                        type="button"
+                        variant={rating === opt.value ? "default" : "outline"}
+                        size="sm"
+                        className="text-[10px] px-2.5 h-7"
+                        onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
+                      >
+                        {opt.label}
+                      </Button>
+                    ))}
                   </div>
                 </div>
 
