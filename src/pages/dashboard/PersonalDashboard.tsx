@@ -132,6 +132,12 @@ export default function PersonalDashboard() {
   };
 
   return (
+    <>
+      <AnimatePresence>
+        {showOnboarding && (
+          <OnboardingWizard profileType="personal" onComplete={() => setShowOnboarding(false)} />
+        )}
+      </AnimatePresence>
     <div className="space-y-5 max-w-[1200px] relative">
       {/* Header — warm & personal */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
