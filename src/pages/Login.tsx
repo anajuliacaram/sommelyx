@@ -16,6 +16,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockUntil, setLockUntil] = useState<number | null>(null);
   const [searchParams] = useSearchParams();
   const emailConfirmed = searchParams.get("confirmed") === "true";
   const autoSessionFallback = searchParams.get("auto_session") === "false";
