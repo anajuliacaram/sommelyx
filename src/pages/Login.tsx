@@ -50,11 +50,30 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+
+    // Rate limiting: block if locked
+    if (lockUntil && Date.now() < lockUntil) {
+      const secsLeft = Math.ceil((lockUntil - Date.now()) / 1000);
+      toast({ title: "Muitas tentativas", description: `Aguarde ${secsLeft}s antes de tentar novamente.`, variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
     try {
       await signIn(email, password);
+      setFailedAttempts(0);
+      setLockUntil(null);
       analytics.track("login_success");
     } catch (err: any) {
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+
+      // Lock after 5 failed attempts: 30s, then 60s, then 120s
+      if (newAttempts >= 5) {
+        const lockDuration = newAttempts >= 15 ? 120_000 : newAttempts >= 10 ? 60_000 : 30_000;
+        setLockUntil(Date.now() + lockDuration);
+      }
+
       const msg =
         err.message === "Invalid login credentials"
           ? "Email ou senha incorretos."
