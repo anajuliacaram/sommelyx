@@ -383,6 +383,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      adjust_wine_quantity: {
+        Args: {
+          _event_type: string
+          _notes?: string
+          _quantity: number
+          _user_id: string
+          _wine_id: string
+        }
+        Returns: number
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
