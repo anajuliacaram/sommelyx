@@ -119,17 +119,14 @@ export function useWineEvent() {
     mutationFn: async ({ wineId, eventType, quantity, notes }: { wineId: string; eventType: string; quantity: number; notes?: string }) => {
       if (!user) throw new Error("Not authenticated");
 
-      const { error: eventError } = await supabase
-        .from("wine_events")
-        .insert({ wine_id: wineId, user_id: user.id, event_type: eventType, quantity, notes });
-      if (eventError) throw eventError;
-
-      const { data: wine } = await supabase.from("wines").select("quantity").eq("id", wineId).single();
-      if (!wine) throw new Error("Wine not found");
-
-      const newQty = eventType === "add" ? wine.quantity + quantity : Math.max(0, wine.quantity - quantity);
-      const { error: updateError } = await supabase.from("wines").update({ quantity: newQty }).eq("id", wineId);
-      if (updateError) throw updateError;
+      const { error } = await supabase.rpc("adjust_wine_quantity", {
+        _wine_id: wineId,
+        _user_id: user.id,
+        _event_type: eventType,
+        _quantity: quantity,
+        _notes: notes ?? null,
+      });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
