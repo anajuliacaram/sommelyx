@@ -255,11 +255,16 @@ export default function Landing() {
                     <span className="text-sm font-medium opacity-50" style={{ color: s.text }}>{plan.period}</span>
                   </div>
 
-                  <div className="mb-5 inline-flex items-center gap-1.5 px-4 py-2 rounded-full border" style={{ background: "rgba(34,197,94,0.12)", borderColor: "rgba(34,197,94,0.3)" }}>
-                    <span className="text-[13px] font-bold" style={{ color: "#22c55e" }}>
-                      ✦ 14 dias grátis • Sem compromisso
+                  <motion.div
+                    className="mb-6 mt-1 w-full rounded-full py-2.5 px-5 text-center shadow-[0_0_24px_rgba(34,197,94,0.4)]"
+                    style={{ background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" }}
+                    animate={{ boxShadow: ["0 0 20px rgba(34,197,94,0.3)", "0 0 32px rgba(34,197,94,0.55)", "0 0 20px rgba(34,197,94,0.3)"] }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <span className="text-[14px] sm:text-[15px] font-bold text-white tracking-wide">
+                      ✨ Teste grátis por 14 dias • Sem compromisso
                     </span>
-                  </div>
+                  </motion.div>
 
                   <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map(f => (
