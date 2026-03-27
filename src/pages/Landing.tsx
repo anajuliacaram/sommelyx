@@ -136,7 +136,7 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-24 sm:pt-32 lg:pt-36 pb-6 sm:pb-8 lg:pb-10 px-4 sm:px-6 flex items-center overflow-visible">
+      <section className="relative pt-24 sm:pt-32 lg:pt-36 pb-2 sm:pb-4 px-4 sm:px-6 flex items-center overflow-visible">
         <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         <div className="absolute top-[-12%] left-[-12%] w-[46vw] h-[46vw] rounded-full bg-[#8C2044]/14 blur-[130px] pointer-events-none" />
 
@@ -176,7 +176,7 @@ export default function Landing() {
             </motion.div>
 
             <motion.p
-              className="mt-4 text-[12px] text-[#9CA3AF] font-medium flex items-center gap-1.5"
+              className="mt-2.5 text-[12px] text-[#9CA3AF] font-medium flex items-center gap-1.5"
               initial="hidden" animate="visible" variants={fadeUp} custom={3}
             >
               <Check className="h-3.5 w-3.5 text-[#8C2044]" /> Sem cartão de crédito. Comece em 30 segundos.
@@ -186,9 +186,9 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 3 PILLARS ═══════════════ */}
-      <section id="features" className="relative px-4 sm:px-6 py-8 sm:py-12">
+      <section id="features" className="relative px-4 sm:px-6 py-4 sm:py-6">
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="text-center mb-7 sm:mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+          <motion.div className="text-center mb-5 sm:mb-7" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
               Controle sua adega, saiba o momento ideal
               <br className="hidden sm:block" />
@@ -200,12 +200,12 @@ export default function Landing() {
             {pillars.map((p, i) => (
               <motion.div
                 key={p.title}
-                className="rounded-2xl p-6 sm:p-7 text-center relative overflow-hidden"
+                className="rounded-2xl p-5 sm:p-6 text-center relative overflow-hidden"
                 style={{ background: "rgba(255,255,255,0.85)", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 4px 20px -8px rgba(0,0,0,0.06)" }}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                 whileHover={{ y: -4, transition: { duration: 0.3 } }}
               >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: `${p.color}14` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: `${p.color}14` }}>
                   <p.icon className="h-6 w-6" style={{ color: p.color }} />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 block" style={{ color: p.color }}>{p.title}</span>
@@ -218,7 +218,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ DUAL CTA ═══════════════ */}
-      <section className="relative px-4 sm:px-6 py-6 sm:py-10">
+      <section className="relative px-4 sm:px-6 py-4 sm:py-6">
         <div className="container mx-auto max-w-5xl relative z-10">
           <div className="grid md:grid-cols-2 gap-4 lg:gap-5">
             {/* Personal */}
@@ -281,7 +281,7 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ PRICING ═══════════════ */}
-      <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 py-8 sm:py-12 lg:py-14">
+      <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 py-6 sm:py-8 lg:py-10">
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mx-auto mb-6 sm:mb-8 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
