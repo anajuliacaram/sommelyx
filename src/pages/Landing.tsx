@@ -227,72 +227,93 @@ export default function Landing() {
 
 
       {/* ═══════════════ PRICING ═══════════════ */}
-      <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 py-10 sm:py-14 lg:py-20">
+      <section id="pricing" className="relative px-4 sm:px-6 py-14 sm:py-20 lg:py-28 overflow-hidden">
+        {/* Background depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(140,32,68,0.08),transparent_60%),radial-gradient(ellipse_at_80%_100%,rgba(140,32,68,0.05),transparent_50%)] pointer-events-none" />
+        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#8C2044]/[0.04] blur-[120px] pointer-events-none" />
+
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="mx-auto mb-8 sm:mb-12 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
-              Escolha o plano <span className="italic text-gradient-wine">ideal</span>
+          {/* Header */}
+          <motion.div className="mx-auto mb-10 sm:mb-14 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <span className="inline-block px-4 py-1.5 rounded-full text-[12px] font-bold tracking-widest uppercase mb-4" style={{ background: "rgba(34,197,94,0.1)", color: "#16a34a" }}>
+              Teste grátis por 14 dias
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-[42px] font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
+              Escolha o plano ideal<br className="hidden sm:block" /> para sua adega
             </h2>
-            <p className="mt-3 text-[14px] text-[#6B7280] font-medium max-w-md mx-auto">
-              Da coleção pessoal à operação comercial.
+            <p className="mt-4 text-[15px] text-[#6B7280] font-medium max-w-md mx-auto">
+              Comece sem compromisso. Cancele quando quiser.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[780px] mx-auto items-stretch">
+          {/* Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-[820px] mx-auto items-stretch">
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier, plan.popular);
               return (
                 <motion.div
                   key={plan.name}
-                  className={`relative rounded-[24px] overflow-hidden flex flex-col p-6 sm:p-8 h-full ${plan.popular ? "md:scale-105 md:z-10" : ""}`}
+                  className={`relative rounded-[24px] overflow-hidden flex flex-col p-7 sm:p-9 h-full ${plan.popular ? "md:scale-[1.04] md:z-10" : ""}`}
                   style={s.bg}
                   initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                  whileHover={{ y: -6, transition: { duration: 0.3 } }}
+                  whileHover={{ y: -5, transition: { duration: 0.3, ease: "easeOut" } }}
                 >
+                  {/* Popular badge */}
                   {plan.popular && (
-                    <div className="absolute top-0 right-0 p-4">
-                      <span className="px-3 py-1.5 rounded-full text-[10px] font-black tracking-[0.1em] uppercase bg-white text-[#8C2044] shadow-md">
-                        Mais popular
+                    <div className="absolute top-5 right-5">
+                      <span className="px-3.5 py-1.5 rounded-full text-[10px] font-black tracking-[0.1em] uppercase bg-white text-[#8C2044] shadow-lg">
+                        Mais escolhido
                       </span>
                     </div>
                   )}
 
-                  <h3 className="text-xl font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
-                  <p className="text-[13px] mb-4 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
+                  {/* Plan name & desc */}
+                  <h3 className="text-xl sm:text-2xl font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
+                  <p className="text-[13px] sm:text-[14px] mb-5 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
 
-                  <div className="mb-4 flex items-baseline gap-1.5">
-                    <span className="text-5xl font-black font-sans tracking-tighter" style={{ color: s.price }}>{plan.price}</span>
-                    <span className="text-sm font-medium opacity-50" style={{ color: s.text }}>{plan.period}</span>
+                  {/* Price */}
+                  <div className="mb-5 flex items-baseline gap-1.5">
+                    <span className="text-[52px] sm:text-[56px] font-black font-sans tracking-tighter leading-none" style={{ color: s.price }}>{plan.price}</span>
+                    <span className="text-sm font-medium opacity-40" style={{ color: s.text }}>{plan.period}</span>
                   </div>
 
+                  {/* Trial badge */}
                   <motion.div
-                    className="mb-6 mt-1 w-full rounded-full py-2.5 px-5 text-center shadow-[0_0_24px_rgba(34,197,94,0.4)]"
+                    className="mb-4 w-full rounded-xl py-3 px-5 text-center shadow-lg"
                     style={{ background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" }}
-                    animate={{ boxShadow: ["0 0 20px rgba(34,197,94,0.3)", "0 0 32px rgba(34,197,94,0.55)", "0 0 20px rgba(34,197,94,0.3)"] }}
+                    animate={{ boxShadow: ["0 4px 20px rgba(34,197,94,0.25)", "0 4px 30px rgba(34,197,94,0.45)", "0 4px 20px rgba(34,197,94,0.25)"] }}
                     transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <span className="text-[14px] sm:text-[15px] font-bold text-white tracking-wide">
-                      ✨ Teste grátis por 14 dias • Sem compromisso
+                    <span className="text-[15px] font-bold text-white block">
+                      Teste grátis por 14 dias
+                    </span>
+                    <span className="text-[11px] font-medium text-white/70 block mt-0.5">
+                      Sem cartão • Sem compromisso
                     </span>
                   </motion.div>
 
-                  <ul className="space-y-3 mb-8 flex-1">
+                  {/* CTA — above benefits */}
+                  <Button
+                    className={`w-full h-14 rounded-xl text-[15px] font-semibold tracking-wide transition-all duration-300 mb-7 ${s.btn}`}
+                    onClick={handleStartFreeClick}
+                  >
+                    {plan.cta}
+                  </Button>
+                  <p className="text-[11px] font-medium text-center -mt-5 mb-6 opacity-50" style={{ color: s.text }}>
+                    Leva menos de 30 segundos
+                  </p>
+
+                  {/* Benefits */}
+                  <ul className="space-y-3 flex-1">
                     {plan.features.map(f => (
-                      <li key={f} className="flex items-center gap-2.5 text-[14px] leading-snug font-medium" style={{ color: s.feat }}>
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: s.checkBg }}>
+                      <li key={f} className="flex items-start gap-2.5 text-[14px] leading-snug font-medium" style={{ color: s.feat }}>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: s.checkBg }}>
                           <Check className="h-3 w-3" style={{ color: s.checkColor }} strokeWidth={3} />
                         </div>
                         {f}
                       </li>
                     ))}
                   </ul>
-
-                  <Button
-                    className={`mt-auto w-full h-12 sm:h-14 rounded-2xl text-[14px] font-bold tracking-wide transition-all duration-300 ${s.btn}`}
-                    onClick={handleStartFreeClick}
-                  >
-                    {plan.cta}
-                  </Button>
                 </motion.div>
               );
             })}
