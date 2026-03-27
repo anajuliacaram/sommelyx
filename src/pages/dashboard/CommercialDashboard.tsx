@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   DollarSign, Package, AlertTriangle, ShoppingCart, TrendingUp, Plus,
-  ArrowDownRight, BarChart3, Upload, Clock, Layers
+  ArrowDownRight, BarChart3, Upload, Clock, Layers, FileText, Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,8 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { DashboardProfileProgress } from "@/components/DashboardProfileProgress";
+import { ContextualSuggestions } from "@/components/ContextualSuggestions";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -45,6 +47,19 @@ export default function CommercialDashboard() {
   const [csvOpen, setCsvOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_commercial"));
   const lowStockWines = wines.filter(w => w.quantity > 0 && w.quantity <= 2).slice(0, 6);
+
+  const uniqueLabels = wines.filter(w => w.quantity > 0).length;
+
+  const topSellers = useMemo(() => {
+    return wines
+      .filter(w => w.quantity > 0)
+      .sort((a, b) => {
+        const aVal = (a.current_value ?? a.purchase_price ?? 0) * a.quantity;
+        const bVal = (b.current_value ?? b.purchase_price ?? 0) * b.quantity;
+        return bVal - aVal;
+      })
+      .slice(0, 5);
+  }, [wines]);
 
   const abcData = useMemo(() => {
     const sorted = wines.filter(w => w.quantity > 0).map(w => ({
@@ -84,10 +99,10 @@ export default function CommercialDashboard() {
   }, [wines]);
 
   const metrics = [
-    { label: "Estoque", value: `${totalBottles} un.`, icon: Package, color: "#8F2D56" },
-    { label: "Valor", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: DollarSign, color: "#C9A86A" },
-    { label: "Giro", value: `${turnover}%`, icon: TrendingUp, color: "#22c55e" },
-    { label: "Baixo estoque", value: lowStock.toString(), icon: AlertTriangle, color: "#E07A5F" },
+    { label: "Rótulos ativos", value: uniqueLabels.toString(), icon: Package, color: "#8F2D56" },
+    { label: "Total em estoque", value: `${totalBottles} un.`, icon: Layers, color: "#3b82f6" },
+    { label: "Valor em estoque", value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`, icon: DollarSign, color: "#C9A86A" },
+    { label: "Estoque baixo", value: lowStock.toString(), icon: AlertTriangle, color: "#E07A5F" },
   ];
 
   return (
@@ -104,13 +119,13 @@ export default function CommercialDashboard() {
         )}
       </AnimatePresence>
     <div className="space-y-4 max-w-[1200px] relative">
-      {/* Header — compact */}
+      {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight text-foreground">
-            Olá, {firstName}
+            Painel Operacional
           </h1>
-          <p className="text-sm text-muted-foreground">Estoque, vendas e performance da operação</p>
+          <p className="text-sm text-muted-foreground">Estoque, giro e controle da sua operação</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold" onClick={() => setCsvOpen(true)}>
@@ -118,7 +133,7 @@ export default function CommercialDashboard() {
           </Button>
           <MagneticButton>
             <Button variant="premium" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setAddOpen(true)}>
-              <Plus className="h-3 w-3 mr-1" /> Cadastrar
+              <Plus className="h-3 w-3 mr-1" /> Cadastrar produto
             </Button>
           </MagneticButton>
         </div>
@@ -154,18 +169,49 @@ export default function CommercialDashboard() {
         )}
       </div>
 
+      {/* Profile progress */}
+      <DashboardProfileProgress wines={wines} profileType="commercial" />
+
+      {/* Contextual Suggestions */}
+      {wines.length > 0 && <ContextualSuggestions wines={wines} />}
+
+      {/* Quick access links */}
+      {totalBottles > 0 && (
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { icon: Package, label: "Estoque", route: "/dashboard/inventory", color: "#8F2D56" },
+              { icon: ShoppingCart, label: "Vendas", route: "/dashboard/sales", color: "#22c55e" },
+              { icon: Users, label: "Cadastros", route: "/dashboard/registers", color: "#3b82f6" },
+              { icon: FileText, label: "Relatórios", route: "/dashboard/reports", color: "#C9A86A" },
+            ].map((item) => (
+              <button
+                key={item.label}
+                onClick={() => navigate(item.route)}
+                className="glass-card p-3 flex items-center gap-2.5 hover:shadow-md transition-all group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${item.color}14` }}>
+                  <item.icon className="h-4 w-4" style={{ color: item.color }} />
+                </div>
+                <span className="text-[13px] font-semibold text-foreground">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Main 2-column grid */}
       {totalBottles > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-          {/* LEFT (3/5) — lists */}
+          {/* LEFT (3/5) */}
           <div className="lg:col-span-3 space-y-3">
             {/* Low Stock */}
             {lowStockWines.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h2 className="text-sm font-semibold font-sans text-foreground">⚠️ Baixo estoque</h2>
-                    <p className="text-[11px] text-muted-foreground">Produtos com ≤ 2 unidades</p>
+                    <h2 className="text-sm font-semibold font-sans text-foreground">⚠️ Reposição necessária</h2>
+                    <p className="text-[11px] text-muted-foreground">Produtos com ≤ 2 unidades em estoque</p>
                   </div>
                   <Badge variant="secondary" className="text-[11px] h-6" style={{ background: "rgba(224,122,95,0.08)", color: "#E07A5F" }}>
                     {lowStock} itens
@@ -190,7 +236,7 @@ export default function CommercialDashboard() {
 
             {/* ABC Curve */}
             {abcData.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
                 <div className="flex items-center gap-1.5 mb-3">
                   <Layers className="h-3 w-3 text-muted-foreground" />
                   <div>
@@ -211,22 +257,25 @@ export default function CommercialDashboard() {
               </motion.div>
             )}
 
-            {/* Operational alerts */}
-            {lowStock > 0 && (
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-                <h2 className="text-[12px] font-semibold uppercase tracking-[0.08em] mb-2 text-muted-foreground">
-                  Alertas operacionais
-                </h2>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="glass-card p-4 flex items-center gap-3 cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(224,122,95,0.07)" }}>
-                      <AlertTriangle className="h-4 w-4" style={{ color: "#E07A5F" }} />
-                    </div>
-                    <div>
-                      <p className="text-base font-bold text-foreground">{lowStock}</p>
-                      <p className="text-[12px] font-medium" style={{ color: "#E07A5F" }}>Baixo estoque</p>
-                    </div>
-                  </div>
+            {/* Top products by value */}
+            {topSellers.length > 0 && (
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
+                <h2 className="text-sm font-semibold font-sans text-foreground mb-0.5">Produtos com maior valor</h2>
+                <p className="text-[11px] text-muted-foreground mb-3">Maiores investimentos em estoque</p>
+                <div className="space-y-1.5">
+                  {topSellers.map((w, i) => {
+                    const val = (w.current_value ?? w.purchase_price ?? 0) * w.quantity;
+                    return (
+                      <div key={w.id} className="flex items-center gap-2.5 p-2 rounded-lg" style={{ border: "1px solid rgba(0,0,0,0.04)" }}>
+                        <span className="text-[11px] font-bold text-muted-foreground w-4">{i + 1}.</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-semibold truncate text-foreground">{w.name}</p>
+                          <p className="text-[11px] text-muted-foreground">{w.quantity} un. · {w.style || "—"}</p>
+                        </div>
+                        <span className="text-[13px] font-bold text-foreground">R$ {val.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}
@@ -234,13 +283,34 @@ export default function CommercialDashboard() {
 
           {/* RIGHT (2/5) — charts */}
           <div className="lg:col-span-2 space-y-3">
+            {/* Giro KPI */}
+            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold font-sans text-foreground">Giro (30 dias)</h3>
+                <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-foreground">{turnover}%</span>
+                <span className="text-xs text-muted-foreground font-medium">dos produtos movimentados</span>
+              </div>
+              <div className="mt-3 h-2 rounded-full bg-black/[0.04] overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: turnover > 50 ? "#22c55e" : turnover > 25 ? "#f59e0b" : "#E07A5F" }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(turnover, 100)}%` }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                />
+              </div>
+            </motion.div>
+
             {/* Bar chart */}
             {styleData.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h3 className="text-sm font-semibold font-sans text-foreground">Estoque por estilo</h3>
-                    <p className="text-[11px] text-muted-foreground">Distribuição atual</p>
+                    <h3 className="text-sm font-semibold font-sans text-foreground">Volume por categoria</h3>
+                    <p className="text-[11px] text-muted-foreground">Distribuição atual do estoque</p>
                   </div>
                   <BarChart3 className="h-3 w-3 text-muted-foreground" />
                 </div>
@@ -260,9 +330,9 @@ export default function CommercialDashboard() {
 
             {/* Pie chart */}
             {styleData.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
                 <h3 className="text-sm font-semibold font-sans text-foreground mb-0.5">Composição</h3>
-                <p className="text-[11px] text-muted-foreground mb-2">Por estilo de vinho</p>
+                <p className="text-[11px] text-muted-foreground mb-2">Por tipo de produto</p>
                 <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
                     <Pie data={styleData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
@@ -289,15 +359,15 @@ export default function CommercialDashboard() {
       {totalBottles === 0 && (
         <PremiumEmptyState
           icon={Package}
-          title="Gestão comercial simplificada"
-          description="Cadastre seus primeiros produtos para acompanhar valor e giro de estoque em tempo real."
+          title="Controle total do seu estoque"
+          description="Cadastre seus primeiros produtos para acompanhar valor, giro e níveis de estoque em tempo real."
           primaryAction={{
             label: "Cadastrar produto",
             onClick: () => setAddOpen(true),
             icon: <Plus className="h-4 w-4" />
           }}
           secondaryAction={{
-            label: "Importar lista",
+            label: "Importar lista CSV",
             onClick: () => setCsvOpen(true)
           }}
         />
@@ -307,10 +377,7 @@ export default function CommercialDashboard() {
       <motion.button
         onClick={() => setAddOpen(true)}
         className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full flex items-center justify-center text-white cursor-pointer"
-        style={{
-          background: "linear-gradient(135deg, #8F2D56, #C44569)",
-          boxShadow: "0 6px 20px rgba(143,45,86,0.3)",
-        }}
+        style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)", boxShadow: "0 6px 20px rgba(143,45,86,0.3)" }}
         whileHover={{ scale: 1.08, y: -2 }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0, scale: 0.5 }}
