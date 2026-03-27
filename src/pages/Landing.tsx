@@ -297,7 +297,7 @@ export default function Landing() {
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier);
               return (
-                <motion.div key={plan.name} className="snap-start shrink-0 w-[75vw] max-w-[280px] rounded-2xl overflow-hidden flex flex-col p-3.5" style={s.bg} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <motion.div key={plan.name} className="snap-start shrink-0 w-[75vw] max-w-[320px] rounded-2xl overflow-hidden flex flex-col p-3.5" style={s.bg} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
                   {s.badge && (
                     <div className="flex justify-end mb-1.5">
                       <span className="px-2 py-0.5 rounded-full text-[7px] font-black tracking-[0.12em] uppercase bg-gradient-to-r from-[#EAB3C8]/80 to-[#D1739A]/80 text-[#3B1326] border border-white/40 shadow-sm">
@@ -307,10 +307,13 @@ export default function Landing() {
                   )}
                   <h3 className="text-sm font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
                   <p className="text-[10px] mb-1.5 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
-                  <div className="mb-2 flex items-baseline gap-1 border-b pb-2" style={{ borderColor: s.border }}>
+                  <div className="mb-1 flex items-baseline gap-1 border-b pb-2" style={{ borderColor: s.border }}>
                     <span className="text-2xl font-black font-sans tracking-tighter" style={{ color: s.price }}>{plan.price}</span>
                     <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
                   </div>
+                  <p className="text-[9px] font-bold mb-2 tracking-wide" style={{ color: s.checkColor }}>
+                    ✦ {plan.trial}
+                  </p>
                   <ul className="space-y-1 mb-3">
                     {plan.features.map(f => (
                       <li key={f} className="flex items-center gap-1.5 text-[10px] leading-snug font-medium" style={{ color: s.feat }}>
@@ -330,15 +333,14 @@ export default function Landing() {
           </div>
 
           {/* Desktop */}
-          <div className="hidden lg:grid lg:grid-cols-3 gap-4 lg:gap-5 items-center">
+          <div className="hidden lg:grid lg:grid-cols-2 gap-5 max-w-3xl mx-auto items-stretch">
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier);
-              const isScaled = plan.tier !== "free";
               return (
                 <motion.div
                   key={plan.name}
-                  className={`relative rounded-[24px] overflow-hidden flex flex-col ${isScaled ? "p-6 md:p-8 z-10" : "p-6 md:p-7"}`}
-                  style={{ ...s.bg, ...(plan.tier === "business" ? { transform: "scale(1.06)" } : {}) }}
+                  className="relative rounded-[24px] overflow-hidden flex flex-col p-6 md:p-8"
+                  style={s.bg}
                   initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                   whileHover={{ y: -4, transition: { duration: 0.3 } }}
                 >
@@ -351,10 +353,13 @@ export default function Landing() {
                   )}
                   <h3 className="text-lg font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
                   <p className="text-[12px] mb-4 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
-                  <div className="mb-5 flex items-baseline gap-1 border-b pb-5" style={{ borderColor: s.border }}>
+                  <div className="mb-2 flex items-baseline gap-1 border-b pb-5" style={{ borderColor: s.border }}>
                     <span className="text-4xl md:text-5xl font-black font-sans tracking-tighter" style={{ color: s.price }}>{plan.price}</span>
                     <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
                   </div>
+                  <p className="text-[11px] font-bold mb-5 tracking-wide" style={{ color: s.checkColor }}>
+                    ✦ {plan.trial}
+                  </p>
                   <ul className="space-y-2.5 mb-6">
                     {plan.features.map(f => (
                       <li key={f} className="flex items-center gap-2.5 text-[13px] leading-snug font-medium" style={{ color: s.feat }}>
