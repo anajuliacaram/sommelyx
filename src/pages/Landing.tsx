@@ -129,7 +129,7 @@ export default function Landing() {
         <div className="container mx-auto flex items-center justify-between max-w-7xl">
           <a href="/" className="flex items-center gap-2 sm:gap-3 transition-opacity duration-300 hover:opacity-80">
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 sm:h-[68px] md:h-[90px] w-auto object-contain" />
-            <span className="text-lg sm:text-[30px] md:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
+            <span className="text-lg sm:text-[30px] md:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#1A1A1A]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
@@ -145,7 +145,7 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-3.5 sm:px-6 md:px-9 h-8 sm:h-11 md:h-12 text-[10px] sm:text-[13px] font-black uppercase tracking-[0.1em] sm:tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-3.5 sm:px-6 md:px-9 h-8 sm:h-11 md:h-12 text-[10px] sm:text-[13px] font-black uppercase tracking-[0.1em] sm:tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#1A1A1A] hover:bg-[#202028] text-white"
                 onClick={handleStartFreeClick}
               >
                 Começar Grátis
@@ -248,7 +248,7 @@ export default function Landing() {
             <span className="inline-block px-4 py-1.5 rounded-full text-[12px] font-bold tracking-widest uppercase mb-4" style={{ background: "rgba(34,197,94,0.1)", color: "#16a34a" }}>
               Teste grátis por 14 dias
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-[42px] font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
+            <h2 className="text-2xl sm:text-3xl md:text-[42px] font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.08]">
               Escolha o plano ideal<br className="hidden sm:block" /> para sua adega
             </h2>
             <p className="mt-4 text-[15px] text-[#6B7280] font-medium max-w-md mx-auto">
