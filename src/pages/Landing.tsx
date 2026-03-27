@@ -105,11 +105,23 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden premium-noise selection:bg-[#8F2D56]/20 selection:text-[#0F0F14] bg-[radial-gradient(circle_at_12%_-8%,rgba(173,69,104,0.18),transparent_40%),radial-gradient(circle_at_82%_6%,rgba(255,255,255,0.85),transparent_35%),#f6f3f5] text-[#0F0F14]">
+    <div className="min-h-screen overflow-hidden selection:bg-[#8F2D56]/20 selection:text-[#0F0F14] bg-[#FAF7F6] text-[#0F0F14]">
+
+      {/* ─── GLOBAL AMBIENT LIGHT ─── */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Wine glow — top left */}
+        <div className="absolute top-[-8%] left-[-6%] w-[55vw] h-[55vw] rounded-full bg-[#8C2044]/[0.07] blur-[160px]" />
+        {/* Rosé glow — top right */}
+        <div className="absolute top-[2%] right-[-8%] w-[45vw] h-[45vw] rounded-full bg-[#E8A1B3]/[0.09] blur-[140px]" />
+        {/* Champagne warmth — center */}
+        <div className="absolute top-[15%] left-[30%] w-[40vw] h-[40vw] rounded-full bg-[#F3E5D8]/[0.12] blur-[120px]" />
+        {/* Subtle grain texture */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat", backgroundSize: "128px 128px" }} />
+      </div>
 
       {/* ─── HEADER ─── */}
       <motion.header
-        className="fixed top-0 w-full z-50 px-4 sm:px-6 py-2.5 sm:py-5 lg:py-6 bg-[#FFF8FB]/78 backdrop-blur-2xl border-b border-[#8C2044]/10"
+        className="fixed top-0 w-full z-50 px-4 sm:px-6 py-2.5 sm:py-5 lg:py-6 bg-[#FAF7F6]/80 backdrop-blur-2xl border-b border-[#8C2044]/8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -144,9 +156,7 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-24 sm:pt-32 lg:pt-36 pb-2 sm:pb-4 px-4 sm:px-6 flex items-center overflow-visible">
-        <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
-        <div className="absolute top-[-12%] left-[-12%] w-[46vw] h-[46vw] rounded-full bg-[#8C2044]/14 blur-[130px] pointer-events-none" />
+      <section className="relative pt-24 sm:pt-32 lg:pt-36 pb-2 sm:pb-4 px-4 sm:px-6 flex items-center overflow-visible z-10">
 
         <div className="container mx-auto relative z-10 max-w-3xl">
           <div className="flex flex-col items-center text-center">
