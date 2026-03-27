@@ -13,30 +13,23 @@ const fadeUp = {
 
 const plans = [
   {
-    name: "Free",
-    price: "R$ 0",
-    period: "/mês",
-    desc: "Organize sua coleção",
-    features: ["Até 50 garrafas", "Dashboard básico", "Notas de degustação", "1 usuário"],
-    current: true,
-    cta: "Plano Atual",
-  },
-  {
     name: "Pro",
     price: "R$ 29",
     period: "/mês",
     desc: "Para colecionadores sérios",
-    features: ["Garrafas ilimitadas", "Analytics avançado", "Wishlist & harmonização", "Alertas inteligentes", "Exportação CSV"],
+    trial: "14 dias grátis",
+    features: ["Garrafas ilimitadas", "Alertas de consumo ideal", "Insights e relatórios", "Exportação CSV"],
     highlighted: true,
-    cta: "Assinar Pro",
+    cta: "Começar 14 dias grátis",
   },
   {
     name: "Business",
     price: "R$ 99",
     period: "/mês",
-    desc: "Operações comerciais",
-    features: ["Tudo do Pro", "Multiusuário (até 10)", "Gestão de vendas", "Relatórios financeiros"],
-    cta: "Falar com Comercial",
+    desc: "Para restaurantes, bares e lojas",
+    trial: "14 dias grátis",
+    features: ["Tudo do Pro", "Gestão de vendas e estoque", "Relatórios financeiros", "Curva ABC e giro"],
+    cta: "Começar 14 dias grátis",
   },
 ];
 
