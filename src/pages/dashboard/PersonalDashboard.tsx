@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Wine, TrendingUp, GlassWater, Plus, AlertTriangle, ArrowDownRight,
-  BarChart3, Star, Upload, ShoppingCart, Clock, Globe, Grape, MapPin
+  Wine, GlassWater, Plus, AlertTriangle, ArrowDownRight,
+  Clock, MapPin, Upload, Star, Grape, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,14 +14,8 @@ import { useWineMetrics, useWineEvent } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { PersonalizedNotifications } from "@/components/PersonalizedNotifications";
-import { DashboardProfileProgress } from "@/components/DashboardProfileProgress";
-import { DashboardCommunityCard } from "@/components/DashboardCommunityCard";
-import { ContextualSuggestions } from "@/components/ContextualSuggestions";
 import { useToast } from "@/hooks/use-toast";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -39,7 +33,7 @@ export default function PersonalDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Sommelier";
-  const { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines, isLoading } = useWineMetrics();
+  const { totalBottles, drinkNow, recentCount, lowStock, wines, isLoading } = useWineMetrics();
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
@@ -70,46 +64,23 @@ export default function PersonalDashboard() {
       const key = w.style || "Outro";
       map[key] = (map[key] || 0) + w.quantity;
     });
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
+    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 6)
       .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
   }, [wines]);
 
   const countryData = useMemo(() => {
     const map: Record<string, number> = {};
-    wines.forEach(w => {
-      const key = w.country || "Outro";
-      map[key] = (map[key] || 0) + w.quantity;
-    });
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([name, value]) => ({ name, value }));
+    wines.forEach(w => { const key = w.country || "Outro"; map[key] = (map[key] || 0) + w.quantity; });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, value]) => ({ name, value }));
   }, [wines]);
 
   const recentWines = wines
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 5);
 
-  const avgRating = useMemo(() => {
-    const rated = wines.filter(w => w.rating);
-    if (rated.length === 0) return "—";
-    return (rated.reduce((s, w) => s + (w.rating ?? 0), 0) / rated.length).toFixed(1);
-  }, [wines]);
-
-  const collectionData = useMemo(() => {
-    const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-    const currentMonth = new Date().getMonth();
-    return months.slice(0, currentMonth + 1).map((m, i) => ({
-      name: m,
-      garrafas: Math.max(0, totalBottles - (currentMonth - i) * Math.ceil(totalBottles * 0.08)),
-    }));
-  }, [totalBottles]);
-
+  const inGuard = wines.filter(w => w.drink_from && currentYear < w.drink_from && w.quantity > 0).length;
   const pastPeak = wines.filter(w => w.drink_until && currentYear > w.drink_until && w.quantity > 0).length;
   const noLocation = wines.filter(w => w.quantity > 0 && !w.cellar_location).length;
-  const inGuard = wines.filter(w => w.drink_from && currentYear < w.drink_from && w.quantity > 0).length;
 
   const alerts = [
     ...(drinkNow > 0 ? [{ label: "Beber agora", count: drinkNow, icon: GlassWater, color: "#22c55e", bg: "rgba(34,197,94,0.07)" }] : []),
@@ -118,11 +89,12 @@ export default function PersonalDashboard() {
     ...(noLocation > 0 ? [{ label: "Sem localização", count: noLocation, icon: MapPin, color: "#6B7280", bg: "rgba(107,114,128,0.07)" }] : []),
   ];
 
+  // 4 KPIs: Garrafas, Beber agora, Em guarda, Consumo recente
   const metrics = [
     { label: "Garrafas", value: totalBottles.toString(), icon: Wine, color: "#8F2D56", badge: recentCount > 0 ? `+${recentCount}` : undefined, onClick: () => navigate("/dashboard/cellar") },
     { label: "Beber agora", value: drinkNow.toString(), icon: GlassWater, color: "#22c55e", onClick: () => navigate("/dashboard/cellar") },
     { label: "Em guarda", value: inGuard.toString(), icon: Clock, color: "#3b82f6", onClick: () => navigate("/dashboard/cellar") },
-    { label: "Consumo recente", value: recentCount.toString(), icon: TrendingUp, color: "#C44569" },
+    { label: "Consumo recente", value: recentCount.toString(), icon: Star, color: "#C44569" },
   ];
 
   const handleOpenBottle = async (wineId: string, wineName: string) => {
@@ -148,7 +120,7 @@ export default function PersonalDashboard() {
           <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-sm text-muted-foreground font-medium mt-0.5">Sua coleção, seus momentos, suas descobertas</p>
+          <p className="text-sm text-muted-foreground font-medium mt-0.5">Sua adega, seus momentos</p>
         </div>
         <div className="flex gap-2.5">
           <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-semibold" onClick={() => setCsvOpen(true)}>
@@ -163,7 +135,7 @@ export default function PersonalDashboard() {
       {/* KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (
-          [1, 2, 3, 4].map((i) => (
+          [1, 2, 3, 4].map(i => (
             <div key={i} className="glass-card p-5 space-y-3">
               <div className="w-10 h-10 rounded-xl shimmer-premium" />
               <div className="h-8 w-16 rounded shimmer-premium" />
@@ -196,20 +168,14 @@ export default function PersonalDashboard() {
         )}
       </div>
 
-      {/* Personalized Notifications */}
+      {/* Notifications */}
       {wines.length > 0 && <PersonalizedNotifications wines={wines} />}
 
-      {/* Profile Progress */}
-      <DashboardProfileProgress wines={wines} profileType="personal" />
-
-      {/* Contextual Suggestions */}
-      {wines.length > 0 && <ContextualSuggestions wines={wines} />}
-
-      {/* Main 2-column grid */}
+      {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* LEFT column (3/5) */}
+        {/* LEFT (3/5) */}
         <div className="lg:col-span-3 space-y-4">
-          {/* What to open */}
+          {/* Ready to drink */}
           {suggestions.length > 0 && (
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5} className="glass-card p-5">
               <div className="flex items-center justify-between mb-4">
@@ -217,28 +183,19 @@ export default function PersonalDashboard() {
                   <h2 className="text-sm font-bold font-sans text-foreground">🍷 Prontos para abrir</h2>
                   <p className="text-xs text-muted-foreground font-medium">Na janela ideal de consumo</p>
                 </div>
-                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>
-                  Ver todos →
-                </button>
+                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>Ver todos →</button>
               </div>
               <div className="space-y-2">
-                {suggestions.map((w) => (
+                {suggestions.map(w => (
                   <div key={w.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/[0.02] transition-colors" style={{ border: "1px solid rgba(0,0,0,0.05)" }}>
                     <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.08)" }}>
                       <GlassWater className="h-4 w-4" style={{ color: "#22c55e" }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.
-                      </p>
+                      <p className="text-xs text-muted-foreground font-medium">{[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.</p>
                     </div>
-                    <Button
-                      size="sm" variant="outline"
-                      className="h-7 text-xs px-3 shrink-0 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold"
-                      onClick={() => handleOpenBottle(w.id, w.name)}
-                      disabled={wineEvent.isPending}
-                    >
+                    <Button size="sm" variant="outline" className="h-7 text-xs px-3 shrink-0 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpenBottle(w.id, w.name)} disabled={wineEvent.isPending}>
                       Abrir
                     </Button>
                   </div>
@@ -252,7 +209,7 @@ export default function PersonalDashboard() {
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
               <h2 className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">Atenção</h2>
               <div className="grid grid-cols-2 gap-3">
-                {alerts.map((a) => (
+                {alerts.map(a => (
                   <div key={a.label} className="glass-card p-3.5 flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/dashboard/alerts")}>
                     <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.bg }}>
                       <a.icon className="h-4 w-4" style={{ color: a.color }} />
@@ -274,11 +231,8 @@ export default function PersonalDashboard() {
                 <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" /> Adicionados recentemente
                 </h2>
-                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>
-                  Ver todos →
-                </button>
+                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>Ver todos →</button>
               </div>
-              {/* Desktop table */}
               <div className="glass-card overflow-hidden hidden sm:block">
                 <table className="w-full">
                   <thead>
@@ -306,9 +260,8 @@ export default function PersonalDashboard() {
                   </tbody>
                 </table>
               </div>
-              {/* Mobile card list */}
               <div className="space-y-2 sm:hidden">
-                {recentWines.map((w) => (
+                {recentWines.map(w => (
                   <div key={w.id} className="glass-card p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/dashboard/cellar")}>
                     <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
                       <Wine className="h-4 w-4" style={{ color: "#8F2D56" }} />
@@ -328,13 +281,13 @@ export default function PersonalDashboard() {
           )}
         </div>
 
-        {/* RIGHT column (2/5) — charts + community */}
+        {/* RIGHT (2/5) */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Drink Window */}
+          {/* Drink Window Chart */}
           {totalBottles > 0 && drinkWindowData.length > 0 && (
             <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
               <h3 className="text-sm font-bold font-sans text-foreground mb-0.5">Janela de Consumo</h3>
-              <p className="text-xs text-muted-foreground font-medium mb-3">Quando cada garrafa atinge seu melhor momento</p>
+              <p className="text-xs text-muted-foreground font-medium mb-3">Quando cada garrafa está pronta</p>
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
                   <Pie data={drinkWindowData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
@@ -354,37 +307,9 @@ export default function PersonalDashboard() {
             </motion.div>
           )}
 
-          {/* Collection evolution */}
-          {totalBottles > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-sm font-bold font-sans text-foreground">Evolução</h3>
-                  <p className="text-xs text-muted-foreground font-medium">Sua coleção ao longo do tempo</p>
-                </div>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <ResponsiveContainer width="100%" height={120}>
-                <AreaChart data={collectionData}>
-                  <defs>
-                    <linearGradient id="colorGarrafas" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8F2D56" stopOpacity={0.12} />
-                      <stop offset="95%" stopColor="#8F2D56" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 9, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={20} />
-                  <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }} />
-                  <Area type="monotone" dataKey="garrafas" stroke="#8F2D56" strokeWidth={1.5} fill="url(#colorGarrafas)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </motion.div>
-          )}
-
           {/* By style */}
           {totalBottles > 0 && compositionData.length > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
               <div className="flex items-center gap-2 mb-3">
                 <Grape className="h-4 w-4 text-muted-foreground" />
                 <h3 className="text-sm font-bold font-sans text-foreground">Por estilo</h3>
@@ -408,7 +333,7 @@ export default function PersonalDashboard() {
 
           {/* By country */}
           {totalBottles > 0 && countryData.length > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
+            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
               <div className="flex items-center gap-2 mb-3">
                 <Globe className="h-4 w-4 text-muted-foreground" />
                 <h3 className="text-sm font-bold font-sans text-foreground">Por país</h3>
@@ -429,9 +354,6 @@ export default function PersonalDashboard() {
               </div>
             </motion.div>
           )}
-
-          {/* Community & Inspiration */}
-          <DashboardCommunityCard />
         </div>
       </div>
 
@@ -455,11 +377,9 @@ export default function PersonalDashboard() {
               <div className="absolute inset-0 rounded-full gradient-wine opacity-10" />
               <Wine className="h-7 w-7 text-primary relative z-10" />
             </motion.div>
-            <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight text-foreground">
-              Sua coleção começa aqui
-            </h3>
+            <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight text-foreground">Sua coleção começa aqui</h3>
             <p className="text-sm mb-4 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
-              Adicione seu primeiro vinho e comece a organizar, acompanhar e descobrir o melhor da sua adega.
+              Adicione seu primeiro vinho e saiba exatamente quando abrir cada garrafa.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 text-xs text-muted-foreground mb-6">
               <span className="flex items-center gap-1.5"><Wine className="h-3.5 w-3.5 text-primary" /> Cadastro manual</span>

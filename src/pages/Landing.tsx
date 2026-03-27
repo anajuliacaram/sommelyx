@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Wine, Search, Bell, StickyNote, Upload, LayoutGrid, ArrowRight, Check, ShieldCheck, BarChart4, Package, TrendingUp, Users, GlassWater, Grape } from "lucide-react";
+import { Wine, Bell, ArrowRight, Check, Package, GlassWater, ShieldCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -15,21 +15,28 @@ const fadeUp = {
   }),
 } as const;
 
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
-const personalFeatures = [
-  { icon: GlassWater, title: "Janela de Consumo", desc: "Saiba exatamente quando cada garrafa atinge seu melhor momento." },
-  { icon: Wine, title: "Organização Total", desc: "Cadastre safra, produtor, uva e localização em fichas completas." },
-  { icon: BarChart4, title: "Insights Pessoais", desc: "Acompanhe consumo, avaliações e a evolução da sua coleção." },
-];
-
-const commercialFeatures = [
-  { icon: Package, title: "Controle de Estoque", desc: "Monitore entradas, saídas e níveis críticos em tempo real." },
-  { icon: TrendingUp, title: "Giro & Performance", desc: "Identifique seus produtos mais rentáveis com a curva ABC." },
-  { icon: Users, title: "Gestão Operacional", desc: "Relatórios financeiros, importação CSV e visão multiusuário." },
+const pillars = [
+  {
+    icon: Wine,
+    title: "Organize",
+    headline: "Cada garrafa no lugar certo",
+    desc: "Cadastre safra, produtor, uva e localização. Encontre qualquer rótulo em segundos.",
+    color: "#8F2D56",
+  },
+  {
+    icon: Clock,
+    title: "Saiba quando beber",
+    headline: "Nunca perca o ponto ideal",
+    desc: "Alertas de janela de consumo avisam quando cada garrafa está pronta para abrir.",
+    color: "#22c55e",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Controle total",
+    headline: "Estoque, consumo e visão clara",
+    desc: "Acompanhe o que entra e sai, monitore estoque baixo e tome decisões com dados reais.",
+    color: "#3b82f6",
+  },
 ];
 
 const plans = [
@@ -38,7 +45,7 @@ const plans = [
     price: "R$ 0",
     period: "/mês",
     desc: "Para começar a organizar",
-    features: ["Até 50 garrafas", "Dashboard básico", "Notas de degustação", "1 usuário"],
+    features: ["Até 50 garrafas", "Cadastro completo", "Notas de degustação"],
     cta: "Começar Grátis",
     tier: "free" as const,
   },
@@ -47,7 +54,7 @@ const plans = [
     price: "R$ 29",
     period: "/mês",
     desc: "Para colecionadores sérios",
-    features: ["Garrafas ilimitadas", "Analytics avançado", "Wishlist & harmonização", "Alertas inteligentes", "Exportação CSV"],
+    features: ["Garrafas ilimitadas", "Alertas de consumo ideal", "Insights e relatórios", "Exportação CSV"],
     cta: "Assinar Pro",
     tier: "pro" as const,
   },
@@ -56,7 +63,7 @@ const plans = [
     price: "R$ 99",
     period: "/mês",
     desc: "Para restaurantes, bares e lojas",
-    features: ["Tudo do Pro", "Multiusuário (até 10)", "Gestão de vendas e estoque", "Relatórios financeiros", "Curva ABC e giro"],
+    features: ["Tudo do Pro", "Gestão de vendas e estoque", "Relatórios financeiros", "Curva ABC e giro"],
     cta: "Começar Business",
     tier: "business" as const,
   },
@@ -143,160 +150,143 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section id="features" className="relative pt-20 sm:pt-32 lg:pt-40 pb-6 sm:pb-8 lg:pb-14 px-4 sm:px-6 flex items-center overflow-visible">
+      <section className="relative pt-24 sm:pt-36 lg:pt-44 pb-10 sm:pb-14 lg:pb-20 px-4 sm:px-6 flex items-center overflow-visible">
         <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
-        <div className="absolute inset-0 z-0 opacity-[0.28] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(88,20,46,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(88,20,46,0.07) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
         <div className="absolute top-[-12%] left-[-12%] w-[46vw] h-[46vw] rounded-full bg-[#8C2044]/14 blur-[130px] pointer-events-none" />
-        <div className="absolute bottom-[-30%] right-[-10%] w-[44vw] h-[44vw] rounded-full bg-[#e8cfda]/35 blur-[140px] pointer-events-none" />
 
-        <div className="container mx-auto relative z-10 max-w-7xl">
-          <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-4 sm:mb-6 flex items-center gap-3">
-              <div className="h-7 sm:h-8 px-3 sm:px-4 rounded-full bg-[#8C2044]/8 border border-[#8C2044]/18 shadow-[0_8px_18px_rgba(140,32,68,0.08)] flex items-center justify-center">
-                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[#8C2044]">Gestão Inteligente de Vinhos</span>
-              </div>
-            </motion.div>
-
+        <div className="container mx-auto relative z-10 max-w-3xl">
+          <div className="flex flex-col items-center text-center">
             <motion.h1
               className="font-serif font-black text-[#0F0F14]"
-              style={{ fontSize: "clamp(32px, 5.5vw, 76px)", lineHeight: 1, letterSpacing: "-0.04em" }}
-              initial="hidden" animate="visible" variants={fadeUp} custom={1}
+              style={{ fontSize: "clamp(28px, 5vw, 64px)", lineHeight: 1.08, letterSpacing: "-0.04em" }}
+              initial="hidden" animate="visible" variants={fadeUp} custom={0}
             >
-              Sua coleção organizada.
-              <br />
-              <span className="italic text-gradient-wine">Sua operação sob controle.</span>
+              Gerencie sua adega e nunca mais perca o{" "}
+              <span className="italic text-gradient-wine">ponto ideal de consumo</span>
             </motion.h1>
 
             <motion.p
-              className="text-base sm:text-lg md:text-[20px] max-w-[620px] mt-5 sm:mt-8 font-medium text-[#4B5563]"
+              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-5 sm:mt-7 font-medium text-[#4B5563]"
               style={{ lineHeight: 1.5 }}
-              initial="hidden" animate="visible" variants={fadeUp} custom={2}
+              initial="hidden" animate="visible" variants={fadeUp} custom={1}
             >
-              Para quem coleciona com paixão ou opera com precisão. Organize sua adega pessoal ou gerencie estoque, vendas e performance do seu negócio — tudo em um só lugar.
+              Organize, acompanhe e saiba exatamente quando abrir cada garrafa.
             </motion.p>
 
             <motion.div
-              className="mt-6 sm:mt-10 flex flex-col sm:flex-row items-center gap-3 sm:gap-5"
-              initial="hidden" animate="visible" variants={fadeUp} custom={3}
+              className="mt-7 sm:mt-10"
+              initial="hidden" animate="visible" variants={fadeUp} custom={2}
             >
               <MagneticButton>
                 <Button
-                  className="group relative isolate w-full sm:w-auto px-8 sm:px-14 h-12 sm:h-[64px] text-[12px] sm:text-[14px] font-black uppercase tracking-[0.14em] sm:tracking-[0.16em] rounded-2xl sm:rounded-[20px] transition-all text-white hover:-translate-y-1.5 shadow-[0_18px_40px_rgba(122,35,72,0.44)] hover:shadow-[0_24px_52px_rgba(122,35,72,0.52)] border border-white/25"
+                  className="group relative isolate px-10 sm:px-14 h-13 sm:h-[60px] text-[13px] sm:text-[15px] font-black uppercase tracking-[0.14em] rounded-2xl transition-all text-white hover:-translate-y-1.5 shadow-[0_18px_40px_rgba(122,35,72,0.44)] hover:shadow-[0_24px_52px_rgba(122,35,72,0.52)] border border-white/25"
                   style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
                   onClick={handleStartFreeClick}
                 >
-                  <span className="pointer-events-none absolute inset-[1px] rounded-[18px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
+                  <span className="pointer-events-none absolute inset-[1px] rounded-[14px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
                   Começar Grátis
                 </Button>
               </MagneticButton>
             </motion.div>
 
-            <motion.div
-              className="mt-5 sm:mt-7 flex items-center gap-4 sm:gap-6 pt-3"
-              initial="hidden" animate="visible" variants={fadeUp} custom={4}
+            <motion.p
+              className="mt-4 text-[12px] text-[#9CA3AF] font-medium flex items-center gap-1.5"
+              initial="hidden" animate="visible" variants={fadeUp} custom={3}
             >
-              <div className="flex -space-x-2.5 sm:-space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#FAFAFA] bg-slate-200 overflow-hidden"><img src="https://i.pravatar.cc/100?img=11" alt="Avatar" className="w-full h-full object-cover" /></div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#FAFAFA] bg-slate-300 overflow-hidden"><img src="https://i.pravatar.cc/100?img=12" alt="Avatar" className="w-full h-full object-cover" /></div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#FAFAFA] bg-slate-400 overflow-hidden"><img src="https://i.pravatar.cc/100?img=13" alt="Avatar" className="w-full h-full object-cover" /></div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#FAFAFA] bg-[#0F0F14] flex items-center justify-center text-[9px] sm:text-[10px] font-bold text-white">+2k</div>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[12px] sm:text-[14px] font-bold text-[#0F0F14]">Colecionadores e gestores confiam</span>
-                <span className="text-[11px] sm:text-[12px] font-medium text-[#7B6A73] flex items-center gap-1.5 mt-0.5">
-                  <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8C2044]" /> Comece em 30 segundos, sem cartão.
-                </span>
-              </div>
-            </motion.div>
+              <Check className="h-3.5 w-3.5 text-[#8C2044]" /> Sem cartão de crédito. Comece em 30 segundos.
+            </motion.p>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════ TWO JOURNEYS ═══════════════ */}
-      <section className="relative px-4 sm:px-6 py-10 sm:py-16 lg:py-20">
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div className="text-center mb-8 sm:mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <span className="text-[11px] sm:text-[13px] font-black uppercase tracking-[0.22em] text-primary mb-2 block">
-              Duas Jornadas, Uma Plataforma
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
-              O que o Sommelyx faz <span className="italic text-gradient-wine">por você</span>
+      {/* ═══════════════ 3 PILLARS ═══════════════ */}
+      <section id="features" className="relative px-4 sm:px-6 py-12 sm:py-20">
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <motion.div className="text-center mb-10 sm:mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
+              Controle sua adega, saiba o momento ideal
+              <br className="hidden sm:block" />
+              <span className="italic text-gradient-wine"> e evite perder garrafas</span>
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-            {/* Personal Journey */}
+          <div className="grid sm:grid-cols-3 gap-5 lg:gap-8">
+            {pillars.map((p, i) => (
+              <motion.div
+                key={p.title}
+                className="rounded-2xl p-6 sm:p-7 text-center relative overflow-hidden"
+                style={{ background: "rgba(255,255,255,0.85)", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 4px 20px -8px rgba(0,0,0,0.06)" }}
+                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
+                whileHover={{ y: -4, transition: { duration: 0.3 } }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: `${p.color}14` }}>
+                  <p.icon className="h-6 w-6" style={{ color: p.color }} />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 block" style={{ color: p.color }}>{p.title}</span>
+                <h3 className="text-lg font-serif font-bold text-[#0F0F14] mb-2">{p.headline}</h3>
+                <p className="text-[13px] text-[#6B7280] leading-relaxed">{p.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ DUAL CTA ═══════════════ */}
+      <section className="relative px-4 sm:px-6 py-10 sm:py-16">
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <div className="grid md:grid-cols-2 gap-5 lg:gap-6">
+            {/* Personal */}
             <motion.div
-              className="rounded-[24px] p-6 sm:p-8 relative overflow-hidden"
+              className="rounded-2xl p-6 relative overflow-hidden"
               style={{ background: "linear-gradient(160deg, rgba(143,45,86,0.06), rgba(255,255,255,0.9))", border: "1px solid rgba(143,45,86,0.12)" }}
               initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
-              whileHover={{ y: -4, transition: { duration: 0.3 } }}
+              whileHover={{ y: -3, transition: { duration: 0.3 } }}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#8F2D56]/8 to-transparent rounded-bl-full" />
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)" }}>
-                  <Wine className="h-5 w-5 text-white" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)" }}>
+                  <Wine className="h-4.5 w-4.5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-serif font-bold text-[#0F0F14]">Adega Pessoal</h3>
-                  <p className="text-[11px] font-medium text-[#9CA3AF]">Para colecionadores e entusiastas</p>
+                  <h3 className="text-base font-serif font-bold text-[#0F0F14]">Adega Pessoal</h3>
+                  <p className="text-[11px] text-[#9CA3AF]">Colecionadores e entusiastas</p>
                 </div>
               </div>
-              <div className="space-y-4">
-                {personalFeatures.map((f, i) => (
-                  <div key={f.title} className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white shadow-sm border border-black/[0.04]">
-                      <f.icon className="h-4 w-4 text-[#8C2044]" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <h4 className="text-[14px] font-bold text-[#0F0F14] mb-0.5">{f.title}</h4>
-                      <p className="text-[13px] text-[#6B7280] leading-relaxed">{f.desc}</p>
-                    </div>
-                  </div>
+              <ul className="space-y-2 mb-5">
+                {["Organize sua coleção em um só lugar", "Saiba quando cada garrafa está pronta", "Registre notas e acompanhe consumo"].map(t => (
+                  <li key={t} className="flex items-center gap-2 text-[13px] text-[#4B5563]">
+                    <Check className="h-3.5 w-3.5 text-[#8C2044] shrink-0" /> {t}
+                  </li>
                 ))}
-              </div>
-              <Button
-                className="mt-6 w-full h-11 rounded-xl text-[12px] font-bold tracking-wide bg-[#8F2D56] text-white hover:bg-[#7a1e47] transition-all"
-                onClick={handleStartFreeClick}
-              >
+              </ul>
+              <Button className="w-full h-10 rounded-xl text-[12px] font-bold bg-[#8F2D56] text-white hover:bg-[#7a1e47]" onClick={handleStartFreeClick}>
                 Organizar minha coleção <ArrowRight className="h-3.5 w-3.5 ml-2" />
               </Button>
             </motion.div>
 
-            {/* Commercial Journey */}
+            {/* Commercial */}
             <motion.div
-              className="rounded-[24px] p-6 sm:p-8 relative overflow-hidden"
+              className="rounded-2xl p-6 relative overflow-hidden"
               style={{ background: "linear-gradient(160deg, #2B0F1F, #4A1932, #6A2143)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 16px 32px rgba(74,25,50,0.2)" }}
               initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
-              whileHover={{ y: -4, transition: { duration: 0.3 } }}
+              whileHover={{ y: -3, transition: { duration: 0.3 } }}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-full" />
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 backdrop-blur-sm border border-white/20">
-                  <Package className="h-5 w-5 text-white" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/15 border border-white/20">
+                  <Package className="h-4.5 w-4.5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-serif font-bold text-white">Operação Comercial</h3>
-                  <p className="text-[11px] font-medium text-white/50">Para restaurantes, bares e lojas</p>
+                  <h3 className="text-base font-serif font-bold text-white">Operação Comercial</h3>
+                  <p className="text-[11px] text-white/50">Restaurantes, bares e lojas</p>
                 </div>
               </div>
-              <div className="space-y-4">
-                {commercialFeatures.map((f, i) => (
-                  <div key={f.title} className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white/10 border border-white/10">
-                      <f.icon className="h-4 w-4 text-white/80" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <h4 className="text-[14px] font-bold text-white mb-0.5">{f.title}</h4>
-                      <p className="text-[13px] text-white/60 leading-relaxed">{f.desc}</p>
-                    </div>
-                  </div>
+              <ul className="space-y-2 mb-5">
+                {["Controle estoque sem planilhas", "Acompanhe giro, vendas e relatórios", "Cadastre rótulos, fornecedores e clientes"].map(t => (
+                  <li key={t} className="flex items-center gap-2 text-[13px] text-white/80">
+                    <Check className="h-3.5 w-3.5 text-white/60 shrink-0" /> {t}
+                  </li>
                 ))}
-              </div>
-              <Button
-                className="mt-6 w-full h-11 rounded-xl text-[12px] font-bold tracking-wide bg-white text-[#3B1326] hover:bg-[#FFF7FA] transition-all"
-                onClick={handleStartFreeClick}
-              >
+              </ul>
+              <Button className="w-full h-10 rounded-xl text-[12px] font-bold bg-white text-[#3B1326] hover:bg-[#FFF7FA]" onClick={handleStartFreeClick}>
                 Controlar minha operação <ArrowRight className="h-3.5 w-3.5 ml-2" />
               </Button>
             </motion.div>
@@ -305,31 +295,23 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ PRICING ═══════════════ */}
-      <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 pb-10 sm:pb-16 pt-6 sm:pt-8 lg:pb-20 lg:pt-10">
+      <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 py-10 sm:py-16 lg:py-20">
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="mx-auto mb-6 sm:mb-10 max-w-2xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <span className="mb-2 sm:mb-4 block text-[11px] sm:text-[13px] font-black uppercase tracking-[0.22em] text-primary">
-              Planos
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-black tracking-tight text-foreground leading-[1.08]">
+          <motion.div className="mx-auto mb-8 sm:mb-12 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
               Escolha o plano <span className="italic text-gradient-wine">ideal</span>
             </h2>
-            <p className="mt-3 text-[14px] sm:text-[16px] text-[#6B7280] font-medium max-w-md mx-auto">
-              Da coleção pessoal à operação comercial, com tudo que você precisa.
+            <p className="mt-3 text-[14px] text-[#6B7280] font-medium max-w-md mx-auto">
+              Da coleção pessoal à operação comercial.
             </p>
           </motion.div>
 
-          {/* Mobile: horizontal scroll carousel */}
+          {/* Mobile: horizontal scroll */}
           <div className="flex lg:hidden overflow-x-auto snap-x snap-mandatory gap-3 pb-4 -mx-4 px-4 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth", scrollPaddingLeft: "16px" }}>
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier);
               return (
-                <motion.div
-                  key={plan.name}
-                  className="snap-start shrink-0 w-[75vw] max-w-[280px] rounded-2xl overflow-hidden flex flex-col p-3.5"
-                  style={s.bg}
-                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                >
+                <motion.div key={plan.name} className="snap-start shrink-0 w-[75vw] max-w-[280px] rounded-2xl overflow-hidden flex flex-col p-3.5" style={s.bg} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
                   {s.badge && (
                     <div className="flex justify-end mb-1.5">
                       <span className="px-2 py-0.5 rounded-full text-[7px] font-black tracking-[0.12em] uppercase bg-gradient-to-r from-[#EAB3C8]/80 to-[#D1739A]/80 text-[#3B1326] border border-white/40 shadow-sm">
@@ -344,7 +326,7 @@ export default function Landing() {
                     <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
                   </div>
                   <ul className="space-y-1 mb-3">
-                    {plan.features.slice(0, 5).map((f) => (
+                    {plan.features.map(f => (
                       <li key={f} className="flex items-center gap-1.5 text-[10px] leading-snug font-medium" style={{ color: s.feat }}>
                         <div className="w-3 h-3 rounded-full flex items-center justify-center shrink-0" style={{ background: s.checkBg }}>
                           <Check className="h-1.5 w-1.5" style={{ color: s.checkColor }} strokeWidth={3} />
@@ -353,10 +335,7 @@ export default function Landing() {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    className={`mt-auto w-full h-8 rounded-xl text-[10px] font-bold tracking-wide transition-all duration-300 ${s.btn}`}
-                    onClick={handleStartFreeClick}
-                  >
+                  <Button className={`mt-auto w-full h-8 rounded-xl text-[10px] font-bold tracking-wide transition-all duration-300 ${s.btn}`} onClick={handleStartFreeClick}>
                     {plan.cta}
                   </Button>
                 </motion.div>
@@ -364,7 +343,7 @@ export default function Landing() {
             })}
           </div>
 
-          {/* Desktop: grid layout */}
+          {/* Desktop */}
           <div className="hidden lg:grid lg:grid-cols-3 gap-4 lg:gap-5 items-center">
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier);
@@ -391,7 +370,7 @@ export default function Landing() {
                     <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
                   </div>
                   <ul className="space-y-2.5 mb-6">
-                    {plan.features.map((f) => (
+                    {plan.features.map(f => (
                       <li key={f} className="flex items-center gap-2.5 text-[13px] leading-snug font-medium" style={{ color: s.feat }}>
                         <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: s.checkBg }}>
                           <Check className="h-2.5 w-2.5" style={{ color: s.checkColor }} strokeWidth={3} />
@@ -400,37 +379,13 @@ export default function Landing() {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    className={`mt-auto w-full h-11 rounded-2xl text-[12px] font-bold tracking-wide transition-all duration-300 ${s.btn}`}
-                    onClick={handleStartFreeClick}
-                  >
+                  <Button className={`mt-auto w-full h-11 rounded-2xl text-[12px] font-bold tracking-wide transition-all duration-300 ${s.btn}`} onClick={handleStartFreeClick}>
                     {plan.cta}
                   </Button>
                 </motion.div>
               );
             })}
           </div>
-        </div>
-      </section>
-
-      {/* ═══════════════ STATS ═══════════════ */}
-      <section className="relative z-10 py-12 sm:py-24 border-y border-black/[0.04] bg-[#0F0F14] text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
-        <div className="absolute top-[-50%] right-[-10%] w-[50%] h-[200%] bg-gradient-to-bl from-[#8C2044]/30 to-transparent blur-[140px] pointer-events-none" />
-        <div className="container mx-auto max-w-6xl relative z-10 px-4">
-          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-12 md:gap-0" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            {[
-              { label: "Garrafas gerenciadas", value: "320k+" },
-              { label: "Valor em acervos", value: "R$ 48M+" },
-              { label: "Operações ativas", value: "1.2k+" },
-              { label: "Satisfação", value: "99%" },
-            ].map((stat) => (
-              <motion.div key={stat.label} className="text-center relative md:border-r border-white/10 last:border-0" variants={fadeUp}>
-                <p className="text-3xl sm:text-4xl md:text-6xl font-black font-serif tracking-tight text-white mb-1 sm:mb-3" style={{ textShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>{stat.value}</p>
-                <p className="text-[10px] sm:text-[12px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/50">{stat.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
       </section>
 
