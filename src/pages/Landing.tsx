@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Wine, Bell, ArrowRight, Check, Package, GlassWater, ShieldCheck, Clock } from "lucide-react";
+import { Wine, Check, ShieldCheck, Clock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -15,26 +15,35 @@ const fadeUp = {
   }),
 } as const;
 
-const pillars = [
+const blocks = [
   {
     icon: Wine,
-    title: "Organize",
-    headline: "Cada garrafa no lugar certo",
-    desc: "Cadastre safra, produtor, uva e localização. Encontre qualquer rótulo em segundos.",
-    color: "#8F2D56",
+    title: "Organize sua adega",
+    bullets: [
+      "Cadastre todos seus vinhos com safra, produtor e uva",
+      "Visualize tudo em um só lugar",
+      "Encontre qualquer garrafa em segundos",
+    ],
+    color: "#8C2044",
   },
   {
     icon: Clock,
     title: "Saiba quando beber",
-    headline: "Nunca perca o ponto ideal",
-    desc: "Alertas de janela de consumo avisam quando cada garrafa está pronta para abrir.",
+    bullets: [
+      "Alertas de consumo no momento ideal",
+      "Evite abrir cedo ou tarde demais",
+      "Aproveite cada garrafa no melhor momento",
+    ],
     color: "#22c55e",
   },
   {
     icon: ShieldCheck,
-    title: "Controle total",
-    headline: "Estoque, consumo e visão clara",
-    desc: "Acompanhe o que entra e sai, monitore estoque baixo e tome decisões com dados reais.",
+    title: "Tenha controle total",
+    bullets: [
+      "Histórico completo e notas de degustação",
+      "Insights inteligentes da sua coleção",
+      "Tudo registrado automaticamente",
+    ],
     color: "#3b82f6",
   },
 ];
@@ -75,15 +84,13 @@ const plans = [
 const tierStyle = (tier: "pro" | "business", popular: boolean) => {
   if (tier === "business") return {
     bg: { background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)", boxShadow: "0 16px 32px rgba(74,25,50,0.25)", border: "1px solid rgba(255,255,255,0.14)" },
-    text: "white", sub: "rgba(255,255,255,0.55)", price: "white", period: "rgba(255,255,255,0.35)", feat: "rgba(255,255,255,0.88)", border: "rgba(255,255,255,0.12)",
+    text: "white", sub: "rgba(255,255,255,0.55)", price: "white", feat: "rgba(255,255,255,0.88)",
     checkBg: "rgba(255,225,236,0.18)", checkColor: "#FFD3E4",
-    btn: "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_8px_20px_rgba(20,8,14,0.2)] hover:shadow-[0_12px_28px_rgba(20,8,14,0.3)] hover:scale-[1.02]",
   };
   return {
     bg: { background: "linear-gradient(160deg, #8C2044 0%, #B5436A 52%, #D4638A 100%)", boxShadow: popular ? "0 20px 50px rgba(140,32,68,0.35), 0 0 0 2px rgba(255,255,255,0.25)" : "0 12px 28px rgba(140,32,68,0.2)", border: popular ? "2px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.18)" },
-    text: "white", sub: "rgba(255,255,255,0.6)", price: "white", period: "rgba(255,255,255,0.4)", feat: "rgba(255,255,255,0.9)", border: "rgba(255,255,255,0.15)",
+    text: "white", sub: "rgba(255,255,255,0.6)", price: "white", feat: "rgba(255,255,255,0.9)",
     checkBg: "rgba(255,255,255,0.2)", checkColor: "#FFE0EC",
-    btn: "bg-white text-[#8C2044] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_8px_20px_rgba(140,32,68,0.15)] hover:shadow-[0_12px_28px_rgba(140,32,68,0.25)] hover:scale-[1.02]",
   };
 };
 
@@ -107,48 +114,41 @@ export default function Landing() {
   return (
     <div className="min-h-screen overflow-hidden selection:bg-[#8F2D56]/20 selection:text-[#1A1A1A] bg-[#FAF7F6] text-[#1A1A1A]">
 
-      {/* ─── GLOBAL AMBIENT LIGHT ─── */}
+      {/* ─── AMBIENT LIGHT ─── */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        {/* Wine glow — top left */}
-        <div className="absolute top-[-8%] left-[-6%] w-[55vw] h-[55vw] rounded-full bg-[#8C2044]/[0.07] blur-[160px]" />
-        {/* Rosé glow — top right */}
-        <div className="absolute top-[2%] right-[-8%] w-[45vw] h-[45vw] rounded-full bg-[#E8A1B3]/[0.09] blur-[140px]" />
-        {/* Champagne warmth — center */}
-        <div className="absolute top-[15%] left-[30%] w-[40vw] h-[40vw] rounded-full bg-[#F3E5D8]/[0.12] blur-[120px]" />
-        {/* Subtle grain texture */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat", backgroundSize: "128px 128px" }} />
+        <div className="absolute top-[-8%] left-[-6%] w-[55vw] h-[55vw] rounded-full bg-[#8C2044]/[0.06] blur-[160px]" />
+        <div className="absolute top-[2%] right-[-8%] w-[45vw] h-[45vw] rounded-full bg-[#E8A1B3]/[0.08] blur-[140px]" />
+        <div className="absolute top-[15%] left-[30%] w-[40vw] h-[40vw] rounded-full bg-[#F3E5D8]/[0.1] blur-[120px]" />
       </div>
 
       {/* ─── HEADER ─── */}
       <motion.header
-        className="fixed top-0 w-full z-50 px-4 sm:px-6 py-2.5 sm:py-5 lg:py-6 bg-[#FAF7F6]/80 backdrop-blur-2xl border-b border-[#8C2044]/8"
+        className="fixed top-0 w-full z-50 px-4 sm:px-6 py-2.5 sm:py-4 lg:py-5 bg-[#FAF7F6]/80 backdrop-blur-2xl border-b border-[#8C2044]/8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="container mx-auto flex items-center justify-between max-w-7xl">
+        <div className="container mx-auto flex items-center justify-between max-w-6xl">
           <a href="/" className="flex items-center gap-2 sm:gap-3 transition-opacity duration-300 hover:opacity-80">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 sm:h-[68px] md:h-[90px] w-auto object-contain" />
-            <span className="text-lg sm:text-[30px] md:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#1A1A1A]" style={{ letterSpacing: "-0.04em" }}>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 sm:h-[58px] md:h-[72px] w-auto object-contain" />
+            <span className="text-lg sm:text-[26px] md:text-[32px] font-black tracking-tight font-sans hidden sm:block text-[#1A1A1A]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
-          <div className="flex items-center gap-2 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Button
+              variant="ghost"
+              className="h-8 sm:h-10 px-3 sm:px-5 text-[12px] sm:text-[14px] font-semibold text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors"
+              onClick={handleLoginClick}
+            >
+              Entrar
+            </Button>
             <MagneticButton>
               <Button
-                variant="outline"
-                className="inline-flex h-8 sm:h-11 md:h-12 rounded-full px-3.5 sm:px-6 md:px-7 text-[11px] sm:text-[14px] font-semibold text-foreground bg-transparent border border-border/60 shadow-none transition-all duration-300 hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_14px_hsl(var(--primary)/0.25)] active:bg-[hsl(340,54%,30%)] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-                onClick={handleLoginClick}
-              >
-                Entrar
-              </Button>
-            </MagneticButton>
-            <MagneticButton>
-              <Button
-                className="px-3.5 sm:px-6 md:px-9 h-8 sm:h-11 md:h-12 text-[10px] sm:text-[13px] font-black uppercase tracking-[0.1em] sm:tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#1A1A1A] hover:bg-[#202028] text-white"
+                className="px-4 sm:px-7 h-8 sm:h-10 text-[11px] sm:text-[13px] font-bold rounded-xl transition-all bg-[#1A1A1A] hover:bg-[#2a2a2a] text-white shadow-sm"
                 onClick={handleStartFreeClick}
               >
-                Começar Grátis
+                Começar grátis
               </Button>
             </MagneticButton>
           </div>
@@ -156,157 +156,172 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-24 sm:pt-32 lg:pt-36 pb-2 sm:pb-4 px-4 sm:px-6 flex items-center overflow-visible z-10">
-
-        <div className="container mx-auto relative z-10 max-w-3xl">
+      <section className="relative pt-28 sm:pt-36 lg:pt-44 pb-16 sm:pb-24 px-4 sm:px-6 z-10">
+        <div className="container mx-auto relative max-w-3xl">
           <div className="flex flex-col items-center text-center">
             <motion.h1
               className="font-serif font-black text-[#1A1A1A]"
-              style={{ fontSize: "clamp(28px, 5vw, 64px)", lineHeight: 1.08, letterSpacing: "-0.04em" }}
+              style={{ fontSize: "clamp(28px, 5vw, 58px)", lineHeight: 1.1, letterSpacing: "-0.03em" }}
               initial="hidden" animate="visible" variants={fadeUp} custom={0}
             >
-              Gerencie sua adega e nunca mais perca o{" "}
-              <span className="italic text-gradient-wine">ponto ideal de consumo</span>
+              Controle sua adega e saiba exatamente quando abrir cada vinho
             </motion.h1>
 
             <motion.p
-              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-4 sm:mt-5 font-medium text-[#6B6B6B]"
-              style={{ lineHeight: 1.5 }}
+              className="text-base sm:text-lg md:text-xl max-w-[520px] mt-5 sm:mt-6 font-medium text-[#6B6B6B]"
+              style={{ lineHeight: 1.55 }}
               initial="hidden" animate="visible" variants={fadeUp} custom={1}
             >
-              Organize, acompanhe e saiba exatamente quando abrir cada garrafa.
+              Organize, acompanhe e nunca mais perca garrafas no ponto errado.
             </motion.p>
 
             <motion.div
-              className="mt-5 sm:mt-7"
+              className="mt-7 sm:mt-9 flex flex-col items-center gap-3"
               initial="hidden" animate="visible" variants={fadeUp} custom={2}
             >
               <MagneticButton>
                 <Button
-                  className="group relative isolate px-10 sm:px-14 h-13 sm:h-[60px] text-[13px] sm:text-[15px] font-black uppercase tracking-[0.14em] rounded-2xl transition-all text-white hover:-translate-y-1.5 shadow-[0_18px_40px_rgba(122,35,72,0.44)] hover:shadow-[0_24px_52px_rgba(122,35,72,0.52)] border border-white/25"
-                  style={{ background: "linear-gradient(130deg, #a83866 0%, #7f1e44 42%, #5c1632 100%)" }}
+                  className="group px-10 sm:px-14 h-13 sm:h-[56px] text-[14px] sm:text-[15px] font-bold rounded-xl transition-all text-white hover:-translate-y-1 shadow-[0_12px_32px_rgba(140,32,68,0.3)] hover:shadow-[0_18px_40px_rgba(140,32,68,0.4)] bg-[#8C2044] hover:bg-[#7a1b3a]"
                   onClick={handleStartFreeClick}
                 >
-                  <span className="pointer-events-none absolute inset-[1px] rounded-[14px] bg-gradient-to-b from-white/30 via-transparent to-transparent" />
-                  Começar Grátis
+                  Começar grátis
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </MagneticButton>
+              <span className="text-[12px] text-[#6B6B6B] font-medium flex items-center gap-1.5">
+                <Check className="h-3.5 w-3.5 text-[#22c55e]" /> 14 dias grátis · Sem cartão de crédito
+              </span>
             </motion.div>
-
-            <motion.p
-              className="mt-2.5 text-[12px] text-[#6B6B6B] font-medium flex items-center gap-1.5"
-              initial="hidden" animate="visible" variants={fadeUp} custom={3}
-            >
-              <Check className="h-3.5 w-3.5 text-[#8C2044]" /> Sem cartão de crédito. Comece em 30 segundos.
-            </motion.p>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════ 3 PILLARS ═══════════════ */}
-      <section id="features" className="relative px-4 sm:px-6 py-4 sm:py-6">
-        <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="text-center mb-5 sm:mb-7" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.08]">
-              Controle sua adega, saiba o momento ideal
-              <br className="hidden sm:block" />
-              <span className="italic text-gradient-wine"> e evite perder garrafas</span>
-            </h2>
-          </motion.div>
+      {/* ═══════ SOCIAL PROOF BAR ═══════ */}
+      <motion.section
+        className="relative z-10 px-4 sm:px-6 pb-16 sm:pb-20"
+        initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
+      >
+        <div className="container mx-auto max-w-2xl text-center">
+          <p className="text-[13px] sm:text-[14px] font-medium text-[#6B6B6B] tracking-wide">
+            Usado por colecionadores e profissionais do vinho em todo o Brasil
+          </p>
+        </div>
+      </motion.section>
 
-          <div className="grid sm:grid-cols-3 gap-4 lg:gap-6">
-            {pillars.map((p, i) => (
+      {/* ═══════════════ VALUE BLOCKS ═══════════════ */}
+      <section id="features" className="relative px-4 sm:px-6 pb-16 sm:pb-24 z-10">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid gap-12 sm:gap-16 lg:gap-20">
+            {blocks.map((block, i) => (
               <motion.div
-                key={p.title}
-                className="rounded-2xl p-5 sm:p-6 text-center relative overflow-hidden"
-                style={{ background: "rgba(255,255,255,0.85)", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 4px 20px -8px rgba(0,0,0,0.06)" }}
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                whileHover={{ y: -4, transition: { duration: 0.3 } }}
+                key={block.title}
+                className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-8 md:gap-14`}
+                initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} variants={fadeUp} custom={0}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: `${p.color}14` }}>
-                  <p.icon className="h-6 w-6" style={{ color: p.color }} />
+                {/* Icon area */}
+                <div className="shrink-0">
+                  <div
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center"
+                    style={{ background: `${block.color}10`, border: `1px solid ${block.color}20` }}
+                  >
+                    <block.icon className="h-10 w-10 sm:h-12 sm:w-12" style={{ color: block.color }} strokeWidth={1.5} />
+                  </div>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 block" style={{ color: p.color }}>{p.title}</span>
-                <h3 className="text-lg font-serif font-bold text-[#1A1A1A] mb-2">{p.headline}</h3>
-                <p className="text-[13px] text-[#6B6B6B] leading-relaxed">{p.desc}</p>
+
+                {/* Content */}
+                <div className="text-center md:text-left flex-1 max-w-lg">
+                  <h3 className="text-2xl sm:text-3xl font-serif font-black text-[#1A1A1A] mb-4 tracking-tight">
+                    {block.title}
+                  </h3>
+                  <ul className="space-y-2.5">
+                    {block.bullets.map(b => (
+                      <li key={b} className="flex items-start gap-2.5 text-[15px] text-[#6B6B6B] font-medium leading-relaxed">
+                        <Check className="h-4 w-4 mt-0.5 shrink-0 text-[#22c55e]" strokeWidth={2.5} />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-6">
+                    <Button
+                      variant="ghost"
+                      className="text-[14px] font-semibold text-[#8C2044] hover:text-[#7a1b3a] hover:bg-[#8C2044]/5 px-0 h-auto group"
+                      onClick={handleStartFreeClick}
+                    >
+                      Começar grátis
+                      <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-
       {/* ═══════════════ PRICING ═══════════════ */}
-      <section id="pricing" className="relative px-4 sm:px-6 py-14 sm:py-20 lg:py-28 overflow-hidden">
-        {/* Background depth */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(140,32,68,0.08),transparent_60%),radial-gradient(ellipse_at_80%_100%,rgba(140,32,68,0.05),transparent_50%)] pointer-events-none" />
-        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#8C2044]/[0.04] blur-[120px] pointer-events-none" />
+      <section id="pricing" className="relative px-4 sm:px-6 py-16 sm:py-24 lg:py-28 overflow-hidden z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(140,32,68,0.06),transparent_60%)] pointer-events-none" />
 
         <div className="container mx-auto max-w-5xl relative z-10">
-          {/* Header */}
           <motion.div className="mx-auto mb-10 sm:mb-14 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className="inline-block px-4 py-1.5 rounded-full text-[12px] font-bold tracking-widest uppercase mb-4" style={{ background: "rgba(34,197,94,0.1)", color: "#16a34a" }}>
               Teste grátis por 14 dias
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-[42px] font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.08]">
-              Escolha o plano ideal<br className="hidden sm:block" /> para sua adega
+            <h2 className="text-2xl sm:text-3xl md:text-[40px] font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.1]">
+              Escolha o plano ideal para sua adega
             </h2>
             <p className="mt-4 text-[15px] text-[#6B6B6B] font-medium max-w-md mx-auto">
               Comece sem compromisso. Cancele quando quiser.
             </p>
           </motion.div>
 
-          {/* Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-[820px] mx-auto items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-[800px] mx-auto items-stretch">
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier, plan.popular);
               return (
                 <motion.div
                   key={plan.name}
-                  className={`relative rounded-[24px] overflow-hidden flex flex-col p-7 sm:p-9 h-full ${plan.popular ? "md:scale-[1.04] md:z-10" : ""}`}
+                  className={`relative rounded-[24px] overflow-hidden flex flex-col p-7 sm:p-9 h-full ${plan.popular ? "md:scale-[1.03] md:z-10" : ""}`}
                   style={s.bg}
                   initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                  whileHover={{ y: -5, transition: { duration: 0.3, ease: "easeOut" } }}
+                  whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
                 >
-                  {/* Popular badge */}
                   {plan.popular && (
                     <div className="absolute top-5 right-5">
-                      <span className="px-3.5 py-1.5 rounded-full text-[10px] font-black tracking-[0.1em] uppercase bg-white text-[#8C2044] shadow-lg">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-white text-[#8C2044] shadow-md">
                         Mais escolhido
                       </span>
                     </div>
                   )}
 
-                  {/* Plan name & desc */}
                   <h3 className="text-xl sm:text-2xl font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
-                  <p className="text-[13px] sm:text-[14px] mb-5 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
+                  <p className="text-[13px] mb-5 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
 
-                  {/* Price */}
                   <div className="mb-5 flex items-baseline gap-1.5">
-                    <span className="text-[52px] sm:text-[56px] font-black font-sans tracking-tighter leading-none" style={{ color: s.price }}>{plan.price}</span>
+                    <span className="text-[48px] sm:text-[52px] font-black font-sans tracking-tighter leading-none" style={{ color: s.price }}>{plan.price}</span>
                     <span className="text-sm font-medium opacity-40" style={{ color: s.text }}>{plan.period}</span>
                   </div>
 
-                  {/* Trial badge — subtle, not a button */}
-                  <div className="mb-6 w-full rounded-full py-1.5 px-5 text-center" style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(16,163,74,0.1) 100%)", border: "1px solid rgba(34,197,94,0.25)" }}>
-                    <span className="text-[13px] font-medium" style={{ color: "#16a34a" }}>
-                      ✓ 14 dias grátis • Sem cartão
+                  {/* Trial pill */}
+                  <div className="mb-5 w-full rounded-full py-1.5 px-4 text-center" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                    <span className="text-[13px] font-medium" style={{ color: "#22c55e" }}>
+                      ✓ 14 dias grátis · Sem cartão
                     </span>
                   </div>
 
-                  {/* CTA — dominant action */}
+                  {/* CTA */}
                   <Button
-                    className="w-full h-14 rounded-xl text-[15px] font-semibold tracking-wide transition-all duration-300 mb-2 bg-white text-[#8C2044] hover:bg-[#FFF7FA] shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.18)] hover:scale-[1.02] border-0"
+                    className="w-full h-13 sm:h-14 rounded-xl text-[15px] font-semibold transition-all duration-300 mb-1.5 bg-white text-[#8C2044] hover:bg-[#FFF7FA] shadow-[0_6px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_28px_rgba(0,0,0,0.15)] hover:scale-[1.02] border-0"
                     onClick={handleStartFreeClick}
                   >
                     {plan.cta}
                   </Button>
-                  <p className="text-[11px] font-medium text-center mb-7 opacity-40" style={{ color: s.text }}>
-                    Sem cartão • Comece em segundos
+                  <p className="text-[11px] font-medium text-center mb-6 opacity-40" style={{ color: s.text }}>
+                    Comece em segundos
                   </p>
 
                   {/* Benefits */}
-                  <ul className="space-y-3 flex-1">
+                  <ul className="space-y-2.5 flex-1">
                     {plan.features.map(f => (
                       <li key={f} className="flex items-start gap-2.5 text-[14px] leading-snug font-medium" style={{ color: s.feat }}>
                         <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: s.checkBg }}>
@@ -324,18 +339,18 @@ export default function Landing() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="py-5 sm:py-10 px-4 sm:px-6 relative z-10 bg-white border-t border-black/[0.04]">
-        <div className="container mx-auto max-w-7xl flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between md:gap-8">
+      <footer className="py-8 sm:py-12 px-4 sm:px-6 relative z-10 border-t border-black/[0.04]">
+        <div className="container mx-auto max-w-6xl flex flex-col items-center gap-5 sm:gap-6 md:flex-row md:justify-between md:gap-8">
           <div className="flex items-center gap-2.5">
-            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-6 sm:h-9 w-auto object-contain grayscale opacity-60" />
-            <span className="font-black text-sm sm:text-[20px] font-sans tracking-tight text-foreground">Sommelyx</span>
+            <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-6 sm:h-8 w-auto object-contain grayscale opacity-50" />
+            <span className="font-bold text-sm sm:text-base font-sans tracking-tight text-[#6B6B6B]">Sommelyx</span>
           </div>
-          <div className="flex items-center gap-4 sm:gap-8 text-[10px] sm:text-[13px] font-bold uppercase tracking-widest text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Funcionalidades</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Planos</a>
-            <button onClick={handleLoginClick} className="hover:text-foreground transition-colors cursor-pointer bg-transparent border-0 font-bold uppercase tracking-widest text-[10px] sm:text-[13px]">Acesso</button>
+          <div className="flex items-center gap-5 sm:gap-8 text-[11px] sm:text-[13px] font-semibold uppercase tracking-widest text-[#6B6B6B]">
+            <a href="#features" className="hover:text-[#1A1A1A] transition-colors">Funcionalidades</a>
+            <a href="#pricing" className="hover:text-[#1A1A1A] transition-colors">Planos</a>
+            <button onClick={handleLoginClick} className="hover:text-[#1A1A1A] transition-colors cursor-pointer bg-transparent border-0 font-semibold uppercase tracking-widest text-[11px] sm:text-[13px]">Acesso</button>
           </div>
-          <p className="text-[10px] sm:text-[13px] font-medium text-muted-foreground text-center">
+          <p className="text-[11px] sm:text-[13px] font-medium text-[#6B6B6B]">
             © {new Date().getFullYear()} Sommelyx
           </p>
         </div>
