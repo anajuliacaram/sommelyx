@@ -277,30 +277,22 @@ export default function Landing() {
                     <span className="text-sm font-medium opacity-40" style={{ color: s.text }}>{plan.period}</span>
                   </div>
 
-                  {/* Trial badge */}
-                  <motion.div
-                    className="mb-4 w-full rounded-xl py-3 px-5 text-center shadow-lg"
-                    style={{ background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" }}
-                    animate={{ boxShadow: ["0 4px 20px rgba(34,197,94,0.25)", "0 4px 30px rgba(34,197,94,0.45)", "0 4px 20px rgba(34,197,94,0.25)"] }}
-                    transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <span className="text-[15px] font-bold text-white block">
-                      Teste grátis por 14 dias
+                  {/* Trial badge — subtle, not a button */}
+                  <div className="mb-6 w-full rounded-full py-1.5 px-5 text-center" style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(16,163,74,0.1) 100%)", border: "1px solid rgba(34,197,94,0.25)" }}>
+                    <span className="text-[13px] font-medium" style={{ color: "#16a34a" }}>
+                      ✓ 14 dias grátis • Sem cartão
                     </span>
-                    <span className="text-[11px] font-medium text-white/70 block mt-0.5">
-                      Sem cartão • Sem compromisso
-                    </span>
-                  </motion.div>
+                  </div>
 
-                  {/* CTA — above benefits */}
+                  {/* CTA — dominant action */}
                   <Button
-                    className={`w-full h-14 rounded-xl text-[15px] font-semibold tracking-wide transition-all duration-300 mb-7 ${s.btn}`}
+                    className="w-full h-14 rounded-xl text-[15px] font-semibold tracking-wide transition-all duration-300 mb-2 bg-white text-[#8C2044] hover:bg-[#FFF7FA] shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.18)] hover:scale-[1.02] border-0"
                     onClick={handleStartFreeClick}
                   >
                     {plan.cta}
                   </Button>
-                  <p className="text-[11px] font-medium text-center -mt-5 mb-6 opacity-50" style={{ color: s.text }}>
-                    Leva menos de 30 segundos
+                  <p className="text-[11px] font-medium text-center mb-7 opacity-40" style={{ color: s.text }}>
+                    Sem cartão • Comece em segundos
                   </p>
 
                   {/* Benefits */}
