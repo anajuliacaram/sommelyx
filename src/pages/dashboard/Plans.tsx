@@ -55,7 +55,7 @@ export default function Plans() {
               <h3 className="text-sm font-semibold text-foreground font-sans tracking-tight">Plano atual</h3>
               <Badge variant="outline" className="text-[10px] h-5 border-border/60 text-muted-foreground">Ativo</Badge>
             </div>
-            <p className="text-xs text-muted-foreground">Você está no plano gratuito</p>
+            <p className="text-xs text-muted-foreground">Escolha seu plano — todos com 14 dias grátis</p>
           </div>
         </div>
         <Button className="gradient-gold text-gold-foreground rounded-lg h-8 text-[11px] font-medium btn-gold-glow px-4">
@@ -64,20 +64,17 @@ export default function Plans() {
       </motion.div>
 
       {/* Plans grid */}
-      <div className="grid md:grid-cols-3 gap-3 items-center">
+      <div className="grid md:grid-cols-2 gap-3 items-stretch max-w-2xl mx-auto">
         {plans.map((plan, i) => (
           <motion.div
             key={plan.name}
             className={`rounded-xl flex flex-col transition-all duration-200 relative ${
               plan.highlighted
-                ? "p-5 md:p-6 gradient-wine text-primary-foreground shadow-wine glow-wine border border-wine-vivid/25 md:scale-[1.05] z-10"
+                ? "p-5 md:p-6 gradient-wine text-primary-foreground shadow-wine glow-wine border border-wine-vivid/25"
                 : "p-5 md:p-6 card-depth"
             }`}
             initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
           >
-            {plan.current && (
-              <Badge variant="outline" className="mb-2 text-[10px] h-5 w-fit border-border/60 text-muted-foreground">Plano Atual</Badge>
-            )}
             {plan.highlighted && (
               <Badge className="mb-2 text-[10px] h-5 w-fit bg-primary-foreground/15 text-primary-foreground border-0">
                 Recomendado
@@ -89,12 +86,15 @@ export default function Plans() {
               {plan.desc}
             </p>
 
-            <div className="mb-4 border-b pb-4" style={{ borderColor: plan.highlighted ? "rgba(255,255,255,0.12)" : undefined }}>
+            <div className="mb-1 border-b pb-4" style={{ borderColor: plan.highlighted ? "rgba(255,255,255,0.12)" : undefined }}>
               <span className="text-3xl font-black font-sans tracking-tighter">{plan.price}</span>
               <span className={`text-[11px] ml-1 ${plan.highlighted ? "text-primary-foreground/40" : "text-muted-foreground"}`}>
                 {plan.period}
               </span>
             </div>
+            <p className={`text-[10px] font-bold mb-3 tracking-wide ${plan.highlighted ? "text-gold-light" : "text-primary"}`}>
+              ✦ {plan.trial}
+            </p>
 
             <ul className="space-y-2 mb-5">
               {plan.features.map((f) => (
@@ -106,15 +106,11 @@ export default function Plans() {
             </ul>
 
             <Button
-              variant={plan.current ? "outline" : "default"}
               className={`mt-auto w-full rounded-lg h-9 text-[11px] font-semibold ${
                 plan.highlighted
                   ? "bg-primary-foreground text-wine hover:bg-primary-foreground/90"
-                  : plan.current
-                    ? "border-border/60 text-muted-foreground"
-                    : "gradient-wine text-primary-foreground btn-glow"
+                  : "gradient-wine text-primary-foreground btn-glow"
               }`}
-              disabled={plan.current}
             >
               {plan.cta}
             </Button>
