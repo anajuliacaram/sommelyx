@@ -105,7 +105,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden selection:bg-[#8F2D56]/20 selection:text-[#0F0F14] bg-[#FAF7F6] text-[#0F0F14]">
+    <div className="min-h-screen overflow-hidden selection:bg-[#8F2D56]/20 selection:text-[#1A1A1A] bg-[#FAF7F6] text-[#1A1A1A]">
 
       {/* ─── GLOBAL AMBIENT LIGHT ─── */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -129,7 +129,7 @@ export default function Landing() {
         <div className="container mx-auto flex items-center justify-between max-w-7xl">
           <a href="/" className="flex items-center gap-2 sm:gap-3 transition-opacity duration-300 hover:opacity-80">
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 sm:h-[68px] md:h-[90px] w-auto object-contain" />
-            <span className="text-lg sm:text-[30px] md:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#0F0F14]" style={{ letterSpacing: "-0.04em" }}>
+            <span className="text-lg sm:text-[30px] md:text-[38px] font-black tracking-tight font-sans hidden xsm:block text-[#1A1A1A]" style={{ letterSpacing: "-0.04em" }}>
               Sommelyx
             </span>
           </a>
@@ -145,7 +145,7 @@ export default function Landing() {
             </MagneticButton>
             <MagneticButton>
               <Button
-                className="px-3.5 sm:px-6 md:px-9 h-8 sm:h-11 md:h-12 text-[10px] sm:text-[13px] font-black uppercase tracking-[0.1em] sm:tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#0F0F14] hover:bg-[#202028] text-white"
+                className="px-3.5 sm:px-6 md:px-9 h-8 sm:h-11 md:h-12 text-[10px] sm:text-[13px] font-black uppercase tracking-[0.1em] sm:tracking-[0.13em] rounded-2xl transition-all shadow-[0_10px_22px_-12px_rgba(140,32,68,0.28)] hover:shadow-[0_16px_30px_-16px_rgba(140,32,68,0.36)] bg-[#1A1A1A] hover:bg-[#202028] text-white"
                 onClick={handleStartFreeClick}
               >
                 Começar Grátis
@@ -161,7 +161,7 @@ export default function Landing() {
         <div className="container mx-auto relative z-10 max-w-3xl">
           <div className="flex flex-col items-center text-center">
             <motion.h1
-              className="font-serif font-black text-[#0F0F14]"
+              className="font-serif font-black text-[#1A1A1A]"
               style={{ fontSize: "clamp(28px, 5vw, 64px)", lineHeight: 1.08, letterSpacing: "-0.04em" }}
               initial="hidden" animate="visible" variants={fadeUp} custom={0}
             >
@@ -170,7 +170,7 @@ export default function Landing() {
             </motion.h1>
 
             <motion.p
-              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-4 sm:mt-5 font-medium text-[#4B5563]"
+              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-4 sm:mt-5 font-medium text-[#6B6B6B]"
               style={{ lineHeight: 1.5 }}
               initial="hidden" animate="visible" variants={fadeUp} custom={1}
             >
@@ -194,7 +194,7 @@ export default function Landing() {
             </motion.div>
 
             <motion.p
-              className="mt-2.5 text-[12px] text-[#9CA3AF] font-medium flex items-center gap-1.5"
+              className="mt-2.5 text-[12px] text-[#6B6B6B] font-medium flex items-center gap-1.5"
               initial="hidden" animate="visible" variants={fadeUp} custom={3}
             >
               <Check className="h-3.5 w-3.5 text-[#8C2044]" /> Sem cartão de crédito. Comece em 30 segundos.
@@ -207,7 +207,7 @@ export default function Landing() {
       <section id="features" className="relative px-4 sm:px-6 py-4 sm:py-6">
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="text-center mb-5 sm:mb-7" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.08]">
               Controle sua adega, saiba o momento ideal
               <br className="hidden sm:block" />
               <span className="italic text-gradient-wine"> e evite perder garrafas</span>
@@ -227,8 +227,8 @@ export default function Landing() {
                   <p.icon className="h-6 w-6" style={{ color: p.color }} />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 block" style={{ color: p.color }}>{p.title}</span>
-                <h3 className="text-lg font-serif font-bold text-[#0F0F14] mb-2">{p.headline}</h3>
-                <p className="text-[13px] text-[#6B7280] leading-relaxed">{p.desc}</p>
+                <h3 className="text-lg font-serif font-bold text-[#1A1A1A] mb-2">{p.headline}</h3>
+                <p className="text-[13px] text-[#6B6B6B] leading-relaxed">{p.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -248,10 +248,10 @@ export default function Landing() {
             <span className="inline-block px-4 py-1.5 rounded-full text-[12px] font-bold tracking-widest uppercase mb-4" style={{ background: "rgba(34,197,94,0.1)", color: "#16a34a" }}>
               Teste grátis por 14 dias
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-[42px] font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
+            <h2 className="text-2xl sm:text-3xl md:text-[42px] font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.08]">
               Escolha o plano ideal<br className="hidden sm:block" /> para sua adega
             </h2>
-            <p className="mt-4 text-[15px] text-[#6B7280] font-medium max-w-md mx-auto">
+            <p className="mt-4 text-[15px] text-[#6B6B6B] font-medium max-w-md mx-auto">
               Comece sem compromisso. Cancele quando quiser.
             </p>
           </motion.div>
