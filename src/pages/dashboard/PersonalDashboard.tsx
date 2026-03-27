@@ -14,6 +14,9 @@ import { useWineMetrics, useWineEvent } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { PersonalizedNotifications } from "@/components/PersonalizedNotifications";
+import { DashboardProfileProgress } from "@/components/DashboardProfileProgress";
+import { DashboardCommunityCard } from "@/components/DashboardCommunityCard";
+import { ContextualSuggestions } from "@/components/ContextualSuggestions";
 import { useToast } from "@/hooks/use-toast";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -119,7 +122,7 @@ export default function PersonalDashboard() {
     { label: "Garrafas", value: totalBottles.toString(), icon: Wine, color: "#8F2D56", badge: recentCount > 0 ? `+${recentCount}` : undefined, onClick: () => navigate("/dashboard/cellar") },
     { label: "Beber agora", value: drinkNow.toString(), icon: GlassWater, color: "#22c55e", onClick: () => navigate("/dashboard/cellar") },
     { label: "Em guarda", value: inGuard.toString(), icon: Clock, color: "#3b82f6", onClick: () => navigate("/dashboard/cellar") },
-    { label: "Recentes", value: recentCount.toString(), icon: TrendingUp, color: "#C44569" },
+    { label: "Consumo recente", value: recentCount.toString(), icon: TrendingUp, color: "#C44569" },
   ];
 
   const handleOpenBottle = async (wineId: string, wineName: string) => {
@@ -139,13 +142,13 @@ export default function PersonalDashboard() {
         )}
       </AnimatePresence>
     <div className="space-y-5 max-w-[1200px] relative">
-      {/* Header — warm & personal */}
+      {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-foreground">
             Olá, {firstName}
           </h1>
-          <p className="text-sm text-muted-foreground font-medium mt-0.5">Sua coleção ganha vida a cada garrafa</p>
+          <p className="text-sm text-muted-foreground font-medium mt-0.5">Sua coleção, seus momentos, suas descobertas</p>
         </div>
         <div className="flex gap-2.5">
           <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-semibold" onClick={() => setCsvOpen(true)}>
@@ -157,7 +160,7 @@ export default function PersonalDashboard() {
         </div>
       </motion.div>
 
-      {/* ─── KPI Strip ─── */}
+      {/* KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (
           [1, 2, 3, 4].map((i) => (
@@ -196,9 +199,15 @@ export default function PersonalDashboard() {
       {/* Personalized Notifications */}
       {wines.length > 0 && <PersonalizedNotifications wines={wines} />}
 
-      {/* ─── Main 2-column grid ─── */}
+      {/* Profile Progress */}
+      <DashboardProfileProgress wines={wines} profileType="personal" />
+
+      {/* Contextual Suggestions */}
+      {wines.length > 0 && <ContextualSuggestions wines={wines} />}
+
+      {/* Main 2-column grid */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* LEFT column (3/5) — lists & alerts */}
+        {/* LEFT column (3/5) */}
         <div className="lg:col-span-3 space-y-4">
           {/* What to open */}
           {suggestions.length > 0 && (
@@ -241,9 +250,7 @@ export default function PersonalDashboard() {
           {/* Alerts */}
           {alerts.length > 0 && (
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <h2 className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">
-                Atenção
-              </h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">Atenção</h2>
               <div className="grid grid-cols-2 gap-3">
                 {alerts.map((a) => (
                   <div key={a.label} className="glass-card p-3.5 flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/dashboard/alerts")}>
@@ -275,7 +282,7 @@ export default function PersonalDashboard() {
               <div className="glass-card overflow-hidden hidden sm:block">
                 <table className="w-full">
                   <thead>
-                     <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
                       <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Vinho</th>
                       <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Estilo</th>
                       <th className="text-right text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Qtd</th>
@@ -283,20 +290,13 @@ export default function PersonalDashboard() {
                   </thead>
                   <tbody>
                     {recentWines.map((w, i) => (
-                      <tr
-                        key={w.id}
-                        className="hover:bg-black/[0.015] cursor-pointer"
-                        style={{ borderBottom: i < recentWines.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none" }}
-                        onClick={() => navigate("/dashboard/cellar")}
-                      >
+                      <tr key={w.id} className="hover:bg-black/[0.015] cursor-pointer" style={{ borderBottom: i < recentWines.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none" }} onClick={() => navigate("/dashboard/cellar")}>
                         <td className="px-3 py-2.5">
                           <p className="text-sm font-semibold truncate max-w-[180px] text-foreground">{w.name}</p>
                           <p className="text-xs text-muted-foreground font-medium">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
                         </td>
                         <td className="px-3 py-2.5">
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>
-                            {w.style || "—"}
-                          </span>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>{w.style || "—"}</span>
                         </td>
                         <td className="px-3 py-2.5 text-right">
                           <span className="text-sm font-bold text-foreground">{w.quantity}</span>
@@ -309,11 +309,7 @@ export default function PersonalDashboard() {
               {/* Mobile card list */}
               <div className="space-y-2 sm:hidden">
                 {recentWines.map((w) => (
-                  <div
-                    key={w.id}
-                    className="glass-card p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
-                    onClick={() => navigate("/dashboard/cellar")}
-                  >
+                  <div key={w.id} className="glass-card p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/dashboard/cellar")}>
                     <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
                       <Wine className="h-4 w-4" style={{ color: "#8F2D56" }} />
                     </div>
@@ -332,7 +328,7 @@ export default function PersonalDashboard() {
           )}
         </div>
 
-        {/* RIGHT column (2/5) — charts */}
+        {/* RIGHT column (2/5) — charts + community */}
         <div className="lg:col-span-2 space-y-4">
           {/* Drink Window */}
           {totalBottles > 0 && drinkWindowData.length > 0 && (
@@ -400,13 +396,7 @@ export default function PersonalDashboard() {
                     <div key={d.name} className="flex items-center gap-2.5">
                       <span className="text-xs font-medium w-20 truncate text-muted-foreground">{d.name}</span>
                       <div className="flex-1 h-2 rounded-full overflow-hidden bg-black/[0.04]">
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }}
-                        />
+                        <motion.div className="h-full rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }} />
                       </div>
                       <span className="text-xs font-bold w-8 text-right text-foreground">{pct}%</span>
                     </div>
@@ -430,13 +420,7 @@ export default function PersonalDashboard() {
                     <div key={d.name} className="flex items-center gap-2.5">
                       <span className="text-xs font-medium w-20 truncate text-muted-foreground">{d.name}</span>
                       <div className="flex-1 h-2 rounded-full overflow-hidden bg-black/[0.04]">
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }}
-                        />
+                        <motion.div className="h-full rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }} />
                       </div>
                       <span className="text-xs font-bold w-8 text-right text-foreground">{pct}%</span>
                     </div>
@@ -445,6 +429,9 @@ export default function PersonalDashboard() {
               </div>
             </motion.div>
           )}
+
+          {/* Community & Inspiration */}
+          <DashboardCommunityCard />
         </div>
       </div>
 
@@ -468,12 +455,16 @@ export default function PersonalDashboard() {
               <div className="absolute inset-0 rounded-full gradient-wine opacity-10" />
               <Wine className="h-7 w-7 text-primary relative z-10" />
             </motion.div>
-             <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight text-foreground">
-              Sua coleção começa a ganhar vida aqui
+            <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight text-foreground">
+              Sua coleção começa aqui
             </h3>
-            <p className="text-sm mb-8 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
-              Cada garrafa conta uma história. Adicione seu primeiro vinho e comece a construir um acervo que reflete o seu paladar.
+            <p className="text-sm mb-4 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
+              Adicione seu primeiro vinho e comece a organizar, acompanhar e descobrir o melhor da sua adega.
             </p>
+            <div className="flex flex-col sm:flex-row gap-2 text-xs text-muted-foreground mb-6">
+              <span className="flex items-center gap-1.5"><Wine className="h-3.5 w-3.5 text-primary" /> Cadastro manual</span>
+              <span className="flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-primary" /> Importação CSV</span>
+            </div>
             <div className="flex gap-3 justify-center">
               <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-11 px-7 text-sm font-bold">
                 <Plus className="h-4 w-4 mr-1.5" /> Começar minha adega
@@ -490,10 +481,7 @@ export default function PersonalDashboard() {
       <motion.button
         onClick={() => setAddOpen(true)}
         className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full flex items-center justify-center text-white cursor-pointer"
-        style={{
-          background: "linear-gradient(135deg, #8F2D56, #C44569)",
-          boxShadow: "0 6px 20px rgba(143,45,86,0.3)",
-        }}
+        style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)", boxShadow: "0 6px 20px rgba(143,45,86,0.3)" }}
         whileHover={{ scale: 1.08, y: -2 }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0, scale: 0.5 }}
