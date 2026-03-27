@@ -209,49 +209,42 @@ export default function Landing() {
       </motion.section>
 
       {/* ═══════════════ VALUE BLOCKS ═══════════════ */}
-      <section id="features" className="relative px-4 sm:px-6 pb-16 sm:pb-24 z-10">
+      <section id="features" className="relative px-4 sm:px-6 pb-10 sm:pb-16 z-10">
         <div className="container mx-auto max-w-5xl">
-          <div className="grid gap-12 sm:gap-16 lg:gap-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {blocks.map((block, i) => (
               <motion.div
                 key={block.title}
-                className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-8 md:gap-14`}
-                initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} variants={fadeUp} custom={0}
+                className="flex flex-col items-start p-5 sm:p-6 rounded-2xl transition-shadow duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
+                style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(0,0,0,0.04)" }}
+                initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp} custom={i}
               >
-                {/* Icon area */}
-                <div className="shrink-0">
-                  <div
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center"
-                    style={{ background: `${block.color}10`, border: `1px solid ${block.color}20` }}
-                  >
-                    <block.icon className="h-10 w-10 sm:h-12 sm:w-12" style={{ color: block.color }} strokeWidth={1.5} />
-                  </div>
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: `${block.color}12`, border: `1px solid ${block.color}18` }}
+                >
+                  <block.icon className="h-5 w-5" style={{ color: block.color }} strokeWidth={1.8} />
                 </div>
 
-                {/* Content */}
-                <div className="text-center md:text-left flex-1 max-w-lg">
-                  <h3 className="text-2xl sm:text-3xl font-serif font-black text-[#1A1A1A] mb-4 tracking-tight">
-                    {block.title}
-                  </h3>
-                  <ul className="space-y-2.5">
-                    {block.bullets.map(b => (
-                      <li key={b} className="flex items-start gap-2.5 text-[15px] text-[#6B6B6B] font-medium leading-relaxed">
-                        <Check className="h-4 w-4 mt-0.5 shrink-0 text-[#22c55e]" strokeWidth={2.5} />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-6">
-                    <Button
-                      variant="ghost"
-                      className="text-[14px] font-semibold text-[#8C2044] hover:text-[#7a1b3a] hover:bg-[#8C2044]/5 px-0 h-auto group"
-                      onClick={handleStartFreeClick}
-                    >
-                      Começar grátis
-                      <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </div>
-                </div>
+                <h3 className="text-lg sm:text-xl font-serif font-black text-[#1A1A1A] mb-3 tracking-tight">
+                  {block.title}
+                </h3>
+                <ul className="space-y-2 flex-1">
+                  {block.bullets.map(b => (
+                    <li key={b} className="flex items-start gap-2 text-[13px] sm:text-[14px] text-[#6B6B6B] font-medium leading-snug">
+                      <Check className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#22c55e]" strokeWidth={2.5} />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant="ghost"
+                  className="mt-4 text-[13px] font-semibold text-[#8C2044] hover:text-[#7a1b3a] hover:bg-[#8C2044]/5 px-0 h-auto group"
+                  onClick={handleStartFreeClick}
+                >
+                  Começar grátis
+                  <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </Button>
               </motion.div>
             ))}
           </div>
