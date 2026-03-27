@@ -105,7 +105,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden selection:bg-[#8F2D56]/20 selection:text-[#0F0F14] bg-[#FAF7F6] text-[#0F0F14]">
+    <div className="min-h-screen overflow-hidden selection:bg-[#8F2D56]/20 selection:text-[#1A1A1A] bg-[#FAF7F6] text-[#1A1A1A]">
 
       {/* ─── GLOBAL AMBIENT LIGHT ─── */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -161,7 +161,7 @@ export default function Landing() {
         <div className="container mx-auto relative z-10 max-w-3xl">
           <div className="flex flex-col items-center text-center">
             <motion.h1
-              className="font-serif font-black text-[#0F0F14]"
+              className="font-serif font-black text-[#1A1A1A]"
               style={{ fontSize: "clamp(28px, 5vw, 64px)", lineHeight: 1.08, letterSpacing: "-0.04em" }}
               initial="hidden" animate="visible" variants={fadeUp} custom={0}
             >
@@ -170,7 +170,7 @@ export default function Landing() {
             </motion.h1>
 
             <motion.p
-              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-4 sm:mt-5 font-medium text-[#4B5563]"
+              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-4 sm:mt-5 font-medium text-[#6B6B6B]"
               style={{ lineHeight: 1.5 }}
               initial="hidden" animate="visible" variants={fadeUp} custom={1}
             >
@@ -207,7 +207,7 @@ export default function Landing() {
       <section id="features" className="relative px-4 sm:px-6 py-4 sm:py-6">
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="text-center mb-5 sm:mb-7" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.08]">
               Controle sua adega, saiba o momento ideal
               <br className="hidden sm:block" />
               <span className="italic text-gradient-wine"> e evite perder garrafas</span>
@@ -227,8 +227,8 @@ export default function Landing() {
                   <p.icon className="h-6 w-6" style={{ color: p.color }} />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 block" style={{ color: p.color }}>{p.title}</span>
-                <h3 className="text-lg font-serif font-bold text-[#0F0F14] mb-2">{p.headline}</h3>
-                <p className="text-[13px] text-[#6B7280] leading-relaxed">{p.desc}</p>
+                <h3 className="text-lg font-serif font-bold text-[#1A1A1A] mb-2">{p.headline}</h3>
+                <p className="text-[13px] text-[#6B6B6B] leading-relaxed">{p.desc}</p>
               </motion.div>
             ))}
           </div>
