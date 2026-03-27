@@ -217,68 +217,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════ DUAL CTA ═══════════════ */}
-      <section className="relative px-4 sm:px-6 py-4 sm:py-6">
-        <div className="container mx-auto max-w-5xl relative z-10">
-          <div className="grid md:grid-cols-2 gap-4 lg:gap-5">
-            {/* Personal */}
-            <motion.div
-              className="rounded-2xl p-6 relative overflow-hidden"
-              style={{ background: "linear-gradient(160deg, rgba(143,45,86,0.06), rgba(255,255,255,0.9))", border: "1px solid rgba(143,45,86,0.12)" }}
-              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
-              whileHover={{ y: -3, transition: { duration: 0.3 } }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)" }}>
-                  <Wine className="h-4.5 w-4.5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-base font-serif font-bold text-[#0F0F14]">Adega Pessoal</h3>
-                  <p className="text-[11px] text-[#9CA3AF]">Colecionadores e entusiastas</p>
-                </div>
-              </div>
-              <ul className="space-y-2 mb-5">
-                {["Organize sua coleção em um só lugar", "Saiba quando cada garrafa está pronta", "Registre notas e acompanhe consumo"].map(t => (
-                  <li key={t} className="flex items-center gap-2 text-[13px] text-[#4B5563]">
-                    <Check className="h-3.5 w-3.5 text-[#8C2044] shrink-0" /> {t}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full h-10 rounded-xl text-[12px] font-bold bg-[#8F2D56] text-white hover:bg-[#7a1e47]" onClick={handleStartFreeClick}>
-                Organizar minha coleção <ArrowRight className="h-3.5 w-3.5 ml-2" />
-              </Button>
-            </motion.div>
-
-            {/* Commercial */}
-            <motion.div
-              className="rounded-2xl p-6 relative overflow-hidden"
-              style={{ background: "linear-gradient(160deg, #2B0F1F, #4A1932, #6A2143)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 16px 32px rgba(74,25,50,0.2)" }}
-              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
-              whileHover={{ y: -3, transition: { duration: 0.3 } }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/15 border border-white/20">
-                  <Package className="h-4.5 w-4.5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-base font-serif font-bold text-white">Operação Comercial</h3>
-                  <p className="text-[11px] text-white/50">Restaurantes, bares e lojas</p>
-                </div>
-              </div>
-              <ul className="space-y-2 mb-5">
-                {["Controle estoque sem planilhas", "Acompanhe giro, vendas e relatórios", "Cadastre rótulos, fornecedores e clientes"].map(t => (
-                  <li key={t} className="flex items-center gap-2 text-[13px] text-white/80">
-                    <Check className="h-3.5 w-3.5 text-white/60 shrink-0" /> {t}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full h-10 rounded-xl text-[12px] font-bold bg-white text-[#3B1326] hover:bg-[#FFF7FA]" onClick={handleStartFreeClick}>
-                Controlar minha operação <ArrowRight className="h-3.5 w-3.5 ml-2" />
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* ═══════════════ PRICING ═══════════════ */}
       <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 py-6 sm:py-8 lg:py-10">
