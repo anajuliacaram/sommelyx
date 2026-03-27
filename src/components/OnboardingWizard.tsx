@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wine, BarChart3, Bell, Shield, TrendingUp, Users, Sparkles, ArrowRight, X, GlassWater, Upload } from "lucide-react";
+import { Wine, BarChart3, Bell, TrendingUp, Sparkles, ArrowRight, X, GlassWater, Package, Users, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 
 interface Benefit {
   icon: React.ElementType;
@@ -14,41 +13,41 @@ interface Benefit {
 const personalBenefits: Benefit[] = [
   {
     icon: Wine,
-    title: "Sua coleção, organizada",
-    desc: "Cadastre cada garrafa com detalhes como safra, produtor, região e notas de degustação. Saiba exatamente o que você tem e onde está.",
+    title: "Organize sua coleção em um só lugar",
+    desc: "Cadastre cada garrafa com safra, produtor, região e notas. Encontre qualquer vinho em segundos.",
     color: "#8F2D56",
   },
   {
     icon: GlassWater,
-    title: "Hora certa de abrir",
-    desc: "Receba alertas inteligentes quando seus vinhos atingirem a janela ideal de consumo — nunca mais perca o momento perfeito.",
+    title: "Saiba o que beber agora e o que guardar",
+    desc: "Alertas inteligentes avisam quando cada garrafa atinge sua janela ideal de consumo.",
     color: "#22c55e",
   },
   {
     icon: BarChart3,
-    title: "Insights da sua adega",
-    desc: "Acompanhe estatísticas de consumo, avaliações e a evolução da sua coleção ao longo do tempo com relatórios visuais.",
+    title: "Registre notas, harmonizações e favoritos",
+    desc: "Acompanhe seu consumo, avalie degustações e descubra tendências do seu paladar.",
     color: "#C9A86A",
   },
 ];
 
 const commercialBenefits: Benefit[] = [
   {
-    icon: Shield,
-    title: "Controle total de estoque",
-    desc: "Monitore entradas, saídas e níveis críticos em tempo real. Alertas automáticos de baixo estoque evitam ruptura.",
+    icon: Package,
+    title: "Controle estoque sem planilhas",
+    desc: "Monitore entradas, saídas e níveis críticos em tempo real. Alertas automáticos de baixo estoque.",
     color: "#8F2D56",
   },
   {
     icon: TrendingUp,
-    title: "Vendas e performance",
-    desc: "Registre vendas, acompanhe o giro de estoque e identifique seus produtos mais rentáveis com a curva ABC.",
+    title: "Acompanhe giro e relatórios com clareza",
+    desc: "Curva ABC, valor em estoque e giro de produtos — tudo em um dashboard objetivo.",
     color: "#22c55e",
   },
   {
     icon: Users,
-    title: "Operação profissional",
-    desc: "Relatórios financeiros, importação em lote via CSV e gestão multiusuário para escalar sua operação.",
+    title: "Cadastre rótulos, fornecedores e clientes",
+    desc: "Registre vendas, importações em lote via CSV e gerencie sua operação de forma profissional.",
     color: "#C9A86A",
   },
 ];
@@ -93,7 +92,12 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleSkip} />
 
       <motion.div
-        className="relative w-full max-w-md bg-card rounded-2xl shadow-2xl overflow-hidden border border-border/50"
+        className="relative w-full max-w-md overflow-hidden rounded-2xl shadow-2xl border border-white/10"
+        style={{
+          background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.88))",
+          backdropFilter: "blur(40px)",
+          boxShadow: "0 32px 64px -16px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.15) inset",
+        }}
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -101,22 +105,35 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
         {/* Close */}
         <button
           onClick={handleSkip}
-          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/5 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
 
-        {/* Progress */}
+        {/* Progress bar */}
         <div className="px-6 pt-6 pb-2">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               {step + 1} de {totalSteps}
             </span>
-            <span className="text-[11px] font-medium text-muted-foreground">
+            <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"
+              style={{
+                background: profileType === "personal" ? "rgba(143,45,86,0.08)" : "rgba(201,168,106,0.12)",
+                color: profileType === "personal" ? "#8F2D56" : "#8B7340",
+              }}
+            >
               {profileType === "personal" ? "Adega Pessoal" : "Operação Comercial"}
             </span>
           </div>
-          <Progress value={((step + 1) / totalSteps) * 100} className="h-1.5" />
+          <div className="h-1.5 rounded-full bg-black/[0.05] overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: "linear-gradient(90deg, #8F2D56, #C44569)" }}
+              initial={{ width: 0 }}
+              animate={{ width: `${((step + 1) / totalSteps) * 100}%` }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
         </div>
 
         {/* Content */}
