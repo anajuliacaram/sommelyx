@@ -333,13 +333,13 @@ export default function Landing() {
           </div>
 
           {/* Desktop */}
-          <div className="hidden lg:grid lg:grid-cols-2 gap-5 max-w-3xl mx-auto items-stretch">
+          <div className="hidden lg:grid lg:grid-cols-2 gap-6 max-w-[720px] mx-auto items-stretch">
             {plans.map((plan, i) => {
               const s = tierStyle(plan.tier);
               return (
                 <motion.div
                   key={plan.name}
-                  className="relative rounded-[24px] overflow-hidden flex flex-col p-6 md:p-8"
+                  className="relative rounded-[24px] overflow-hidden flex flex-col p-7 md:p-9"
                   style={s.bg}
                   initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
                   whileHover={{ y: -4, transition: { duration: 0.3 } }}
@@ -351,26 +351,28 @@ export default function Landing() {
                       </span>
                     </div>
                   )}
-                  <h3 className="text-lg font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
-                  <p className="text-[12px] mb-4 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
-                  <div className="mb-2 flex items-baseline gap-1 border-b pb-5" style={{ borderColor: s.border }}>
-                    <span className="text-4xl md:text-5xl font-black font-sans tracking-tighter" style={{ color: s.price }}>{plan.price}</span>
-                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
+                  <h3 className="text-xl font-serif font-black tracking-tight" style={{ color: s.text }}>{plan.name}</h3>
+                  <p className="text-[13px] mb-4 font-medium" style={{ color: s.sub }}>{plan.desc}</p>
+                  <div className="mb-3 flex items-baseline gap-1.5 border-b pb-4" style={{ borderColor: s.border }}>
+                    <span className="text-5xl font-black font-sans tracking-tighter" style={{ color: s.price }}>{plan.price}</span>
+                    <span className="text-[12px] font-bold uppercase tracking-wider" style={{ color: s.period }}>{plan.period}</span>
                   </div>
-                  <p className="text-[11px] font-bold mb-5 tracking-wide" style={{ color: s.checkColor }}>
-                    ✦ {plan.trial}
-                  </p>
-                  <ul className="space-y-2.5 mb-6">
+                  <div className="mb-5 px-3 py-2 rounded-xl flex items-center justify-center gap-2" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    <span className="text-[14px] font-black tracking-wide" style={{ color: s.text }}>
+                      🎁 Teste grátis por 14 dias
+                    </span>
+                  </div>
+                  <ul className="space-y-3 mb-7">
                     {plan.features.map(f => (
-                      <li key={f} className="flex items-center gap-2.5 text-[13px] leading-snug font-medium" style={{ color: s.feat }}>
-                        <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: s.checkBg }}>
-                          <Check className="h-2.5 w-2.5" style={{ color: s.checkColor }} strokeWidth={3} />
+                      <li key={f} className="flex items-center gap-2.5 text-[14px] leading-snug font-medium" style={{ color: s.feat }}>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: s.checkBg }}>
+                          <Check className="h-3 w-3" style={{ color: s.checkColor }} strokeWidth={3} />
                         </div>
                         {f}
                       </li>
                     ))}
                   </ul>
-                  <Button className={`mt-auto w-full h-11 rounded-2xl text-[12px] font-bold tracking-wide transition-all duration-300 ${s.btn}`} onClick={handleStartFreeClick}>
+                  <Button className={`mt-auto w-full h-12 rounded-2xl text-[13px] font-bold tracking-wide transition-all duration-300 ${s.btn}`} onClick={handleStartFreeClick}>
                     {plan.cta}
                   </Button>
                 </motion.div>
