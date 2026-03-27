@@ -188,8 +188,8 @@ export default function Landing() {
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </MagneticButton>
-              <span className="text-[12px] text-[#6B6B6B] font-medium flex items-center gap-1.5">
-                <Check className="h-3.5 w-3.5 text-[#22c55e]" /> 14 dias grátis · Sem cartão de crédito
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 hover:shadow-[0_0_12px_rgba(34,197,94,0.25)]" style={{ background: "#E6F6EC", color: "#166534", border: "1px solid rgba(34,197,94,0.2)" }}>
+                <Check className="h-3.5 w-3.5 text-[#22c55e]" /> 14 dias grátis · Sem cartão
               </span>
             </motion.div>
           </div>
@@ -264,8 +264,8 @@ export default function Landing() {
 
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mx-auto mb-10 sm:mb-14 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <span className="inline-block px-4 py-1.5 rounded-full text-[12px] font-bold tracking-widest uppercase mb-4" style={{ background: "rgba(34,197,94,0.1)", color: "#16a34a" }}>
-              Teste grátis por 14 dias
+            <span className="inline-block px-5 py-2 rounded-full text-[12px] font-bold tracking-widest uppercase mb-4 transition-all duration-200 hover:shadow-[0_0_12px_rgba(34,197,94,0.25)]" style={{ background: "#E6F6EC", color: "#166534", border: "1px solid rgba(34,197,94,0.2)" }}>
+              ✔ 14 dias grátis · Sem cartão
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-[40px] font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.1]">
               Escolha o plano ideal para sua adega
@@ -303,9 +303,9 @@ export default function Landing() {
                   </div>
 
                   {/* Trial pill */}
-                  <div className="mb-5 w-full rounded-full py-1.5 px-4 text-center" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.2)" }}>
-                    <span className="text-[13px] font-medium" style={{ color: "#22c55e" }}>
-                      ✓ 14 dias grátis · Sem cartão
+                  <div className="mb-5 w-full rounded-full py-2 px-5 text-center transition-all duration-200 hover:shadow-[0_0_12px_rgba(34,197,94,0.25)]" style={{ background: "#E6F6EC", border: "1px solid rgba(34,197,94,0.2)" }}>
+                    <span className="text-[13px] font-bold" style={{ color: "#166534" }}>
+                      ✔ 14 dias grátis · Sem cartão
                     </span>
                   </div>
 
