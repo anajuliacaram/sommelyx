@@ -136,7 +136,7 @@ export default function Landing() {
       </motion.header>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <section className="relative pt-24 sm:pt-36 lg:pt-44 pb-10 sm:pb-14 lg:pb-20 px-4 sm:px-6 flex items-center overflow-visible">
+      <section className="relative pt-24 sm:pt-32 lg:pt-36 pb-6 sm:pb-8 lg:pb-10 px-4 sm:px-6 flex items-center overflow-visible">
         <div className="absolute inset-x-0 top-0 h-[76%] bg-[radial-gradient(circle_at_18%_22%,rgba(143,45,86,0.16),transparent_46%),radial-gradient(circle_at_82%_18%,rgba(196,69,105,0.14),transparent_42%),linear-gradient(180deg,rgba(255,246,251,0.8),transparent_72%)] pointer-events-none" />
         <div className="absolute top-[-12%] left-[-12%] w-[46vw] h-[46vw] rounded-full bg-[#8C2044]/14 blur-[130px] pointer-events-none" />
 
@@ -152,7 +152,7 @@ export default function Landing() {
             </motion.h1>
 
             <motion.p
-              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-5 sm:mt-7 font-medium text-[#4B5563]"
+              className="text-base sm:text-lg md:text-xl max-w-[540px] mt-4 sm:mt-5 font-medium text-[#4B5563]"
               style={{ lineHeight: 1.5 }}
               initial="hidden" animate="visible" variants={fadeUp} custom={1}
             >
@@ -160,7 +160,7 @@ export default function Landing() {
             </motion.p>
 
             <motion.div
-              className="mt-7 sm:mt-10"
+              className="mt-5 sm:mt-7"
               initial="hidden" animate="visible" variants={fadeUp} custom={2}
             >
               <MagneticButton>
@@ -186,9 +186,9 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ 3 PILLARS ═══════════════ */}
-      <section id="features" className="relative px-4 sm:px-6 py-12 sm:py-20">
+      <section id="features" className="relative px-4 sm:px-6 py-8 sm:py-12">
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="text-center mb-10 sm:mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+          <motion.div className="text-center mb-7 sm:mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
               Controle sua adega, saiba o momento ideal
               <br className="hidden sm:block" />
@@ -196,7 +196,7 @@ export default function Landing() {
             </h2>
           </motion.div>
 
-          <div className="grid sm:grid-cols-3 gap-5 lg:gap-8">
+          <div className="grid sm:grid-cols-3 gap-4 lg:gap-6">
             {pillars.map((p, i) => (
               <motion.div
                 key={p.title}
@@ -218,9 +218,9 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ DUAL CTA ═══════════════ */}
-      <section className="relative px-4 sm:px-6 py-10 sm:py-16">
+      <section className="relative px-4 sm:px-6 py-6 sm:py-10">
         <div className="container mx-auto max-w-5xl relative z-10">
-          <div className="grid md:grid-cols-2 gap-5 lg:gap-6">
+          <div className="grid md:grid-cols-2 gap-4 lg:gap-5">
             {/* Personal */}
             <motion.div
               className="rounded-2xl p-6 relative overflow-hidden"
@@ -281,9 +281,9 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════ PRICING ═══════════════ */}
-      <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 py-10 sm:py-16 lg:py-20">
+      <section id="pricing" className="relative bg-[#FAFAFA] px-4 sm:px-6 py-8 sm:py-12 lg:py-14">
         <div className="container mx-auto max-w-5xl relative z-10">
-          <motion.div className="mx-auto mb-8 sm:mb-12 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+          <motion.div className="mx-auto mb-6 sm:mb-8 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-[#0F0F14] leading-[1.08]">
               Escolha o plano <span className="italic text-gradient-wine">ideal</span>
             </h2>
@@ -381,7 +381,7 @@ export default function Landing() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="py-6 sm:py-14 px-4 sm:px-6 relative z-10 bg-white border-t border-black/[0.04]">
+      <footer className="py-5 sm:py-10 px-4 sm:px-6 relative z-10 bg-white border-t border-black/[0.04]">
         <div className="container mx-auto max-w-7xl flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between md:gap-8">
           <div className="flex items-center gap-2.5">
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-6 sm:h-9 w-auto object-contain grayscale opacity-60" />
