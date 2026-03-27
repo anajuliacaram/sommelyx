@@ -79,6 +79,33 @@ export type Database = {
           },
         ]
       }
+      contacts: {
+        Row: {
+          contact_info: string | null
+          created_at: string
+          id: string
+          name: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -193,6 +220,36 @@ export type Database = {
           profile_type?: Database["public"]["Enums"]["profile_type"] | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          price: number
+          quantity: number
+          user_id: string
+          wine_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          price?: number
+          quantity?: number
+          user_id: string
+          wine_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          quantity?: number
+          user_id?: string
+          wine_id?: string | null
         }
         Relationships: []
       }
@@ -375,6 +432,30 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vintage?: number | null
+        }
+        Relationships: []
+      }
+      wishlist: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          user_id: string
+          wine_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+          wine_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+          wine_name?: string
         }
         Relationships: []
       }
