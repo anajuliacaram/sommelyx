@@ -41,21 +41,13 @@ const pillars = [
 
 const plans = [
   {
-    name: "Free",
-    price: "R$ 0",
-    period: "/mês",
-    desc: "Para começar a organizar",
-    features: ["Até 50 garrafas", "Cadastro completo", "Notas de degustação"],
-    cta: "Começar Grátis",
-    tier: "free" as const,
-  },
-  {
     name: "Pro",
     price: "R$ 29",
     period: "/mês",
     desc: "Para colecionadores sérios",
+    trial: "14 dias grátis",
     features: ["Garrafas ilimitadas", "Alertas de consumo ideal", "Insights e relatórios", "Exportação CSV"],
-    cta: "Assinar Pro",
+    cta: "Começar 14 dias grátis",
     tier: "pro" as const,
   },
   {
@@ -63,13 +55,14 @@ const plans = [
     price: "R$ 99",
     period: "/mês",
     desc: "Para restaurantes, bares e lojas",
+    trial: "14 dias grátis",
     features: ["Tudo do Pro", "Gestão de vendas e estoque", "Relatórios financeiros", "Curva ABC e giro"],
-    cta: "Começar Business",
+    cta: "Começar 14 dias grátis",
     tier: "business" as const,
   },
 ];
 
-const tierStyle = (tier: "free" | "pro" | "business") => {
+const tierStyle = (tier: "pro" | "business") => {
   if (tier === "business") return {
     bg: { background: "linear-gradient(160deg, #2B0F1F 0%, #4A1932 52%, #6A2143 100%)", boxShadow: "0 16px 32px rgba(74,25,50,0.25), 0 0 0 1px rgba(255,255,255,0.12) inset", border: "1px solid rgba(255,255,255,0.14)" },
     text: "white", sub: "rgba(255,255,255,0.55)", price: "white", period: "rgba(255,255,255,0.35)", feat: "rgba(255,255,255,0.88)", border: "rgba(255,255,255,0.12)",
@@ -77,19 +70,12 @@ const tierStyle = (tier: "free" | "pro" | "business") => {
     btn: "bg-white text-[#3B1326] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_8px_20px_rgba(20,8,14,0.2)]",
     badge: true,
   };
-  if (tier === "pro") return {
+  return {
     bg: { background: "linear-gradient(160deg, #8C2044 0%, #B5436A 52%, #D4638A 100%)", boxShadow: "0 12px 28px rgba(140,32,68,0.2), 0 0 0 1px rgba(255,255,255,0.15) inset", border: "1px solid rgba(255,255,255,0.18)" },
     text: "white", sub: "rgba(255,255,255,0.6)", price: "white", period: "rgba(255,255,255,0.4)", feat: "rgba(255,255,255,0.9)", border: "rgba(255,255,255,0.15)",
     checkBg: "rgba(255,255,255,0.2)", checkColor: "#FFE0EC",
     btn: "bg-white text-[#8C2044] hover:bg-[#FFF7FA] border border-white/70 shadow-[0_8px_20px_rgba(140,32,68,0.15)]",
     badge: true,
-  };
-  return {
-    bg: { background: "rgba(255,255,255,0.92)", border: "1px solid rgba(15,15,20,0.06)", boxShadow: "0 4px 16px -8px rgba(15,15,20,0.08)" },
-    text: "#0F0F14", sub: "#9CA3AF", price: "#0F0F14", period: "#9CA3AF", feat: "#4B5563", border: "rgba(0,0,0,0.04)",
-    checkBg: "rgba(140,32,68,0.08)", checkColor: "#8C2044",
-    btn: "bg-[#F5F5F5] text-[#18181B] hover:bg-white shadow-[0_2px_8px_rgba(15,15,20,0.04)] border border-black/[0.06]",
-    badge: false,
   };
 };
 
