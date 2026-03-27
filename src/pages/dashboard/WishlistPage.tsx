@@ -1,76 +1,49 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Plus, Trash2, ExternalLink, Wine } from "lucide-react";
+import { Heart, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { useAddWishlist, useDeleteWishlist, useWishlist } from "@/hooks/useBusinessData";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
   visible: (i: number) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { delay: i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
-interface WishlistItem {
-  id: string;
-  name: string;
-  producer: string;
-  region: string;
-  notes: string;
-  addedAt: string;
-}
-
-const STORAGE_KEY = "sommelyx_wishlist";
-
-function loadWishlist(): WishlistItem[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  } catch { return []; }
-}
-
-function saveWishlist(items: WishlistItem[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
-
 export default function WishlistPage() {
-  const [items, setItems] = useState<WishlistItem[]>(loadWishlist);
+  const { data: items = [], isLoading } = useWishlist();
+  const addWishlist = useAddWishlist();
+  const deleteWishlist = useDeleteWishlist();
+
   const [showForm, setShowForm] = useState(false);
-  const [name, setName] = useState("");
-  const [producer, setProducer] = useState("");
-  const [region, setRegion] = useState("");
+  const [wineName, setWineName] = useState("");
   const [notes, setNotes] = useState("");
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
     if (!search) return items;
     const q = search.toLowerCase();
-    return items.filter(i => i.name.toLowerCase().includes(q) || i.producer.toLowerCase().includes(q));
+    return items.filter((i) => i.wine_name.toLowerCase().includes(q) || (i.notes ?? "").toLowerCase().includes(q));
   }, [items, search]);
 
-  const handleAdd = () => {
-    if (!name.trim()) return;
-    const newItem: WishlistItem = {
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      producer: producer.trim(),
-      region: region.trim(),
-      notes: notes.trim(),
-      addedAt: new Date().toISOString(),
-    };
-    const updated = [newItem, ...items];
-    setItems(updated);
-    saveWishlist(updated);
-    setName(""); setProducer(""); setRegion(""); setNotes("");
+  const handleAdd = async () => {
+    if (!wineName.trim()) return;
+    await addWishlist.mutateAsync({ wine_name: wineName.trim(), notes: notes.trim() });
+    setWineName("");
+    setNotes("");
     setShowForm(false);
   };
 
-  const handleRemove = (id: string) => {
-    const updated = items.filter(i => i.id !== id);
-    setItems(updated);
-    saveWishlist(updated);
+  const handleRemove = async (id: string) => {
+    await deleteWishlist.mutateAsync(id);
   };
+
+  if (isLoading) return <div className="text-sm text-muted-foreground p-4">Carregando wishlist…</div>;
 
   return (
     <div className="space-y-4 max-w-[900px]">
@@ -87,45 +60,37 @@ export default function WishlistPage() {
       {showForm && (
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="glass-card p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input placeholder="Nome do vinho *" value={name} onChange={e => setName(e.target.value)} className="h-9 text-[12px]" />
-            <Input placeholder="Produtor" value={producer} onChange={e => setProducer(e.target.value)} className="h-9 text-[12px]" />
-            <Input placeholder="Região / País" value={region} onChange={e => setRegion(e.target.value)} className="h-9 text-[12px]" />
-            <Input placeholder="Notas" value={notes} onChange={e => setNotes(e.target.value)} className="h-9 text-[12px]" />
+            <Input placeholder="Nome do vinho *" value={wineName} onChange={(e) => setWineName(e.target.value)} className="h-9 text-[12px]" />
+            <Input placeholder="Notas" value={notes} onChange={(e) => setNotes(e.target.value)} className="h-9 text-[12px]" />
           </div>
           <div className="flex gap-2">
-            <Button size="sm" className="h-8 text-[11px]" onClick={handleAdd} disabled={!name.trim()}>Salvar</Button>
-            <Button size="sm" variant="ghost" className="h-8 text-[11px]" onClick={() => setShowForm(false)}>Cancelar</Button>
+            <Button size="sm" className="h-8 text-[11px]" onClick={handleAdd} disabled={!wineName.trim() || addWishlist.isPending}>
+              Salvar
+            </Button>
+            <Button size="sm" variant="ghost" className="h-8 text-[11px]" onClick={() => setShowForm(false)}>
+              Cancelar
+            </Button>
           </div>
         </motion.div>
       )}
 
-      {items.length > 0 && (
-        <Input placeholder="Buscar na wishlist…" value={search} onChange={e => setSearch(e.target.value)} className="h-9 text-[12px] max-w-xs" />
-      )}
+      {items.length > 0 && <Input placeholder="Buscar na wishlist…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 text-[12px] max-w-xs" />}
 
       {filtered.length > 0 ? (
         <div className="space-y-2">
           {filtered.map((item, i) => (
-            <motion.div
-              key={item.id}
-              className="glass-card p-3 flex items-center gap-3 group"
-              initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
-            >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
+            <motion.div key={item.id} className="glass-card p-3 flex items-center gap-3 group" initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10">
                 <Heart className="h-3.5 w-3.5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold truncate text-foreground">{item.name}</p>
-                <p className="text-[9px] text-muted-foreground">
-                  {[item.producer, item.region].filter(Boolean).join(" · ") || "Sem detalhes"}
-                  {item.notes && ` — ${item.notes}`}
-                </p>
+                <p className="text-[12px] font-semibold truncate text-foreground">{item.wine_name}</p>
+                <p className="text-[9px] text-muted-foreground">{item.notes || "Sem notas"}</p>
               </div>
-              <span className="text-[9px] text-muted-foreground hidden sm:block">
-                {new Date(item.addedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
-              </span>
+              <span className="text-[9px] text-muted-foreground hidden sm:block">{new Date(item.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}</span>
               <Button
-                size="sm" variant="ghost"
+                size="sm"
+                variant="ghost"
                 className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
                 onClick={() => handleRemove(item.id)}
               >
@@ -138,7 +103,7 @@ export default function WishlistPage() {
         <PremiumEmptyState
           icon={Heart}
           title="Sua lista de desejos"
-          description="Adicione vinhos que você quer experimentar ou adquirir. Organize sua próxima compra."
+          description="Adicione vinhos que você quer experimentar ou adquirir."
           primaryAction={{ label: "Adicionar primeiro", onClick: () => setShowForm(true), icon: <Plus className="h-4 w-4" /> }}
         />
       ) : (

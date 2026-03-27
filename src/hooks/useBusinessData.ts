@@ -41,7 +41,7 @@ export function useSales() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data ?? []) as SaleRecord[];
+      return (data ?? []) as unknown as SaleRecord[];
     },
     enabled: !!user,
   });
@@ -105,7 +105,7 @@ export function useWishlist() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data ?? []) as WishlistRecord[];
+      return (data ?? []) as unknown as WishlistRecord[];
     },
     enabled: !!user,
   });
@@ -159,7 +159,7 @@ export function useContacts() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data ?? []) as ContactRecord[];
+      return (data ?? []) as unknown as ContactRecord[];
     },
     enabled: !!user,
   });
