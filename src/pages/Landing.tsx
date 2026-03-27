@@ -194,7 +194,7 @@ export default function Landing() {
             </motion.div>
 
             <motion.p
-              className="mt-2.5 text-[12px] text-[#9CA3AF] font-medium flex items-center gap-1.5"
+              className="mt-2.5 text-[12px] text-[#6B6B6B] font-medium flex items-center gap-1.5"
               initial="hidden" animate="visible" variants={fadeUp} custom={3}
             >
               <Check className="h-3.5 w-3.5 text-[#8C2044]" /> Sem cartão de crédito. Comece em 30 segundos.
@@ -251,7 +251,7 @@ export default function Landing() {
             <h2 className="text-2xl sm:text-3xl md:text-[42px] font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.08]">
               Escolha o plano ideal<br className="hidden sm:block" /> para sua adega
             </h2>
-            <p className="mt-4 text-[15px] text-[#6B7280] font-medium max-w-md mx-auto">
+            <p className="mt-4 text-[15px] text-[#6B6B6B] font-medium max-w-md mx-auto">
               Comece sem compromisso. Cancele quando quiser.
             </p>
           </motion.div>
