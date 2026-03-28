@@ -7,6 +7,32 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ── Simple in-memory rate limiter ──
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW_MS = 60_000;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitMap) {
+    if (now > val.resetAt) rateLimitMap.delete(key);
+  }
+}, 120_000);
+
+const MAX_CSV_SIZE = 1_000_000; // 1MB
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -35,13 +61,36 @@ serve(async (req) => {
       });
     }
 
-    // ── Business Logic ──
+    const userId = claimsData.claims.sub as string;
+
+    // ── Rate Limiting ──
+    if (!checkRateLimit(userId)) {
+      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+      });
+    }
+
+    // ── Input Validation ──
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { csvContent } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
-      return new Response(JSON.stringify({ error: "csvContent is required" }), {
+      return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (csvContent.length > MAX_CSV_SIZE) {
+      return new Response(JSON.stringify({ error: "Arquivo CSV muito grande. Máximo 1MB." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -126,12 +175,12 @@ Regras:
                   column_mapping: {
                     type: "object",
                     description:
-                      "Mapeamento das colunas originais para os campos do sistema, ex: { 'Vinho': 'name', 'Preço Unit.': 'purchase_price' }",
+                      "Mapeamento das colunas originais para os campos do sistema",
                     additionalProperties: { type: "string" },
                   },
                   notes: {
                     type: "string",
-                    description: "Observações sobre decisões de mapeamento ou problemas encontrados",
+                    description: "Observações sobre decisões de mapeamento",
                   },
                 },
                 required: ["wines"],
@@ -147,25 +196,30 @@ Regras:
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
           status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos de IA esgotados. Adicione créditos nas configurações." }), {
+        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const errText = await response.text();
-      console.error("AI gateway error:", response.status, errText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error("AI gateway error:", response.status);
+      return new Response(
+        JSON.stringify({ error: "Serviço de análise indisponível." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
     if (!toolCall) {
-      throw new Error("AI did not return structured data");
+      return new Response(
+        JSON.stringify({ error: "Não foi possível extrair dados do CSV." }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const result = JSON.parse(toolCall.function.arguments);
@@ -174,9 +228,9 @@ Regras:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("parse-csv-wines error:", e);
+    console.error("parse-csv-wines error:", e instanceof Error ? e.message : "unknown");
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro ao processar CSV. Tente novamente." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

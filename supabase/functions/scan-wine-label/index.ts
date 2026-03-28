@@ -8,13 +8,40 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ── Simple in-memory rate limiter ──
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10; // max requests
+const RATE_WINDOW_MS = 60_000; // per minute
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
+// Cleanup stale entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitMap) {
+    if (now > val.resetAt) rateLimitMap.delete(key);
+  }
+}, 120_000);
+
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB base64
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // --- JWT Authentication ---
+    // ── JWT Authentication ──
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -37,11 +64,28 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    // --- End Authentication ---
 
+    const userId = claimsData.claims.sub as string;
+
+    // ── Rate Limiting ──
+    if (!checkRateLimit(userId)) {
+      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+      });
+    }
+
+    // ── Input Validation ──
     const { imageBase64 } = await req.json();
-    if (!imageBase64) {
-      return new Response(JSON.stringify({ error: "No image provided" }), {
+    if (!imageBase64 || typeof imageBase64 !== "string") {
+      return new Response(JSON.stringify({ error: "Imagem não fornecida" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (imageBase64.length > MAX_IMAGE_SIZE) {
+      return new Response(JSON.stringify({ error: "Imagem muito grande. Máximo 10MB." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -50,7 +94,10 @@ serve(async (req) => {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) {
       console.error("Missing required API key configuration");
-      throw new Error("Service configuration error");
+      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const response = await fetch(
@@ -116,33 +163,40 @@ Rules:
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
-      throw new Error("Label analysis service unavailable");
+      console.error("AI Gateway error:", response.status);
+      return new Response(
+        JSON.stringify({ error: "Serviço de análise indisponível. Tente novamente." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
-      throw new Error("No response from AI");
+      return new Response(
+        JSON.stringify({ error: "Não foi possível analisar o rótulo." }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    // Parse the JSON from the response, handling potential markdown wrapping
     let parsed;
     try {
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       parsed = JSON.parse(cleaned);
     } catch {
-      console.error("Failed to parse AI response:", content);
-      throw new Error("Could not parse wine data from label");
+      console.error("Failed to parse AI response");
+      return new Response(
+        JSON.stringify({ error: "Não foi possível extrair dados do rótulo." }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     return new Response(JSON.stringify({ wine: parsed }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in scan-wine-label:", error);
+    console.error("Error in scan-wine-label:", error instanceof Error ? error.message : "unknown");
     return new Response(
       JSON.stringify({ error: "Falha ao analisar o rótulo. Tente novamente." }),
       {
