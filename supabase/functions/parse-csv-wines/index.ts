@@ -32,14 +32,44 @@ setInterval(() => {
 }, 120_000);
 
 const MAX_CSV_SIZE = 1_000_000; // 1MB
+const FUNCTION_NAME = "parse-csv-wines";
+
+async function logAudit(
+  userId: string,
+  statusCode: number,
+  outcome: string,
+  durationMs: number,
+  metadata?: Record<string, unknown>
+) {
+  try {
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    await adminClient.from("edge_function_logs").insert({
+      user_id: userId,
+      function_name: FUNCTION_NAME,
+      status_code: statusCode,
+      outcome,
+      duration_ms: durationMs,
+      metadata: metadata || {},
+    });
+  } catch (e) {
+    console.error("Audit log failed:", e instanceof Error ? e.message : "unknown");
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const startTime = Date.now();
+  let userId = "anonymous";
 
   try {
     // ── JWT Authentication ──
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -54,16 +84,18 @@ serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userId = user.id;
+    userId = user.id;
 
     // ── Rate Limiting ──
     if (!checkRateLimit(userId)) {
+      await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
@@ -74,6 +106,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -82,6 +115,7 @@ serve(async (req) => {
 
     const { csvContent } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_csv" });
       return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -89,6 +123,10 @@ serve(async (req) => {
     }
 
     if (csvContent.length > MAX_CSV_SIZE) {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        reason: "csv_too_large",
+        size_bytes: csvContent.length,
+      });
       return new Response(JSON.stringify({ error: "Arquivo CSV muito grande. Máximo 1MB." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -193,18 +231,21 @@ Regras:
 
     if (!response.ok) {
       if (response.status === 429) {
+        await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
         return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
         });
       }
       if (response.status === 402) {
+        await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
         return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       console.error("AI gateway error:", response.status);
+      await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: response.status });
       return new Response(
         JSON.stringify({ error: "Serviço de análise indisponível." }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -215,6 +256,7 @@ Regras:
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
     if (!toolCall) {
+      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "no_tool_call" });
       return new Response(
         JSON.stringify({ error: "Não foi possível extrair dados do CSV." }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -222,12 +264,19 @@ Regras:
     }
 
     const result = JSON.parse(toolCall.function.arguments);
+    const wineCount = result.wines?.length || 0;
+
+    await logAudit(userId, 200, "success", Date.now() - startTime, {
+      wines_extracted: wineCount,
+      csv_lines: lines.length,
+    });
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("parse-csv-wines error:", e instanceof Error ? e.message : "unknown");
+    await logAudit(userId, 500, "internal_error", Date.now() - startTime);
     return new Response(
       JSON.stringify({ error: "Erro ao processar CSV. Tente novamente." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

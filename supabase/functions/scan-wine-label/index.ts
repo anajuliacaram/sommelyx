@@ -10,8 +10,8 @@ const corsHeaders = {
 
 // ── Simple in-memory rate limiter ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10; // max requests
-const RATE_WINDOW_MS = 60_000; // per minute
+const RATE_LIMIT = 10;
+const RATE_WINDOW_MS = 60_000;
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now();
@@ -25,7 +25,6 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
-// Cleanup stale entries periodically
 setInterval(() => {
   const now = Date.now();
   for (const [key, val] of rateLimitMap) {
@@ -34,16 +33,46 @@ setInterval(() => {
 }, 120_000);
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB base64
+const FUNCTION_NAME = "scan-wine-label";
+
+async function logAudit(
+  userId: string,
+  statusCode: number,
+  outcome: string,
+  durationMs: number,
+  metadata?: Record<string, unknown>
+) {
+  try {
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    await adminClient.from("edge_function_logs").insert({
+      user_id: userId,
+      function_name: FUNCTION_NAME,
+      status_code: statusCode,
+      outcome,
+      duration_ms: durationMs,
+      metadata: metadata || {},
+    });
+  } catch (e) {
+    console.error("Audit log failed:", e instanceof Error ? e.message : "unknown");
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  let userId = "anonymous";
+
   try {
     // ── JWT Authentication ──
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -58,16 +87,18 @@ serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userId = user.id;
+    userId = user.id;
 
     // ── Rate Limiting ──
     if (!checkRateLimit(userId)) {
+      await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
@@ -77,6 +108,7 @@ serve(async (req) => {
     // ── Input Validation ──
     const { imageBase64 } = await req.json();
     if (!imageBase64 || typeof imageBase64 !== "string") {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_image" });
       return new Response(JSON.stringify({ error: "Imagem não fornecida" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -84,6 +116,10 @@ serve(async (req) => {
     }
 
     if (imageBase64.length > MAX_IMAGE_SIZE) {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        reason: "image_too_large",
+        size_bytes: imageBase64.length,
+      });
       return new Response(JSON.stringify({ error: "Imagem muito grande. Máximo 10MB." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -93,6 +129,7 @@ serve(async (req) => {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) {
       console.error("Missing required API key configuration");
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -163,6 +200,7 @@ Rules:
 
     if (!response.ok) {
       console.error("AI Gateway error:", response.status);
+      await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: response.status });
       return new Response(
         JSON.stringify({ error: "Serviço de análise indisponível. Tente novamente." }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -173,6 +211,7 @@ Rules:
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
+      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "empty_response" });
       return new Response(
         JSON.stringify({ error: "Não foi possível analisar o rótulo." }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -185,17 +224,23 @@ Rules:
       parsed = JSON.parse(cleaned);
     } catch {
       console.error("Failed to parse AI response");
+      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "parse_failed" });
       return new Response(
         JSON.stringify({ error: "Não foi possível extrair dados do rótulo." }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    await logAudit(userId, 200, "success", Date.now() - startTime, {
+      wine_name: parsed.name || "unknown",
+    });
+
     return new Response(JSON.stringify({ wine: parsed }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error in scan-wine-label:", error instanceof Error ? error.message : "unknown");
+    await logAudit(userId, 500, "internal_error", Date.now() - startTime);
     return new Response(
       JSON.stringify({ error: "Falha ao analisar o rótulo. Tente novamente." }),
       {
