@@ -203,7 +203,7 @@ export default function Landing() {
                 </Button>
               </MagneticButton>
               <span className={trialPillClass} style={trialPillStyle}>
-                <Check className="h-3 w-3 text-[#22c55e]" /> 14 dias grátis · Sem cartão
+                <Check className="h-3 w-3 text-[#22c55e]" /> 14 dias grátis
               </span>
             </motion.div>
           </div>
@@ -272,7 +272,7 @@ export default function Landing() {
         <div className="container mx-auto max-w-5xl relative z-10">
           <motion.div className="mx-auto mb-7 sm:mb-12 max-w-xl text-center" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <span className={`${trialPillClass} mb-3 text-[11px] tracking-wider uppercase font-bold`} style={trialPillStyle}>
-              ✔ 14 dias grátis · Sem cartão
+              ✔ 14 dias grátis
             </span>
             <h2 className="text-xl sm:text-3xl md:text-[38px] font-serif font-black tracking-tight text-[#1A1A1A] leading-[1.1] mt-3">
               Escolha o plano ideal para sua adega
@@ -312,7 +312,7 @@ export default function Landing() {
                   {/* Trial pill */}
                   <div className="mb-4 w-full rounded-full py-1.5 px-4 text-center transition-all duration-200 hover:shadow-[0_0_10px_rgba(34,197,94,0.2)]" style={{ background: "#E6F6EC", border: "1px solid rgba(34,197,94,0.18)" }}>
                     <span className="text-[11px] font-bold" style={{ color: "#166534" }}>
-                      ✔ 14 dias grátis · Sem cartão
+                      ✔ 14 dias grátis
                     </span>
                   </div>
 

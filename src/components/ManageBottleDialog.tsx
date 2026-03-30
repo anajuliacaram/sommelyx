@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2, Star } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +42,7 @@ interface ConsumptionItem {
 let itemCounter = 0;
 
 export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogProps) {
+  const { profileType } = useAuth();
   const [items, setItems] = useState<ConsumptionItem[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -467,7 +469,8 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                   </div>
                 </div>
 
-                {/* Rating */}
+                {/* Rating - only for personal profile */}
+                {profileType !== "commercial" && (
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground flex items-center gap-1">
                     <Star className="h-3 w-3" /> Avaliação
@@ -493,6 +496,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                     ))}
                   </div>
                 </div>
+                )}
 
                 {/* Add to list button */}
                 <Button
