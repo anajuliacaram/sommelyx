@@ -106,6 +106,39 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_function_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          function_name: string
+          id: string
+          metadata: Json | null
+          outcome: string
+          status_code: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          function_name: string
+          id?: string
+          metadata?: Json | null
+          outcome: string
+          status_code: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          function_name?: string
+          id?: string
+          metadata?: Json | null
+          outcome?: string
+          status_code?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
