@@ -1,0 +1,1 @@
+ALTER TABLE public.edge_function_logs ALTER COLUMN user_id TYPE text USING user_id::text;
