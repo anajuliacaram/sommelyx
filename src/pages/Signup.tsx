@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { analytics } from "@/lib/analytics";
 
+const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Tente novamente em instantes.");
+
 export default function Signup() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -49,10 +51,10 @@ export default function Signup() {
         title: "Conta criada!",
         description: "Enviamos um link de confirmação para o seu e-mail.",
       });
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Erro ao criar conta",
-        description: err.message,
+        description: getErrorMessage(err),
         variant: "destructive",
       });
     } finally {
@@ -78,10 +80,10 @@ export default function Signup() {
         title: "Novo envio realizado",
         description: "Verifique sua caixa de entrada e também o spam.",
       });
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Não foi possível reenviar",
-        description: err.message || "Tente novamente em instantes.",
+        description: getErrorMessage(err),
         variant: "destructive",
       });
     } finally {
@@ -98,10 +100,10 @@ export default function Signup() {
         title: "E-mail reenviado",
         description: "Confira sua caixa de entrada e spam para confirmar a conta.",
       });
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Não foi possível reenviar",
-        description: err.message || "Tente novamente em instantes.",
+        description: getErrorMessage(err),
         variant: "destructive",
       });
     } finally {
@@ -233,6 +235,7 @@ export default function Signup() {
                     <Input
                       id="name"
                       type="text"
+                      autoComplete="name"
                       placeholder="João Silva"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -248,6 +251,7 @@ export default function Signup() {
                     <Input
                       id="email"
                       type="email"
+                      autoComplete="email"
                       placeholder="nome@empresa.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -264,6 +268,7 @@ export default function Signup() {
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
                         placeholder="Mínimo 8 caracteres"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}

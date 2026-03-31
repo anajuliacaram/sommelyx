@@ -21,6 +21,7 @@ import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { DashboardProfileProgress } from "@/components/DashboardProfileProgress";
 import { ContextualSuggestions } from "@/components/ContextualSuggestions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardExecutiveSummary } from "@/components/DashboardExecutiveSummary";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -119,24 +120,44 @@ export default function CommercialDashboard() {
         )}
       </AnimatePresence>
     <div className="space-y-4 max-w-[1200px] relative">
-      {/* Header */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight text-foreground">
-            Painel Operacional
-          </h1>
-          <p className="text-sm text-muted-foreground">Estoque, giro e controle da sua operação</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold" onClick={() => setCsvOpen(true)}>
-            <Upload className="h-3 w-3 mr-1" /> Importar
-          </Button>
-          <MagneticButton>
-            <Button variant="premium" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setAddOpen(true)}>
-              <Plus className="h-3 w-3 mr-1" /> Cadastrar produto
-            </Button>
-          </MagneticButton>
-        </div>
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+        <DashboardExecutiveSummary
+          eyebrow="Operacao Comercial"
+          title={`Painel de comando para ${firstName} acompanhar estoque, giro e margem.`}
+          description="A operacao Sommelyx agora ganha um topo mais executivo, com sinais claros de reposicao, valor imobilizado e acoes prioritarias no mesmo campo visual."
+          badges={[
+            `${uniqueLabels} rotulos ativos`,
+            `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })} em estoque`,
+            `${lowStock} itens em reposicao`,
+          ]}
+          metrics={[
+            {
+              label: "Valor imobilizado",
+              value: `R$ ${totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`,
+              detail: "Leitura rapida do capital hoje parado em garrafas e caixas.",
+              icon: DollarSign,
+              tone: "gold",
+            },
+            {
+              label: "Giro mensal",
+              value: `${turnover}%`,
+              detail: "Percentual de produtos movimentados nos ultimos 30 dias.",
+              icon: TrendingUp,
+              tone: turnover > 40 ? "emerald" : "wine",
+            },
+            {
+              label: "Reposicao",
+              value: lowStock.toString(),
+              detail: "Itens que pedem acao para nao comprometer disponibilidade.",
+              icon: AlertTriangle,
+              tone: "wine",
+            },
+          ]}
+          actions={[
+            { label: "Cadastrar produto", onClick: () => setAddOpen(true), icon: Plus, variant: "premium" },
+            { label: "Importar planilha", onClick: () => setCsvOpen(true), icon: Upload, variant: "outline" },
+          ]}
+        />
       </motion.div>
 
       {/* KPI Strip */}

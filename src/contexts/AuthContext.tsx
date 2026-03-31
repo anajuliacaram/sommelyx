@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { getOptionalClientEnv } from "@/lib/env";
 
 type ProfileType = "personal" | "commercial" | null;
 
@@ -17,6 +18,13 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+const appUrl = getOptionalClientEnv("VITE_APP_URL");
+
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const normalizeFullName = (value: string) => value.trim().replace(/\s+/g, " ");
+const debugAuth = (...args: unknown[]) => {
+  if (import.meta.env.DEV) console.debug(...args);
+};
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
@@ -31,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const initializedRef = useRef(false);
-  const emailRedirectTo = `${window.location.origin}/auth/confirm`;
+  const emailRedirectTo = `${(appUrl ?? window.location.origin).replace(/\/$/, "")}/auth/confirm`;
 
   const fetchProfileType = useCallback(async (userId: string): Promise<ProfileType> => {
     try {
@@ -58,7 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         if (!mountedRef.current) return;
-        console.log("[Auth] State change:", event);
+        debugAuth("[Auth] State change:", event);
 
         setSession(newSession);
         setUser(newSession?.user ?? null);
@@ -84,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
       if (!mountedRef.current || initializedRef.current) return;
       initializedRef.current = true;
-      console.log("[Auth] Initial session:", initialSession ? "found" : "none");
+      debugAuth("[Auth] Initial session:", initialSession ? "found" : "none");
 
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
@@ -104,10 +112,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
-      email,
+      email: normalizeEmail(email),
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: normalizeFullName(fullName) },
         emailRedirectTo,
       },
     });
@@ -117,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const resendConfirmationEmail = async (email: string) => {
     const { error } = await supabase.auth.resend({
       type: "signup",
-      email,
+      email: normalizeEmail(email),
       options: {
         emailRedirectTo,
       },
@@ -127,22 +135,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log("[Auth] signIn called");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email: normalizeEmail(email), password });
     if (error) throw error;
-    console.log("[Auth] signIn success");
+    debugAuth("[Auth] signIn success");
   };
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-    } finally {
-      if (!mountedRef.current) return;
-      setSession(null);
-      setUser(null);
-      setProfileTypeState(null);
-      setLoading(false);
     }
+    catch (error) {
+      debugAuth("[Auth] signOut fallback cleanup:", error);
+    }
+
+    if (!mountedRef.current) return;
+    setSession(null);
+    setUser(null);
+    setProfileTypeState(null);
+    setLoading(false);
   };
 
   const setProfileType = async (type: "personal" | "commercial") => {
@@ -168,7 +178,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .insert({
           user_id: user.id,
           profile_type: type,
-          full_name: user.user_metadata?.full_name || null,
+          full_name:
+            typeof user.user_metadata?.full_name === "string"
+              ? normalizeFullName(user.user_metadata.full_name)
+              : null,
         });
       if (error) throw error;
     }

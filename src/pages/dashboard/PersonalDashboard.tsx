@@ -16,6 +16,7 @@ import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { PersonalizedNotifications } from "@/components/PersonalizedNotifications";
 import { useToast } from "@/hooks/use-toast";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { DashboardExecutiveSummary } from "@/components/DashboardExecutiveSummary";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -114,22 +115,44 @@ export default function PersonalDashboard() {
         )}
       </AnimatePresence>
     <div className="space-y-5 max-w-[1200px] relative">
-      {/* Header */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-foreground">
-            Olá, {firstName}
-          </h1>
-          <p className="text-sm text-muted-foreground font-medium mt-0.5">Sua adega, seus momentos</p>
-        </div>
-        <div className="flex gap-2.5">
-          <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-semibold" onClick={() => setCsvOpen(true)}>
-            <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar
-          </Button>
-          <Button variant="premium" size="sm" className="h-9 px-5 text-xs font-bold" onClick={() => setAddOpen(true)}>
-            <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
-          </Button>
-        </div>
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+        <DashboardExecutiveSummary
+          eyebrow="Acervo Pessoal"
+          title={`Ola, ${firstName}. Sua adega agora fala com mais clareza.`}
+          description="Centralize consumo, guarda e proximos movimentos em uma experiencia mais elegante, orientada a contexto e pronta para decisoes rapidas."
+          badges={[
+            `${totalBottles} garrafas ativas`,
+            `${suggestions.length} prontas para abrir`,
+            `${alerts.length} frentes de atencao`,
+          ]}
+          metrics={[
+            {
+              label: "Prontas agora",
+              value: drinkNow.toString(),
+              detail: "Rotulos que merecem prioridade na sua agenda de consumo.",
+              icon: GlassWater,
+              tone: "emerald",
+            },
+            {
+              label: "Em guarda",
+              value: inGuard.toString(),
+              detail: "Garrafas que pedem paciencia antes da melhor janela.",
+              icon: Clock,
+              tone: "wine",
+            },
+            {
+              label: "Sem posicao",
+              value: noLocation.toString(),
+              detail: "Itens que ainda precisam de endereco claro na adega.",
+              icon: MapPin,
+              tone: "slate",
+            },
+          ]}
+          actions={[
+            { label: "Adicionar vinho", onClick: () => setAddOpen(true), icon: Plus, variant: "premium" },
+            { label: "Importar acervo", onClick: () => setCsvOpen(true), icon: Upload, variant: "outline" },
+          ]}
+        />
       </motion.div>
 
       {/* KPI Strip */}

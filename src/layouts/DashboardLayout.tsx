@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
 
 export default function DashboardLayout() {
   const { user, profileType } = useAuth();
@@ -68,10 +69,10 @@ export default function DashboardLayout() {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="dashboard-shell min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 md:h-[56px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30 bg-background/85 backdrop-blur-xl border-b border-border/60">
+          <header className="h-12 md:h-[64px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30 bg-[#FCFAF8]/75 backdrop-blur-2xl border-b border-white/40 shadow-[0_12px_40px_-32px_rgba(23,20,29,0.7)]">
             <SidebarTrigger className="shrink-0 h-12 w-12 md:h-10 md:w-10 rounded-2xl gradient-wine text-primary-foreground shadow-lg backdrop-blur-sm border border-white/20 transition-all active:scale-[0.95] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] [&>svg]:h-5 [&>svg]:w-5" />
 
             <div className="flex-1 max-w-lg relative hidden sm:block">
@@ -117,6 +118,27 @@ export default function DashboardLayout() {
             <div className="flex-1 sm:hidden" />
 
             <div className="flex items-center gap-1.5 md:gap-2">
+              <DashboardCommandMenu
+                profileType={profileType}
+                wines={wines ?? []}
+                alertCount={alertCount}
+                onAddWine={() => setAddOpen(true)}
+                onImportCsv={() =>
+                  navigate(profileType === "commercial" ? "/dashboard/inventory" : "/dashboard/cellar")
+                }
+                onRegisterOpen={() => {
+                  setManageTab("open");
+                  setManageOpen(true);
+                }}
+                onRegisterExit={() => {
+                  setManageTab("exit");
+                  setManageOpen(true);
+                }}
+                onRegisterSale={
+                  profileType === "commercial" ? () => navigate("/dashboard/sales") : undefined
+                }
+              />
+
               <button
                 className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center hover:bg-muted/40 text-muted-foreground"
                 onClick={() => setMobileSearchOpen((v) => !v)}

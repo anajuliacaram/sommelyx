@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { analytics } from "@/lib/analytics";
 
+const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Erro desconhecido.");
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,7 +66,7 @@ export default function Login() {
       setFailedAttempts(0);
       setLockUntil(null);
       analytics.track("login_success");
-    } catch (err: any) {
+    } catch (err) {
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
 
@@ -75,11 +77,11 @@ export default function Login() {
       }
 
       const msg =
-        err.message === "Invalid login credentials"
+        getErrorMessage(err) === "Invalid login credentials"
           ? "Email ou senha incorretos."
-          : err.message === "Email not confirmed"
+          : getErrorMessage(err) === "Email not confirmed"
             ? "Confirme seu email antes de fazer login."
-            : err.message || "Erro desconhecido.";
+            : getErrorMessage(err);
       toast({ title: "Erro ao entrar", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
@@ -171,6 +173,7 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="nome@empresa.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -192,6 +195,7 @@ export default function Login() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
