@@ -25,8 +25,9 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
         </a>
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
-            variant="ghost"
-            className="h-9 px-3 sm:px-4 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            variant="secondary"
+            size="sm"
+            className="text-[13px] font-semibold"
             onClick={onLogin}
           >
             Entrar

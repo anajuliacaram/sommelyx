@@ -56,7 +56,7 @@ export default function InventoryPlaceholder({ title, icon, description }: Place
                     <Button variant="primary" className="flex-1 h-12 rounded-2xl font-bold shadow-float" onClick={() => navigate("/dashboard")}>
                         <LayoutDashboard className="h-4 w-4 mr-2" /> Voltar ao Painel
                     </Button>
-                    <Button variant="ghost" className="flex-1 h-12 rounded-2xl font-bold border border-border/70 bg-background/50 hover:bg-background" onClick={() => navigate("/dashboard/plans")}>
+                    <Button variant="outline" className="flex-1 h-12 rounded-2xl font-bold" onClick={() => navigate("/dashboard/plans")}>
                         Ver Planos Pro
                     </Button>
                 </div>

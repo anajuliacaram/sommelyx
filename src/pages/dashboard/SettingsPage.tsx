@@ -226,7 +226,7 @@ export default function SettingsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmProfileSwitch} className="gradient-wine text-white border-0">
+            <AlertDialogAction onClick={confirmProfileSwitch}>
               Confirmar troca
             </AlertDialogAction>
           </AlertDialogFooter>

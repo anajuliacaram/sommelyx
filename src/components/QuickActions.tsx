@@ -31,7 +31,7 @@ export function QuickActions({ onAddWine, onOpenBottle, onViewCellar, variant = 
           {variant === "commercial" ? "Registrar venda" : "Registrar abertura"}
         </Button>
       )}
-      <Button onClick={onViewCellar} variant="ghost" className="h-10 px-5 text-[13px] font-medium border border-border/70 bg-background/50 hover:bg-background">
+      <Button onClick={onViewCellar} variant="outline" className="h-10 px-5 text-[13px] font-medium">
         <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
         {variant === "commercial" ? "Ver estoque" : "Ver adega"}
       </Button>

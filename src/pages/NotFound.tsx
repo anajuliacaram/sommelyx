@@ -1,5 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 const NotFound = () => {
   const location = useLocation();
@@ -13,12 +14,9 @@ const NotFound = () => {
       <div className="text-center">
         <h1 className="mb-3 text-5xl font-serif font-bold" style={{ color: "#0F0F14" }}>404</h1>
         <p className="mb-6 text-base" style={{ color: "#6B7280" }}>Página não encontrada</p>
-        <Link
-          to="/"
-          className="inline-flex h-11 px-6 items-center rounded-2xl text-[13px] font-semibold text-white gradient-wine"
-        >
-          Voltar ao início
-        </Link>
+        <Button asChild variant="primary" className="h-11 px-6 text-[13px] font-semibold shadow-float">
+          <Link to="/">Voltar ao início</Link>
+        </Button>
       </div>
     </div>
   );

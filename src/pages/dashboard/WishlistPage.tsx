@@ -392,11 +392,11 @@ export default function WishlistPage() {
                 </p>
 
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  <Button type="button" variant="ghost" className="h-10 text-[11px] font-bold border border-border/70 bg-background/50 hover:bg-background" onClick={() => fileInputRef.current?.click()}>
+                  <Button type="button" variant="outline" className="h-10 text-[11px] font-bold" onClick={() => fileInputRef.current?.click()}>
                     <Upload className="h-3.5 w-3.5 mr-1.5" />
                     Anexar foto
                   </Button>
-                  <Button type="button" variant="ghost" className="h-10 text-[11px] font-bold border border-border/70 bg-background/50 hover:bg-background" onClick={() => cameraInputRef.current?.click()}>
+                  <Button type="button" variant="outline" className="h-10 text-[11px] font-bold" onClick={() => cameraInputRef.current?.click()}>
                     <Camera className="h-3.5 w-3.5 mr-1.5" />
                     Tirar foto
                   </Button>

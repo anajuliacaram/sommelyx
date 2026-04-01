@@ -229,7 +229,7 @@ export default function CommercialDashboard() {
                 <Button variant="outline" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/sales")}>
                   <ShoppingCart className="mr-2 h-4 w-4" /> Registrar venda
                 </Button>
-                <Button variant="ghost" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em] border border-border/70 bg-background/50 hover:bg-background" onClick={() => setCsvOpen(true)}>
+                <Button variant="ghost" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setCsvOpen(true)}>
                   <Upload className="mr-2 h-4 w-4" /> Importar planilha
                 </Button>
               </div>

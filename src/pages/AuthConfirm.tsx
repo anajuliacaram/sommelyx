@@ -152,7 +152,7 @@ export default function AuthConfirm() {
                 <Button asChild variant="primary" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em]">
                   <Link to="/signup?resend=true">Reenviar confirmação</Link>
                 </Button>
-                <Button asChild variant="ghost" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em] border border-border/70 bg-background/50 hover:bg-background">
+                <Button asChild variant="outline" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em]">
                   <Link to="/login">Voltar para login</Link>
                 </Button>
               </div>

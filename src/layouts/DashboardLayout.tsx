@@ -10,7 +10,8 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { useWineMetrics, useWines } from "@/hooks/useWines";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function DashboardLayout() {
   const { user, profileType } = useAuth();
@@ -37,7 +38,12 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
           <header className="h-14 md:h-[64px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30 bg-[#FCFAF8]/75 backdrop-blur-2xl border-b border-white/40 shadow-[0_12px_40px_-32px_rgba(23,20,29,0.7)]">
-            <SidebarTrigger className="shrink-0 h-10 w-10 md:h-10 md:w-10 rounded-2xl gradient-wine text-primary-foreground shadow-lg backdrop-blur-sm border border-white/20 transition-all active:scale-[0.95] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] [&>svg]:h-5 [&>svg]:w-5" />
+            <SidebarTrigger
+              className={cn(
+                buttonVariants({ variant: "secondary", size: "icon" }),
+                "rounded-2xl [&>svg]:h-5 [&>svg]:w-5",
+              )}
+            />
 
             <div className="flex-1 flex items-center justify-start md:justify-center px-1 md:px-3">
               <DashboardCommandMenu
@@ -90,10 +96,9 @@ export default function DashboardLayout() {
 
               <Button
                 type="button"
-                variant="ghost"
+                variant="primary"
                 size="icon"
-                className="h-10 w-10 rounded-2xl p-0 text-white shadow-[0_10px_26px_-18px_hsl(var(--primary)/0.45)]"
-                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--wine-vivid)))" }}
+                className="h-10 w-10 rounded-2xl p-0 font-black shadow-float"
                 onClick={() => navigate("/dashboard/settings")}
               >
                 {initials}

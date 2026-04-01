@@ -310,7 +310,8 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting || items.length === 0}
-                className="w-full gradient-wine text-primary-foreground btn-glow h-11 text-[13px] font-medium"
+                variant="primary"
+                className="w-full h-11 text-[13px] font-medium shadow-float"
               >
                 {isSubmitting ? "Registrando..." : "Confirmar Venda"}
               </Button>

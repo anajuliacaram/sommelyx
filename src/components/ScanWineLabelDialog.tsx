@@ -267,7 +267,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               </p>
 
               <div className="flex gap-3 pt-2">
-                <Button variant="ghost" onClick={reset} className="flex-1 h-11 text-[13px] border border-border/70 bg-background/50 hover:bg-background">
+                <Button variant="outline" onClick={reset} className="flex-1 h-11 text-[13px]">
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                   Reescanear
                 </Button>

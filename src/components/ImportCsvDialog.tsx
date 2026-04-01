@@ -303,7 +303,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
               <Button
                 onClick={handleImport}
-                className="w-full gradient-wine text-primary-foreground btn-glow h-11 text-[13px] font-medium"
+                variant="primary"
+                className="w-full h-11 text-[13px] font-medium shadow-float"
                 disabled={parsed.length === 0}
               >
                 <Upload className="h-4 w-4 mr-1.5" /> Importar {parsed.length} vinho(s)
@@ -334,7 +335,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   {importErrors.length} erro(s) durante importação
                 </p>
               )}
-              <Button variant="ghost" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 text-[13px] border border-border/70 bg-background/60 hover:bg-background">
+              <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 text-[13px]">
                 Fechar
               </Button>
             </motion.div>
