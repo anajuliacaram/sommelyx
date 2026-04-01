@@ -48,7 +48,7 @@ interface LandingPricingProps {
 
 export function LandingPricing({ onSignup }: LandingPricingProps) {
   return (
-    <section id="pricing" className="relative px-5 sm:px-8 pt-12 sm:pt-24 pb-16 sm:pb-28 overflow-hidden z-10">
+    <section id="pricing" className="relative px-5 sm:px-8 pt-10 sm:pt-16 pb-16 sm:pb-24 overflow-hidden z-10">
       {/* Subtle background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,hsl(340_54%_36%/0.04),transparent_60%)] pointer-events-none" />
 
@@ -58,7 +58,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           className="mx-auto mb-10 sm:mb-14 max-w-xl text-center"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-black tracking-[0.14em] uppercase mb-4 bg-wine/5 text-wine border border-wine/15">
+          <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-[12px] sm:text-[13px] font-black tracking-[0.16em] uppercase mb-4 bg-emerald-500/12 text-emerald-700 border border-emerald-500/25">
             ✔ 14 dias grátis
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-foreground leading-[1.1]">
@@ -195,8 +195,8 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 </div>
 
                 {/* Trial pill */}
-                <div className="mb-5 w-full rounded-full py-2 px-4 text-center bg-[hsl(142_66%_95%/0.12)] border border-[hsl(142_66%_38%/0.2)]">
-                  <span className="text-[11px] font-bold text-[hsl(142_66%_85%)]">
+                <div className="mb-5 w-full rounded-full py-2.5 px-4 text-center bg-emerald-400/15 border border-emerald-200/25">
+                  <span className="text-[12px] font-black tracking-[0.08em] text-emerald-100">
                     ✔ 14 dias grátis
                   </span>
                 </div>

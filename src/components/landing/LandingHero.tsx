@@ -49,7 +49,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
             <MagneticButton>
               <Button
                 variant="primary"
@@ -61,16 +61,13 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               </Button>
             </MagneticButton>
             <div className="flex items-center gap-3 text-[12px] font-semibold text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/55 px-3 py-2 backdrop-blur-xl">
-                <Check className="h-3.5 w-3.5 text-gold" /> 14 dias grátis
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/55 px-3 py-2 backdrop-blur-xl">
-                <Check className="h-3.5 w-3.5 text-gold" /> Sem cartão
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-black uppercase tracking-[0.14em] text-emerald-700 backdrop-blur-xl">
+                <Check className="h-4 w-4 text-emerald-600" /> 14 dias grátis
               </span>
             </div>
           </motion.div>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mt-5 grid max-w-xl grid-cols-3 gap-2">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mt-4 grid max-w-xl grid-cols-3 gap-2">
             {[
               { label: "Estoque", icon: Layers },
               { label: "Giro", icon: TrendingUp },
