@@ -3,19 +3,12 @@ import { AnimatedOutlet } from "@/components/AnimatedOutlet";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, Search, Bell, GlassWater, Wine, ArrowDownRight, Camera } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, Bell, Wine } from "lucide-react";
 import { useState, useMemo } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { useWineMetrics, useWines } from "@/hooks/useWines";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
 
 export default function DashboardLayout() {
@@ -164,35 +157,6 @@ export default function DashboardLayout() {
                 <Bell className="h-4 w-4" />
                 {alertCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-[8px] font-bold flex items-center justify-center text-white bg-destructive">{alertCount}</span>}
               </button>
-
-              {profileType !== "commercial" && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="sm" className="gradient-wine text-primary-foreground btn-glow h-8 px-3 text-[11px] font-semibold border-0">
-                      <Plus className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline ml-1">Adicionar</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52">
-                    <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
-                      <Wine className="h-4 w-4 mr-2 text-primary" />
-                      <span className="text-[12px]">Adicionar garrafa</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => { setManageTab("open"); setManageOpen(true); }} className="cursor-pointer">
-                      <GlassWater className="h-4 w-4 mr-2 text-success" />
-                      <span className="text-[12px]">Registrar abertura</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => { setManageTab("exit"); setManageOpen(true); }} className="cursor-pointer">
-                      <ArrowDownRight className="h-4 w-4 mr-2 text-warning" />
-                      <span className="text-[12px]">Registrar saída</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setAddOpen(true)} className="cursor-pointer">
-                      <Camera className="h-4 w-4 mr-2 text-primary" />
-                      <span className="text-[12px]">Adicionar via foto</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
 
               <div
                 className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 cursor-pointer"
