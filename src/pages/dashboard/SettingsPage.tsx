@@ -166,20 +166,20 @@ export default function SettingsPage() {
           <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Tipo de conta</h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Button
             type="button"
             onClick={() => handleProfileSwitch("personal")}
             variant="outline"
             className={cn(
-              "h-auto w-full justify-start items-start p-4 rounded-2xl text-left transition-all",
+              "h-auto w-full flex-col justify-start items-start p-4 rounded-2xl text-left transition-all gap-1",
               profileType === "personal"
                 ? "bg-primary/5 border-primary/25 shadow-sm"
                 : "bg-background/60 border-border/60 hover:bg-background",
             )}
           >
-            <p className="text-[13px] font-semibold" style={{ color: "#0F0F14" }}>🍷 Adega Pessoal</p>
-            <p className="text-[11px] mt-1" style={{ color: "#6B7280" }}>Para colecionadores e entusiastas</p>
+            <p className="text-[13px] font-semibold leading-tight" style={{ color: "#0F0F14" }}>🍷 Adega Pessoal</p>
+            <p className="text-[11px] leading-snug" style={{ color: "#6B7280" }}>Para colecionadores e entusiastas</p>
             {profileType === "personal" && <Check className="h-4 w-4 mt-2" style={{ color: "#8F2D56" }} />}
           </Button>
           <Button
@@ -187,14 +187,14 @@ export default function SettingsPage() {
             onClick={() => handleProfileSwitch("commercial")}
             variant="outline"
             className={cn(
-              "h-auto w-full justify-start items-start p-4 rounded-2xl text-left transition-all",
+              "h-auto w-full flex-col justify-start items-start p-4 rounded-2xl text-left transition-all gap-1",
               profileType === "commercial"
                 ? "bg-primary/5 border-primary/25 shadow-sm"
                 : "bg-background/60 border-border/60 hover:bg-background",
             )}
           >
-            <p className="text-[13px] font-semibold" style={{ color: "#0F0F14" }}>🏪 Operação Comercial</p>
-            <p className="text-[11px] mt-1" style={{ color: "#6B7280" }}>Para bares, restaurantes e lojas</p>
+            <p className="text-[13px] font-semibold leading-tight" style={{ color: "#0F0F14" }}>🏪 Operação Comercial</p>
+            <p className="text-[11px] leading-snug" style={{ color: "#6B7280" }}>Para bares, restaurantes e lojas</p>
             {profileType === "commercial" && <Check className="h-4 w-4 mt-2" style={{ color: "#8F2D56" }} />}
           </Button>
         </div>
