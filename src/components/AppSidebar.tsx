@@ -72,7 +72,7 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="offcanvas" className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)", background: "#FDFDFD" }}>
-        <SidebarHeader className="pt-5 px-3">
+        <SidebarHeader className="pt-4 px-3">
           {/* Logo + Mode */}
           <div className="flex items-center gap-3 px-2 py-1.5 mb-3">
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 w-8 object-contain" />
@@ -152,7 +152,7 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
-                        className="sidebar-item !h-[42px] !text-[13px]"
+                        className="sidebar-item !text-[13px]"
                         activeClassName="sidebar-item--active"
                         onClick={closeMobileSidebar}
                       >
@@ -174,7 +174,7 @@ export function AppSidebar() {
               <SidebarMenu className="gap-1">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/settings" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
+                    <NavLink to="/dashboard/settings" className="sidebar-item !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <Settings className="h-4 w-4 shrink-0" />
                       <span>Preferências</span>
                     </NavLink>
@@ -182,7 +182,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/plans" className="sidebar-item !h-[42px] !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
+                    <NavLink to="/dashboard/plans" className="sidebar-item !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <CreditCard className="h-4 w-4 shrink-0" />
                       <span>Meu Plano</span>
                     </NavLink>

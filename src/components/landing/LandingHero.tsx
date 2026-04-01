@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, ArrowRight } from "lucide-react";
+import { ArrowRight, Check, Sparkles, TrendingUp, AlertTriangle, Layers, Wine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 
@@ -18,52 +18,139 @@ interface LandingHeroProps {
 
 export function LandingHero({ onSignup }: LandingHeroProps) {
   return (
-    <section className="relative pt-28 sm:pt-40 lg:pt-48 pb-16 sm:pb-24 px-5 sm:px-8 z-10">
-      <div className="mx-auto relative max-w-2xl">
-        <div className="flex flex-col items-center text-center">
-          {/* Eyebrow */}
-          <motion.div
-            className="mb-5 sm:mb-6"
-            initial="hidden" animate="visible" variants={fadeUp} custom={0}
-          >
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-wine-light text-wine border border-wine/10">
-              Gestão de adega inteligente
+    <section className="relative z-10 px-5 sm:px-8 pt-24 sm:pt-28 lg:pt-32 pb-12 sm:pb-16">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
+        {/* Left */}
+        <div className="text-left">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-wine/15 bg-white/60 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-wine backdrop-blur-xl">
+              <Sparkles className="h-3.5 w-3.5" />
+              wine + tech + luxury
             </span>
           </motion.div>
 
           <motion.h1
-            className="font-serif font-black text-foreground leading-[1.08] tracking-[-0.03em]"
-            style={{ fontSize: "clamp(28px, 5.5vw, 54px)" }}
-            initial="hidden" animate="visible" variants={fadeUp} custom={1}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            custom={1}
+            className="max-w-xl font-serif text-[44px] font-black leading-[0.98] tracking-[-0.045em] text-foreground sm:text-[54px]"
           >
-            Controle sua adega e saiba exatamente quando abrir cada vinho
+            Um cockpit executivo para sua adega, com clareza de estoque, valor e giro.
           </motion.h1>
 
           <motion.p
-            className="text-[15px] sm:text-lg md:text-xl max-w-md mt-5 sm:mt-7 font-medium text-muted-foreground leading-relaxed"
-            initial="hidden" animate="visible" variants={fadeUp} custom={2}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            custom={2}
+            className="mt-5 max-w-xl text-[16px] font-medium leading-relaxed text-muted-foreground sm:text-[18px]"
           >
-            Organize, acompanhe e nunca mais perca garrafas no ponto errado.
+            Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
 
-          <motion.div
-            className="mt-8 sm:mt-10 flex flex-col items-center gap-3"
-            initial="hidden" animate="visible" variants={fadeUp} custom={3}
-          >
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <MagneticButton>
               <Button
-                className="group px-10 sm:px-14 h-12 sm:h-14 text-[14px] sm:text-[15px] font-bold rounded-full transition-all text-primary-foreground hover:-translate-y-0.5 shadow-[0_8px_30px_hsl(340_54%_36%/0.3)] hover:shadow-[0_16px_40px_hsl(340_54%_36%/0.4)] bg-primary hover:bg-wine-vivid active:scale-[0.98]"
+                className="group h-12 rounded-2xl bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] px-8 text-[13px] font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_44px_-26px_rgba(15,15,20,0.8)] ring-1 ring-black/10 transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_64px_-32px_rgba(15,15,20,0.9)] active:scale-[0.99]"
                 onClick={onSignup}
               >
                 Começar grátis
-                <ArrowRight className="ml-2.5 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="ml-2 h-4.5 w-4.5 transition-transform group-hover:translate-x-1" />
               </Button>
             </MagneticButton>
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-semibold bg-[hsl(142_66%_95%)] text-[hsl(142_66%_28%)] border border-[hsl(142_66%_38%/0.15)]">
-              <Check className="h-3 w-3 text-[hsl(142_66%_38%)]" /> 14 dias grátis
-            </span>
+            <div className="flex items-center gap-3 text-[12px] font-semibold text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/55 px-3 py-2 backdrop-blur-xl">
+                <Check className="h-3.5 w-3.5 text-emerald-600" /> 14 dias grátis
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/55 px-3 py-2 backdrop-blur-xl">
+                <Check className="h-3.5 w-3.5 text-emerald-600" /> Sem cartão
+              </span>
+            </div>
+          </motion.div>
+
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mt-6 grid max-w-xl grid-cols-3 gap-2">
+            {[
+              { label: "Estoque", icon: Layers },
+              { label: "Giro", icon: TrendingUp },
+              { label: "Reposição", icon: AlertTriangle },
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl border border-black/[0.06] bg-white/55 px-3 py-2.5 backdrop-blur-xl">
+                <div className="flex items-center gap-2">
+                  <item.icon className="h-4 w-4 text-wine" />
+                  <span className="text-[11px] font-black uppercase tracking-[0.14em] text-foreground">{item.label}</span>
+                </div>
+              </div>
+            ))}
           </motion.div>
         </div>
+
+        {/* Right: Mock Dashboard */}
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2} className="relative">
+          <div className="absolute -left-10 -top-10 h-56 w-56 rounded-full bg-wine/20 blur-[70px]" />
+          <div className="absolute -bottom-12 -right-12 h-72 w-72 rounded-full bg-gold/20 blur-[90px]" />
+
+          <div className="relative rounded-[28px] border border-black/[0.06] bg-white/65 p-4 shadow-[0_32px_90px_-52px_rgba(15,15,20,0.9)] ring-1 ring-white/50 backdrop-blur-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
+                  <Wine className="h-4.5 w-4.5" />
+                </div>
+                <div className="leading-none">
+                  <p className="text-[12px] font-black uppercase tracking-[0.14em] text-muted-foreground">Dashboard</p>
+                  <p className="text-[15px] font-bold tracking-tight text-foreground">Cockpit executivo</p>
+                </div>
+              </div>
+              <div className="rounded-full border border-wine/15 bg-wine/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-wine">
+                Premium
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {[
+                { label: "Estoque total", value: "128 un.", tone: "wine" },
+                { label: "Valor imobilizado", value: "R$ 92k", tone: "gold" },
+                { label: "Giro mensal", value: "37%", tone: "wine" },
+                { label: "Reposição", value: "6 itens", tone: "wine" },
+              ].map((kpi) => (
+                <div key={kpi.label} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{kpi.label}</p>
+                  <p className="mt-1 text-[18px] font-black tracking-tight text-foreground">{kpi.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 grid grid-cols-12 gap-2">
+              <div className="col-span-7 rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Estoque atual</p>
+                <div className="mt-2 space-y-2">
+                  {[
+                    { name: "Brunello di Montalcino", qty: "2", tone: "low" },
+                    { name: "Champagne Brut", qty: "8", tone: "ok" },
+                    { name: "Barolo Riserva", qty: "1", tone: "low" },
+                  ].map((row) => (
+                    <div key={row.name} className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-emerald-500"}`} />
+                      <p className="flex-1 truncate text-[12px] font-semibold text-foreground">{row.name}</p>
+                      <span className="rounded-full bg-black/[0.04] px-2 py-1 text-[10px] font-black text-muted-foreground">{row.qty}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="col-span-5 rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Vendas</p>
+                <div className="mt-2 grid grid-cols-6 items-end gap-1">
+                  {[4, 7, 6, 10, 9, 12].map((h, i) => (
+                    <div key={i} className="col-span-1 rounded-md bg-wine/15">
+                      <div className="rounded-md bg-wine" style={{ height: `${h * 6}px`, opacity: 0.9 }} />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] font-semibold text-muted-foreground">Últimos 6 meses</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

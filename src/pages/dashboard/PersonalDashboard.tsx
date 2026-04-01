@@ -1,109 +1,127 @@
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Wine, GlassWater, Plus, AlertTriangle, ArrowDownRight,
-  Clock, MapPin, Upload, Star, Grape, Globe
+  AlertTriangle,
+  ArrowRight,
+  Clock,
+  GlassWater,
+  Layers,
+  Plus,
+  Star,
+  Upload,
+  Wine,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { WineMesh } from "@/components/WineMesh";
-import { AddWineDialog } from "@/components/AddWineDialog";
-import { ManageBottleDialog } from "@/components/ManageBottleDialog";
-import { ImportCsvDialog } from "@/components/ImportCsvDialog";
-import { useWineMetrics, useWineEvent } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AddWineDialog } from "@/components/AddWineDialog";
+import { ImportCsvDialog } from "@/components/ImportCsvDialog";
+import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
-import { PersonalizedNotifications } from "@/components/PersonalizedNotifications";
+import { useAuth } from "@/contexts/AuthContext";
+import { useConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { DashboardExecutiveSummary } from "@/components/DashboardExecutiveSummary";
+import { useWineEvent, useWineMetrics } from "@/hooks/useWines";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 8 } as const,
+  hidden: { opacity: 0, y: 10 } as const,
   visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.035, duration: 0.42, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
-const currentYear = new Date().getFullYear();
-const PIE_COLORS = ["#8F2D56", "#C44569", "#E07A5F", "#C9A86A", "#6B7280", "#22c55e"];
+function buildMonthWindow(size: number) {
+  const months: Array<{ key: string; label: string }> = [];
+  const cursor = new Date();
+  cursor.setDate(1);
+  cursor.setHours(0, 0, 0, 0);
+  cursor.setMonth(cursor.getMonth() - (size - 1));
+  for (let i = 0; i < size; i++) {
+    const d = new Date(cursor);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const label = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
+    months.push({ key, label });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return months;
+}
 
 export default function PersonalDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Sommelier";
-  const { totalBottles, drinkNow, recentCount, lowStock, wines, isLoading } = useWineMetrics();
+
+  const { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines, isLoading } = useWineMetrics();
+  const { data: consumption = [] } = useConsumption();
+  const wineEvent = useWineEvent();
+
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
-  const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
-  const wineEvent = useWineEvent();
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_personal"));
 
-  const suggestions = useMemo(() => {
+  const currentYear = new Date().getFullYear();
+
+  const readyToDrink = useMemo(() => {
     return wines
-      .filter(w => w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until && w.quantity > 0)
-      .slice(0, 4);
-  }, [wines]);
+      .filter((w) => w.quantity > 0 && w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until)
+      .slice()
+      .sort((a, b) => (a.drink_until ?? 9999) - (b.drink_until ?? 9999))
+      .slice(0, 8);
+  }, [wines, currentYear]);
 
-  const drinkWindowData = useMemo(() => {
-    const late = wines.filter(w => w.drink_until && currentYear > w.drink_until && w.quantity > 0).length;
-    const now = wines.filter(w => w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until && w.quantity > 0).length;
-    const future = wines.filter(w => w.drink_from && currentYear < w.drink_from && w.quantity > 0).length;
-    return [
-      { name: "Atrasados", value: late, color: "#E07A5F" },
-      { name: "Agora", value: now, color: "#22c55e" },
-      { name: "Futuro", value: future, color: "#8F2D56" },
-    ].filter(d => d.value > 0);
-  }, [wines]);
+  const inGuard = useMemo(
+    () => wines.filter((w) => w.quantity > 0 && w.drink_from && currentYear < w.drink_from).length,
+    [wines, currentYear],
+  );
 
-  const compositionData = useMemo(() => {
+  const pastPeak = useMemo(
+    () => wines.filter((w) => w.quantity > 0 && w.drink_until && currentYear > w.drink_until).length,
+    [wines, currentYear],
+  );
+
+  const months = useMemo(() => buildMonthWindow(6), []);
+
+  const consumptionMonthly = useMemo(() => {
     const map: Record<string, number> = {};
-    wines.forEach(w => {
-      const key = w.style || "Outro";
-      map[key] = (map[key] || 0) + w.quantity;
+    consumption.forEach((c) => {
+      const d = new Date(c.consumed_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      map[key] = (map[key] || 0) + 1;
     });
-    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 6)
-      .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
-  }, [wines]);
+    return months.map((m) => ({ name: m.label, value: map[m.key] || 0 }));
+  }, [consumption, months]);
 
-  const countryData = useMemo(() => {
-    const map: Record<string, number> = {};
-    wines.forEach(w => { const key = w.country || "Outro"; map[key] = (map[key] || 0) + w.quantity; });
-    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, value]) => ({ name, value }));
-  }, [wines]);
-
-  const recentWines = wines
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5);
-
-  const inGuard = wines.filter(w => w.drink_from && currentYear < w.drink_from && w.quantity > 0).length;
-  const pastPeak = wines.filter(w => w.drink_until && currentYear > w.drink_until && w.quantity > 0).length;
-  const noLocation = wines.filter(w => w.quantity > 0 && !w.cellar_location).length;
-
-  const alerts = [
-    ...(drinkNow > 0 ? [{ label: "Beber agora", count: drinkNow, icon: GlassWater, color: "#22c55e", bg: "rgba(34,197,94,0.07)" }] : []),
-    ...(pastPeak > 0 ? [{ label: "Passaram do pico", count: pastPeak, icon: AlertTriangle, color: "#f59e0b", bg: "rgba(245,158,11,0.07)" }] : []),
-    ...(lowStock > 0 ? [{ label: "Estoque baixo", count: lowStock, icon: ArrowDownRight, color: "#E07A5F", bg: "rgba(224,122,95,0.07)" }] : []),
-    ...(noLocation > 0 ? [{ label: "Sem localização", count: noLocation, icon: MapPin, color: "#6B7280", bg: "rgba(107,114,128,0.07)" }] : []),
-  ];
-
-  // 4 KPIs: Garrafas, Beber agora, Em guarda, Consumo recente
-  const metrics = [
-    { label: "Garrafas", value: totalBottles.toString(), icon: Wine, color: "#8F2D56", badge: recentCount > 0 ? `+${recentCount}` : undefined, onClick: () => navigate("/dashboard/cellar") },
-    { label: "Beber agora", value: drinkNow.toString(), icon: GlassWater, color: "#22c55e", onClick: () => navigate("/dashboard/cellar") },
-    { label: "Em guarda", value: inGuard.toString(), icon: Clock, color: "#3b82f6", onClick: () => navigate("/dashboard/cellar") },
-    { label: "Consumo recente", value: recentCount.toString(), icon: Star, color: "#C44569" },
-  ];
+  const kpis = useMemo(
+    () => [
+      { label: "Garrafas", value: `${totalBottles}`, icon: Layers },
+      { label: "Valor estimado", value: totalValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }), icon: Star },
+      { label: "Beber agora", value: `${drinkNow}`, icon: GlassWater },
+      { label: "Estoque baixo", value: `${lowStock}`, icon: AlertTriangle },
+    ],
+    [drinkNow, lowStock, totalBottles, totalValue],
+  );
 
   const handleOpenBottle = async (wineId: string, wineName: string) => {
     try {
       await wineEvent.mutateAsync({ wineId, eventType: "open", quantity: 1 });
-      toast({ title: `🍷 "${wineName}" aberto!`, description: "Saída registrada com sucesso." });
+      toast({ title: `🍷 "${wineName}" aberto`, description: "Consumo registrado com sucesso." });
     } catch {
-      toast({ title: "Erro ao registrar abertura", variant: "destructive" });
+      toast({ title: "Erro ao registrar consumo", variant: "destructive" });
     }
   };
 
@@ -111,333 +129,177 @@ export default function PersonalDashboard() {
     <>
       <AnimatePresence>
         {showOnboarding && (
-          <OnboardingWizard profileType="personal" onComplete={() => setShowOnboarding(false)} />
+          <OnboardingWizard
+            profileType="personal"
+            onComplete={() => {
+              localStorage.setItem("sommelyx_onboarding_done_personal", "true");
+              setShowOnboarding(false);
+            }}
+          />
         )}
       </AnimatePresence>
-    <div className="space-y-5 max-w-[1200px] relative">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <DashboardExecutiveSummary
-          eyebrow="Acervo Pessoal"
-          title={`Ola, ${firstName}. Sua adega agora fala com mais clareza.`}
-          description="Centralize consumo, guarda e proximos movimentos em uma experiencia mais elegante, orientada a contexto e pronta para decisoes rapidas."
-          badges={[
-            `${totalBottles} garrafas ativas`,
-            `${suggestions.length} prontas para abrir`,
-            `${alerts.length} frentes de atencao`,
-          ]}
-          metrics={[
-            {
-              label: "Prontas agora",
-              value: drinkNow.toString(),
-              detail: "Rotulos que merecem prioridade na sua agenda de consumo.",
-              icon: GlassWater,
-              tone: "emerald",
-            },
-            {
-              label: "Em guarda",
-              value: inGuard.toString(),
-              detail: "Garrafas que pedem paciencia antes da melhor janela.",
-              icon: Clock,
-              tone: "wine",
-            },
-            {
-              label: "Sem posicao",
-              value: noLocation.toString(),
-              detail: "Itens que ainda precisam de endereco claro na adega.",
-              icon: MapPin,
-              tone: "slate",
-            },
-          ]}
-          actions={[
-            { label: "Adicionar vinho", onClick: () => setAddOpen(true), icon: Plus, variant: "premium" },
-            { label: "Importar acervo", onClick: () => setCsvOpen(true), icon: Upload, variant: "outline" },
-          ]}
-        />
-      </motion.div>
 
-      {/* KPI Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {isLoading ? (
-          [1, 2, 3, 4].map(i => (
-            <div key={i} className="glass-card p-5 space-y-3">
-              <div className="w-10 h-10 rounded-xl shimmer-premium" />
-              <div className="h-8 w-16 rounded shimmer-premium" />
-              <div className="h-3 w-20 rounded shimmer-premium" />
+      <div className="max-w-[1320px] space-y-3">
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+          <div className="glass-card p-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">Acervo pessoal</p>
+                <h1 className="mt-2 text-[28px] font-black tracking-[-0.04em] text-foreground sm:text-[34px]">
+                  Olá, <span className="font-serif italic text-wine">{firstName}</span>. Vamos decidir com clareza.
+                </h1>
+                <p className="mt-3 max-w-[720px] text-[13px] font-medium leading-relaxed text-muted-foreground">
+                  Sinais do seu acervo: janela ideal, risco de passar do pico e ações rápidas sem navegar.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant="premium" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setAddOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" /> Adicionar vinho
+                </Button>
+                <Button variant="outline" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setManageOpen(true)}>
+                  <Wine className="mr-2 h-4 w-4" /> Registrar consumo
+                </Button>
+                <Button variant="outline" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setCsvOpen(true)}>
+                  <Upload className="mr-2 h-4 w-4" /> Importar acervo
+                </Button>
+              </div>
             </div>
-          ))
-        ) : (
-          metrics.map((m, i) => (
-            <motion.div
-              key={m.label}
-              className="glass-card p-5 group cursor-pointer border border-white/5 ring-1 ring-black/[0.03]"
-              onClick={m.onClick}
-              initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
-              whileHover={{ y: -3, boxShadow: "0 16px 32px -10px rgba(140,32,68,0.12)" }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${m.color}14` }}>
-                  <m.icon className="h-5 w-5" style={{ color: m.color }} />
-                </div>
-                {m.badge && (
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full text-white" style={{ background: m.color }}>
-                    {m.badge}
-                  </span>
-                )}
-              </div>
-              <p className="text-3xl lg:text-4xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{m.label}</p>
-            </motion.div>
-          ))
-        )}
-      </div>
 
-      {/* Notifications */}
-      {wines.length > 0 && <PersonalizedNotifications wines={wines} />}
-
-      {/* Main grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* LEFT (3/5) */}
-        <div className="lg:col-span-3 space-y-4">
-          {/* Ready to drink */}
-          {suggestions.length > 0 && (
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5} className="glass-card p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-sm font-bold font-sans text-foreground">🍷 Prontos para abrir</h2>
-                  <p className="text-xs text-muted-foreground font-medium">Na janela ideal de consumo</p>
-                </div>
-                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>Ver todos →</button>
-              </div>
-              <div className="space-y-2">
-                {suggestions.map(w => (
-                  <div key={w.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/[0.02] transition-colors" style={{ border: "1px solid rgba(0,0,0,0.05)" }}>
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.08)" }}>
-                      <GlassWater className="h-4 w-4" style={{ color: "#22c55e" }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
-                      <p className="text-xs text-muted-foreground font-medium">{[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.</p>
-                    </div>
-                    <Button size="sm" variant="outline" className="h-7 text-xs px-3 shrink-0 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpenBottle(w.id, w.name)} disabled={wineEvent.isPending}>
-                      Abrir
-                    </Button>
+            <div className="mt-4 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+              {isLoading ? (
+                [1, 2, 3, 4].map((i) => (
+                  <div key={i} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="mt-3 h-7 w-24" />
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Alerts */}
-          {alerts.length > 0 && (
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <h2 className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">Atenção</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {alerts.map(a => (
-                  <div key={a.label} className="glass-card p-3.5 flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/dashboard/alerts")}>
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.bg }}>
-                      <a.icon className="h-4 w-4" style={{ color: a.color }} />
-                    </div>
-                    <div>
-                      <p className="text-lg font-black text-foreground">{a.count}</p>
-                      <p className="text-xs font-semibold" style={{ color: a.color }}>{a.label}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Recent wines */}
-          {recentWines.length > 0 && (
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" /> Adicionados recentemente
-                </h2>
-                <button className="text-xs font-semibold text-primary hover:underline" onClick={() => navigate("/dashboard/cellar")}>Ver todos →</button>
-              </div>
-              <div className="glass-card overflow-hidden hidden sm:block">
-                <table className="w-full">
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-                      <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Vinho</th>
-                      <th className="text-left text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Estilo</th>
-                      <th className="text-right text-[10px] font-bold uppercase tracking-wider px-3 py-2.5 text-muted-foreground">Qtd</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentWines.map((w, i) => (
-                      <tr key={w.id} className="hover:bg-black/[0.015] cursor-pointer" style={{ borderBottom: i < recentWines.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none" }} onClick={() => navigate("/dashboard/cellar")}>
-                        <td className="px-3 py-2.5">
-                          <p className="text-sm font-semibold truncate max-w-[180px] text-foreground">{w.name}</p>
-                          <p className="text-xs text-muted-foreground font-medium">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
-                        </td>
-                        <td className="px-3 py-2.5">
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(143,45,86,0.06)", color: "#8F2D56" }}>{w.style || "—"}</span>
-                        </td>
-                        <td className="px-3 py-2.5 text-right">
-                          <span className="text-sm font-bold text-foreground">{w.quantity}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="space-y-2 sm:hidden">
-                {recentWines.map(w => (
-                  <div key={w.id} className="glass-card p-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate("/dashboard/cellar")}>
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(143,45,86,0.06)" }}>
-                      <Wine className="h-4 w-4" style={{ color: "#8F2D56" }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
-                      <p className="text-xs text-muted-foreground font-medium">{w.producer}{w.vintage ? ` · ${w.vintage}` : ""}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-sm font-bold text-foreground">{w.quantity}</span>
-                      <p className="text-[10px] text-muted-foreground">un.</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </div>
-
-        {/* RIGHT (2/5) */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Drink Window Chart */}
-          {totalBottles > 0 && drinkWindowData.length > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-              <h3 className="text-sm font-bold font-sans text-foreground mb-0.5">Janela de Consumo</h3>
-              <p className="text-xs text-muted-foreground font-medium mb-3">Quando cada garrafa está pronta</p>
-              <ResponsiveContainer width="100%" height={120}>
-                <PieChart>
-                  <Pie data={drinkWindowData} cx="50%" cy="50%" innerRadius={32} outerRadius={48} paddingAngle={3} dataKey="value">
-                    {drinkWindowData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                  </Pie>
-                  <Tooltip contentStyle={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 8, fontSize: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex justify-center gap-4 mt-2">
-                {drinkWindowData.map(d => (
-                  <div key={d.name} className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full" style={{ background: d.color }} />
-                    <span className="text-xs font-medium text-muted-foreground">{d.name} ({d.value})</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* By style */}
-          {totalBottles > 0 && compositionData.length > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <div className="flex items-center gap-2 mb-3">
-                <Grape className="h-4 w-4 text-muted-foreground" />
-                <h3 className="text-sm font-bold font-sans text-foreground">Por estilo</h3>
-              </div>
-              <div className="space-y-2.5">
-                {compositionData.map((d, i) => {
-                  const pct = totalBottles > 0 ? Math.round((d.value / totalBottles) * 100) : 0;
-                  return (
-                    <div key={d.name} className="flex items-center gap-2.5">
-                      <span className="text-xs font-medium w-20 truncate text-muted-foreground">{d.name}</span>
-                      <div className="flex-1 h-2 rounded-full overflow-hidden bg-black/[0.04]">
-                        <motion.div className="h-full rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }} />
+                ))
+              ) : (
+                kpis.map((kpi) => (
+                  <div key={kpi.label} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
+                        <kpi.icon className="h-4 w-4" />
                       </div>
-                      <span className="text-xs font-bold w-8 text-right text-foreground">{pct}%</span>
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{kpi.label}</p>
                     </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* By country */}
-          {totalBottles > 0 && countryData.length > 0 && (
-            <motion.div className="glass-card p-5" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-              <div className="flex items-center gap-2 mb-3">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <h3 className="text-sm font-bold font-sans text-foreground">Por país</h3>
-              </div>
-              <div className="space-y-2.5">
-                {countryData.map((d, i) => {
-                  const pct = totalBottles > 0 ? Math.round((d.value / totalBottles) * 100) : 0;
-                  return (
-                    <div key={d.name} className="flex items-center gap-2.5">
-                      <span className="text-xs font-medium w-20 truncate text-muted-foreground">{d.name}</span>
-                      <div className="flex-1 h-2 rounded-full overflow-hidden bg-black/[0.04]">
-                        <motion.div className="h-full rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 0.3 + i * 0.06, duration: 0.4, ease: "easeOut" }} />
-                      </div>
-                      <span className="text-xs font-bold w-8 text-right text-foreground">{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </div>
-
-      {/* Empty State */}
-      {totalBottles === 0 && (
-        <motion.div
-          className="glass-card p-12 text-center relative overflow-hidden flex flex-col items-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at center, rgba(140,32,68,0.06) 0%, transparent 70%)" }} />
-          <WineMesh variant="empty-state" />
-          <div className="relative z-10 flex flex-col items-center">
-            <motion.div
-              className="w-16 h-16 rounded-full flex items-center justify-center mb-6 relative"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="absolute inset-0 rounded-full bg-white/20 backdrop-blur-xl border border-white/40 shadow-premium" />
-              <div className="absolute inset-0 rounded-full gradient-wine opacity-10" />
-              <Wine className="h-7 w-7 text-primary relative z-10" />
-            </motion.div>
-            <h3 className="text-2xl font-serif font-bold mb-2 tracking-tight text-foreground">Sua coleção começa aqui</h3>
-            <p className="text-sm mb-4 max-w-sm mx-auto font-medium leading-relaxed text-muted-foreground">
-              Adicione seu primeiro vinho e saiba exatamente quando abrir cada garrafa.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 text-xs text-muted-foreground mb-6">
-              <span className="flex items-center gap-1.5"><Wine className="h-3.5 w-3.5 text-primary" /> Cadastro manual</span>
-              <span className="flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-primary" /> Importação CSV</span>
-            </div>
-            <div className="flex gap-3 justify-center">
-              <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-11 px-7 text-sm font-bold">
-                <Plus className="h-4 w-4 mr-1.5" /> Começar minha adega
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setCsvOpen(true)} className="h-11 px-5 text-sm font-bold">
-                <Upload className="h-3.5 w-3.5 mr-1.5" /> Importar lista
-              </Button>
+                    <p className="mt-2 text-[20px] font-black tracking-tight text-foreground">{kpi.value}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </motion.div>
-      )}
 
-      {/* FAB */}
-      <motion.button
-        onClick={() => setAddOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full flex items-center justify-center text-white cursor-pointer"
-        style={{ background: "linear-gradient(135deg, #8F2D56, #C44569)", boxShadow: "0 6px 20px rgba(143,45,86,0.3)" }}
-        whileHover={{ scale: 1.08, y: -2 }}
-        whileTap={{ scale: 0.95 }}
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, type: "spring", stiffness: 200, damping: 15 }}
-      >
-        <Plus className="h-4.5 w-4.5" />
-      </motion.button>
+        <div className="grid grid-cols-12 gap-3">
+          <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+            <div className="glass-card p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Hoje</p>
+                  <h2 className="mt-1 text-[16px] font-bold tracking-tight text-foreground">Prontos para abrir</h2>
+                </div>
+                <Button variant="outline" className="h-9 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/cellar")}>
+                  Ver adega
+                </Button>
+              </div>
+
+              <div className="mt-3 grid gap-2">
+                {readyToDrink.length === 0 ? (
+                  <div className="rounded-2xl border border-black/[0.06] bg-white/70 p-4 text-[13px] font-medium text-muted-foreground">
+                    Nenhum vinho na janela ideal agora.
+                  </div>
+                ) : (
+                  readyToDrink.map((w) => (
+                    <div key={w.id} className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white/70 px-3 py-2.5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700 ring-1 ring-black/[0.04]">
+                        <GlassWater className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-semibold text-foreground">{w.name}</p>
+                        <p className="mt-0.5 truncate text-[11px] font-medium text-muted-foreground">
+                          {[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="h-9 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]"
+                        onClick={() => handleOpenBottle(w.id, w.name)}
+                        disabled={wineEvent.isPending}
+                      >
+                        Abrir <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="col-span-12 grid gap-3 lg:col-span-5">
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+              <div className="glass-card p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Alertas</p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Beber agora", value: drinkNow, tone: "emerald" },
+                    { label: "Em guarda", value: inGuard, tone: "blue" },
+                    { label: "Passaram do pico", value: pastPeak, tone: "amber" },
+                    { label: "Baixo estoque", value: lowStock, tone: "wine" },
+                  ].map((a) => (
+                    <button
+                      key={a.label}
+                      onClick={() => navigate("/dashboard/alerts")}
+                      className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-white/80"
+                    >
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{a.label}</p>
+                      <p className="mt-1 text-[20px] font-black tracking-tight text-foreground">{a.value}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+              <div className="glass-card p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Consumo</p>
+                    <h3 className="mt-1 text-[15px] font-bold tracking-tight text-foreground">Últimos 6 meses</h3>
+                  </div>
+                  <span className="rounded-full bg-black/[0.04] px-3 py-1 text-[11px] font-black text-muted-foreground">
+                    {consumption.length}
+                  </span>
+                </div>
+                <div className="mt-3 h-[170px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={consumptionMonthly}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: "rgba(23,20,29,0.6)", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "rgba(23,20,29,0.45)" }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "rgba(255,255,255,0.92)",
+                          border: "1px solid rgba(0,0,0,0.06)",
+                          borderRadius: 14,
+                          fontSize: 12,
+                          boxShadow: "0 16px 40px -28px rgba(15,15,20,0.65)",
+                        }}
+                      />
+                      <Bar dataKey="value" radius={[10, 10, 0, 0]} fill="hsl(var(--wine))" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
-      <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
+      <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab="open" />
       <ImportCsvDialog open={csvOpen} onOpenChange={setCsvOpen} />
-    </div>
     </>
   );
 }
+
