@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,10 @@ import { Wine as WineIcon, MapPin, Star } from "lucide-react";
 interface AddConsumptionDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  preSelectedWine?: { id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null;
 }
 
-export function AddConsumptionDialog({ open, onOpenChange }: AddConsumptionDialogProps) {
+export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: AddConsumptionDialogProps) {
   const { data: wines } = useWines();
   const addConsumption = useAddConsumption();
 
@@ -32,6 +33,22 @@ export function AddConsumptionDialog({ open, onOpenChange }: AddConsumptionDialo
   const [tastingNotes, setTastingNotes] = useState("");
   const [rating, setRating] = useState<number>(0);
   const [consumedAt, setConsumedAt] = useState(new Date().toISOString().split("T")[0]);
+
+  // Auto-fill when opening with a pre-selected wine
+  useEffect(() => {
+    if (open && preSelectedWine) {
+      setSource("cellar");
+      setSelectedWineId(preSelectedWine.id);
+      setWineName(preSelectedWine.name);
+      setProducer(preSelectedWine.producer || "");
+      setCountry(preSelectedWine.country || "");
+      setRegion(preSelectedWine.region || "");
+      setGrape(preSelectedWine.grape || "");
+      setStyle(preSelectedWine.style || "");
+      setVintage(preSelectedWine.vintage?.toString() || "");
+    }
+  }, [open, preSelectedWine]);
+
 
   const resetForm = () => {
     setSource("external");

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, Bookmark, BookmarkCheck, SlidersHorizontal } from "lucide-react";
+import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, Bookmark, BookmarkCheck, SlidersHorizontal, UtensilsCrossed } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
 import { useWines, useDeleteWine, useWineEvent, type Wine as WineType } from "@/hooks/useWines";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
+import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { useToast } from "@/hooks/use-toast";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
@@ -104,6 +105,7 @@ export default function CellarPage() {
   const [deleteTarget, setDeleteTarget] = useState<WineType | null>(null);
   const [activeSavedFilter, setActiveSavedFilter] = useState<string | null>(null);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [consumptionWine, setConsumptionWine] = useState<WineType | null>(null);
   const isMobile = useIsSmallScreen();
 
   // Derive dynamic filter options from wine data
@@ -424,6 +426,9 @@ export default function CellarPage() {
 
                 {/* Actions — minimal */}
                 <div className="flex gap-1.5 border-t border-border/30 pt-2.5">
+                  <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 font-semibold" onClick={() => setConsumptionWine(wine)}>
+                    <UtensilsCrossed className="h-3 w-3 mr-1" /> Consumo
+                  </Button>
                   {status === "now" && (
                     <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpen(wine)}>
                       <GlassWater className="h-3 w-3 mr-1" /> Abrir
@@ -478,6 +483,9 @@ export default function CellarPage() {
                     </td>
                     <td className="px-3 py-2 text-right">
                       <div className="flex gap-0.5 justify-end">
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
+                          <UtensilsCrossed className="h-3 w-3 text-amber-600" />
+                        </Button>
                         {status === "now" && (
                           <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleOpen(wine)}>
                             <GlassWater className="h-3 w-3 text-green-600" />
@@ -502,6 +510,11 @@ export default function CellarPage() {
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
       <EditWineDialog open={!!editWine} onOpenChange={v => { if (!v) setEditWine(null); }} wine={editWine} />
+      <AddConsumptionDialog
+        open={!!consumptionWine}
+        onOpenChange={v => { if (!v) setConsumptionWine(null); }}
+        preSelectedWine={consumptionWine}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={v => { if (!v) setDeleteTarget(null); }}>
         <AlertDialogContent>
