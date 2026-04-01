@@ -8,6 +8,7 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { BreakageDialog } from "@/components/BreakageDialog";
 import { SaleDialog } from "@/components/SaleDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -74,7 +75,12 @@ export function AppSidebar() {
       <Sidebar collapsible="offcanvas" className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)", background: "#FDFDFD" }}>
         <SidebarHeader className="pt-4 px-3">
           {/* Logo + Mode */}
-          <div className="flex items-center gap-3 px-2 py-1.5 mb-3">
+          <Link
+            to="/dashboard"
+            onClick={closeMobileSidebar}
+            className="flex items-center gap-3 px-2 py-1.5 mb-3 rounded-2xl transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+            aria-label="Ir para o início do dashboard"
+          >
             <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-8 w-8 object-contain" />
             <div className="flex flex-col">
               <span className="text-[14px] font-black font-sans tracking-tight text-foreground" style={{ letterSpacing: "-0.04em" }}>Sommelyx</span>
@@ -85,7 +91,7 @@ export function AppSidebar() {
                 {isCommercial ? "OPERAÇÃO COMERCIAL" : "ACERVO PESSOAL"}
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* CTA */}
           <div className="px-0 pb-2 flex flex-col gap-1.5">
