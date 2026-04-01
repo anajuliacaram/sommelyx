@@ -15,6 +15,7 @@ import {
 import { useWines, useDeleteWine, useWineEvent, type Wine as WineType } from "@/hooks/useWines";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
+import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { useToast } from "@/hooks/use-toast";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
