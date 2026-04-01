@@ -19,9 +19,11 @@ function useWineEvents() {
   return useQuery({
     queryKey: ["wine_events", user?.id],
     queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("wine_events")
-        .select("*")
+        .select("id,user_id,wine_id,event_type,quantity,notes,created_at")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;

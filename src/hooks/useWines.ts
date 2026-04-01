@@ -34,9 +34,13 @@ export function useWines() {
   return useQuery({
     queryKey: ["wines", user?.id],
     queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("wines")
-        .select("*")
+        .select(
+          "id,user_id,name,producer,country,region,grape,vintage,style,purchase_price,current_value,quantity,rating,drink_from,drink_until,cellar_location,food_pairing,tasting_notes,image_url,created_at,updated_at",
+        )
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Wine[];
@@ -69,10 +73,19 @@ export function useAddWine() {
   return useMutation({
     mutationFn: async (wine: Omit<WineInsert, "user_id">) => {
       if (!user) throw new Error("Not authenticated");
+      const name = wine.name?.trim();
+      if (!name) throw new Error("Nome do vinho é obrigatório");
+      if (!Number.isFinite(wine.quantity) || wine.quantity < 0) throw new Error("Quantidade inválida");
+      if (wine.vintage !== null && wine.vintage !== undefined) {
+        const currentYear = new Date().getFullYear();
+        if (!Number.isInteger(wine.vintage) || wine.vintage < 1900 || wine.vintage > currentYear + 1) {
+          throw new Error("Safra inválida");
+        }
+      }
       const { data, error } = await supabase
         .from("wines")
-        .insert({ ...wine, user_id: user.id })
-        .select()
+        .insert({ ...wine, name, user_id: user.id })
+        .select("id")
         .single();
       if (error) throw error;
       return data;
@@ -85,10 +98,21 @@ export function useAddWine() {
 
 export function useUpdateWine() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Wine, "id" | "created_at" | "updated_at" | "user_id">> }) => {
-      const { error } = await supabase.from("wines").update(updates).eq("id", id);
+      if (!user) throw new Error("Not authenticated");
+      const safeUpdates = { ...updates } as typeof updates;
+      if (typeof safeUpdates.name === "string") {
+        const next = safeUpdates.name.trim();
+        if (!next) throw new Error("Nome do vinho é obrigatório");
+        safeUpdates.name = next;
+      }
+      if (typeof safeUpdates.quantity === "number" && (!Number.isFinite(safeUpdates.quantity) || safeUpdates.quantity < 0)) {
+        throw new Error("Quantidade inválida");
+      }
+      const { error } = await supabase.from("wines").update(safeUpdates).eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -99,10 +123,12 @@ export function useUpdateWine() {
 
 export function useDeleteWine() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("wines").delete().eq("id", id);
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await supabase.from("wines").delete().eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {

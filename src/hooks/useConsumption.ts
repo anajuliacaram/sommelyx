@@ -29,9 +29,13 @@ export function useConsumption() {
   return useQuery({
     queryKey: ["consumption", user?.id],
     queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("consumption_log")
-        .select("*")
+        .select(
+          "id,user_id,wine_id,source,wine_name,producer,country,region,grape,style,vintage,location,tasting_notes,rating,consumed_at,created_at",
+        )
+        .eq("user_id", user.id)
         .order("consumed_at", { ascending: false });
       if (error) throw error;
       return data as ConsumptionEntry[];
@@ -47,10 +51,16 @@ export function useAddConsumption() {
   return useMutation({
     mutationFn: async (entry: Omit<ConsumptionInsert, "user_id">) => {
       if (!user) throw new Error("Not authenticated");
+      const wineName = entry.wine_name?.trim();
+      if (!wineName) throw new Error("Nome do vinho é obrigatório");
+      if (!entry.consumed_at) throw new Error("Data de consumo é obrigatória");
+      if (entry.rating !== null && entry.rating !== undefined) {
+        if (!Number.isFinite(entry.rating) || entry.rating < 0 || entry.rating > 5) throw new Error("Avaliação inválida");
+      }
       const { data, error } = await supabase
         .from("consumption_log")
-        .insert({ ...entry, user_id: user.id })
-        .select()
+        .insert({ ...entry, wine_name: wineName, user_id: user.id })
+        .select("id")
         .single();
       if (error) throw error;
       return data;
@@ -63,10 +73,12 @@ export function useAddConsumption() {
 
 export function useDeleteConsumption() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("consumption_log").delete().eq("id", id);
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await supabase.from("consumption_log").delete().eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {

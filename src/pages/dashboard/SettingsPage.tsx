@@ -46,15 +46,18 @@ export default function SettingsPage() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
+      const nextName = fullName.trim().replace(/\s+/g, " ");
+      if (!nextName) throw new Error("Nome completo é obrigatório");
+      if (nextName.length > 120) throw new Error("Nome completo é muito longo");
       // Update auth metadata
       const { error: authErr } = await supabase.auth.updateUser({
-        data: { full_name: fullName },
+        data: { full_name: nextName },
       });
       if (authErr) throw authErr;
 
       // Update profiles table
       if (user) {
-        await supabase.from("profiles").update({ full_name: fullName }).eq("user_id", user.id);
+        await supabase.from("profiles").update({ full_name: nextName }).eq("user_id", user.id);
       }
 
       // Save notification prefs

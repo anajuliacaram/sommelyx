@@ -49,9 +49,11 @@ export function useSales() {
   return useQuery({
     queryKey: ["sales", user?.id],
     queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("sales" as any)
-        .select("*")
+        .select("id,user_id,wine_id,name,quantity,price,created_at")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -75,11 +77,18 @@ export function useAddSalesBatch() {
       }>
     ) => {
       if (!user) throw new Error("Not authenticated");
+      if (!sales.length) return;
+      for (const s of sales) {
+        const name = s.name?.trim();
+        if (!name) throw new Error("Nome do produto é obrigatório");
+        if (!Number.isFinite(s.quantity) || s.quantity <= 0) throw new Error("Quantidade inválida");
+        if (!Number.isFinite(s.price) || s.price < 0) throw new Error("Preço inválido");
+      }
 
       const payload = sales.map((sale) => ({
         user_id: user.id,
         wine_id: sale.wine_id ?? null,
-        name: sale.name,
+        name: sale.name.trim(),
         quantity: sale.quantity,
         price: sale.price,
       }));
@@ -95,10 +104,12 @@ export function useAddSalesBatch() {
 
 export function useDeleteSale() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("sales" as any).delete().eq("id", id);
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await supabase.from("sales" as any).delete().eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -113,9 +124,13 @@ export function useWishlist() {
   return useQuery({
     queryKey: ["wishlist", user?.id],
     queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("wishlist")
-        .select("*")
+        .select(
+          "id,user_id,wine_name,notes,producer,vintage,style,country,region,grape,target_price,image_url,ai_summary,source,created_at,updated_at",
+        )
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -132,10 +147,12 @@ export function useAddWishlist() {
   return useMutation({
     mutationFn: async (entry: Omit<WishlistInsert, "user_id">) => {
       if (!user) throw new Error("Not authenticated");
+      const wineName = entry.wine_name?.trim();
+      if (!wineName) throw new Error("Nome do vinho é obrigatório");
 
       const { error } = await supabase.from("wishlist").insert({
         user_id: user.id,
-        wine_name: entry.wine_name.trim(),
+        wine_name: wineName,
         notes: entry.notes?.trim() || null,
         producer: entry.producer?.trim() || null,
         vintage: entry.vintage ?? null,
@@ -159,10 +176,12 @@ export function useAddWishlist() {
 
 export function useDeleteWishlist() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("wishlist").delete().eq("id", id);
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await supabase.from("wishlist").delete().eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -177,9 +196,11 @@ export function useContacts() {
   return useQuery({
     queryKey: ["contacts", user?.id],
     queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("contacts" as any)
-        .select("*")
+        .select("id,user_id,name,type,contact_info,created_at")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -196,10 +217,12 @@ export function useAddContact() {
   return useMutation({
     mutationFn: async (entry: { name: string; type: "cliente" | "fornecedor"; contact_info?: string }) => {
       if (!user) throw new Error("Not authenticated");
+      const name = entry.name?.trim();
+      if (!name) throw new Error("Nome é obrigatório");
 
       const { error } = await supabase.from("contacts" as any).insert({
         user_id: user.id,
-        name: entry.name,
+        name,
         type: entry.type,
         contact_info: entry.contact_info?.trim() || null,
       } as any);
@@ -214,10 +237,12 @@ export function useAddContact() {
 
 export function useDeleteContact() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("contacts" as any).delete().eq("id", id);
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await supabase.from("contacts" as any).delete().eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
