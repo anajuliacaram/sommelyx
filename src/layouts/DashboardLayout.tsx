@@ -38,9 +38,7 @@ export default function DashboardLayout() {
           <header className="h-12 md:h-[64px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30 bg-[#FCFAF8]/75 backdrop-blur-2xl border-b border-white/40 shadow-[0_12px_40px_-32px_rgba(23,20,29,0.7)]">
             <SidebarTrigger className="shrink-0 h-12 w-12 md:h-10 md:w-10 rounded-2xl gradient-wine text-primary-foreground shadow-lg backdrop-blur-sm border border-white/20 transition-all active:scale-[0.95] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] [&>svg]:h-5 [&>svg]:w-5" />
 
-            <div className="flex-1" />
-
-            <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="flex-1 flex items-center justify-center px-1 md:px-3">
               <DashboardCommandMenu
                 profileType={profileType}
                 wines={wines ?? []}
@@ -57,13 +55,13 @@ export default function DashboardLayout() {
                   setManageTab("exit");
                   setManageOpen(true);
                 }}
-                onRegisterSale={
-                  profileType === "commercial" ? () => navigate("/dashboard/sales") : undefined
-                }
+                onRegisterSale={profileType === "commercial" ? () => navigate("/dashboard/sales") : undefined}
               />
+            </div>
 
+            <div className="flex items-center gap-1.5 md:gap-2">
               <span
-                className="inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] shrink-0"
+                className="inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] shrink-0 whitespace-nowrap"
                 style={{
                   background: profileType === "commercial" ? "hsl(var(--gold) / 0.1)" : "hsl(var(--primary) / 0.06)",
                   color: profileType === "commercial" ? "hsl(var(--gold))" : "hsl(var(--primary))",

@@ -60,7 +60,6 @@ export function DashboardCommandMenu({
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const isCommercial = profileType === "commercial";
-  const commandLabel = typeof navigator !== "undefined" && navigator.platform.toLowerCase().includes("mac") ? "Cmd + K" : "Ctrl + K";
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -156,15 +155,14 @@ export function DashboardCommandMenu({
       <Button
         type="button"
         variant="outline"
-        className="hidden h-9 min-w-[168px] items-center justify-between rounded-2xl border-[#8C2044]/15 bg-white/70 px-3 text-[12px] font-semibold text-[#5F5663] shadow-[0_12px_28px_-22px_rgba(23,20,29,0.55)] backdrop-blur-xl transition-colors hover:border-[#8C2044]/25 hover:bg-white/85 md:inline-flex"
+        className="hidden h-10 w-full max-w-[760px] items-center justify-start gap-3 rounded-2xl border-[#8C2044]/15 bg-white/70 px-4 text-[12px] font-semibold text-[#5F5663] shadow-[0_12px_28px_-22px_rgba(23,20,29,0.55)] backdrop-blur-xl transition-colors hover:border-[#8C2044]/25 hover:bg-white/85 md:inline-flex"
         onClick={() => setOpen(true)}
+        aria-label="Abrir pesquisa"
       >
-        <span className="inline-flex items-center gap-2">
-          <Search className="h-4 w-4 text-[#8C2044]" />
-          Pesquisa
-        </span>
-        <span className="rounded-lg border border-black/[0.08] bg-white/80 px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#8A808E]">
-          {commandLabel}
+        <Search className="h-4.5 w-4.5 text-[#8C2044]" />
+        <span className="text-[12px] font-semibold text-[#5F5663]">Pesquisa</span>
+        <span className="ml-auto hidden text-[11px] font-semibold text-[#8A808E] sm:inline">
+          {isCommercial ? "Pesquisar telas, ações e produtos…" : "Pesquisar telas, ações e rótulos…"}
         </span>
       </Button>
 
@@ -172,7 +170,7 @@ export function DashboardCommandMenu({
         type="button"
         variant="outline"
         size="icon"
-        className="h-8 w-8 rounded-xl border-white/20 bg-white/70 md:hidden"
+        className="h-9 w-9 rounded-2xl border-[#8C2044]/15 bg-white/70 md:hidden"
         onClick={() => setOpen(true)}
         aria-label="Abrir menu rápido"
       >
