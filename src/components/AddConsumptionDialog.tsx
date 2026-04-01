@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,11 +34,20 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [rating, setRating] = useState<number>(0);
   const [consumedAt, setConsumedAt] = useState(new Date().toISOString().split("T")[0]);
 
-  // Auto-fill when preSelectedWine changes
-  useState(() => {});
-  const prevPreSelected = useState<string | null>(null);
-  // Use effect to prefill
-  useState(() => {});
+  // Auto-fill when opening with a pre-selected wine
+  useEffect(() => {
+    if (open && preSelectedWine) {
+      setSource("cellar");
+      setSelectedWineId(preSelectedWine.id);
+      setWineName(preSelectedWine.name);
+      setProducer(preSelectedWine.producer || "");
+      setCountry(preSelectedWine.country || "");
+      setRegion(preSelectedWine.region || "");
+      setGrape(preSelectedWine.grape || "");
+      setStyle(preSelectedWine.style || "");
+      setVintage(preSelectedWine.vintage?.toString() || "");
+    }
+  }, [open, preSelectedWine]);
 
 
   const resetForm = () => {
