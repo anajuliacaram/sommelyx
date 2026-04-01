@@ -5,3 +5,5 @@ project_id = "xhjcwxspndvcsgdlmaqy"
     verify_jwt = false
   [functions.process-email-queue]
     verify_jwt = true
+  [functions.wishlist-wine-assistant]
+    verify_jwt = true
