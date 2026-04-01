@@ -11,6 +11,7 @@ import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -28,6 +29,9 @@ const styles = [
 ];
 
 export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
+  const { profileType } = useAuth();
+  const isCommercial = profileType === "commercial";
+
   const [name, setName] = useState("");
   const [producer, setProducer] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -55,6 +59,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       setScanOpen(true);
     }
   }, [open, initialScan]);
+
+  useEffect(() => {
+    if (open && isCommercial) setMoreOpen(true);
+  }, [open, isCommercial]);
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
@@ -222,14 +230,22 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         <Input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" />
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
+                        <Label className="text-xs text-muted-foreground">
+                          {isCommercial ? "Último preço de compra (R$)" : "Preço de compra (R$)"}
+                        </Label>
                         <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
-                        <p className="mt-1 text-[10px] text-muted-foreground/80">Custo da última compra registrada.</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground/80">
+                          {isCommercial ? "Custo unitário da última compra." : "Quanto você pagou nessa garrafa."}
+                        </p>
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
+                        <Label className="text-xs text-muted-foreground">
+                          {isCommercial ? "Último valor pago (R$)" : "Valor atual (R$)"}
+                        </Label>
                         <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
-                        <p className="mt-1 text-[10px] text-muted-foreground/80">Usado como referência de valor/venda.</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground/80">
+                          {isCommercial ? "Último valor pago pelo cliente (referência de venda)." : "Referência de valor/venda."}
+                        </p>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Localização na adega</Label>

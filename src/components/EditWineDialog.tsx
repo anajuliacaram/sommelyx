@@ -9,6 +9,7 @@ import { Check, Save } from "lucide-react";
 import { useUpdateWine, type Wine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EditWineDialogProps {
   open: boolean;
@@ -25,6 +26,9 @@ const styles = [
 ];
 
 export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps) {
+  const { profileType } = useAuth();
+  const isCommercial = profileType === "commercial";
+
   const [name, setName] = useState("");
   const [producer, setProducer] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -165,11 +169,15 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    {isCommercial ? "Último preço de compra (R$)" : "Preço de compra (R$)"}
+                  </Label>
                   <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    {isCommercial ? "Último valor pago (R$)" : "Valor atual (R$)"}
+                  </Label>
                   <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} />
                 </div>
               </div>
