@@ -17,11 +17,14 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="mx-auto flex items-center justify-between max-w-6xl">
-        <a href="/" className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20">
-          <Logo
-            variant="navbar"
-            className="drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
-          />
+        <a
+          href="/"
+          className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+        >
+          <Logo variant="navbar" className="drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]" />
+          <span className="hidden sm:inline font-serif text-[18px] md:text-[20px] font-black tracking-tight text-foreground">
+            Sommelyx
+          </span>
         </a>
         <div className="flex items-center gap-2 sm:gap-3">
           <Button

@@ -12,7 +12,7 @@ type Props = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> & {
 
 const variantClasses: Record<LogoVariant, string> = {
   // Requested: max-width 140px mobile / 220px desktop
-  hero: "w-auto max-w-[140px] sm:max-w-[220px] h-auto",
+  hero: "w-auto max-w-[120px] sm:max-w-[180px] h-auto",
   // Requested: Desktop h-8 or h-10; Mobile h-6 or h-7 + hover scale
   navbar:
     "h-7 sm:h-8 md:h-10 w-auto transition-transform duration-300 ease-premium hover:scale-[1.05]",
@@ -21,9 +21,9 @@ const variantClasses: Record<LogoVariant, string> = {
 };
 
 function getBaseName(variant: LogoVariant, tone: LogoTone) {
-  // Keep a dedicated mark for compact usage
+  // Compact = icon (vertical mark). Hero/navbar = horizontal (laid down).
   if (variant === "compact") return tone === "mono" ? "logo-sommelyx-mono" : "logo-sommelyx-mark";
-  return tone === "mono" ? "logo-sommelyx-mono" : "logo-sommelyx";
+  return tone === "mono" ? "logo-sommelyx-horizontal-mono" : "logo-sommelyx-horizontal";
 }
 
 export const Logo = React.forwardRef<HTMLImageElement, Props>(function Logo(
