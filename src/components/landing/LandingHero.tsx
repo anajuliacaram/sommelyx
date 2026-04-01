@@ -62,10 +62,10 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </MagneticButton>
             <div className="flex items-center gap-3 text-[12px] font-semibold text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/55 px-3 py-2 backdrop-blur-xl">
-                <Check className="h-3.5 w-3.5 text-emerald-600" /> 14 dias grátis
+                <Check className="h-3.5 w-3.5 text-gold" /> 14 dias grátis
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/55 px-3 py-2 backdrop-blur-xl">
-                <Check className="h-3.5 w-3.5 text-emerald-600" /> Sem cartão
+                <Check className="h-3.5 w-3.5 text-gold" /> Sem cartão
               </span>
             </div>
           </motion.div>
@@ -99,7 +99,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 </div>
                 <div className="leading-none">
                   <p className="text-[12px] font-black uppercase tracking-[0.14em] text-muted-foreground">Dashboard</p>
-                  <p className="text-[15px] font-bold tracking-tight text-foreground">Cockpit executivo</p>
+                  <p className="text-[15px] font-bold tracking-tight text-foreground">Painel executivo</p>
                 </div>
               </div>
               <div className="rounded-full border border-wine/15 bg-wine/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-wine">
@@ -131,7 +131,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                     { name: "Barolo Riserva", qty: "1", tone: "low" },
                   ].map((row) => (
                     <div key={row.name} className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-emerald-500"}`} />
+                      <div className={`h-2 w-2 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-gold"}`} />
                       <p className="flex-1 truncate text-[12px] font-semibold text-foreground">{row.name}</p>
                       <span className="rounded-full bg-black/[0.04] px-2 py-1 text-[10px] font-black text-muted-foreground">{row.qty}</span>
                     </div>

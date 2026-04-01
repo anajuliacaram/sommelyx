@@ -76,7 +76,6 @@ export default function CommercialDashboard() {
   const [csvOpen, setCsvOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_commercial"));
 
-  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Gestor";
   const uniqueLabels = useMemo(() => wines.filter((w) => w.quantity > 0).length, [wines]);
 
   const turnover = useMemo(() => {
@@ -133,10 +132,34 @@ export default function CommercialDashboard() {
 
   const kpis = useMemo(
     () => [
-      { label: "Estoque total", value: `${totalBottles} un.`, icon: Layers, tone: "wine" as const },
-      { label: "Valor imobilizado", value: formatCompactBRL(totalValue), icon: DollarSign, tone: "gold" as const },
-      { label: "Giro mensal", value: `${turnover}%`, icon: TrendingUp, tone: turnover > 40 ? ("emerald" as const) : ("wine" as const) },
-      { label: "Reposição", value: `${lowStock}`, icon: AlertTriangle, tone: "wine" as const },
+      {
+        label: "Estoque total",
+        value: `${totalBottles} un.`,
+        detail: "Quantidade total de itens disponíveis",
+        icon: Layers,
+        tone: "wine" as const,
+      },
+      {
+        label: "Valor imobilizado",
+        value: formatCompactBRL(totalValue),
+        detail: "Valor investido no estoque",
+        icon: DollarSign,
+        tone: "gold" as const,
+      },
+      {
+        label: "Giro mensal",
+        value: `${turnover}%`,
+        detail: "Percentual de produtos movimentados no mês",
+        icon: TrendingUp,
+        tone: "wine" as const,
+      },
+      {
+        label: "Reposição",
+        value: `${lowStock}`,
+        detail: "Itens com estoque baixo (2 ou menos)",
+        icon: AlertTriangle,
+        tone: "wine" as const,
+      },
     ],
     [lowStock, totalBottles, totalValue, turnover],
   );
@@ -192,10 +215,10 @@ export default function CommercialDashboard() {
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">Operação comercial</p>
                 <h1 className="mt-2 text-[28px] font-black tracking-[-0.04em] text-foreground sm:text-[34px]">
-                  Cockpit executivo para <span className="font-serif italic text-wine">{firstName}</span>
+                  Resumo da operação
                 </h1>
                 <p className="mt-3 max-w-[720px] text-[13px] font-medium leading-relaxed text-muted-foreground">
-                  Estoque, valor imobilizado, giro e reposição no mesmo campo visual. Ações rápidas sempre acessíveis.
+                  Acompanhe seu estoque, vendas e reposições de forma rápida e clara.
                 </p>
               </div>
 
@@ -203,7 +226,7 @@ export default function CommercialDashboard() {
                 <Button variant="primary" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setAddOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" /> Cadastrar produto
                 </Button>
-                <Button variant="success" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/sales")}>
+                <Button variant="outline" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/sales")}>
                   <ShoppingCart className="mr-2 h-4 w-4" /> Registrar venda
                 </Button>
                 <Button variant="ghost" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em] border border-border/70 bg-background/50 hover:bg-background" onClick={() => setCsvOpen(true)}>
@@ -224,12 +247,18 @@ export default function CommercialDashboard() {
                 kpis.map((kpi) => (
                   <div key={kpi.label} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
+                      <div
+                        className={[
+                          "flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ring-black/[0.04]",
+                          kpi.tone === "gold" ? "bg-gold/10 text-gold" : "bg-wine/10 text-wine",
+                        ].join(" ")}
+                      >
                         <kpi.icon className="h-4 w-4" />
                       </div>
                       <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{kpi.label}</p>
                     </div>
                     <p className="mt-2 text-[20px] font-black tracking-tight text-foreground">{kpi.value}</p>
+                    <p className="mt-1 text-[11px] font-medium text-muted-foreground">{kpi.detail}</p>
                   </div>
                 ))
               )}
@@ -284,7 +313,7 @@ export default function CommercialDashboard() {
                         >
                           <div className="col-span-7 min-w-0">
                             <div className="flex items-center gap-2">
-                              <div className={`h-2 w-2 rounded-full ${row.low ? "bg-wine" : "bg-emerald-500"}`} />
+                              <div className={`h-2 w-2 rounded-full ${row.low ? "bg-wine" : "bg-gold"}`} />
                               <p className="truncate text-[13px] font-semibold text-foreground">{row.name}</p>
                             </div>
                             <p className="mt-0.5 truncate text-[11px] font-medium text-muted-foreground">{row.producer || "—"}</p>

@@ -450,7 +450,7 @@ export default function CellarPage() {
                     <UtensilsCrossed className="h-3 w-3 mr-1" /> Consumo
                   </Button>
                   {status === "now" && (
-                    <Button size="sm" variant="success" className="h-7 text-xs px-2.5 flex-1 font-semibold" onClick={() => handleOpen(wine)}>
+                    <Button size="sm" variant="secondary" className="h-7 text-xs px-2.5 flex-1 font-semibold" onClick={() => handleOpen(wine)}>
                       <GlassWater className="h-3 w-3 mr-1" /> Abrir
                     </Button>
                   )}
@@ -507,7 +507,7 @@ export default function CellarPage() {
                           <UtensilsCrossed className="h-3 w-3" />
                         </Button>
                         {status === "now" && (
-                          <Button size="sm" variant="success" className="h-6 w-6 p-0" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
+                          <Button size="sm" variant="secondary" className="h-6 w-6 p-0" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
                             <GlassWater className="h-3 w-3" />
                           </Button>
                         )}

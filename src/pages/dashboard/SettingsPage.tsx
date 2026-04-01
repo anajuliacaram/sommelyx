@@ -204,7 +204,8 @@ export default function SettingsPage() {
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
         <Button
           onClick={handleSaveProfile}
-          className="gradient-wine text-primary-foreground btn-glow h-11 px-8 text-[13px] font-medium"
+          variant="primary"
+          className="h-11 px-8 text-[12px] font-black uppercase tracking-[0.12em] shadow-float"
           disabled={saving}
         >
           {saved ? <Check className="h-4 w-4 mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}

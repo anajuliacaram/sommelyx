@@ -90,7 +90,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (data.country || data.region || data.grape || data.food_pairing || data.tasting_notes || data.drink_from) {
       setMoreOpen(true);
     }
-    toast({ title: "🍷 Dados do rótulo preenchidos!" });
+    toast({ title: isCommercial ? "Dados do produto preenchidos!" : "🍷 Dados do rótulo preenchidos!" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -124,7 +124,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         onOpenChange(false);
       }, 1200);
     } catch {
-      toast({ title: "Erro ao adicionar vinho", variant: "destructive" });
+      toast({ title: isCommercial ? "Erro ao cadastrar produto" : "Erro ao adicionar vinho", variant: "destructive" });
     }
   };
 
@@ -136,7 +136,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
           <div className="p-6 h-full flex flex-col relative z-10">
             <SheetHeader className="mb-6">
-              <SheetTitle className="font-serif text-2xl font-black italic text-gradient-wine">Adicionar Vinho</SheetTitle>
+              <SheetTitle className="font-serif text-2xl font-black italic text-gradient-wine">
+                {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
+              </SheetTitle>
             </SheetHeader>
 
             <AnimatePresence mode="wait">
@@ -150,7 +152,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   <div className="w-14 h-14 rounded-full gradient-wine flex items-center justify-center glow-wine">
                     <Check className="h-7 w-7 text-primary-foreground" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">{parseInt(quantity) || 1} garrafa(s) adicionada(s)!</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {isCommercial ? "Produto cadastrado!" : `${parseInt(quantity) || 1} garrafa(s) adicionada(s)!`}
+                  </p>
                 </motion.div>
               ) : (
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-5 mt-6">
@@ -178,7 +182,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   {/* Essential fields */}
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="name" className="text-xs text-muted-foreground">Nome do vinho *</Label>
+                      <Label htmlFor="name" className="text-xs text-muted-foreground">{isCommercial ? "Nome do produto *" : "Nome do vinho *"}</Label>
                       <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Malbec Reserva" required />
                     </div>
                     <div>
@@ -274,7 +278,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
                   <Button variant="primary" type="submit" disabled={addWine.isPending || !name.trim()} className="w-full h-11 text-[13px] font-medium">
                     <Plus className="h-4 w-4 mr-1.5" />
-                    {addWine.isPending ? "Salvando..." : "Adicionar Vinho"}
+                    {addWine.isPending ? "Salvando..." : isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
                   </Button>
                 </motion.form>
               )}

@@ -290,17 +290,22 @@ export default function InventoryPage() {
         }
     };
 
+    const formatListCount = (count: number, singular: string, plural: string) =>
+        `${count} ${count === 1 ? singular : plural}`;
+
     // --- Render Helpers ---
     const renderStockVisual = (qty: number) => {
-        let color = "bg-green-500 shadow-green-500/50";
+        let color = "bg-wine shadow-[hsl(var(--wine)/0.35)]";
         if (qty === 0) color = "bg-gray-400 shadow-gray-400/50";
-        else if (qty <= 2) color = "bg-red-500 shadow-red-500/50";
-        else if (qty <= 6) color = "bg-yellow-500 shadow-yellow-500/50";
+        else if (qty <= 2) color = "bg-wine shadow-[hsl(var(--wine)/0.4)]";
+        else if (qty <= 6) color = "bg-gold shadow-[hsl(var(--gold)/0.4)]";
 
         return (
             <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] ${color}`} />
-                <span className="text-sm font-black text-foreground">{qty} <span className="text-[11px] text-muted-foreground font-bold lowercase">un</span></span>
+                <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.35)] ${color}`} />
+                <span className="text-sm font-black text-foreground">
+                    {qty} <span className="text-[11px] text-muted-foreground font-bold lowercase">un.</span>
+                </span>
             </div>
         );
     };
@@ -347,7 +352,7 @@ export default function InventoryPage() {
                     </div>
                     <MagneticButton>
                         <Button variant="primary" className="h-10 px-4 rounded-2xl shadow-float font-bold text-[12px] uppercase tracking-wider" onClick={() => setAddWineOpen(true)}>
-                            <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar Vinho
+                            <Plus className="h-3.5 w-3.5 mr-1.5" /> Cadastrar produto
                         </Button>
                     </MagneticButton>
                 </div>
@@ -457,7 +462,10 @@ export default function InventoryPage() {
                     </Button>
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground px-0.5">
-                    <p>{filteredWines.length} itens exibidos • {selectedIds.length} selecionados</p>
+                <p>
+                    {formatListCount(filteredWines.length, "item exibido", "itens exibidos")} •{" "}
+                    {formatListCount(selectedIds.length, "selecionado", "selecionados")}
+                </p>
                     <p className="hidden md:block">Filtros rápidos para operação comercial</p>
                 </div>
                 </div>
@@ -586,10 +594,10 @@ export default function InventoryPage() {
                                         <td className="text-right pr-4" onClick={e => e.stopPropagation()}>
                                             <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                                 <Button
-                                                    variant="success"
+                                                    variant="secondary"
                                                     size="icon"
                                                     className="h-8 w-8"
-                                                    title="Registrar Entrada"
+                                                    title="Registrar entrada"
                                                     disabled={stockBusyWineId === wine.id}
                                                     onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, 1); }}
                                                 >
@@ -599,7 +607,7 @@ export default function InventoryPage() {
                                                     variant="danger"
                                                     size="icon"
                                                     className="h-8 w-8"
-                                                    title="Registrar Saída"
+                                                    title="Registrar saída"
                                                     disabled={stockBusyWineId === wine.id}
                                                     onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, -1); }}
                                                 >
@@ -639,7 +647,7 @@ export default function InventoryPage() {
                                                                 void handleQuickStock(wine.id, 1);
                                                             }}
                                                         >
-                                                            <Plus className="mr-2 h-4 w-4" /> Ajustar estoque (+1)
+                                                            <Plus className="mr-2 h-4 w-4" /> Registrar entrada (+1)
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             variant="danger"

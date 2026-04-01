@@ -132,7 +132,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 text-primary" />
-            Registrar Venda
+            Registrar venda
           </SheetTitle>
           <p className="text-[11px] text-muted-foreground">{today}</p>
         </SheetHeader>

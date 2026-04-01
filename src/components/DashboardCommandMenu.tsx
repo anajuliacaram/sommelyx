@@ -94,34 +94,20 @@ export function DashboardCommandMenu({
 
   const actionItems = useMemo<ActionDefinition[]>(
     () =>
-      [
-        { label: isCommercial ? "Cadastrar produto" : "Adicionar vinho", shortcut: "A", icon: Plus, onSelect: onAddWine },
-        onImportCsv
-          ? { label: "Importar planilha", shortcut: "I", icon: Upload, onSelect: onImportCsv }
-          : undefined,
-        {
-          label: isCommercial ? "Registrar movimentação" : "Registrar abertura",
-          shortcut: "O",
-          icon: Sparkles,
-          onSelect: onRegisterOpen,
-        },
-        isCommercial && onRegisterSale
-          ? {
-              label: "Registrar venda",
-              shortcut: "S",
-              icon: CircleDollarSign,
-              onSelect: onRegisterSale,
-            }
-          : undefined,
-        !isCommercial && onRegisterExit
-          ? {
-              label: "Registrar saída",
-              shortcut: "X",
-              icon: Wine,
-              onSelect: onRegisterExit,
-            }
-          : undefined,
-      ].filter(Boolean) as ActionDefinition[],
+      (
+        isCommercial
+          ? [
+              { label: "Cadastrar produto", shortcut: "A", icon: Plus, onSelect: onAddWine },
+              onImportCsv ? { label: "Importar planilha", shortcut: "I", icon: Upload, onSelect: onImportCsv } : undefined,
+              onRegisterSale ? { label: "Registrar venda", shortcut: "S", icon: CircleDollarSign, onSelect: onRegisterSale } : undefined,
+            ]
+          : [
+              { label: "Adicionar vinho", shortcut: "A", icon: Plus, onSelect: onAddWine },
+              onImportCsv ? { label: "Importar planilha", shortcut: "I", icon: Upload, onSelect: onImportCsv } : undefined,
+              { label: "Registrar abertura", shortcut: "O", icon: Sparkles, onSelect: onRegisterOpen },
+              onRegisterExit ? { label: "Registrar saída", shortcut: "X", icon: Wine, onSelect: onRegisterExit } : undefined,
+            ]
+      ).filter(Boolean) as ActionDefinition[],
     [isCommercial, onAddWine, onImportCsv, onRegisterExit, onRegisterOpen, onRegisterSale],
   );
 

@@ -31,7 +31,7 @@ interface MenuItem {
 }
 
 const personalMenu: MenuItem[] = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Visão geral", url: "/dashboard", icon: LayoutDashboard },
   { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater },
   { title: "Meu Consumo", url: "/dashboard/consumption", icon: Wine },
   { title: "Alertas", url: "/dashboard/alerts", icon: Bell },
@@ -39,12 +39,12 @@ const personalMenu: MenuItem[] = [
 ];
 
 const commercialMenu: MenuItem[] = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Visão geral", url: "/dashboard", icon: LayoutDashboard },
   { title: "Estoque", url: "/dashboard/inventory", icon: Package },
   { title: "Vendas", url: "/dashboard/sales", icon: ShoppingCart },
   { title: "Cadastros", url: "/dashboard/registers", icon: Users },
   { title: "Relatórios", url: "/dashboard/reports", icon: FileText },
-  { title: "Log", url: "/dashboard/log", icon: ClipboardList },
+  { title: "Histórico", url: "/dashboard/log", icon: ClipboardList },
 ];
 
 export function AppSidebar() {
@@ -103,15 +103,15 @@ export function AppSidebar() {
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  Adicionar Estoque
+                  Cadastrar produto
                 </Button>
                 <Button
-                  variant="success"
+                  variant="outline"
                   className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                  Adicionar Venda
+                  Registrar venda
                 </Button>
                 <Button
                   variant="danger"
@@ -119,7 +119,7 @@ export function AppSidebar() {
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
-                  Adicionar Ruptura
+                  Registrar ruptura
                 </Button>
               </>
             ) : (
@@ -130,7 +130,7 @@ export function AppSidebar() {
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  Adicionar Vinho na Adega
+                  Adicionar vinho
                 </Button>
                 <Button
                   variant="secondary"

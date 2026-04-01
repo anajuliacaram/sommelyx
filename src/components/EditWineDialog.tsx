@@ -111,7 +111,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card border-border/50">
         <SheetHeader>
-          <SheetTitle className="font-serif text-lg">Editar Vinho</SheetTitle>
+          <SheetTitle className="font-serif text-lg">{isCommercial ? "Editar produto" : "Editar vinho"}</SheetTitle>
         </SheetHeader>
 
         <AnimatePresence mode="wait">

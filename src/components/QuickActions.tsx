@@ -19,21 +19,21 @@ export function QuickActions({ onAddWine, onOpenBottle, onViewCellar, variant = 
     >
       <Button variant="primary" onClick={onAddWine} className="h-10 px-5 text-[13px] font-medium">
         <Plus className="h-3.5 w-3.5 mr-1.5" />
-        {variant === "commercial" ? "Cadastrar Produto" : "Adicionar Vinho"}
+        {variant === "commercial" ? "Cadastrar produto" : "Adicionar vinho"}
       </Button>
       {onOpenBottle && (
         <Button
           onClick={onOpenBottle}
-          variant={variant === "commercial" ? "success" : "secondary"}
+          variant={variant === "commercial" ? "outline" : "secondary"}
           className="h-10 px-5 text-[13px] font-medium"
         >
           <Wine className="h-3.5 w-3.5 mr-1.5" />
-          {variant === "commercial" ? "Registrar Venda" : "Registrar Abertura"}
+          {variant === "commercial" ? "Registrar venda" : "Registrar abertura"}
         </Button>
       )}
       <Button onClick={onViewCellar} variant="ghost" className="h-10 px-5 text-[13px] font-medium border border-border/70 bg-background/50 hover:bg-background">
         <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
-        {variant === "commercial" ? "Checar Estoque" : "Ver Adega"}
+        {variant === "commercial" ? "Ver estoque" : "Ver adega"}
       </Button>
     </motion.div>
   );
