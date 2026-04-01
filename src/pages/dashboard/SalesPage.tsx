@@ -158,7 +158,7 @@ export default function SalesPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 w-7 p-0 opacity-0 group-hover/item:opacity-100 transition-opacity text-destructive"
+                          className="h-9 w-9 md:h-7 md:w-7 p-0 opacity-100 md:opacity-0 md:group-hover/item:opacity-100 transition-opacity text-destructive"
                           onClick={() => handleRemove(sale.id)}
                         >
                           <Trash2 className="h-3 w-3" />

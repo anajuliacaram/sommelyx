@@ -550,7 +550,7 @@ export default function WishlistPage() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 shrink-0 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                className="h-9 w-9 md:h-8 md:w-8 shrink-0 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
                 onClick={() => void handleRemove(item.id)}
               >
                 <Trash2 className="h-3.5 w-3.5" />

@@ -67,7 +67,7 @@ export default function AlertsPage() {
       </motion.div>
 
       {alerts.length === 0 ? (
-        <motion.div className="glass-card p-12 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+        <motion.div className="glass-card p-6 sm:p-12 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
           <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(34,197,94,0.08)" }}>
             <Wine className="h-6 w-6" style={{ color: "#22c55e" }} />
           </div>

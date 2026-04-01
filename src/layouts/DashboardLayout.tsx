@@ -36,10 +36,10 @@ export default function DashboardLayout() {
       <div className="dashboard-shell min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 md:h-[64px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30 bg-[#FCFAF8]/75 backdrop-blur-2xl border-b border-white/40 shadow-[0_12px_40px_-32px_rgba(23,20,29,0.7)]">
-            <SidebarTrigger className="shrink-0 h-12 w-12 md:h-10 md:w-10 rounded-2xl gradient-wine text-primary-foreground shadow-lg backdrop-blur-sm border border-white/20 transition-all active:scale-[0.95] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] [&>svg]:h-5 [&>svg]:w-5" />
+          <header className="h-14 md:h-[64px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30 bg-[#FCFAF8]/75 backdrop-blur-2xl border-b border-white/40 shadow-[0_12px_40px_-32px_rgba(23,20,29,0.7)]">
+            <SidebarTrigger className="shrink-0 h-10 w-10 md:h-10 md:w-10 rounded-2xl gradient-wine text-primary-foreground shadow-lg backdrop-blur-sm border border-white/20 transition-all active:scale-[0.95] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] [&>svg]:h-5 [&>svg]:w-5" />
 
-            <div className="flex-1 flex items-center justify-center px-1 md:px-3">
+            <div className="flex-1 flex items-center justify-start md:justify-center px-1 md:px-3">
               <DashboardCommandMenu
                 profileType={profileType}
                 wines={wines ?? []}
@@ -62,7 +62,7 @@ export default function DashboardLayout() {
 
             <div className="flex items-center gap-1.5 md:gap-2">
               <span
-                className="inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] shrink-0 whitespace-nowrap"
                 style={{
                   background: profileType === "commercial" ? "hsl(var(--gold) / 0.1)" : "hsl(var(--primary) / 0.06)",
                   color: profileType === "commercial" ? "hsl(var(--gold))" : "hsl(var(--primary))",
@@ -77,7 +77,7 @@ export default function DashboardLayout() {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/dashboard/alerts")}
-                className="h-8 w-8 rounded-xl relative text-muted-foreground hover:bg-muted/40"
+                className="h-10 w-10 rounded-2xl relative text-muted-foreground hover:bg-muted/40"
                 title="Alertas"
               >
                 <Bell className="h-4 w-4" />
@@ -88,17 +88,20 @@ export default function DashboardLayout() {
                 )}
               </Button>
 
-              <div
-                className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 cursor-pointer"
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-2xl p-0 text-white shadow-[0_10px_26px_-18px_hsl(var(--primary)/0.45)]"
                 style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--wine-vivid)))" }}
                 onClick={() => navigate("/dashboard/settings")}
               >
                 {initials}
-              </div>
+              </Button>
             </div>
           </header>
 
-          <div className="flex-1 p-3 md:p-4 lg:p-5">
+          <div className="flex-1 px-3 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] md:p-4 lg:p-5">
             <AnimatedOutlet />
           </div>
         </main>

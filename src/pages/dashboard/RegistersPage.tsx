@@ -88,7 +88,14 @@ export default function RegistersPage() {
         </motion.div>
       )}
 
-      {contacts.length > 0 && <Input placeholder="Buscar cadastro…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 text-[12px] max-w-xs" />}
+      {contacts.length > 0 && (
+        <Input
+          placeholder="Buscar cadastro…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-9 text-[12px] w-full sm:max-w-xs"
+        />
+      )}
 
       {filtered.length > 0 ? (
         <div className="space-y-1.5">
@@ -107,7 +114,7 @@ export default function RegistersPage() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive"
+                className="h-9 w-9 md:h-7 md:w-7 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-destructive"
                 onClick={() => handleRemove(c.id)}
               >
                 <Trash2 className="h-3 w-3" />

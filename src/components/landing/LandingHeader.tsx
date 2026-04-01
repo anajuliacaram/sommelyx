@@ -10,13 +10,13 @@ interface LandingHeaderProps {
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-5 sm:px-8 py-3 sm:py-4 bg-background/70 backdrop-blur-2xl border-b border-border/40"
+      className="fixed top-0 w-full z-50 px-4 sm:px-8 py-2.5 sm:py-3.5 bg-background/70 backdrop-blur-2xl border-b border-border/40"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="mx-auto flex items-center justify-between max-w-6xl">
-        <a href="/" className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-300 hover:opacity-80">
+        <a href="/" className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20">
           <img
             src="/logo-sommelyx.png"
             alt="Sommelyx"
@@ -29,14 +29,15 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
-            className="h-9 px-4 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            className="h-9 px-3 sm:px-4 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
             onClick={onLogin}
           >
             Entrar
           </Button>
           <MagneticButton>
             <Button
-              className="px-5 sm:px-7 h-9 sm:h-10 text-[12px] sm:text-[13px] font-bold rounded-full transition-all bg-foreground hover:bg-foreground/90 text-background shadow-sm"
+              variant="primary"
+              className="px-5 sm:px-7 h-9 sm:h-10 text-[12px] sm:text-[13px] font-black uppercase tracking-[0.12em] rounded-full shadow-float"
               onClick={onSignup}
             >
               Começar grátis

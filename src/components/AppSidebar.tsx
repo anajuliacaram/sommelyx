@@ -73,7 +73,7 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="offcanvas" className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)", background: "#FDFDFD" }}>
-        <SidebarHeader className="pt-4 px-3">
+        <SidebarHeader className="pt-3 md:pt-4 px-3">
           {/* Logo + Mode */}
           <Link
             to="/dashboard"
@@ -94,52 +94,56 @@ export function AppSidebar() {
           </Link>
 
           {/* CTA */}
-          <div className="px-0 pb-2 flex flex-col gap-1.5">
+          <div className="px-0 pb-2">
             {isCommercial ? (
               <>
-                <Button
-                  variant="primary"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
-                  onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  Cadastrar produto
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
-                  onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
-                >
-                  <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                  Registrar venda
-                </Button>
-                <Button
-                  variant="danger"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
-                  onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
-                >
-                  <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
-                  Registrar ruptura
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="primary"
+                    className="col-span-2 h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
+                    onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
+                  >
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Cadastrar produto
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
+                    onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-1.5" />
+                    Venda
+                  </Button>
+                  <Button
+                    variant="danger"
+                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
+                    onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-1.5" />
+                    Ruptura
+                  </Button>
+                </div>
               </>
             ) : (
               <>
-                <Button
-                  variant="primary"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
-                  onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  Adicionar vinho
-                </Button>
-                <Button
-                  variant="secondary"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
-                  onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
-                >
-                  <Wine className="h-3.5 w-3.5 mr-1.5" />
-                  Adicionar Consumo
-                </Button>
+                <div className="grid gap-2">
+                  <Button
+                    variant="primary"
+                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
+                    onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
+                  >
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Adicionar vinho
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
+                    onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
+                  >
+                    <Wine className="h-4 w-4 mr-1.5" />
+                    Registrar consumo
+                  </Button>
+                </div>
               </>
             )}
           </div>
@@ -200,7 +204,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="px-3 py-4">
+          <div className="px-3 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))]">
             <div className="flex items-center gap-2.5 px-2 mb-4">
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-bold text-white shrink-0"

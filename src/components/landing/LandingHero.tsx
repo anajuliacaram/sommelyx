@@ -18,7 +18,7 @@ interface LandingHeroProps {
 
 export function LandingHero({ onSignup }: LandingHeroProps) {
   return (
-    <section className="relative z-10 px-5 sm:px-8 pt-24 sm:pt-28 lg:pt-32 pb-12 sm:pb-16">
+    <section className="relative z-10 px-4 sm:px-8 pt-20 sm:pt-28 lg:pt-32 pb-10 sm:pb-16">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Left */}
         <div className="text-left">
@@ -34,7 +34,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="max-w-xl font-serif text-[44px] font-black leading-[0.98] tracking-[-0.045em] text-foreground sm:text-[54px]"
+            className="max-w-xl font-serif text-[38px] font-black leading-[0.98] tracking-[-0.045em] text-foreground sm:text-[54px]"
           >
             Um painel executivo para sua adega, com clareza de estoque, valor e giro.
           </motion.h1>
@@ -49,7 +49,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
             <MagneticButton>
               <Button
                 variant="primary"
@@ -70,7 +70,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </div>
           </motion.div>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mt-6 grid max-w-xl grid-cols-3 gap-2">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mt-5 grid max-w-xl grid-cols-3 gap-2">
             {[
               { label: "Estoque", icon: Layers },
               { label: "Giro", icon: TrendingUp },
@@ -91,7 +91,40 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
           <div className="absolute -left-10 -top-10 h-56 w-56 rounded-full bg-wine/20 blur-[70px]" />
           <div className="absolute -bottom-12 -right-12 h-72 w-72 rounded-full bg-gold/20 blur-[90px]" />
 
-          <div className="relative rounded-[28px] border border-black/[0.06] bg-white/65 p-4 shadow-[0_32px_90px_-52px_rgba(15,15,20,0.9)] ring-1 ring-white/50 backdrop-blur-2xl">
+          {/* Mobile: compact mock (reduz scroll) */}
+          <div className="sm:hidden relative rounded-[26px] border border-black/[0.06] bg-white/70 p-4 shadow-[0_26px_72px_-52px_rgba(15,15,20,0.85)] ring-1 ring-white/50 backdrop-blur-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
+                  <Wine className="h-4.5 w-4.5" />
+                </div>
+                <div className="leading-none">
+                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Dashboard</p>
+                  <p className="text-[14px] font-bold tracking-tight text-foreground">Painel executivo</p>
+                </div>
+              </div>
+              <div className="rounded-full border border-wine/15 bg-wine/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-wine">
+                Premium
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {[
+                { label: "Estoque", value: "128 un." },
+                { label: "Valor", value: "R$ 92k" },
+                { label: "Giro", value: "37%" },
+                { label: "Reposição", value: "6 itens" },
+              ].map((kpi) => (
+                <div key={kpi.label} className="rounded-2xl border border-black/[0.06] bg-white/75 p-3 shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{kpi.label}</p>
+                  <p className="mt-1 text-[18px] font-black tracking-tight text-foreground">{kpi.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop/tablet: full mock */}
+          <div className="hidden sm:block relative rounded-[28px] border border-black/[0.06] bg-white/65 p-4 shadow-[0_32px_90px_-52px_rgba(15,15,20,0.9)] ring-1 ring-white/50 backdrop-blur-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">

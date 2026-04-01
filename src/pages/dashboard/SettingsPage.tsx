@@ -205,7 +205,7 @@ export default function SettingsPage() {
         <Button
           onClick={handleSaveProfile}
           variant="primary"
-          className="h-11 px-8 text-[12px] font-black uppercase tracking-[0.12em] shadow-float"
+          className="h-11 w-full sm:w-auto px-8 text-[12px] font-black uppercase tracking-[0.12em] shadow-float"
           disabled={saving}
         >
           {saved ? <Check className="h-4 w-4 mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}

@@ -168,7 +168,7 @@ export function PersonalizedNotifications({ wines }: Props) {
               variant="ghost"
               size="icon"
               onClick={() => setDismissed(prev => new Set(prev).add(tip.id))}
-              className="h-6 w-6 rounded-full shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors opacity-0 group-hover:opacity-100"
+              className="h-8 w-8 md:h-6 md:w-6 rounded-full shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
               title="Dispensar"
             >
               <X className="h-3 w-3" />

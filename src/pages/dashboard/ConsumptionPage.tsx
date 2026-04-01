@@ -408,7 +408,7 @@ export default function ConsumptionPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 shrink-0 text-muted-foreground/30 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-9 w-9 md:h-7 md:w-7 shrink-0 text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       onClick={() => handleDelete(entry.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
