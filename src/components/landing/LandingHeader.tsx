@@ -20,11 +20,8 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <img
             src="/logo-sommelyx.png"
             alt="Sommelyx"
-            className="h-8 sm:h-11 md:h-12 w-auto object-contain"
+            className="h-11 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
           />
-          <span className="text-lg sm:text-xl md:text-2xl font-black tracking-[-0.04em] font-sans hidden sm:block text-foreground">
-            Sommelyx
-          </span>
         </a>
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
