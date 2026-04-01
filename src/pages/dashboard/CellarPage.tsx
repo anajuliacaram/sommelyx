@@ -510,6 +510,11 @@ export default function CellarPage() {
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
       <EditWineDialog open={!!editWine} onOpenChange={v => { if (!v) setEditWine(null); }} wine={editWine} />
+      <AddConsumptionDialog
+        open={!!consumptionWine}
+        onOpenChange={v => { if (!v) setConsumptionWine(null); }}
+        preSelectedWine={consumptionWine}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={v => { if (!v) setDeleteTarget(null); }}>
         <AlertDialogContent>
