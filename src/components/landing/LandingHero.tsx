@@ -36,7 +36,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             custom={1}
             className="max-w-xl font-serif text-[44px] font-black leading-[0.98] tracking-[-0.045em] text-foreground sm:text-[54px]"
           >
-            Um cockpit executivo para sua adega, com clareza de estoque, valor e giro.
+            Um painel executivo para sua adega, com clareza de estoque, valor e giro.
           </motion.h1>
 
           <motion.p

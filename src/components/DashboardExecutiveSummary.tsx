@@ -107,7 +107,7 @@ export function DashboardExecutiveSummary({
                   Experiencia guiada
                 </p>
                 <h2 className="mt-2 text-[24px] font-black tracking-[-0.04em]">
-                  Um cockpit claro para decidir rapido.
+                  Um painel claro para decidir rápido.
                 </h2>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-right">

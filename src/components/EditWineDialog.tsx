@@ -37,6 +37,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
   const [country, setCountry] = useState("");
   const [region, setRegion] = useState("");
   const [grape, setGrape] = useState("");
+  const [lastPaidSnapshot, setLastPaidSnapshot] = useState("");
   const [lastPaid, setLastPaid] = useState("");
   const [currentValue, setCurrentValue] = useState("");
   const [location, setLocation] = useState("");
@@ -60,6 +61,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setCountry(wine.country || "");
       setRegion(wine.region || "");
       setGrape(wine.grape || "");
+      setLastPaidSnapshot(wine.purchase_price != null ? String(wine.purchase_price) : "");
       setLastPaid(wine.purchase_price ? String(wine.purchase_price) : "");
       setCurrentValue(wine.current_value ? String(wine.current_value) : "");
       setLocation(wine.cellar_location || "");
@@ -170,13 +172,21 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground">
-                    {isCommercial ? "Último preço de compra (R$)" : "Preço de compra (R$)"}
+                    {isCommercial ? "Preço pago atual (R$)" : "Preço de compra (R$)"}
                   </Label>
+                  {isCommercial && (
+                    <p className="mb-2 text-[11px] font-medium text-muted-foreground">
+                      Último preço pago:{" "}
+                      <span className="font-semibold text-foreground">
+                        {lastPaidSnapshot ? `R$ ${Number(lastPaidSnapshot).toLocaleString("pt-BR")}` : "—"}
+                      </span>
+                    </p>
+                  )}
                   <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} />
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">
-                    {isCommercial ? "Último valor pago (R$)" : "Valor atual (R$)"}
+                    {isCommercial ? "Preço de venda (R$)" : "Valor atual (R$)"}
                   </Label>
                   <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} />
                 </div>
