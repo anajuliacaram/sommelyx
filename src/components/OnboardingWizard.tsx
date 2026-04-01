@@ -53,7 +53,7 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
 
   return (
     <motion.div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[10vh] sm:pt-[12vh] lg:pt-[14vh]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
