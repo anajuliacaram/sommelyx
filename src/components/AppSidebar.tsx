@@ -82,9 +82,14 @@ export function AppSidebar() {
             className="flex items-center gap-3 px-2 py-1.5 mb-3 rounded-2xl transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
             aria-label="Ir para o início do dashboard"
           >
-            <Logo variant="compact" className="h-10 w-auto drop-shadow-[0_10px_22px_rgba(15,15,20,0.18)]" />
+            <Logo
+              variant="compact"
+              className="h-12 sm:h-12 w-auto drop-shadow-[0_12px_26px_rgba(15,15,20,0.16)]"
+            />
             <div className="flex flex-col">
-              <span className="text-[14px] font-black font-sans tracking-tight text-foreground" style={{ letterSpacing: "-0.04em" }}>Sommelyx</span>
+              <span className="text-[16px] font-black font-sans tracking-tight text-foreground leading-none" style={{ letterSpacing: "-0.04em" }}>
+                Sommelyx
+              </span>
               <span
                 className="text-[8px] font-black uppercase tracking-[0.2em] leading-none mt-0.5"
                 style={{ color: isCommercial ? "hsl(var(--gold))" : "hsl(var(--primary))", opacity: 0.7 }}
