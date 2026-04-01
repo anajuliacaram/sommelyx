@@ -56,7 +56,7 @@ interface LandingFeaturesProps {
 
 export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
   return (
-    <section id="features" className="relative px-4 sm:px-8 pb-10 sm:pb-14 z-10">
+    <section id="features" className="relative px-4 sm:px-8 pb-6 sm:pb-10 z-10">
       <div className="mx-auto max-w-5xl">
         {/* Section header */}
         <motion.div

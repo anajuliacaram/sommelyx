@@ -48,19 +48,16 @@ interface LandingPricingProps {
 
 export function LandingPricing({ onSignup }: LandingPricingProps) {
   return (
-    <section id="pricing" className="relative px-5 sm:px-8 pt-10 sm:pt-16 pb-16 sm:pb-24 overflow-hidden z-10">
+    <section id="pricing" className="relative px-5 sm:px-8 pt-6 sm:pt-10 pb-14 sm:pb-20 overflow-hidden z-10">
       {/* Subtle background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,hsl(340_54%_36%/0.04),transparent_60%)] pointer-events-none" />
 
       <div className="mx-auto max-w-5xl relative z-10">
         {/* Header */}
         <motion.div
-          className="mx-auto mb-10 sm:mb-14 max-w-xl text-center"
+          className="mx-auto mb-7 sm:mb-10 max-w-xl text-center"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-[12px] sm:text-[13px] font-black tracking-[0.16em] uppercase mb-4 bg-emerald-500/12 text-emerald-700 border border-emerald-500/25">
-            ✔ 14 dias grátis
-          </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight text-foreground leading-[1.1]">
             Escolha o plano ideal para sua adega
           </h2>
@@ -113,6 +110,12 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                     </span>
                     <span className="text-[14px] font-medium text-primary-foreground/40">
                       {plan.period}
+                    </span>
+                  </div>
+
+                  <div className="mb-4 w-full rounded-full py-2.5 px-4 text-center bg-emerald-600 text-white shadow-[0_14px_34px_-26px_rgba(16,185,129,0.85)] ring-1 ring-emerald-200/30">
+                    <span className="text-[11px] font-black uppercase tracking-[0.14em]">
+                      14 dias grátis
                     </span>
                   </div>
 
@@ -195,9 +198,9 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 </div>
 
                 {/* Trial pill */}
-                <div className="mb-5 w-full rounded-full py-2.5 px-4 text-center bg-emerald-400/15 border border-emerald-200/25">
-                  <span className="text-[12px] font-black tracking-[0.08em] text-emerald-100">
-                    ✔ 14 dias grátis
+                <div className="mb-5 w-full rounded-full py-2.5 px-4 text-center bg-emerald-600 text-white shadow-[0_16px_40px_-28px_rgba(16,185,129,0.85)] ring-1 ring-emerald-200/30">
+                  <span className="text-[12px] font-black uppercase tracking-[0.12em]">
+                    14 dias grátis
                   </span>
                 </div>
 
