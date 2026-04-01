@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, Check, Sparkles, TrendingUp, AlertTriangle, Layers, Wine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
-import { Logo } from "@/components/Logo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -23,30 +22,11 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Left */}
         <div className="text-left">
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-6 flex justify-center lg:justify-start"
-          >
-            <Logo
-              variant="hero"
-              className="drop-shadow-[0_18px_45px_rgba(15,15,20,0.14)]"
-            />
-          </motion.div>
-
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-5">
-            <span className="inline-flex items-center gap-2 rounded-full border border-wine/15 bg-white/60 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-wine backdrop-blur-xl">
-              <Sparkles className="h-3.5 w-3.5" />
-              wine + tech + luxury
-            </span>
-          </motion.div>
-
           <motion.h1
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            custom={1}
+            custom={0}
             className="max-w-xl font-serif text-[38px] font-black leading-[0.98] tracking-[-0.045em] text-foreground sm:text-[54px]"
           >
             Um painel executivo para sua adega, com clareza de estoque, valor e giro.
@@ -56,13 +36,13 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            custom={2}
+            custom={1}
             className="mt-5 max-w-xl text-[16px] font-medium leading-relaxed text-muted-foreground sm:text-[18px]"
           >
             Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2} className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
             <MagneticButton>
               <Button
                 variant="primary"
@@ -80,7 +60,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </div>
           </motion.div>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4} className="mt-4 grid max-w-xl grid-cols-3 gap-2">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-4 grid max-w-xl grid-cols-3 gap-2">
             {[
               { label: "Estoque", icon: Layers },
               { label: "Giro", icon: TrendingUp },
