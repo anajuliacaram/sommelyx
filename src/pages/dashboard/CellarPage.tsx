@@ -105,6 +105,7 @@ export default function CellarPage() {
   const [deleteTarget, setDeleteTarget] = useState<WineType | null>(null);
   const [activeSavedFilter, setActiveSavedFilter] = useState<string | null>(null);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [consumptionWine, setConsumptionWine] = useState<WineType | null>(null);
   const isMobile = useIsSmallScreen();
 
   // Derive dynamic filter options from wine data
