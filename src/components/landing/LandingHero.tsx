@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Check, Sparkles, TrendingUp, AlertTriangle, Layers, Wine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { Logo } from "@/components/Logo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -22,6 +23,18 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Left */}
         <div className="text-left">
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-6 flex justify-center lg:justify-start"
+          >
+            <Logo
+              variant="hero"
+              className="drop-shadow-[0_18px_45px_rgba(15,15,20,0.14)]"
+            />
+          </motion.div>
+
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-5">
             <span className="inline-flex items-center gap-2 rounded-full border border-wine/15 bg-white/60 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-wine backdrop-blur-xl">
               <Sparkles className="h-3.5 w-3.5" />

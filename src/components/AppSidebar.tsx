@@ -9,6 +9,7 @@ import { BreakageDialog } from "@/components/BreakageDialog";
 import { SaleDialog } from "@/components/SaleDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
+import { Logo } from "@/components/Logo";
 import {
   Sidebar,
   SidebarContent,
@@ -81,11 +82,7 @@ export function AppSidebar() {
             className="flex items-center gap-3 px-2 py-1.5 mb-3 rounded-2xl transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
             aria-label="Ir para o início do dashboard"
           >
-            <img
-              src="/logo-sommelyx.png"
-              alt="Sommelyx"
-              className="h-10 w-10 object-contain drop-shadow-[0_10px_22px_rgba(15,15,20,0.18)]"
-            />
+            <Logo variant="compact" className="h-10 w-auto drop-shadow-[0_10px_22px_rgba(15,15,20,0.18)]" />
             <div className="flex flex-col">
               <span className="text-[14px] font-black font-sans tracking-tight text-foreground" style={{ letterSpacing: "-0.04em" }}>Sommelyx</span>
               <span

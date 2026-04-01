@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { Logo } from "@/components/Logo";
 
 interface LandingHeaderProps {
   onLogin: () => void;
@@ -17,10 +18,9 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
     >
       <div className="mx-auto flex items-center justify-between max-w-6xl">
         <a href="/" className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20">
-          <img
-            src="/logo-sommelyx.png"
-            alt="Sommelyx"
-            className="h-11 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
+          <Logo
+            variant="navbar"
+            className="drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
           />
         </a>
         <div className="flex items-center gap-2 sm:gap-3">

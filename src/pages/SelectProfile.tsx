@@ -5,6 +5,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 
 export default function SelectProfile() {
   const { setProfileType, user, profileType: existingProfile, loading: authLoading } = useAuth();
@@ -77,7 +78,7 @@ export default function SelectProfile() {
             >
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center gap-2 mb-5">
-                  <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-10 w-auto object-contain" />
+                  <Logo variant="compact" className="h-10 w-auto" />
                   <span className="text-[14px] font-bold font-sans tracking-tight" style={{ color: "#0F0F14" }}>Sommelyx</span>
                 </div>
                 <h1 className="text-2xl md:text-3xl font-serif font-bold mb-2" style={{ letterSpacing: "-0.03em", color: "#0F0F14" }}>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { supabase } from "@/integrations/supabase/client";
 import { analytics } from "@/lib/analytics";
+import { Logo } from "@/components/Logo";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -53,7 +54,7 @@ export default function ForgotPassword() {
         <section className="hidden lg:flex order-2 flex-col justify-between rounded-[28px] border border-black/[0.06] bg-white/70 p-6 shadow-[0_16px_40px_rgba(44,20,31,0.06)] backdrop-blur-xl sm:p-8 md:p-10 lg:order-1 lg:rounded-[36px] lg:p-12">
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
-              <img src="/logo-sommelyx.png" alt="Sommelyx" className="h-11 w-11 rounded-xl object-contain shadow-[0_8px_20px_rgba(140,32,68,0.14)]" />
+              <Logo variant="compact" className="h-11 w-auto drop-shadow-[0_8px_20px_rgba(140,32,68,0.14)]" />
               <span className="font-sans text-[24px] font-black tracking-tight text-[#17141D]">Sommelyx</span>
             </Link>
 
