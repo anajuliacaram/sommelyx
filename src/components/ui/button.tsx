@@ -5,45 +5,38 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-all duration-250 ease-premium active:scale-[0.97]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-all duration-300 ease-premium active:scale-[0.97]",
   {
     variants: {
       variant: {
         primary:
-          "bg-primary text-primary-foreground hover:bg-primary/92 rounded-2xl ring-1 ring-white/10 shadow-[0_10px_26px_-18px_hsl(var(--primary)/0.55)] hover:-translate-y-px hover:shadow-[0_18px_34px_-22px_hsl(var(--primary)/0.65)] font-semibold tracking-[-0.01em]",
+          "rounded-full text-white bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] shadow-[0_10px_25px_rgba(123,30,43,0.30)] hover:-translate-y-0.5 hover:shadow-[0_15px_35px_rgba(123,30,43,0.40)] active:shadow-[0_10px_22px_rgba(123,30,43,0.28)] tracking-[-0.01em]",
         secondary:
-          "bg-white/55 text-primary border border-primary/15 backdrop-blur-md rounded-2xl shadow-[0_10px_26px_-22px_hsl(var(--primary)/0.22)] hover:bg-primary/10 hover:text-primary hover:border-primary/25 hover:-translate-y-px hover:shadow-[0_18px_32px_-26px_hsl(var(--primary)/0.34)] active:bg-primary/12 font-semibold tracking-[-0.01em]",
+          "rounded-full bg-white/15 text-[#5a1e28] backdrop-blur-[10px] border border-white/20 shadow-none hover:bg-white/25 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.10)] active:shadow-[0_8px_20px_rgba(0,0,0,0.08)] tracking-[-0.01em]",
         outline:
-          "bg-transparent text-foreground border border-primary/22 rounded-2xl hover:bg-primary/6 hover:text-primary hover:border-primary/35 hover:-translate-y-px shadow-none font-medium",
+          "rounded-full bg-transparent border border-black/10 text-foreground hover:bg-black/[0.03] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)]",
         ghost:
-          "bg-transparent text-foreground/90 hover:bg-primary/6 hover:text-primary rounded-2xl font-medium",
+          "rounded-full bg-transparent text-foreground hover:bg-black/[0.03]",
         danger:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/92 rounded-2xl shadow-[0_10px_26px_-22px_hsl(var(--destructive)/0.4)] hover:-translate-y-px hover:shadow-[0_18px_34px_-26px_hsl(var(--destructive)/0.45)] font-semibold tracking-[-0.01em]",
+          "rounded-full bg-destructive text-destructive-foreground shadow-[0_10px_25px_rgba(220,38,38,0.22)] hover:-translate-y-0.5 hover:bg-destructive/92 hover:shadow-[0_15px_35px_rgba(220,38,38,0.30)]",
         success:
-          "bg-success text-success-foreground hover:bg-success/92 rounded-2xl shadow-[0_10px_26px_-22px_hsl(var(--success)/0.38)] hover:-translate-y-px hover:shadow-[0_18px_34px_-26px_hsl(var(--success)/0.42)] font-semibold tracking-[-0.01em]",
+          "rounded-full bg-success text-success-foreground shadow-[0_10px_25px_rgba(16,185,129,0.20)] hover:-translate-y-0.5 hover:bg-success/92 hover:shadow-[0_15px_35px_rgba(16,185,129,0.26)]",
 
         // Back-compat variants (avoid using in new code)
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/92 rounded-2xl ring-1 ring-white/10 shadow-[0_10px_26px_-18px_hsl(var(--primary)/0.55)] hover:-translate-y-px hover:shadow-[0_18px_34px_-22px_hsl(var(--primary)/0.65)] font-semibold tracking-[-0.01em]",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/92 rounded-2xl hover:-translate-y-px",
+          "rounded-full text-white bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] shadow-[0_10px_25px_rgba(123,30,43,0.30)] hover:-translate-y-0.5 hover:shadow-[0_15px_35px_rgba(123,30,43,0.40)] active:shadow-[0_10px_22px_rgba(123,30,43,0.28)] tracking-[-0.01em]",
+        destructive: "rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/92 hover:-translate-y-0.5",
         link: "text-primary underline-offset-4 hover:underline",
         premium: "btn-premium text-white rounded-2xl border-0 font-semibold tracking-[-0.01em] shadow-float",
         glass: "btn-glass rounded-2xl px-6 font-medium backdrop-blur-xl",
       },
       size: {
-        default: "h-11 px-6 py-2",
-        sm: "h-9 px-4 text-[13px]",
-        lg: "h-14 px-10 text-[15px]",
-        icon: "h-10 w-10",
+        default: "h-11 px-[22px] text-[14px]",
+        sm: "h-11 px-[18px] text-[14px]",
+        lg: "h-12 px-7 text-[15px]",
+        icon: "h-11 w-11 p-0",
       },
     },
-    compoundVariants: [
-      {
-        variant: "secondary",
-        size: "sm",
-        className: "rounded-full px-5",
-      },
-    ],
     defaultVariants: {
       variant: "primary",
       size: "default",
