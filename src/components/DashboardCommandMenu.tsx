@@ -77,14 +77,14 @@ export function DashboardCommandMenu({
     () =>
       isCommercial
         ? [
-            { label: "Visao geral", shortcut: "G D", icon: LayoutDashboard, onSelect: () => navigate("/dashboard") },
+            { label: "Visão geral", shortcut: "G D", icon: LayoutDashboard, onSelect: () => navigate("/dashboard") },
             { label: "Estoque", shortcut: "G E", icon: Package, onSelect: () => navigate("/dashboard/inventory") },
             { label: "Vendas", shortcut: "G V", icon: ShoppingCart, onSelect: () => navigate("/dashboard/sales") },
-            { label: "Relatorios", shortcut: "G R", icon: FileText, onSelect: () => navigate("/dashboard/reports") },
+            { label: "Relatórios", shortcut: "G R", icon: FileText, onSelect: () => navigate("/dashboard/reports") },
             { label: `Alertas${alertCount > 0 ? ` (${alertCount})` : ""}`, shortcut: "G A", icon: Bell, onSelect: () => navigate("/dashboard/alerts") },
           ]
         : [
-            { label: "Visao geral", shortcut: "G D", icon: LayoutDashboard, onSelect: () => navigate("/dashboard") },
+            { label: "Visão geral", shortcut: "G D", icon: LayoutDashboard, onSelect: () => navigate("/dashboard") },
             { label: "Minha adega", shortcut: "G C", icon: GlassWater, onSelect: () => navigate("/dashboard/cellar") },
             { label: "Meu consumo", shortcut: "G M", icon: Wine, onSelect: () => navigate("/dashboard/consumption") },
             { label: "Wishlist", shortcut: "G W", icon: Compass, onSelect: () => navigate("/dashboard/wishlist") },
@@ -101,7 +101,7 @@ export function DashboardCommandMenu({
           ? { label: "Importar planilha", shortcut: "I", icon: Upload, onSelect: onImportCsv }
           : undefined,
         {
-          label: isCommercial ? "Registrar movimentacao" : "Registrar abertura",
+          label: isCommercial ? "Registrar movimentação" : "Registrar abertura",
           shortcut: "O",
           icon: Sparkles,
           onSelect: onRegisterOpen,
@@ -116,7 +116,7 @@ export function DashboardCommandMenu({
           : undefined,
         !isCommercial && onRegisterExit
           ? {
-              label: "Registrar saida",
+              label: "Registrar saída",
               shortcut: "X",
               icon: Wine,
               onSelect: onRegisterExit,
@@ -156,12 +156,12 @@ export function DashboardCommandMenu({
       <Button
         type="button"
         variant="outline"
-        className="hidden h-9 min-w-[180px] items-center justify-between rounded-2xl border-white/20 bg-white/70 px-3 text-[12px] font-semibold text-[#5F5663] shadow-[0_12px_28px_-22px_rgba(23,20,29,0.55)] md:inline-flex"
+        className="hidden h-9 min-w-[168px] items-center justify-between rounded-2xl border-[#8C2044]/15 bg-white/70 px-3 text-[12px] font-semibold text-[#5F5663] shadow-[0_12px_28px_-22px_rgba(23,20,29,0.55)] backdrop-blur-xl transition-colors hover:border-[#8C2044]/25 hover:bg-white/85 md:inline-flex"
         onClick={() => setOpen(true)}
       >
         <span className="inline-flex items-center gap-2">
           <Search className="h-4 w-4 text-[#8C2044]" />
-          Command menu
+          Pesquisa
         </span>
         <span className="rounded-lg border border-black/[0.08] bg-white/80 px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#8A808E]">
           {commandLabel}
@@ -183,19 +183,22 @@ export function DashboardCommandMenu({
         <CommandInput
           placeholder={
             isCommercial
-              ? "Buscar telas, ações e produtos..."
-              : "Buscar telas, ações e rótulos..."
+              ? "Pesquisar telas, ações e produtos..."
+              : "Pesquisar telas, ações e rótulos..."
           }
           className="h-14 text-[15px]"
         />
         <CommandList className="max-h-[440px]">
           <CommandEmpty>Nada encontrado. Tente outro termo.</CommandEmpty>
 
-          <CommandGroup heading="Navegacao">
+          <CommandGroup
+            heading="Navegação"
+            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-[#8A808E]"
+          >
             {navItems.map((item) => (
               <CommandItem
                 key={item.label}
-                className="rounded-2xl px-3 py-3"
+                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-[#8C2044]/10 data-[selected=true]:text-[#17141D]"
                 onSelect={() => runAction(item.onSelect)}
               >
                 <item.icon className="h-4 w-4 text-[#8C2044]" />
@@ -207,11 +210,14 @@ export function DashboardCommandMenu({
 
           <CommandSeparator />
 
-          <CommandGroup heading="Acoes Rapidas">
+          <CommandGroup
+            heading="Ações rápidas"
+            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-[#8A808E]"
+          >
             {actionItems.map((item) => (
               <CommandItem
                 key={item.label}
-                className="rounded-2xl px-3 py-3"
+                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-[#8C2044]/10 data-[selected=true]:text-[#17141D]"
                 onSelect={() => runAction(item.onSelect)}
               >
                 <item.icon className="h-4 w-4 text-[#8C2044]" />
@@ -224,11 +230,14 @@ export function DashboardCommandMenu({
           {wineResults.length > 0 ? (
             <>
               <CommandSeparator />
-              <CommandGroup heading={isCommercial ? "Produtos em Destaque" : "Rotulos em Destaque"}>
+              <CommandGroup
+                heading={isCommercial ? "Produtos em destaque" : "Rótulos em destaque"}
+                className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-[#8A808E]"
+              >
                 {wineResults.map((wine) => (
                   <CommandItem
                     key={wine.id}
-                    className="rounded-2xl px-3 py-3"
+                    className="rounded-2xl px-3 py-3 data-[selected=true]:bg-[#8C2044]/10 data-[selected=true]:text-[#17141D]"
                     value={`${wine.name} ${wine.producer ?? ""} ${wine.country ?? ""} ${wine.region ?? ""}`}
                     onSelect={() => handleNavigateToWine(wine.name)}
                   >

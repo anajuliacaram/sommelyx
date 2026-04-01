@@ -3,8 +3,8 @@ import { AnimatedOutlet } from "@/components/AnimatedOutlet";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Bell, Wine } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Bell } from "lucide-react";
+import { useState } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { useWineMetrics, useWines } from "@/hooks/useWines";
@@ -16,33 +16,11 @@ export default function DashboardLayout() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { drinkNow, lowStock } = useWineMetrics();
   const { data: wines } = useWines();
   const alertCount = drinkNow + lowStock;
   const isMobile = useIsMobile();
-
-  const searchResults = useMemo(() => {
-    if (!searchQuery || !wines) return [];
-    const q = searchQuery.toLowerCase().trim();
-    if (q.length < 1) return [];
-
-    return wines
-      .filter(
-        (w) =>
-          w.name.toLowerCase().includes(q) ||
-          w.producer?.toLowerCase().includes(q) ||
-          w.grape?.toLowerCase().includes(q) ||
-          w.country?.toLowerCase().includes(q) ||
-          w.region?.toLowerCase().includes(q) ||
-          w.style?.toLowerCase().includes(q) ||
-          String(w.vintage ?? "").includes(q)
-      )
-      .slice(0, 8);
-  }, [searchQuery, wines]);
 
   const initials =
     user?.user_metadata?.full_name
@@ -52,14 +30,6 @@ export default function DashboardLayout() {
       .toUpperCase()
       .slice(0, 2) || "U";
 
-  const handleGoToWine = (wineName: string) => {
-    const route = profileType === "commercial" ? "/dashboard/inventory" : "/dashboard/cellar";
-    navigate(`${route}?q=${encodeURIComponent(wineName)}`);
-    setSearchQuery("");
-    setSearchFocused(false);
-    setMobileSearchOpen(false);
-  };
-
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="dashboard-shell min-h-screen flex w-full bg-background">
@@ -68,47 +38,7 @@ export default function DashboardLayout() {
           <header className="h-12 md:h-[64px] flex items-center px-3 md:px-6 gap-2 md:gap-3 sticky top-0 z-30 bg-[#FCFAF8]/75 backdrop-blur-2xl border-b border-white/40 shadow-[0_12px_40px_-32px_rgba(23,20,29,0.7)]">
             <SidebarTrigger className="shrink-0 h-12 w-12 md:h-10 md:w-10 rounded-2xl gradient-wine text-primary-foreground shadow-lg backdrop-blur-sm border border-white/20 transition-all active:scale-[0.95] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] [&>svg]:h-5 [&>svg]:w-5" />
 
-            <div className="flex-1 max-w-lg relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-                placeholder="Pesquise vinho, produtor, uva…"
-                className="w-full h-9 pl-9 pr-3 rounded-2xl text-[12px] font-medium focus:outline-none transition-all bg-muted/40 border border-border/70 text-foreground"
-              />
-
-              {searchFocused && searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl overflow-hidden z-50 bg-card/95 backdrop-blur-2xl border border-border shadow-xl">
-                  {searchResults.length > 0 ? (
-                    searchResults.map((w) => (
-                      <button
-                        key={w.id}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
-                        onMouseDown={() => handleGoToWine(w.name)}
-                      >
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10">
-                          <Wine className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate text-foreground">{w.name}</p>
-                          <p className="text-xs text-muted-foreground">{[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ")}</p>
-                        </div>
-                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${w.quantity > 0 ? "text-success bg-success/10" : "text-muted-foreground bg-muted"}`}>
-                          {w.quantity > 0 ? `${w.quantity} un.` : "Esgotado"}
-                        </span>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="p-4 text-sm text-muted-foreground text-center">Nenhum resultado para "{searchQuery}"</div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 sm:hidden" />
+            <div className="flex-1" />
 
             <div className="flex items-center gap-1.5 md:gap-2">
               <DashboardCommandMenu
@@ -131,13 +61,6 @@ export default function DashboardLayout() {
                   profileType === "commercial" ? () => navigate("/dashboard/sales") : undefined
                 }
               />
-
-              <button
-                className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center hover:bg-muted/40 text-muted-foreground"
-                onClick={() => setMobileSearchOpen((v) => !v)}
-              >
-                <Search className="h-4 w-4" />
-              </button>
 
               <span
                 className="inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] shrink-0"
@@ -167,35 +90,6 @@ export default function DashboardLayout() {
               </div>
             </div>
           </header>
-
-          {mobileSearchOpen && (
-            <div className="sm:hidden px-3 py-2 sticky top-12 z-20 bg-background/95 backdrop-blur-md border-b border-border/50">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Pesquisar…"
-                  className="w-full h-9 pl-9 pr-3 rounded-xl text-[12px] font-medium focus:outline-none bg-muted/40 border border-border/70 text-foreground"
-                />
-              </div>
-              {searchQuery && (
-                <div className="mt-2 rounded-xl border border-border bg-card/95 overflow-hidden">
-                  {searchResults.length > 0 ? (
-                    searchResults.map((w) => (
-                      <button key={w.id} onClick={() => handleGoToWine(w.name)} className="w-full text-left px-3 py-2.5 text-xs hover:bg-muted/40">
-                        <p className="font-semibold text-foreground truncate">{w.name}</p>
-                        <p className="text-muted-foreground truncate">{[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ")}</p>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="px-3 py-3 text-xs text-muted-foreground">Nenhum resultado</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
 
           <div className="flex-1 p-3 md:p-5 lg:p-8">
             <AnimatedOutlet />
