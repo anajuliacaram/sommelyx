@@ -483,6 +483,9 @@ export default function CellarPage() {
                     </td>
                     <td className="px-3 py-2 text-right">
                       <div className="flex gap-0.5 justify-end">
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
+                          <UtensilsCrossed className="h-3 w-3 text-amber-600" />
+                        </Button>
                         {status === "now" && (
                           <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleOpen(wine)}>
                             <GlassWater className="h-3 w-3 text-green-600" />
