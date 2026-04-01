@@ -426,6 +426,9 @@ export default function CellarPage() {
 
                 {/* Actions — minimal */}
                 <div className="flex gap-1.5 border-t border-border/30 pt-2.5">
+                  <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 font-semibold" onClick={() => setConsumptionWine(wine)}>
+                    <UtensilsCrossed className="h-3 w-3 mr-1" /> Consumo
+                  </Button>
                   {status === "now" && (
                     <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpen(wine)}>
                       <GlassWater className="h-3 w-3 mr-1" /> Abrir
