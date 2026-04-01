@@ -112,6 +112,12 @@ export function useUpdateWine() {
       if (typeof safeUpdates.quantity === "number" && (!Number.isFinite(safeUpdates.quantity) || safeUpdates.quantity < 0)) {
         throw new Error("Quantidade inválida");
       }
+      if (typeof safeUpdates.purchase_price === "number" && (!Number.isFinite(safeUpdates.purchase_price) || safeUpdates.purchase_price < 0)) {
+        throw new Error("Último valor pago inválido");
+      }
+      if (typeof safeUpdates.current_value === "number" && (!Number.isFinite(safeUpdates.current_value) || safeUpdates.current_value < 0)) {
+        throw new Error("Valor atual inválido");
+      }
       const { error } = await supabase.from("wines").update(safeUpdates).eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },

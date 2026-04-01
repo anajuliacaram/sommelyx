@@ -33,7 +33,8 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
   const [country, setCountry] = useState("");
   const [region, setRegion] = useState("");
   const [grape, setGrape] = useState("");
-  const [price, setPrice] = useState("");
+  const [lastPaid, setLastPaid] = useState("");
+  const [currentValue, setCurrentValue] = useState("");
   const [location, setLocation] = useState("");
   const [drinkFrom, setDrinkFrom] = useState("");
   const [drinkUntil, setDrinkUntil] = useState("");
@@ -55,7 +56,8 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setCountry(wine.country || "");
       setRegion(wine.region || "");
       setGrape(wine.grape || "");
-      setPrice(wine.purchase_price ? String(wine.purchase_price) : "");
+      setLastPaid(wine.purchase_price ? String(wine.purchase_price) : "");
+      setCurrentValue(wine.current_value ? String(wine.current_value) : "");
       setLocation(wine.cellar_location || "");
       setDrinkFrom(wine.drink_from ? String(wine.drink_from) : "");
       setDrinkUntil(wine.drink_until ? String(wine.drink_until) : "");
@@ -82,7 +84,8 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
           country: country || null,
           region: region || null,
           grape: grape || null,
-          purchase_price: price ? parseFloat(price) : null,
+          purchase_price: lastPaid ? parseFloat(lastPaid) : null,
+          current_value: currentValue ? parseFloat(currentValue) : null,
           cellar_location: location || null,
           drink_from: drinkFrom ? parseInt(drinkFrom) : null,
           drink_until: drinkUntil ? parseInt(drinkUntil) : null,
@@ -162,13 +165,17 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Preço (R$)</Label>
-                  <Input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} />
+                  <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
+                  <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Localização</Label>
-                  <Input value={location} onChange={e => setLocation(e.target.value)} />
+                  <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
+                  <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} />
                 </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Localização</Label>
+                <Input value={location} onChange={e => setLocation(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

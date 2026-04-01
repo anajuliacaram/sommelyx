@@ -303,12 +303,35 @@ export default function WishlistPage() {
                     placeholder="Ex: Sassicaia 2020, Dom Pérignon, Chablis Premier Cru..."
                     value={wineName}
                     onChange={(event) => setWineName(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter") return;
+                      event.preventDefault();
+                      void requestAiSuggestion({ query: wineName, force: true });
+                    }}
                     className="h-11 pl-10 text-[13px]"
                   />
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   Conforme o cliente digita, a IA tenta identificar rótulo, produtor, safra e contexto de compra.
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 text-[11px] font-bold"
+                    onClick={() => void requestAiSuggestion({ query: wineName, force: true })}
+                    disabled={!wineName.trim() || isAiLoading}
+                  >
+                    {isAiLoading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1.5" />}
+                    Pesquisar com IA
+                  </Button>
+                  {lastAiQuery ? (
+                    <span className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Última busca: {lastAiQuery}
+                    </span>
+                  ) : null}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -455,16 +478,9 @@ export default function WishlistPage() {
             >
               Cancelar
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="h-9 text-[11px] font-bold"
-              onClick={() => void requestAiSuggestion({ query: wineName, force: true })}
-              disabled={!wineName.trim() || isAiLoading}
-            >
+            <Button type="button" size="sm" variant="outline" className="h-9 text-[11px] font-bold" onClick={() => void requestAiSuggestion({ query: wineName, force: true })} disabled={!wineName.trim() || isAiLoading}>
               <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-              Reforçar com IA
+              Pesquisar com IA
             </Button>
           </div>
         </motion.div>

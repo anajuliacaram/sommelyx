@@ -36,7 +36,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [country, setCountry] = useState("");
   const [region, setRegion] = useState("");
   const [grape, setGrape] = useState("");
-  const [price, setPrice] = useState("");
+  const [lastPaid, setLastPaid] = useState("");
+  const [currentValue, setCurrentValue] = useState("");
   const [location, setLocation] = useState("");
   const [drinkFrom, setDrinkFrom] = useState("");
   const [drinkUntil, setDrinkUntil] = useState("");
@@ -57,7 +58,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
-    setCountry(""); setRegion(""); setGrape(""); setPrice(""); setLocation("");
+    setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setCurrentValue(""); setLocation("");
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setMoreOpen(false); setSuccess(false);
   };
@@ -74,7 +75,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (data.tasting_notes) setNotes(data.tasting_notes);
     if (data.drink_from) setDrinkFrom(String(data.drink_from));
     if (data.drink_until) setDrinkUntil(String(data.drink_until));
-    if (data.purchase_price) setPrice(String(data.purchase_price));
+    if (data.purchase_price) setLastPaid(String(data.purchase_price));
+    if (data.current_value) setCurrentValue(String(data.current_value));
     if (data.cellar_location) setLocation(data.cellar_location);
     // Open advanced fields if we have data for them
     if (data.country || data.region || data.grape || data.food_pairing || data.tasting_notes || data.drink_from) {
@@ -97,8 +99,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         country: country || null,
         region: region || null,
         grape: grape || null,
-        purchase_price: price ? parseFloat(price) : null,
-        current_value: null,
+        purchase_price: lastPaid ? parseFloat(lastPaid) : null,
+        current_value: currentValue ? parseFloat(currentValue) : null,
         cellar_location: location || null,
         drink_from: drinkFrom ? parseInt(drinkFrom) : null,
         drink_until: drinkUntil ? parseInt(drinkUntil) : null,
@@ -220,8 +222,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         <Input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" />
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Preço de compra (R$)</Label>
-                        <Input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" />
+                        <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
+                        <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
+                        <p className="mt-1 text-[10px] text-muted-foreground/80">Custo da última compra registrada.</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
+                        <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
+                        <p className="mt-1 text-[10px] text-muted-foreground/80">Usado como referência de valor/venda.</p>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Localização na adega</Label>
