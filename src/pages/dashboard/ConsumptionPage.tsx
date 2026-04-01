@@ -155,7 +155,7 @@ export default function ConsumptionPage() {
 
       {/* Period + Source Filters */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-col sm:flex-row gap-3">
-        <div className="flex gap-1 p-1 rounded-xl bg-accent/50 border border-border/30">
+        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-white/55 bg-white/60 p-1.5 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
           {([
             { value: "week", label: "Semana" },
             { value: "month", label: "Mês" },
@@ -164,16 +164,23 @@ export default function ConsumptionPage() {
           ] as { value: Period; label: string }[]).map(p => (
             <Button
               key={p.value}
-              variant={period === p.value ? "default" : "ghost"}
               size="sm"
-              className={`text-[11px] h-7 px-3 rounded-lg ${period === p.value ? "" : "text-muted-foreground"}`}
+              variant="ghost"
+              aria-pressed={period === p.value}
+              className={[
+                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em] transition-all",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20",
+                period === p.value
+                  ? "bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-white shadow-[0_16px_34px_-18px_rgba(15,15,20,0.55)] ring-1 ring-black/10"
+                  : "text-[#6D6676] hover:bg-black/[0.04] hover:text-[#17141D] active:scale-[0.99]",
+              ].join(" ")}
               onClick={() => setPeriod(p.value)}
             >
               {p.label}
             </Button>
           ))}
         </div>
-        <div className="flex gap-1 p-1 rounded-xl bg-accent/50 border border-border/30">
+        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-white/55 bg-white/60 p-1.5 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
           {([
             { value: "all", label: "Todos", icon: null },
             { value: "cellar", label: "Adega", icon: GlassWater },
@@ -181,12 +188,20 @@ export default function ConsumptionPage() {
           ] as { value: Source; label: string; icon: any }[]).map(s => (
             <Button
               key={s.value}
-              variant={source === s.value ? "default" : "ghost"}
               size="sm"
-              className={`text-[11px] h-7 px-3 rounded-lg gap-1 ${source === s.value ? "" : "text-muted-foreground"}`}
+              variant="ghost"
+              aria-pressed={source === s.value}
+              className={[
+                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em] transition-all",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20",
+                "gap-2",
+                source === s.value
+                  ? "bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-white shadow-[0_16px_34px_-18px_rgba(15,15,20,0.55)] ring-1 ring-black/10"
+                  : "text-[#6D6676] hover:bg-black/[0.04] hover:text-[#17141D] active:scale-[0.99]",
+              ].join(" ")}
               onClick={() => setSource(s.value)}
             >
-              {s.icon && <s.icon className="h-3 w-3" />}
+              {s.icon && <s.icon className="h-4 w-4 opacity-85" />}
               {s.label}
             </Button>
           ))}
