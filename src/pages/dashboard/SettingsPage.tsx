@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 } as const,
@@ -166,30 +167,36 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <button
+          <Button
+            type="button"
             onClick={() => handleProfileSwitch("personal")}
-            className="p-4 rounded-xl text-left transition-all duration-200"
-            style={{
-              background: profileType === "personal" ? "rgba(143,45,86,0.06)" : "rgba(0,0,0,0.02)",
-              border: profileType === "personal" ? "2px solid rgba(143,45,86,0.3)" : "2px solid rgba(0,0,0,0.06)",
-            }}
+            variant="outline"
+            className={cn(
+              "h-auto w-full justify-start items-start p-4 rounded-2xl text-left transition-all",
+              profileType === "personal"
+                ? "bg-primary/5 border-primary/25 shadow-sm"
+                : "bg-background/60 border-border/60 hover:bg-background",
+            )}
           >
             <p className="text-[13px] font-semibold" style={{ color: "#0F0F14" }}>🍷 Adega Pessoal</p>
             <p className="text-[11px] mt-1" style={{ color: "#6B7280" }}>Para colecionadores e entusiastas</p>
             {profileType === "personal" && <Check className="h-4 w-4 mt-2" style={{ color: "#8F2D56" }} />}
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
             onClick={() => handleProfileSwitch("commercial")}
-            className="p-4 rounded-xl text-left transition-all duration-200"
-            style={{
-              background: profileType === "commercial" ? "rgba(143,45,86,0.06)" : "rgba(0,0,0,0.02)",
-              border: profileType === "commercial" ? "2px solid rgba(143,45,86,0.3)" : "2px solid rgba(0,0,0,0.06)",
-            }}
+            variant="outline"
+            className={cn(
+              "h-auto w-full justify-start items-start p-4 rounded-2xl text-left transition-all",
+              profileType === "commercial"
+                ? "bg-primary/5 border-primary/25 shadow-sm"
+                : "bg-background/60 border-border/60 hover:bg-background",
+            )}
           >
             <p className="text-[13px] font-semibold" style={{ color: "#0F0F14" }}>🏪 Operação Comercial</p>
             <p className="text-[11px] mt-1" style={{ color: "#6B7280" }}>Para bares, restaurantes e lojas</p>
             {profileType === "commercial" && <Check className="h-4 w-4 mt-2" style={{ color: "#8F2D56" }} />}
-          </button>
+          </Button>
         </div>
       </motion.div>
 

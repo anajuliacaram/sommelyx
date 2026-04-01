@@ -10,6 +10,7 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { useWineMetrics, useWines } from "@/hooks/useWines";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardLayout() {
   const { user, profileType } = useAuth();
@@ -71,13 +72,21 @@ export default function DashboardLayout() {
                 {profileType === "commercial" ? "Comercial" : "Pessoal"}
               </span>
 
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => navigate("/dashboard/alerts")}
-                className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:bg-muted/40 relative text-muted-foreground"
+                className="h-8 w-8 rounded-xl relative text-muted-foreground hover:bg-muted/40"
+                title="Alertas"
               >
                 <Bell className="h-4 w-4" />
-                {alertCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-[8px] font-bold flex items-center justify-center text-white bg-destructive">{alertCount}</span>}
-              </button>
+                {alertCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-[8px] font-bold flex items-center justify-center text-white bg-destructive">
+                    {alertCount}
+                  </span>
+                )}
+              </Button>
 
               <div
                 className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 cursor-pointer"

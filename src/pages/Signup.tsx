@@ -203,7 +203,8 @@ export default function Signup() {
                   <Button
                     onClick={handleResend}
                     disabled={resentLoading}
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white"
+                    variant="primary"
+                    className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] shadow-float"
                   >
                     <span className="flex items-center gap-2">
                       <RefreshCcw className={`h-4.5 w-4.5 ${resentLoading ? "animate-spin" : ""}`} />
@@ -276,14 +277,16 @@ export default function Signup() {
                         minLength={8}
                         className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 pr-12 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-black/[0.03] hover:text-[#0F0F14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground focus-visible:ring-primary/20"
                       >
                         {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -291,8 +294,9 @@ export default function Signup() {
                     <MagneticButton disabled={loading}>
                       <Button
                         type="submit"
+                        variant="primary"
                         disabled={loading}
-                        className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                        className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.35)]"
                       >
                         {loading ? (
                           <span className="flex items-center gap-3">
@@ -320,8 +324,9 @@ export default function Signup() {
                   <div className="h-px flex-1 bg-black/[0.08]" />
                 </div>
 
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={async () => {
                     const { error } = await lovable.auth.signInWithOAuth("google", {
                       redirect_uri: window.location.origin,
@@ -330,7 +335,7 @@ export default function Signup() {
                       toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                     }
                   }}
-                  className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-black/[0.08] bg-white text-[13px] font-semibold text-[#17141D] transition-all hover:border-black/[0.14] hover:bg-[#FAFAFA] hover:shadow-sm active:scale-[0.98]"
+                  className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background/70 text-[13px] font-semibold text-foreground hover:bg-background hover:shadow-sm"
                 >
                   <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -339,7 +344,7 @@ export default function Signup() {
                     <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 2.58 9 3.58z" fill="#EA4335"/>
                   </svg>
                   Cadastrar com Google
-                </button>
+                </Button>
 
                 <div className="mt-6 border-t border-black/[0.06] pt-6 text-center">
                   <p className="text-[14px] font-medium text-[#6D6676]">

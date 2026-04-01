@@ -282,7 +282,7 @@ export default function WishlistPage() {
             Digite um rótulo, produtor ou safra e deixe a IA completar os detalhes. Se preferir, anexe uma foto do vinho.
           </p>
         </div>
-        <Button variant="premium" size="sm" className="h-9 px-4 text-[11px] font-bold" onClick={() => setShowForm((value) => !value)}>
+        <Button variant="primary" size="sm" className="h-9 px-4 text-[11px] font-bold" onClick={() => setShowForm((value) => !value)}>
           <Plus className="h-3.5 w-3.5 mr-1.5" />
           {showForm ? "Fechar" : "Novo item"}
         </Button>
@@ -318,7 +318,7 @@ export default function WishlistPage() {
                   <Button
                     type="button"
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                     className="h-9 text-[11px] font-bold"
                     onClick={() => void requestAiSuggestion({ query: wineName, force: true })}
                     disabled={!wineName.trim() || isAiLoading}
@@ -392,11 +392,11 @@ export default function WishlistPage() {
                 </p>
 
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  <Button type="button" variant="outline" className="h-10 text-[11px] font-bold" onClick={() => fileInputRef.current?.click()}>
+                  <Button type="button" variant="ghost" className="h-10 text-[11px] font-bold border border-border/70 bg-background/50 hover:bg-background" onClick={() => fileInputRef.current?.click()}>
                     <Upload className="h-3.5 w-3.5 mr-1.5" />
                     Anexar foto
                   </Button>
-                  <Button type="button" variant="outline" className="h-10 text-[11px] font-bold" onClick={() => cameraInputRef.current?.click()}>
+                  <Button type="button" variant="ghost" className="h-10 text-[11px] font-bold border border-border/70 bg-background/50 hover:bg-background" onClick={() => cameraInputRef.current?.click()}>
                     <Camera className="h-3.5 w-3.5 mr-1.5" />
                     Tirar foto
                   </Button>
@@ -433,9 +433,11 @@ export default function WishlistPage() {
                     className="h-56 w-full object-cover"
                   />
                   {imagePreview && (
-                    <button
+                    <Button
                       type="button"
-                      className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-3 top-3 h-8 w-8 rounded-full bg-foreground/70 text-background hover:bg-foreground/85"
                       onClick={() => {
                         setImagePreview(null);
                         setImageFile(null);
@@ -443,7 +445,7 @@ export default function WishlistPage() {
                       aria-label="Remover imagem"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               )}
@@ -478,7 +480,7 @@ export default function WishlistPage() {
             >
               Cancelar
             </Button>
-            <Button type="button" size="sm" variant="outline" className="h-9 text-[11px] font-bold" onClick={() => void requestAiSuggestion({ query: wineName, force: true })} disabled={!wineName.trim() || isAiLoading}>
+            <Button type="button" size="sm" variant="secondary" className="h-9 text-[11px] font-bold" onClick={() => void requestAiSuggestion({ query: wineName, force: true })} disabled={!wineName.trim() || isAiLoading}>
               <Sparkles className="h-3.5 w-3.5 mr-1.5" />
               Pesquisar com IA
             </Button>

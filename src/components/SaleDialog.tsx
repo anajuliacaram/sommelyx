@@ -169,7 +169,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                   <Label className="text-xs text-muted-foreground">Itens da venda</Label>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     className="h-7 text-[10px] px-2 rounded-lg"
                     onClick={() => setPickingItem(true)}
@@ -205,11 +205,12 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                         ) : (
                           <div className="divide-y divide-border/30">
                             {filteredWines.map(w => (
-                              <button
+                              <Button
                                 key={w.id}
                                 type="button"
+                                variant="ghost"
                                 onClick={() => addItem(w)}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-accent/50"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-none h-auto justify-start hover:bg-muted/40"
                               >
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[11px] font-semibold text-foreground truncate">{w.name}</p>
@@ -223,18 +224,20 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                                     <p className="text-[9px] text-muted-foreground">R$ {(w.current_value ?? w.purchase_price ?? 0).toLocaleString("pt-BR")}</p>
                                   ) : null}
                                 </div>
-                              </button>
+                              </Button>
                             ))}
                           </div>
                         )}
                       </ScrollArea>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => { setPickingItem(false); setSearchText(""); }}
-                        className="text-[10px] text-muted-foreground hover:underline"
+                        className="h-7 px-2 text-[10px] font-semibold text-muted-foreground hover:text-foreground"
                       >
                         Cancelar
-                      </button>
+                      </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -253,13 +256,16 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                         <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
                         {item.wineDetails && <p className="text-[9px] text-muted-foreground truncate">{item.wineDetails}</p>}
                       </div>
-                      <button
+                      <Button
                         type="button"
+                        variant="danger"
+                        size="icon"
                         onClick={() => removeItem(item.id)}
-                        className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-destructive/10 transition-colors"
+                        className="shrink-0 h-6 w-6 rounded-lg"
+                        aria-label="Remover item"
                       >
-                        <Trash2 className="h-3 w-3 text-destructive" />
-                      </button>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>

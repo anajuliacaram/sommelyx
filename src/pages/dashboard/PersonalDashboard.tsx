@@ -154,13 +154,13 @@ export default function PersonalDashboard() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <Button variant="premium" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setAddOpen(true)}>
+                <Button variant="primary" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setAddOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" /> Adicionar vinho
                 </Button>
-                <Button variant="outline" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setManageOpen(true)}>
+                <Button variant="ghost" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setManageOpen(true)}>
                   <Wine className="mr-2 h-4 w-4" /> Registrar consumo
                 </Button>
-                <Button variant="outline" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setCsvOpen(true)}>
+                <Button variant="ghost" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setCsvOpen(true)}>
                   <Upload className="mr-2 h-4 w-4" /> Importar acervo
                 </Button>
               </div>
@@ -199,7 +199,7 @@ export default function PersonalDashboard() {
                   <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Hoje</p>
                   <h2 className="mt-1 text-[16px] font-bold tracking-tight text-foreground">Prontos para abrir</h2>
                 </div>
-                <Button variant="outline" className="h-9 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/cellar")}>
+                <Button variant="ghost" className="h-9 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/cellar")}>
                   Ver adega
                 </Button>
               </div>
@@ -222,7 +222,7 @@ export default function PersonalDashboard() {
                         </p>
                       </div>
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         className="h-9 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]"
                         onClick={() => handleOpenBottle(w.id, w.name)}
                         disabled={wineEvent.isPending}
@@ -247,14 +247,16 @@ export default function PersonalDashboard() {
                     { label: "Passaram do pico", value: pastPeak, tone: "amber" },
                     { label: "Baixo estoque", value: lowStock, tone: "wine" },
                   ].map((a) => (
-                    <button
+                    <Button
                       key={a.label}
+                      type="button"
+                      variant="ghost"
                       onClick={() => navigate("/dashboard/alerts")}
                       className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-white/80"
                     >
                       <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{a.label}</p>
                       <p className="mt-1 text-[20px] font-black tracking-tight text-foreground">{a.value}</p>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -302,4 +304,3 @@ export default function PersonalDashboard() {
     </>
   );
 }
-

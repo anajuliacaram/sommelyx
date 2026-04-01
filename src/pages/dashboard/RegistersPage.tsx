@@ -58,7 +58,7 @@ export default function RegistersPage() {
           <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Cadastros</h1>
           <p className="text-[11px] text-muted-foreground">Clientes e fornecedores</p>
         </div>
-        <Button variant="premium" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setShowForm(!showForm)}>
+        <Button variant="primary" size="sm" className="h-8 px-3 text-[11px] font-bold" onClick={() => setShowForm(!showForm)}>
           <Plus className="h-3 w-3 mr-1" /> Novo cadastro
         </Button>
       </motion.div>

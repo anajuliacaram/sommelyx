@@ -4,7 +4,7 @@ import {
     Search, Filter, SlidersHorizontal, ArrowUpDown, ChevronDown,
     MoreHorizontal, Trash2, Tag, Download, Check, X,
     Package, AlertTriangle, Clock, History, Star,
-    Smartphone, ChevronRight, LayoutGrid, List as ListIcon, Plus, Minus, Pencil
+    Smartphone, ChevronRight, LayoutGrid, List as ListIcon, Plus, Minus, Pencil, Loader2
 } from "lucide-react";
 import { useWineMetrics, useDeleteWine, useWineEvent, Wine } from "@/hooks/useWines";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ import {
     SheetFooter,
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -38,6 +38,7 @@ import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddWineDialog } from "@/components/AddWineDialog";
+import { EditWineDialog } from "@/components/EditWineDialog";
 
 // --- Types & Constants ---
 type StockStatus = "all" | "in-stock" | "low" | "out" | "aging" | "drink-now";
@@ -50,14 +51,18 @@ export default function InventoryPage() {
     const wineEvent = useWineEvent();
     const { toast } = useToast();
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     // --- States ---
     const [search, setSearch] = useState(searchParams.get("q") || "");
     const [debouncedSearch, setDebouncedSearch] = useState(search);
     const [filterOpen, setFilterOpen] = useState(false);
     const [addWineOpen, setAddWineOpen] = useState(false);
+    const [editWineOpen, setEditWineOpen] = useState(false);
+    const [editingWine, setEditingWine] = useState<Wine | null>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+    const [stockBusyWineId, setStockBusyWineId] = useState<string | null>(null);
 
     // Filter Values (from URL)
     const statusFilter = (searchParams.get("status") as StockStatus) || "all";
@@ -273,11 +278,15 @@ export default function InventoryPage() {
     };
 
     const handleQuickStock = async (wineId: string, diff: number) => {
+        if (stockBusyWineId === wineId) return;
         try {
+            setStockBusyWineId(wineId);
             await wineEvent.mutateAsync({ wineId, eventType: diff > 0 ? "add" : "open", quantity: Math.abs(diff) });
             toast({ title: diff > 0 ? "Entrada registrada!" : "Saída registrada!", variant: "default" });
         } catch {
             toast({ title: "Erro ao atualizar estoque.", variant: "destructive" });
+        } finally {
+            setStockBusyWineId((current) => (current === wineId ? null : current));
         }
     };
 
@@ -291,7 +300,7 @@ export default function InventoryPage() {
         return (
             <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] ${color}`} />
-                <span className="text-sm font-black text-[#0F0F14]">{qty} <span className="text-[11px] text-muted-foreground font-bold lowercase">un</span></span>
+                <span className="text-sm font-black text-foreground">{qty} <span className="text-[11px] text-muted-foreground font-bold lowercase">un</span></span>
             </div>
         );
     };
@@ -304,28 +313,40 @@ export default function InventoryPage() {
             {/* --- HEADER --- */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-serif font-black italic tracking-tight" style={{ color: "#0F0F14", letterSpacing: "-0.04em" }}>
+                    <h1 className="text-2xl md:text-3xl font-serif font-black italic tracking-tight text-foreground" style={{ letterSpacing: "-0.04em" }}>
                         Estoque
                     </h1>
                     <p className="text-sm mt-1 text-muted-foreground font-medium">Operação comercial com leitura rápida de disponibilidade, valor e giro.</p>
                     <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-white/70 border-black/10 text-[#4B5563]">{summary.labels} rótulos</Badge>
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-white/70 border-black/10 text-[#4B5563]">{summary.bottles} em estoque</Badge>
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-white/70 border-black/10 text-[#4B5563]">R$ {summary.totalValue.toLocaleString("pt-BR")} estimado</Badge>
+                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.labels} rótulos</Badge>
+                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.bottles} em estoque</Badge>
+                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">R$ {summary.totalValue.toLocaleString("pt-BR")} estimado</Badge>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <div className="hidden sm:flex border border-[#8C2044]/10 rounded-2xl bg-white/40 backdrop-blur-md p-1">
-                        <Button variant="ghost" size="icon" className={cn("h-8 w-8 rounded-xl transition-all", viewMode === "table" && "bg-white shadow-premium text-[#8C2044]")} onClick={() => setViewMode("table")}>
+                    <div className="hidden sm:flex border border-border/70 rounded-2xl bg-background/50 backdrop-blur-md p-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-pressed={viewMode === "table"}
+                            className={cn("h-8 w-8 rounded-xl", viewMode === "table" && "bg-background shadow-sm text-primary")}
+                            onClick={() => setViewMode("table")}
+                        >
                             <ListIcon className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className={cn("h-8 w-8 rounded-xl transition-all", viewMode === "grid" && "bg-white shadow-premium text-[#8C2044]")} onClick={() => setViewMode("grid")}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-pressed={viewMode === "grid"}
+                            className={cn("h-8 w-8 rounded-xl", viewMode === "grid" && "bg-background shadow-sm text-primary")}
+                            onClick={() => setViewMode("grid")}
+                        >
                             <LayoutGrid className="h-4 w-4" />
                         </Button>
                     </div>
                     <MagneticButton>
-                        <Button variant="premium" className="h-10 px-4 rounded-2xl shadow-float font-bold text-[12px] uppercase tracking-wider" onClick={() => setAddWineOpen(true)}>
+                        <Button variant="primary" className="h-10 px-4 rounded-2xl shadow-float font-bold text-[12px] uppercase tracking-wider" onClick={() => setAddWineOpen(true)}>
                             <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar Vinho
                         </Button>
                     </MagneticButton>
@@ -352,12 +373,12 @@ export default function InventoryPage() {
             <div className="glass-card p-3 md:p-4 border-white/50 space-y-3">
                 <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8C2044]/60 group-focus-within:text-primary transition-colors" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60 transition-colors" />
                     <Input
                         placeholder="Pesquisar vinho, produtor, região, safra ou uva..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="pl-10 h-11 rounded-[16px] border-[#8C2044]/10 bg-white/40 backdrop-blur-md shadow-sm focus:ring-[#8C2044]/5 focus:border-[#8C2044]/20 transition-all font-medium text-[13px]"
+                        className="pl-10 h-11 rounded-[16px] border-primary/10 bg-background/50 backdrop-blur-md shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all font-medium text-[13px]"
                     />
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -368,16 +389,21 @@ export default function InventoryPage() {
                             { id: "low", label: "Baixo estoque" },
                             { id: "out", label: "Sem estoque" },
                         ].map(t => (
-                            <button
+                            <Button
                                 key={t.id}
+                                type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => updateParam("status", t.id === "all" ? null : t.id)}
                                 className={cn(
-                                    "px-3 py-1.5 text-[11px] font-bold rounded-[10px] transition-all",
-                                    (statusFilter === t.id || (t.id === "all" && statusFilter === "all")) ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                    "h-8 px-3 text-[11px] font-bold rounded-[10px]",
+                                    (statusFilter === t.id || (t.id === "all" && statusFilter === "all"))
+                                      ? "bg-background shadow-sm text-primary hover:bg-background"
+                                      : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
                                 {t.label}
-                            </button>
+                            </Button>
                         ))}
                     </div>
 
@@ -416,10 +442,15 @@ export default function InventoryPage() {
                         searchPlaceholder="Buscar safra..."
                     />
 
-                    <Button variant="outline" size="icon" className="h-10 w-10 rounded-[12px] bg-white/40 border-border/50 hover:border-black/20" onClick={() => setFilterOpen(true)}>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative h-10 w-10 rounded-[12px] border border-border/70 bg-background/50 hover:bg-background"
+                        onClick={() => setFilterOpen(true)}
+                    >
                         <SlidersHorizontal className="h-4 w-4 opacity-70" />
                         {activeFilterCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#8C2044] text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[8px] font-black rounded-full flex items-center justify-center border-2 border-background shadow-sm">
                                 {activeFilterCount}
                             </span>
                         )}
@@ -472,7 +503,15 @@ export default function InventoryPage() {
                                 {statusFilter === "low" ? "Baixo estoque" : statusFilter === "out" ? "Sem estoque" : "Em estoque"} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("status", null)} />
                             </Badge>
                         )}
-                        <button className="text-[10px] font-bold text-red-500 hover:text-red-600 hover:underline border-l border-red-200 pl-2 ml-1 transition-colors" onClick={clearAllFilters}>Limpar tudo</button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-[10px] font-bold text-destructive hover:bg-destructive/10 hover:text-destructive border-l border-destructive/20 rounded-none ml-1"
+                            onClick={clearAllFilters}
+                        >
+                            Limpar tudo
+                        </Button>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -523,7 +562,7 @@ export default function InventoryPage() {
                                                     {wine.image_url ? <img src={wine.image_url} className="w-full h-full object-cover" /> : <Package className="h-5 w-5 text-muted-foreground/50" />}
                                                 </div>
                                                 <div className="min-w-[140px]">
-                                                    <p className="font-extrabold text-[14px] text-[#0F0F14] hover:text-primary transition-colors cursor-pointer leading-tight">{wine.name}</p>
+                                                    <p className="font-extrabold text-[14px] text-foreground hover:text-primary transition-colors cursor-pointer leading-tight">{wine.name}</p>
                                                     <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.producer || "Produtor não informado"}</p>
                                                 </div>
                                             </div>
@@ -532,31 +571,98 @@ export default function InventoryPage() {
                                             <div className="text-[13px] font-medium">{wine.region || "Região não informada"}</div>
                                             <div className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.country || "País não informado"} • Safra {wine.vintage || "NV"}</div>
                                         </td>
-                                        <td><div className="flex items-center gap-2.5">{renderStockVisual(wine.quantity)}{wine.quantity > 0 && wine.quantity <= 2 && <Badge className="h-6 rounded-lg bg-red-50 text-red-700 border border-red-200 text-[10px] font-semibold">Baixo estoque</Badge>}</div></td>
-                                        <td className="text-right hidden sm:table-cell">
-                                            <p className="text-sm font-bold text-[#0F0F14]">R$ {(wine.current_value || wine.purchase_price || 0).toLocaleString("pt-BR")}</p>
+                                        <td>
+                                            <div className="flex items-center gap-2.5">
+                                                {renderStockVisual(wine.quantity)}
+                                                {wine.quantity > 0 && wine.quantity <= 2 && (
+                                                    <Badge className="h-6 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-semibold">Baixo estoque</Badge>
+                                                )}
+                                            </div>
                                         </td>
-                                        <td className="text-right hidden xl:table-cell"><p className="text-sm font-extrabold text-[#0F0F14]">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
+                                        <td className="text-right hidden sm:table-cell">
+                                            <p className="text-sm font-bold text-foreground">R$ {(wine.current_value || wine.purchase_price || 0).toLocaleString("pt-BR")}</p>
+                                        </td>
+                                        <td className="text-right hidden xl:table-cell"><p className="text-sm font-extrabold text-foreground">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
                                         <td className="text-right pr-4" onClick={e => e.stopPropagation()}>
                                             <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800" title="Registrar Entrada" onClick={() => handleQuickStock(wine.id, 1)}>
-                                                    <Plus className="h-4 w-4" />
+                                                <Button
+                                                    variant="success"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    title="Registrar Entrada"
+                                                    disabled={stockBusyWineId === wine.id}
+                                                    onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, 1); }}
+                                                >
+                                                    {stockBusyWineId === wine.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-red-500/10 text-red-700 hover:bg-red-500/20 hover:text-red-800" title="Registrar Saída" onClick={() => handleQuickStock(wine.id, -1)}>
-                                                    <Minus className="h-4 w-4" />
+                                                <Button
+                                                    variant="danger"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    title="Registrar Saída"
+                                                    disabled={stockBusyWineId === wine.id}
+                                                    onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, -1); }}
+                                                >
+                                                    {stockBusyWineId === wine.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Minus className="h-4 w-4" />}
                                                 </Button>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8"
+                                                            title="Mais ações"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1.5 shadow-float border-white/20 bg-white/95 backdrop-blur-xl">
+                                                    <DropdownMenuContent align="end" className="w-56">
                                                         <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground">Ações</DropdownMenuLabel>
-                                                        <DropdownMenuItem className="rounded-xl group font-medium"><Pencil className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Editar vinho</DropdownMenuItem>
-                                                        <DropdownMenuItem className="rounded-xl group font-medium" onClick={() => handleQuickStock(wine.id, 1)}><Plus className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Ajustar estoque (+1)</DropdownMenuItem>
-                                                        <DropdownMenuItem className="rounded-xl group font-medium" onClick={() => handleQuickStock(wine.id, -1)}><Minus className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Registrar saída (-1)</DropdownMenuItem>
-                                                        <DropdownMenuItem className="rounded-xl group font-medium"><History className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary" /> Ver histórico</DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            variant="primary"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setEditingWine(wine);
+                                                                setEditWineOpen(true);
+                                                            }}
+                                                        >
+                                                            <Pencil className="mr-2 h-4 w-4" /> Editar vinho
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            variant="neutral"
+                                                            disabled={stockBusyWineId === wine.id}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                void handleQuickStock(wine.id, 1);
+                                                            }}
+                                                        >
+                                                            <Plus className="mr-2 h-4 w-4" /> Ajustar estoque (+1)
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            variant="danger"
+                                                            disabled={stockBusyWineId === wine.id}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                void handleQuickStock(wine.id, -1);
+                                                            }}
+                                                        >
+                                                            <Minus className="mr-2 h-4 w-4" /> Registrar saída (-1)
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                navigate(`/dashboard/log?wine=${encodeURIComponent(wine.id)}`);
+                                                            }}
+                                                        >
+                                                            <History className="mr-2 h-4 w-4" /> Ver histórico
+                                                        </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </div>
@@ -607,12 +713,20 @@ export default function InventoryPage() {
                         </div>
                     </ScrollArea>
                     <SheetFooter className="pt-4">
-                        <Button variant="outline" onClick={clearAllFilters}>Limpar filtros</Button>
-                        <Button onClick={() => setFilterOpen(false)}>Aplicar</Button>
+                        <Button variant="ghost" onClick={clearAllFilters}>Limpar filtros</Button>
+                        <Button variant="primary" onClick={() => setFilterOpen(false)}>Aplicar</Button>
                     </SheetFooter>
                 </SheetContent>
             </Sheet>
             <AddWineDialog open={addWineOpen} onOpenChange={setAddWineOpen} />
+            <EditWineDialog
+                open={editWineOpen}
+                onOpenChange={(open) => {
+                    setEditWineOpen(open);
+                    if (!open) setEditingWine(null);
+                }}
+                wine={editingWine}
+            />
         </div>
     );
 }

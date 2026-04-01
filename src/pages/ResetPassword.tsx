@@ -147,7 +147,8 @@ export default function ResetPassword() {
                     <Button
                       type="button"
                       onClick={() => navigate("/forgot-password")}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                      variant="primary"
+                      className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] shadow-float"
                     >
                       Solicitar novo link <ArrowRight className="ml-2 h-4.5 w-4.5" />
                     </Button>
@@ -192,14 +193,16 @@ export default function ResetPassword() {
                         minLength={8}
                         className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 pr-12 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-black/[0.03] hover:text-[#0F0F14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50"
                       >
                         {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
-                      </button>
+                      </Button>
                     </div>
                     {password.length > 0 && password.length < 8 && (
                       <p className="text-[12px] font-semibold text-amber-700">Mínimo 8 caracteres.</p>
@@ -230,7 +233,8 @@ export default function ResetPassword() {
                       <Button
                         type="submit"
                         disabled={loading || !isValid}
-                        className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                        variant="primary"
+                        className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] shadow-float"
                       >
                         {loading ? (
                           <span className="flex items-center justify-center gap-3">

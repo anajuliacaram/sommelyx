@@ -121,16 +121,17 @@ export default function AuthCallback() {
           <div className="mt-6 space-y-3">
             <Button
               type="button"
+              variant="primary"
               onClick={() => navigate("/login?confirmed=true", { replace: true })}
-              className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white"
+              className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em]"
             >
               Ir para login
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={() => navigate("/signup", { replace: true })}
-              className="h-12 w-full rounded-2xl border-black/10 bg-white/70 text-[13px] font-bold uppercase tracking-[0.1em] text-[#17141D] hover:bg-white"
+              className="h-12 w-full rounded-2xl border border-border/70 bg-background/60 text-[13px] font-bold uppercase tracking-[0.1em] hover:bg-background"
             >
               Tentar novamente
             </Button>

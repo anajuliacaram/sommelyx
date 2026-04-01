@@ -47,29 +47,26 @@ export default function InventoryPlaceholder({ title, icon, description }: Place
                     <Icon className="h-9 w-9 relative z-10" style={{ color: active.color }} />
                 </motion.div>
 
-                <h1 className="text-3xl font-serif font-black italic tracking-tight mb-4 text-[#0F0F14]">{title}</h1>
-                <p className="text-gray-500 font-medium leading-relaxed mb-10">
+                <h1 className="text-3xl font-serif font-black italic tracking-tight mb-4 text-foreground">{title}</h1>
+                <p className="text-muted-foreground font-medium leading-relaxed mb-10">
                     Esta funcionalidade é exclusiva para o plano <span className="font-bold text-primary">Sommelyx Pro</span> e está sendo preparada para revolucionar sua operação. <br /><br /> {description}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full">
-                    <Button variant="premium" className="flex-1 h-12 rounded-2xl font-bold shadow-float" onClick={() => navigate("/dashboard")}>
+                    <Button variant="primary" className="flex-1 h-12 rounded-2xl font-bold shadow-float" onClick={() => navigate("/dashboard")}>
                         <LayoutDashboard className="h-4 w-4 mr-2" /> Voltar ao Painel
                     </Button>
-                    <Button variant="outline" className="flex-1 h-12 rounded-2xl font-bold bg-white/50" onClick={() => navigate("/dashboard/plans")}>
+                    <Button variant="ghost" className="flex-1 h-12 rounded-2xl font-bold border border-border/70 bg-background/50 hover:bg-background" onClick={() => navigate("/dashboard/plans")}>
                         Ver Planos Pro
                     </Button>
                 </div>
             </motion.div>
 
-            <motion.button
-                onClick={() => navigate(-1)}
-                className="mt-12 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-            >
-                <ArrowLeft className="h-3 w-3" /> Voltar
-            </motion.button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-12">
+                <Button variant="ghost" className="h-9 px-3 text-[11px] font-black uppercase tracking-[0.2em]" onClick={() => navigate(-1)}>
+                    <ArrowLeft className="h-3 w-3" /> Voltar
+                </Button>
+            </motion.div>
         </div>
     );
 }

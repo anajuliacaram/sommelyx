@@ -140,26 +140,26 @@ export default function AuthConfirm() {
           {status === "error" && (
             <>
               <h1 className="text-[30px] font-serif font-bold italic">Não foi possível confirmar seu acesso.</h1>
-              <p className="mt-3 text-[15px] text-[#5B5564]">
+              <p className="mt-3 text-[15px] text-muted-foreground">
                 {reason === "expired"
                   ? "Este link de confirmação expirou. Solicite um novo envio para continuar."
                   : reason === "invalid"
                     ? "Este link parece inválido ou já foi utilizado. Solicite um novo envio e tente novamente."
                     : "Encontramos um problema ao validar seu link. Tente novamente a partir do e-mail mais recente."}
               </p>
-              {errorMessage && <p className="mt-2 text-[13px] text-[#8C2044]">{errorMessage}</p>}
+              {errorMessage && <p className="mt-2 text-[13px] text-destructive">{errorMessage}</p>}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Button asChild className="h-11 rounded-xl bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] px-6 text-[12px] font-black uppercase tracking-[0.12em] text-white">
+                <Button asChild variant="primary" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em]">
                   <Link to="/signup?resend=true">Reenviar confirmação</Link>
                 </Button>
-                <Button asChild variant="outline" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em]">
+                <Button asChild variant="ghost" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em] border border-border/70 bg-background/50 hover:bg-background">
                   <Link to="/login">Voltar para login</Link>
                 </Button>
               </div>
             </>
           )}
 
-          <p className="mt-8 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-[#8C2044]">
+          <p className="mt-8 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-primary">
             <Sparkles className="h-3.5 w-3.5" /> Sommelyx • fluxo seguro
           </p>
         </motion.div>

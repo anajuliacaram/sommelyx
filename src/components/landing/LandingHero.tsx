@@ -52,7 +52,8 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <MagneticButton>
               <Button
-                className="group h-12 rounded-2xl bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] px-8 text-[13px] font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_44px_-26px_rgba(15,15,20,0.8)] ring-1 ring-black/10 transition-all hover:-translate-y-0.5 hover:shadow-[0_28px_64px_-32px_rgba(15,15,20,0.9)] active:scale-[0.99]"
+                variant="primary"
+                className="group h-12 rounded-2xl px-8 text-[13px] font-black uppercase tracking-[0.12em] shadow-float"
                 onClick={onSignup}
               >
                 Começar grátis

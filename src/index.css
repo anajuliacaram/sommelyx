@@ -26,8 +26,9 @@
     --muted: 30 16% 92%;
     --muted-foreground: 240 6% 38%;
 
-    --accent: 18 68% 58%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent — Soft Gold (remove orange from UI accents) */
+    --accent: 40 44% 60%;
+    --accent-foreground: 240 10% 6%;
 
     /* Semantic States — Refined/Clean */
     --success: 142 66% 38%;
@@ -89,8 +90,8 @@
     --muted: 240 8% 10%;
     --muted-foreground: 220 8% 58%;
 
-    --accent: 18 68% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 40 44% 60%;
+    --accent-foreground: 240 10% 6%;
 
     /* Dark Semantic */
     --success: 142 66% 45%;

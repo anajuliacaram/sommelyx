@@ -111,9 +111,9 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                           {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ")} — {selectedWine.quantity} un. em estoque
                         </p>
                       </div>
-                      <button type="button" onClick={() => setWineId("")} className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-destructive/10 transition-colors">
+                      <Button type="button" variant="ghost" size="icon" onClick={() => setWineId("")} className="shrink-0 h-6 w-6 rounded-lg">
                         <X className="h-3.5 w-3.5 text-muted-foreground" />
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -137,11 +137,12 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                         ) : (
                           <div className="divide-y divide-border/30">
                             {filteredWines.map(w => (
-                              <button
+                              <Button
                                 key={w.id}
                                 type="button"
+                                variant="ghost"
                                 onClick={() => setWineId(w.id)}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-accent/50"
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-none h-auto justify-start hover:bg-muted/40"
                               >
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[11px] font-semibold text-foreground truncate">{w.name}</p>
@@ -150,7 +151,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                                   </p>
                                 </div>
                                 <span className="text-[10px] font-bold text-muted-foreground shrink-0">{w.quantity} un.</span>
-                              </button>
+                              </Button>
                             ))}
                           </div>
                         )}
@@ -193,11 +194,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={wineEvent.isPending || !wineId || !justification.trim()}
-                  className="w-full h-11 text-[13px] font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
+                <Button type="submit" variant="danger" disabled={wineEvent.isPending || !wineId || !justification.trim()} className="w-full h-11 text-[13px] font-medium">
                   {wineEvent.isPending ? "Registrando..." : "Confirmar Ruptura"}
                 </Button>
               </form>

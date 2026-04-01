@@ -92,24 +92,24 @@ export function AppSidebar() {
             {isCommercial ? (
               <>
                 <Button
-                  variant="premium"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl shadow-float border border-white/20 active:scale-[0.97] transition-all"
+                  variant="primary"
+                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
                   Adicionar Estoque
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl active:scale-[0.97] transition-all bg-emerald-500/10 text-emerald-700 border-emerald-500/20 hover:bg-emerald-500/20 hover:text-emerald-800 hover:border-emerald-500/30"
+                  variant="success"
+                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                   Adicionar Venda
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl active:scale-[0.97] transition-all text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/20"
+                  variant="danger"
+                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
@@ -119,16 +119,16 @@ export function AppSidebar() {
             ) : (
               <>
                 <Button
-                  variant="premium"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl shadow-float border border-white/20 active:scale-[0.97] transition-all"
+                  variant="primary"
+                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
                   Adicionar Vinho na Adega
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl active:scale-[0.97] transition-all bg-amber-500/10 text-amber-700 border-amber-500/20 hover:bg-amber-500/20 hover:text-amber-800 hover:border-amber-500/30"
+                  variant="secondary"
+                  className="w-full h-9 text-[11px] font-bold uppercase tracking-wider rounded-xl"
                   onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
                 >
                   <Wine className="h-3.5 w-3.5 mr-1.5" />

@@ -154,27 +154,27 @@ export function DashboardCommandMenu({
     <>
       <Button
         type="button"
-        variant="outline"
-        className="hidden h-10 w-full max-w-[760px] items-center justify-start gap-3 rounded-2xl border-[#8C2044]/15 bg-white/70 px-4 text-[12px] font-semibold text-[#5F5663] shadow-[0_12px_28px_-22px_rgba(23,20,29,0.55)] backdrop-blur-xl transition-colors hover:border-[#8C2044]/25 hover:bg-white/85 md:inline-flex"
+        variant="ghost"
+        className="hidden h-10 w-full max-w-[760px] items-center justify-start gap-3 rounded-2xl border border-border/70 bg-background/60 px-4 text-[12px] font-semibold text-muted-foreground shadow-[0_12px_28px_-22px_rgba(23,20,29,0.55)] backdrop-blur-xl transition-colors hover:bg-background md:inline-flex"
         onClick={() => setOpen(true)}
         aria-label="Abrir pesquisa"
       >
-        <Search className="h-4.5 w-4.5 text-[#8C2044]" />
-        <span className="text-[12px] font-semibold text-[#5F5663]">Pesquisa</span>
-        <span className="ml-auto hidden text-[11px] font-semibold text-[#8A808E] sm:inline">
+        <Search className="h-4.5 w-4.5 text-primary" />
+        <span className="text-[12px] font-semibold text-foreground">Pesquisa</span>
+        <span className="ml-auto hidden text-[11px] font-semibold text-muted-foreground sm:inline">
           {isCommercial ? "Pesquisar telas, ações e produtos…" : "Pesquisar telas, ações e rótulos…"}
         </span>
       </Button>
 
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="h-9 w-9 rounded-2xl border-[#8C2044]/15 bg-white/70 md:hidden"
+        className="h-9 w-9 rounded-2xl border border-border/70 bg-background/60 md:hidden"
         onClick={() => setOpen(true)}
         aria-label="Abrir menu rápido"
       >
-        <Search className="h-4 w-4 text-[#8C2044]" />
+        <Search className="h-4 w-4 text-primary" />
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -191,15 +191,15 @@ export function DashboardCommandMenu({
 
           <CommandGroup
             heading="Navegação"
-            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-[#8A808E]"
+            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-muted-foreground"
           >
             {navItems.map((item) => (
               <CommandItem
                 key={item.label}
-                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-[#8C2044]/10 data-[selected=true]:text-[#17141D]"
+                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-primary/10 data-[selected=true]:text-foreground"
                 onSelect={() => runAction(item.onSelect)}
               >
-                <item.icon className="h-4 w-4 text-[#8C2044]" />
+                <item.icon className="h-4 w-4 text-primary" />
                 <span>{item.label}</span>
                 {item.shortcut ? <CommandShortcut>{item.shortcut}</CommandShortcut> : null}
               </CommandItem>
@@ -210,15 +210,15 @@ export function DashboardCommandMenu({
 
           <CommandGroup
             heading="Ações rápidas"
-            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-[#8A808E]"
+            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-muted-foreground"
           >
             {actionItems.map((item) => (
               <CommandItem
                 key={item.label}
-                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-[#8C2044]/10 data-[selected=true]:text-[#17141D]"
+                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-primary/10 data-[selected=true]:text-foreground"
                 onSelect={() => runAction(item.onSelect)}
               >
-                <item.icon className="h-4 w-4 text-[#8C2044]" />
+                <item.icon className="h-4 w-4 text-primary" />
                 <span>{item.label}</span>
                 {item.shortcut ? <CommandShortcut>{item.shortcut}</CommandShortcut> : null}
               </CommandItem>

@@ -272,7 +272,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     </CollapsibleContent>
                   </Collapsible>
 
-                  <Button type="submit" disabled={addWine.isPending || !name.trim()} className="w-full gradient-wine text-primary-foreground btn-glow h-11 text-[13px] font-medium">
+                  <Button variant="primary" type="submit" disabled={addWine.isPending || !name.trim()} className="w-full h-11 text-[13px] font-medium">
                     <Plus className="h-4 w-4 mr-1.5" />
                     {addWine.isPending ? "Salvando..." : "Adicionar Vinho"}
                   </Button>

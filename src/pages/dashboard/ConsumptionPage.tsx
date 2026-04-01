@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
+import { cn } from "@/lib/utils";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -50,7 +51,7 @@ const ratingLabel = (r: number) =>
   r === 1 ? "Ruim" : r === 2 ? "Regular" : r === 3 ? "Bom" : r === 4 ? "Muito bom" : "Excelente";
 
 const ratingColor = (r: number) =>
-  r <= 1 ? "text-red-500" : r === 2 ? "text-orange-500" : r === 3 ? "text-amber-500" : r === 4 ? "text-emerald-500" : "text-primary";
+  r <= 1 ? "text-destructive" : r === 2 ? "text-warning" : r === 3 ? "text-gold" : r === 4 ? "text-success" : "text-primary";
 
 type Period = "week" | "month" | "year" | "all";
 type Source = "all" | "cellar" | "external";
@@ -167,13 +168,12 @@ export default function ConsumptionPage() {
               size="sm"
               variant="ghost"
               aria-pressed={period === p.value}
-              className={[
-                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em] transition-all",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20",
+              className={cn(
+                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em]",
                 period === p.value
-                  ? "bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-white shadow-[0_16px_34px_-18px_rgba(15,15,20,0.55)] ring-1 ring-black/10"
-                  : "text-[#6D6676] hover:bg-black/[0.04] hover:text-[#17141D] active:scale-[0.99]",
-              ].join(" ")}
+                  ? "bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/15"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+              )}
               onClick={() => setPeriod(p.value)}
             >
               {p.label}
@@ -191,14 +191,12 @@ export default function ConsumptionPage() {
               size="sm"
               variant="ghost"
               aria-pressed={source === s.value}
-              className={[
-                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em] transition-all",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8C2044]/20",
-                "gap-2",
+              className={cn(
+                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em] gap-2",
                 source === s.value
-                  ? "bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-white shadow-[0_16px_34px_-18px_rgba(15,15,20,0.55)] ring-1 ring-black/10"
-                  : "text-[#6D6676] hover:bg-black/[0.04] hover:text-[#17141D] active:scale-[0.99]",
-              ].join(" ")}
+                  ? "bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/15"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+              )}
               onClick={() => setSource(s.value)}
             >
               {s.icon && <s.icon className="h-4 w-4 opacity-85" />}

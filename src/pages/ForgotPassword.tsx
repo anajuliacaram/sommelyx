@@ -118,7 +118,8 @@ export default function ForgotPassword() {
 
                 <Button
                   type="button"
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24]"
+                  variant="primary"
+                  className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] shadow-float"
                   onClick={() => setSent(false)}
                 >
                   Enviar para outro e-mail
@@ -164,7 +165,8 @@ export default function ForgotPassword() {
                       <Button
                         type="submit"
                         disabled={loading}
-                        className="h-12 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-[#1A1A24] to-[#0F0F14] text-[13px] font-black uppercase tracking-[0.12em] text-white ring-1 ring-black/10 transition-all hover:from-[#202028] hover:to-[#1A1A24] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.55)] hover:shadow-[0_20px_36px_-18px_rgba(15,15,20,0.65)]"
+                        variant="primary"
+                        className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] shadow-float"
                       >
                         {loading ? (
                           <span className="flex items-center gap-3">

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWines } from "@/hooks/useWines";
+import { useSearchParams } from "react-router-dom";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -48,6 +49,8 @@ function getEventMeta(notes: string | null) {
 export default function ActivityLogPage() {
   const { data: events, isLoading } = useWineEvents();
   const { data: wines } = useWines();
+  const [searchParams] = useSearchParams();
+  const wineFilterId = searchParams.get("wine");
 
   const wineMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -56,10 +59,16 @@ export default function ActivityLogPage() {
   }, [wines]);
 
   // Group by date
-  const grouped = useMemo(() => {
+  const filteredEvents = useMemo(() => {
     if (!events) return [];
-    const map = new Map<string, typeof events>();
-    events.forEach(ev => {
+    if (!wineFilterId) return events;
+    return events.filter((ev) => ev.wine_id === wineFilterId);
+  }, [events, wineFilterId]);
+
+  const grouped = useMemo(() => {
+    if (!filteredEvents.length) return [];
+    const map = new Map<string, typeof filteredEvents>();
+    filteredEvents.forEach(ev => {
       const d = new Date(ev.created_at);
       const key = d.toISOString().split("T")[0];
       if (!map.has(key)) map.set(key, []);
@@ -81,7 +90,7 @@ export default function ActivityLogPage() {
 
       return { dateKey, label: label.charAt(0).toUpperCase() + label.slice(1), items };
     });
-  }, [events]);
+  }, [filteredEvents]);
 
   if (isLoading) return <div className="text-muted-foreground text-sm p-8">Carregando…</div>;
 
@@ -92,7 +101,7 @@ export default function ActivityLogPage() {
         <p className="text-[11px] text-muted-foreground">Registro de todas as movimentações</p>
       </motion.div>
 
-      {(!events || events.length === 0) ? (
+      {(!filteredEvents || filteredEvents.length === 0) ? (
         <div className="glass-card p-8 text-center">
           <ClipboardList className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-[12px] text-muted-foreground">Nenhuma atividade registrada ainda.</p>

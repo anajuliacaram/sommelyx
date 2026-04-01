@@ -104,27 +104,33 @@ export function MultiSelectDropdown({
                         )}
                         {!options.length || options.length <= 5 ? <div className="flex-1" /> : null}
                         <div className="flex rounded-lg bg-muted/30 p-0.5 shrink-0">
-                            <button
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => setSortMode("alpha")}
                                 className={cn(
-                                    "h-7 w-7 rounded-md flex items-center justify-center transition-colors",
+                                    "h-7 w-7 rounded-md",
                                     sortMode === "alpha" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
                                 )}
                                 title="Ordem alfabética"
                             >
                                 <ArrowDownAZ className="h-3.5 w-3.5" />
-                            </button>
+                            </Button>
                             {hasCounts && (
-                                <button
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => setSortMode("count")}
                                     className={cn(
-                                        "h-7 w-7 rounded-md flex items-center justify-center transition-colors",
+                                        "h-7 w-7 rounded-md",
                                         sortMode === "count" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
                                     )}
                                     title="Ordenar por quantidade"
                                 >
                                     <ArrowDown01 className="h-3.5 w-3.5" />
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </div>

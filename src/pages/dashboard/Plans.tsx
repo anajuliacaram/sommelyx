@@ -58,7 +58,7 @@ export default function Plans() {
             <p className="text-xs text-muted-foreground">Escolha seu plano — todos com 14 dias grátis</p>
           </div>
         </div>
-        <Button className="gradient-gold text-gold-foreground rounded-lg h-8 text-[11px] font-medium btn-gold-glow px-4">
+        <Button variant="secondary" className="rounded-lg h-8 text-[11px] font-medium px-4">
           <Crown className="h-3 w-3 mr-1" /> Fazer Upgrade
         </Button>
       </motion.div>
@@ -106,10 +106,9 @@ export default function Plans() {
             </ul>
 
             <Button
+              variant={plan.highlighted ? "ghost" : "primary"}
               className={`mt-auto w-full rounded-lg h-9 text-[11px] font-semibold ${
-                plan.highlighted
-                  ? "bg-primary-foreground text-wine hover:bg-primary-foreground/90"
-                  : "gradient-wine text-primary-foreground btn-glow"
+                plan.highlighted ? "bg-primary-foreground text-primary hover:bg-primary-foreground/95" : ""
               }`}
             >
               {plan.cta}

@@ -272,13 +272,16 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                               {item.quantity} un.{item.rating ? ` · ${item.rating === 1 ? "Ruim" : item.rating === 2 ? "Regular" : item.rating === 3 ? "Bom" : item.rating === 4 ? "Muito bom" : "Excelente"}` : ""}
                             </p>
                           </div>
-                          <button
+                          <Button
                             type="button"
+                            variant="danger"
+                            size="icon"
                             onClick={() => removeItem(item.id)}
-                            className="shrink-0 w-6 h-6 rounded-md flex items-center justify-center hover:bg-destructive/10 transition-colors"
+                            className="shrink-0 h-6 w-6 rounded-md"
+                            aria-label="Remover item"
                           >
-                            <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />
-                          </button>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </motion.div>
                       ))}
                     </div>
@@ -321,9 +324,9 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ")} — {selectedWine.quantity} un.
                           </p>
                         </div>
-                        <button type="button" onClick={() => setWineId("")} className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-primary/10 transition-colors">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => setWineId("")} className="shrink-0 h-6 w-6 rounded-lg">
                           <X className="h-3.5 w-3.5 text-muted-foreground" />
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -335,12 +338,14 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             onChange={e => setSearchText(e.target.value)}
                             className="pl-9 h-9 text-[12px] rounded-xl"
                           />
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setShowFilters(!showFilters)}
                             className={cn(
-                              "absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center transition-colors",
-                              showFilters || activeFilterCount > 0 ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
+                              "absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg",
+                              showFilters || activeFilterCount > 0 ? "bg-primary/10 text-primary hover:bg-primary/10" : "text-muted-foreground hover:bg-muted/40"
                             )}
                           >
                             <Filter className="h-3.5 w-3.5" />
@@ -349,7 +354,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                 {activeFilterCount}
                               </span>
                             )}
-                          </button>
+                          </Button>
                         </div>
 
                         <AnimatePresence>
@@ -391,9 +396,15 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                 </div>
                               )}
                               {activeFilterCount > 0 && (
-                                <button type="button" onClick={() => { setSelectedCountries([]); setSelectedGrapes([]); }} className="text-[10px] font-medium text-primary hover:underline">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => { setSelectedCountries([]); setSelectedGrapes([]); }}
+                                  className="h-7 px-2 text-[10px] font-semibold text-primary hover:bg-primary/10"
+                                >
                                   Limpar filtros
-                                </button>
+                                </Button>
                               )}
                             </motion.div>
                           )}
@@ -409,11 +420,12 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                           ) : (
                             <div className="divide-y divide-border/30">
                               {filteredWines.map(w => (
-                                <button
+                                <Button
                                   key={w.id}
                                   type="button"
+                                  variant="ghost"
                                   onClick={() => setWineId(w.id)}
-                                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-accent/50"
+                                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-none h-auto justify-start hover:bg-muted/40"
                                 >
                                   <div className="flex-1 min-w-0">
                                     <p className="text-[11px] font-semibold text-foreground truncate">{w.name}</p>
@@ -422,7 +434,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                     </p>
                                   </div>
                                   <span className="text-[10px] font-bold text-muted-foreground shrink-0">{w.quantity} un.</span>
-                                </button>
+                                </Button>
                               ))}
                             </div>
                           )}
@@ -438,7 +450,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-xs text-muted-foreground">Dados do vinho</Label>
-                      <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] gap-1.5" onClick={() => setScanOpen(true)}>
+                      <Button type="button" variant="secondary" size="sm" className="h-7 text-[10px] gap-1.5" onClick={() => setScanOpen(true)}>
                         <Camera className="h-3 w-3" />
                         Escanear Rótulo
                       </Button>
@@ -486,9 +498,12 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                       <Button
                         key={opt.value}
                         type="button"
-                        variant={rating === opt.value ? "default" : "outline"}
+                        variant={rating === opt.value ? "secondary" : "ghost"}
                         size="sm"
-                        className="text-[10px] px-2.5 h-7"
+                        className={cn(
+                          "text-[10px] px-2.5 h-7 border",
+                          rating === opt.value ? "border-transparent" : "border-border/60 bg-background/40 hover:bg-background",
+                        )}
                         onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
                       >
                         {opt.label}
@@ -501,10 +516,10 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                 {/* Add to list button */}
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   disabled={!canAddItem}
                   onClick={addItemToList}
-                  className="w-full h-10 text-[12px] font-semibold gap-1.5 border-dashed"
+                  className="w-full h-10 text-[12px] font-semibold gap-1.5 border border-border/70 border-dashed bg-background/50 hover:bg-background"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Adicionar à lista
@@ -513,9 +528,10 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                 {/* Submit all */}
                 <Button
                   type="button"
+                  variant="primary"
                   disabled={submitting || items.length === 0}
                   onClick={handleSubmitAll}
-                  className="w-full gradient-wine text-primary-foreground btn-glow h-11 text-[13px] font-medium"
+                  className="w-full h-11 text-[13px] font-medium"
                 >
                   {submitting ? "Salvando..." : `Confirmar ${items.length} consumo(s)`}
                 </Button>

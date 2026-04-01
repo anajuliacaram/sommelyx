@@ -46,7 +46,7 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 }
 
 const statusLabel = { now: "Beber agora", past: "Passou", young: "Jovem" };
-const statusColor = { now: "bg-green-500/10 text-green-700", past: "bg-orange-500/10 text-orange-700", young: "bg-blue-500/10 text-blue-700" };
+const statusColor = { now: "bg-success/10 text-success", past: "bg-gold/15 text-gold", young: "bg-muted/50 text-muted-foreground" };
 
 const styleOptions = [
   { value: "tinto", label: "Tinto" },
@@ -260,7 +260,7 @@ export default function CellarPage() {
           <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
           <p className="text-sm text-muted-foreground font-medium">{filtered.length} vinho{filtered.length !== 1 ? "s" : ""} em estoque</p>
         </div>
-        <Button variant="premium" size="sm" onClick={() => setAddOpen(true)} className="h-9 px-5 text-xs font-bold">
+        <Button variant="primary" size="sm" onClick={() => setAddOpen(true)} className="h-9 px-5 text-xs font-bold">
           <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
         </Button>
       </div>
@@ -284,26 +284,43 @@ export default function CellarPage() {
             <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
             <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
             <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
               className={cn(
-                "h-9 px-3 rounded-xl text-[12px] font-semibold flex items-center gap-1.5 transition-all border",
+                "h-9 px-3 rounded-xl text-[12px] font-semibold flex items-center gap-1.5 border",
                 lowStock
-                  ? "bg-orange-500/10 text-orange-700 border-orange-500/20 shadow-sm"
+                  ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/12"
                   : "bg-card/80 hover:bg-card border-border/50 text-muted-foreground hover:text-foreground"
               )}
             >
               Baixo estoque
-            </button>
+            </Button>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="hidden sm:flex rounded-lg p-[2px] bg-muted/30 border border-border/40">
-              <button onClick={() => setViewMode("grid")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-colors", viewMode === "grid" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-pressed={viewMode === "grid"}
+                onClick={() => setViewMode("grid")}
+                className={cn("h-8 w-8 rounded-md", viewMode === "grid" ? "bg-background shadow-sm text-primary hover:bg-background" : "text-muted-foreground")}
+              >
                 <LayoutGrid className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => setViewMode("list")} className={cn("h-8 w-8 rounded-md flex items-center justify-center transition-colors", viewMode === "list" ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-pressed={viewMode === "list"}
+                onClick={() => setViewMode("list")}
+                className={cn("h-8 w-8 rounded-md", viewMode === "list" ? "bg-background shadow-sm text-primary hover:bg-background" : "text-muted-foreground")}
+              >
                 <List className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
               <select
               value={sortBy}
@@ -333,19 +350,22 @@ export default function CellarPage() {
       <div className="flex flex-wrap gap-2 items-center">
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
         {defaultSavedFilters.map(f => (
-          <button
+          <Button
             key={f.name}
+            type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => applySavedFilter(f)}
-            className="h-8 px-3.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-200"
-            style={{
-              background: activeSavedFilter === f.name ? "rgba(143,45,86,0.10)" : "rgba(0,0,0,0.02)",
-              color: activeSavedFilter === f.name ? "#8F2D56" : undefined,
-              border: `1px solid ${activeSavedFilter === f.name ? "rgba(143,45,86,0.25)" : "rgba(0,0,0,0.06)"}`,
-            }}
+            className={cn(
+              "h-8 px-3.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border",
+              activeSavedFilter === f.name
+                ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/12"
+                : "bg-black/[0.02] text-foreground/80 border-black/[0.06] hover:bg-muted/40",
+            )}
           >
             {activeSavedFilter === f.name ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
             {f.name}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -426,11 +446,11 @@ export default function CellarPage() {
 
                 {/* Actions — minimal */}
                 <div className="flex gap-1.5 border-t border-border/30 pt-2.5">
-                  <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 font-semibold" onClick={() => setConsumptionWine(wine)}>
+                  <Button size="sm" variant="secondary" className="h-7 text-xs px-2.5 flex-1 font-semibold" onClick={() => setConsumptionWine(wine)}>
                     <UtensilsCrossed className="h-3 w-3 mr-1" /> Consumo
                   </Button>
                   {status === "now" && (
-                    <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 flex-1 hover:bg-green-50 hover:border-green-200 hover:text-green-700 font-semibold" onClick={() => handleOpen(wine)}>
+                    <Button size="sm" variant="success" className="h-7 text-xs px-2.5 flex-1 font-semibold" onClick={() => handleOpen(wine)}>
                       <GlassWater className="h-3 w-3 mr-1" /> Abrir
                     </Button>
                   )}
@@ -483,19 +503,19 @@ export default function CellarPage() {
                     </td>
                     <td className="px-3 py-2 text-right">
                       <div className="flex gap-0.5 justify-end">
-                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
-                          <UtensilsCrossed className="h-3 w-3 text-amber-600" />
+                        <Button size="sm" variant="secondary" className="h-6 w-6 p-0" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
+                          <UtensilsCrossed className="h-3 w-3" />
                         </Button>
                         {status === "now" && (
-                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleOpen(wine)}>
-                            <GlassWater className="h-3 w-3 text-green-600" />
+                          <Button size="sm" variant="success" className="h-6 w-6 p-0" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
+                            <GlassWater className="h-3 w-3" />
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setEditWine(wine)}>
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Editar" onClick={() => setEditWine(wine)}>
                           <Pencil className="h-3 w-3 text-muted-foreground" />
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setDeleteTarget(wine)}>
-                          <Trash2 className="h-3 w-3 text-destructive" />
+                        <Button size="sm" variant="danger" className="h-6 w-6 p-0" title="Remover" onClick={() => setDeleteTarget(wine)}>
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     </td>

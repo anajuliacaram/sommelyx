@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 interface LandingFooterProps {
   onLogin: () => void;
 }
@@ -13,9 +15,14 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
         <div className="flex items-center gap-5 sm:gap-7 text-[11px] sm:text-[12px] font-semibold uppercase tracking-widest text-muted-foreground">
           <a href="#features" className="hover:text-foreground transition-colors">Funcionalidades</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">Planos</a>
-          <button onClick={onLogin} className="hover:text-foreground transition-colors cursor-pointer bg-transparent border-0 font-semibold uppercase tracking-widest text-[11px] sm:text-[12px] text-muted-foreground">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onLogin}
+            className="h-auto p-0 bg-transparent hover:bg-transparent text-muted-foreground hover:text-foreground text-[11px] sm:text-[12px] font-semibold uppercase tracking-widest"
+          >
             Acesso
-          </button>
+          </Button>
         </div>
         <p className="text-[11px] sm:text-[12px] font-medium text-muted-foreground/60">
           © {new Date().getFullYear()} Sommelyx

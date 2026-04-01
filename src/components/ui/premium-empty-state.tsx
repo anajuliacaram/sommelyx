@@ -64,8 +64,9 @@ export function PremiumEmptyState({
             <div className="flex flex-col sm:flex-row items-center gap-4">
                 {primaryAction && (
                     <Button
+                        variant="primary"
                         onClick={primaryAction.onClick}
-                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider gradient-wine text-white shadow-float transition-all hover:shadow-wine"
+                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider shadow-float"
                     >
                         {primaryAction.icon && <span className="mr-2">{primaryAction.icon}</span>}
                         {primaryAction.label}
@@ -73,9 +74,9 @@ export function PremiumEmptyState({
                 )}
                 {secondaryAction && (
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         onClick={secondaryAction.onClick}
-                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider border-border hover:bg-foreground hover:text-background shadow-sm transition-all"
+                        className="h-12 px-8 rounded-xl text-[14px] font-bold uppercase tracking-wider border border-border/70 bg-background/50 hover:bg-background shadow-sm"
                     >
                         {secondaryAction.label}
                     </Button>

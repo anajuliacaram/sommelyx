@@ -3,12 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, GlassWater, AlertTriangle, Lightbulb, ArrowRight, Sparkles } from "lucide-react";
 import { Wine } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+type TipTone = "success" | "warning" | "gold" | "info";
 
 interface Tip {
   id: string;
   icon: React.ElementType;
-  color: string;
-  bg: string;
+  tone: TipTone;
   title: string;
   desc: string;
   action?: string;
@@ -32,8 +35,7 @@ function generateTips(wines: Wine[]): Tip[] {
     tips.push({
       id: `drink-${w.id}`,
       icon: GlassWater,
-      color: "#22c55e",
-      bg: "rgba(34,197,94,0.08)",
+      tone: "success",
       title: `Seu${grapeText}${vintageText} está no ponto!`,
       desc: `"${w.name}" está na janela ideal (${w.drink_from}–${w.drink_until}). Que tal abrir hoje?`,
       action: "Ver na adega",
@@ -51,8 +53,7 @@ function generateTips(wines: Wine[]): Tip[] {
     tips.push({
       id: `past-${w.id}`,
       icon: AlertTriangle,
-      color: "#f59e0b",
-      bg: "rgba(245,158,11,0.08)",
+      tone: "warning",
       title: "Atenção: garrafa passando do pico",
       desc: `"${w.name}" tinha janela até ${w.drink_until}. Considere abrir em breve.`,
       action: "Ver alertas",
@@ -66,8 +67,7 @@ function generateTips(wines: Wine[]): Tip[] {
     tips.push({
       id: "tip-rating",
       icon: Sparkles,
-      color: "#C9A86A",
-      bg: "rgba(201,168,106,0.08)",
+      tone: "gold",
       title: "Dica: avalie seus vinhos",
       desc: `Você tem ${noRating} vinhos sem avaliação. Avaliá-los ajuda a identificar seus favoritos.`,
       action: "Ir para a adega",
@@ -80,8 +80,7 @@ function generateTips(wines: Wine[]): Tip[] {
     tips.push({
       id: "tip-location",
       icon: Lightbulb,
-      color: "#3b82f6",
-      bg: "rgba(59,130,246,0.08)",
+      tone: "info",
       title: "Organize por localização",
       desc: `${noLocation} vinhos sem local definido na adega. Organizar facilita encontrar a garrafa certa.`,
       action: "Organizar",
@@ -109,21 +108,32 @@ export function PersonalizedNotifications({ wines }: Props) {
     <div className="space-y-2">
       <AnimatePresence>
         {visibleTips.map((tip, i) => (
+          // Tone mapping keeps UI consistent with the global palette (no hex hardcoding).
           <motion.div
             key={tip.id}
             initial={{ opacity: 0, y: 10, height: 0 }}
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, x: -20, height: 0 }}
             transition={{ duration: 0.3, delay: i * 0.05 }}
-            className="glass-card p-4 flex items-start gap-3 group relative overflow-hidden"
-            style={{ borderLeft: `3px solid ${tip.color}` }}
+            className={cn(
+              "glass-card p-4 flex items-start gap-3 group relative overflow-hidden border-l-[3px]",
+              tip.tone === "success" && "border-success/40",
+              tip.tone === "warning" && "border-warning/40",
+              tip.tone === "gold" && "border-gold/45",
+              tip.tone === "info" && "border-info/40",
+            )}
           >
             {/* Icon */}
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: tip.bg }}
+              className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                tip.tone === "success" && "bg-success/10 text-success",
+                tip.tone === "warning" && "bg-warning/10 text-warning",
+                tip.tone === "gold" && "bg-gold/10 text-gold",
+                tip.tone === "info" && "bg-info/10 text-info",
+              )}
             >
-              <tip.icon className="h-4.5 w-4.5" style={{ color: tip.color }} />
+              <tip.icon className="h-4.5 w-4.5" />
             </div>
 
             {/* Content */}
@@ -135,23 +145,34 @@ export function PersonalizedNotifications({ wines }: Props) {
                 {tip.desc}
               </p>
               {tip.action && tip.route && (
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
                   onClick={() => navigate(tip.route!)}
-                  className="mt-2 text-[12px] font-bold flex items-center gap-1 transition-colors hover:opacity-80"
-                  style={{ color: tip.color }}
+                  className={cn(
+                    "mt-2 h-auto p-0 bg-transparent hover:bg-transparent text-[12px] font-bold flex items-center gap-1",
+                    tip.tone === "success" && "text-success",
+                    tip.tone === "warning" && "text-warning",
+                    tip.tone === "gold" && "text-gold",
+                    tip.tone === "info" && "text-info",
+                  )}
                 >
                   {tip.action} <ArrowRight className="h-3 w-3" />
-                </button>
+                </Button>
               )}
             </div>
 
             {/* Dismiss */}
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => setDismissed(prev => new Set(prev).add(tip.id))}
-              className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
+              className="h-6 w-6 rounded-full shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors opacity-0 group-hover:opacity-100"
+              title="Dispensar"
             >
               <X className="h-3 w-3" />
-            </button>
+            </Button>
           </motion.div>
         ))}
       </AnimatePresence>

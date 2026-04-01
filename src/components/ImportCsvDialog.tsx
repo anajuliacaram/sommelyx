@@ -334,7 +334,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   {importErrors.length} erro(s) durante importação
                 </p>
               )}
-              <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 text-[13px]">
+              <Button variant="ghost" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 text-[13px] border border-border/70 bg-background/60 hover:bg-background">
                 Fechar
               </Button>
             </motion.div>

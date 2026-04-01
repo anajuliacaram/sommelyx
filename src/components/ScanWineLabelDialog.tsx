@@ -150,16 +150,17 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
               <div className="flex flex-col gap-3 w-full mt-4">
                 <Button
+                  variant="primary"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="gradient-wine text-white btn-glow h-12 text-[13px] font-semibold border-0"
+                  className="h-12 text-[13px] font-semibold"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Tirar Foto
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-12 text-[13px] font-medium"
+                  className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Escolher da Galeria
@@ -266,11 +267,11 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               </p>
 
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" onClick={reset} className="flex-1 h-11 text-[13px]">
+                <Button variant="ghost" onClick={reset} className="flex-1 h-11 text-[13px] border border-border/70 bg-background/50 hover:bg-background">
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                   Reescanear
                 </Button>
-                <Button onClick={handleConfirm} className="flex-1 gradient-wine text-white btn-glow h-11 text-[13px] font-semibold border-0">
+                <Button variant="primary" onClick={handleConfirm} className="flex-1 h-11 text-[13px] font-semibold">
                   <Check className="h-4 w-4 mr-1.5" />
                   Usar dados
                 </Button>
@@ -293,7 +294,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <p className="text-sm font-medium text-foreground mb-1">Não foi possível analisar</p>
                 <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
               </div>
-              <Button onClick={reset} variant="outline" className="h-11 px-6 text-[13px]">
+              <Button onClick={reset} variant="secondary" className="h-11 px-6 text-[13px]">
                 <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                 Tentar novamente
               </Button>

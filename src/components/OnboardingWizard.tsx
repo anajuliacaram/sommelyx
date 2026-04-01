@@ -71,9 +71,16 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
         animate={{ scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
       >
-        <button onClick={handleSkip} className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/5 transition-colors">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={handleSkip}
+          className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          title="Pular"
+        >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
 
         <div className="px-6 pt-6 pb-2">
           <div className="flex items-center justify-between mb-2">

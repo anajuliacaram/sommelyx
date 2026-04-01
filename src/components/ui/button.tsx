@@ -5,18 +5,29 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none transition-all duration-200 ease-out active:scale-[0.98]",
   {
     variants: {
       variant: {
-        default: "bg-foreground text-background hover:bg-foreground/92 rounded-2xl shadow-[0_8px_18px_-12px_rgba(15,15,20,0.5)] hover:-translate-y-px hover:shadow-[0_14px_30px_-14px_rgba(15,15,20,0.55)] active:scale-[0.98] active:shadow-sm font-semibold tracking-[-0.01em]",
-        destructive: "bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground rounded-full active:scale-[0.97]",
-        outline: "border border-border/70 bg-background/80 backdrop-blur-sm hover:bg-background hover:border-primary/25 text-foreground rounded-2xl hover:-translate-y-px shadow-[0_3px_10px_-8px_rgba(15,15,20,0.35)] hover:shadow-[0_10px_24px_-16px_rgba(15,15,20,0.4)] active:scale-[0.98] font-medium",
-        secondary: "bg-primary/8 text-primary hover:bg-primary/14 rounded-full font-bold uppercase tracking-wider text-[11px] backdrop-blur-sm active:scale-[0.97]",
-        ghost: "hover:bg-primary/6 hover:text-primary text-muted-foreground rounded-2xl font-medium active:scale-[0.98]",
+        primary:
+          "bg-primary text-primary-foreground hover:bg-primary/92 rounded-2xl shadow-[0_10px_26px_-18px_hsl(var(--primary)/0.55)] hover:-translate-y-px hover:shadow-[0_18px_34px_-22px_hsl(var(--primary)/0.65)] font-semibold tracking-[-0.01em]",
+        secondary:
+          "bg-[hsl(var(--wine-vivid))] text-[hsl(var(--wine-foreground))] hover:bg-[hsl(var(--wine-vivid)/0.92)] rounded-2xl shadow-[0_10px_26px_-18px_hsl(var(--wine-vivid)/0.5)] hover:-translate-y-px font-semibold tracking-[-0.01em]",
+        ghost:
+          "bg-transparent text-foreground/90 hover:bg-muted/50 hover:text-foreground rounded-2xl font-medium",
+        danger:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/92 rounded-2xl shadow-[0_10px_26px_-18px_hsl(var(--destructive)/0.45)] hover:-translate-y-px font-semibold tracking-[-0.01em]",
+        success:
+          "bg-success text-success-foreground hover:bg-success/92 rounded-2xl shadow-[0_10px_26px_-18px_hsl(var(--success)/0.45)] hover:-translate-y-px font-semibold tracking-[-0.01em]",
+
+        // Back-compat variants (avoid using in new code)
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary/92 rounded-2xl shadow-[0_10px_26px_-18px_hsl(var(--primary)/0.55)] hover:-translate-y-px hover:shadow-[0_18px_34px_-22px_hsl(var(--primary)/0.65)] font-semibold tracking-[-0.01em]",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/92 rounded-2xl hover:-translate-y-px",
+        outline: "border border-border/70 bg-background/70 backdrop-blur-sm hover:bg-background hover:border-primary/25 text-foreground rounded-2xl hover:-translate-y-px font-medium",
         link: "text-primary underline-offset-4 hover:underline",
-        premium: "btn-premium text-white rounded-2xl border-0 font-semibold tracking-[-0.01em] shadow-float active:scale-[0.98] active:shadow-sm",
-        glass: "btn-glass rounded-2xl px-6 font-medium backdrop-blur-xl active:scale-[0.98]",
+        premium: "btn-premium text-white rounded-2xl border-0 font-semibold tracking-[-0.01em] shadow-float",
+        glass: "btn-glass rounded-2xl px-6 font-medium backdrop-blur-xl",
       },
       size: {
         default: "h-11 px-6 py-2",
@@ -26,7 +37,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "primary",
       size: "default",
     },
   },

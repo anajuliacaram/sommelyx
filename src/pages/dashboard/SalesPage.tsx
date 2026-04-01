@@ -127,13 +127,18 @@ export default function SalesPage() {
             const isCollapsed = collapsedDays.has(group.dateKey);
             return (
               <motion.div key={group.dateKey} initial="hidden" animate="visible" variants={fadeUp} custom={gi + 4}>
-                <button onClick={() => toggleDay(group.dateKey)} className="w-full flex items-center gap-2 px-1 py-2 group">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => toggleDay(group.dateKey)}
+                  className="w-full flex items-center gap-2 px-1 py-2 rounded-xl h-auto justify-start hover:bg-muted/40"
+                >
                   {isCollapsed ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
                   <span className="text-[12px] font-bold text-foreground">{group.label}</span>
                   <span className="text-[10px] text-muted-foreground">{group.sales.length} item(ns)</span>
                   <span className="ml-auto text-[11px] font-bold text-foreground">R$ {group.totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                   <span className="text-[9px] text-muted-foreground">{group.totalUnits} un.</span>
-                </button>
+                </Button>
 
                 {!isCollapsed && (
                   <div className="space-y-1 ml-1">
