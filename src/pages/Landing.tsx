@@ -31,15 +31,6 @@ export default function Landing() {
       <LandingHeader onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
       <LandingHero onSignup={handleStartFreeClick} />
 
-      {/* ─── Social proof ─── */}
-      <section className="relative z-10 px-5 sm:px-8 pb-12 sm:pb-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-[12px] sm:text-[13px] font-medium text-muted-foreground/70 tracking-wide">
-            Usado por colecionadores e profissionais do vinho em todo o Brasil
-          </p>
-        </div>
-      </section>
-
       <LandingFeatures onSignup={handleStartFreeClick} />
       <LandingPricing onSignup={handleStartFreeClick} />
       <LandingFooter onLogin={handleLoginClick} />

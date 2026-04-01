@@ -18,7 +18,7 @@ interface LandingHeroProps {
 
 export function LandingHero({ onSignup }: LandingHeroProps) {
   return (
-    <section className="relative z-10 px-4 sm:px-8 pt-20 sm:pt-28 lg:pt-32 pb-10 sm:pb-16">
+    <section className="relative z-10 px-4 sm:px-8 pt-20 sm:pt-28 lg:pt-32 pb-6 sm:pb-10">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Left */}
         <div className="text-left">
