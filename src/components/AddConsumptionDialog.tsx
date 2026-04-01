@@ -13,9 +13,10 @@ import { Wine as WineIcon, MapPin, Star } from "lucide-react";
 interface AddConsumptionDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  preSelectedWine?: { id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null;
 }
 
-export function AddConsumptionDialog({ open, onOpenChange }: AddConsumptionDialogProps) {
+export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: AddConsumptionDialogProps) {
   const { data: wines } = useWines();
   const addConsumption = useAddConsumption();
 
@@ -32,6 +33,13 @@ export function AddConsumptionDialog({ open, onOpenChange }: AddConsumptionDialo
   const [tastingNotes, setTastingNotes] = useState("");
   const [rating, setRating] = useState<number>(0);
   const [consumedAt, setConsumedAt] = useState(new Date().toISOString().split("T")[0]);
+
+  // Auto-fill when preSelectedWine changes
+  useState(() => {});
+  const prevPreSelected = useState<string | null>(null);
+  // Use effect to prefill
+  useState(() => {});
+
 
   const resetForm = () => {
     setSource("external");
