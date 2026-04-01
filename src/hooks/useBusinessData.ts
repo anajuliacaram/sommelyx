@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Database } from "@/integrations/supabase/types";
 
 export interface SaleRecord {
   id: string;
@@ -17,8 +18,21 @@ export interface WishlistRecord {
   user_id: string;
   wine_name: string;
   notes: string | null;
+  producer: string | null;
+  vintage: number | null;
+  style: string | null;
+  country: string | null;
+  region: string | null;
+  grape: string | null;
+  target_price: number | null;
+  image_url: string | null;
+  ai_summary: string | null;
+  source: string;
   created_at: string;
+  updated_at: string;
 }
+
+type WishlistInsert = Database["public"]["Tables"]["wishlist"]["Insert"];
 
 export interface ContactRecord {
   id: string;
@@ -100,12 +114,12 @@ export function useWishlist() {
     queryKey: ["wishlist", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("wishlist" as any)
+        .from("wishlist")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data ?? []) as unknown as WishlistRecord[];
+      return (data ?? []) as WishlistRecord[];
     },
     enabled: !!user,
   });
@@ -116,14 +130,24 @@ export function useAddWishlist() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (entry: { wine_name: string; notes?: string }) => {
+    mutationFn: async (entry: Omit<WishlistInsert, "user_id">) => {
       if (!user) throw new Error("Not authenticated");
 
-      const { error } = await supabase.from("wishlist" as any).insert({
+      const { error } = await supabase.from("wishlist").insert({
         user_id: user.id,
-        wine_name: entry.wine_name,
+        wine_name: entry.wine_name.trim(),
         notes: entry.notes?.trim() || null,
-      } as any);
+        producer: entry.producer?.trim() || null,
+        vintage: entry.vintage ?? null,
+        style: entry.style?.trim() || null,
+        country: entry.country?.trim() || null,
+        region: entry.region?.trim() || null,
+        grape: entry.grape?.trim() || null,
+        target_price: entry.target_price ?? null,
+        image_url: entry.image_url?.trim() || null,
+        ai_summary: entry.ai_summary?.trim() || null,
+        source: entry.source ?? "manual",
+      });
 
       if (error) throw error;
     },
@@ -138,7 +162,7 @@ export function useDeleteWishlist() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("wishlist" as any).delete().eq("id", id);
+      const { error } = await supabase.from("wishlist").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
