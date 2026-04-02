@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Sparkles, TrendingUp, AlertTriangle, Layers, Wine } from "@/icons/lucide";
+import { ArrowRight, Check, Layers, TrendingUp, AlertTriangle, Wine } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
-import { Logo } from "@/components/Logo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
