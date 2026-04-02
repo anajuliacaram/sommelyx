@@ -226,14 +226,22 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         data-sidebar="trigger"
         variant="ghost"
         size="icon"
-        className={cn("h-7 w-7", className)}
+        className={cn(
+          "relative h-9 w-9 rounded-2xl bg-wine/5 text-wine ring-1 ring-black/[0.06] shadow-[0_12px_28px_-22px_rgba(44,20,31,0.45)] hover:bg-wine/10 hover:-translate-y-0.5",
+          className,
+        )}
         onClick={(event) => {
           onClick?.(event);
           toggleSidebar();
         }}
         {...props}
       >
-        <PanelLeft />
+        <PanelLeft className="h-4 w-4" />
+        {/* Wine "etiqueta" indicator (brand accent) */}
+        <span
+          aria-hidden="true"
+          className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-wine ring-2 ring-background shadow-[0_10px_24px_-18px_rgba(110,30,42,0.85)]"
+        />
         <span className="sr-only">Toggle Sidebar</span>
       </Button>
     );
