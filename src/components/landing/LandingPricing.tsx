@@ -24,7 +24,7 @@ const plans = [
       "Histórico completo de degustações",
       "Insights inteligentes da sua coleção",
     ],
-    cta: "Começar teste grátis",
+    cta: "Começar grátis",
     popular: true,
   },
   {
@@ -38,7 +38,7 @@ const plans = [
       "Análise de giro e performance",
       "Gestão operacional simplificada",
     ],
-    cta: "Começar teste grátis",
+    cta: "Começar grátis",
     popular: false,
   },
 ];
@@ -120,71 +120,113 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`snap-start shrink-0 w-[88%] max-w-[380px] relative rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-300 ${
-                  plan.popular
-                    ? "shadow-[0_20px_60px_hsl(340_54%_36%/0.2),0_0_0_1px_hsl(0_0%_100%/0.2)]"
-                    : "shadow-[0_12px_40px_hsl(240_10%_4%/0.12),0_0_0_1px_hsl(0_0%_100%/0.1)]"
-                }`}
-                style={{
-                  background: plan.popular
-                    ? "linear-gradient(160deg, hsl(340 54% 32%) 0%, hsl(340 48% 42%) 50%, hsl(340 42% 50%) 100%)"
-                    : "linear-gradient(160deg, hsl(240 10% 12%) 0%, hsl(260 12% 18%) 50%, hsl(280 14% 22%) 100%)",
-                }}
+                className={`
+                  snap-start shrink-0 w-[88%] max-w-[380px] relative rounded-[22px] overflow-hidden flex flex-col h-full
+                  transition-all duration-300
+                  ${plan.popular
+                    ? "bg-[#F8F6F3] shadow-[0_26px_80px_-56px_rgba(44,20,31,0.55)] ring-1 ring-black/[0.06]"
+                    : "bg-[linear-gradient(180deg,#2B2B2B_0%,#1F1C20_55%,#171518_100%)] shadow-[0_28px_90px_-60px_rgba(15,15,20,0.75)] ring-1 ring-white/[0.08]"
+                  }
+                `}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-40px" }}
                 variants={fadeUp}
                 custom={i + 1}
               >
-                <div className="p-5 flex flex-col flex-1">
+                {/* subtle accents */}
+                {plan.popular ? (
+                  <>
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.10),transparent_55%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_30%,rgba(198,167,104,0.10),transparent_55%)]" />
+                  </>
+                ) : (
+                  <>
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.35),transparent_60%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(198,167,104,0.18),transparent_55%)]" />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-[linear-gradient(90deg,transparent,rgba(198,167,104,0.65),transparent)]" />
+                  </>
+                )}
+
+                <div className="relative p-5 flex flex-col flex-1">
                   {plan.popular && (
                     <div className="mb-3">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/90 text-[#7B1E3A] shadow-sm ring-1 ring-white/25">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.14em] uppercase bg-[#6E1E2A]/8 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/15">
                         Mais escolhido
                       </span>
                     </div>
                   )}
 
-                  <h3 className="text-xl font-serif font-black tracking-tight text-primary-foreground">
+                  <h3 className={plan.popular
+                    ? "text-[22px] font-serif font-bold tracking-tight text-[#2B2B2B]"
+                    : "text-[22px] font-serif font-bold tracking-tight text-[#F8F6F3]"}
+                  >
                     {plan.name}
                   </h3>
-                  <p className="text-[13px] mt-1 mb-4 font-medium text-primary-foreground/72">
+                  <p className={plan.popular
+                    ? "text-[13px] mt-2 mb-4 font-medium leading-relaxed text-[#2B2B2B]/70"
+                    : "text-[13px] mt-2 mb-4 font-medium leading-relaxed text-[#F8F6F3]/70"}
+                  >
                     {plan.desc}
                   </p>
 
-                  <div className="mb-4 flex items-baseline gap-1.5">
-                    <span className="text-[44px] font-black font-sans tracking-[-0.04em] leading-none text-primary-foreground">
+                  <div className="mb-4 flex items-end gap-2">
+                    <span className={plan.popular
+                      ? "text-[40px] font-semibold font-sans tracking-[-0.03em] leading-none text-[#2B2B2B]"
+                      : "text-[40px] font-semibold font-sans tracking-[-0.03em] leading-none text-[#F8F6F3]"}
+                    >
                       {plan.price}
                     </span>
-                    <span className="text-[14px] font-medium text-primary-foreground/40">
+                    <span className={plan.popular
+                      ? "pb-[3px] text-[13px] font-medium text-[#2B2B2B]/55"
+                      : "pb-[3px] text-[13px] font-medium text-[#F8F6F3]/55"}
+                    >
                       {plan.period}
                     </span>
                   </div>
 
-                  <div className="mb-4 w-full rounded-full py-2.5 px-4 text-center bg-emerald-600 text-white shadow-[0_14px_34px_-26px_rgba(16,185,129,0.85)] ring-1 ring-emerald-200/30">
-                    <span className="text-[11px] font-black uppercase tracking-[0.14em]">
+                  <div className="mb-4 flex items-center gap-2">
+                    <span
+                      className={plan.popular
+                        ? "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/18 text-[#6E1E2A] ring-1 ring-[#C6A768]/30"
+                        : "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/12 text-[#F8F6F3] ring-1 ring-[#C6A768]/28"}
+                    >
                       14 dias grátis
+                    </span>
+                    <span className={plan.popular ? "text-[11px] font-medium text-[#2B2B2B]/55" : "text-[11px] font-medium text-[#F8F6F3]/55"}>
+                      Cancele quando quiser
                     </span>
                   </div>
 
                   <Button
-                    variant="outline"
-                    className="w-full h-11 rounded-xl text-[13px] font-bold mb-2 active:scale-[0.98] bg-white text-[#7B1E3A] border-white/25 shadow-[0_10px_30px_rgba(0,0,0,0.14)] hover:bg-white/95 hover:border-white/35 hover:-translate-y-0.5"
+                    variant="primary"
+                    className={plan.popular
+                      ? "w-full h-11 rounded-2xl px-5 text-[13px] font-semibold tracking-tight shadow-[0_16px_44px_-26px_rgba(110,30,42,0.45)] hover:-translate-y-0.5"
+                      : "w-full h-11 rounded-2xl px-5 text-[13px] font-semibold tracking-tight shadow-[0_18px_54px_-30px_rgba(110,30,42,0.55)] hover:-translate-y-0.5"}
                     onClick={onSignup}
                   >
                     {plan.cta}
                   </Button>
-                  <p className="text-[10px] font-medium text-center mb-5 text-primary-foreground/55">
-                    Comece em segundos
-                  </p>
 
-                  <div className="h-px w-full bg-primary-foreground/10 mb-4" />
+                  <div className={plan.popular ? "mt-5 h-px w-full bg-black/[0.06] mb-4" : "mt-5 h-px w-full bg-white/[0.08] mb-4"} />
 
                   <ul className="space-y-3 flex-1">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2.5 text-[13px] leading-snug font-medium text-primary-foreground/88">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0 bg-white/12 ring-1 ring-white/10">
-                          <Check className="h-3 w-3 text-white/80" strokeWidth={3} />
+                      <li
+                        key={f}
+                        className={plan.popular
+                          ? "flex items-start gap-2.5 text-[13px] leading-relaxed font-medium text-[#2B2B2B]/80"
+                          : "flex items-start gap-2.5 text-[13px] leading-relaxed font-medium text-[#F8F6F3]/80"}
+                      >
+                        <div
+                          className={plan.popular
+                            ? "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px] bg-[#6E1E2A]/8 ring-1 ring-[#6E1E2A]/12"
+                            : "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px] bg-white/10 ring-1 ring-white/10"}
+                        >
+                          <Check
+                            className={plan.popular ? "h-3 w-3 text-[#6E1E2A]/70" : "h-3 w-3 text-[#C6A768]/80"}
+                            strokeWidth={2.5}
+                          />
                         </div>
                         {f}
                       </li>
@@ -201,75 +243,113 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
-              className={`relative rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-300 ${
-                plan.popular
-                  ? "md:scale-[1.02] md:z-10 shadow-[0_20px_60px_hsl(340_54%_36%/0.2),0_0_0_1px_hsl(0_0%_100%/0.2)]"
-                  : "shadow-[0_12px_40px_hsl(240_10%_4%/0.12),0_0_0_1px_hsl(0_0%_100%/0.1)]"
-              }`}
-              style={{
-                background: plan.popular
-                  ? "linear-gradient(160deg, hsl(340 54% 32%) 0%, hsl(340 48% 42%) 50%, hsl(340 42% 50%) 100%)"
-                  : "linear-gradient(160deg, hsl(240 10% 12%) 0%, hsl(260 12% 18%) 50%, hsl(280 14% 22%) 100%)",
-              }}
+              className={`
+                relative rounded-[24px] overflow-hidden flex flex-col h-full transition-all duration-300
+                ${plan.popular
+                  ? "bg-[#F8F6F3] md:scale-[1.01] md:z-10 shadow-[0_30px_92px_-62px_rgba(44,20,31,0.55)] ring-1 ring-black/[0.06]"
+                  : "bg-[linear-gradient(180deg,#2B2B2B_0%,#1F1C20_55%,#171518_100%)] shadow-[0_34px_100px_-68px_rgba(15,15,20,0.80)] ring-1 ring-white/[0.08]"
+                }
+              `}
               initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
             >
-              <div className="p-6 sm:p-8 flex flex-col flex-1">
+              {/* subtle accents */}
+              {plan.popular ? (
+                <>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.10),transparent_55%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_35%,rgba(198,167,104,0.10),transparent_55%)]" />
+                </>
+              ) : (
+                <>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.35),transparent_60%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_82%_18%,rgba(198,167,104,0.18),transparent_55%)]" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-[linear-gradient(90deg,transparent,rgba(198,167,104,0.65),transparent)]" />
+                </>
+              )}
+
+              <div className="relative p-6 sm:p-8 flex flex-col flex-1">
                 {/* Badge */}
                 {plan.popular && (
                   <div className="mb-4">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/90 text-[#7B1E3A] shadow-sm ring-1 ring-white/25">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.14em] uppercase bg-[#6E1E2A]/8 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/15">
                       Mais escolhido
                     </span>
                   </div>
                 )}
 
                 {/* Plan name & desc */}
-                <h3 className="text-xl sm:text-2xl font-serif font-black tracking-tight text-primary-foreground">
+                <h3 className={plan.popular
+                  ? "text-[24px] font-serif font-bold tracking-tight text-[#2B2B2B]"
+                  : "text-[24px] font-serif font-bold tracking-tight text-[#F8F6F3]"}
+                >
                   {plan.name}
                 </h3>
-                <p className="text-[13px] mt-1 mb-5 font-medium text-primary-foreground/72">
+                <p className={plan.popular
+                  ? "text-[14px] mt-2 mb-6 font-medium leading-relaxed text-[#2B2B2B]/70"
+                  : "text-[14px] mt-2 mb-6 font-medium leading-relaxed text-[#F8F6F3]/70"}
+                >
                   {plan.desc}
                 </p>
 
                 {/* Price */}
-                <div className="mb-5 flex items-baseline gap-1.5">
-                  <span className="text-[44px] sm:text-[52px] font-black font-sans tracking-[-0.04em] leading-none text-primary-foreground">
+                <div className="mb-4 flex items-end gap-2">
+                  <span className={plan.popular
+                    ? "text-[46px] sm:text-[52px] font-semibold font-sans tracking-[-0.03em] leading-none text-[#2B2B2B]"
+                    : "text-[46px] sm:text-[52px] font-semibold font-sans tracking-[-0.03em] leading-none text-[#F8F6F3]"}
+                  >
                     {plan.price}
                   </span>
-                  <span className="text-[14px] font-medium text-primary-foreground/40">
+                  <span className={plan.popular
+                    ? "pb-[6px] text-[14px] font-medium text-[#2B2B2B]/55"
+                    : "pb-[6px] text-[14px] font-medium text-[#F8F6F3]/55"}
+                  >
                     {plan.period}
                   </span>
                 </div>
 
-                {/* Trial pill */}
-                <div className="mb-5 w-full rounded-full py-2.5 px-4 text-center bg-emerald-600 text-white shadow-[0_16px_40px_-28px_rgba(16,185,129,0.85)] ring-1 ring-emerald-200/30">
-                  <span className="text-[12px] font-black uppercase tracking-[0.12em]">
+                <div className="mb-6 flex items-center gap-2">
+                  <span
+                    className={plan.popular
+                      ? "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/18 text-[#6E1E2A] ring-1 ring-[#C6A768]/30"
+                      : "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/12 text-[#F8F6F3] ring-1 ring-[#C6A768]/28"}
+                  >
                     14 dias grátis
+                  </span>
+                  <span className={plan.popular ? "text-[12px] font-medium text-[#2B2B2B]/55" : "text-[12px] font-medium text-[#F8F6F3]/55"}>
+                    Cancele quando quiser
                   </span>
                 </div>
 
                 {/* CTA */}
                 <Button
-                  variant="outline"
-                  className="w-full h-11 sm:h-12 rounded-xl text-[13px] sm:text-[14px] font-bold mb-2 active:scale-[0.98] bg-white text-[#7B1E3A] border-white/25 shadow-[0_12px_34px_rgba(0,0,0,0.16)] hover:bg-white/95 hover:border-white/35 hover:-translate-y-0.5"
+                  variant="primary"
+                  className="w-full h-11 sm:h-12 rounded-2xl px-6 text-[13px] sm:text-[14px] font-semibold tracking-tight shadow-[0_18px_54px_-30px_rgba(110,30,42,0.55)] hover:-translate-y-0.5"
                   onClick={onSignup}
                 >
                   {plan.cta}
                 </Button>
-                <p className="text-[10px] font-medium text-center mb-6 text-primary-foreground/55">
-                  Comece em segundos
-                </p>
 
                 {/* Divider */}
-                <div className="h-px w-full bg-primary-foreground/10 mb-5" />
+                <div className={plan.popular ? "mt-6 h-px w-full bg-black/[0.06] mb-5" : "mt-6 h-px w-full bg-white/[0.08] mb-5"} />
 
                 {/* Benefits */}
                 <ul className="space-y-3 flex-1">
                   {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2.5 text-[13px] sm:text-[14px] leading-snug font-medium text-primary-foreground/88">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0 bg-white/12 ring-1 ring-white/10">
-                        <Check className="h-3 w-3 text-white/80" strokeWidth={3} />
+                    <li
+                      key={f}
+                      className={plan.popular
+                        ? "flex items-start gap-2.5 text-[13px] sm:text-[14px] leading-relaxed font-medium text-[#2B2B2B]/80"
+                        : "flex items-start gap-2.5 text-[13px] sm:text-[14px] leading-relaxed font-medium text-[#F8F6F3]/80"}
+                    >
+                      <div
+                        className={plan.popular
+                          ? "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px] bg-[#6E1E2A]/8 ring-1 ring-[#6E1E2A]/12"
+                          : "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px] bg-white/10 ring-1 ring-white/10"}
+                      >
+                        <Check
+                          className={plan.popular ? "h-3 w-3 text-[#6E1E2A]/70" : "h-3 w-3 text-[#C6A768]/80"}
+                          strokeWidth={2.5}
+                        />
                       </div>
                       {f}
                     </li>
