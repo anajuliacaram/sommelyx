@@ -29,10 +29,15 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="mb-5 flex justify-center lg:justify-start"
           >
-            <Logo
-              variant="hero"
-              className="drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
-            />
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Logo
+                variant="hero"
+                className="drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
+              />
+              <span className="font-serif text-[22px] sm:text-[26px] font-black tracking-tight text-[#7B1E3A]">
+                Sommelyx
+              </span>
+            </div>
           </motion.div>
 
           <motion.h1
