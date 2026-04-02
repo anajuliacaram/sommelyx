@@ -45,7 +45,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={0}
-            className="max-w-xl font-serif text-[38px] font-black leading-[0.98] tracking-[-0.045em] text-foreground sm:text-[54px]"
+            className="max-w-xl font-serif text-[38px] font-semibold leading-[1.1] tracking-[-0.5px] text-[#2B2B2B] sm:text-[54px] supports-[background-clip:text]:bg-clip-text supports-[background-clip:text]:text-transparent supports-[background-clip:text]:bg-[linear-gradient(180deg,#2B2B2B_0%,#2B2B2B_60%,#2A1A1D_100%)]"
           >
             Um painel executivo para sua adega, com clareza de estoque, valor e giro.
           </motion.h1>
