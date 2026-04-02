@@ -23,22 +23,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Left */}
         <div className="text-left">
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="hidden"
-          >
-            <div className="flex items-center gap-3 sm:gap-4">
-              <Logo
-                variant="hero"
-                className="drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
-              />
-              <span className="font-serif text-[22px] sm:text-[26px] font-black tracking-tight text-[#7B1E3A]">
-                Sommelyx
-              </span>
-            </div>
-          </motion.div>
+          {/* Logo removido — presente apenas no header fixo */}
 
           <motion.h1
             initial="hidden"
