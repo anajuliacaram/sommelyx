@@ -38,7 +38,6 @@ const plans = [
       "Gestão operacional simplificada",
     ],
     cta: "Começar grátis",
-    popular: false,
   },
 ];
 
