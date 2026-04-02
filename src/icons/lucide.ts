@@ -30,6 +30,7 @@ export { default as ClipboardList } from "lucide-react/dist/esm/icons/clipboard-
 export { default as Clock } from "lucide-react/dist/esm/icons/clock.js";
 export { default as Compass } from "lucide-react/dist/esm/icons/compass.js";
 export { default as Construction } from "lucide-react/dist/esm/icons/construction.js";
+export { default as Copy } from "lucide-react/dist/esm/icons/copy.js";
 export { default as CreditCard } from "lucide-react/dist/esm/icons/credit-card.js";
 export { default as Crown } from "lucide-react/dist/esm/icons/crown.js";
 export { default as DollarSign } from "lucide-react/dist/esm/icons/dollar-sign.js";
@@ -86,4 +87,3 @@ export { default as UtensilsCrossed } from "lucide-react/dist/esm/icons/utensils
 export { default as Wine } from "lucide-react/dist/esm/icons/wine.js";
 export { default as X } from "lucide-react/dist/esm/icons/x.js";
 export { default as Zap } from "lucide-react/dist/esm/icons/zap.js";
-

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import { useAuth } from "@/contexts/AuthContext";
+import { FloatingContactButton } from "@/components/FloatingContactButton";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
@@ -105,6 +106,8 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <AnimatedRoutes />
+          {/* Floating contact: public pages only (avoid overlapping dashboard actions) */}
+          <PublicFloatingContact />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
@@ -112,3 +115,9 @@ const App = () => (
 );
 
 export default App;
+
+function PublicFloatingContact() {
+  const location = useLocation();
+  if (location.pathname.startsWith("/dashboard")) return null;
+  return <FloatingContactButton />;
+}

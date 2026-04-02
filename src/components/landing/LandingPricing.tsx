@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Check } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -41,6 +42,53 @@ const plans = [
     popular: false,
   },
 ];
+
+const faqs = [
+  {
+    q: "Como funciona o teste grátis de 14 dias?",
+    a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser.",
+  },
+  {
+    q: "Qual a diferença entre Pro e Business?",
+    a: "O Pro é para adega pessoal (coleção, consumo, alertas e organização). O Business é para operação comercial, com foco em estoque, vendas e acompanhamento da operação.",
+  },
+  {
+    q: "Posso trocar de plano depois?",
+    a: "Sim. Você pode mudar de plano a qualquer momento, mantendo seus dados.",
+  },
+  {
+    q: "Consigo importar minha planilha?",
+    a: "Sim. Você pode importar CSV e Excel (XLS/XLSX) e também PDF. A IA mapeia as colunas e você confirma antes de salvar.",
+  },
+  {
+    q: "A IA preenche os dados automaticamente?",
+    a: "Sim. Em importações e na wishlist, a IA tenta identificar rótulo, produtor, safra, país, região e outros detalhes para acelerar seu cadastro.",
+  },
+  {
+    q: "Posso cadastrar vinhos por foto do rótulo?",
+    a: "Sim. Você pode enviar uma foto nítida do rótulo e a IA extrai as informações para preencher o cadastro.",
+  },
+  {
+    q: "Meus dados ficam privados?",
+    a: "Sim. Sua conta é isolada e seus dados ficam disponíveis apenas para você e sua operação.",
+  },
+  {
+    q: "Consigo acompanhar reposição e alertas?",
+    a: "Sim. O sistema destaca itens críticos e ajuda a priorizar reposição para evitar ruptura.",
+  },
+  {
+    q: "Posso registrar entradas e saídas?",
+    a: "Sim. Você registra movimentações e mantém o histórico organizado para consultar depois.",
+  },
+  {
+    q: "Tem suporte se eu tiver dúvida?",
+    a: "Sim. Use o botão “Fale conosco” no canto da tela para enviar uma mensagem por e-mail.",
+  },
+  {
+    q: "Funciona bem no celular?",
+    a: "Sim. O layout é responsivo e pensado para operação rápida, inclusive no mobile.",
+  },
+] as const;
 
 interface LandingPricingProps {
   onSignup: () => void;
@@ -231,6 +279,46 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
             </motion.div>
           ))}
         </div>
+
+        {/* FAQ */}
+        <motion.div
+          className="mx-auto mt-10 sm:mt-12 max-w-3xl"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-40px" }}
+          variants={fadeUp}
+          custom={4}
+        >
+          <div className="text-center">
+            <h3 className="font-serif text-[22px] sm:text-[26px] font-black tracking-tight text-foreground">
+              Perguntas frequentes
+            </h3>
+            <p className="mt-2 text-[14px] sm:text-[15px] font-medium text-muted-foreground">
+              Respostas rápidas para decidir com confiança.
+            </p>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-black/[0.06] bg-white/60 shadow-[0_26px_70px_-58px_rgba(15,15,20,0.65)] ring-1 ring-white/60 backdrop-blur-2xl overflow-hidden">
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((item, idx) => (
+                <AccordionItem
+                  key={item.q}
+                  value={`faq-${idx}`}
+                  className="border-black/[0.06]"
+                >
+                  <AccordionTrigger
+                    className="px-5 text-left text-[14px] sm:text-[15px] font-semibold tracking-tight text-foreground hover:no-underline data-[state=open]:text-[#7B1E3A]"
+                  >
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="px-5 pb-5 pt-0 text-[13px] sm:text-[14px] leading-relaxed text-muted-foreground">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
