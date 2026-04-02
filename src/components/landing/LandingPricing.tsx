@@ -25,7 +25,6 @@ const plans = [
       "Insights inteligentes da sua coleção",
     ],
     cta: "Começar grátis",
-    popular: true,
   },
   {
     name: "Business",
