@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 
 const fadeUp = {

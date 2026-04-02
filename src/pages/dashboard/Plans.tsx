@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Crown, Zap } from "lucide-react";
+import { Check, Crown, Zap } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 

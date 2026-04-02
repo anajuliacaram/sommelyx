@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Camera, Heart, Loader2, Plus, Search, Sparkles, Trash2, Upload, Wine, X } from "lucide-react";
+import { Camera, Heart, Loader2, Plus, Search, Sparkles, Trash2, Upload, Wine, X } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

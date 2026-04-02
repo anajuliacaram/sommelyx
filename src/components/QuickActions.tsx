@@ -1,4 +1,4 @@
-import { Plus, Wine, ClipboardList } from "lucide-react";
+import { Plus, Wine, ClipboardList } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Wine, Globe, Grape, TrendingUp, DollarSign } from "lucide-react";
+import { BarChart3, Wine, Globe, Grape, TrendingUp, DollarSign } from "@/icons/lucide";
 import { useWineMetrics } from "@/hooks/useWines";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,

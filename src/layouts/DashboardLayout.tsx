@@ -3,7 +3,7 @@ import { AnimatedOutlet } from "@/components/AnimatedOutlet";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell } from "lucide-react";
+import { Bell } from "@/icons/lucide";
 import { useState } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";

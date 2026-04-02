@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wine, Building2, ArrowRight, Check, Sparkles } from "lucide-react";
+import { Wine, Building2, ArrowRight, Check, Sparkles } from "@/icons/lucide";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";

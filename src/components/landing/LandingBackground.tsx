@@ -1,6 +1,6 @@
 export function LandingBackground() {
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
       {/* Ambient light orbs */}
       <div className="absolute top-[-8%] left-[-6%] w-[55vw] h-[55vw] rounded-full bg-wine/[0.04] blur-[180px]" />
       <div className="absolute top-[2%] right-[-8%] w-[45vw] h-[45vw] rounded-full bg-wine-light/[0.15] blur-[160px]" />

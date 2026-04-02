@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Search, X, AlertTriangle } from "lucide-react";
+import { Check, Search, X, AlertTriangle } from "@/icons/lucide";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";

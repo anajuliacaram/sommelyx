@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Wine, Check, ShieldCheck, Clock, ArrowRight } from "lucide-react";
+import { Wine, Check, ShieldCheck, Clock, ArrowRight } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 
 const fadeUp = {

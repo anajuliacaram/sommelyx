@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wine, Clock, ShieldCheck, Sparkles, ArrowRight, X, Package, TrendingUp, Users } from "lucide-react";
+import { Wine, Clock, ShieldCheck, Sparkles, ArrowRight, X, Package, TrendingUp, Users } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 
 interface Benefit {

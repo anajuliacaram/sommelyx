@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, Search, X, Plus, Trash2, ShoppingCart } from "lucide-react";
+import { Check, Search, X, Plus, Trash2, ShoppingCart } from "@/icons/lucide";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";

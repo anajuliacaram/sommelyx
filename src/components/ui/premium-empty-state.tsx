@@ -1,6 +1,6 @@
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 

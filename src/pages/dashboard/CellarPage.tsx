@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, Bookmark, BookmarkCheck, SlidersHorizontal, UtensilsCrossed } from "lucide-react";
+import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, Bookmark, BookmarkCheck, SlidersHorizontal, UtensilsCrossed } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

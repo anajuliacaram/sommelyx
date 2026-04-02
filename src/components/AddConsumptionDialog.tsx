@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useWines, Wine } from "@/hooks/useWines";
 import { toast } from "sonner";
-import { Wine as WineIcon, MapPin, Star } from "lucide-react";
+import { Wine as WineIcon, MapPin, Star } from "@/icons/lucide";
 
 interface AddConsumptionDialogProps {
   open: boolean;

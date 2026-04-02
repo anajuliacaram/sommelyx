@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Trash2, DollarSign, Package, ChevronDown, ChevronRight, CalendarDays } from "lucide-react";
+import { ShoppingCart, Trash2, DollarSign, Package, ChevronDown, ChevronRight, CalendarDays } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { useDeleteSale, useSales } from "@/hooks/useBusinessData";

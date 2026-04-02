@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine } from "lucide-react";
+import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine } from "@/icons/lucide";
 import { useWines } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 

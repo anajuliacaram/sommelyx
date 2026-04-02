@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Loader2, Check, X, RotateCcw } from "lucide-react";
+import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";

@@ -27,17 +27,16 @@ function getBaseName(variant: LogoVariant, tone: LogoTone) {
 }
 
 export const Logo = React.forwardRef<HTMLImageElement, Props>(function Logo(
-  { variant = "navbar", tone = "default", className, alt = "Sommelyx", loading, fetchPriority, ...props },
+  { variant = "navbar", tone = "default", className, alt = "Sommelyx", loading, ...props },
   ref,
 ) {
   const base = getBaseName(variant, tone);
   const webp = `/${base}.webp`;
   const png = `/${base}.png`;
 
-  const resolvedLoading =
-    loading ?? (variant === "hero" ? "eager" : "lazy");
-  const resolvedFetchPriority =
-    fetchPriority ?? (variant === "hero" ? "high" : undefined);
+  const resolvedLoading = loading ?? (variant === "hero" ? "eager" : "lazy");
+  const fetchPriorityProps =
+    variant === "hero" ? ({ fetchpriority: "high" } as Record<string, string>) : undefined;
 
   return (
     <picture>
@@ -48,7 +47,7 @@ export const Logo = React.forwardRef<HTMLImageElement, Props>(function Logo(
         alt={alt}
         draggable={false}
         loading={resolvedLoading}
-        fetchPriority={resolvedFetchPriority}
+        {...fetchPriorityProps}
         className={cn("object-contain select-none", variantClasses[variant], className)}
         {...props}
       />

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, GlassWater, AlertTriangle, Lightbulb, ArrowRight, Sparkles } from "lucide-react";
+import { X, GlassWater, AlertTriangle, Lightbulb, ArrowRight, Sparkles } from "@/icons/lucide";
 import { Wine } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";

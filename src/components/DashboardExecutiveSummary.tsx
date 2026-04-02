@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowRight, type LucideIcon, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "@/icons/lucide";
+import type { LucideIcon } from "lucide-react";
 
 type SummaryAction = {
   label: string;

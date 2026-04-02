@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus, Trash2 } from "lucide-react";
+import { Users, Plus, Trash2 } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";

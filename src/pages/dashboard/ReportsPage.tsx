@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Wine, DollarSign, ShoppingCart, Tag, Package, CalendarDays } from "lucide-react";
+import { Wine, DollarSign, ShoppingCart, Tag, Package, CalendarDays } from "@/icons/lucide";
 import { useWineMetrics } from "@/hooks/useWines";
 import { useSales } from "@/hooks/useBusinessData";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

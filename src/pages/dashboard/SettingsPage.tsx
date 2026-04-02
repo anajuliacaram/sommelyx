@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Settings, User, Bell, Building2, Save, Check, AlertTriangle } from "lucide-react";
+import { Settings, User, Bell, Building2, Save, Check, AlertTriangle } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

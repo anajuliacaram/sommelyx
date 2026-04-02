@@ -14,7 +14,7 @@ import {
   Sparkles,
   Upload,
   Wine,
-} from "lucide-react";
+} from "@/icons/lucide";
 import type { LucideIcon } from "lucide-react";
 import {
   CommandDialog,

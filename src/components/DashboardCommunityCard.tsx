@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MessageCircle, Lightbulb, Star, TrendingUp, ArrowRight } from "lucide-react";
+import { MessageCircle, Lightbulb, Star, TrendingUp, ArrowRight } from "@/icons/lucide";
 
 const communityItems = [
   {

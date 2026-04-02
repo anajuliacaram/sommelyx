@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, ChevronLeft, Eye, EyeOff, KeyRound, Lock, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronLeft, Eye, EyeOff, KeyRound, Lock, ShieldCheck, Sparkles } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

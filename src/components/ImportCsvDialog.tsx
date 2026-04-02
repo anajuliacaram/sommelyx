@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, Check, AlertTriangle, X, Sparkles, Loader2 } from "lucide-react";
+import { Upload, FileText, Check, AlertTriangle, X, Sparkles, Loader2 } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";

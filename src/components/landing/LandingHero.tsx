@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Sparkles, TrendingUp, AlertTriangle, Layers, Wine } from "lucide-react";
+import { ArrowRight, Check, Sparkles, TrendingUp, AlertTriangle, Layers, Wine } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { Logo } from "@/components/Logo";

@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
 import {
-    ShoppingCart, Users, FileText,
-    ArrowLeft, LayoutDashboard, Search
-} from "lucide-react";
+  ArrowLeft,
+  FileText,
+  LayoutDashboard,
+  Search,
+  ShoppingCart,
+  Users,
+} from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { WineMesh } from "@/components/WineMesh";

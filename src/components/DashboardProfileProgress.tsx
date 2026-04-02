@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Circle, ArrowRight } from "lucide-react";
+import { CheckCircle2, Circle, ArrowRight } from "@/icons/lucide";
 import { Wine } from "@/hooks/useWines";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";

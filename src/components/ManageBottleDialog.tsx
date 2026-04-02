@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2, Star } from "lucide-react";
+import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2, Star } from "@/icons/lucide";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useAddConsumption } from "@/hooks/useConsumption";

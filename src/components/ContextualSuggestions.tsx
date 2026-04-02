@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Lightbulb, ArrowRight, Star, MapPin, Bell, Grape, Wine } from "lucide-react";
+import { Lightbulb, ArrowRight, Star, MapPin, Bell, Grape, Wine } from "@/icons/lucide";
 import { Wine as WineType } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Construction } from "lucide-react";
+import { Construction } from "@/icons/lucide";
 import { WineMesh } from "@/components/WineMesh";
 
 export default function Placeholder({ title }: { title: string }) {

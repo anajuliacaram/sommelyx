@@ -5,7 +5,7 @@ import {
     MoreHorizontal, Trash2, Tag, Download, Check, X,
     Package, AlertTriangle, Clock, History, Star,
     Smartphone, ChevronRight, LayoutGrid, List as ListIcon, Plus, Minus, Pencil, Loader2
-} from "lucide-react";
+} from "@/icons/lucide";
 import { useWineMetrics, useDeleteWine, useWineEvent, Wine } from "@/hooks/useWines";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
