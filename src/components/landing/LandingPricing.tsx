@@ -238,7 +238,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
             <h3 className="font-serif text-[24px] sm:text-[30px] font-black tracking-tight text-[#2B2B2B]">
               Perguntas frequentes
             </h3>
-            <p className="mt-2 text-[13px] sm:text-[14px] font-medium text-[#2B2B2B]/60">
+            <p className="mt-2 font-sans text-[13px] sm:text-[14px] font-medium text-[#2B2B2B]/60">
               Respostas rápidas para decidir com confiança.
             </p>
           </div>
@@ -246,23 +246,23 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           <div className="mt-6">
             <Accordion type="single" collapsible className="w-full space-y-3">
               {faqs.map((item, idx) => (
-                <AccordionItem
-                  key={item.q}
-                  value={`faq-${idx}`}
-                  className="group relative overflow-hidden rounded-[18px] border border-[#6E1E2A]/[0.08] bg-[linear-gradient(135deg,rgba(110,30,42,0.025),rgba(198,167,104,0.02))] shadow-[0_22px_70px_-58px_rgba(15,15,20,0.45)] ring-1 ring-white/50 backdrop-blur-2xl transition-all duration-300 ease-premium hover:border-[#6E1E2A]/[0.14] hover:bg-[linear-gradient(135deg,rgba(110,30,42,0.05),rgba(198,167,104,0.035))] hover:-translate-y-0.5 hover:shadow-[0_26px_80px_-60px_rgba(44,20,31,0.50)] data-[state=open]:border-[#6E1E2A]/[0.18] data-[state=open]:bg-[linear-gradient(135deg,rgba(110,30,42,0.065),rgba(198,167,104,0.04))] data-[state=open]:shadow-[0_28px_90px_-66px_rgba(44,20,31,0.60)] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-[3px] before:rounded-r-full before:bg-[#6E1E2A] before:opacity-0 data-[state=open]:before:opacity-100"
-                >
-                  <AccordionTrigger
-                    className="px-5 py-4 text-left text-[14px] sm:text-[15px] font-serif font-semibold tracking-tight text-[#2B2B2B] hover:no-underline [&>svg]:text-[#6E1E2A]/30 [&[data-state=open]>svg]:text-[#6E1E2A] data-[state=open]:text-[#6E1E2A]"
-                  >
-                    {item.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="px-5 pb-5 pt-0 font-sans text-[13px] sm:text-[14px] leading-relaxed text-[#2B2B2B]/70">
-                    {item.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+	                <AccordionItem
+	                  key={item.q}
+	                  value={`faq-${idx}`}
+	                  className="group relative overflow-hidden rounded-[18px] border border-[#6E1E2A]/[0.08] bg-[linear-gradient(135deg,rgba(110,30,42,0.025),rgba(198,167,104,0.02))] shadow-[0_22px_70px_-58px_rgba(15,15,20,0.45)] ring-1 ring-white/50 backdrop-blur-2xl transition-all duration-300 ease-premium hover:border-[#6E1E2A]/[0.14] hover:bg-[linear-gradient(135deg,rgba(110,30,42,0.05),rgba(198,167,104,0.035))] hover:-translate-y-0.5 hover:shadow-[0_26px_80px_-60px_rgba(44,20,31,0.50)] data-[state=open]:border-[#6E1E2A]/[0.18] data-[state=open]:bg-[linear-gradient(135deg,rgba(110,30,42,0.065),rgba(198,167,104,0.04))] data-[state=open]:shadow-[0_28px_90px_-66px_rgba(44,20,31,0.60)] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-[3px] before:rounded-r-full before:bg-[#6E1E2A] before:opacity-0 data-[state=open]:before:opacity-100"
+	                >
+	                  <AccordionTrigger
+	                    className="px-5 py-4 text-left font-serif text-[14px] sm:text-[15px] font-bold tracking-[-0.03em] leading-snug text-[#2B2B2B] hover:no-underline [&>svg]:text-[#2B2B2B]/40 [&[data-state=open]>svg]:text-[#6E1E2A] data-[state=open]:text-[#6E1E2A]"
+	                  >
+	                    {item.q}
+	                  </AccordionTrigger>
+	                  <AccordionContent className="px-5 pb-5 pt-0 font-sans text-[13px] sm:text-[14px] font-medium tracking-[-0.01em] leading-relaxed text-[#2B2B2B]/70">
+	                    {item.a}
+	                  </AccordionContent>
+	                </AccordionItem>
+	              ))}
+	            </Accordion>
+	          </div>
         </motion.div>
       </div>
     </section>
