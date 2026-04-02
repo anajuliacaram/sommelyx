@@ -23,9 +23,9 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
         >
           <Logo
             variant="navbar"
-            className="h-9 sm:h-9 md:h-11 drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
+            className="h-10 sm:h-10 md:h-12 drop-shadow-[0_12px_32px_rgba(15,15,20,0.18)]"
           />
-          <span className="font-serif text-[16px] sm:text-[18px] md:text-[20px] font-black tracking-tight text-[#7B1E3A]">
+          <span className="font-serif text-[18px] sm:text-[20px] md:text-[24px] font-black tracking-tight text-[#7B1E3A]">
             Sommelyx
           </span>
         </a>
@@ -33,7 +33,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <Button
             variant="secondary"
             size="sm"
-            className="text-[13px] font-semibold bg-white/35 border border-black/[0.06] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-white/45"
+            className="text-[13px] font-semibold bg-white/35 border border-black/[0.06] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-white/48"
             onClick={onLogin}
           >
             Entrar
