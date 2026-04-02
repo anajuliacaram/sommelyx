@@ -19,13 +19,13 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
       <div className="mx-auto flex items-center justify-between max-w-6xl">
         <a
           href="/"
-          className="flex items-center gap-2 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          className="flex items-center gap-2 sm:gap-3 lg:gap-4 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
         >
           <Logo
             variant="navbar"
-            className="h-10 sm:h-10 md:h-12 drop-shadow-[0_12px_32px_rgba(15,15,20,0.18)]"
+            className="h-10 sm:h-10 md:h-12 lg:h-14 drop-shadow-[0_14px_36px_rgba(15,15,20,0.18)]"
           />
-          <span className="font-serif text-[18px] sm:text-[20px] md:text-[24px] font-black tracking-tight text-[#7B1E3A]">
+          <span className="font-serif text-[18px] sm:text-[20px] md:text-[24px] lg:text-[30px] font-black tracking-tight text-[#7B1E3A]">
             Sommelyx
           </span>
         </a>
