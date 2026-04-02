@@ -91,7 +91,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 <div className="p-5 flex flex-col flex-1">
                   {plan.popular && (
                     <div className="mb-3">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-primary-foreground/95 text-wine shadow-sm">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/90 text-[#7B1E3A] shadow-sm ring-1 ring-white/25">
                         Mais escolhido
                       </span>
                     </div>
@@ -100,7 +100,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                   <h3 className="text-xl font-serif font-black tracking-tight text-primary-foreground">
                     {plan.name}
                   </h3>
-                  <p className="text-[13px] mt-1 mb-4 font-medium text-primary-foreground/55">
+                  <p className="text-[13px] mt-1 mb-4 font-medium text-primary-foreground/72">
                     {plan.desc}
                   </p>
 
@@ -120,16 +120,13 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                   </div>
 
                   <Button
-                    className={`w-full h-11 rounded-xl text-[13px] font-bold transition-all duration-200 mb-2 active:scale-[0.98] ${
-                      plan.popular
-                        ? "bg-primary-foreground text-wine hover:bg-primary-foreground/90 shadow-[0_4px_20px_hsl(0_0%_0%/0.15)]"
-                        : "bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/15 shadow-[0_4px_16px_hsl(0_0%_0%/0.1)]"
-                    }`}
+                    variant="outline"
+                    className="w-full h-11 rounded-xl text-[13px] font-bold mb-2 active:scale-[0.98] bg-white text-[#7B1E3A] border-white/25 shadow-[0_10px_30px_rgba(0,0,0,0.14)] hover:bg-white/95 hover:border-white/35 hover:-translate-y-0.5"
                     onClick={onSignup}
                   >
                     {plan.cta}
                   </Button>
-                  <p className="text-[10px] font-medium text-center mb-5 text-primary-foreground/30">
+                  <p className="text-[10px] font-medium text-center mb-5 text-primary-foreground/55">
                     Comece em segundos
                   </p>
 
@@ -137,9 +134,9 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
 
                   <ul className="space-y-3 flex-1">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2.5 text-[13px] leading-snug font-medium text-primary-foreground/85">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0 bg-primary-foreground/10">
-                          <Check className="h-3 w-3 text-primary-foreground/70" strokeWidth={3} />
+                      <li key={f} className="flex items-start gap-2.5 text-[13px] leading-snug font-medium text-primary-foreground/88">
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0 bg-white/12 ring-1 ring-white/10">
+                          <Check className="h-3 w-3 text-white/80" strokeWidth={3} />
                         </div>
                         {f}
                       </li>
@@ -173,7 +170,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 {/* Badge */}
                 {plan.popular && (
                   <div className="mb-4">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-primary-foreground/95 text-wine shadow-sm">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/90 text-[#7B1E3A] shadow-sm ring-1 ring-white/25">
                       Mais escolhido
                     </span>
                   </div>
@@ -183,7 +180,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 <h3 className="text-xl sm:text-2xl font-serif font-black tracking-tight text-primary-foreground">
                   {plan.name}
                 </h3>
-                <p className="text-[13px] mt-1 mb-5 font-medium text-primary-foreground/55">
+                <p className="text-[13px] mt-1 mb-5 font-medium text-primary-foreground/72">
                   {plan.desc}
                 </p>
 
@@ -206,16 +203,13 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
 
                 {/* CTA */}
                 <Button
-                  className={`w-full h-11 sm:h-12 rounded-xl text-[13px] sm:text-[14px] font-bold transition-all duration-200 mb-2 active:scale-[0.98] ${
-                    plan.popular
-                      ? "bg-primary-foreground text-wine hover:bg-primary-foreground/90 shadow-[0_4px_20px_hsl(0_0%_0%/0.15)]"
-                      : "bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/15 shadow-[0_4px_16px_hsl(0_0%_0%/0.1)]"
-                  }`}
+                  variant="outline"
+                  className="w-full h-11 sm:h-12 rounded-xl text-[13px] sm:text-[14px] font-bold mb-2 active:scale-[0.98] bg-white text-[#7B1E3A] border-white/25 shadow-[0_12px_34px_rgba(0,0,0,0.16)] hover:bg-white/95 hover:border-white/35 hover:-translate-y-0.5"
                   onClick={onSignup}
                 >
                   {plan.cta}
                 </Button>
-                <p className="text-[10px] font-medium text-center mb-6 text-primary-foreground/30">
+                <p className="text-[10px] font-medium text-center mb-6 text-primary-foreground/55">
                   Comece em segundos
                 </p>
 
@@ -225,9 +219,9 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 {/* Benefits */}
                 <ul className="space-y-3 flex-1">
                   {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2.5 text-[13px] sm:text-[14px] leading-snug font-medium text-primary-foreground/85">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0 bg-primary-foreground/10">
-                        <Check className="h-3 w-3 text-primary-foreground/70" strokeWidth={3} />
+                    <li key={f} className="flex items-start gap-2.5 text-[13px] sm:text-[14px] leading-snug font-medium text-primary-foreground/88">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0 bg-white/12 ring-1 ring-white/10">
+                        <Check className="h-3 w-3 text-white/80" strokeWidth={3} />
                       </div>
                       {f}
                     </li>
