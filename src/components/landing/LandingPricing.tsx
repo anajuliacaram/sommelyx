@@ -370,28 +370,28 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           custom={4}
         >
           <div className="text-center">
-            <h3 className="font-serif text-[22px] sm:text-[26px] font-black tracking-tight text-foreground">
+            <h3 className="font-serif text-[24px] sm:text-[30px] font-black tracking-tight text-[#2B2B2B]">
               Perguntas frequentes
             </h3>
-            <p className="mt-2 text-[14px] sm:text-[15px] font-medium text-muted-foreground">
+            <p className="mt-2 text-[13px] sm:text-[14px] font-medium text-[#2B2B2B]/60">
               Respostas rápidas para decidir com confiança.
             </p>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-black/[0.06] bg-white/60 shadow-[0_26px_70px_-58px_rgba(15,15,20,0.65)] ring-1 ring-white/60 backdrop-blur-2xl overflow-hidden">
-            <Accordion type="single" collapsible className="w-full">
+          <div className="mt-6">
+            <Accordion type="single" collapsible className="w-full space-y-3">
               {faqs.map((item, idx) => (
                 <AccordionItem
                   key={item.q}
                   value={`faq-${idx}`}
-                  className="border-black/[0.06]"
+                  className="group relative overflow-hidden rounded-[18px] border border-black/[0.05] bg-white/72 shadow-[0_22px_70px_-58px_rgba(15,15,20,0.55)] ring-1 ring-white/65 backdrop-blur-2xl transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#6E1E2A]/[0.04] hover:shadow-[0_26px_80px_-60px_rgba(15,15,20,0.60)] data-[state=open]:bg-[#6E1E2A]/[0.06] data-[state=open]:shadow-[0_28px_90px_-66px_rgba(44,20,31,0.60)] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-[3px] before:rounded-r-full before:bg-[#6E1E2A] before:opacity-0 data-[state=open]:before:opacity-100"
                 >
                   <AccordionTrigger
-                    className="px-5 text-left text-[14px] sm:text-[15px] font-semibold tracking-tight text-foreground hover:no-underline data-[state=open]:text-[#7B1E3A]"
+                    className="px-5 py-4 text-left text-[14px] sm:text-[15px] font-medium tracking-tight text-[#2B2B2B] hover:no-underline [&>svg]:text-[#2B2B2B]/40 [&[data-state=open]>svg]:text-[#6E1E2A] data-[state=open]:text-[#6E1E2A]"
                   >
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="px-5 pb-5 pt-0 text-[13px] sm:text-[14px] leading-relaxed text-muted-foreground">
+                  <AccordionContent className="px-5 pb-5 pt-0 text-[13px] sm:text-[14px] leading-relaxed text-[#2B2B2B]/70">
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
