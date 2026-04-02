@@ -84,14 +84,14 @@ export function AppSidebar() {
           >
             <Logo
               variant="compact"
-              className="h-12 sm:h-12 w-auto drop-shadow-[0_12px_26px_rgba(15,15,20,0.16)]"
+              className="h-14 sm:h-14 w-auto drop-shadow-[0_14px_30px_rgba(15,15,20,0.16)]"
             />
             <div className="flex flex-col">
-              <span className="text-[16px] font-black font-sans tracking-tight text-foreground leading-none" style={{ letterSpacing: "-0.04em" }}>
+              <span className="text-[18px] font-black font-sans tracking-tight text-foreground leading-none" style={{ letterSpacing: "-0.04em" }}>
                 Sommelyx
               </span>
               <span
-                className="text-[8px] font-black uppercase tracking-[0.2em] leading-none mt-0.5"
+                className="text-[9px] font-black uppercase tracking-[0.2em] leading-none mt-1"
                 style={{ color: isCommercial ? "hsl(var(--gold))" : "hsl(var(--primary))", opacity: 0.7 }}
               >
                 {isCommercial ? "OPERAÇÃO COMERCIAL" : "ACERVO PESSOAL"}
