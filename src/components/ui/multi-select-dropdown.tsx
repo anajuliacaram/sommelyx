@@ -20,6 +20,11 @@ interface MultiSelectDropdownProps {
     onChange: (value: string) => void
     onClear: () => void
     searchPlaceholder?: string
+    /**
+     * Forces a "type-to-filter" input inside the dropdown.
+     * Defaults to only showing search when the list is large.
+     */
+    searchable?: boolean
 }
 
 export function MultiSelectDropdown({
@@ -29,6 +34,7 @@ export function MultiSelectDropdown({
     onChange,
     onClear,
     searchPlaceholder = "Buscar...",
+    searchable,
 }: MultiSelectDropdownProps) {
     const [open, setOpen] = React.useState(false)
     const [search, setSearch] = React.useState("")
@@ -48,6 +54,7 @@ export function MultiSelectDropdown({
 
     const hasSelection = selected.length > 0
     const hasCounts = options.some(o => o.count !== undefined)
+    const showSearch = (searchable ?? (options.length > 5)) && options.length > 0
 
     // Formatting trigger label
     let triggerLabel = title
@@ -91,7 +98,7 @@ export function MultiSelectDropdown({
                 <div className="flex flex-col gap-1.5">
                     {/* Sort toggle + search */}
                     <div className="flex items-center gap-1.5 px-1 pt-0.5">
-                        {options.length > 5 && (
+                        {showSearch && (
                             <div className="relative flex-1">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground opacity-50" />
                                 <Input
@@ -102,7 +109,7 @@ export function MultiSelectDropdown({
                                 />
                             </div>
                         )}
-                        {!options.length || options.length <= 5 ? <div className="flex-1" /> : null}
+                        {!showSearch ? <div className="flex-1" /> : null}
                         <div className="flex rounded-lg bg-muted/30 p-0.5 shrink-0">
                             <Button
                                 type="button"

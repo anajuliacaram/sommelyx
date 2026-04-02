@@ -98,8 +98,8 @@ export function AppSidebar() {
                   "mt-1 w-fit inline-flex items-center rounded-full px-3 py-1",
                   "text-[10px] font-black uppercase tracking-[0.18em] leading-none",
                   isCommercial
-                    ? "bg-[#C6A768]/15 text-[#8A6A2A] ring-1 ring-[#C6A768]/35"
-                    : "bg-[#6E1E2A]/8 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/18",
+                    ? "bg-[#C6A768]/16 text-[#6D531C] ring-1 ring-[#C6A768]/45"
+                    : "bg-[#6E1E2A]/12 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/28",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}

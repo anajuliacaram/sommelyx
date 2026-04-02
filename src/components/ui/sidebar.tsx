@@ -227,7 +227,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         variant="ghost"
         size="icon"
         className={cn(
-          "relative h-9 w-9 rounded-2xl bg-wine/5 text-wine ring-1 ring-black/[0.06] shadow-[0_12px_28px_-22px_rgba(44,20,31,0.45)] hover:bg-wine/10 hover:-translate-y-0.5",
+          "relative h-9 w-9 rounded-2xl text-white ring-1 ring-black/[0.06] bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(123,30,43,0.28)] hover:brightness-[1.03] active:brightness-[0.98]",
           className,
         )}
         onClick={(event) => {

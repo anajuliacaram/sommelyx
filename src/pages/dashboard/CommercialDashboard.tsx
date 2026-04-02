@@ -222,18 +222,34 @@ export default function CommercialDashboard() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <Button variant="primary" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setAddOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" /> Cadastrar produto
-                </Button>
-                <Button variant="outline" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/sales")}>
-                  <ShoppingCart className="mr-2 h-4 w-4" /> Registrar venda
-                </Button>
-                <Button variant="ghost" className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => setCsvOpen(true)}>
-                  <Upload className="mr-2 h-4 w-4" /> Importar planilha
-                </Button>
-              </div>
-            </div>
+	              <div className="flex flex-col items-start gap-2 lg:items-end">
+	                <div className="flex flex-wrap items-center gap-2">
+	                  <Button
+	                    variant="primary"
+	                    className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]"
+	                    onClick={() => setAddOpen(true)}
+	                  >
+	                    <Plus className="mr-2 h-4 w-4" /> Cadastrar produto
+	                  </Button>
+	                  <Button
+	                    variant="outline"
+	                    className="h-10 rounded-2xl text-[12px] font-bold uppercase tracking-[0.10em]"
+	                    onClick={() => navigate("/dashboard/sales")}
+	                  >
+	                    <ShoppingCart className="mr-2 h-4 w-4" /> Registrar venda
+	                  </Button>
+	                </div>
+
+	                <button
+	                  type="button"
+	                  onClick={() => setCsvOpen(true)}
+	                  className="inline-flex items-center gap-2 rounded-xl px-2 py-1 text-[12px] font-semibold text-muted-foreground transition-colors hover:text-[#6E1E2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E1E2A]/20"
+	                >
+	                  <Upload className="h-4 w-4 opacity-70" />
+	                  Importar planilha
+	                </button>
+	              </div>
+	            </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
               {isLoading ? (

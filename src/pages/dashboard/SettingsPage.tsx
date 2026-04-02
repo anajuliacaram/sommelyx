@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Settings, User, Bell, Building2, Save, Check, AlertTriangle } from "@/icons/lucide";
+import { Settings, User, Bell, Building2, Save, Check, AlertTriangle, Wine } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -160,48 +160,107 @@ export default function SettingsPage() {
       </motion.div>
 
       {/* Account Type */}
-      <motion.div className="glass-card p-6 space-y-5" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-        <div className="flex items-center gap-2 mb-1">
-          <Building2 className="h-4 w-4" style={{ color: "#8F2D56" }} />
-          <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Tipo de conta</h2>
+      <motion.div className="glass-card p-6 space-y-5 pb-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+        <div>
+          <div className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" style={{ color: "#8F2D56" }} />
+            <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Tipo de conta</h2>
+          </div>
+          <p className="mt-1 text-[12px] text-muted-foreground">
+            Escolha como você usa o Sommelyx
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Button
             type="button"
             onClick={() => handleProfileSwitch("personal")}
-            variant="outline"
+            variant="ghost"
             className={cn(
-              "h-auto w-full flex-col justify-start items-start p-4 rounded-2xl text-left transition-all gap-1",
+              "relative h-auto min-h-[124px] w-full overflow-hidden rounded-[18px] border p-6 text-left transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(17,17,19,0.10)] hover:border-[#6E1E2A]/22 focus-visible:shadow-[0_0_0_4px_rgba(110,30,42,0.14)] flex flex-col items-start justify-start",
               profileType === "personal"
-                ? "bg-primary/5 border-primary/25 shadow-sm"
-                : "bg-background/60 border-border/60 hover:bg-background",
+                ? "border-[#6E1E2A]/34 bg-[linear-gradient(135deg,rgba(110,30,42,0.085),rgba(255,255,255,0.66))] shadow-[0_14px_34px_rgba(110,30,42,0.12)]"
+                : "border-[#6E1E2A]/12 bg-[linear-gradient(135deg,rgba(110,30,42,0.035),rgba(255,255,255,0.62))]",
             )}
           >
-            <p className="text-[13px] font-semibold leading-tight" style={{ color: "#0F0F14" }}>🍷 Adega Pessoal</p>
-            <p className="text-[11px] leading-snug" style={{ color: "#6B7280" }}>Para colecionadores e entusiastas</p>
-            {profileType === "personal" && <Check className="h-4 w-4 mt-2" style={{ color: "#8F2D56" }} />}
+            <div className="flex items-start gap-3">
+              <div
+                className={cn(
+                  "mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl border backdrop-blur-sm",
+                  profileType === "personal"
+                    ? "border-[#6E1E2A]/15 bg-white/55"
+                    : "border-[#6E1E2A]/10 bg-white/50",
+                )}
+              >
+                <Wine className={cn("h-4 w-4", profileType === "personal" ? "text-[#6E1E2A]" : "text-[#7B1E3A]")} />
+              </div>
+              <div className="min-w-0">
+                <p
+                  className={cn(
+                    "text-[16px] font-bold leading-tight tracking-[-0.015em]",
+                    profileType === "personal" ? "text-[#6E1E2A]" : "text-[#1C1C1E]",
+                  )}
+                >
+                  Adega Pessoal
+                </p>
+                <p className="mt-1 text-[12px] leading-snug text-[#6B7280]">
+                  Para colecionadores e entusiastas.
+                </p>
+              </div>
+            </div>
+            {profileType === "personal" && (
+              <span className="absolute right-4 top-4 rounded-full border border-[#6E1E2A]/18 bg-white/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6E1E2A] backdrop-blur-sm">
+                Selecionado
+              </span>
+            )}
           </Button>
           <Button
             type="button"
             onClick={() => handleProfileSwitch("commercial")}
-            variant="outline"
+            variant="ghost"
             className={cn(
-              "h-auto w-full flex-col justify-start items-start p-4 rounded-2xl text-left transition-all gap-1",
+              "relative h-auto min-h-[124px] w-full overflow-hidden rounded-[18px] border p-6 text-left transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(17,17,19,0.10)] hover:border-[#6E1E2A]/22 focus-visible:shadow-[0_0_0_4px_rgba(110,30,42,0.14)] flex flex-col items-start justify-start",
               profileType === "commercial"
-                ? "bg-primary/5 border-primary/25 shadow-sm"
-                : "bg-background/60 border-border/60 hover:bg-background",
+                ? "border-[#6E1E2A]/34 bg-[linear-gradient(135deg,rgba(110,30,42,0.085),rgba(255,255,255,0.66))] shadow-[0_14px_34px_rgba(110,30,42,0.12)]"
+                : "border-[#6E1E2A]/12 bg-[linear-gradient(135deg,rgba(110,30,42,0.035),rgba(255,255,255,0.62))]",
             )}
           >
-            <p className="text-[13px] font-semibold leading-tight" style={{ color: "#0F0F14" }}>🏪 Operação Comercial</p>
-            <p className="text-[11px] leading-snug" style={{ color: "#6B7280" }}>Para bares, restaurantes e lojas</p>
-            {profileType === "commercial" && <Check className="h-4 w-4 mt-2" style={{ color: "#8F2D56" }} />}
+            <div className="flex items-start gap-3">
+              <div
+                className={cn(
+                  "mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl border backdrop-blur-sm",
+                  profileType === "commercial"
+                    ? "border-[#6E1E2A]/15 bg-white/55"
+                    : "border-[#6E1E2A]/10 bg-white/50",
+                )}
+              >
+                <Building2 className={cn("h-4 w-4", profileType === "commercial" ? "text-[#6E1E2A]" : "text-[#7B1E3A]")} />
+              </div>
+              <div className="min-w-0">
+                <p
+                  className={cn(
+                    "text-[16px] font-bold leading-tight tracking-[-0.015em]",
+                    profileType === "commercial" ? "text-[#6E1E2A]" : "text-[#1C1C1E]",
+                  )}
+                >
+                  Operação Comercial
+                </p>
+                <p className="mt-1 text-[12px] leading-snug text-[#6B7280]">
+                  Para bares, restaurantes e lojas.
+                </p>
+              </div>
+            </div>
+            {profileType === "commercial" && (
+              <span className="absolute right-4 top-4 rounded-full border border-[#6E1E2A]/18 bg-white/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6E1E2A] backdrop-blur-sm">
+                Selecionado
+              </span>
+            )}
           </Button>
         </div>
       </motion.div>
 
       {/* Save button */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+      <motion.div className="pt-2" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
         <Button
           onClick={handleSaveProfile}
           variant="primary"

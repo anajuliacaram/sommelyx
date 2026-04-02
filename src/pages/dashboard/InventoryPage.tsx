@@ -426,6 +426,7 @@ export default function InventoryPage() {
                                 onChange={(val) => updateParam("region", val, true)}
                                 onClear={() => updateParam("region", null, true)}
                                 searchPlaceholder="Buscar região..."
+                                searchable
                             />
                             <MultiSelectDropdown
                                 title="País"
@@ -434,6 +435,7 @@ export default function InventoryPage() {
                                 onChange={(val) => updateParam("country", val, true)}
                                 onClear={() => updateParam("country", null, true)}
                                 searchPlaceholder="Buscar país..."
+                                searchable
                             />
                             <MultiSelectDropdown
                                 title="Status"
@@ -449,6 +451,7 @@ export default function InventoryPage() {
                                 onChange={(val) => updateParam("vintage", val, true)}
                                 onClear={() => updateParam("vintage", null, true)}
                                 searchPlaceholder="Buscar safra..."
+                                searchable
                             />
 
                             <Button
@@ -1069,6 +1072,7 @@ export default function InventoryPage() {
                                     onChange={(val) => updateParam("country", val, true)}
                                     onClear={() => updateParam("country", null, true)}
                                     searchPlaceholder="Buscar país..."
+                                    searchable
                                 />
                                 <MultiSelectDropdown
                                     title="Região"
@@ -1077,6 +1081,7 @@ export default function InventoryPage() {
                                     onChange={(val) => updateParam("region", val, true)}
                                     onClear={() => updateParam("region", null, true)}
                                     searchPlaceholder="Buscar região..."
+                                    searchable
                                 />
                                 <MultiSelectDropdown
                                     title="Safra"
@@ -1085,6 +1090,7 @@ export default function InventoryPage() {
                                     onChange={(val) => updateParam("vintage", val, true)}
                                     onClear={() => updateParam("vintage", null, true)}
                                     searchPlaceholder="Buscar safra..."
+                                    searchable
                                 />
                                 <MultiSelectDropdown
                                     title="Status"
