@@ -6,7 +6,8 @@ type AnalyticsEventName =
   | "signup_success"
   | "login_success"
   | "forgot_password_request_sent"
-  | "email_confirmation_success";
+  | "email_confirmation_success"
+  | "reset_password_success";
 
 type AnalyticsEventProps = Record<string, string | number | boolean | null | undefined>;
 
