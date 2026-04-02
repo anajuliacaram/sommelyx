@@ -87,14 +87,22 @@ export function AppSidebar() {
               className="h-14 sm:h-14 w-auto drop-shadow-[0_14px_30px_rgba(15,15,20,0.16)]"
             />
             <div className="flex flex-col">
-              <span className="text-[18px] font-black font-sans tracking-tight text-foreground leading-none" style={{ letterSpacing: "-0.04em" }}>
+              <span
+                className="text-[18px] font-black font-serif tracking-tight text-[#7B1E3A] leading-none"
+                style={{ letterSpacing: "-0.04em" }}
+              >
                 Sommelyx
               </span>
               <span
-                className="text-[9px] font-black uppercase tracking-[0.2em] leading-none mt-1"
-                style={{ color: isCommercial ? "hsl(var(--gold))" : "hsl(var(--primary))", opacity: 0.7 }}
+                className={[
+                  "mt-1 w-fit inline-flex items-center rounded-full px-3 py-1",
+                  "text-[10px] font-black uppercase tracking-[0.18em] leading-none",
+                  isCommercial
+                    ? "bg-[#C6A768]/15 text-[#8A6A2A] ring-1 ring-[#C6A768]/35"
+                    : "bg-[#6E1E2A]/8 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/18",
+                ].join(" ")}
               >
-                {isCommercial ? "OPERAÇÃO COMERCIAL" : "ACERVO PESSOAL"}
+                {isCommercial ? "COMERCIAL" : "PESSOAL"}
               </span>
             </div>
           </Link>
