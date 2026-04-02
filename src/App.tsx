@@ -106,8 +106,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <AnimatedRoutes />
-          {/* Floating contact: public pages only (avoid overlapping dashboard actions) */}
-          <PublicFloatingContact />
+          <FloatingContactButton />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
@@ -115,9 +114,3 @@ const App = () => (
 );
 
 export default App;
-
-function PublicFloatingContact() {
-  const location = useLocation();
-  if (location.pathname.startsWith("/dashboard")) return null;
-  return <FloatingContactButton />;
-}
