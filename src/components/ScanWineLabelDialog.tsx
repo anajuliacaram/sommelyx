@@ -2,9 +2,9 @@ import { useState, useRef, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { invokeEdgeFunction } from "@/lib/edge-invoke";
 
 interface ScannedWineData {
   name: string | null;
@@ -92,16 +92,17 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
     try {
       const base64 = await compressImage(file);
-      
-      const { data, error } = await supabase.functions.invoke("scan-wine-label", {
-        body: { imageBase64: base64 },
-      });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await invokeEdgeFunction<any>(
+        "scan-wine-label",
+        { imageBase64: base64 },
+        { timeoutMs: 75_000, retries: 2 },
+      );
+
+      if (data?.error) throw new Error(String(data.error));
       if (!data?.wine) throw new Error("Nenhum dado encontrado");
 
-      setScannedData(data.wine);
+      setScannedData(data.wine as ScannedWineData);
       setStep("preview");
     } catch (err: any) {
       console.error("Scan error:", err);

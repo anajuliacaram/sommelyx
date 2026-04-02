@@ -11,6 +11,30 @@ const corsHeaders = {
 const FUNCTION_NAME = "wishlist-wine-assistant";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
+// ── Simple in-memory rate limiter ──
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW_MS = 60_000;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitMap) {
+    if (now > val.resetAt) rateLimitMap.delete(key);
+  }
+}, 120_000);
+
 type AssistantResult = {
   wine_name: string | null;
   producer: string | null;
@@ -63,6 +87,19 @@ function normalizeNumber(value: unknown) {
     if (Number.isFinite(parsed)) return parsed;
   }
   return null;
+}
+
+function normalizeStyle(value: unknown) {
+  const v = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (!v) return null;
+  if (["tinto", "branco", "rose", "espumante", "sobremesa", "fortificado"].includes(v)) return v;
+  if (v.includes("ros")) return "rose";
+  if (v.includes("spark") || v.includes("espum") || v.includes("champ")) return "espumante";
+  if (v.includes("fort") || v.includes("porto") || v.includes("sherry")) return "fortificado";
+  if (v.includes("dess") || v.includes("sobrem")) return "sobremesa";
+  if (v.includes("white") || v.includes("branc")) return "branco";
+  if (v.includes("red") || v.includes("tint")) return "tinto";
+  return v;
 }
 
 async function getImageFromOpenFoodFacts(query: string) {
@@ -126,6 +163,14 @@ serve(async (req) => {
 
     userId = user.id;
 
+    if (!checkRateLimit(userId)) {
+      await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
+      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+      });
+    }
+
     const { query, imageBase64 } = await req.json();
     const safeQuery = typeof query === "string" ? query.trim() : "";
 
@@ -157,7 +202,7 @@ serve(async (req) => {
     const messages: Array<Record<string, unknown>> = [
       {
         role: "system",
-        content: `Voce e um especialista em vinhos e assistente de wishlist premium. Receba um texto livre do cliente, e opcionalmente uma foto do rótulo, e devolva um JSON com os campos abaixo. Use null quando nao souber com boa confianca.
+        content: `Você é um especialista em vinhos e assistente de wishlist premium. Receba um texto livre do cliente e, opcionalmente, uma foto do rótulo. Devolva APENAS via tool_call com os campos abaixo. Use null quando não souber com boa confiança.
 
 {
   "wine_name": "Nome principal do vinho",
@@ -173,10 +218,10 @@ serve(async (req) => {
 }
 
 Regras:
-- Responda apenas JSON puro.
-- Se o texto vier incompleto, infira apenas o que for razoavelmente confiavel.
-- Em ai_summary, escreva no maximo 2 frases curtas e elegantes.
-- Em notes, escreva algo curto como oportunidade de compra, ocasiao de consumo ou diferencial do rótulo.
+- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado.
+- Se o texto vier incompleto, infira apenas o que for razoavelmente confiável.
+- Em ai_summary, escreva no máximo 2 frases curtas e elegantes.
+- Em notes, escreva algo curto como oportunidade de compra, ocasião de consumo ou diferencial do rótulo.
 - Se houver foto, priorize a foto sobre o texto.`,
       },
     ];
@@ -211,33 +256,79 @@ Regras:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "suggest_wishlist_wine",
+              description: "Gerar sugestão estruturada para wishlist",
+              parameters: {
+                type: "object",
+                properties: {
+                  suggestion: {
+                    type: "object",
+                    properties: {
+                      wine_name: { type: "string" },
+                      producer: { type: "string" },
+                      vintage: { type: "number" },
+                      style: { type: "string" },
+                      country: { type: "string" },
+                      region: { type: "string" },
+                      grape: { type: "string" },
+                      target_price: { type: "number" },
+                      ai_summary: { type: "string" },
+                      notes: { type: "string" },
+                    },
+                    required: ["wine_name"],
+                  },
+                },
+                required: ["suggestion"],
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "suggest_wishlist_wine" } },
         temperature: 0.2,
         max_tokens: 700,
       }),
     });
 
     if (!aiResponse.ok) {
+      if (aiResponse.status === 429) {
+        await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
+        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+        });
+      }
+      if (aiResponse.status === 402) {
+        await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
+        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: aiResponse.status });
-      return new Response(JSON.stringify({ error: "Servico de IA indisponivel." }), {
+      return new Response(JSON.stringify({ error: "Serviço de IA indisponível." }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content;
-    if (!content) {
-      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "empty_response" });
-      return new Response(JSON.stringify({ error: "Nao foi possivel gerar sugestoes." }), {
+    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) {
+      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "no_tool_call" });
+      return new Response(JSON.stringify({ error: "Não foi possível gerar sugestões." }), {
         status: 422,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const cleaned = String(content).replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const parsed = JSON.parse(cleaned) as Record<string, unknown>;
+    const parsed = JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
+    const suggestionRaw = (parsed.suggestion ?? {}) as Record<string, unknown>;
 
-    const searchBasis = [normalizeValue(parsed.wine_name), normalizeValue(parsed.producer), normalizeValue(parsed.vintage)]
+    const searchBasis = [normalizeValue(suggestionRaw.wine_name), normalizeValue(suggestionRaw.producer), normalizeValue(suggestionRaw.vintage)]
       .filter(Boolean)
       .join(" ")
       || safeQuery;
@@ -245,16 +336,16 @@ Regras:
     const imageUrl = await getImageFromOpenFoodFacts(searchBasis);
 
     const result: AssistantResult = {
-      wine_name: normalizeValue(parsed.wine_name),
-      producer: normalizeValue(parsed.producer),
-      vintage: normalizeNumber(parsed.vintage),
-      style: normalizeValue(parsed.style),
-      country: normalizeValue(parsed.country),
-      region: normalizeValue(parsed.region),
-      grape: normalizeValue(parsed.grape),
-      target_price: normalizeNumber(parsed.target_price),
-      ai_summary: normalizeValue(parsed.ai_summary),
-      notes: normalizeValue(parsed.notes),
+      wine_name: normalizeValue(suggestionRaw.wine_name),
+      producer: normalizeValue(suggestionRaw.producer),
+      vintage: normalizeNumber(suggestionRaw.vintage),
+      style: normalizeStyle(suggestionRaw.style),
+      country: normalizeValue(suggestionRaw.country),
+      region: normalizeValue(suggestionRaw.region),
+      grape: normalizeValue(suggestionRaw.grape),
+      target_price: normalizeNumber(suggestionRaw.target_price),
+      ai_summary: normalizeValue(suggestionRaw.ai_summary),
+      notes: normalizeValue(suggestionRaw.notes),
       image_url: imageUrl,
     };
 

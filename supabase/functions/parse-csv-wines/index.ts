@@ -31,7 +31,7 @@ setInterval(() => {
   }
 }, 120_000);
 
-const MAX_CSV_SIZE = 1_000_000; // 1MB
+const MAX_CSV_SIZE = 2_000_000; // 2MB
 const FUNCTION_NAME = "parse-csv-wines";
 
 async function logAudit(
@@ -113,7 +113,7 @@ serve(async (req) => {
       });
     }
 
-    const { csvContent } = await req.json();
+    const { csvContent, fileName, fileType } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_csv" });
       return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
@@ -133,11 +133,29 @@ serve(async (req) => {
       });
     }
 
-    // Limit to first 50 lines to keep token usage reasonable
-    const lines = csvContent.trim().split("\n");
-    const truncated = lines.slice(0, 51).join("\n");
+    const normalized = csvContent.replace(/\r\n/g, "\n").trim();
+    const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
 
-    const systemPrompt = `Você é um especialista em dados de vinhos. Sua tarefa é receber o conteúdo bruto de um arquivo CSV/TSV/planilha e extrair os dados de vinhos, mapeando automaticamente as colunas para os campos corretos.
+    // Chunk input to keep token usage reasonable while still importing more than ~50 lines.
+    const header = lines[0] || "";
+    const dataLines = lines.slice(1);
+    const CHUNK_SIZE = 120;
+    const MAX_CHUNKS = 6; // max ~720 rows + header
+
+    const chunks: string[] = [];
+    if (lines.length <= CHUNK_SIZE + 1) {
+      chunks.push(normalized);
+    } else {
+      for (let i = 0; i < MAX_CHUNKS; i++) {
+        const slice = dataLines.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        if (slice.length === 0) break;
+        chunks.push([header, ...slice].join("\n"));
+      }
+    }
+
+    const wasTruncated = dataLines.length > chunks.length * CHUNK_SIZE;
+
+    const systemPrompt = `Você é um especialista em dados de vinhos. Sua tarefa é receber o conteúdo bruto de um arquivo (CSV/TSV, planilha convertida em texto ou texto extraído de PDF) e extrair os dados de vinhos, mapeando automaticamente as colunas para os campos corretos.
 
 Os campos possíveis são:
 - name (string, OBRIGATÓRIO): nome do vinho
@@ -162,113 +180,198 @@ Regras:
 6. Se quantidade estiver ausente, use 1.
 7. SEMPRE retorne um array JSON válido de objetos com os campos mapeados.
 8. Ignore linhas completamente vazias ou totalizadores.
-9. Se não conseguir identificar o nome do vinho em nenhuma coluna, use a coluna que parecer mais provável.`;
+9. Se não conseguir identificar o nome do vinho em nenhuma coluna, use a coluna que parecer mais provável.
+10. Se o conteúdo vier de PDF, trate como uma lista e extraia o máximo de campos possível a partir do texto.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: `Analise este CSV e extraia os dados de vinhos mapeando as colunas corretamente. Retorne APENAS o JSON array, sem markdown nem explicação.\n\n${truncated}`,
-          },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "extract_wines",
-              description: "Extract wine data from CSV content",
-              parameters: {
-                type: "object",
-                properties: {
-                  wines: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string" },
-                        producer: { type: "string" },
-                        vintage: { type: "number" },
-                        style: { type: "string" },
-                        country: { type: "string" },
-                        region: { type: "string" },
-                        grape: { type: "string" },
-                        quantity: { type: "number" },
-                        purchase_price: { type: "number" },
-                        cellar_location: { type: "string" },
-                        drink_from: { type: "number" },
-                        drink_until: { type: "number" },
+    function normalizeStyle(value: unknown) {
+      const v = typeof value === "string" ? value.trim().toLowerCase() : "";
+      if (!v) return undefined;
+      if (["tinto", "branco", "rose", "espumante", "sobremesa", "fortificado"].includes(v)) return v;
+      if (v.includes("ros")) return "rose";
+      if (v.includes("spark") || v.includes("espum") || v.includes("champ")) return "espumante";
+      if (v.includes("fort") || v.includes("porto") || v.includes("sherry")) return "fortificado";
+      if (v.includes("dess") || v.includes("sobrem")) return "sobremesa";
+      if (v.includes("white") || v.includes("branc")) return "branco";
+      if (v.includes("red") || v.includes("tint")) return "tinto";
+      return v;
+    }
+
+    function normalizeNumber(value: unknown) {
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      if (typeof value === "string") {
+        const cleaned = value.replace(/[^\d.,-]/g, "").replace(",", ".");
+        const parsed = Number(cleaned);
+        if (Number.isFinite(parsed)) return parsed;
+      }
+      return undefined;
+    }
+
+    async function callAi(chunkText: string) {
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content:
+                `Analise o conteúdo abaixo e extraia os dados de vinhos mapeando colunas corretamente. ` +
+                `Retorne APENAS via tool_call.\n\n` +
+                chunkText,
+            },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "extract_wines",
+                description: "Extract wine data from tabular or semi-structured content",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    wines: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          name: { type: "string" },
+                          producer: { type: "string" },
+                          vintage: { type: "number" },
+                          style: { type: "string" },
+                          country: { type: "string" },
+                          region: { type: "string" },
+                          grape: { type: "string" },
+                          quantity: { type: "number" },
+                          purchase_price: { type: "number" },
+                          cellar_location: { type: "string" },
+                          drink_from: { type: "number" },
+                          drink_until: { type: "number" },
+                        },
+                        required: ["name"],
                       },
-                      required: ["name"],
+                    },
+                    column_mapping: {
+                      type: "object",
+                      description: "Mapeamento das colunas originais para os campos do sistema",
+                      additionalProperties: { type: "string" },
+                    },
+                    notes: {
+                      type: "string",
+                      description: "Observações sobre decisões de mapeamento",
                     },
                   },
-                  column_mapping: {
-                    type: "object",
-                    description:
-                      "Mapeamento das colunas originais para os campos do sistema",
-                    additionalProperties: { type: "string" },
-                  },
-                  notes: {
-                    type: "string",
-                    description: "Observações sobre decisões de mapeamento",
-                  },
+                  required: ["wines"],
                 },
-                required: ["wines"],
               },
             },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "extract_wines" } },
-      }),
-    });
+          ],
+          tool_choice: { type: "function", function: { name: "extract_wines" } },
+        }),
+      });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
-        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
-        });
+      if (!response.ok) {
+        return { errorStatus: response.status as number };
       }
-      if (response.status === 402) {
-        await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
-        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      console.error("AI gateway error:", response.status);
-      await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: response.status });
-      return new Response(
-        JSON.stringify({ error: "Serviço de análise indisponível." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+
+      const data = await response.json();
+      const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+      if (!toolCall) return { errorStatus: 422 as number };
+
+      const result = JSON.parse(toolCall.function.arguments);
+      return { result };
     }
 
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    const allWines: Array<Record<string, unknown>> = [];
+    let column_mapping: Record<string, unknown> | undefined = undefined;
+    const notes: string[] = [];
+    const failures: number[] = [];
 
-    if (!toolCall) {
-      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "no_tool_call" });
-      return new Response(
-        JSON.stringify({ error: "Não foi possível extrair dados do CSV." }),
-        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    for (let i = 0; i < chunks.length; i++) {
+      const { result, errorStatus } = await callAi(chunks[i]);
+      if (errorStatus) {
+        failures.push(errorStatus);
+        continue;
+      }
+      if (result?.notes) notes.push(String(result.notes));
+      if (!column_mapping && result?.column_mapping && typeof result.column_mapping === "object") {
+        column_mapping = result.column_mapping as Record<string, unknown>;
+      }
+      const wines = Array.isArray(result?.wines) ? result.wines : [];
+      for (const w of wines) {
+        if (w && typeof w === "object") allWines.push(w as Record<string, unknown>);
+      }
     }
 
-    const result = JSON.parse(toolCall.function.arguments);
-    const wineCount = result.wines?.length || 0;
+    if (allWines.length === 0) {
+      const status = failures.includes(429) ? 429 : failures.includes(402) ? 402 : 422;
+      const message =
+        status === 429 ? "Muitas requisições. Tente novamente em alguns segundos."
+          : status === 402 ? "Créditos de IA esgotados."
+          : "Não foi possível extrair dados do arquivo.";
+      await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length });
+      return new Response(JSON.stringify({ error: message }), {
+        status,
+        headers: { ...corsHeaders, "Content-Type": "application/json", ...(status === 429 ? { "Retry-After": "60" } : {}) },
+      });
+    }
+
+    // Normalize, default values, and dedupe.
+    const dedup = new Map<string, Record<string, unknown>>();
+    for (const w of allWines) {
+      const name = typeof w.name === "string" ? w.name.trim() : "";
+      if (!name) continue;
+
+      const producer = typeof w.producer === "string" ? w.producer.trim() : "";
+      const vintage = normalizeNumber(w.vintage);
+      const key = `${name.toLowerCase()}|${producer.toLowerCase()}|${vintage ?? ""}`;
+
+      const normalizedWine: Record<string, unknown> = {
+        name,
+        producer: producer || undefined,
+        vintage: vintage ?? undefined,
+        style: normalizeStyle(w.style),
+        country: typeof w.country === "string" ? w.country.trim() : undefined,
+        region: typeof w.region === "string" ? w.region.trim() : undefined,
+        grape: typeof w.grape === "string" ? w.grape.trim() : undefined,
+        quantity: normalizeNumber(w.quantity) ?? 1,
+        purchase_price: normalizeNumber(w.purchase_price),
+        cellar_location: typeof w.cellar_location === "string" ? w.cellar_location.trim() : undefined,
+        drink_from: normalizeNumber(w.drink_from),
+        drink_until: normalizeNumber(w.drink_until),
+      };
+
+      if (!dedup.has(key)) dedup.set(key, normalizedWine);
+    }
+
+    if (wasTruncated) {
+      notes.push("Arquivo grande: importamos uma amostra para manter a qualidade. Se precisar, importe em partes.");
+    }
+    if (failures.length > 0) {
+      notes.push("Algumas partes do arquivo não puderam ser analisadas. Tente novamente ou importe em partes menores.");
+    }
+
+    const result = {
+      wines: Array.from(dedup.values()),
+      column_mapping: column_mapping ?? {},
+      notes: notes.filter(Boolean).join(" "),
+      metadata: {
+        fileName: typeof fileName === "string" ? fileName : null,
+        fileType: typeof fileType === "string" ? fileType : null,
+        chunks: chunks.length,
+        truncated: wasTruncated,
+      },
+    };
 
     await logAudit(userId, 200, "success", Date.now() - startTime, {
-      wines_extracted: wineCount,
+      wines_extracted: result.wines.length,
       csv_lines: lines.length,
+      chunks: chunks.length,
+      truncated: wasTruncated,
     });
 
     return new Response(JSON.stringify(result), {

@@ -10,6 +10,7 @@ import { useAddWishlist, useDeleteWishlist, useWishlist } from "@/hooks/useBusin
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { invokeEdgeFunction } from "@/lib/edge-invoke";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -162,15 +163,13 @@ export default function WishlistPage() {
     try {
       setIsAiLoading(true);
       const imageBase64 = file ? await compressImage(file) : undefined;
-      const { data, error } = await supabase.functions.invoke("wishlist-wine-assistant", {
-        body: {
-          query: safeQuery || undefined,
-          imageBase64,
-        },
-      });
+      const data = await invokeEdgeFunction<any>(
+        "wishlist-wine-assistant",
+        { query: safeQuery || undefined, imageBase64 },
+        { timeoutMs: 75_000, retries: 2 },
+      );
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) throw new Error(String(data.error));
       if (!data?.suggestion) throw new Error("A IA não conseguiu sugerir este vinho.");
 
       applySuggestion(data.suggestion as WishlistSuggestion, !!force);

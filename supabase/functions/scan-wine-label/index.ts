@@ -35,6 +35,29 @@ setInterval(() => {
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB base64
 const FUNCTION_NAME = "scan-wine-label";
 
+function normalizeStyle(value: unknown) {
+  const v = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (!v) return null;
+  if (["tinto", "branco", "rose", "espumante", "sobremesa", "fortificado"].includes(v)) return v;
+  if (v.includes("ros")) return "rose";
+  if (v.includes("spark") || v.includes("espum") || v.includes("champ")) return "espumante";
+  if (v.includes("fort") || v.includes("porto") || v.includes("sherry")) return "fortificado";
+  if (v.includes("dess") || v.includes("sobrem")) return "sobremesa";
+  if (v.includes("white") || v.includes("branc")) return "branco";
+  if (v.includes("red") || v.includes("tint")) return "tinto";
+  return v;
+}
+
+function normalizeNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const cleaned = value.replace(/[^\d.,-]/g, "").replace(",", ".");
+    const parsed = Number(cleaned);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+}
+
 async function logAudit(
   userId: string,
   statusCode: number,
@@ -149,39 +172,23 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are an expert sommelier and wine label reader. Analyze the wine label image and extract ALL available information with maximum precision. Return a JSON object with these exact fields (use null for unknown):
+              content: `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão.
 
-{
-  "name": "Full wine name exactly as on label",
-  "producer": "Winery/producer name",
-  "vintage": 2020,
-  "style": "tinto|branco|rose|espumante|sobremesa|fortificado",
-  "country": "Full country name in Portuguese (e.g. França, Itália, Argentina)",
-  "region": "Wine region (e.g. Bordeaux, Mendoza, Douro)",
-  "grape": "Grape variety or blend (e.g. Cabernet Sauvignon, Malbec/Merlot)",
-  "food_pairing": "Suggested pairings in Portuguese (e.g. Carnes vermelhas, queijos maturados)",
-  "tasting_notes": "Brief tasting profile in Portuguese based on grape/region/style",
-  "cellar_location": null,
-  "purchase_price": null,
-  "drink_from": 2024,
-  "drink_until": 2030
-}
-
-Rules:
-- "style" MUST be one of: tinto, branco, rose, espumante, sobremesa, fortificado
-- Country names in Portuguese: France→França, Italy→Itália, Spain→Espanha, Portugal→Portugal, Chile→Chile, Argentina→Argentina, USA→Estados Unidos, Germany→Alemanha, Australia→Austrália, South Africa→África do Sul, New Zealand→Nova Zelândia
-- For "drink_from" and "drink_until": estimate based on vintage, style, region, and grape variety. If vintage is null, set both to null.
-- For "tasting_notes": write 1-2 sentences in Portuguese describing expected aromas and flavors based on the wine's characteristics.
-- For "food_pairing": suggest 2-3 pairings in Portuguese.
-- Be as precise as possible. Read all text on the label including back label if visible.
-- Return ONLY the JSON object, no markdown, no explanation.`,
+Regras:
+- Responda APENAS via tool_call.
+- "style" DEVE ser: tinto, branco, rose, espumante, sobremesa, fortificado.
+- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc).
+- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.
+- tasting_notes: 1-2 frases curtas em português (perfil esperado).
+- food_pairing: 2-3 sugestões em português.
+- Leia todo texto visível no rótulo (frente e verso, se aparecer).`,
             },
             {
               role: "user",
               content: [
                 {
                   type: "text",
-                  text: "Analyze this wine label and extract all information. Be thorough and precise.",
+                  text: "Analise este rótulo de vinho e extraia todas as informações possíveis.",
                 },
                 {
                   type: "image_url",
@@ -192,50 +199,104 @@ Rules:
               ],
             },
           ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "extract_wine",
+                description: "Extrair dados estruturados de um rótulo de vinho",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    wine: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        producer: { type: "string" },
+                        vintage: { type: "number" },
+                        style: { type: "string" },
+                        country: { type: "string" },
+                        region: { type: "string" },
+                        grape: { type: "string" },
+                        food_pairing: { type: "string" },
+                        tasting_notes: { type: "string" },
+                        cellar_location: { type: "string" },
+                        purchase_price: { type: "number" },
+                        drink_from: { type: "number" },
+                        drink_until: { type: "number" },
+                      },
+                      required: ["name"],
+                    },
+                  },
+                  required: ["wine"],
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "extract_wine" } },
           temperature: 0.1,
-          max_tokens: 1000,
+          max_tokens: 900,
         }),
       }
     );
 
     if (!response.ok) {
+      if (response.status === 429) {
+        await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
+        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+        });
+      }
+      if (response.status === 402) {
+        await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
+        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       console.error("AI Gateway error:", response.status);
       await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: response.status });
-      return new Response(
-        JSON.stringify({ error: "Serviço de análise indisponível. Tente novamente." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Serviço de análise indisponível. Tente novamente." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "empty_response" });
-      return new Response(
-        JSON.stringify({ error: "Não foi possível analisar o rótulo." }),
-        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) {
+      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "no_tool_call" });
+      return new Response(JSON.stringify({ error: "Não foi possível extrair dados do rótulo." }), {
+        status: 422,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    let parsed;
-    try {
-      const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      parsed = JSON.parse(cleaned);
-    } catch {
-      console.error("Failed to parse AI response");
-      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "parse_failed" });
-      return new Response(
-        JSON.stringify({ error: "Não foi possível extrair dados do rótulo." }),
-        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const parsed = JSON.parse(toolCall.function.arguments);
+    const wine = parsed?.wine ?? {};
+
+    const normalizedWine = {
+      name: typeof wine.name === "string" ? wine.name.trim() : null,
+      producer: typeof wine.producer === "string" ? wine.producer.trim() : null,
+      vintage: normalizeNumber(wine.vintage),
+      style: normalizeStyle(wine.style),
+      country: typeof wine.country === "string" ? wine.country.trim() : null,
+      region: typeof wine.region === "string" ? wine.region.trim() : null,
+      grape: typeof wine.grape === "string" ? wine.grape.trim() : null,
+      food_pairing: typeof wine.food_pairing === "string" ? wine.food_pairing.trim() : null,
+      tasting_notes: typeof wine.tasting_notes === "string" ? wine.tasting_notes.trim() : null,
+      cellar_location: typeof wine.cellar_location === "string" ? wine.cellar_location.trim() : null,
+      purchase_price: normalizeNumber(wine.purchase_price),
+      drink_from: normalizeNumber(wine.drink_from),
+      drink_until: normalizeNumber(wine.drink_until),
+    };
 
     await logAudit(userId, 200, "success", Date.now() - startTime, {
-      wine_name: parsed.name || "unknown",
+      wine_name: normalizedWine.name || "unknown",
     });
 
-    return new Response(JSON.stringify({ wine: parsed }), {
+    return new Response(JSON.stringify({ wine: normalizedWine }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

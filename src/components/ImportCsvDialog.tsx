@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, Check, AlertTriangle, X, Sparkles, Loader2 } from "@/icons/lucide";
+import { Upload, Check, AlertTriangle, X, Sparkles, Loader2 } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/edge-invoke";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -41,6 +41,56 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const addWine = useAddWine();
   const { toast } = useToast();
 
+  const MAX_CLIENT_INPUT_CHARS = 1_900_000; // keep request under edge limit after JSON overhead
+
+  const readTextFile = async (file: File) => {
+    const text = await file.text();
+    return text;
+  };
+
+  const readSpreadsheetAsCsv = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const XLSX = await import("xlsx");
+    const wb = XLSX.read(buffer, { type: "array" });
+    const sheetName = wb.SheetNames?.[0];
+    if (!sheetName) return "";
+    const ws = wb.Sheets[sheetName];
+    // Convert first sheet to CSV so our edge function can map columns.
+    return XLSX.utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
+  };
+
+  const readPdfAsText = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const pdfjs = await import("pdfjs-dist");
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+    const maxPages = Math.min(doc.numPages, 12);
+    const pages: string[] = [];
+    for (let p = 1; p <= maxPages; p++) {
+      const page = await doc.getPage(p);
+      const content = await page.getTextContent();
+      const line = (content.items || [])
+        .map((it: any) => String(it.str || "").trim())
+        .filter(Boolean)
+        .join(" ");
+      if (line) pages.push(line);
+    }
+    return pages.join("\n");
+  };
+
+  const fileToCsvLikeText = async (file: File) => {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    if (ext === "xlsx" || ext === "xls" || ext === "ods") {
+      return await readSpreadsheetAsCsv(file);
+    }
+    if (ext === "pdf") {
+      return await readPdfAsText(file);
+    }
+    // csv/tsv/txt fallback
+    return await readTextFile(file);
+  };
+
   const reset = () => {
     setStep("upload");
     setParsed([]);
@@ -56,52 +106,56 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setFileName(file.name);
     setStep("analyzing");
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const csvContent = e.target?.result as string;
+    try {
+      const raw = await fileToCsvLikeText(file);
+      const csvContent = raw.length > MAX_CLIENT_INPUT_CHARS ? raw.slice(0, MAX_CLIENT_INPUT_CHARS) : raw;
 
-      try {
-        const { data, error } = await supabase.functions.invoke("parse-csv-wines", {
-          body: { csvContent },
-        });
+      const data = await invokeEdgeFunction<any>(
+        "parse-csv-wines",
+        { csvContent, fileName: file.name, fileType: file.type || null },
+        { timeoutMs: 75_000, retries: 2 },
+      );
 
-        if (error) throw new Error(error.message || "Erro ao processar arquivo");
-
-        if (data.error) {
-          setParseErrors([data.error]);
-          setParsed([]);
-          setStep("preview");
-          return;
-        }
-
-        const wines: ParsedWine[] = (data.wines || []).map((w: any) => ({
-          name: w.name || "",
-          producer: w.producer || undefined,
-          vintage: w.vintage ? Number(w.vintage) : undefined,
-          style: w.style || undefined,
-          country: w.country || undefined,
-          region: w.region || undefined,
-          grape: w.grape || undefined,
-          quantity: w.quantity ? Number(w.quantity) : 1,
-          purchase_price: w.purchase_price ? Number(w.purchase_price) : undefined,
-          cellar_location: w.cellar_location || undefined,
-          drink_from: w.drink_from ? Number(w.drink_from) : undefined,
-          drink_until: w.drink_until ? Number(w.drink_until) : undefined,
-        }));
-
-        setParsed(wines.filter((w) => w.name));
-        setColumnMapping(data.column_mapping || {});
-        setAiNotes(data.notes || "");
-        setParseErrors([]);
-        setStep("preview");
-      } catch (err: any) {
-        console.error("AI parse error:", err);
-        setParseErrors([err.message || "Erro ao analisar o arquivo com IA."]);
+      if (data?.error) {
+        setParseErrors([String(data.error)]);
         setParsed([]);
         setStep("preview");
+        return;
       }
-    };
-    reader.readAsText(file);
+
+      const wines: ParsedWine[] = (data?.wines || []).map((w: any) => ({
+        name: w.name || "",
+        producer: w.producer || undefined,
+        vintage: w.vintage ? Number(w.vintage) : undefined,
+        style: w.style || undefined,
+        country: w.country || undefined,
+        region: w.region || undefined,
+        grape: w.grape || undefined,
+        quantity: w.quantity ? Number(w.quantity) : 1,
+        purchase_price: w.purchase_price ? Number(w.purchase_price) : undefined,
+        cellar_location: w.cellar_location || undefined,
+        drink_from: w.drink_from ? Number(w.drink_from) : undefined,
+        drink_until: w.drink_until ? Number(w.drink_until) : undefined,
+      }));
+
+      setParsed(wines.filter((w) => w.name));
+      setColumnMapping(data?.column_mapping || {});
+      setAiNotes(data?.notes || "");
+      setParseErrors([]);
+      setStep("preview");
+
+      if (raw.length > MAX_CLIENT_INPUT_CHARS) {
+        toast({
+          title: "Arquivo muito grande",
+          description: "Importamos uma amostra do arquivo para manter a qualidade da análise com IA. Se precisar, importe em partes.",
+        });
+      }
+    } catch (err: any) {
+      console.error("AI parse error:", err);
+      setParseErrors([err?.message || "Erro ao analisar o arquivo com IA."]);
+      setParsed([]);
+      setStep("preview");
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -171,13 +225,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   Arraste o arquivo ou clique para selecionar
                 </p>
                 <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
-                  CSV, TSV ou TXT — qualquer formato de colunas
+                  CSV, Excel (XLS/XLSX) ou PDF
                 </p>
               </div>
               <input
                 ref={fileRef}
                 type="file"
-                accept=".csv,.txt,.tsv,.xls,.xlsx"
+                accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
               />
