@@ -35,8 +35,7 @@ export async function invokeEdgeFunction<T>(
 
       // supabase-js wraps non-2xx as `error`
       if (error) {
-        // @ts-expect-error supabase-js error includes status in runtime
-        const status = typeof error?.status === "number" ? error.status : undefined;
+        const status = typeof (error as any)?.status === "number" ? (error as any).status : undefined;
         if (attempt < retries && isRetriable(status)) {
           const backoff = 600 * Math.pow(2, attempt);
           attempt++;
