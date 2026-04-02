@@ -21,8 +21,11 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           href="/"
           className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
         >
-          <Logo variant="navbar" className="drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]" />
-          <span className="hidden sm:inline font-serif text-[18px] md:text-[20px] font-black tracking-tight text-foreground">
+          <Logo
+            variant="navbar"
+            className="h-8 sm:h-9 md:h-11 drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
+          />
+          <span className="hidden sm:inline font-serif text-[18px] md:text-[20px] font-black tracking-tight text-[#7B1E3A]">
             Sommelyx
           </span>
         </a>
