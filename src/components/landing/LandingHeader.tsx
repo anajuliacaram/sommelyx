@@ -19,13 +19,13 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
       <div className="mx-auto flex items-center justify-between max-w-6xl">
         <a
           href="/"
-          className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          className="flex items-center gap-2 sm:gap-3 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
         >
           <Logo
             variant="navbar"
-            className="h-8 sm:h-9 md:h-11 drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
+            className="h-9 sm:h-9 md:h-11 drop-shadow-[0_10px_28px_rgba(15,15,20,0.18)]"
           />
-          <span className="hidden sm:inline font-serif text-[18px] md:text-[20px] font-black tracking-tight text-[#7B1E3A]">
+          <span className="font-serif text-[16px] sm:text-[18px] md:text-[20px] font-black tracking-tight text-[#7B1E3A]">
             Sommelyx
           </span>
         </a>
@@ -33,7 +33,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <Button
             variant="secondary"
             size="sm"
-            className="text-[13px] font-semibold"
+            className="text-[13px] font-semibold bg-white/35 border border-black/[0.06] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-white/45"
             onClick={onLogin}
           >
             Entrar
