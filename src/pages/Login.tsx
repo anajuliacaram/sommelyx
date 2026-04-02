@@ -101,8 +101,8 @@ export default function Login() {
         <section className="hidden lg:flex order-2 flex-col justify-between rounded-[28px] border border-black/[0.06] bg-white/70 p-6 shadow-[0_16px_40px_rgba(44,20,31,0.06)] backdrop-blur-xl sm:p-8 md:p-10 lg:order-1 lg:rounded-[36px] lg:p-12">
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
-              <Logo variant="compact" className="h-11 w-auto drop-shadow-[0_8px_20px_rgba(140,32,68,0.14)]" />
-              <span className="font-sans text-[24px] font-black tracking-tight text-[#17141D]">Sommelyx</span>
+              <Logo variant="navbar" className="h-10 sm:h-11 w-auto drop-shadow-[0_10px_26px_rgba(44,20,31,0.16)]" />
+              <span className="font-serif text-[26px] font-black tracking-tight text-[#7B1E3A]">Sommelyx</span>
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">
