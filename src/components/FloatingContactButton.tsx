@@ -60,10 +60,10 @@ export function FloatingContactButton({ className }: Props) {
                 "rounded-full border border-white/20 bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] text-white shadow-[0_18px_50px_-28px_rgba(123,30,43,0.75)] hover:-translate-y-0.5 hover:shadow-[0_22px_64px_-34px_rgba(123,30,43,0.85)] active:scale-[0.98] backdrop-blur-xl",
                 collapsed ? "h-12 w-12 px-0" : "h-12 px-5",
               )}
-              aria-label="Fale conosco"
+              aria-label="Falar com um Sommelier"
             >
               <MessageCircle className="h-4 w-4" />
-              {!collapsed && <span className="text-[13px] font-black tracking-tight">Fale conosco</span>}
+              {!collapsed && <span className="text-[13px] font-black tracking-tight">Falar com um Sommelier</span>}
             </Button>
           </PopoverTrigger>
 
