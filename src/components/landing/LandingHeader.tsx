@@ -11,7 +11,7 @@ interface LandingHeaderProps {
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-4 sm:px-8 py-2.5 sm:py-3.5 bg-background/70 backdrop-blur-2xl border-b border-border/40"
+      className="fixed top-0 w-full z-50 px-4 sm:px-8 py-2.5 sm:py-3.5 lg:py-4 bg-background/70 backdrop-blur-2xl border-b border-border/40"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -23,9 +23,9 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
         >
           <Logo
             variant="navbar"
-            className="h-10 sm:h-10 md:h-12 lg:h-14 drop-shadow-[0_14px_36px_rgba(15,15,20,0.18)]"
+            className="h-10 sm:h-10 md:h-12 lg:h-16 drop-shadow-[0_16px_40px_rgba(15,15,20,0.18)]"
           />
-          <span className="font-serif text-[18px] sm:text-[20px] md:text-[24px] lg:text-[30px] font-black tracking-tight text-[#7B1E3A]">
+          <span className="font-serif text-[18px] sm:text-[20px] md:text-[24px] lg:text-[34px] font-black tracking-tight text-[#7B1E3A]">
             Sommelyx
           </span>
         </a>

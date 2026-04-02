@@ -82,7 +82,7 @@ const faqs = [
   },
   {
     q: "Tem suporte se eu tiver dúvida?",
-    a: "Sim. Use o botão “Fale conosco” no canto da tela para enviar uma mensagem por e-mail.",
+    a: "Sim. Use o botão “Falar com um Sommelier” no canto da tela para enviar uma mensagem por e-mail.",
   },
   {
     q: "Funciona bem no celular?",
@@ -149,14 +149,6 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 )}
 
                 <div className="relative p-5 flex flex-col flex-1">
-                  {plan.popular && (
-                    <div className="mb-3">
-                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.14em] uppercase bg-[#6E1E2A]/8 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/15">
-                        Mais escolhido
-                      </span>
-                    </div>
-                  )}
-
                   <h3 className={plan.popular
                     ? "text-[22px] font-serif font-bold tracking-tight text-[#2B2B2B]"
                     : "text-[22px] font-serif font-bold tracking-tight text-[#F8F6F3]"}
@@ -185,15 +177,15 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                     </span>
                   </div>
 
-                  <div className="mb-4 flex items-center gap-2">
+                  <div className="mb-5 flex items-center gap-2">
                     <span
                       className={plan.popular
-                        ? "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/18 text-[#6E1E2A] ring-1 ring-[#C6A768]/30"
-                        : "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/12 text-[#F8F6F3] ring-1 ring-[#C6A768]/28"}
+                        ? "inline-flex items-center justify-center rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6E1E2A] ring-1 ring-[#6E1E2A]/18 bg-[linear-gradient(90deg,rgba(110,30,42,0.06),rgba(198,167,104,0.18))] shadow-[0_14px_36px_-26px_rgba(110,30,42,0.35)]"
+                        : "inline-flex items-center justify-center rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#F8F6F3] ring-1 ring-[#C6A768]/25 bg-[linear-gradient(90deg,rgba(110,30,42,0.22),rgba(198,167,104,0.16))] shadow-[0_14px_40px_-28px_rgba(110,30,42,0.45)]"}
                     >
                       14 dias grátis
                     </span>
-                    <span className={plan.popular ? "text-[11px] font-medium text-[#2B2B2B]/55" : "text-[11px] font-medium text-[#F8F6F3]/55"}>
+                    <span className={plan.popular ? "text-[12px] font-medium text-[#2B2B2B]/60" : "text-[12px] font-medium text-[#F8F6F3]/60"}>
                       Cancele quando quiser
                     </span>
                   </div>
@@ -268,15 +260,6 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
               )}
 
               <div className="relative p-6 sm:p-8 flex flex-col flex-1">
-                {/* Badge */}
-                {plan.popular && (
-                  <div className="mb-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.14em] uppercase bg-[#6E1E2A]/8 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/15">
-                      Mais escolhido
-                    </span>
-                  </div>
-                )}
-
                 {/* Plan name & desc */}
                 <h3 className={plan.popular
                   ? "text-[24px] font-serif font-bold tracking-tight text-[#2B2B2B]"
@@ -307,15 +290,15 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                   </span>
                 </div>
 
-                <div className="mb-6 flex items-center gap-2">
+                <div className="mb-7 flex items-center gap-2">
                   <span
                     className={plan.popular
-                      ? "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/18 text-[#6E1E2A] ring-1 ring-[#C6A768]/30"
-                      : "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#C6A768]/12 text-[#F8F6F3] ring-1 ring-[#C6A768]/28"}
+                      ? "inline-flex items-center justify-center rounded-full px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#6E1E2A] ring-1 ring-[#6E1E2A]/18 bg-[linear-gradient(90deg,rgba(110,30,42,0.06),rgba(198,167,104,0.18))] shadow-[0_16px_40px_-28px_rgba(110,30,42,0.35)]"
+                      : "inline-flex items-center justify-center rounded-full px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#F8F6F3] ring-1 ring-[#C6A768]/25 bg-[linear-gradient(90deg,rgba(110,30,42,0.22),rgba(198,167,104,0.16))] shadow-[0_16px_46px_-30px_rgba(110,30,42,0.48)]"}
                   >
                     14 dias grátis
                   </span>
-                  <span className={plan.popular ? "text-[12px] font-medium text-[#2B2B2B]/55" : "text-[12px] font-medium text-[#F8F6F3]/55"}>
+                  <span className={plan.popular ? "text-[12px] font-medium text-[#2B2B2B]/60" : "text-[12px] font-medium text-[#F8F6F3]/60"}>
                     Cancele quando quiser
                   </span>
                 </div>
@@ -384,14 +367,14 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                 <AccordionItem
                   key={item.q}
                   value={`faq-${idx}`}
-                  className="group relative overflow-hidden rounded-[18px] border border-black/[0.05] bg-white/72 shadow-[0_22px_70px_-58px_rgba(15,15,20,0.55)] ring-1 ring-white/65 backdrop-blur-2xl transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#6E1E2A]/[0.04] hover:shadow-[0_26px_80px_-60px_rgba(15,15,20,0.60)] data-[state=open]:bg-[#6E1E2A]/[0.06] data-[state=open]:shadow-[0_28px_90px_-66px_rgba(44,20,31,0.60)] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-[3px] before:rounded-r-full before:bg-[#6E1E2A] before:opacity-0 data-[state=open]:before:opacity-100"
+                  className="group relative overflow-hidden rounded-[18px] border border-black/[0.05] bg-white/72 shadow-[0_22px_70px_-58px_rgba(15,15,20,0.55)] ring-1 ring-white/65 backdrop-blur-2xl transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_26px_80px_-60px_rgba(15,15,20,0.60)] data-[state=open]:shadow-[0_28px_90px_-66px_rgba(44,20,31,0.60)] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-[3px] before:rounded-r-full before:bg-[#6E1E2A] before:opacity-0 data-[state=open]:before:opacity-100 after:absolute after:inset-0 after:pointer-events-none after:bg-[#6E1E2A]/[0.02] hover:after:bg-[#6E1E2A]/[0.04] data-[state=open]:after:bg-[#6E1E2A]/[0.065]"
                 >
                   <AccordionTrigger
-                    className="px-5 py-4 text-left text-[14px] sm:text-[15px] font-medium tracking-tight text-[#2B2B2B] hover:no-underline [&>svg]:text-[#2B2B2B]/40 [&[data-state=open]>svg]:text-[#6E1E2A] data-[state=open]:text-[#6E1E2A]"
+                    className="px-5 py-4 text-left text-[14px] sm:text-[15px] font-serif font-semibold tracking-tight text-[#2B2B2B] hover:no-underline [&>svg]:text-[#2B2B2B]/40 [&[data-state=open]>svg]:text-[#6E1E2A] data-[state=open]:text-[#6E1E2A]"
                   >
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="px-5 pb-5 pt-0 text-[13px] sm:text-[14px] leading-relaxed text-[#2B2B2B]/70">
+                  <AccordionContent className="px-5 pb-5 pt-0 font-sans text-[13px] sm:text-[14px] leading-relaxed text-[#2B2B2B]/70">
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
