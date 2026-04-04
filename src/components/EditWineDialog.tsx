@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Save } from "@/icons/lucide";
-import { useUpdateWine, type Wine } from "@/hooks/useWines";
+import { useUpdateWine, useWineEvent, type Wine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { StockAuditDialog } from "@/components/StockAuditDialog";
 
 interface EditWineDialogProps {
   open: boolean;
@@ -26,7 +27,7 @@ const styles = [
 ];
 
 export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps) {
-  const { profileType } = useAuth();
+  const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
 
   const [name, setName] = useState("");
@@ -49,7 +50,19 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
   const [success, setSuccess] = useState(false);
 
   const updateWine = useUpdateWine();
+  const wineEvent = useWineEvent();
   const { toast } = useToast();
+  const [auditOpen, setAuditOpen] = useState(false);
+  const [pendingAudit, setPendingAudit] = useState<{
+    wineId: string;
+    wineName: string;
+    prevQty: number;
+    nextQty: number;
+    delta: number;
+    quantityAbs: number;
+    eventType: "stock_increase" | "stock_decrease";
+    baseUpdates: Record<string, any>;
+  } | null>(null);
 
   useEffect(() => {
     if (wine) {
@@ -78,26 +91,50 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
     e.preventDefault();
     if (!wine || !name.trim()) return;
 
+    const nextQty = Math.max(0, Number.parseInt(quantity || "0", 10) || 0);
+    const prevQty = wine.quantity;
+
+    const baseUpdates: Record<string, any> = {
+      name: name.trim(),
+      producer: producer || null,
+      // quantity: handled separately for commercial (audit trail required)
+      vintage: vintage ? parseInt(vintage) : null,
+      style: style || null,
+      country: country || null,
+      region: region || null,
+      grape: grape || null,
+      purchase_price: lastPaid ? parseFloat(lastPaid) : null,
+      current_value: currentValue ? parseFloat(currentValue) : null,
+      cellar_location: location || null,
+      drink_from: drinkFrom ? parseInt(drinkFrom) : null,
+      drink_until: drinkUntil ? parseInt(drinkUntil) : null,
+      food_pairing: foodPairing || null,
+      tasting_notes: notes || null,
+      rating: rating ? parseFloat(rating) : null,
+    };
+
+    if (isCommercial && nextQty !== prevQty) {
+      const delta = nextQty - prevQty;
+      setPendingAudit({
+        wineId: wine.id,
+        wineName: name.trim(),
+        prevQty,
+        nextQty,
+        delta,
+        quantityAbs: Math.abs(delta),
+        eventType: delta > 0 ? "stock_increase" : "stock_decrease",
+        baseUpdates,
+      });
+      setAuditOpen(true);
+      return;
+    }
+
     try {
       await updateWine.mutateAsync({
         id: wine.id,
         updates: {
-          name: name.trim(),
-          producer: producer || null,
-          quantity: parseInt(quantity) || 1,
-          vintage: vintage ? parseInt(vintage) : null,
-          style: style || null,
-          country: country || null,
-          region: region || null,
-          grape: grape || null,
-          purchase_price: lastPaid ? parseFloat(lastPaid) : null,
-          current_value: currentValue ? parseFloat(currentValue) : null,
-          cellar_location: location || null,
-          drink_from: drinkFrom ? parseInt(drinkFrom) : null,
-          drink_until: drinkUntil ? parseInt(drinkUntil) : null,
-          food_pairing: foodPairing || null,
-          tasting_notes: notes || null,
-          rating: rating ? parseFloat(rating) : null,
+          ...baseUpdates,
+          quantity: nextQty,
         },
       });
       setSuccess(true);
@@ -113,6 +150,51 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
         <SheetHeader>
           <SheetTitle className="font-serif text-lg">{isCommercial ? "Editar produto" : "Editar vinho"}</SheetTitle>
         </SheetHeader>
+
+        <StockAuditDialog
+          open={auditOpen}
+          onOpenChange={(v) => { setAuditOpen(v); if (!v) setPendingAudit(null); }}
+          payload={pendingAudit ? {
+            wineName: pendingAudit.wineName,
+            actionLabel: "Ajuste manual de estoque (edição)",
+            previousQuantity: pendingAudit.prevQty,
+            newQuantity: pendingAudit.nextQty,
+            delta: pendingAudit.delta,
+          } : null}
+          defaultResponsibleName={
+            typeof user?.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : undefined
+          }
+          defaultReason="Ajuste de inventário"
+          confirmLabel="Confirmar alteração"
+          busy={updateWine.isPending || wineEvent.isPending}
+          onConfirm={async ({ responsibleName, reason, notes: auditNotes }) => {
+            if (!pendingAudit) return;
+            try {
+              // 1) Update non-stock fields
+              await updateWine.mutateAsync({
+                id: pendingAudit.wineId,
+                updates: pendingAudit.baseUpdates,
+              });
+              // 2) Apply stock delta with required audit metadata
+              await wineEvent.mutateAsync({
+                wineId: pendingAudit.wineId,
+                eventType: pendingAudit.eventType,
+                quantity: pendingAudit.quantityAbs,
+                notes: auditNotes,
+                responsibleName,
+                reason,
+              });
+              setSuccess(true);
+              setTimeout(() => { setSuccess(false); onOpenChange(false); }, 900);
+            } catch (err: any) {
+              toast({
+                title: "Erro ao registrar alteração",
+                description: err?.message,
+                variant: "destructive",
+              });
+            }
+          }}
+        />
 
         <AnimatePresence mode="wait">
           {success ? (
@@ -135,7 +217,17 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground">Quantidade</Label>
-                  <Input type="number" min="0" value={quantity} onChange={e => setQuantity(e.target.value)} />
+                  <Input
+                    type="number"
+                    min="0"
+                    value={quantity}
+                    onChange={e => setQuantity(e.target.value)}
+                  />
+                  {isCommercial ? (
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      Ao salvar com quantidade diferente, você registrará responsável e motivo no log.
+                    </p>
+                  ) : null}
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Safra</Label>

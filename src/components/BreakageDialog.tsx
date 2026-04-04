@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,9 @@ import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { STOCK_AUDIT_REASONS, normalizeAuditName, normalizeAuditText } from "@/lib/stock-audit";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BreakageDialogProps {
   open: boolean;
@@ -16,10 +19,12 @@ interface BreakageDialogProps {
 }
 
 export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
+  const { user } = useAuth();
   const [wineId, setWineId] = useState("");
   const [quantity, setQuantity] = useState("1");
-  const [justification, setJustification] = useState("");
-  const [occurrenceDate, setOccurrenceDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [responsibleName, setResponsibleName] = useState("");
+  const [reason, setReason] = useState("");
+  const [notes, setNotes] = useState("");
   const [searchText, setSearchText] = useState("");
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -30,8 +35,9 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
   const reset = () => {
     setWineId("");
     setQuantity("1");
-    setJustification("");
-    setOccurrenceDate(new Date().toISOString().split("T")[0]);
+    setResponsibleName("");
+    setReason("");
+    setNotes("");
     setSearchText("");
     setSuccess(null);
   };
@@ -52,19 +58,30 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
 
   const selectedWine = wines?.find(w => w.id === wineId);
 
+  // Ruptura: quando escolher um vinho, a ação deve zerar o estoque (quantidade = estoque atual).
+  useEffect(() => {
+    if (!selectedWine) return;
+    setQuantity(String(selectedWine.quantity));
+  }, [selectedWine?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wineId || !justification.trim()) return;
+    const resp = normalizeAuditName(responsibleName);
+    const rsn = normalizeAuditText(reason);
+    const obs = normalizeAuditText(notes);
+    if (!wineId || !resp || !rsn) return;
+    if (rsn === "Outro" && !obs) return;
 
-    const qty = parseInt(quantity) || 1;
-    const noteText = `[RUPTURA ${occurrenceDate}] ${justification.trim()}`;
+    const qty = selectedWine?.quantity ?? (parseInt(quantity) || 1);
 
     try {
       await wineEvent.mutateAsync({
         wineId,
-        eventType: "exit",
+        eventType: "stockout_registered",
         quantity: qty,
-        notes: noteText,
+        notes: obs || undefined,
+        responsibleName: resp,
+        reason: rsn,
       });
       setSuccess(`Ruptura registrada: ${qty} garrafa(s) de ${selectedWine?.name ?? ""}`);
       setTimeout(() => { reset(); onOpenChange(false); }, 1500);
@@ -81,6 +98,9 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
             <AlertTriangle className="h-5 w-5 text-destructive" />
             Registrar Ruptura
           </SheetTitle>
+          <p className="text-[11px] text-muted-foreground">
+            Antes de concluir, registre quem realizou a ação e o motivo para manter o histórico da operação.
+          </p>
         </SheetHeader>
 
         <AnimatePresence mode="wait">
@@ -160,41 +180,97 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                   )}
                 </div>
 
-                {/* Quantity */}
-                <div>
-                  <Label className="text-xs text-muted-foreground">Quantidade perdida</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max={selectedWine?.quantity ?? 999}
-                    value={quantity}
-                    onChange={e => setQuantity(e.target.value)}
-                  />
+                {/* Quantity (ruptura zera o estoque) */}
+                <div className="glass-card p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+                    Resumo da ruptura
+                  </p>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">De</p>
+                      <p className="text-[16px] font-black text-foreground">{selectedWine?.quantity ?? 0}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Para</p>
+                      <p className="text-[16px] font-black text-foreground">0</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <Label className="text-xs text-muted-foreground">Quantidade zerada</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={e => setQuantity(e.target.value)}
+                      disabled
+                      className="h-9 text-[12px] rounded-xl mt-1"
+                    />
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      Ao confirmar, o estoque deste vinho será zerado e registrado no log.
+                    </p>
+                  </div>
                 </div>
 
-                {/* Date */}
-                <div>
-                  <Label className="text-xs text-muted-foreground">Quando ocorreu</Label>
-                  <Input
-                    type="date"
-                    value={occurrenceDate}
-                    onChange={e => setOccurrenceDate(e.target.value)}
-                  />
+                {/* Audit */}
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Nome do responsável *</Label>
+                    <Input
+                      placeholder="Ex.: Ana / Equipe salão / Gerência"
+                      value={responsibleName}
+                      onChange={e => setResponsibleName(e.target.value)}
+                      className="h-9 text-[12px] rounded-xl"
+                      autoComplete="off"
+                      onFocus={() => {
+                        if (!responsibleName && typeof user?.user_metadata?.full_name === "string") {
+                          setResponsibleName(String(user.user_metadata.full_name));
+                        }
+                      }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Motivo da alteração *</Label>
+                    <Select value={reason} onValueChange={setReason}>
+                      <SelectTrigger className="h-9 rounded-xl">
+                        <SelectValue placeholder="Selecionar..." />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl">
+                        {STOCK_AUDIT_REASONS.map((r) => (
+                          <SelectItem key={r} value={r}>
+                            {r}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">
+                      Observação complementar {reason === "Outro" ? "*" : "(opcional)"}
+                    </Label>
+                    <Textarea
+                      value={notes}
+                      onChange={e => setNotes(e.target.value)}
+                      rows={3}
+                      placeholder="Adicione contexto, se necessário"
+                      required={reason === "Outro"}
+                    />
+                  </div>
                 </div>
 
-                {/* Justification - required */}
-                <div>
-                  <Label className="text-xs text-muted-foreground">Justificativa *</Label>
-                  <Textarea
-                    value={justification}
-                    onChange={e => setJustification(e.target.value)}
-                    rows={3}
-                    placeholder="Descreva o motivo da ruptura (ex: garrafa quebrada, vinho estragado, furto...)"
-                    required
-                  />
-                </div>
-
-                <Button type="submit" variant="danger" disabled={wineEvent.isPending || !wineId || !justification.trim()} className="w-full h-11 text-[13px] font-medium">
+                <Button
+                  type="submit"
+                  variant="danger"
+                  disabled={
+                    wineEvent.isPending ||
+                    !wineId ||
+                    !normalizeAuditName(responsibleName) ||
+                    !normalizeAuditText(reason) ||
+                    (normalizeAuditText(reason) === "Outro" && !normalizeAuditText(notes))
+                  }
+                  className="w-full h-11 text-[13px] font-medium"
+                >
                   {wineEvent.isPending ? "Registrando..." : "Confirmar Ruptura"}
                 </Button>
               </form>

@@ -148,7 +148,21 @@ export function useWineEvent() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ wineId, eventType, quantity, notes }: { wineId: string; eventType: string; quantity: number; notes?: string }) => {
+    mutationFn: async ({
+      wineId,
+      eventType,
+      quantity,
+      notes,
+      responsibleName,
+      reason,
+    }: {
+      wineId: string;
+      eventType: string;
+      quantity: number;
+      notes?: string;
+      responsibleName?: string;
+      reason?: string;
+    }) => {
       if (!user) throw new Error("Not authenticated");
 
       const { error } = await supabase.rpc("adjust_wine_quantity", {
@@ -156,7 +170,9 @@ export function useWineEvent() {
         _user_id: user.id,
         _event_type: eventType,
         _quantity: quantity,
-        _notes: notes ?? null,
+        _notes: notes ?? undefined,
+        _responsible_name: responsibleName ?? undefined,
+        _reason: reason ?? undefined,
       });
       if (error) throw error;
     },

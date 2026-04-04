@@ -361,28 +361,49 @@ export type Database = {
       wine_events: {
         Row: {
           created_at: string
+          created_by_user_id: string | null
           event_type: string
           id: string
+          new_quantity: number | null
           notes: string | null
+          previous_quantity: number | null
+          profile_type: Database["public"]["Enums"]["profile_type"] | null
           quantity: number
+          quantity_delta: number | null
+          reason: string | null
+          responsible_name: string | null
           user_id: string
           wine_id: string
         }
         Insert: {
           created_at?: string
+          created_by_user_id?: string | null
           event_type: string
           id?: string
+          new_quantity?: number | null
           notes?: string | null
+          previous_quantity?: number | null
+          profile_type?: Database["public"]["Enums"]["profile_type"] | null
           quantity?: number
+          quantity_delta?: number | null
+          reason?: string | null
+          responsible_name?: string | null
           user_id: string
           wine_id: string
         }
         Update: {
           created_at?: string
+          created_by_user_id?: string | null
           event_type?: string
           id?: string
+          new_quantity?: number | null
           notes?: string | null
+          previous_quantity?: number | null
+          profile_type?: Database["public"]["Enums"]["profile_type"] | null
           quantity?: number
+          quantity_delta?: number | null
+          reason?: string | null
+          responsible_name?: string | null
           user_id?: string
           wine_id?: string
         }
@@ -535,6 +556,8 @@ export type Database = {
           _event_type: string
           _notes?: string
           _quantity: number
+          _reason?: string
+          _responsible_name?: string
           _user_id: string
           _wine_id: string
         }

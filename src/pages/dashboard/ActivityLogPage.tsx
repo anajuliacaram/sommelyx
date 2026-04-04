@@ -1,11 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ClipboardList, Plus, Wine, ArrowDownRight, AlertTriangle, ShoppingCart } from "@/icons/lucide";
+import { ClipboardList, Plus, Wine, ArrowDownRight, AlertTriangle, ShoppingCart, Filter, Search } from "@/icons/lucide";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWines } from "@/hooks/useWines";
 import { useSearchParams } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
+import { cn } from "@/lib/utils";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -23,7 +26,7 @@ function useWineEvents() {
       if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("wine_events")
-        .select("id,user_id,wine_id,event_type,quantity,notes,created_at")
+        .select("id,user_id,wine_id,event_type,quantity,notes,created_at,previous_quantity,new_quantity,quantity_delta,responsible_name,reason,profile_type")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(200);
@@ -34,23 +37,32 @@ function useWineEvents() {
   });
 }
 
-const eventConfig: Record<string, { label: string; icon: typeof Plus; color: string; bg: string }> = {
-  add: { label: "Adição de estoque", icon: Plus, color: "#22c55e", bg: "rgba(34,197,94,0.08)" },
-  open: { label: "Garrafa aberta", icon: Wine, color: "#8F2D56", bg: "rgba(143,45,86,0.06)" },
-  exit: { label: "Saída / Venda", icon: ArrowDownRight, color: "#C9A86A", bg: "rgba(201,168,106,0.1)" },
-};
+const eventConfig: Record<string, { label: string; icon: typeof Plus; color: string; bg: string; badge?: string }> = {
+  stock_increase: { label: "Aumento de estoque", icon: Plus, color: "#6E1E2A", bg: "rgba(110,30,42,0.08)", badge: "Entrada" },
+  stock_decrease: { label: "Redução de estoque", icon: ArrowDownRight, color: "#6E1E2A", bg: "rgba(110,30,42,0.08)", badge: "Saída" },
+  stock_adjustment: { label: "Ajuste de estoque", icon: Filter, color: "#6E1E2A", bg: "rgba(110,30,42,0.08)", badge: "Ajuste" },
+  stockout_registered: { label: "Ruptura registrada", icon: AlertTriangle, color: "#ef4444", bg: "rgba(239,68,68,0.09)", badge: "Ruptura" },
 
-function getEventMeta(notes: string | null) {
-  if (notes?.startsWith("[RUPTURA")) return { type: "ruptura" as const, label: "Ruptura", icon: AlertTriangle, color: "#ef4444", bg: "rgba(239,68,68,0.08)" };
-  if (notes?.startsWith("[VENDA]")) return { type: "venda" as const, label: "Venda", icon: ShoppingCart, color: "#C9A86A", bg: "rgba(201,168,106,0.1)" };
-  return null;
-}
+  // Back-compat
+  add: { label: "Adição de estoque", icon: Plus, color: "#6E1E2A", bg: "rgba(110,30,42,0.08)", badge: "Entrada" },
+  open: { label: "Garrafa aberta", icon: Wine, color: "#8F2D56", bg: "rgba(143,45,86,0.06)", badge: "Abertura" },
+  exit: { label: "Saída / Venda", icon: ShoppingCart, color: "#C9A86A", bg: "rgba(201,168,106,0.10)", badge: "Venda" },
+};
 
 export default function ActivityLogPage() {
   const { data: events, isLoading } = useWineEvents();
   const { data: wines } = useWines();
   const [searchParams] = useSearchParams();
   const wineFilterId = searchParams.get("wine");
+  const { profileType } = useAuth();
+  const isCommercial = profileType === "commercial";
+
+  const [q, setQ] = useState("");
+  const [responsibleQ, setResponsibleQ] = useState("");
+  const [reasonFilters, setReasonFilters] = useState<string[]>([]);
+  const [typeFilters, setTypeFilters] = useState<string[]>([]);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const wineMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -58,12 +70,35 @@ export default function ActivityLogPage() {
     return map;
   }, [wines]);
 
-  // Group by date
   const filteredEvents = useMemo(() => {
     if (!events) return [];
-    if (!wineFilterId) return events;
-    return events.filter((ev) => ev.wine_id === wineFilterId);
-  }, [events, wineFilterId]);
+    let list = events;
+    if (wineFilterId) list = list.filter((ev) => ev.wine_id === wineFilterId);
+
+    const qn = q.trim().toLowerCase();
+    const rn = responsibleQ.trim().toLowerCase();
+    if (qn) {
+      list = list.filter((ev) => (wineMap.get(ev.wine_id) ?? "").toLowerCase().includes(qn));
+    }
+    if (rn) {
+      list = list.filter((ev) => (ev.responsible_name ?? "").toLowerCase().includes(rn));
+    }
+    if (reasonFilters.length) {
+      list = list.filter((ev) => reasonFilters.includes(ev.reason ?? ""));
+    }
+    if (typeFilters.length) {
+      list = list.filter((ev) => typeFilters.includes(ev.event_type));
+    }
+    if (fromDate) {
+      const from = new Date(fromDate + "T00:00:00");
+      list = list.filter((ev) => new Date(ev.created_at) >= from);
+    }
+    if (toDate) {
+      const to = new Date(toDate + "T23:59:59");
+      list = list.filter((ev) => new Date(ev.created_at) <= to);
+    }
+    return list;
+  }, [events, wineFilterId, q, responsibleQ, reasonFilters, typeFilters, fromDate, toDate, wineMap]);
 
   const grouped = useMemo(() => {
     if (!filteredEvents.length) return [];
@@ -101,6 +136,58 @@ export default function ActivityLogPage() {
         <p className="text-[11px] text-muted-foreground">Registro de todas as movimentações</p>
       </motion.div>
 
+      {isCommercial ? (
+        <div className="glass-card p-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Buscar por vinho..."
+                  className="h-10 pl-9 rounded-2xl"
+                />
+              </div>
+              <div className="relative flex-1">
+                <Input
+                  value={responsibleQ}
+                  onChange={(e) => setResponsibleQ(e.target.value)}
+                  placeholder="Responsável..."
+                  className="h-10 rounded-2xl"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+              <MultiSelectDropdown
+                title="Tipo"
+                options={Array.from(new Set((events ?? []).map((e) => e.event_type))).sort().map((v) => ({ label: eventConfig[v]?.label ?? v, value: v }))}
+                selected={typeFilters}
+                onChange={(v) => setTypeFilters((prev) => prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v])}
+                onClear={() => setTypeFilters([])}
+                searchPlaceholder="Buscar tipo..."
+                searchable
+              />
+              <MultiSelectDropdown
+                title="Motivo"
+                options={Array.from(new Set((events ?? []).map((e) => e.reason).filter(Boolean) as string[])).sort().map((v) => ({ label: v, value: v }))}
+                selected={reasonFilters}
+                onChange={(v) => setReasonFilters((prev) => prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v])}
+                onClear={() => setReasonFilters([])}
+                searchPlaceholder="Buscar motivo..."
+                searchable
+              />
+              <div className="flex items-center gap-2">
+                <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-9 rounded-xl" />
+                <span className="text-[11px] text-muted-foreground">até</span>
+                <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-9 rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {(!filteredEvents || filteredEvents.length === 0) ? (
         <div className="glass-card p-8 text-center">
           <ClipboardList className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
@@ -113,21 +200,17 @@ export default function ActivityLogPage() {
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 px-1">{group.label}</p>
               <div className="space-y-1">
                 {group.items.map(ev => {
-                  const meta = getEventMeta(ev.notes);
-                  const cfg = meta
-                    ? { label: meta.label, icon: meta.icon, color: meta.color, bg: meta.bg }
-                    : eventConfig[ev.event_type] ?? eventConfig.exit;
+                  const cfg = eventConfig[ev.event_type] ?? eventConfig.exit;
                   const Icon = cfg.icon;
                   const wineName = wineMap.get(ev.wine_id) ?? "Vinho removido";
                   const time = new Date(ev.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-                  // Clean notes for display
-                  let displayNotes = ev.notes || "";
-                  if (displayNotes.startsWith("[RUPTURA")) {
-                    displayNotes = displayNotes.replace(/^\[RUPTURA [^\]]*\]\s*/, "");
-                  } else if (displayNotes.startsWith("[VENDA]")) {
-                    displayNotes = displayNotes.replace(/^\[VENDA\]\s*/, "");
-                  }
+                  const displayNotes = ev.notes || "";
+                  const prev = (ev as any).previous_quantity as number | null;
+                  const next = (ev as any).new_quantity as number | null;
+                  const delta = (ev as any).quantity_delta as number | null;
+                  const responsible = (ev as any).responsible_name as string | null;
+                  const reason = (ev as any).reason as string | null;
 
                   return (
                     <div key={ev.id} className="glass-card p-3 flex items-start gap-3">
@@ -137,13 +220,36 @@ export default function ActivityLogPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: cfg.color }}>{cfg.label}</span>
+                          {cfg.badge ? (
+                            <span className={cn("ml-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] ring-1", ev.event_type === "stockout_registered" ? "bg-destructive/10 text-destructive ring-destructive/20" : "bg-[#6E1E2A]/8 text-[#6E1E2A] ring-[#6E1E2A]/14")}>
+                              {cfg.badge}
+                            </span>
+                          ) : null}
                           <span className="text-[9px] text-muted-foreground">· {time}</span>
                         </div>
                         <p className="text-[11px] font-semibold text-foreground truncate">{wineName}</p>
-                        {displayNotes && <p className="text-[9px] text-muted-foreground truncate mt-0.5">{displayNotes}</p>}
+                        {isCommercial && prev != null && next != null ? (
+                          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground">
+                            <span>De: <span className="font-semibold text-foreground">{prev}</span></span>
+                            <span>Para: <span className="font-semibold text-foreground">{next}</span></span>
+                            {delta != null ? (
+                              <span>Variação: <span className="font-semibold text-foreground">{delta > 0 ? `+${delta}` : `${delta}`}</span></span>
+                            ) : null}
+                          </div>
+                        ) : null}
+                        {isCommercial && (responsible || reason) ? (
+                          <p className="mt-1 text-[10px] text-muted-foreground truncate">
+                            {responsible ? <>Responsável: <span className="font-semibold text-foreground">{responsible}</span></> : null}
+                            {responsible && reason ? <span className="text-muted-foreground"> · </span> : null}
+                            {reason ? <>Motivo: <span className="font-semibold text-foreground">{reason}</span></> : null}
+                          </p>
+                        ) : null}
+                        {displayNotes ? <p className="text-[9px] text-muted-foreground truncate mt-0.5">{displayNotes}</p> : null}
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="text-[12px] font-black text-foreground">{ev.event_type === "add" ? "+" : "−"}{ev.quantity}</span>
+                        <span className="text-[12px] font-black text-foreground">
+                          {(delta != null ? (delta > 0 ? "+" : "") + String(delta) : (ev.event_type === "add" || ev.event_type === "stock_increase" ? "+" : "−") + String(ev.quantity))}
+                        </span>
                         <p className="text-[8px] text-muted-foreground">un.</p>
                       </div>
                     </div>

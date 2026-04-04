@@ -40,6 +40,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { StockAuditDialog } from "@/components/StockAuditDialog";
 
 // --- Types & Constants ---
 type StockStatus = "all" | "in-stock" | "low" | "out" | "aging" | "drink-now";
@@ -54,6 +56,8 @@ export default function InventoryPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
+    const { user, profileType } = useAuth();
+    const isCommercial = profileType === "commercial";
 
     // --- States ---
     const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -65,6 +69,17 @@ export default function InventoryPage() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
     const [stockBusyWineId, setStockBusyWineId] = useState<string | null>(null);
+    const [auditOpen, setAuditOpen] = useState(false);
+    const [auditPayload, setAuditPayload] = useState<{
+        wineId: string;
+        wineName: string;
+        prevQty: number;
+        nextQty: number;
+        delta: number;
+        eventType: "stock_increase" | "stock_decrease";
+        quantityAbs: number;
+        actionLabel: string;
+    } | null>(null);
 
     // Filter Values (from URL)
     const statusFilter = (searchParams.get("status") as StockStatus) || "all";
@@ -281,9 +296,33 @@ export default function InventoryPage() {
 
     const handleQuickStock = async (wineId: string, diff: number) => {
         if (stockBusyWineId === wineId) return;
+        const wine = wines.find(w => w.id === wineId);
+        if (!wine) return;
+
+        const prevQty = wine.quantity;
+        const quantityAbs = Math.abs(diff);
+        const nextQty = Math.max(0, prevQty + diff);
+        const eventType = diff > 0 ? "stock_increase" : "stock_decrease";
+        const actionLabel = diff > 0 ? "Aumento manual de estoque" : "Redução manual de estoque";
+
+        if (isCommercial) {
+            setAuditPayload({
+                wineId,
+                wineName: wine.name,
+                prevQty,
+                nextQty,
+                delta: nextQty - prevQty,
+                eventType,
+                quantityAbs,
+                actionLabel,
+            });
+            setAuditOpen(true);
+            return;
+        }
+
         try {
             setStockBusyWineId(wineId);
-            await wineEvent.mutateAsync({ wineId, eventType: diff > 0 ? "add" : "open", quantity: Math.abs(diff) });
+            await wineEvent.mutateAsync({ wineId, eventType: diff > 0 ? "add" : "open", quantity: quantityAbs });
             toast({ title: diff > 0 ? "Entrada registrada!" : "Saída registrada!", variant: "default" });
         } catch {
             toast({ title: "Erro ao atualizar estoque.", variant: "destructive" });
@@ -316,6 +355,45 @@ export default function InventoryPage() {
 
     return (
         <div className="space-y-4 md:space-y-5 max-w-[1440px] pb-[calc(72px+env(safe-area-inset-bottom))] relative">
+            <StockAuditDialog
+                open={auditOpen}
+                onOpenChange={(v) => { setAuditOpen(v); if (!v) setAuditPayload(null); }}
+                payload={auditPayload ? {
+                    wineName: auditPayload.wineName,
+                    actionLabel: auditPayload.actionLabel,
+                    previousQuantity: auditPayload.prevQty,
+                    newQuantity: auditPayload.nextQty,
+                    delta: auditPayload.delta,
+                } : null}
+                defaultResponsibleName={
+                    typeof user?.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : undefined
+                }
+                defaultReason={auditPayload?.eventType === "stock_increase" ? "Entrada manual" : "Ajuste de inventário"}
+                confirmLabel="Confirmar alteração"
+                busy={auditPayload ? stockBusyWineId === auditPayload.wineId : false}
+                onConfirm={async ({ responsibleName, reason, notes }) => {
+                    if (!auditPayload) return;
+                    try {
+                        setStockBusyWineId(auditPayload.wineId);
+                        await wineEvent.mutateAsync({
+                            wineId: auditPayload.wineId,
+                            eventType: auditPayload.eventType,
+                            quantity: auditPayload.quantityAbs,
+                            notes,
+                            responsibleName,
+                            reason,
+                        });
+                        toast({
+                            title: auditPayload.delta > 0 ? "Entrada registrada!" : "Saída registrada!",
+                            variant: "default",
+                        });
+                    } catch (err: any) {
+                        toast({ title: "Erro ao atualizar estoque.", description: err?.message, variant: "destructive" });
+                    } finally {
+                        setStockBusyWineId((current) => (current === auditPayload.wineId ? null : current));
+                    }
+                }}
+            />
 
             {/* --- HEADER --- */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">

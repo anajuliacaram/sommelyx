@@ -9,6 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Wine } from "@/hooks/useWines";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { STOCK_AUDIT_REASONS, normalizeAuditName, normalizeAuditText } from "@/lib/stock-audit";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SaleItem {
   id: string;
@@ -25,8 +28,12 @@ interface SaleDialogProps {
 }
 
 export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
+  const { user } = useAuth();
   const [items, setItems] = useState<SaleItem[]>([]);
   const [customer, setCustomer] = useState("");
+  const [responsibleName, setResponsibleName] = useState("");
+  const [reason, setReason] = useState("Venda");
+  const [auditNotes, setAuditNotes] = useState("");
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,6 +50,9 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
   const reset = () => {
     setItems([]);
     setCustomer("");
+    setResponsibleName("");
+    setReason("Venda");
+    setAuditNotes("");
     setSuccess(null);
     setPickingItem(false);
     setSearchText("");
@@ -91,6 +101,11 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
   const handleSubmit = async () => {
     if (items.length === 0) return;
+    const resp = normalizeAuditName(responsibleName);
+    const rsn = normalizeAuditText(reason);
+    const obs = normalizeAuditText(auditNotes);
+    if (!resp || !rsn) return;
+    if (rsn === "Outro" && !obs) return;
     setIsSubmitting(true);
 
     try {
@@ -100,7 +115,13 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
           wineId: item.wineId,
           eventType: "exit",
           quantity: item.quantity,
-          notes: `[VENDA] Cliente: ${customer || "N/A"} | R$ ${item.unitPrice.toFixed(2)} × ${item.quantity} = R$ ${(item.unitPrice * item.quantity).toFixed(2)}`,
+          notes: [
+            customer ? `Cliente: ${customer}` : null,
+            obs ? `Obs: ${obs}` : null,
+            `R$ ${item.unitPrice.toFixed(2)} × ${item.quantity} = R$ ${(item.unitPrice * item.quantity).toFixed(2)}`,
+          ].filter(Boolean).join(" | "),
+          responsibleName: resp,
+          reason: rsn,
         });
       }
 
@@ -152,6 +173,61 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
             </motion.div>
           ) : (
             <motion.div key="form" className="mt-5 space-y-4">
+              <div className="glass-card p-4 space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+                  Auditoria da operação
+                </p>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Nome do responsável *</Label>
+                    <Input
+                      placeholder="Ex.: Ana / Equipe salão / Gerência"
+                      value={responsibleName}
+                      onChange={e => setResponsibleName(e.target.value)}
+                      className="h-9 text-[12px]"
+                      autoComplete="off"
+                      onFocus={() => {
+                        if (!responsibleName && typeof user?.user_metadata?.full_name === "string") {
+                          setResponsibleName(String(user.user_metadata.full_name));
+                        }
+                      }}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Motivo *</Label>
+                      <Select value={reason} onValueChange={setReason}>
+                        <SelectTrigger className="h-9 rounded-xl">
+                          <SelectValue placeholder="Selecionar..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl">
+                          {STOCK_AUDIT_REASONS.map((r) => (
+                            <SelectItem key={r} value={r}>
+                              {r}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-muted-foreground">
+                        Observação {reason === "Outro" ? "*" : "(opcional)"}
+                      </Label>
+                      <Input
+                        placeholder="Ex.: mesa 14 / jantar harmonizado"
+                        value={auditNotes}
+                        onChange={(e) => setAuditNotes(e.target.value)}
+                        className="h-9 text-[12px]"
+                        required={reason === "Outro"}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Customer */}
               <div>
                 <Label className="text-xs text-muted-foreground">Cliente</Label>
@@ -309,7 +385,13 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
               <Button
                 onClick={handleSubmit}
-                disabled={isSubmitting || items.length === 0}
+                disabled={
+                  isSubmitting ||
+                  items.length === 0 ||
+                  !normalizeAuditName(responsibleName) ||
+                  !normalizeAuditText(reason) ||
+                  (normalizeAuditText(reason) === "Outro" && !normalizeAuditText(auditNotes))
+                }
                 variant="primary"
                 className="w-full h-11 text-[13px] font-medium shadow-float"
               >
