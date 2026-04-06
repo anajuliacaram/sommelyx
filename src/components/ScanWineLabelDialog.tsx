@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { invokeEdgeFunction } from "@/lib/edge-invoke";
+import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 
 interface ScannedWineData {
   name: string | null;
@@ -35,6 +35,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [scannedData, setScannedData] = useState<ScannedWineData | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [supportCode, setSupportCode] = useState<string | null>(null);
+  const [lastBase64, setLastBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -44,6 +46,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setImagePreview(null);
     setScannedData(null);
     setErrorMsg("");
+    setSupportCode(null);
+    setLastBase64(null);
   };
 
   const handleClose = (v: boolean) => {
@@ -80,6 +84,50 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     });
   }, []);
 
+  const runScan = useCallback(async (base64: string) => {
+    setStep("scanning");
+    setErrorMsg("");
+    setSupportCode(null);
+
+    try {
+      const data = await invokeEdgeFunction<any>(
+        "scan-wine-label",
+        { imageBase64: base64 },
+        { timeoutMs: 75_000, retries: 2 },
+      );
+
+      if (!data?.wine) throw new Error("Nenhum dado encontrado");
+
+      setScannedData(data.wine as ScannedWineData);
+      setStep("preview");
+    } catch (err: unknown) {
+      console.error("Scan error:", err);
+
+      const e = err as any;
+      const code = e?.code as string | undefined;
+
+      let msg = e?.message || "Não foi possível analisar o rótulo";
+      if (err instanceof EdgeFunctionError) {
+        setSupportCode(err.requestId ?? null);
+      }
+
+      if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
+        msg = "Sua sessão expirou. Faça login novamente para continuar.";
+      } else if (code === "IMAGE_TOO_LARGE") {
+        msg = "A imagem está muito grande. Tente uma foto mais leve.";
+      } else if (code === "LABEL_NOT_IDENTIFIED") {
+        msg = "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
+      } else if (code === "AI_TIMEOUT") {
+        msg = "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.";
+      } else if (code === "AI_UNAVAILABLE" || code === "AI_RATE_LIMIT") {
+        msg = "A análise não pôde ser concluída agora. Tente novamente em instantes.";
+      }
+
+      setErrorMsg(msg);
+      setStep("error");
+    }
+  }, []);
+
   const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Selecione uma imagem válida", variant: "destructive" });
@@ -92,24 +140,15 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
     try {
       const base64 = await compressImage(file);
-
-      const data = await invokeEdgeFunction<any>(
-        "scan-wine-label",
-        { imageBase64: base64 },
-        { timeoutMs: 75_000, retries: 2 },
-      );
-
-      if (data?.error) throw new Error(String(data.error));
-      if (!data?.wine) throw new Error("Nenhum dado encontrado");
-
-      setScannedData(data.wine as ScannedWineData);
-      setStep("preview");
+      setLastBase64(base64);
+      await runScan(base64);
     } catch (err: any) {
-      console.error("Scan error:", err);
-      setErrorMsg(err.message || "Não foi possível analisar o rótulo");
+      console.error("Image error:", err);
+      setSupportCode(null);
+      setErrorMsg("Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo.");
       setStep("error");
     }
-  }, [compressImage, toast]);
+  }, [compressImage, runScan, toast]);
 
   const handleConfirm = () => {
     if (!scannedData) return;
@@ -294,11 +333,23 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <div className="text-center">
                 <p className="text-sm font-medium text-foreground mb-1">Não foi possível analisar</p>
                 <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
+                {supportCode && (
+                  <p className="text-[10px] text-muted-foreground mt-2">Código do suporte: {supportCode}</p>
+                )}
               </div>
-              <Button onClick={reset} variant="secondary" className="h-11 px-6 text-[13px]">
-                <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                Tentar novamente
-              </Button>
+              <div className="flex flex-col gap-2 w-full">
+                <Button
+                  onClick={() => (lastBase64 ? runScan(lastBase64) : reset())}
+                  variant="secondary"
+                  className="h-11 px-6 text-[13px]"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  Tentar novamente
+                </Button>
+                <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-border/70 bg-background/60 hover:bg-background">
+                  Cadastrar manualmente
+                </Button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

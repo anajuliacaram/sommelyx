@@ -8,6 +8,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const FUNCTION_NAME = "scan-wine-label";
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB (tamanho aproximado da string base64)
+const AI_TIMEOUT_MS = 35_000;
+const OPENAI_URL = "https://api.openai.com/v1/responses";
+const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
+
 // ── Simple in-memory rate limiter ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 10;
@@ -32,8 +38,60 @@ setInterval(() => {
   }
 }, 120_000);
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB base64
-const FUNCTION_NAME = "scan-wine-label";
+type FailPayload = {
+  ok: false;
+  error: string;
+  code: string;
+  requestId: string;
+  retryable?: boolean;
+};
+
+function jsonResponse(status: number, body: Record<string, unknown>) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function fail(status: number, payload: FailPayload) {
+  return jsonResponse(status, payload);
+}
+
+function getBearerToken(authHeader: string) {
+  return authHeader.replace(/^Bearer\s+/i, "").trim();
+}
+
+function normalizeBase64(input: string) {
+  const trimmed = input.trim();
+  const idx = trimmed.indexOf("base64,");
+  if (idx !== -1) return trimmed.slice(idx + "base64,".length).trim();
+  return trimmed;
+}
+
+function safeJsonParse(value: unknown): unknown | null {
+  if (!value) return null;
+  if (typeof value === "object") return value;
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function extractJsonFromText(text: string) {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+  const candidate = text.slice(start, end + 1);
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    return null;
+  }
+}
 
 function normalizeStyle(value: unknown) {
   const v = typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -63,13 +121,14 @@ async function logAudit(
   statusCode: number,
   outcome: string,
   durationMs: number,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ) {
   try {
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SERVICE_ROLE_KEY")!,
     );
+
     await adminClient.from("edge_function_logs").insert({
       user_id: userId,
       function_name: FUNCTION_NAME,
@@ -84,197 +143,285 @@ async function logAudit(
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const startTime = Date.now();
   let userId = "anonymous";
+  const requestId = crypto.randomUUID();
 
   try {
-    // ── JWT Authentication ──
-    const authHeader = req.headers.get("Authorization");
+    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        request_id: requestId,
+        reason: "missing_or_invalid_authorization_header",
+        has_authorization_header: Boolean(authHeader),
+      });
+      return fail(401, {
+        ok: false,
+        code: "AUTH_REQUIRED",
+        error: "Sua sessão expirou. Faça login novamente para continuar.",
+        requestId,
+        retryable: false,
       });
     }
 
+    const token = getBearerToken(authHeader);
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
+      { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Passar o token explicitamente evita falhas quando o header global não é aplicado.
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        request_id: requestId,
+        reason: "invalid_token",
+        supabase_error: userError ? { message: userError.message, status: (userError as any).status } : null,
+        token_length: token?.length ?? 0,
+      });
+      return fail(401, {
+        ok: false,
+        code: "AUTH_INVALID",
+        error: "Sua sessão não é válida. Faça login novamente para continuar.",
+        requestId,
+        retryable: false,
       });
     }
 
     userId = user.id;
 
-    // ── Rate Limiting ──
     if (!checkRateLimit(userId)) {
-      await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, { request_id: requestId });
+      return fail(429, {
+        ok: false,
+        code: "RATE_LIMITED",
+        error: "Muitas tentativas em pouco tempo. Tente novamente em instantes.",
+        requestId,
+        retryable: true,
       });
     }
 
-    // ── Input Validation ──
-    const { imageBase64 } = await req.json();
-    if (!imageBase64 || typeof imageBase64 !== "string") {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_image" });
-      return new Response(JSON.stringify({ error: "Imagem não fornecida" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    let payload: { imageBase64?: unknown } = {};
+    try {
+      payload = await req.json();
+    } catch {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "invalid_json" });
+      return fail(400, {
+        ok: false,
+        code: "INVALID_REQUEST",
+        error: "Não foi possível ler sua solicitação. Tente novamente.",
+        requestId,
+        retryable: true,
       });
     }
 
+    const imageBase64Raw = payload?.imageBase64;
+    if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "missing_image" });
+      return fail(400, {
+        ok: false,
+        code: "MISSING_IMAGE",
+        error: "Envie uma foto do rótulo para analisar.",
+        requestId,
+        retryable: false,
+      });
+    }
+
+    const imageBase64 = normalizeBase64(imageBase64Raw);
     if (imageBase64.length > MAX_IMAGE_SIZE) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+      await logAudit(userId, 413, "validation_error", Date.now() - startTime, {
+        request_id: requestId,
         reason: "image_too_large",
         size_bytes: imageBase64.length,
       });
-      return new Response(JSON.stringify({ error: "Imagem muito grande. Máximo 10MB." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return fail(413, {
+        ok: false,
+        code: "IMAGE_TOO_LARGE",
+        error: "A imagem está muito grande. Tente novamente com uma foto mais leve.",
+        requestId,
+        retryable: false,
       });
     }
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) {
-      console.error("Missing required API key configuration");
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    const openaiModel = Deno.env.get("OPENAI_MODEL") || DEFAULT_OPENAI_MODEL;
+
+    if (!openaiKey) {
+      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing OPENAI_API_KEY`);
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_openai_key" });
+      return fail(500, {
+        ok: false,
+        code: "CONFIG_ERROR",
+        error: "A análise não pôde ser concluída agora. Tente novamente mais tarde.",
+        requestId,
+        retryable: true,
       });
     }
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            {
-              role: "system",
-              content: `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
-Regras:
-- Responda APENAS via tool_call.
-- "style" DEVE ser: tinto, branco, rose, espumante, sobremesa, fortificado.
-- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc).
-- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.
-- tasting_notes: 1-2 frases curtas em português (perfil esperado).
-- food_pairing: 2-3 sugestões em português.
-- Leia todo texto visível no rótulo (frente e verso, se aparecer).`,
-            },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "Analise este rótulo de vinho e extraia todas as informações possíveis.",
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:image/jpeg;base64,${imageBase64}`,
+    const response = await fetch(OPENAI_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${openaiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: openaiModel,
+        // Responses API: input items include text + image.
+        input: [
+          {
+            role: "system",
+            content: [
+              {
+                type: "input_text",
+                text:
+                  `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão.\n\n` +
+                  `Regras:\n` +
+                  `- Retorne APENAS JSON seguindo o schema (sem texto extra).\n` +
+                  `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado.\n` +
+                  `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc).\n` +
+                  `- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.\n` +
+                  `- tasting_notes: 1-2 frases curtas em português (perfil esperado).\n` +
+                  `- food_pairing: 2-3 sugestões em português.\n` +
+                  `- Leia todo texto visível no rótulo (frente e verso, se aparecer).`,
+              },
+            ],
+          },
+          {
+            role: "user",
+            content: [
+              { type: "input_text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
+              { type: "input_image", image_url: `data:image/jpeg;base64,${imageBase64}` },
+            ],
+          },
+        ],
+        // Enforce a strict JSON schema output for reliability.
+        format: {
+          type: "json_schema",
+          name: "wine_label",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              wine: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  producer: { type: "string" },
+                  vintage: { anyOf: [{ type: "integer" }, { type: "null" }] },
+                  style: {
+                    anyOf: [
+                      { type: "string", enum: ["tinto", "branco", "rose", "espumante", "sobremesa", "fortificado"] },
+                      { type: "null" },
+                    ],
                   },
+                  country: { anyOf: [{ type: "string" }, { type: "null" }] },
+                  region: { anyOf: [{ type: "string" }, { type: "null" }] },
+                  grape: { anyOf: [{ type: "string" }, { type: "null" }] },
+                  food_pairing: { anyOf: [{ type: "string" }, { type: "null" }] },
+                  tasting_notes: { anyOf: [{ type: "string" }, { type: "null" }] },
+                  cellar_location: { anyOf: [{ type: "string" }, { type: "null" }] },
+                  purchase_price: { anyOf: [{ type: "number" }, { type: "null" }] },
+                  drink_from: { anyOf: [{ type: "integer" }, { type: "null" }] },
+                  drink_until: { anyOf: [{ type: "integer" }, { type: "null" }] },
                 },
-              ],
-            },
-          ],
-          tools: [
-            {
-              type: "function",
-              function: {
-                name: "extract_wine",
-                description: "Extrair dados estruturados de um rótulo de vinho",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    wine: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string" },
-                        producer: { type: "string" },
-                        vintage: { type: "number" },
-                        style: { type: "string" },
-                        country: { type: "string" },
-                        region: { type: "string" },
-                        grape: { type: "string" },
-                        food_pairing: { type: "string" },
-                        tasting_notes: { type: "string" },
-                        cellar_location: { type: "string" },
-                        purchase_price: { type: "number" },
-                        drink_from: { type: "number" },
-                        drink_until: { type: "number" },
-                      },
-                      required: ["name"],
-                    },
-                  },
-                  required: ["wine"],
-                },
+                required: ["name"],
               },
             },
-          ],
-          tool_choice: { type: "function", function: { name: "extract_wine" } },
-          temperature: 0.1,
-          max_tokens: 900,
-        }),
-      }
-    );
+            required: ["wine"],
+          },
+        },
+        temperature: 0.1,
+        max_output_tokens: 900,
+      }),
+    });
+
+    clearTimeout(timeout);
+    const durationMs = Date.now() - startTime;
 
     if (!response.ok) {
+      const bodyText = await response.text().catch(() => "");
       if (response.status === 429) {
-        await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
-        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+        await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
+        return fail(429, {
+          ok: false,
+          code: "AI_RATE_LIMIT",
+          error: "Muitas requisições agora. Tente novamente em instantes.",
+          requestId,
+          retryable: true,
         });
       }
       if (response.status === 402) {
-        await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
-        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        await logAudit(userId, 402, "ai_error", durationMs, { request_id: requestId, reason: "credits_exhausted" });
+        return fail(402, {
+          ok: false,
+          code: "AI_CREDITS_EXHAUSTED",
+          error: "A análise não está disponível no momento. Tente novamente mais tarde.",
+          requestId,
+          retryable: true,
         });
       }
-      console.error("AI Gateway error:", response.status);
-      await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: response.status });
-      return new Response(JSON.stringify({ error: "Serviço de análise indisponível. Tente novamente." }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+      console.error(`[${FUNCTION_NAME}] request_id=${requestId} ai_status=${response.status} body=${bodyText.slice(0, 240)}`);
+      await logAudit(userId, 502, "ai_error", durationMs, {
+        request_id: requestId,
+        ai_status: response.status,
+        ai_body_preview: bodyText.slice(0, 400),
+      });
+      return fail(502, {
+        ok: false,
+        code: "AI_UNAVAILABLE",
+        error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+        requestId,
+        retryable: true,
       });
     }
 
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "no_tool_call" });
-      return new Response(JSON.stringify({ error: "Não foi possível extrair dados do rótulo." }), {
-        status: 422,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const data = await response.json().catch(() => null);
+    if (!data) {
+      await logAudit(userId, 502, "ai_error", durationMs, { request_id: requestId, reason: "invalid_ai_json" });
+      return fail(502, {
+        ok: false,
+        code: "AI_INVALID_RESPONSE",
+        error: "O serviço de análise retornou uma resposta inválida. Tente novamente.",
+        requestId,
+        retryable: true,
       });
     }
 
-    const parsed = JSON.parse(toolCall.function.arguments);
-    const wine = parsed?.wine ?? {};
+    // Responses API: prefer `output_text` when available, otherwise traverse `output[]`.
+    const rawTextDirect = typeof (data as any)?.output_text === "string" ? String((data as any).output_text) : "";
+    const outputItems = Array.isArray((data as any)?.output) ? (data as any).output : [];
+    const firstMessage =
+      outputItems.find((it: any) => it?.type === "message" && it?.role === "assistant") ??
+      outputItems.find((it: any) => it?.type === "message") ??
+      outputItems[0];
+    const content = Array.isArray(firstMessage?.content) ? firstMessage.content : [];
+    const textPart = content.find((c: any) => c?.type === "output_text") ?? null;
+    const rawTextFromItems = typeof textPart?.text === "string" ? textPart.text : "";
+    const rawText = rawTextDirect || rawTextFromItems;
+
+    const parsedArgs = safeJsonParse(rawText) ?? extractJsonFromText(rawText);
+
+    if (!parsedArgs || typeof parsedArgs !== "object") {
+      await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "no_structured_output" });
+      return fail(422, {
+        ok: false,
+        code: "LABEL_NOT_IDENTIFIED",
+        error: "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.",
+        requestId,
+        retryable: false,
+      });
+    }
+
+    const parsed = parsedArgs as Record<string, unknown>;
+    const wine = (parsed?.wine ?? parsed) as Record<string, unknown>;
 
     const normalizedWine = {
       name: typeof wine.name === "string" ? wine.name.trim() : null,
@@ -292,22 +439,52 @@ Regras:
       drink_until: normalizeNumber(wine.drink_until),
     };
 
-    await logAudit(userId, 200, "success", Date.now() - startTime, {
+    if (!normalizedWine.name) {
+      await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "missing_name" });
+      return fail(422, {
+        ok: false,
+        code: "LABEL_NOT_IDENTIFIED",
+        error: "Não foi possível identificar o nome do vinho com segurança. Tente outra foto ou cadastre manualmente.",
+        requestId,
+        retryable: false,
+      });
+    }
+
+    await logAudit(userId, 200, "success", durationMs, {
+      request_id: requestId,
       wine_name: normalizedWine.name || "unknown",
     });
 
-    return new Response(JSON.stringify({ wine: normalizedWine }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse(200, { ok: true, wine: normalizedWine, requestId });
   } catch (error) {
-    console.error("Error in scan-wine-label:", error instanceof Error ? error.message : "unknown");
-    await logAudit(userId, 500, "internal_error", Date.now() - startTime);
-    return new Response(
-      JSON.stringify({ error: "Falha ao analisar o rótulo. Tente novamente." }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    const durationMs = Date.now() - startTime;
+    const errMsg = error instanceof Error ? error.message : "unknown";
+    const isAbort = errMsg.toLowerCase().includes("aborted") || errMsg.toLowerCase().includes("abort");
+
+    console.error(`[${FUNCTION_NAME}] request_id=${requestId} user_id=${userId} error=${errMsg}`);
+
+    await logAudit(userId, isAbort ? 504 : 500, "internal_error", durationMs, {
+      request_id: requestId,
+      error: errMsg,
+      aborted: isAbort,
+    });
+
+    if (isAbort) {
+      return fail(504, {
+        ok: false,
+        code: "AI_TIMEOUT",
+        error: "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.",
+        requestId,
+        retryable: true,
+      });
+    }
+
+    return fail(500, {
+      ok: false,
+      code: "INTERNAL_ERROR",
+      error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+      requestId,
+      retryable: true,
+    });
   }
 });
