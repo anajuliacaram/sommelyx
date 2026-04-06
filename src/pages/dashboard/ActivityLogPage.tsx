@@ -25,14 +25,20 @@ function useWineEvents() {
     queryKey: ["wine_events", user?.id],
     queryFn: async () => {
       if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("wine_events")
         .select("id,user_id,wine_id,event_type,quantity,notes,created_at,previous_quantity,new_quantity,quantity_delta,responsible_name,reason,profile_type")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;
-      return data;
+      return (data ?? []) as Array<{
+        id: string; user_id: string; wine_id: string; event_type: string;
+        quantity: number; notes: string | null; created_at: string;
+        previous_quantity: number | null; new_quantity: number | null;
+        quantity_delta: number | null; responsible_name: string | null;
+        reason: string | null; profile_type: string | null;
+      }>;
     },
     enabled: !!user,
   });
@@ -249,7 +255,7 @@ export default function ActivityLogPage() {
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: cfg.color }}>{cfg.label}</span>
                           {cfg.badge ? (
-                            <span className={cn("ml-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] ring-1", ev.event_type === "stockout_registered" ? "bg-destructive/10 text-destructive ring-destructive/20" : "bg-[#6E1E2A]/8 text-[#6E1E2A] ring-[#6E1E2A]/14")}>
+                            <span className={cn("ml-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] ring-1", (ev as any).event_type === "stockout_registered" ? "bg-destructive/10 text-destructive ring-destructive/20" : "bg-[#6E1E2A]/8 text-[#6E1E2A] ring-[#6E1E2A]/14")}>
                               {cfg.badge}
                             </span>
                           ) : null}

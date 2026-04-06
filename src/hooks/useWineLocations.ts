@@ -43,7 +43,7 @@ export function useWineLocations(wineId?: string) {
     queryKey: ["wine_locations", user?.id, wineId ?? "*"],
     queryFn: async () => {
       if (!user) throw new Error("Not authenticated");
-      let q = supabase
+      let q = (supabase as any)
         .from("wine_locations")
         .select("id,wine_id,user_id,profile_type,sector,zone,level,position,manual_label,formatted_label,quantity,created_at,updated_at")
         .eq("user_id", user.id)
@@ -53,7 +53,7 @@ export function useWineLocations(wineId?: string) {
 
       const { data, error } = await q;
       if (error) throw error;
-      return data as WineLocation[];
+      return (data ?? []) as WineLocation[];
     },
     enabled: !!user,
   });
@@ -66,7 +66,7 @@ export function useWineLocationEvents(wineId?: string) {
     queryKey: ["wine_location_events", user?.id, wineId ?? "*"],
     queryFn: async () => {
       if (!user) throw new Error("Not authenticated");
-      let q = supabase
+      let q = (supabase as any)
         .from("wine_location_events")
         .select("id,wine_id,user_id,created_by_user_id,profile_type,action_type,from_location_id,to_location_id,previous_label,new_label,quantity_moved,responsible_name,reason,notes,created_at")
         .eq("user_id", user.id)
@@ -75,7 +75,7 @@ export function useWineLocationEvents(wineId?: string) {
       if (wineId) q = q.eq("wine_id", wineId);
       const { data, error } = await q;
       if (error) throw error;
-      return data as WineLocationEvent[];
+      return (data ?? []) as WineLocationEvent[];
     },
     enabled: !!user,
   });
@@ -109,7 +109,7 @@ export function useCreateWineLocation() {
       notes?: string | null;
     }) => {
       if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase.rpc("create_wine_location", {
+      const { data, error } = await (supabase as any).rpc("create_wine_location", {
         _wine_id: input.wineId,
         _sector: input.sector ?? null,
         _zone: input.zone ?? null,
@@ -146,7 +146,7 @@ export function useUpdateWineLocation() {
       notes?: string | null;
     }) => {
       if (!user) throw new Error("Not authenticated");
-      const { error } = await supabase.rpc("update_wine_location_meta", {
+      const { error } = await (supabase as any).rpc("update_wine_location_meta", {
         _location_id: input.id,
         _sector: input.updates.sector ?? null,
         _zone: input.updates.zone ?? null,
@@ -173,7 +173,7 @@ export function useDeleteWineLocation() {
   return useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error("Not authenticated");
-      const { error } = await supabase.from("wine_locations").delete().eq("id", id).eq("user_id", user.id);
+      const { error } = await (supabase as any).from("wine_locations").delete().eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -198,7 +198,7 @@ export function useTransferWineLocation() {
       reason?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
-      const { error } = await supabase.rpc("transfer_wine_location_quantity", {
+      const { error } = await (supabase as any).rpc("transfer_wine_location_quantity", {
         _wine_id: input.wineId,
         _from_location_id: input.fromLocationId,
         _to_location_id: input.toLocationId,
