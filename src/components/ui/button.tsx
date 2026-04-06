@@ -10,21 +10,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "rounded-full text-white bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] shadow-[0_10px_25px_rgba(123,30,43,0.30)] hover:-translate-y-0.5 hover:shadow-[0_15px_35px_rgba(123,30,43,0.40)] active:shadow-[0_10px_22px_rgba(123,30,43,0.28)] tracking-[-0.01em]",
+          "rounded-full text-primary-foreground bg-gradient-to-br from-wine to-wine-vivid shadow-[0_10px_26px_hsl(var(--wine)/0.26)] hover:-translate-y-0.5 hover:shadow-[0_16px_40px_hsl(var(--wine)/0.34)] active:shadow-[0_10px_24px_hsl(var(--wine)/0.24)] tracking-[-0.01em]",
         secondary:
-          "rounded-full bg-white/15 text-[#5a1e28] backdrop-blur-[10px] border border-white/20 shadow-none hover:bg-white/25 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.10)] active:shadow-[0_8px_20px_rgba(0,0,0,0.08)] tracking-[-0.01em]",
+          "rounded-full bg-card/55 text-wine backdrop-blur-md border border-border/70 shadow-[0_1px_2px_rgba(15,15,20,0.05)] hover:bg-wine-light/65 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-18px_rgba(15,15,20,0.28)] active:shadow-[0_8px_20px_-18px_rgba(15,15,20,0.22)] tracking-[-0.01em]",
         outline:
-          "rounded-full bg-transparent border border-black/10 text-foreground hover:bg-black/[0.03] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)]",
+          "rounded-full bg-transparent border border-border/80 text-foreground hover:bg-muted/35 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_-18px_rgba(15,15,20,0.18)]",
         ghost:
-          "rounded-full bg-transparent text-foreground hover:bg-black/[0.03]",
+          "rounded-full bg-transparent text-foreground hover:bg-muted/35",
         danger:
-          "rounded-full bg-destructive text-destructive-foreground shadow-[0_10px_25px_rgba(220,38,38,0.22)] hover:-translate-y-0.5 hover:bg-destructive/92 hover:shadow-[0_15px_35px_rgba(220,38,38,0.30)]",
+          "rounded-full bg-destructive/92 text-destructive-foreground shadow-[0_10px_26px_rgba(220,38,38,0.18)] hover:-translate-y-0.5 hover:bg-destructive hover:shadow-[0_16px_40px_rgba(220,38,38,0.24)]",
         success:
-          "rounded-full bg-success text-success-foreground shadow-[0_10px_25px_rgba(16,185,129,0.20)] hover:-translate-y-0.5 hover:bg-success/92 hover:shadow-[0_15px_35px_rgba(16,185,129,0.26)]",
+          "rounded-full bg-success/92 text-success-foreground shadow-[0_10px_26px_rgba(16,185,129,0.16)] hover:-translate-y-0.5 hover:bg-success hover:shadow-[0_16px_40px_rgba(16,185,129,0.22)]",
 
         // Back-compat variants (avoid using in new code)
         default:
-          "rounded-full text-white bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] shadow-[0_10px_25px_rgba(123,30,43,0.30)] hover:-translate-y-0.5 hover:shadow-[0_15px_35px_rgba(123,30,43,0.40)] active:shadow-[0_10px_22px_rgba(123,30,43,0.28)] tracking-[-0.01em]",
+          "rounded-full text-primary-foreground bg-gradient-to-br from-wine to-wine-vivid shadow-[0_10px_26px_hsl(var(--wine)/0.26)] hover:-translate-y-0.5 hover:shadow-[0_16px_40px_hsl(var(--wine)/0.34)] active:shadow-[0_10px_24px_hsl(var(--wine)/0.24)] tracking-[-0.01em]",
         destructive: "rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/92 hover:-translate-y-0.5",
         link: "text-primary underline-offset-4 hover:underline",
         premium: "btn-premium text-white rounded-2xl border-0 font-semibold tracking-[-0.01em] shadow-float",

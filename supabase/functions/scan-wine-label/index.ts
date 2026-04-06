@@ -68,6 +68,18 @@ function normalizeBase64(input: string) {
   return trimmed;
 }
 
+function parseImageDataUrl(input: string): { mime: string; base64: string } {
+  const trimmed = input.trim();
+  // data:image/png;base64,....
+  if (trimmed.startsWith("data:") && trimmed.includes(";base64,")) {
+    const mime = trimmed.slice(5, trimmed.indexOf(";base64,")) || "image/jpeg";
+    const base64 = trimmed.slice(trimmed.indexOf("base64,") + "base64,".length).trim();
+    return { mime, base64 };
+  }
+  // If no data-url prefix is present, default to jpeg.
+  return { mime: "image/jpeg", base64: trimmed };
+}
+
 function safeJsonParse(value: unknown): unknown | null {
   if (!value) return null;
   if (typeof value === "object") return value;
@@ -230,7 +242,7 @@ serve(async (req) => {
       });
     }
 
-    const imageBase64 = normalizeBase64(imageBase64Raw);
+    const { mime: imageMime, base64: imageBase64 } = parseImageDataUrl(normalizeBase64(imageBase64Raw));
     if (imageBase64.length > MAX_IMAGE_SIZE) {
       await logAudit(userId, 413, "validation_error", Date.now() - startTime, {
         request_id: requestId,
@@ -297,7 +309,8 @@ serve(async (req) => {
             role: "user",
             content: [
               { type: "input_text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
-              { type: "input_image", image_url: `data:image/jpeg;base64,${imageBase64}` },
+              // Preserve the correct mime type when the client uploads png/webp etc.
+              { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}` },
             ],
           },
         ],
@@ -368,6 +381,22 @@ serve(async (req) => {
         });
       }
 
+      // Invalid image / invalid request: return a helpful message instead of generic "unavailable".
+      if (response.status === 400) {
+        await logAudit(userId, 422, "ai_error", durationMs, {
+          request_id: requestId,
+          reason: "invalid_ai_request",
+          ai_body_preview: bodyText.slice(0, 400),
+        });
+        return fail(422, {
+          ok: false,
+          code: "IMAGE_INVALID",
+          error: "Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo.",
+          requestId,
+          retryable: false,
+        });
+      }
+
       console.error(`[${FUNCTION_NAME}] request_id=${requestId} ai_status=${response.status} body=${bodyText.slice(0, 240)}`);
       await logAudit(userId, 502, "ai_error", durationMs, {
         request_id: requestId,
@@ -395,19 +424,27 @@ serve(async (req) => {
       });
     }
 
-    // Responses API: prefer `output_text` when available, otherwise traverse `output[]`.
+    // Responses API: prefer parsed output when available; otherwise read `output_text` / traverse `output[]`.
+    const outputParsed = safeJsonParse((data as any)?.output_parsed);
     const rawTextDirect = typeof (data as any)?.output_text === "string" ? String((data as any).output_text) : "";
+
     const outputItems = Array.isArray((data as any)?.output) ? (data as any).output : [];
     const firstMessage =
       outputItems.find((it: any) => it?.type === "message" && it?.role === "assistant") ??
       outputItems.find((it: any) => it?.type === "message") ??
       outputItems[0];
     const content = Array.isArray(firstMessage?.content) ? firstMessage.content : [];
-    const textPart = content.find((c: any) => c?.type === "output_text") ?? null;
-    const rawTextFromItems = typeof textPart?.text === "string" ? textPart.text : "";
+    const contentItem =
+      content.find((c: any) => c?.type === "output_text") ??
+      content.find((c: any) => c?.type === "output_json") ??
+      content[0] ??
+      null;
+
+    const parsedFromContent = safeJsonParse((contentItem as any)?.parsed) ?? safeJsonParse((contentItem as any)?.json);
+    const rawTextFromItems = typeof (contentItem as any)?.text === "string" ? String((contentItem as any).text) : "";
     const rawText = rawTextDirect || rawTextFromItems;
 
-    const parsedArgs = safeJsonParse(rawText) ?? extractJsonFromText(rawText);
+    const parsedArgs = outputParsed ?? parsedFromContent ?? safeJsonParse(rawText) ?? extractJsonFromText(rawText);
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
       await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "no_structured_output" });

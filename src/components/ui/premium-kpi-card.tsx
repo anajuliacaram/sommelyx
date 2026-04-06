@@ -79,8 +79,8 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
                 scale: isPressing ? 0.98 : 1,
                 y: isHovering && interactive ? -2 : 0,
                 boxShadow: isHovering && interactive
-                    ? "0 20px 40px -15px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)"
-                    : "0 8px 16px -8px rgba(0,0,0,0.03), 0 0 0 1px rgba(0,0,0,0.04)"
+                    ? "0 22px 54px -26px rgba(15,15,20,0.20), 0 0 0 1px rgba(15,15,20,0.04)"
+                    : "0 10px 26px -22px rgba(15,15,20,0.12), 0 0 0 1px rgba(15,15,20,0.04)"
             }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             style={interactive ? {
@@ -91,8 +91,8 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
                 willChange: "transform, box-shadow",
             } : {}}
             className={cn(
-                "relative rounded-[24px] bg-white p-7 cursor-default transition-colors",
-                onClick && "cursor-pointer hover:bg-slate-50/50",
+                "relative rounded-[24px] border border-border/70 bg-card/70 backdrop-blur-xl p-7 cursor-default transition-colors",
+                onClick && "cursor-pointer hover:bg-wine-light/45",
                 className
             )}
         >

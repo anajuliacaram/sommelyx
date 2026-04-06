@@ -36,21 +36,21 @@ export function PremiumEmptyState({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "flex flex-col items-center justify-center p-12 lg:p-20 text-center rounded-[32px] bg-white/40 backdrop-blur-3xl border border-black/[0.04] shadow-sm relative overflow-hidden",
+                "flex flex-col items-center justify-center p-12 lg:p-20 text-center rounded-[32px] bg-card/55 backdrop-blur-3xl border border-border/70 shadow-[0_18px_50px_-40px_rgba(15,15,20,0.25),0_2px_8px_rgba(15,15,20,0.06)] relative overflow-hidden",
                 className
             )}
         >
             {/* Background elegant gradient */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[400px] max-h-[400px] bg-gradient-to-br from-[#8C2044]/5 to-transparent blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[420px] max-h-[420px] bg-gradient-to-br from-wine/10 to-transparent blur-[90px] rounded-full pointer-events-none" />
 
             <motion.div
                 animate={reducedMotion ? {} : { y: [-4, 4, -4] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="relative flex items-center justify-center w-24 h-24 mb-8"
             >
-                <div className="absolute inset-0 bg-[#8C2044]/10 rounded-full blur-xl pointer-events-none" />
-                <div className="relative z-10 w-16 h-16 rounded-[24px] bg-gradient-to-br from-white to-[#F7F7F8] shadow-[0_8px_16px_-6px_rgba(0,0,0,0.1)] border border-black/[0.04] flex items-center justify-center">
-                    <Icon className="w-7 h-7 text-[#8C2044]" strokeWidth={1.5} />
+                <div className="absolute inset-0 bg-wine/10 rounded-full blur-xl pointer-events-none" />
+                <div className="relative z-10 w-16 h-16 rounded-[24px] bg-gradient-to-br from-white to-card shadow-[0_10px_22px_-12px_rgba(15,15,20,0.18)] border border-border/70 flex items-center justify-center">
+                    <Icon className="w-7 h-7 text-wine" strokeWidth={1.5} />
                 </div>
             </motion.div>
 

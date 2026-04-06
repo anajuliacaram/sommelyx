@@ -6,27 +6,28 @@
   :root {
     /* ── Sommelyx Light Theme (Luxury SaaS) ── */
     --background: 30 22% 96%;
-    --foreground: 240 10% 6%;
+    /* Softer ink (avoid pure black) */
+    --foreground: 345 12% 12%;
 
     --card: 30 22% 98%;
-    --card-foreground: 240 10% 6%;
+    --card-foreground: 345 12% 12%;
 
     --popover: 30 22% 98%;
-    --popover-foreground: 240 10% 6%;
+    --popover-foreground: 345 12% 12%;
 
     /* Primary — Premium Wine & Gold Palette */
     --primary: 342 61% 30%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 30 18% 92%;
-    --secondary-foreground: 240 6% 26%;
+    --secondary-foreground: 345 10% 22%;
 
     --muted: 30 16% 92%;
-    --muted-foreground: 240 6% 38%;
+    --muted-foreground: 345 8% 40%;
 
     /* Accent — Soft Gold (remove orange from UI accents) */
     --accent: 40 44% 60%;
-    --accent-foreground: 240 10% 6%;
+    --accent-foreground: 345 12% 12%;
 
     /* Semantic States — Refined/Clean */
     --success: 142 66% 38%;
@@ -38,20 +39,21 @@
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
-    --border: 220 10% 91%;
-    --input: 220 10% 91%;
+    /* Warm neutrals (avoid cool/blue borders) */
+    --border: 30 10% 88%;
+    --input: 30 10% 88%;
     --ring: 342 61% 30%;
 
     --radius: 1rem;
 
     /* Sidebar */
     --sidebar-background: 240 8% 99%;
-    --sidebar-foreground: 240 6% 32%;
+    --sidebar-foreground: 345 8% 30%;
     --sidebar-primary: 340 54% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 5% 95%;
-    --sidebar-accent-foreground: 240 10% 8%;
-    --sidebar-border: 220 10% 91%;
+    --sidebar-accent-foreground: 345 12% 14%;
+    --sidebar-border: 30 10% 88%;
     --sidebar-ring: 340 54% 36%;
 
     /* ── Wine palette tokens ── */
@@ -138,6 +140,12 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Silent depth (premium off-white surface, no harsh flatness) */
+    background-image:
+      radial-gradient(120% 80% at 15% 0%, hsl(var(--wine) / 0.07), transparent 58%),
+      radial-gradient(90% 70% at 100% 10%, hsl(var(--gold) / 0.09), transparent 55%),
+      radial-gradient(110% 75% at 40% 100%, hsl(var(--wine) / 0.04), transparent 62%);
+    background-attachment: fixed;
   }
 
   h1,
@@ -150,6 +158,12 @@
     letter-spacing: -0.035em;
     line-height: 1.15;
     font-weight: 700;
+  }
+}
+
+@layer base {
+  ::selection {
+    background: hsl(var(--wine) / 0.18);
   }
 }
 
