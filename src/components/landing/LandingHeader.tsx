@@ -31,10 +31,26 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           </span>
         </a>
         <div className="flex items-center gap-2 sm:gap-3">
+          <a
+            href="https://instagram.com/sommelyx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
+          >
+            <Instagram size={15} />
+          </a>
+          <a
+            href="https://www.linkedin.com/company/sommelyx/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
+          >
+            <Linkedin size={15} />
+          </a>
           <Button
             variant="secondary"
             size="sm"
-            className="text-[13px] font-semibold bg-white/35 border border-black/[0.06] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-white/48"
+            className="text-[13px] font-semibold bg-white/35 border border-wine/[0.10] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-wine/5 text-wine"
             onClick={onLogin}
           >
             Entrar
