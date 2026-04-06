@@ -25,14 +25,20 @@ function useWineEvents() {
     queryKey: ["wine_events", user?.id],
     queryFn: async () => {
       if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("wine_events")
         .select("id,user_id,wine_id,event_type,quantity,notes,created_at,previous_quantity,new_quantity,quantity_delta,responsible_name,reason,profile_type")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;
-      return data;
+      return (data ?? []) as Array<{
+        id: string; user_id: string; wine_id: string; event_type: string;
+        quantity: number; notes: string | null; created_at: string;
+        previous_quantity: number | null; new_quantity: number | null;
+        quantity_delta: number | null; responsible_name: string | null;
+        reason: string | null; profile_type: string | null;
+      }>;
     },
     enabled: !!user,
   });
