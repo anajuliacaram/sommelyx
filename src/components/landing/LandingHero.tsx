@@ -18,7 +18,7 @@ interface LandingHeroProps {
 
 export function LandingHero({ onSignup }: LandingHeroProps) {
   return (
-    <section className="relative z-10 px-4 sm:px-8 pt-20 sm:pt-28 lg:pt-32 pb-6 sm:pb-10">
+    <section className="relative z-10 px-4 sm:px-8 pt-20 sm:pt-28 lg:pt-32 pb-10 sm:pb-14">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Left */}
         <div className="text-left">
@@ -29,9 +29,10 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={0}
-            className="max-w-xl font-serif text-[38px] font-semibold leading-[1.1] tracking-[-0.5px] sm:text-[54px] bg-clip-text text-transparent bg-[linear-gradient(180deg,#2B2B2B_0%,#2B2B2B_55%,#2A1A1D_100%)]"
+            className="max-w-[34rem] lg:max-w-[38rem] font-serif text-[38px] font-semibold leading-[1.15] tracking-[-0.5px] sm:text-[54px] pb-[0.10em] bg-clip-text text-transparent bg-[linear-gradient(180deg,#2B2B2B_0%,#2B2B2B_55%,#2A1A1D_100%)]"
           >
-            Um painel executivo para sua adega, com clareza de estoque, valor e giro.
+            Um painel executivo para sua adega, com clareza de estoque,{" "}
+            <span className="whitespace-nowrap">valor e giro.</span>
           </motion.h1>
 
           <motion.p
