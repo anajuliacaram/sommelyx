@@ -255,7 +255,7 @@ export default function ActivityLogPage() {
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: cfg.color }}>{cfg.label}</span>
                           {cfg.badge ? (
-                            <span className={cn("ml-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] ring-1", ev.event_type === "stockout_registered" ? "bg-destructive/10 text-destructive ring-destructive/20" : "bg-[#6E1E2A]/8 text-[#6E1E2A] ring-[#6E1E2A]/14")}>
+                            <span className={cn("ml-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] ring-1", (ev as any).event_type === "stockout_registered" ? "bg-destructive/10 text-destructive ring-destructive/20" : "bg-[#6E1E2A]/8 text-[#6E1E2A] ring-[#6E1E2A]/14")}>
                               {cfg.badge}
                             </span>
                           ) : null}
