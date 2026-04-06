@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { Instagram, Linkedin } from "lucide-react";
 
 interface LandingFooterProps {
   onLogin: () => void;
@@ -24,6 +25,26 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
           >
             Acesso
           </Button>
+        </div>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://instagram.com/sommelyx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center h-8 w-8 rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+            aria-label="Instagram"
+          >
+            <Instagram size={16} />
+          </a>
+          <a
+            href="https://www.linkedin.com/company/sommelyx/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center h-8 w-8 rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+            aria-label="LinkedIn"
+          >
+            <Linkedin size={16} />
+          </a>
         </div>
         <p className="text-[11px] sm:text-[12px] font-medium text-muted-foreground/60">
           © {new Date().getFullYear()} Sommelyx
