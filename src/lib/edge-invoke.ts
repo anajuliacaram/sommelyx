@@ -36,13 +36,24 @@ export async function invokeEdgeFunction<T>(
       // supabase-js wraps non-2xx as `error`
       if (error) {
         const status = typeof (error as any)?.status === "number" ? (error as any).status : undefined;
+        // Try to extract the real error message from the response context
+        let message = "Não foi possível completar a solicitação.";
+        try {
+          if (typeof (error as any)?.context?.json === "function") {
+            const body = await (error as any).context.json();
+            if (body?.error) message = String(body.error);
+          } else if (error.message && !error.message.includes("non-2xx")) {
+            message = error.message;
+          }
+        } catch { /* ignore parse errors */ }
+
         if (attempt < retries && isRetriable(status)) {
           const backoff = 600 * Math.pow(2, attempt);
           attempt++;
           await sleep(backoff);
           continue;
         }
-        throw new Error(error.message || "Não foi possível completar a solicitação.");
+        throw new Error(message);
       }
 
       if (data && typeof data === "object" && "error" in (data as Record<string, unknown>)) {
