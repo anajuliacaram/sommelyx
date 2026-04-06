@@ -155,6 +155,7 @@ export function useWineEvent() {
       notes,
       responsibleName,
       reason,
+      locationId,
     }: {
       wineId: string;
       eventType: string;
@@ -162,6 +163,7 @@ export function useWineEvent() {
       notes?: string;
       responsibleName?: string;
       reason?: string;
+      locationId?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
 
@@ -173,6 +175,7 @@ export function useWineEvent() {
         _notes: notes ?? undefined,
         _responsible_name: responsibleName ?? undefined,
         _reason: reason ?? undefined,
+        _location_id: locationId ?? undefined,
       });
       if (error) throw error;
     },

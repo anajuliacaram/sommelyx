@@ -7,6 +7,7 @@ export { default as AlertTriangle } from "lucide-react/dist/esm/icons/alert-tria
 export { default as ArrowDown01 } from "lucide-react/dist/esm/icons/arrow-down-01.js";
 export { default as ArrowDownAZ } from "lucide-react/dist/esm/icons/arrow-down-az.js";
 export { default as ArrowDownRight } from "lucide-react/dist/esm/icons/arrow-down-right.js";
+export { default as ArrowLeftRight } from "lucide-react/dist/esm/icons/arrow-left-right.js";
 export { default as ArrowLeft } from "lucide-react/dist/esm/icons/arrow-left.js";
 export { default as ArrowRight } from "lucide-react/dist/esm/icons/arrow-right.js";
 export { default as ArrowUpDown } from "lucide-react/dist/esm/icons/arrow-up-down.js";

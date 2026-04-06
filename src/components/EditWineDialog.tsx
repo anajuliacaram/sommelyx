@@ -11,6 +11,12 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { StockAuditDialog } from "@/components/StockAuditDialog";
+import { LocationFields } from "@/components/LocationFields";
+import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
+import { useCreateWineLocation, useUpdateWineLocation, useWineLocations } from "@/hooks/useWineLocations";
+import { LocationAuditDialog } from "@/components/LocationAuditDialog";
+import { TransferLocationDialog } from "@/components/TransferLocationDialog";
+import { CreateLocationDialog } from "@/components/CreateLocationDialog";
 
 interface EditWineDialogProps {
   open: boolean;
@@ -29,6 +35,9 @@ const styles = [
 export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
+  const { data: locations } = useWineLocations(wine?.id);
+  const updateLocation = useUpdateWineLocation();
+  const createLocation = useCreateWineLocation();
 
   const [name, setName] = useState("");
   const [producer, setProducer] = useState("");
@@ -41,18 +50,29 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
   const [lastPaidSnapshot, setLastPaidSnapshot] = useState("");
   const [lastPaid, setLastPaid] = useState("");
   const [currentValue, setCurrentValue] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState<StructuredLocation>({});
   const [drinkFrom, setDrinkFrom] = useState("");
   const [drinkUntil, setDrinkUntil] = useState("");
   const [foodPairing, setFoodPairing] = useState("");
   const [notes, setNotes] = useState("");
   const [rating, setRating] = useState("");
   const [success, setSuccess] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [createLocOpen, setCreateLocOpen] = useState(false);
 
   const updateWine = useUpdateWine();
   const wineEvent = useWineEvent();
   const { toast } = useToast();
   const [auditOpen, setAuditOpen] = useState(false);
+  const [locationAuditOpen, setLocationAuditOpen] = useState(false);
+  const [pendingLocationOnly, setPendingLocationOnly] = useState<{
+    wineId: string;
+    wineName: string;
+    locationId: string | null;
+    previousLabel: string;
+    newLabel: string;
+    locationUpdates: { sector?: string | null; zone?: string | null; level?: string | null; position?: string | null; manual_label?: string | null };
+  } | null>(null);
   const [pendingAudit, setPendingAudit] = useState<{
     wineId: string;
     wineName: string;
@@ -62,10 +82,17 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
     quantityAbs: number;
     eventType: "stock_increase" | "stock_decrease";
     baseUpdates: Record<string, any>;
+    locationMeta?: {
+      locationId: string | null;
+      previousLabel: string;
+      newLabel: string;
+      locationUpdates: { sector?: string | null; zone?: string | null; level?: string | null; position?: string | null; manual_label?: string | null };
+    };
   } | null>(null);
 
   useEffect(() => {
     if (wine) {
+      const primaryLoc = (locations ?? []).find((l) => l.wine_id === wine.id) ?? null;
       setName(wine.name);
       setProducer(wine.producer || "");
       setQuantity(String(wine.quantity));
@@ -77,7 +104,17 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setLastPaidSnapshot(wine.purchase_price != null ? String(wine.purchase_price) : "");
       setLastPaid(wine.purchase_price ? String(wine.purchase_price) : "");
       setCurrentValue(wine.current_value ? String(wine.current_value) : "");
-      setLocation(wine.cellar_location || "");
+      setLocation(
+        primaryLoc
+          ? {
+              sector: primaryLoc.sector ?? undefined,
+              zone: primaryLoc.zone ?? undefined,
+              level: primaryLoc.level ?? undefined,
+              position: primaryLoc.position ?? undefined,
+              manualLabel: primaryLoc.manual_label ?? undefined,
+            }
+          : (wine.cellar_location ? { manualLabel: wine.cellar_location } : {})
+      );
       setDrinkFrom(wine.drink_from ? String(wine.drink_from) : "");
       setDrinkUntil(wine.drink_until ? String(wine.drink_until) : "");
       setFoodPairing(wine.food_pairing || "");
@@ -85,7 +122,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setRating(wine.rating ? String(wine.rating) : "");
       setSuccess(false);
     }
-  }, [wine]);
+  }, [wine, locations]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,6 +130,18 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
 
     const nextQty = Math.max(0, Number.parseInt(quantity || "0", 10) || 0);
     const prevQty = wine.quantity;
+    const formattedLocation = formatLocationLabel(location) || null;
+    const primaryLoc = (locations ?? []).find((l) => l.wine_id === wine.id) ?? null;
+    const prevLocationLabel = (primaryLoc?.formatted_label ?? primaryLoc?.manual_label ?? wine.cellar_location ?? "") || "";
+    const locationChanged = (formattedLocation ?? "") !== (prevLocationLabel ?? "");
+
+    const locationUpdates = {
+      sector: location.sector ? location.sector : null,
+      zone: location.zone ? location.zone : null,
+      level: location.level ? location.level : null,
+      position: location.position ? location.position : null,
+      manual_label: location.manualLabel ? location.manualLabel : null,
+    };
 
     const baseUpdates: Record<string, any> = {
       name: name.trim(),
@@ -105,7 +154,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       grape: grape || null,
       purchase_price: lastPaid ? parseFloat(lastPaid) : null,
       current_value: currentValue ? parseFloat(currentValue) : null,
-      cellar_location: location || null,
+      cellar_location: formattedLocation,
       drink_from: drinkFrom ? parseInt(drinkFrom) : null,
       drink_until: drinkUntil ? parseInt(drinkUntil) : null,
       food_pairing: foodPairing || null,
@@ -124,8 +173,28 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
         quantityAbs: Math.abs(delta),
         eventType: delta > 0 ? "stock_increase" : "stock_decrease",
         baseUpdates,
+        locationMeta: locationChanged ? {
+          locationId: primaryLoc?.id ?? null,
+          previousLabel: prevLocationLabel,
+          newLabel: formattedLocation ?? "",
+          locationUpdates,
+        } : undefined,
       });
       setAuditOpen(true);
+      return;
+    }
+
+    if (locationChanged) {
+      // Location meta changes must be logged; commercial requires responsible + reason.
+      setPendingLocationOnly({
+        wineId: wine.id,
+        wineName: name.trim(),
+        locationId: primaryLoc?.id ?? null,
+        previousLabel: prevLocationLabel,
+        newLabel: formattedLocation ?? "",
+        locationUpdates,
+      });
+      setLocationAuditOpen(true);
       return;
     }
 
@@ -161,13 +230,22 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
             newQuantity: pendingAudit.nextQty,
             delta: pendingAudit.delta,
           } : null}
+          locations={
+            wine && locations
+              ? locations
+                  .filter((l) => l.wine_id === wine.id)
+                  .map((l) => ({ id: l.id, label: l.formatted_label ?? l.manual_label ?? "Sem localização", quantity: l.quantity }))
+              : undefined
+          }
+          requireLocation={isCommercial}
+          defaultLocationId={wine && locations ? (locations.find((l) => l.wine_id === wine.id)?.id ?? undefined) : undefined}
           defaultResponsibleName={
             typeof user?.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : undefined
           }
           defaultReason="Ajuste de inventário"
           confirmLabel="Confirmar alteração"
           busy={updateWine.isPending || wineEvent.isPending}
-          onConfirm={async ({ responsibleName, reason, notes: auditNotes }) => {
+          onConfirm={async ({ responsibleName, reason, notes: auditNotes, locationId }) => {
             if (!pendingAudit) return;
             try {
               // 1) Update non-stock fields
@@ -175,6 +253,35 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 id: pendingAudit.wineId,
                 updates: pendingAudit.baseUpdates,
               });
+
+              // 1b) If location meta changed, persist and log using the same audit metadata
+              if (pendingAudit.locationMeta) {
+                const locId = pendingAudit.locationMeta.locationId;
+                if (locId) {
+                  await updateLocation.mutateAsync({
+                    id: locId,
+                    updates: pendingAudit.locationMeta.locationUpdates,
+                    responsibleName: responsibleName ?? null,
+                    reason: reason ?? null,
+                    notes: auditNotes ?? null,
+                  });
+                } else {
+                  const created = await createLocation.mutateAsync({
+                    wineId: pendingAudit.wineId,
+                    sector: pendingAudit.locationMeta.locationUpdates.sector ?? null,
+                    zone: pendingAudit.locationMeta.locationUpdates.zone ?? null,
+                    level: pendingAudit.locationMeta.locationUpdates.level ?? null,
+                    position: pendingAudit.locationMeta.locationUpdates.position ?? null,
+                    manualLabel: pendingAudit.locationMeta.locationUpdates.manual_label ?? null,
+                    quantity: pendingAudit.prevQty,
+                    responsibleName: responsibleName ?? null,
+                    reason: reason ?? null,
+                    notes: auditNotes ?? null,
+                  });
+                  void created;
+                }
+              }
+
               // 2) Apply stock delta with required audit metadata
               await wineEvent.mutateAsync({
                 wineId: pendingAudit.wineId,
@@ -183,6 +290,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 notes: auditNotes,
                 responsibleName,
                 reason,
+                locationId,
               });
               setSuccess(true);
               setTimeout(() => { setSuccess(false); onOpenChange(false); }, 900);
@@ -195,6 +303,71 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
             }
           }}
         />
+
+        <LocationAuditDialog
+          open={locationAuditOpen}
+          onOpenChange={(v) => { setLocationAuditOpen(v); if (!v) setPendingLocationOnly(null); }}
+          previousLabel={pendingLocationOnly?.previousLabel ?? ""}
+          newLabel={pendingLocationOnly?.newLabel ?? ""}
+          requireAudit={isCommercial}
+          defaultResponsibleName={typeof user?.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : undefined}
+          onConfirm={async ({ responsibleName, reason, notes: auditNotes }) => {
+            if (!pendingLocationOnly) return;
+            try {
+              const locId = pendingLocationOnly.locationId;
+              if (locId) {
+                await updateLocation.mutateAsync({
+                  id: locId,
+                  updates: pendingLocationOnly.locationUpdates,
+                  responsibleName: responsibleName ?? null,
+                  reason: reason ?? null,
+                  notes: auditNotes ?? null,
+                });
+              } else {
+                await createLocation.mutateAsync({
+                  wineId: pendingLocationOnly.wineId,
+                  sector: pendingLocationOnly.locationUpdates.sector ?? null,
+                  zone: pendingLocationOnly.locationUpdates.zone ?? null,
+                  level: pendingLocationOnly.locationUpdates.level ?? null,
+                  position: pendingLocationOnly.locationUpdates.position ?? null,
+                  manualLabel: pendingLocationOnly.locationUpdates.manual_label ?? null,
+                  quantity: wine?.quantity ?? 0,
+                  responsibleName: responsibleName ?? null,
+                  reason: reason ?? null,
+                  notes: auditNotes ?? null,
+                });
+              }
+
+              await updateWine.mutateAsync({
+                id: pendingLocationOnly.wineId,
+                updates: { cellar_location: pendingLocationOnly.newLabel || null },
+              });
+
+              setSuccess(true);
+              setTimeout(() => { setSuccess(false); onOpenChange(false); }, 900);
+            } catch (err: any) {
+              toast({ title: "Erro ao atualizar localização", description: err?.message, variant: "destructive" });
+            }
+          }}
+        />
+
+        {wine && isCommercial ? (
+          <>
+            <TransferLocationDialog
+              open={transferOpen}
+              onOpenChange={setTransferOpen}
+              wineId={wine.id}
+              wineName={wine.name}
+              locations={(locations ?? []).filter((l) => l.wine_id === wine.id)}
+            />
+            <CreateLocationDialog
+              open={createLocOpen}
+              onOpenChange={setCreateLocOpen}
+              wineId={wine.id}
+              wineName={wine.name}
+            />
+          </>
+        ) : null}
 
         <AnimatePresence mode="wait">
           {success ? (
@@ -284,8 +457,57 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Localização</Label>
-                <Input value={location} onChange={e => setLocation(e.target.value)} />
+                <LocationFields
+                  value={location}
+                  onChange={setLocation}
+                  label={isCommercial ? "Localização (principal)" : "Localização na adega"}
+                />
+                {isCommercial ? (
+                  <div className="mt-3 rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Localizações</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          Quantidade por ponto físico. Use transferência para mover entre locais.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button type="button" variant="outline" className="h-9 rounded-2xl text-[11px] font-bold" onClick={() => setCreateLocOpen(true)}>
+                          Adicionar
+                        </Button>
+                        <Button type="button" variant="primary" className="h-9 rounded-2xl text-[11px] font-bold" onClick={() => setTransferOpen(true)}>
+                          Transferir
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 space-y-2">
+                      {(locations ?? []).filter((l) => l.wine_id === wine?.id).map((l) => (
+                        <div key={l.id} className="flex items-center justify-between gap-3 rounded-xl bg-background/60 px-3 py-2 ring-1 ring-black/[0.05]">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-semibold text-foreground truncate">
+                              {l.formatted_label ?? l.manual_label ?? "Sem localização"}
+                            </p>
+                            <p className="text-[9px] text-muted-foreground truncate">
+                              {[
+                                l.sector ? `Setor: ${l.sector}` : null,
+                                l.zone ? `Gôndola: ${l.zone}` : null,
+                                l.level ? `Linha: ${l.level}` : null,
+                              ].filter(Boolean).join(" · ")}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-[13px] font-black text-foreground">{l.quantity}</p>
+                            <p className="text-[9px] text-muted-foreground">un.</p>
+                          </div>
+                        </div>
+                      ))}
+                      {(locations ?? []).filter((l) => l.wine_id === wine?.id).length === 0 ? (
+                        <p className="text-[11px] text-muted-foreground">Nenhuma localização cadastrada ainda.</p>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

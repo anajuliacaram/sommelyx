@@ -21,12 +21,16 @@ type AuditResult = {
   responsibleName: string;
   reason: StockAuditReason;
   notes?: string;
+  locationId?: string;
 };
 
 export function StockAuditDialog({
   open,
   onOpenChange,
   payload,
+  locations,
+  requireLocation,
+  defaultLocationId,
   defaultResponsibleName,
   defaultReason,
   confirmLabel = "Confirmar alteração",
@@ -36,6 +40,9 @@ export function StockAuditDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   payload: AuditPayload | null;
+  locations?: { id: string; label: string; quantity?: number }[];
+  requireLocation?: boolean;
+  defaultLocationId?: string;
   defaultResponsibleName?: string;
   defaultReason?: StockAuditReason;
   confirmLabel?: string;
@@ -45,6 +52,7 @@ export function StockAuditDialog({
   const [responsibleName, setResponsibleName] = useState(defaultResponsibleName ?? "");
   const [reason, setReason] = useState<StockAuditReason | "">((defaultReason ?? "") as any);
   const [notes, setNotes] = useState("");
+  const [locationId, setLocationId] = useState(defaultLocationId ?? "");
   const [touched, setTouched] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -53,20 +61,24 @@ export function StockAuditDialog({
     setResponsibleName(defaultResponsibleName ?? "");
     setReason((defaultReason ?? "") as any);
     setNotes("");
+    setLocationId(defaultLocationId ?? "");
     setTouched(false);
     setSuccess(false);
-  }, [open, defaultResponsibleName, defaultReason]);
+  }, [open, defaultResponsibleName, defaultReason, defaultLocationId]);
 
   const errors = useMemo(() => {
-    const next: { responsible?: string; reason?: string; notes?: string } = {};
+    const next: { responsible?: string; reason?: string; notes?: string; location?: string } = {};
     const n = normalizeAuditName(responsibleName);
     const r = normalizeAuditText(String(reason || ""));
     const nn = normalizeAuditText(notes);
     if (!n) next.responsible = "Informe o responsável para registrar no histórico.";
     if (!r) next.reason = "Selecione um motivo para manter a rastreabilidade.";
     if (r === "Outro" && !nn) next.notes = "Descreva o motivo em observação complementar.";
+    if (requireLocation && (!locationId || !locations?.some((l) => l.id === locationId))) {
+      next.location = "Selecione a localização para registrar corretamente.";
+    }
     return next;
-  }, [responsibleName, reason, notes]);
+  }, [responsibleName, reason, notes, requireLocation, locationId, locations]);
 
   const canSubmit = Object.keys(errors).length === 0 && !!payload && !busy && !success;
 
@@ -126,6 +138,31 @@ export function StockAuditDialog({
           ) : (
             <>
               <div className="grid gap-3">
+                {locations?.length ? (
+                  <div>
+                    <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                      Localização {requireLocation ? <span className="text-destructive">*</span> : null}
+                    </Label>
+                    <Select value={locationId} onValueChange={(v) => { setLocationId(v); setTouched(true); }}>
+                      <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                        <SelectValue placeholder="Selecionar..." />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl">
+                        {locations.map((l) => (
+                          <SelectItem key={l.id} value={l.id}>
+                            {l.label}{typeof l.quantity === "number" ? ` • ${l.quantity} un.` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {touched && errors.location ? (
+                      <p className="mt-1 text-[11px] text-destructive flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5" /> {errors.location}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
                 <div>
                   <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Nome do responsável <span className="text-destructive">*</span>
@@ -211,6 +248,7 @@ export function StockAuditDialog({
                       responsibleName: normalizeAuditName(responsibleName),
                       reason: reason as StockAuditReason,
                       notes: normalizeAuditText(notes) || undefined,
+                      locationId: locationId || undefined,
                     });
                     setSuccess(true);
                     setTimeout(() => onOpenChange(false), 650);
@@ -226,4 +264,3 @@ export function StockAuditDialog({
     </Dialog>
   );
 }
-

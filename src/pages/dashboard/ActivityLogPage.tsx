@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ClipboardList, Plus, Wine, ArrowDownRight, AlertTriangle, ShoppingCart, Filter, Search } from "@/icons/lucide";
+import { ClipboardList, Plus, Wine, ArrowDownRight, AlertTriangle, ShoppingCart, Filter, Search, MapPin, ArrowLeftRight } from "@/icons/lucide";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWines } from "@/hooks/useWines";
+import { useWineLocationEvents } from "@/hooks/useWineLocations";
 import { useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
@@ -49,8 +50,15 @@ const eventConfig: Record<string, { label: string; icon: typeof Plus; color: str
   exit: { label: "Saída / Venda", icon: ShoppingCart, color: "#C9A86A", bg: "rgba(201,168,106,0.10)", badge: "Venda" },
 };
 
+const locationConfig: Record<string, { label: string; icon: typeof MapPin; color: string; bg: string; badge?: string }> = {
+  created: { label: "Localização adicionada", icon: MapPin, color: "#6E1E2A", bg: "rgba(110,30,42,0.06)", badge: "Local" },
+  meta_changed: { label: "Localização atualizada", icon: MapPin, color: "#6E1E2A", bg: "rgba(110,30,42,0.06)", badge: "Local" },
+  transfer: { label: "Transferência na adega", icon: ArrowLeftRight, color: "#6E1E2A", bg: "rgba(110,30,42,0.06)", badge: "Transferência" },
+};
+
 export default function ActivityLogPage() {
-  const { data: events, isLoading } = useWineEvents();
+  const { data: stockEvents, isLoading } = useWineEvents();
+  const { data: locationEvents } = useWineLocationEvents();
   const { data: wines } = useWines();
   const [searchParams] = useSearchParams();
   const wineFilterId = searchParams.get("wine");
@@ -70,9 +78,15 @@ export default function ActivityLogPage() {
     return map;
   }, [wines]);
 
+  const mergedEvents = useMemo(() => {
+    const s = (stockEvents ?? []).map((ev) => ({ kind: "stock" as const, ...ev }));
+    const l = (locationEvents ?? []).map((ev) => ({ kind: "location" as const, ...ev }));
+    return [...s, ...l].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [stockEvents, locationEvents]);
+
   const filteredEvents = useMemo(() => {
-    if (!events) return [];
-    let list = events;
+    if (!mergedEvents) return [];
+    let list = mergedEvents;
     if (wineFilterId) list = list.filter((ev) => ev.wine_id === wineFilterId);
 
     const qn = q.trim().toLowerCase();
@@ -81,13 +95,13 @@ export default function ActivityLogPage() {
       list = list.filter((ev) => (wineMap.get(ev.wine_id) ?? "").toLowerCase().includes(qn));
     }
     if (rn) {
-      list = list.filter((ev) => (ev.responsible_name ?? "").toLowerCase().includes(rn));
+      list = list.filter((ev) => ((ev as any).responsible_name ?? "").toLowerCase().includes(rn));
     }
     if (reasonFilters.length) {
-      list = list.filter((ev) => reasonFilters.includes(ev.reason ?? ""));
+      list = list.filter((ev) => reasonFilters.includes(((ev as any).reason ?? "")));
     }
     if (typeFilters.length) {
-      list = list.filter((ev) => typeFilters.includes(ev.event_type));
+      list = list.filter((ev) => typeFilters.includes((ev.kind === "stock" ? (ev as any).event_type : (ev as any).action_type)));
     }
     if (fromDate) {
       const from = new Date(fromDate + "T00:00:00");
@@ -98,7 +112,7 @@ export default function ActivityLogPage() {
       list = list.filter((ev) => new Date(ev.created_at) <= to);
     }
     return list;
-  }, [events, wineFilterId, q, responsibleQ, reasonFilters, typeFilters, fromDate, toDate, wineMap]);
+  }, [mergedEvents, wineFilterId, q, responsibleQ, reasonFilters, typeFilters, fromDate, toDate, wineMap]);
 
   const grouped = useMemo(() => {
     if (!filteredEvents.length) return [];
@@ -162,7 +176,10 @@ export default function ActivityLogPage() {
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
               <MultiSelectDropdown
                 title="Tipo"
-                options={Array.from(new Set((events ?? []).map((e) => e.event_type))).sort().map((v) => ({ label: eventConfig[v]?.label ?? v, value: v }))}
+                options={Array.from(new Set([
+                  ...(stockEvents ?? []).map((e) => e.event_type),
+                  ...(locationEvents ?? []).map((e) => e.action_type),
+                ])).sort().map((v) => ({ label: eventConfig[v]?.label ?? locationConfig[v]?.label ?? v, value: v }))}
                 selected={typeFilters}
                 onChange={(v) => setTypeFilters((prev) => prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v])}
                 onClear={() => setTypeFilters([])}
@@ -171,7 +188,10 @@ export default function ActivityLogPage() {
               />
               <MultiSelectDropdown
                 title="Motivo"
-                options={Array.from(new Set((events ?? []).map((e) => e.reason).filter(Boolean) as string[])).sort().map((v) => ({ label: v, value: v }))}
+                options={Array.from(new Set([
+                  ...(stockEvents ?? []).map((e) => e.reason).filter(Boolean) as string[],
+                  ...(locationEvents ?? []).map((e) => e.reason).filter(Boolean) as string[],
+                ])).sort().map((v) => ({ label: v, value: v }))}
                 selected={reasonFilters}
                 onChange={(v) => setReasonFilters((prev) => prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v])}
                 onClear={() => setReasonFilters([])}
@@ -200,17 +220,25 @@ export default function ActivityLogPage() {
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 px-1">{group.label}</p>
               <div className="space-y-1">
                 {group.items.map(ev => {
-                  const cfg = eventConfig[ev.event_type] ?? eventConfig.exit;
+                  const cfg =
+                    ev.kind === "location"
+                      ? (locationConfig[(ev as any).action_type] ?? locationConfig.meta_changed)
+                      : (eventConfig[(ev as any).event_type] ?? eventConfig.exit);
                   const Icon = cfg.icon;
                   const wineName = wineMap.get(ev.wine_id) ?? "Vinho removido";
                   const time = new Date(ev.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-                  const displayNotes = ev.notes || "";
-                  const prev = (ev as any).previous_quantity as number | null;
-                  const next = (ev as any).new_quantity as number | null;
-                  const delta = (ev as any).quantity_delta as number | null;
+                  const displayNotes = (ev as any).notes || "";
                   const responsible = (ev as any).responsible_name as string | null;
                   const reason = (ev as any).reason as string | null;
+
+                  const prevQty = (ev as any).previous_quantity as number | null;
+                  const nextQty = (ev as any).new_quantity as number | null;
+                  const deltaQty = (ev as any).quantity_delta as number | null;
+
+                  const prevLoc = (ev as any).previous_label as string | null;
+                  const nextLoc = (ev as any).new_label as string | null;
+                  const moved = (ev as any).quantity_moved as number | null;
 
                   return (
                     <div key={ev.id} className="glass-card p-3 flex items-start gap-3">
@@ -228,13 +256,22 @@ export default function ActivityLogPage() {
                           <span className="text-[9px] text-muted-foreground">· {time}</span>
                         </div>
                         <p className="text-[11px] font-semibold text-foreground truncate">{wineName}</p>
-                        {isCommercial && prev != null && next != null ? (
+                        {ev.kind === "stock" && isCommercial && prevQty != null && nextQty != null ? (
                           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground">
-                            <span>De: <span className="font-semibold text-foreground">{prev}</span></span>
-                            <span>Para: <span className="font-semibold text-foreground">{next}</span></span>
-                            {delta != null ? (
-                              <span>Variação: <span className="font-semibold text-foreground">{delta > 0 ? `+${delta}` : `${delta}`}</span></span>
+                            <span>De: <span className="font-semibold text-foreground">{prevQty}</span></span>
+                            <span>Para: <span className="font-semibold text-foreground">{nextQty}</span></span>
+                            {deltaQty != null ? (
+                              <span>Variação: <span className="font-semibold text-foreground">{deltaQty > 0 ? `+${deltaQty}` : `${deltaQty}`}</span></span>
                             ) : null}
+                          </div>
+                        ) : null}
+                        {ev.kind === "location" ? (
+                          <div className="mt-1 text-[10px] text-muted-foreground">
+                            {prevLoc ? <>De: <span className="font-semibold text-foreground">{prevLoc}</span></> : null}
+                            {prevLoc && nextLoc ? <span className="text-muted-foreground"> · </span> : null}
+                            {nextLoc ? <>Para: <span className="font-semibold text-foreground">{nextLoc}</span></> : null}
+                            {moved != null ? <span className="text-muted-foreground"> · </span> : null}
+                            {moved != null ? <>Qtd: <span className="font-semibold text-foreground">{moved}</span></> : null}
                           </div>
                         ) : null}
                         {isCommercial && (responsible || reason) ? (
@@ -248,7 +285,9 @@ export default function ActivityLogPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <span className="text-[12px] font-black text-foreground">
-                          {(delta != null ? (delta > 0 ? "+" : "") + String(delta) : (ev.event_type === "add" || ev.event_type === "stock_increase" ? "+" : "−") + String(ev.quantity))}
+                          {ev.kind === "location"
+                            ? (moved != null ? `↔ ${moved}` : "•")
+                            : (deltaQty != null ? (deltaQty > 0 ? "+" : "") + String(deltaQty) : (((ev as any).event_type === "add" || (ev as any).event_type === "stock_increase") ? "+" : "−") + String((ev as any).quantity))}
                         </span>
                         <p className="text-[8px] text-muted-foreground">un.</p>
                       </div>

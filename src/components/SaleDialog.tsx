@@ -12,6 +12,7 @@ import type { Wine } from "@/hooks/useWines";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STOCK_AUDIT_REASONS, normalizeAuditName, normalizeAuditText } from "@/lib/stock-audit";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWineLocations } from "@/hooks/useWineLocations";
 
 interface SaleItem {
   id: string;
@@ -20,6 +21,7 @@ interface SaleItem {
   wineDetails: string; // producer · vintage · grape · country
   quantity: number;
   unitPrice: number;
+  locationId: string;
 }
 
 interface SaleDialogProps {
@@ -42,6 +44,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
   const [searchText, setSearchText] = useState("");
 
   const { data: wines } = useWines();
+  const { data: allLocations } = useWineLocations();
   const wineEvent = useWineEvent();
   const { toast } = useToast();
 
@@ -73,6 +76,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
   }, [winesInStock, searchText]);
 
   const addItem = (wine: Wine) => {
+    const defaultLocId = allLocations?.find((l) => l.wine_id === wine.id)?.id ?? "";
     const existing = items.find(i => i.wineId === wine.id);
     if (existing) {
       setItems(items.map(i => i.wineId === wine.id ? { ...i, quantity: i.quantity + 1 } : i));
@@ -85,6 +89,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
         wineDetails: details,
         quantity: 1,
         unitPrice: wine.current_value ?? wine.purchase_price ?? 0,
+        locationId: defaultLocId,
       }]);
     }
     setPickingItem(false);
@@ -93,7 +98,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
   const removeItem = (id: string) => setItems(items.filter(i => i.id !== id));
 
-  const updateItem = (id: string, field: "quantity" | "unitPrice", value: number) => {
+  const updateItem = (id: string, field: "quantity" | "unitPrice" | "locationId", value: number | string) => {
     setItems(items.map(i => i.id === id ? { ...i, [field]: value } : i));
   };
 
@@ -111,6 +116,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
     try {
       // Register exit event for each item (decreases stock)
       for (const item of items) {
+        if (!item.locationId) throw new Error("Selecione a localização para registrar a venda.");
         await wineEvent.mutateAsync({
           wineId: item.wineId,
           eventType: "exit",
@@ -122,6 +128,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
           ].filter(Boolean).join(" | "),
           responsibleName: resp,
           reason: rsn,
+          locationId: item.locationId,
         });
       }
 
@@ -366,6 +373,27 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                         />
                       </div>
                     </div>
+
+                    <div>
+                      <Label className="text-[9px] text-muted-foreground">Localização (obrigatório)</Label>
+                      <Select
+                        value={item.locationId}
+                        onValueChange={(v) => updateItem(item.id, "locationId", v)}
+                      >
+                        <SelectTrigger className="h-8 rounded-xl text-[11px]">
+                          <SelectValue placeholder="Selecionar..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl">
+                          {(allLocations ?? [])
+                            .filter((l) => l.wine_id === item.wineId)
+                            .map((l) => (
+                              <SelectItem key={l.id} value={l.id}>
+                                {(l.formatted_label ?? l.manual_label ?? "Sem localização")} • {l.quantity} un.
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <p className="text-[10px] text-right text-muted-foreground">
                       Subtotal: <span className="font-bold text-foreground">R$ {(item.quantity * item.unitPrice).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                     </p>
@@ -383,15 +411,16 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                 </div>
               )}
 
-              <Button
-                onClick={handleSubmit}
-                disabled={
-                  isSubmitting ||
-                  items.length === 0 ||
-                  !normalizeAuditName(responsibleName) ||
-                  !normalizeAuditText(reason) ||
-                  (normalizeAuditText(reason) === "Outro" && !normalizeAuditText(auditNotes))
-                }
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    isSubmitting ||
+                    items.length === 0 ||
+                    !items.every((i) => !!i.locationId) ||
+                    !normalizeAuditName(responsibleName) ||
+                    !normalizeAuditText(reason) ||
+                    (normalizeAuditText(reason) === "Outro" && !normalizeAuditText(auditNotes))
+                  }
                 variant="primary"
                 className="w-full h-11 text-[13px] font-medium shadow-float"
               >

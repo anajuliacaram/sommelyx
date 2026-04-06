@@ -42,6 +42,7 @@ import { EditWineDialog } from "@/components/EditWineDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { StockAuditDialog } from "@/components/StockAuditDialog";
+import { useWineLocations } from "@/hooks/useWineLocations";
 
 // --- Types & Constants ---
 type StockStatus = "all" | "in-stock" | "low" | "out" | "aging" | "drink-now";
@@ -58,6 +59,7 @@ export default function InventoryPage() {
     const isMobile = useIsMobile();
     const { user, profileType } = useAuth();
     const isCommercial = profileType === "commercial";
+    const { data: allLocations } = useWineLocations();
 
     // --- States ---
     const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -86,6 +88,9 @@ export default function InventoryPage() {
     const styleFilters = searchParams.getAll("style");
     const countryFilters = searchParams.getAll("country");
     const regionFilters = searchParams.getAll("region");
+    const sectorFilters = searchParams.getAll("sector");
+    const zoneFilters = searchParams.getAll("zone");
+    const levelFilters = searchParams.getAll("level");
     const grapeFilters = searchParams.getAll("grape");
     const vintageFilters = searchParams.getAll("vintage");
     const tagFilters = searchParams.getAll("tag");
@@ -124,6 +129,19 @@ export default function InventoryPage() {
         wines.forEach(w => { if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity; });
         const grapes = Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ label: v, value: v, count: c }));
 
+        // Locations (counts by bottles)
+        const sectorMap: Record<string, number> = {};
+        const zoneMap: Record<string, number> = {};
+        const levelMap: Record<string, number> = {};
+        (allLocations ?? []).forEach((l) => {
+          if (l.sector) sectorMap[l.sector] = (sectorMap[l.sector] || 0) + (l.quantity || 0);
+          if (l.zone) zoneMap[l.zone] = (zoneMap[l.zone] || 0) + (l.quantity || 0);
+          if (l.level) levelMap[l.level] = (levelMap[l.level] || 0) + (l.quantity || 0);
+        });
+        const sectors = Object.entries(sectorMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ label: v, value: v, count: c }));
+        const zones = Object.entries(zoneMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ label: v, value: v, count: c }));
+        const levels = Object.entries(levelMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ label: v, value: v, count: c }));
+
         // Vintages with counts
         const vintageMap: Record<string, number> = {};
         wines.forEach(w => { if (w.vintage) vintageMap[String(w.vintage)] = (vintageMap[String(w.vintage)] || 0) + w.quantity; });
@@ -144,8 +162,8 @@ export default function InventoryPage() {
             { label: "Sem estoque", value: "out", count: out },
         ];
 
-        return { countries, regions, grapes, vintages, styles, statusOptions };
-    }, [wines]);
+        return { countries, regions, grapes, vintages, styles, statusOptions, sectors, zones, levels };
+    }, [wines, allLocations]);
 
     // Summary metrics
     const summary = useMemo(() => {
@@ -174,6 +192,12 @@ export default function InventoryPage() {
     // --- Filtering Logic ---
     const filteredWines = useMemo(() => {
         return wines.filter(wine => {
+            const wineLocs = (allLocations ?? []).filter((l) => l.wine_id === wine.id);
+            const locText = [
+              wine.cellar_location ?? "",
+              ...wineLocs.map((l) => l.formatted_label ?? l.manual_label ?? ""),
+            ].join(" • ").toLowerCase();
+
             // Text Search
             const searchMatch = !debouncedSearch ||
                 wine.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -181,6 +205,7 @@ export default function InventoryPage() {
                 wine.region?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
                 wine.grape?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
                 wine.country?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                locText.includes(debouncedSearch.toLowerCase()) ||
                 (wine.vintage && String(wine.vintage).includes(debouncedSearch.toLowerCase()));
 
             if (!searchMatch) return false;
@@ -202,6 +227,17 @@ export default function InventoryPage() {
 
             // Multi-select Regions
             if (regionFilters.length > 0 && (!wine.region || !regionFilters.includes(wine.region))) return false;
+
+            // Location filters (sector/zone/level)
+            if (sectorFilters.length > 0) {
+              if (!wineLocs.some((l) => l.sector && sectorFilters.includes(l.sector))) return false;
+            }
+            if (zoneFilters.length > 0) {
+              if (!wineLocs.some((l) => l.zone && zoneFilters.includes(l.zone))) return false;
+            }
+            if (levelFilters.length > 0) {
+              if (!wineLocs.some((l) => l.level && levelFilters.includes(l.level))) return false;
+            }
 
             // Multi-select Grapes
             if (grapeFilters.length > 0 && (!wine.grape || !grapeFilters.includes(wine.grape))) return false;
@@ -245,9 +281,19 @@ export default function InventoryPage() {
 
             return sortOrder === "asc" ? comparison : -comparison;
         });
-    }, [wines, debouncedSearch, statusFilter, styleFilters, countryFilters, regionFilters, grapeFilters, vintageFilters, tagFilters, vintageRange, priceRange, sortKey, sortOrder]);
+    }, [wines, allLocations, debouncedSearch, statusFilter, styleFilters, countryFilters, regionFilters, sectorFilters, zoneFilters, levelFilters, grapeFilters, vintageFilters, tagFilters, vintageRange, priceRange, sortKey, sortOrder]);
 
-    const activeFilterCount = styleFilters.length + countryFilters.length + regionFilters.length + grapeFilters.length + vintageFilters.length + tagFilters.length + (statusFilter !== "all" ? 1 : 0);
+    const activeFilterCount =
+      styleFilters.length +
+      countryFilters.length +
+      regionFilters.length +
+      sectorFilters.length +
+      zoneFilters.length +
+      levelFilters.length +
+      grapeFilters.length +
+      vintageFilters.length +
+      tagFilters.length +
+      (statusFilter !== "all" ? 1 : 0);
 
     // --- Handlers ---
     const toggleSelectAll = () => {
@@ -365,13 +411,30 @@ export default function InventoryPage() {
                     newQuantity: auditPayload.nextQty,
                     delta: auditPayload.delta,
                 } : null}
+                locations={
+                  auditPayload && allLocations
+                    ? allLocations
+                        .filter((l) => l.wine_id === auditPayload.wineId)
+                        .map((l) => ({
+                          id: l.id,
+                          label: l.formatted_label ?? l.manual_label ?? "Sem localização",
+                          quantity: l.quantity,
+                        }))
+                    : undefined
+                }
+                requireLocation={isCommercial}
+                defaultLocationId={
+                  auditPayload && allLocations
+                    ? (allLocations.find((l) => l.wine_id === auditPayload.wineId)?.id ?? undefined)
+                    : undefined
+                }
                 defaultResponsibleName={
                     typeof user?.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : undefined
                 }
                 defaultReason={auditPayload?.eventType === "stock_increase" ? "Entrada manual" : "Ajuste de inventário"}
                 confirmLabel="Confirmar alteração"
                 busy={auditPayload ? stockBusyWineId === auditPayload.wineId : false}
-                onConfirm={async ({ responsibleName, reason, notes }) => {
+                onConfirm={async ({ responsibleName, reason, notes, locationId }) => {
                     if (!auditPayload) return;
                     try {
                         setStockBusyWineId(auditPayload.wineId);
@@ -382,6 +445,7 @@ export default function InventoryPage() {
                             notes,
                             responsibleName,
                             reason,
+                            locationId,
                         });
                         toast({
                             title: auditPayload.delta > 0 ? "Entrada registrada!" : "Saída registrada!",
@@ -504,6 +568,33 @@ export default function InventoryPage() {
                                 onChange={(val) => updateParam("region", val, true)}
                                 onClear={() => updateParam("region", null, true)}
                                 searchPlaceholder="Buscar região..."
+                                searchable
+                            />
+                            <MultiSelectDropdown
+                                title="Setor"
+                                options={dynamicOptions.sectors ?? []}
+                                selected={sectorFilters}
+                                onChange={(val) => updateParam("sector", val, true)}
+                                onClear={() => updateParam("sector", null, true)}
+                                searchPlaceholder="Buscar setor..."
+                                searchable
+                            />
+                            <MultiSelectDropdown
+                                title="Gôndola"
+                                options={dynamicOptions.zones ?? []}
+                                selected={zoneFilters}
+                                onChange={(val) => updateParam("zone", val, true)}
+                                onClear={() => updateParam("zone", null, true)}
+                                searchPlaceholder="Buscar gôndola..."
+                                searchable
+                            />
+                            <MultiSelectDropdown
+                                title="Linha"
+                                options={dynamicOptions.levels ?? []}
+                                selected={levelFilters}
+                                onChange={(val) => updateParam("level", val, true)}
+                                onClear={() => updateParam("level", null, true)}
+                                searchPlaceholder="Buscar linha..."
                                 searchable
                             />
                             <MultiSelectDropdown
@@ -723,6 +814,26 @@ export default function InventoryPage() {
                                                 <p className="text-[11px] font-medium text-muted-foreground mt-0.5 truncate">
                                                     {[wine.country || "País não informado", wine.region || "Região não informada"].join(" · ")}
                                                 </p>
+                                                {(() => {
+                                                  const locs = (allLocations ?? [])
+                                                    .filter((l) => l.wine_id === wine.id)
+                                                    .map((l) => ({ id: l.id, label: l.formatted_label ?? l.manual_label ?? "", quantity: l.quantity }))
+                                                    .filter((l) => !!l.label)
+                                                    .slice(0, 2);
+                                                  return locs.length ? (
+                                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                                      {locs.map((l) => (
+                                                        <Badge
+                                                          key={l.id}
+                                                          variant="secondary"
+                                                          className="h-5 rounded-full px-2 text-[9px] font-bold tracking-wide bg-[#6E1E2A]/[0.06] text-[#6E1E2A] border border-[#6E1E2A]/[0.12]"
+                                                        >
+                                                          {l.label}{isCommercial ? ` • ${l.quantity} un.` : ""}
+                                                        </Badge>
+                                                      ))}
+                                                    </div>
+                                                  ) : null;
+                                                })()}
                                             </button>
 
                                             <div className="mt-2 flex items-center justify-between gap-2">
@@ -872,6 +983,25 @@ export default function InventoryPage() {
                                         <td className="hidden lg:table-cell">
                                             <div className="text-[13px] font-medium">{wine.region || "Região não informada"}</div>
                                             <div className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.country || "País não informado"} • Safra {wine.vintage || "NV"}</div>
+                                            {(() => {
+                                              const loc = (allLocations ?? [])
+                                                .filter((l) => l.wine_id === wine.id)
+                                                .map((l) => {
+                                                  const label = l.formatted_label ?? l.manual_label ?? "";
+                                                  return label ? (isCommercial ? `${label} • ${l.quantity} un.` : label) : "";
+                                                })
+                                                .find(Boolean);
+                                              return loc ? (
+                                                <div className="mt-1">
+                                                  <Badge
+                                                    variant="secondary"
+                                                    className="h-5 rounded-full px-2 text-[9px] font-bold tracking-wide bg-[#6E1E2A]/[0.06] text-[#6E1E2A] border border-[#6E1E2A]/[0.12]"
+                                                  >
+                                                    {loc}
+                                                  </Badge>
+                                                </div>
+                                              ) : null;
+                                            })()}
                                         </td>
                                         <td>
                                             <div className="flex items-center gap-2.5">

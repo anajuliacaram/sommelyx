@@ -6,6 +6,8 @@ import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCreateWineLocation } from "@/hooks/useWineLocations";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -28,6 +30,8 @@ interface ParsedWine {
 }
 
 export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
+  const { user, profileType } = useAuth();
+  const isCommercial = profileType === "commercial";
   const [step, setStep] = useState<"upload" | "analyzing" | "preview" | "importing" | "done">("upload");
   const [parsed, setParsed] = useState<ParsedWine[]>([]);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
@@ -39,6 +43,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const addWine = useAddWine();
+  const createLocation = useCreateWineLocation();
   const { toast } = useToast();
 
   const MAX_CLIENT_INPUT_CHARS = 1_900_000; // keep request under edge limit after JSON overhead
@@ -170,7 +175,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     for (let i = 0; i < parsed.length; i++) {
       const w = parsed[i];
       try {
-        await addWine.mutateAsync({
+        const inserted = await addWine.mutateAsync({
           name: w.name,
           producer: w.producer || null,
           quantity: w.quantity || 1,
@@ -189,6 +194,18 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           rating: null,
           image_url: null,
         });
+
+        if (inserted?.id && user) {
+          const resp = typeof user.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : null;
+          await createLocation.mutateAsync({
+            wineId: inserted.id,
+            manualLabel: w.cellar_location || null,
+            quantity: w.quantity || 1,
+            responsibleName: isCommercial ? resp : null,
+            reason: isCommercial ? "Entrada manual" : null,
+            notes: null,
+          });
+        }
       } catch {
         errors.push(`Erro ao importar "${w.name}"`);
       }

@@ -12,6 +12,9 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { LocationFields } from "@/components/LocationFields";
+import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
+import { useCreateWineLocation } from "@/hooks/useWineLocations";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -29,7 +32,7 @@ const styles = [
 ];
 
 export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
-  const { profileType } = useAuth();
+  const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
 
   const [name, setName] = useState("");
@@ -42,7 +45,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [grape, setGrape] = useState("");
   const [lastPaid, setLastPaid] = useState("");
   const [currentValue, setCurrentValue] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState<StructuredLocation>({});
   const [drinkFrom, setDrinkFrom] = useState("");
   const [drinkUntil, setDrinkUntil] = useState("");
   const [foodPairing, setFoodPairing] = useState("");
@@ -52,6 +55,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [scanOpen, setScanOpen] = useState(false);
 
   const addWine = useAddWine();
+  const createLocation = useCreateWineLocation();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
-    setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setCurrentValue(""); setLocation("");
+    setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setMoreOpen(false); setSuccess(false);
   };
@@ -85,7 +89,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (data.drink_until) setDrinkUntil(String(data.drink_until));
     if (data.purchase_price) setLastPaid(String(data.purchase_price));
     if (data.current_value) setCurrentValue(String(data.current_value));
-    if (data.cellar_location) setLocation(data.cellar_location);
+    if (data.cellar_location) setLocation({ manualLabel: String(data.cellar_location) });
     // Open advanced fields if we have data for them
     if (data.country || data.region || data.grape || data.food_pairing || data.tasting_notes || data.drink_from) {
       setMoreOpen(true);
@@ -98,7 +102,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (!name.trim()) return;
 
     try {
-      await addWine.mutateAsync({
+      const formattedLocation = formatLocationLabel(location) || null;
+      const inserted = await addWine.mutateAsync({
         name: name.trim(),
         producer: producer || null,
         quantity: parseInt(quantity) || 1,
@@ -109,7 +114,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         grape: grape || null,
         purchase_price: lastPaid ? parseFloat(lastPaid) : null,
         current_value: currentValue ? parseFloat(currentValue) : null,
-        cellar_location: location || null,
+        cellar_location: formattedLocation,
         drink_from: drinkFrom ? parseInt(drinkFrom) : null,
         drink_until: drinkUntil ? parseInt(drinkUntil) : null,
         food_pairing: foodPairing || null,
@@ -117,6 +122,24 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         rating: null,
         image_url: null,
       });
+
+      // Persist structured location (personal + commercial). For commercial, this becomes the first stock location.
+      // For personal, we keep quantity mirrored with the wine total.
+      if (inserted?.id && user) {
+        const resp = typeof user.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : null;
+        await createLocation.mutateAsync({
+          wineId: inserted.id,
+          sector: location.sector ?? null,
+          zone: location.zone ?? null,
+          level: location.level ?? null,
+          position: location.position ?? null,
+          manualLabel: location.manualLabel ?? null,
+          quantity: parseInt(quantity) || 1,
+          responsibleName: isCommercial ? resp : null,
+          reason: isCommercial ? "Entrada manual" : null,
+          notes: null,
+        });
+      }
 
       setSuccess(true);
       setTimeout(() => {
@@ -252,8 +275,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         </p>
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Localização na adega</Label>
-                        <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Estante A, prateleira 2" />
+                        <LocationFields
+                          value={location}
+                          onChange={setLocation}
+                          label="Localização na adega"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
