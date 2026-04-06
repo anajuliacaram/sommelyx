@@ -242,7 +242,9 @@ serve(async (req) => {
       });
     }
 
-    const { mime: imageMime, base64: imageBase64 } = parseImageDataUrl(normalizeBase64(imageBase64Raw));
+    const parsedImage = parseImageDataUrl(imageBase64Raw);
+    const imageMime = parsedImage.mime;
+    const imageBase64 = normalizeBase64(parsedImage.base64);
     if (imageBase64.length > MAX_IMAGE_SIZE) {
       await logAudit(userId, 413, "validation_error", Date.now() - startTime, {
         request_id: requestId,
@@ -315,39 +317,43 @@ serve(async (req) => {
           },
         ],
         // Enforce a strict JSON schema output for reliability.
-        format: {
-          type: "json_schema",
-          name: "wine_label",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              wine: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  producer: { type: "string" },
-                  vintage: { anyOf: [{ type: "integer" }, { type: "null" }] },
-                  style: {
-                    anyOf: [
-                      { type: "string", enum: ["tinto", "branco", "rose", "espumante", "sobremesa", "fortificado"] },
-                      { type: "null" },
-                    ],
+        // NOTE: In Responses API, structured output format lives under `text.format`.
+        // See: https://platform.openai.com/docs/api-reference/responses/create
+        text: {
+          format: {
+            type: "json_schema",
+            name: "wine_label",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                wine: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    producer: { type: "string" },
+                    vintage: { anyOf: [{ type: "integer" }, { type: "null" }] },
+                    style: {
+                      anyOf: [
+                        { type: "string", enum: ["tinto", "branco", "rose", "espumante", "sobremesa", "fortificado"] },
+                        { type: "null" },
+                      ],
+                    },
+                    country: { anyOf: [{ type: "string" }, { type: "null" }] },
+                    region: { anyOf: [{ type: "string" }, { type: "null" }] },
+                    grape: { anyOf: [{ type: "string" }, { type: "null" }] },
+                    food_pairing: { anyOf: [{ type: "string" }, { type: "null" }] },
+                    tasting_notes: { anyOf: [{ type: "string" }, { type: "null" }] },
+                    cellar_location: { anyOf: [{ type: "string" }, { type: "null" }] },
+                    purchase_price: { anyOf: [{ type: "number" }, { type: "null" }] },
+                    drink_from: { anyOf: [{ type: "integer" }, { type: "null" }] },
+                    drink_until: { anyOf: [{ type: "integer" }, { type: "null" }] },
                   },
-                  country: { anyOf: [{ type: "string" }, { type: "null" }] },
-                  region: { anyOf: [{ type: "string" }, { type: "null" }] },
-                  grape: { anyOf: [{ type: "string" }, { type: "null" }] },
-                  food_pairing: { anyOf: [{ type: "string" }, { type: "null" }] },
-                  tasting_notes: { anyOf: [{ type: "string" }, { type: "null" }] },
-                  cellar_location: { anyOf: [{ type: "string" }, { type: "null" }] },
-                  purchase_price: { anyOf: [{ type: "number" }, { type: "null" }] },
-                  drink_from: { anyOf: [{ type: "integer" }, { type: "null" }] },
-                  drink_until: { anyOf: [{ type: "integer" }, { type: "null" }] },
+                  required: ["name"],
                 },
-                required: ["name"],
               },
+              required: ["wine"],
             },
-            required: ["wine"],
           },
         },
         temperature: 0.1,
@@ -392,6 +398,23 @@ serve(async (req) => {
           ok: false,
           code: "IMAGE_INVALID",
           error: "Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo.",
+          requestId,
+          retryable: false,
+        });
+      }
+
+      // Upstream auth/config error (invalid key, missing permission, suspended/billing issue, etc).
+      if (response.status === 401 || response.status === 403) {
+        await logAudit(userId, 500, "ai_error", durationMs, {
+          request_id: requestId,
+          reason: "ai_auth_error",
+          ai_status: response.status,
+          ai_body_preview: bodyText.slice(0, 400),
+        });
+        return fail(500, {
+          ok: false,
+          code: "AI_AUTH",
+          error: "A análise por IA não está configurada corretamente no momento. Tente novamente mais tarde.",
           requestId,
           retryable: false,
         });
