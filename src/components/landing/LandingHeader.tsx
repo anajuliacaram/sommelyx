@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { Logo } from "@/components/Logo";
+import { Instagram, Linkedin } from "lucide-react";
 
 interface LandingHeaderProps {
   onLogin: () => void;
