@@ -1,4 +1,5 @@
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
+import type { AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 
 // ── Types ──
 
@@ -118,7 +119,7 @@ export async function getDishWineSuggestions(
 }
 
 export async function analyzeWineList(
-  imageBase64: string,
+  attachment: AiAnalysisAttachmentPayload,
   userProfile?: {
     topStyles?: string[];
     topGrapes?: string[];
@@ -128,19 +129,19 @@ export async function analyzeWineList(
 ): Promise<WineListAnalysis> {
   const data = await invokeEdgeFunction<WineListAnalysis>(
     "analyze-wine-list",
-    { imageBase64, userProfile },
+    { ...attachment, userProfile },
     { timeoutMs: 60_000, retries: 1 },
   );
   return data || { wines: [], topPick: null, bestValue: null };
 }
 
 export async function analyzeMenuForWine(
-  imageBase64: string,
+  attachment: AiAnalysisAttachmentPayload,
   wineName: string,
 ): Promise<MenuAnalysis> {
   const data = await invokeEdgeFunction<MenuAnalysis>(
     "analyze-wine-list",
-    { imageBase64, mode: "menu-for-wine", wineName },
+    { ...attachment, mode: "menu-for-wine", wineName },
     { timeoutMs: 60_000, retries: 1 },
   );
   return data || { dishes: [], summary: "" };

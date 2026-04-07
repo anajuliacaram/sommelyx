@@ -1,11 +1,12 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, Loader2, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin } from "@/icons/lucide";
+import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin, FileText } from "@/icons/lucide";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem } from "@/lib/sommelier-ai";
+import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -56,19 +57,19 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const { data: wines } = useWines();
   const { toast } = useToast();
   const [step, setStep] = useState<ScanStep>("capture");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
   const [results, setResults] = useState<WineListAnalysis | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const [lastBase64, setLastBase64] = useState<string | null>(null);
+  const [lastAttachment, setLastAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
     setStep("capture");
-    setImagePreview(null);
+    setAttachmentPreview(null);
     setResults(null);
     setErrorMsg("");
-    setLastBase64(null);
+    setLastAttachment(null);
   };
 
   const handleClose = (v: boolean) => {
@@ -76,40 +77,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     onOpenChange(v);
   };
 
-  const compressImage = useCallback(async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX = 1600;
-          let w = img.width, h = img.height;
-          if (w > MAX || h > MAX) {
-            if (w > h) { h = (h * MAX) / w; w = MAX; }
-            else { w = (w * MAX) / h; h = MAX; }
-          }
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext("2d")!;
-          ctx.drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
-        };
-        img.onerror = reject;
-        img.src = e.target?.result as string;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }, []);
-
-  const runScan = useCallback(async (base64: string) => {
+  const runScan = useCallback(async (attachment: AiAnalysisAttachmentPayload) => {
     setStep("scanning");
     setErrorMsg("");
     try {
       const cellarWines = wines?.filter((w) => w.quantity > 0) || [];
       const profile = cellarWines.length >= 3 ? buildUserProfile(cellarWines) : undefined;
-      const data = await analyzeWineList(base64, profile);
+      const data = await analyzeWineList(attachment, profile);
       if (!data.wines?.length) throw new Error("Nenhum vinho identificado na imagem");
       setResults(data);
       setStep("results");
@@ -120,21 +94,34 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   }, [wines]);
 
   const handleFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Selecione uma imagem válida", variant: "destructive" });
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!file.type.startsWith("image/") && !isPdf) {
+      toast({ title: "Envie uma imagem ou PDF válido", variant: "destructive" });
       return;
     }
-    setImagePreview(URL.createObjectURL(file));
+
     setStep("scanning");
     try {
-      const base64 = await compressImage(file);
-      setLastBase64(base64);
-      await runScan(base64);
-    } catch {
-      setErrorMsg("Não conseguimos ler essa imagem.");
+      const prepared = await prepareAiAnalysisAttachment(file);
+      const payload: AiAnalysisAttachmentPayload = {
+        imageBase64: prepared.imageBase64,
+        extractedText: prepared.extractedText,
+        mimeType: prepared.mimeType,
+        fileName: prepared.fileName,
+      };
+
+      setAttachmentPreview({
+        url: prepared.previewUrl,
+        fileName: prepared.fileName || file.name,
+        isPdf: prepared.sourceType !== "image",
+      });
+      setLastAttachment(payload);
+      await runScan(payload);
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : "Não conseguimos ler esse anexo.");
       setStep("error");
     }
-  }, [compressImage, runScan, toast]);
+  }, [runScan, toast]);
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -160,8 +147,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               </div>
               <div className="text-center">
                 <h3 className="text-base font-semibold text-foreground mb-1">Fotografe a carta</h3>
-                <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
-                  Tire uma foto da carta de vinhos do restaurante. O sommelier vai avaliar cada vinho e sugerir a melhor escolha.
+                  <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
+                    Envie uma foto ou PDF da carta de vinhos. A IA avalia os rótulos visíveis e aponta as melhores escolhas.
                 </p>
               </div>
 
@@ -174,18 +161,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   <Camera className="h-4 w-4 mr-2" />
                   Tirar Foto
                 </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-11 text-[13px] font-medium border border-border/60 bg-background/60 hover:bg-background"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Escolher da Galeria
-                </Button>
+                  <Button variant="ghost" onClick={() => fileInputRef.current?.click()} className="h-11 text-[13px] font-medium border border-border/60 bg-background/60 hover:bg-background">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Escolher imagem ou PDF
+                  </Button>
               </div>
 
-              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
             </motion.div>
           )}
 
@@ -197,10 +180,22 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               exit={{ opacity: 0 }}
               className="flex flex-col items-center gap-5 pt-8"
             >
-              {imagePreview && (
-                <div className="w-full aspect-[4/3] max-h-[200px] rounded-xl overflow-hidden border border-border/30">
-                  <img src={imagePreview} alt="Carta" className="w-full h-full object-cover" />
-                </div>
+              {attachmentPreview && (
+                attachmentPreview.url ? (
+                  <div className="w-full aspect-[4/3] max-h-[200px] rounded-xl overflow-hidden border border-border/30">
+                    <img src={attachmentPreview.url} alt={attachmentPreview.fileName} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-full rounded-xl border border-border/40 bg-background/60 px-4 py-3 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-foreground truncate">{attachmentPreview.fileName}</p>
+                      <p className="text-[10px] text-muted-foreground">PDF anexado para leitura inteligente</p>
+                    </div>
+                  </div>
+                )
               )}
               <AiProgressiveLoader
                 steps={[
@@ -256,7 +251,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
               </div>
               <div className="flex flex-col gap-2.5 w-full">
-                <Button onClick={() => (lastBase64 ? runScan(lastBase64) : reset())} variant="secondary" className="h-11 text-[13px] font-semibold">
+                <Button onClick={() => (lastAttachment ? runScan(lastAttachment) : reset())} variant="secondary" className="h-11 text-[13px] font-semibold">
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
                 </Button>
                 <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-border/60">

@@ -1,12 +1,13 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, ArrowLeft, ChefHat } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, ArrowLeft, ChefHat, FileText } from "@/icons/lucide";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis } from "@/lib/sommelier-ai";
+import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
@@ -66,7 +67,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [menuResults, setMenuResults] = useState<MenuAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
+  const [lastWineListAttachment, setLastWineListAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
+  const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
 
   const reset = () => {
     setSource(null);
@@ -82,6 +85,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setLoading(false);
     setError(null);
     setPreview(null);
+    setLastWineListAttachment(null);
+    setLastMenuAttachment(null);
   };
 
   const handleClose = (v: boolean) => {
@@ -164,26 +169,30 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64 = (reader.result as string).split(",")[1];
-      setPreview(reader.result as string);
-      setStep("scanning");
-      setLoading(true);
-      setError(null);
-      try {
-        const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
-        const result = await analyzeWineList(base64, profile);
-        setScanResults(result);
-        setStep("scan-results");
-      } catch (err: any) {
-        setError(err.message || "Erro ao analisar a carta");
-        setStep("photo");
-      } finally {
-        setLoading(false);
-      }
-    };
-    reader.readAsDataURL(file);
+    setStep("scanning");
+    setLoading(true);
+    setError(null);
+    try {
+      const prepared = await prepareAiAnalysisAttachment(file);
+      const payload: AiAnalysisAttachmentPayload = {
+        imageBase64: prepared.imageBase64,
+        extractedText: prepared.extractedText,
+        mimeType: prepared.mimeType,
+        fileName: prepared.fileName,
+      };
+      setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
+      setLastWineListAttachment(payload);
+
+      const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
+      const result = await analyzeWineList(payload, profile);
+      setScanResults(result);
+      setStep("scan-results");
+    } catch (err: any) {
+      setError(err.message || "Erro ao analisar a carta");
+      setStep("photo");
+    } finally {
+      setLoading(false);
+    }
     e.target.value = "";
   };
 
@@ -191,25 +200,29 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64 = (reader.result as string).split(",")[1];
-      setPreview(reader.result as string);
-      setStep("ext-menu-scanning");
-      setLoading(true);
-      setError(null);
-      try {
-        const result = await analyzeMenuForWine(base64, extWineName);
-        setMenuResults(result);
-        setStep("ext-menu-results");
-      } catch (err: any) {
-        setError(err.message || "Erro ao analisar o cardápio");
-        setStep("ext-menu-photo");
-      } finally {
-        setLoading(false);
-      }
-    };
-    reader.readAsDataURL(file);
+    setStep("ext-menu-scanning");
+    setLoading(true);
+    setError(null);
+    try {
+      const prepared = await prepareAiAnalysisAttachment(file);
+      const payload: AiAnalysisAttachmentPayload = {
+        imageBase64: prepared.imageBase64,
+        extractedText: prepared.extractedText,
+        mimeType: prepared.mimeType,
+        fileName: prepared.fileName,
+      };
+      setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
+      setLastMenuAttachment(payload);
+
+      const result = await analyzeMenuForWine(payload, extWineName);
+      setMenuResults(result);
+      setStep("ext-menu-results");
+    } catch (err: any) {
+      setError(err.message || "Erro ao analisar o cardápio");
+      setStep("ext-menu-photo");
+    } finally {
+      setLoading(false);
+    }
     e.target.value = "";
   };
 
@@ -582,7 +595,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <input
                     ref={menuFileRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,application/pdf,.pdf"
                     capture="environment"
                     className="hidden"
                     onChange={handleMenuFileChange}
@@ -595,7 +608,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                       <Camera className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou escolher da galeria</p>
+                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou anexar PDF</p>
                     <p className="text-[10px] text-muted-foreground">Cardápio de comidas do restaurante</p>
                   </button>
                 </div>
@@ -616,7 +629,19 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="flex flex-col items-center gap-4 py-8"
               >
                 {preview && (
-                  <img src={preview} alt="Cardápio" className="w-20 h-20 object-cover rounded-xl border border-border/30" />
+                  preview.url ? (
+                    <img src={preview.url} alt={preview.fileName} className="w-20 h-20 object-cover rounded-xl border border-border/30" />
+                  ) : (
+                    <div className="w-full rounded-xl border border-border/40 bg-background/60 px-4 py-3 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-semibold text-foreground truncate">{preview.fileName}</p>
+                        <p className="text-[10px] text-muted-foreground">PDF anexado para leitura inteligente</p>
+                      </div>
+                    </div>
+                  )
                 )}
                 <AiProgressiveLoader
                   steps={[
@@ -737,7 +762,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <input
                     ref={fileRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,application/pdf,.pdf"
                     capture="environment"
                     className="hidden"
                     onChange={handleFileChange}
@@ -750,8 +775,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                       <Camera className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou escolher da galeria</p>
-                    <p className="text-[10px] text-muted-foreground">Carta de vinhos, garrafa ou menu</p>
+                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou anexar PDF</p>
+                    <p className="text-[10px] text-muted-foreground">Carta de vinhos, garrafa ou PDF do restaurante</p>
                   </button>
                 </div>
 
@@ -771,7 +796,19 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="flex flex-col items-center gap-4 py-8"
               >
                 {preview && (
-                  <img src={preview} alt="Carta" className="w-20 h-20 object-cover rounded-xl border border-border/30" />
+                  preview.url ? (
+                    <img src={preview.url} alt={preview.fileName} className="w-20 h-20 object-cover rounded-xl border border-border/30" />
+                  ) : (
+                    <div className="w-full rounded-xl border border-border/40 bg-background/60 px-4 py-3 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-semibold text-foreground truncate">{preview.fileName}</p>
+                        <p className="text-[10px] text-muted-foreground">PDF anexado para leitura inteligente</p>
+                      </div>
+                    </div>
+                  )
                 )}
                 <AiProgressiveLoader
                   steps={[
