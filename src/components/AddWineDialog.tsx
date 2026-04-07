@@ -44,6 +44,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [region, setRegion] = useState("");
   const [grape, setGrape] = useState("");
   const [lastPaid, setLastPaid] = useState("");
+  const [lastPaidDate, setLastPaidDate] = useState(new Date().toISOString().split("T")[0]);
   const [currentValue, setCurrentValue] = useState("");
   const [location, setLocation] = useState<StructuredLocation>({});
   const [drinkFrom, setDrinkFrom] = useState("");
@@ -70,7 +71,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
-    setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setCurrentValue(""); setLocation({});
+    setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setMoreOpen(false); setSuccess(false);
   };
@@ -113,6 +114,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         region: region || null,
         grape: grape || null,
         purchase_price: lastPaid ? parseFloat(lastPaid) : null,
+        last_price_date: lastPaid ? lastPaidDate : null,
         current_value: currentValue ? parseFloat(currentValue) : null,
         cellar_location: formattedLocation,
         drink_from: drinkFrom ? parseInt(drinkFrom) : null,
@@ -257,21 +259,20 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         <Input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" />
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {isCommercial ? "Último preço de compra (R$)" : "Preço de compra (R$)"}
-                        </Label>
-                        <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
+                        <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-1">
+                          <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
+                          <Input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} />
+                        </div>
                         <p className="mt-1 text-[10px] text-muted-foreground/80">
-                          {isCommercial ? "Custo unitário da última compra." : "Quanto você pagou nessa garrafa."}
+                          Quanto e quando você pagou por último.
                         </p>
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {isCommercial ? "Último valor pago (R$)" : "Valor atual (R$)"}
-                        </Label>
+                        <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
                         <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
                         <p className="mt-1 text-[10px] text-muted-foreground/80">
-                          {isCommercial ? "Último valor pago pelo cliente (referência de venda)." : "Referência de valor/venda."}
+                          Referência de valor de mercado atual.
                         </p>
                       </div>
                       <div>
