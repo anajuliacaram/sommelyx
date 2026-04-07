@@ -77,29 +77,29 @@ export function AppSidebar() {
 
   return (
     <>
-      <Sidebar collapsible="offcanvas" className="border-r border-border/30" style={{ background: "hsl(var(--sidebar-background))" }}>
-        <SidebarHeader className="pt-3 md:pt-4 px-3">
+      <Sidebar collapsible="offcanvas" className="border-r border-border/20" style={{ background: "hsl(var(--sidebar-background))" }}>
+        <SidebarHeader className="pt-4 md:pt-5 px-4">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-2 py-1.5 mb-3 rounded-xl transition-colors hover:bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+            className="flex items-center gap-3 px-2 py-2 mb-4 rounded-lg transition-colors hover:bg-muted/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
             <Logo
               variant="compact"
-              className="h-12 sm:h-12 w-auto drop-shadow-[0_4px_12px_rgba(15,15,20,0.08)]"
+              className="h-10 sm:h-10 w-auto"
             />
             <div className="flex flex-col">
-              <span className="text-[17px] font-black font-serif tracking-tight text-wine leading-none">
+              <span className="text-[16px] font-serif font-semibold tracking-[-0.01em] text-primary leading-none">
                 Sommelyx
               </span>
               <span
                 className={[
-                  "mt-1 w-fit inline-flex items-center rounded-md px-2.5 py-0.5",
-                  "text-[9px] font-bold uppercase tracking-[0.14em] leading-none",
+                  "mt-1.5 w-fit inline-flex items-center rounded-md px-2 py-0.5",
+                  "text-[9px] font-medium uppercase tracking-[0.08em] leading-none",
                   isCommercial
-                    ? "bg-gold/8 text-gold ring-1 ring-gold/20"
-                    : "bg-wine/[0.06] text-wine ring-1 ring-wine/15",
+                    ? "bg-accent/6 text-accent ring-1 ring-accent/15"
+                    : "bg-primary/[0.04] text-primary ring-1 ring-primary/10",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}
@@ -108,12 +108,12 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="px-0 pb-2">
+          <div className="px-0 pb-3">
             {isCommercial ? (
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="primary"
-                  className="col-span-2 h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  className="col-span-2 h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
@@ -121,7 +121,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  className="h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-3.5 w-3.5 mr-1" />
@@ -129,7 +129,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="danger"
-                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  className="h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-3.5 w-3.5 mr-1" />
@@ -140,7 +140,7 @@ export function AppSidebar() {
               <div className="grid gap-2">
                 <Button
                   variant="primary"
-                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  className="h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
@@ -148,7 +148,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  className="h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
                 >
                   <Wine className="h-3.5 w-3.5 mr-1.5" />
@@ -157,7 +157,7 @@ export function AppSidebar() {
                 <div className="grid grid-cols-2 gap-1.5">
                   <Button
                     variant="ghost"
-                    className="h-8 text-[10px] font-bold uppercase tracking-[0.08em] rounded-lg border border-border/40 bg-background/50 hover:bg-primary/[0.04] hover:border-primary/15 hover:text-primary"
+                    className="h-8 text-[10px] font-medium rounded-lg border border-border/30 bg-background/30 hover:bg-primary/[0.03] hover:border-primary/10 hover:text-primary"
                     onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
                   >
                     <UtensilsCrossed className="h-3 w-3 mr-1" />
@@ -165,7 +165,7 @@ export function AppSidebar() {
                   </Button>
                   <Button
                     variant="ghost"
-                    className="h-8 text-[10px] font-bold uppercase tracking-[0.08em] rounded-lg border border-border/40 bg-background/50 hover:bg-primary/[0.04] hover:border-primary/15 hover:text-primary"
+                    className="h-8 text-[10px] font-medium rounded-lg border border-border/30 bg-background/30 hover:bg-primary/[0.03] hover:border-primary/10 hover:text-primary"
                     onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
                   >
                     <Sparkles className="h-3 w-3 mr-1" />
@@ -177,9 +177,9 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-3">
+        <SidebarContent className="px-4">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.14em] font-bold text-muted-foreground/45 mb-1.5 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.10em] font-medium text-muted-foreground/40 mb-2 px-3">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -204,8 +204,8 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-2">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.14em] font-bold text-muted-foreground/45 mb-1.5 px-3">
+          <SidebarGroup className="mt-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.10em] font-medium text-muted-foreground/40 mb-2 px-3">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
