@@ -3,6 +3,7 @@ import { supabase } from "./client";
 type InvokeOptions = {
   timeoutMs?: number;
   retries?: number;
+  accessToken?: string | null;
 };
 
 export class EdgeFunctionError extends Error {
@@ -37,35 +38,37 @@ function toErrorMessage(err: unknown) {
   return "Falha ao executar a ação. Tente novamente.";
 }
 
+async function resolveAccessToken(preferredToken?: string | null, forceRefresh = false): Promise<string | null> {
+  if (!forceRefresh && preferredToken) return preferredToken;
+
+  if (!forceRefresh) {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentToken = sessionData.session?.access_token ?? null;
+    if (currentToken) return currentToken;
+  }
+
+  const { data: refreshed } = await supabase.auth.refreshSession();
+  return refreshed.session?.access_token ?? null;
+}
+
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
-  { timeoutMs = 45_000, retries = 2 }: InvokeOptions = {},
+  { timeoutMs = 45_000, retries = 2, accessToken: explicitAccessToken }: InvokeOptions = {},
 ): Promise<T> {
   let attempt = 0;
+  let forceTokenRefresh = false;
 
   while (true) {
     try {
-      // Try getSession first; if missing/expired, attempt a refresh (Safari ITP workaround).
-      const { data: sessionData } = await supabase.auth.getSession();
-      let accessToken = sessionData.session?.access_token;
-
-      if (!accessToken) {
-        const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession();
-        if (refreshErr || !refreshData.session) {
-          console.error("[edge-invoke] Sessão expirada. refreshSession falhou:", refreshErr?.message);
-          throw new EdgeFunctionError(
-            "Sua sessão expirou. Faça login novamente para continuar.",
-            { status: 401, code: "SESSION_EXPIRED", retryable: false },
-          );
-        }
-        accessToken = refreshData.session.access_token;
-      }
-
-      const invokePromise = supabase.functions.invoke(name, {
-        body,
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      // Prefer explicit Authorization; fallback to invoke default headers if token is temporarily unavailable.
+      const accessToken = await resolveAccessToken(explicitAccessToken, forceTokenRefresh);
+      const invokePromise = supabase.functions.invoke(name, accessToken
+        ? {
+            body,
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        : { body });
 
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Tempo limite excedido. Tente novamente.")), timeoutMs),
@@ -97,11 +100,18 @@ export async function invokeEdgeFunction<T>(
           // ignore parse errors
         }
 
-        // Sanitize raw JWT errors into friendly messages
-        if (message.toLowerCase().includes("invalid jwt") || message.toLowerCase().includes("jwt expired")) {
-          console.error(`[edge-invoke] JWT error from ${name}:`, message);
+        if (status === 401 && (!message || /unauthorized/i.test(message))) {
           message = "Sua sessão expirou. Faça login novamente para continuar.";
-          code = "AUTH_REQUIRED";
+          if (!code) code = "AUTH_REQUIRED";
+          retryable = false;
+        }
+
+        if (status === 401 && attempt < retries) {
+          forceTokenRefresh = true;
+          const backoff = 600 * Math.pow(2, attempt);
+          attempt++;
+          await sleep(backoff);
+          continue;
         }
 
         if (attempt < retries && (retryable ?? isRetriable(status))) {

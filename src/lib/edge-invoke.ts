@@ -1,9 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getRequiredClientEnv } from "@/lib/env";
 
 type InvokeOptions = {
   timeoutMs?: number;
   retries?: number;
+  accessToken?: string | null;
 };
 
 export class EdgeFunctionError extends Error {
@@ -30,140 +30,69 @@ function isRetriable(status?: number) {
   return status === 429 || status === 502 || status === 503 || status === 504;
 }
 
+function isTransportErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("failed to send a request to the edge function") ||
+    normalized.includes("failed to fetch") ||
+    normalized.includes("networkerror") ||
+    normalized.includes("load failed")
+  );
+}
+
+function humanizeEdgeErrorMessage(message: string) {
+  if (isTransportErrorMessage(message)) {
+    return "Não foi possível conectar com a inteligência do Sommelyx agora. Verifique sua conexão e tente novamente.";
+  }
+  return message || "Não foi possível completar a solicitação.";
+}
+
 function toErrorMessage(err: unknown) {
   if (err instanceof Error) return err.message;
   return "Falha ao executar a ação. Tente novamente.";
 }
 
-function shouldFallbackToDirectFetch(err: unknown) {
-  const message = err instanceof Error ? err.message.toLowerCase() : "";
-  const name = typeof (err as { name?: unknown })?.name === "string"
-    ? String((err as { name?: string }).name).toLowerCase()
-    : "";
+async function resolveAccessToken(preferredToken?: string | null, forceRefresh = false): Promise<string | null> {
+  if (!forceRefresh && preferredToken) return preferredToken;
 
-  return (
-    message.includes("failed to send a request to the edge function") ||
-    message.includes("network") ||
-    name.includes("functionsfetcherror") ||
-    name.includes("relayerror")
-  );
-}
-
-async function parseDirectFetchError(response: Response) {
-  let message = "Não foi possível completar a solicitação.";
-  let code: string | undefined;
-  let requestId: string | undefined;
-  let retryable: boolean | undefined;
-
-  try {
-    const contentType = response.headers.get("content-type") || "";
-    if (contentType.includes("application/json")) {
-      const body = await response.json();
-      if (body?.error) message = String(body.error);
-      else if (body?.message) message = String(body.message);
-      if (body?.code) code = String(body.code);
-      if (body?.requestId) requestId = String(body.requestId);
-      if (body?.request_id) requestId = String(body.request_id);
-      if (typeof body?.retryable === "boolean") retryable = body.retryable;
-    } else {
-      const text = await response.text();
-      if (text.trim()) message = text.trim();
-    }
-  } catch {
-    // ignore parsing failures
+  if (!forceRefresh) {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentToken = sessionData.session?.access_token ?? null;
+    if (currentToken) return currentToken;
   }
 
-  if (message.toLowerCase().includes("invalid jwt") || message.toLowerCase().includes("jwt expired")) {
-    message = "Sua sessão expirou. Faça login novamente para continuar.";
-    code = "AUTH_REQUIRED";
-  }
-
-  return new EdgeFunctionError(message, {
-    status: response.status,
-    code,
-    requestId,
-    retryable: retryable ?? isRetriable(response.status),
-  });
-}
-
-async function invokeEdgeFunctionDirect<T>(
-  name: string,
-  body: Record<string, unknown>,
-  accessToken: string,
-  timeoutMs: number,
-): Promise<T> {
-  const url = `${getRequiredClientEnv("VITE_SUPABASE_URL")}/functions/v1/${name}`;
-  const publishableKey = getRequiredClientEnv("VITE_SUPABASE_PUBLISHABLE_KEY");
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        apikey: publishableKey,
-      },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      throw await parseDirectFetchError(response);
-    }
-
-    return await response.json() as T;
-  } catch (err) {
-    if (err instanceof EdgeFunctionError) throw err;
-    if (err instanceof DOMException && err.name === "AbortError") {
-      throw new Error("Tempo limite excedido. Tente novamente.");
-    }
-    throw err;
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
+  // Fallback for cases where session is momentarily stale but recoverable.
+  const { data: refreshed } = await supabase.auth.refreshSession();
+  return refreshed.session?.access_token ?? null;
 }
 
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
-  { timeoutMs = 45_000, retries = 2 }: InvokeOptions = {},
+  { timeoutMs = 45_000, retries = 2, accessToken: explicitAccessToken }: InvokeOptions = {},
 ): Promise<T> {
   let attempt = 0;
+  let forceTokenRefresh = false;
   while (true) {
     try {
-      let { data: sessionData } = await supabase.auth.getSession();
-      let accessToken = sessionData.session?.access_token;
-
-      if (!accessToken) {
-        const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession();
-        if (refreshErr || !refreshData.session) {
-          console.error("[edge-invoke] Sessão expirada. refreshSession falhou:", refreshErr?.message);
-          throw new EdgeFunctionError(
-            "Sua sessão expirou. Faça login novamente para continuar.",
-            { status: 401, code: "AUTH_REQUIRED", retryable: false },
-          );
-        }
-        accessToken = refreshData.session.access_token;
-      }
-
-      const invokePromise = supabase.functions.invoke(name, {
-        body,
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      // Prefer explicit Authorization; fallback to invoke default headers if token is temporarily unavailable.
+      const accessToken = await resolveAccessToken(explicitAccessToken, forceTokenRefresh);
+      const invokePromise = supabase.functions.invoke(name, accessToken
+        ? {
+            body,
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        : { body });
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Tempo limite excedido. Tente novamente.")), timeoutMs),
       );
 
       const { data, error } = await Promise.race([invokePromise, timeoutPromise]);
 
+      // supabase-js wraps non-2xx as `error`
       if (error) {
-        if (shouldFallbackToDirectFetch(error)) {
-          return await invokeEdgeFunctionDirect<T>(name, body, accessToken, timeoutMs);
-        }
-
         const status = typeof (error as any)?.status === "number" ? (error as any).status : undefined;
+        // Try to extract the real error message from the response context
         let message = "Não foi possível completar a solicitação.";
         let code: string | undefined;
         let requestId: string | undefined;
@@ -180,14 +109,23 @@ export async function invokeEdgeFunction<T>(
           } else if (error.message && !error.message.includes("non-2xx")) {
             message = error.message;
           }
-        } catch {
-          // ignore parse errors
+        } catch { /* ignore parse errors */ }
+
+        if (status === 401 && (!message || /unauthorized/i.test(message))) {
+          message = "Sua sessão expirou. Faça login novamente para continuar.";
+          if (!code) code = "AUTH_REQUIRED";
+          retryable = false;
         }
 
-        if (message.toLowerCase().includes("invalid jwt") || message.toLowerCase().includes("jwt expired")) {
-          console.error(`[edge-invoke] JWT error from ${name}:`, message);
-          message = "Sua sessão expirou. Faça login novamente para continuar.";
-          code = "AUTH_REQUIRED";
+        message = humanizeEdgeErrorMessage(message);
+
+        // If auth failed, force a token refresh and retry before surfacing session-expired to the user.
+        if (status === 401 && attempt < retries) {
+          forceTokenRefresh = true;
+          const backoff = 600 * Math.pow(2, attempt);
+          attempt++;
+          await sleep(backoff);
+          continue;
         }
 
         if (attempt < retries && (retryable ?? isRetriable(status))) {
@@ -221,25 +159,21 @@ export async function invokeEdgeFunction<T>(
 
       return data as T;
     } catch (err) {
-      if (attempt < retries) {
-        const status =
-          err instanceof EdgeFunctionError
-            ? err.status
-            : typeof (err as any)?.status === "number"
-              ? ((err as any).status as number)
-              : undefined;
-        const retryable =
-          err instanceof EdgeFunctionError ? (err.retryable ?? isRetriable(status)) : isRetriable(status);
+      const rawMessage = err instanceof Error ? err.message : "";
+      const retryable =
+        err instanceof EdgeFunctionError
+          ? (err.retryable ?? isRetriable(err.status))
+          : rawMessage.includes("Tempo limite") || isTransportErrorMessage(rawMessage);
 
-        if (retryable) {
-          const backoff = 600 * Math.pow(2, attempt);
-          attempt++;
-          await sleep(backoff);
-          continue;
-        }
+      if (attempt < retries && retryable) {
+        const backoff = 600 * Math.pow(2, attempt);
+        attempt++;
+        await sleep(backoff);
+        continue;
       }
+      // Preserve structured edge errors (requestId/code/retryable) for UX + suporte.
       if (err instanceof EdgeFunctionError) throw err;
-      throw new Error(toErrorMessage(err));
+      throw new Error(humanizeEdgeErrorMessage(toErrorMessage(err)));
     }
   }
 }

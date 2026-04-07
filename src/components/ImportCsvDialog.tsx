@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
-import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -47,7 +46,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const createLocation = useCreateWineLocation();
   const { toast } = useToast();
 
-  const MAX_CLIENT_INPUT_CHARS = 1_900_000;
+  const MAX_CLIENT_INPUT_CHARS = 1_900_000; // keep request under edge limit after JSON overhead
 
   const readTextFile = async (file: File) => {
     const text = await file.text();
@@ -61,6 +60,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const sheetName = wb.SheetNames?.[0];
     if (!sheetName) return "";
     const ws = wb.Sheets[sheetName];
+    // Convert first sheet to CSV so our edge function can map columns.
     return XLSX.utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
   };
 
@@ -92,6 +92,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (ext === "pdf") {
       return await readPdfAsText(file);
     }
+    // csv/tsv/txt fallback
     return await readTextFile(file);
   };
 
@@ -221,25 +222,26 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-card border-border/50">
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary/70" />
+            <Sparkles className="h-4 w-4" style={{ color: "#8F2D56" }} />
             Importar com IA
           </SheetTitle>
         </SheetHeader>
 
         <AnimatePresence mode="wait">
           {step === "upload" && (
-            <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5 pt-6">
+            <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6">
               <div
-                className="border-2 border-dashed border-border/50 rounded-xl p-10 text-center cursor-pointer transition-colors hover:border-primary/30 hover:bg-primary/[0.02]"
+                className="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors hover:border-primary/30"
+                style={{ borderColor: "rgba(143,45,86,0.15)" }}
                 onClick={() => fileRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
               >
-                <Upload className="h-8 w-8 mx-auto mb-3 text-primary/50" />
-                <p className="text-sm font-medium text-foreground">
+                <Upload className="h-8 w-8 mx-auto mb-3" style={{ color: "#8F2D56" }} />
+                <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
                   Arraste o arquivo ou clique para selecionar
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
                   CSV, Excel (XLS/XLSX) ou PDF
                 </p>
               </div>
@@ -251,11 +253,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
               />
 
-              <div className="p-4 rounded-xl bg-primary/[0.04] border border-primary/[0.08]">
-                <p className="text-xs font-semibold text-primary flex items-center gap-1.5 mb-1.5">
+              <div className="mt-5 p-4 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
+                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: "#8F2D56" }}>
                   <Sparkles className="h-3.5 w-3.5" /> IA inteligente
                 </p>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>
                   Não se preocupe com a ordem ou nome das colunas. Nossa IA analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.
                 </p>
               </div>
@@ -263,42 +265,49 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           )}
 
           {step === "analyzing" && (
-            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-5 pt-14 pb-12">
-              <AiProgressiveLoader
-                steps={[
-                  "Lendo arquivo…",
-                  "Identificando colunas…",
-                  "Organizando dados com IA…",
-                  "Finalizando análise…",
-                ]}
-                interval={3000}
-                subtitle={fileName}
-              />
+            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 text-center py-16">
+              <div className="relative w-16 h-16 mx-auto mb-5">
+                <div
+                  className="absolute inset-0 rounded-2xl animate-pulse"
+                  style={{ background: "linear-gradient(135deg, rgba(143,45,86,0.15), rgba(196,69,105,0.1))" }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-7 w-7 animate-spin" style={{ color: "#8F2D56" }} />
+                </div>
+              </div>
+              <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
+                Analisando planilha com IA...
+              </p>
+              <p className="text-xs mt-1.5" style={{ color: "#9CA3AF" }}>
+                Identificando colunas e organizando os dados de <strong>{fileName}</strong>
+              </p>
             </motion.div>
           )}
 
           {step === "preview" && (
-            <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 pt-5">
+            <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-primary/70" />
+                <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
+                  <Sparkles className="h-3.5 w-3.5 inline mr-1 -mt-0.5" style={{ color: "#8F2D56" }} />
                   {parsed.length} vinho(s) identificado(s)
                 </p>
-                <Button variant="ghost" size="sm" onClick={reset} className="h-7 px-2 text-[11px] text-muted-foreground">
+                <Button variant="ghost" size="sm" onClick={reset} className="text-xs">
                   <X className="h-3 w-3 mr-1" /> Trocar
                 </Button>
               </div>
 
+              {/* AI column mapping info */}
               {mappingEntries.length > 0 && (
-                <div className="p-3 rounded-xl bg-success/[0.05] border border-success/[0.12]">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-success mb-1.5">
+                <div className="p-3 rounded-xl" style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.12)" }}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: "#16a34a" }}>
                     Mapeamento automático
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {mappingEntries.map(([from, to]) => (
                       <span
                         key={from}
-                        className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full font-medium bg-success/[0.08] text-success"
+                        className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full font-medium"
+                        style={{ background: "rgba(34,197,94,0.08)", color: "#15803d" }}
                       >
                         {from} → {to}
                       </span>
@@ -307,19 +316,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </div>
               )}
 
+              {/* AI notes */}
               {aiNotes && (
-                <div className="p-3 rounded-xl bg-primary/[0.04] border border-primary/[0.08]">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">
+                <div className="p-3 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#8F2D56" }}>
                     Observações da IA
                   </p>
-                  <p className="text-[11px] leading-relaxed text-muted-foreground">{aiNotes}</p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>{aiNotes}</p>
                 </div>
               )}
 
               {parseErrors.length > 0 && (
-                <div className="p-3 rounded-xl space-y-1 bg-warning/[0.06] border border-warning/[0.12]">
+                <div className="p-3 rounded-xl space-y-1" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>
                   {parseErrors.map((e, i) => (
-                    <p key={i} className="text-[11px] flex items-center gap-1 text-warning">
+                    <p key={i} className="text-[11px] flex items-center gap-1" style={{ color: "#d97706" }}>
                       <AlertTriangle className="h-3 w-3 shrink-0" /> {e}
                     </p>
                   ))}
@@ -327,27 +337,27 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               )}
 
               {parsed.length > 0 && (
-                <div className="max-h-[280px] overflow-y-auto rounded-xl border border-border/40">
+                <div className="max-h-[280px] overflow-y-auto rounded-xl" style={{ border: "1px solid rgba(0,0,0,0.06)" }}>
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="bg-muted/30 border-b border-border/40">
-                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Nome</th>
-                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Produtor</th>
-                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Safra</th>
-                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Estilo</th>
-                        <th className="text-right px-3 py-2 font-semibold text-muted-foreground">Qtd</th>
-                        <th className="text-right px-3 py-2 font-semibold text-muted-foreground">Preço</th>
+                      <tr style={{ background: "rgba(0,0,0,0.02)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                        <th className="text-left px-3 py-2 font-semibold" style={{ color: "#6B7280" }}>Nome</th>
+                        <th className="text-left px-3 py-2 font-semibold" style={{ color: "#6B7280" }}>Produtor</th>
+                        <th className="text-left px-3 py-2 font-semibold" style={{ color: "#6B7280" }}>Safra</th>
+                        <th className="text-left px-3 py-2 font-semibold" style={{ color: "#6B7280" }}>Estilo</th>
+                        <th className="text-right px-3 py-2 font-semibold" style={{ color: "#6B7280" }}>Qtd</th>
+                        <th className="text-right px-3 py-2 font-semibold" style={{ color: "#6B7280" }}>Preço</th>
                       </tr>
                     </thead>
                     <tbody>
                       {parsed.slice(0, 30).map((w, i) => (
-                        <tr key={i} className="border-b border-border/20 last:border-0">
-                          <td className="px-3 py-2 font-medium text-foreground truncate max-w-[140px]">{w.name}</td>
-                          <td className="px-3 py-2 text-muted-foreground truncate max-w-[100px]">{w.producer || "—"}</td>
-                          <td className="px-3 py-2 text-muted-foreground">{w.vintage || "—"}</td>
-                          <td className="px-3 py-2 text-muted-foreground capitalize">{w.style || "—"}</td>
-                          <td className="px-3 py-2 text-right font-medium text-foreground">{w.quantity || 1}</td>
-                          <td className="px-3 py-2 text-right text-muted-foreground">
+                        <tr key={i} style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+                          <td className="px-3 py-2 font-medium truncate max-w-[140px]" style={{ color: "#0F0F14" }}>{w.name}</td>
+                          <td className="px-3 py-2 truncate max-w-[100px]" style={{ color: "#6B7280" }}>{w.producer || "—"}</td>
+                          <td className="px-3 py-2" style={{ color: "#6B7280" }}>{w.vintage || "—"}</td>
+                          <td className="px-3 py-2 capitalize" style={{ color: "#6B7280" }}>{w.style || "—"}</td>
+                          <td className="px-3 py-2 text-right font-medium" style={{ color: "#0F0F14" }}>{w.quantity || 1}</td>
+                          <td className="px-3 py-2 text-right" style={{ color: "#6B7280" }}>
                             {w.purchase_price ? `R$ ${w.purchase_price.toFixed(2)}` : "—"}
                           </td>
                         </tr>
@@ -355,8 +365,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </tbody>
                   </table>
                   {parsed.length > 30 && (
-                    <p className="text-[10px] text-center py-2 text-muted-foreground">
-                      …e mais {parsed.length - 30} vinhos
+                    <p className="text-[10px] text-center py-2" style={{ color: "#9CA3AF" }}>
+                      ...e mais {parsed.length - 30} vinhos
                     </p>
                   )}
                 </div>
@@ -365,7 +375,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               <Button
                 onClick={handleImport}
                 variant="primary"
-                className="w-full h-11 text-[13px] font-semibold"
+                className="w-full h-11 text-[13px] font-medium shadow-float"
                 disabled={parsed.length === 0}
               >
                 <Upload className="h-4 w-4 mr-1.5" /> Importar {parsed.length} vinho(s)
@@ -374,35 +384,29 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           )}
 
           {step === "importing" && (
-            <motion.div key="importing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-5 pt-16 pb-12">
-              <div className="w-full max-w-xs">
-                <div className="w-full h-2 rounded-full overflow-hidden bg-muted/30">
-                  <motion.div className="h-full rounded-full gradient-wine" style={{ width: `${importProgress}%` }} />
-                </div>
+            <motion.div key="importing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 text-center py-12">
+              <div className="w-full h-2 rounded-full overflow-hidden mb-4" style={{ background: "rgba(0,0,0,0.04)" }}>
+                <motion.div className="h-full rounded-full gradient-wine" style={{ width: `${importProgress}%` }} />
               </div>
-              <div className="text-center">
-                <p className="text-sm font-medium text-foreground">Importando… {importProgress}%</p>
-                <p className="text-xs text-muted-foreground mt-1">Não feche esta janela</p>
-              </div>
+              <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>Importando... {importProgress}%</p>
+              <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>Não feche esta janela</p>
             </motion.div>
           )}
 
           {step === "done" && (
-            <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 pt-16 pb-12">
-              <div className="w-14 h-14 rounded-full gradient-wine flex items-center justify-center glow-wine">
+            <motion.div key="done" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-6 text-center py-12">
+              <div className="w-14 h-14 rounded-full gradient-wine flex items-center justify-center glow-wine mx-auto mb-4">
                 <Check className="h-7 w-7 text-primary-foreground" />
               </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-foreground">
-                  {parsed.length - importErrors.length} vinho(s) importado(s) com sucesso!
+              <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
+                {parsed.length - importErrors.length} vinho(s) importado(s) com sucesso!
+              </p>
+              {importErrors.length > 0 && (
+                <p className="text-xs mt-2" style={{ color: "#f59e0b" }}>
+                  {importErrors.length} erro(s) durante importação
                 </p>
-                {importErrors.length > 0 && (
-                  <p className="text-xs text-warning mt-1.5">
-                    {importErrors.length} erro(s) durante importação
-                  </p>
-                )}
-              </div>
-              <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }} className="h-10 text-[13px] mt-2">
+              )}
+              <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 text-[13px]">
                 Fechar
               </Button>
             </motion.div>
