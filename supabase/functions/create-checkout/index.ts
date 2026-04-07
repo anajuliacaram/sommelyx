@@ -9,11 +9,24 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const ABACATEPAY_API = "https://api.abacatepay.com/v2";
+// ── AbacatePay v1 billing endpoint ──
+const ABACATEPAY_API = "https://api.abacatepay.com/v1";
 
-const PLAN_CONFIG: Record<string, { productId: string; amount: number; label: string }> = {
-  pro: { productId: "prod_sommelyx_pro", amount: 2900, label: "Sommelyx Pro" },
-  business: { productId: "prod_sommelyx_business", amount: 5900, label: "Sommelyx Business" },
+const PLAN_CONFIG: Record<string, { externalId: string; name: string; description: string; amount: number; label: string }> = {
+  pro: {
+    externalId: "prod_sommelyx_pro",
+    name: "Sommelyx Pro",
+    description: "Plano Pro – garrafas ilimitadas, alertas, insights e exportação CSV.",
+    amount: 2900,
+    label: "Sommelyx Pro",
+  },
+  business: {
+    externalId: "prod_sommelyx_business",
+    name: "Sommelyx Business",
+    description: "Plano Business – tudo do Pro + vendas, estoque, relatórios financeiros, curva ABC.",
+    amount: 5900,
+    label: "Sommelyx Business",
+  },
 };
 
 const BodySchema = z.object({
@@ -90,6 +103,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existing?.provider_url) {
+      console.log(`[create-checkout] Reusing pending payment ${existing.id} for user ${userId}`);
       return jsonResponse({
         checkoutUrl: existing.provider_url,
         paymentId: existing.id,
@@ -113,43 +127,74 @@ serve(async (req) => {
     const returnUrl = `${baseUrl}/dashboard/plans`;
     const completionUrl = `${baseUrl}/dashboard/plans?payment=success&plan=${plan}`;
 
-    // ── Create checkout on AbacatePay ──
-    const checkoutResponse = await fetch(`${ABACATEPAY_API}/checkouts/create`, {
+    // ── Build v1 billing payload ──
+    const billingPayload = {
+      frequency: "ONE_TIME",
+      methods: ["PIX"],
+      products: [
+        {
+          externalId: config.externalId,
+          name: config.name,
+          description: config.description,
+          quantity: 1,
+          price: config.amount,
+        },
+      ],
+      returnUrl,
+      completionUrl,
+    };
+
+    const billingEndpoint = `${ABACATEPAY_API}/billing/create`;
+
+    console.log(`[create-checkout] Calling AbacatePay v1 billing API`);
+    console.log(`[create-checkout] Endpoint: ${billingEndpoint}`);
+    console.log(`[create-checkout] Payload:`, JSON.stringify({ ...billingPayload, _externalId: externalId, _userId: userId }));
+
+    // ── Create billing on AbacatePay v1 ──
+    const billingResponse = await fetch(billingEndpoint, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${ABACATEPAY_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        items: [{ id: config.productId, quantity: 1 }],
-        methods: ["PIX"],
-        externalId,
-        returnUrl,
-        completionUrl,
-        metadata: {
-          userId,
-          plan,
-          source: "sommelyx",
-        },
-      }),
+      body: JSON.stringify(billingPayload),
     });
 
-    if (!checkoutResponse.ok) {
-      const errText = await checkoutResponse.text();
-      console.error("AbacatePay error:", checkoutResponse.status, errText);
+    const responseText = await billingResponse.text();
+    console.log(`[create-checkout] AbacatePay response status: ${billingResponse.status}`);
+    console.log(`[create-checkout] AbacatePay response body: ${responseText}`);
+
+    if (!billingResponse.ok) {
+      console.error(`[create-checkout] AbacatePay v1 error: ${billingResponse.status} ${responseText}`);
       statusCode = 502;
       outcome = "provider_error";
-      return jsonResponse({ error: "Erro ao criar checkout. Tente novamente." }, 502);
+      return jsonResponse({ error: "Erro ao criar cobrança. Tente novamente." }, 502);
     }
 
-    const checkoutData = await checkoutResponse.json();
-    if (!checkoutData?.success || !checkoutData?.data) {
+    let billingData: any;
+    try {
+      billingData = JSON.parse(responseText);
+    } catch {
+      statusCode = 502;
+      outcome = "provider_error";
+      return jsonResponse({ error: "Resposta inválida do gateway de pagamento." }, 502);
+    }
+
+    // v1 response: { success: true, error: null, data: { id, url, status, devMode, methods, products, frequency, ... } }
+    if (!billingData?.success || !billingData?.data) {
+      console.error(`[create-checkout] Unexpected v1 response structure:`, JSON.stringify(billingData));
       statusCode = 502;
       outcome = "provider_error";
       return jsonResponse({ error: "Resposta inesperada do gateway de pagamento." }, 502);
     }
 
-    const bill = checkoutData.data;
+    const bill = billingData.data;
+    const paymentUrl = bill.url;
+
+    console.log(`[create-checkout] Billing created successfully`);
+    console.log(`[create-checkout] Provider ID: ${bill.id}`);
+    console.log(`[create-checkout] Payment URL: ${paymentUrl}`);
+    console.log(`[create-checkout] Dev mode: ${bill.devMode}`);
 
     // ── Save payment record ──
     const { error: insertError } = await supabaseAdmin
@@ -160,31 +205,37 @@ serve(async (req) => {
         status: "pending",
         external_id: externalId,
         provider_id: bill.id,
-        provider_url: bill.url,
+        provider_url: paymentUrl,
         amount: config.amount,
         dev_mode: bill.devMode ?? true,
-        metadata: { items: bill.items, frequency: "ONE_TIME" },
+        metadata: {
+          products: bill.products,
+          frequency: bill.frequency ?? "ONE_TIME",
+          methods: bill.methods,
+          apiVersion: "v1",
+        },
       });
 
     if (insertError) {
-      console.error("Insert payment error:", insertError);
+      console.error("[create-checkout] Insert payment error:", insertError);
       statusCode = 500;
       outcome = "internal_error";
       return jsonResponse({ error: "Erro ao registrar pagamento." }, 500);
     }
 
+    console.log(`[create-checkout] Payment record saved. externalId=${externalId}`);
+
     return jsonResponse({
-      checkoutUrl: bill.url,
+      checkoutUrl: paymentUrl,
       externalId,
       paymentId: bill.id,
     });
   } catch (e) {
-    console.error("create-checkout error:", e);
+    console.error("[create-checkout] error:", e);
     if (statusCode === 200) statusCode = 500;
     if (outcome === "success") outcome = "internal_error";
     return jsonResponse({ error: e instanceof Error ? e.message : "Erro interno" }, statusCode);
   } finally {
-    // ── Audit log ──
     try {
       const supabaseAdmin = createClient(
         Deno.env.get("SUPABASE_URL")!,
