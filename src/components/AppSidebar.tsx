@@ -87,7 +87,7 @@ export function AppSidebar() {
           >
             <Logo
               variant="compact"
-              className="h-8 w-auto"
+              className="h-10 w-auto"
             />
             <div className="flex flex-col">
               <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground leading-none">
