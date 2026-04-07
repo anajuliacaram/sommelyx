@@ -177,49 +177,76 @@ export default function SettingsPage() {
             { type: "commercial" as const, icon: Building2, title: "Operação Comercial", desc: "Para bares, restaurantes e lojas." },
           ]).map((opt) => {
             const isActive = profileType === opt.type;
+            const isLight = opt.type === "personal";
+            const txt = isLight ? "#2B2B2B" : "#F8F6F3";
+
             return (
-              <Button
+              <button
                 key={opt.type}
                 type="button"
                 onClick={() => handleProfileSwitch(opt.type)}
-                variant="ghost"
                 className={cn(
-                  "h-auto w-full overflow-hidden rounded-[18px] border text-left transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(17,17,19,0.10)] hover:border-primary/22 focus-visible:shadow-[0_0_0_4px_rgba(110,30,42,0.14)] flex flex-col items-start justify-start",
-                  "p-5",
-                  isActive
-                    ? "border-primary/34 bg-[linear-gradient(135deg,hsl(var(--primary)/0.085),hsl(0_0%_100%/0.66))] shadow-[0_14px_34px_hsl(var(--primary)/0.12)]"
-                    : "border-primary/12 bg-[linear-gradient(135deg,hsl(var(--primary)/0.035),hsl(0_0%_100%/0.62))]",
+                  "relative rounded-2xl overflow-hidden text-left transition-all duration-300 flex flex-col items-start justify-start p-5",
+                  "hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isLight
+                    ? "bg-[#F8F6F3] shadow-[0_20px_60px_-40px_rgba(44,20,31,0.35)] ring-1 ring-black/[0.06]"
+                    : "bg-[linear-gradient(180deg,#2B2B2B_0%,#1F1C20_55%,#171518_100%)] shadow-[0_20px_60px_-40px_rgba(15,15,20,0.60)] ring-1 ring-white/[0.08]",
+                  isActive && (isLight
+                    ? "ring-2 ring-primary/30 shadow-[0_24px_70px_-40px_rgba(44,20,31,0.45)]"
+                    : "ring-2 ring-[#C6A768]/40 shadow-[0_24px_70px_-40px_rgba(15,15,20,0.70)]"),
                 )}
               >
-                {/* Row 1: Icon + Text */}
-                <div className="flex items-center gap-3 w-full">
+                {/* Radial overlays */}
+                {isLight ? (
+                  <>
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.10),transparent_55%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_35%,rgba(198,167,104,0.10),transparent_55%)]" />
+                  </>
+                ) : (
+                  <>
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.35),transparent_60%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_82%_18%,rgba(198,167,104,0.18),transparent_55%)]" />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-[linear-gradient(90deg,transparent,rgba(198,167,104,0.65),transparent)]" />
+                  </>
+                )}
+
+                <div className="relative flex items-center gap-3 w-full">
                   <div
                     className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border backdrop-blur-sm",
-                      isActive ? "border-primary/15 bg-white/55" : "border-primary/10 bg-white/50",
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+                      isLight
+                        ? "bg-[#6E1E2A]/8 ring-1 ring-[#6E1E2A]/12"
+                        : "bg-white/10 ring-1 ring-white/10",
                     )}
                   >
-                    <opt.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-primary/70")} />
+                    <opt.icon className={cn("h-4 w-4", isLight ? "text-[#6E1E2A]/70" : "text-[#C6A768]/80")} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className={cn("text-[14px] font-bold leading-snug tracking-[-0.015em] truncate", isActive ? "text-primary" : "text-foreground")}>
+                    <p className="text-[14px] font-bold leading-snug tracking-[-0.015em] truncate" style={{ color: txt }}>
                       {opt.title}
                     </p>
-                    <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
+                    <p className="mt-0.5 text-[12px] leading-snug" style={{ color: isLight ? "rgba(43,43,43,0.7)" : "rgba(248,246,243,0.7)" }}>
                       {opt.desc}
                     </p>
                   </div>
                 </div>
-                {/* Row 2: Badge below content, not overlapping */}
+
                 {isActive && (
-                  <div className="mt-3 w-full">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/18 bg-white/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-primary backdrop-blur-sm">
-                      <Check className="h-2.5 w-2.5" />
+                  <div className="relative mt-3 w-full">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em]",
+                        isLight
+                          ? "text-[#6E1E2A] ring-1 ring-[#6E1E2A]/15 bg-[linear-gradient(135deg,rgba(110,30,42,0.07),rgba(198,167,104,0.14))]"
+                          : "text-[#F8F6F3] ring-1 ring-[#C6A768]/30 bg-[linear-gradient(135deg,rgba(198,167,104,0.18),rgba(110,30,42,0.15))]",
+                      )}
+                    >
+                      <Check className={cn("h-2.5 w-2.5", isLight ? "text-[#6E1E2A]/80" : "text-[#C6A768]")} strokeWidth={2.5} />
                       Ativo
                     </span>
                   </div>
                 )}
-              </Button>
+              </button>
             );
           })}
         </div>
