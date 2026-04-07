@@ -1,9 +1,11 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
-import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight } from "@/icons/lucide";
+import { useMemo, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2 } from "@/icons/lucide";
 import { useWines } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { getWineInsight, type WineInsight } from "@/lib/sommelier-ai";
+import { useToast } from "@/hooks/use-toast";
 
 const currentYear = new Date().getFullYear();
 
@@ -12,34 +14,62 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.45, ease: [0.4, 0, 0.2, 1] as const } }),
 } as const;
 
+interface AlertItem {
+  id: string;
+  wineId: string;
+  type: string;
+  icon: typeof Bell;
+  tone: string;
+  bg: string;
+  title: string;
+  desc: string;
+  wineName: string;
+  style?: string | null;
+  grape?: string | null;
+  region?: string | null;
+  country?: string | null;
+  vintage?: number | null;
+  drinkFrom?: number | null;
+  drinkUntil?: number | null;
+}
+
 export default function AlertsPage() {
   const { data: wines } = useWines();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [insights, setInsights] = useState<Record<string, WineInsight>>({});
+  const [loadingInsight, setLoadingInsight] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const alerts = useMemo(() => {
     if (!wines) return [];
-    const items: { id: string; type: string; icon: typeof Bell; tone: string; bg: string; title: string; desc: string; wineName: string }[] = [];
+    const items: AlertItem[] = [];
 
     wines.forEach(w => {
       if (w.quantity <= 0) return;
 
       if (w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until) {
         items.push({
-          id: `now-${w.id}`, type: "drink_now", icon: GlassWater, tone: "text-success", bg: "bg-success/8",
+          id: `now-${w.id}`, wineId: w.id, type: "drink_now", icon: GlassWater, tone: "text-success", bg: "bg-success/8",
           title: "Beber agora", desc: `Janela ideal: ${w.drink_from}–${w.drink_until}`, wineName: w.name,
+          style: w.style, grape: w.grape, region: w.region, country: w.country, vintage: w.vintage,
+          drinkFrom: w.drink_from, drinkUntil: w.drink_until,
         });
       }
 
       if (w.drink_until && currentYear > w.drink_until) {
         items.push({
-          id: `past-${w.id}`, type: "past_peak", icon: AlertTriangle, tone: "text-warning", bg: "bg-warning/8",
+          id: `past-${w.id}`, wineId: w.id, type: "past_peak", icon: AlertTriangle, tone: "text-warning", bg: "bg-warning/8",
           title: "Passou do pico", desc: `Janela encerrou em ${w.drink_until}`, wineName: w.name,
+          style: w.style, grape: w.grape, region: w.region, country: w.country, vintage: w.vintage,
+          drinkFrom: w.drink_from, drinkUntil: w.drink_until,
         });
       }
 
       if (w.quantity > 0 && w.quantity <= 2) {
         items.push({
-          id: `low-${w.id}`, type: "low_stock", icon: ArrowDownRight, tone: "text-wine", bg: "bg-wine/8",
+          id: `low-${w.id}`, wineId: w.id, type: "low_stock", icon: ArrowDownRight, tone: "text-wine", bg: "bg-wine/8",
           title: "Estoque baixo", desc: `Apenas ${w.quantity} garrafa(s) restante(s)`, wineName: w.name,
         });
       }
@@ -53,6 +83,45 @@ export default function AlertsPage() {
     past_peak: alerts.filter(a => a.type === "past_peak"),
     low_stock: alerts.filter(a => a.type === "low_stock"),
   };
+
+  const handleInsight = useCallback(async (alert: AlertItem) => {
+    // Toggle if already expanded
+    if (expandedId === alert.id) {
+      setExpandedId(null);
+      return;
+    }
+
+    // If already fetched, just expand
+    if (insights[alert.id]) {
+      setExpandedId(alert.id);
+      return;
+    }
+
+    // Fetch from AI
+    setLoadingInsight(alert.id);
+    setExpandedId(alert.id);
+    try {
+      const result = await getWineInsight({
+        name: alert.wineName,
+        alertType: alert.type as "drink_now" | "past_peak",
+        style: alert.style,
+        grape: alert.grape,
+        region: alert.region,
+        country: alert.country,
+        vintage: alert.vintage,
+        drinkFrom: alert.drinkFrom,
+        drinkUntil: alert.drinkUntil,
+      });
+      setInsights(prev => ({ ...prev, [alert.id]: result }));
+    } catch (err) {
+      toast({ title: "Não foi possível gerar a análise", description: err instanceof Error ? err.message : "Tente novamente.", variant: "destructive" });
+      setExpandedId(null);
+    } finally {
+      setLoadingInsight(null);
+    }
+  }, [expandedId, insights, toast]);
+
+  const hasAiSupport = (type: string) => type === "drink_now" || type === "past_peak";
 
   return (
     <div className="space-y-5 max-w-4xl">
@@ -87,25 +156,90 @@ export default function AlertsPage() {
                 </div>
                 <div className="grid gap-1.5">
                   {items.map((a, i) => (
-                    <motion.button
+                    <motion.div
                       key={a.id}
-                      type="button"
-                      className="glass-card p-3 flex items-center gap-3 cursor-pointer group w-full text-left transition-all hover:shadow-md"
                       initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
-                      onClick={() => navigate("/dashboard/cellar")}
                     >
-                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", a.bg)}>
-                        <a.icon className={cn("h-3.5 w-3.5", a.tone)} />
+                      <div className="glass-card overflow-hidden">
+                        <div
+                          className="p-3 flex items-center gap-3 cursor-pointer group w-full text-left transition-all hover:shadow-md"
+                          onClick={() => navigate("/dashboard/cellar")}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", a.bg)}>
+                            <a.icon className={cn("h-3.5 w-3.5", a.tone)} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold truncate text-foreground">{a.wineName}</p>
+                            <p className="text-[11px] text-muted-foreground">{a.desc}</p>
+                          </div>
+
+                          {hasAiSupport(a.type) && (
+                            <button
+                              type="button"
+                              className={cn(
+                                "flex items-center gap-1 text-[10px] font-medium px-2.5 py-1.5 rounded-lg shrink-0 transition-all",
+                                expandedId === a.id
+                                  ? "bg-primary/10 text-primary"
+                                  : "bg-muted/20 text-muted-foreground hover:bg-primary/8 hover:text-primary",
+                              )}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleInsight(a);
+                              }}
+                              disabled={loadingInsight === a.id}
+                            >
+                              {loadingInsight === a.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Sparkles className="h-3 w-3" />
+                              )}
+                              Análise
+                            </button>
+                          )}
+
+                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0", a.bg, a.tone)}>
+                            {a.title}
+                          </span>
+                          <ArrowRight className="h-3 w-3 text-muted-foreground/30 shrink-0 group-hover:text-muted-foreground transition-colors" />
+                        </div>
+
+                        <AnimatePresence>
+                          {expandedId === a.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-4 pb-4 pt-1 border-t border-border/20">
+                                {loadingInsight === a.id ? (
+                                  <div className="flex items-center gap-2 py-3">
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                                    <span className="text-[12px] text-muted-foreground italic">Analisando o vinho...</span>
+                                  </div>
+                                ) : insights[a.id] ? (
+                                  <div className="space-y-2 py-2">
+                                    <div className="flex items-start gap-2">
+                                      <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                                      <p className="text-[12px] leading-relaxed text-foreground/90">{insights[a.id].insight}</p>
+                                    </div>
+                                    {insights[a.id].recommendation && (
+                                      <div className="flex items-start gap-2 rounded-lg bg-primary/5 px-3 py-2">
+                                        <Wine className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                                        <p className="text-[12px] font-medium text-primary">{insights[a.id].recommendation}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : null}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold truncate text-foreground">{a.wineName}</p>
-                        <p className="text-[11px] text-muted-foreground">{a.desc}</p>
-                      </div>
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0", a.bg, a.tone)}>
-                        {a.title}
-                      </span>
-                      <ArrowRight className="h-3 w-3 text-muted-foreground/30 shrink-0 group-hover:text-muted-foreground transition-colors" />
-                    </motion.button>
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
