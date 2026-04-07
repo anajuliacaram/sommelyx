@@ -37,11 +37,11 @@ export default function DashboardLayout() {
       <div className="dashboard-shell min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 md:h-14 flex items-center px-3 md:px-5 gap-2 md:gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/30">
+          <header className="h-12 md:h-13 flex items-center px-3 md:px-5 gap-2 md:gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/25">
             <SidebarTrigger
               className={cn(
-                buttonVariants({ variant: "secondary", size: "icon" }),
-                "rounded-2xl [&>svg]:h-5 [&>svg]:w-5",
+                buttonVariants({ variant: "ghost", size: "icon" }),
+                "rounded-xl [&>svg]:h-4.5 [&>svg]:w-4.5 text-muted-foreground hover:text-foreground",
               )}
             />
 
@@ -68,11 +68,11 @@ export default function DashboardLayout() {
 
             <div className="flex items-center gap-1.5 md:gap-2">
               <span
-                className="hidden sm:inline-flex items-center h-6 px-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center h-6 px-2.5 rounded-md text-[9px] font-bold uppercase tracking-[0.10em] shrink-0 whitespace-nowrap"
                 style={{
-                  background: profileType === "commercial" ? "hsl(var(--gold) / 0.1)" : "hsl(var(--primary) / 0.06)",
+                  background: profileType === "commercial" ? "hsl(var(--gold) / 0.06)" : "hsl(var(--primary) / 0.05)",
                   color: profileType === "commercial" ? "hsl(var(--gold))" : "hsl(var(--primary))",
-                  border: `1px solid ${profileType === "commercial" ? "hsl(var(--gold) / 0.2)" : "hsl(var(--primary) / 0.12)"}`,
+                  border: `1px solid ${profileType === "commercial" ? "hsl(var(--gold) / 0.15)" : "hsl(var(--primary) / 0.10)"}`,
                 }}
               >
                 {profileType === "commercial" ? "Comercial" : "Pessoal"}
@@ -83,7 +83,7 @@ export default function DashboardLayout() {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/dashboard/alerts")}
-                className="h-10 w-10 rounded-2xl relative text-muted-foreground hover:bg-muted/40"
+                className="h-9 w-9 rounded-xl relative text-muted-foreground hover:bg-muted/25"
                 title="Alertas"
               >
                 <Bell className="h-4 w-4" />
@@ -98,7 +98,7 @@ export default function DashboardLayout() {
                 type="button"
                 variant="primary"
                 size="icon"
-                className="h-10 w-10 rounded-2xl p-0 font-black shadow-float"
+                className="h-9 w-9 rounded-xl p-0 font-bold shadow-premium text-[11px]"
                 onClick={() => navigate("/dashboard/settings")}
               >
                 {initials}

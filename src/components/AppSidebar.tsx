@@ -77,33 +77,29 @@ export function AppSidebar() {
 
   return (
     <>
-      <Sidebar collapsible="offcanvas" className="border-r" style={{ borderColor: "rgba(0,0,0,0.06)", background: "#FDFDFD" }}>
+      <Sidebar collapsible="offcanvas" className="border-r border-border/30" style={{ background: "hsl(var(--sidebar-background))" }}>
         <SidebarHeader className="pt-3 md:pt-4 px-3">
-          {/* Logo + Mode */}
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-2 py-1.5 mb-3 rounded-2xl transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+            className="flex items-center gap-3 px-2 py-1.5 mb-3 rounded-xl transition-colors hover:bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
             aria-label="Ir para o início do dashboard"
           >
             <Logo
               variant="compact"
-              className="h-14 sm:h-14 w-auto drop-shadow-[0_14px_30px_rgba(15,15,20,0.16)]"
+              className="h-12 sm:h-12 w-auto drop-shadow-[0_4px_12px_rgba(15,15,20,0.08)]"
             />
             <div className="flex flex-col">
-              <span
-                className="text-[18px] font-black font-serif tracking-tight text-[#7B1E3A] leading-none"
-                style={{ letterSpacing: "-0.04em" }}
-              >
+              <span className="text-[17px] font-black font-serif tracking-tight text-wine leading-none">
                 Sommelyx
               </span>
               <span
                 className={[
-                  "mt-1 w-fit inline-flex items-center rounded-full px-3 py-1",
-                  "text-[10px] font-black uppercase tracking-[0.18em] leading-none",
+                  "mt-1 w-fit inline-flex items-center rounded-md px-2.5 py-0.5",
+                  "text-[9px] font-bold uppercase tracking-[0.14em] leading-none",
                   isCommercial
-                    ? "bg-[#C6A768]/16 text-[#6D531C] ring-1 ring-[#C6A768]/45"
-                    : "bg-[#6E1E2A]/12 text-[#6E1E2A] ring-1 ring-[#6E1E2A]/28",
+                    ? "bg-gold/8 text-gold ring-1 ring-gold/20"
+                    : "bg-wine/[0.06] text-wine ring-1 ring-wine/15",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}
@@ -111,94 +107,90 @@ export function AppSidebar() {
             </div>
           </Link>
 
-          {/* CTA */}
+          {/* CTAs */}
           <div className="px-0 pb-2">
             {isCommercial ? (
-              <>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="primary"
-                    className="col-span-2 h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
-                    onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
-                  >
-                    <Plus className="h-4 w-4 mr-1.5" />
-                    Cadastrar produto
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
-                    onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-1.5" />
-                    Venda
-                  </Button>
-                  <Button
-                    variant="danger"
-                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
-                    onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
-                  >
-                    <AlertTriangle className="h-4 w-4 mr-1.5" />
-                    Ruptura
-                  </Button>
-                </div>
-              </>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="primary"
+                  className="col-span-2 h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Cadastrar produto
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
+                >
+                  <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+                  Venda
+                </Button>
+                <Button
+                  variant="danger"
+                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
+                >
+                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                  Ruptura
+                </Button>
+              </div>
             ) : (
-              <>
-                <div className="grid gap-2">
+              <div className="grid gap-2">
+                <Button
+                  variant="primary"
+                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Adicionar vinho
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-9 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl"
+                  onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
+                >
+                  <Wine className="h-3.5 w-3.5 mr-1.5" />
+                  Registrar consumo
+                </Button>
+                <div className="grid grid-cols-2 gap-1.5">
                   <Button
-                    variant="primary"
-                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
-                    onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
+                    variant="ghost"
+                    className="h-8 text-[10px] font-bold uppercase tracking-[0.08em] rounded-lg border border-border/40 bg-background/50 hover:bg-primary/[0.04] hover:border-primary/15 hover:text-primary"
+                    onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
                   >
-                    <Plus className="h-4 w-4 mr-1.5" />
-                    Adicionar vinho
+                    <UtensilsCrossed className="h-3 w-3 mr-1" />
+                    Harmonizar
                   </Button>
                   <Button
-                    variant="outline"
-                    className="h-10 text-[11px] font-black uppercase tracking-wider rounded-2xl"
-                    onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
+                    variant="ghost"
+                    className="h-8 text-[10px] font-bold uppercase tracking-[0.08em] rounded-lg border border-border/40 bg-background/50 hover:bg-primary/[0.04] hover:border-primary/15 hover:text-primary"
+                    onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
                   >
-                    <Wine className="h-4 w-4 mr-1.5" />
-                    Registrar consumo
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Analisar carta
                   </Button>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="ghost"
-                      className="h-9 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
-                      onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
-                    >
-                      <UtensilsCrossed className="h-3.5 w-3.5 mr-1" />
-                      Harmonizar
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="h-9 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
-                      onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
-                    >
-                      <Sparkles className="h-3.5 w-3.5 mr-1" />
-                      Analisar carta
-                    </Button>
-                  </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </SidebarHeader>
 
         <SidebarContent className="px-3">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.18em] font-bold text-muted-foreground/50 mb-1.5 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.14em] font-bold text-muted-foreground/45 mb-1.5 px-3">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-1">
+              <SidebarMenu className="gap-0.5">
                 {menu.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
-                        className="sidebar-item !text-[13px]"
+                        className="sidebar-item"
                         activeClassName="sidebar-item--active"
                         onClick={closeMobileSidebar}
                       >
@@ -213,14 +205,14 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-2">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.18em] font-bold text-muted-foreground/50 mb-1.5 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.14em] font-bold text-muted-foreground/45 mb-1.5 px-3">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-1">
+              <SidebarMenu className="gap-0.5">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/settings" className="sidebar-item !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
+                    <NavLink to="/dashboard/settings" className="sidebar-item" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <Settings className="h-4 w-4 shrink-0" />
                       <span>Preferências</span>
                     </NavLink>
@@ -228,7 +220,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/plans" className="sidebar-item !text-[13px]" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
+                    <NavLink to="/dashboard/plans" className="sidebar-item" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
                       <CreditCard className="h-4 w-4 shrink-0" />
                       <span>Meu Plano</span>
                     </NavLink>
@@ -240,62 +232,39 @@ export function AppSidebar() {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="px-3 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))]">
-            <div className="flex items-center gap-2.5 px-2 mb-4">
+          <div className="px-3 pt-3 pb-[calc(14px+env(safe-area-inset-bottom))]">
+            <div className="flex items-center gap-2.5 px-2 mb-3">
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
                 style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--wine-vivid)))" }}
               >
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-bold truncate text-foreground">{user?.user_metadata?.full_name || "Usuário"}</p>
-                <p className="text-[9px] truncate text-muted-foreground">{user?.email}</p>
+                <p className="text-[12px] font-semibold truncate text-foreground">{user?.user_metadata?.full_name || "Usuário"}</p>
+                <p className="text-[10px] truncate text-muted-foreground/60">{user?.email}</p>
               </div>
             </div>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={signOut}
-                  className="sidebar-item !h-[38px] !text-[12px] hover:!bg-destructive/5 hover:!text-destructive hover:!border-destructive/20"
+                  className="sidebar-item !h-[36px] !text-[12px] hover:!bg-destructive/[0.04] hover:!text-destructive hover:!border-destructive/15"
                 >
                   <LogOut className="h-4 w-4 shrink-0" />
-                  <span className="font-semibold">Sair</span>
+                  <span className="font-medium">Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </div>
         </SidebarFooter>
       </Sidebar>
-      <AddWineDialog
-        open={addOpen}
-        onOpenChange={(v) => {
-          setAddOpen(v);
-          if (!v) setAddWithScan(false);
-        }}
-        initialScan={addWithScan}
-      />
-      <ManageBottleDialog
-        open={manageOpen}
-        onOpenChange={setManageOpen}
-        defaultTab={manageTab}
-      />
-      <BreakageDialog
-        open={breakageOpen}
-        onOpenChange={setBreakageOpen}
-      />
-      <SaleDialog
-        open={saleOpen}
-        onOpenChange={setSaleOpen}
-      />
-      <DishToWineDialog
-        open={dishToWineOpen}
-        onOpenChange={setDishToWineOpen}
-      />
-      <WineListScannerDialog
-        open={wineListScanOpen}
-        onOpenChange={setWineListScanOpen}
-      />
+      <AddWineDialog open={addOpen} onOpenChange={(v) => { setAddOpen(v); if (!v) setAddWithScan(false); }} initialScan={addWithScan} />
+      <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
+      <BreakageDialog open={breakageOpen} onOpenChange={setBreakageOpen} />
+      <SaleDialog open={saleOpen} onOpenChange={setSaleOpen} />
+      <DishToWineDialog open={dishToWineOpen} onOpenChange={setDishToWineOpen} />
+      <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
     </>
   );
 }
