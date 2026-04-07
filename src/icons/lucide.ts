@@ -39,6 +39,7 @@ export { default as Crown } from "lucide-react/dist/esm/icons/crown.js";
 export { default as DollarSign } from "lucide-react/dist/esm/icons/dollar-sign.js";
 export { default as Dot } from "lucide-react/dist/esm/icons/dot.js";
 export { default as Download } from "lucide-react/dist/esm/icons/download.js";
+export { default as ExternalLink } from "lucide-react/dist/esm/icons/external-link.js";
 export { default as Eye } from "lucide-react/dist/esm/icons/eye.js";
 export { default as EyeOff } from "lucide-react/dist/esm/icons/eye-off.js";
 export { default as FileText } from "lucide-react/dist/esm/icons/file-text.js";
