@@ -157,15 +157,9 @@ export default function PersonalDashboard() {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Acervo pessoal</p>
-              <h1 className="mt-2 text-[26px] font-semibold tracking-[-0.02em] text-foreground sm:text-[30px]">
+              <h1 className="text-[26px] font-semibold tracking-[-0.02em] text-foreground sm:text-[30px]">
                 Olá, <span className="italic text-primary">{firstName}</span>
               </h1>
-              <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
-                {totalBottles} garrafa{totalBottles !== 1 ? "s" : ""}
-                {lowStock > 0 && <> · <span className="text-warning">{lowStock} estoque baixo</span></>}
-                {drinkNow > 0 && <> · <span className="text-success">{drinkNow} para beber agora</span></>}
-              </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button variant="primary" size="default" onClick={() => setAddOpen(true)}>
