@@ -95,11 +95,11 @@ export function AppSidebar() {
               </span>
               <span
                 className={[
-                  "mt-1 w-fit inline-flex items-center rounded-md px-1.5 py-0.5",
-                  "text-[8px] font-bold uppercase tracking-[0.1em] leading-none",
+                  "mt-1 w-fit inline-flex items-center rounded-md px-2 py-0.5",
+                  "text-[10px] font-extrabold uppercase tracking-[0.1em] leading-none",
                   isCommercial
-                    ? "bg-accent/8 text-accent ring-1 ring-accent/15"
-                    : "bg-primary/[0.06] text-primary ring-1 ring-primary/12",
+                    ? "bg-accent/12 text-accent ring-1 ring-accent/20"
+                    : "bg-primary/10 text-primary ring-1 ring-primary/18",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}
