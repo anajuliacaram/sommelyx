@@ -98,7 +98,7 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
         >
             {interactive && isHovering && (
                 <motion.div
-                    className="pointer-events-none absolute inset-0 z-10 rounded-[24px] opacity-40 mix-blend-overlay"
+                    className="pointer-events-none absolute inset-0 z-10 rounded-2xl opacity-25 mix-blend-overlay"
                     style={{ background: gradientBg }}
                 />
             )}
