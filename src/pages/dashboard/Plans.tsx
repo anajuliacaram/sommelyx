@@ -24,7 +24,7 @@ const plans = [
   },
   {
     name: "Business",
-    price: "R$ 99",
+    price: "R$ 59",
     period: "/mês",
     desc: "Para restaurantes, bares e lojas",
     trial: "14 dias grátis",
