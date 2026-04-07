@@ -1,10 +1,11 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, ArrowLeft, ChefHat } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { getDishWineSuggestions, analyzeWineList, buildUserProfile, type WineSuggestion, type WineListAnalysis } from "@/lib/sommelier-ai";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getDishWineSuggestions, getWinePairings, analyzeWineList, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis } from "@/lib/sommelier-ai";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +16,8 @@ interface DishToWineDialogProps {
 }
 
 type Source = null | "cellar" | "external";
-type Step = "source" | "dish" | "results" | "photo" | "scanning" | "scan-results";
+type CellarMode = null | "by-dish" | "by-wine";
+type Step = "source" | "cellar-mode" | "dish" | "select-wine" | "results" | "wine-results" | "photo" | "scanning" | "scan-results";
 
 const matchDot: Record<string, string> = {
   perfeito: "bg-success",
@@ -38,9 +40,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [source, setSource] = useState<Source>(null);
+  const [cellarMode, setCellarMode] = useState<CellarMode>(null);
   const [step, setStep] = useState<Step>("source");
   const [dish, setDish] = useState("");
+  const [selectedWineId, setSelectedWineId] = useState("");
   const [suggestions, setSuggestions] = useState<WineSuggestion[] | null>(null);
+  const [pairings, setPairings] = useState<PairingResult[] | null>(null);
   const [scanResults, setScanResults] = useState<WineListAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,9 +53,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   const reset = () => {
     setSource(null);
+    setCellarMode(null);
     setStep("source");
     setDish("");
+    setSelectedWineId("");
     setSuggestions(null);
+    setPairings(null);
     setScanResults(null);
     setLoading(false);
     setError(null);
@@ -64,9 +72,23 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   const handleSelectSource = (s: Source) => {
     setSource(s);
-    setStep("dish");
+    if (s === "cellar") {
+      setStep("cellar-mode");
+    } else {
+      setStep("dish");
+    }
   };
 
+  const handleSelectCellarMode = (mode: CellarMode) => {
+    setCellarMode(mode);
+    if (mode === "by-dish") {
+      setStep("dish");
+    } else {
+      setStep("select-wine");
+    }
+  };
+
+  // Search cellar wines for a dish
   const handleSearchCellar = useCallback(async (dishName?: string) => {
     const query = dishName || dish.trim();
     if (!query) return;
@@ -89,6 +111,28 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       setLoading(false);
     }
   }, [dish, wines]);
+
+  // Search food pairings for a selected wine
+  const handleSearchWinePairings = useCallback(async () => {
+    const wine = wines?.find((w) => w.id === selectedWineId);
+    if (!wine) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await getWinePairings({
+        name: wine.name,
+        style: wine.style,
+        grape: wine.grape,
+        region: wine.region,
+      });
+      setPairings(result);
+      setStep("wine-results");
+    } catch (err: any) {
+      setError(err.message || "Não foi possível buscar sugestões");
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedWineId, wines]);
 
   const handleSearchExternal = useCallback(async (dishName?: string) => {
     const query = dishName || dish.trim();
@@ -127,22 +171,39 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   };
 
   const goBack = () => {
-    if (step === "dish") {
+    setError(null);
+    if (step === "cellar-mode") {
       setSource(null);
       setStep("source");
+    } else if (step === "dish") {
+      if (source === "cellar") {
+        setStep("cellar-mode");
+        setCellarMode(null);
+      } else {
+        setSource(null);
+        setStep("source");
+      }
+    } else if (step === "select-wine") {
+      setStep("cellar-mode");
+      setCellarMode(null);
+      setSelectedWineId("");
     } else if (step === "photo") {
       setStep("dish");
       setPreview(null);
-    } else if (step === "results" || step === "scan-results") {
-      if (source === "external") {
-        setStep("photo");
-        setScanResults(null);
-      } else {
-        setStep("dish");
-        setSuggestions(null);
-      }
+    } else if (step === "results") {
+      setStep("dish");
+      setSuggestions(null);
+    } else if (step === "wine-results") {
+      setStep("select-wine");
+      setPairings(null);
+    } else if (step === "scan-results") {
+      setStep("photo");
+      setScanResults(null);
     }
   };
+
+  const selectedWine = wines?.find((w) => w.id === selectedWineId);
+  const availableWines = wines?.filter((w) => w.quantity > 0) || [];
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -195,7 +256,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <div>
                       <p className="text-[13px] font-semibold text-foreground">Da minha adega</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Sugerir vinhos que você já tem em estoque
+                        Harmonize com vinhos que você já tem
                       </p>
                     </div>
                   </div>
@@ -220,7 +281,56 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Step 2: Dish Input ── */}
+            {/* ── Step 1b: Cellar Mode (by dish or by wine) ── */}
+            {step === "cellar-mode" && (
+              <motion.div
+                key="cellar-mode"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-3"
+              >
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  Como quer harmonizar?
+                </p>
+
+                <button
+                  onClick={() => handleSelectCellarMode("by-dish")}
+                  className="w-full text-left rounded-xl border border-border/50 bg-background/60 hover:bg-primary/[0.04] hover:border-primary/20 p-4 transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
+                      <ChefHat className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-semibold text-foreground">Tenho um prato em mente</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        A IA sugere vinhos da sua adega para o prato
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleSelectCellarMode("by-wine")}
+                  className="w-full text-left rounded-xl border border-border/50 bg-background/60 hover:bg-primary/[0.04] hover:border-primary/20 p-4 transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
+                      <Wine className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-semibold text-foreground">Tenho um vinho em mente</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        A IA sugere pratos ideais para o vinho escolhido
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              </motion.div>
+            )}
+
+            {/* ── Step 2a: Dish Input ── */}
             {step === "dish" && (
               <motion.div
                 key="dish"
@@ -291,7 +401,73 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Step 3a: Photo Upload (external) ── */}
+            {/* ── Step 2b: Select Wine from Cellar ── */}
+            {step === "select-wine" && (
+              <motion.div
+                key="select-wine"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-4"
+              >
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                    Qual vinho da sua adega?
+                  </p>
+                  <Select value={selectedWineId} onValueChange={setSelectedWineId}>
+                    <SelectTrigger className="h-11 text-[13px]">
+                      <SelectValue placeholder="Selecione um vinho…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableWines.map((w) => (
+                        <SelectItem key={w.id} value={w.id}>
+                          {w.name} {w.vintage ? `(${w.vintage})` : ""} — {w.quantity} garrafa{w.quantity !== 1 ? "s" : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedWine && (
+                  <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 space-y-0.5">
+                    <p className="text-[13px] font-semibold text-foreground">{selectedWine.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleSearchWinePairings}
+                  disabled={!selectedWineId || loading}
+                  className="w-full h-10 text-[13px] font-medium"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Consultando sommelier…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Sugerir pratos
+                    </>
+                  )}
+                </Button>
+
+                {error && (
+                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                )}
+
+                {availableWines.length === 0 && (
+                  <p className="text-[12px] text-muted-foreground text-center py-4">
+                    Nenhum vinho com estoque na adega.
+                  </p>
+                )}
+              </motion.div>
+            )}
+
+            {/* ── Photo Upload (external) ── */}
             {step === "photo" && (
               <motion.div
                 key="photo"
@@ -320,18 +496,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     onChange={handleFileChange}
                   />
 
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => fileRef.current?.click()}
-                      className="w-full h-32 rounded-xl border-2 border-dashed border-primary/20 bg-card/40 flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-200 group"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <Camera className="h-5 w-5 text-primary" />
-                      </div>
-                      <p className="text-[12px] font-medium text-foreground">Tirar foto ou escolher da galeria</p>
-                      <p className="text-[10px] text-muted-foreground">Carta de vinhos, garrafa ou menu</p>
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full h-32 rounded-xl border-2 border-dashed border-primary/20 bg-card/40 flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-200 group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <Camera className="h-5 w-5 text-primary" />
+                    </div>
+                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou escolher da galeria</p>
+                    <p className="text-[10px] text-muted-foreground">Carta de vinhos, garrafa ou menu</p>
+                  </button>
                 </div>
 
                 {error && (
@@ -340,7 +514,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Step: Scanning ── */}
+            {/* ── Scanning ── */}
             {step === "scanning" && (
               <motion.div
                 key="scanning"
@@ -362,7 +536,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Step 3b: Cellar Results ── */}
+            {/* ── Cellar Results (dish → wine suggestions) ── */}
             {step === "results" && suggestions && (
               <motion.div
                 key="results"
@@ -432,7 +606,73 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Step 3c: External Scan Results ── */}
+            {/* ── Wine Results (wine → food suggestions) ── */}
+            {step === "wine-results" && pairings && (
+              <motion.div
+                key="wine-results"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                {selectedWine && (
+                  <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 space-y-0.5">
+                    <p className="text-[13px] font-semibold text-foreground">{selectedWine.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 pb-1">
+                  <ChefHat className="h-3 w-3 text-primary/60" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    Pratos sugeridos
+                  </span>
+                </div>
+
+                {pairings.length === 0 ? (
+                  <p className="text-[12px] text-muted-foreground text-center py-4">
+                    Nenhuma sugestão encontrada. Tente outro vinho.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {pairings.map((p, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                        className="glass-card p-3.5 space-y-1"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", matchDot[p.match] || "bg-primary/40")} />
+                          <span className="text-[13px] font-semibold text-foreground">{p.dish}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-snug pl-3.5">
+                          {p.reason}
+                        </p>
+                      </motion.li>
+                    ))}
+                  </ul>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setPairings(null);
+                    setSelectedWineId("");
+                    setStep("select-wine");
+                  }}
+                  className="w-full h-9 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border/40"
+                >
+                  Escolher outro vinho
+                </Button>
+              </motion.div>
+            )}
+
+            {/* ── External Scan Results ── */}
             {step === "scan-results" && scanResults && (
               <motion.div
                 key="scan-results"
