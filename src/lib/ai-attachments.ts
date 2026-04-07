@@ -151,7 +151,7 @@ async function renderPdfAsImage(file: File) {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
 
-    await page.render({ canvasContext: ctx, viewport }).promise;
+    await page.render({ canvasContext: ctx, viewport, canvas: pageCanvas }).promise;
     renderedPages.push(pageCanvas);
   }
 
