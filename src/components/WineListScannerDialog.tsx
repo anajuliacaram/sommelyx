@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Upload, Loader2, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin } from "@/icons/lucide";
+import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -197,17 +198,20 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               className="flex flex-col items-center gap-5 pt-8"
             >
               {imagePreview && (
-                <div className="w-full aspect-[4/3] max-h-[220px] rounded-xl overflow-hidden border border-border/30">
+                <div className="w-full aspect-[4/3] max-h-[200px] rounded-xl overflow-hidden border border-border/30">
                   <img src={imagePreview} alt="Carta" className="w-full h-full object-cover" />
                 </div>
               )}
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <div className="text-center">
-                  <p className="text-sm font-medium text-foreground">Analisando carta de vinhos…</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">O sommelier está avaliando cada rótulo</p>
-                </div>
-              </div>
+              <AiProgressiveLoader
+                steps={[
+                  "Processando imagem…",
+                  "Identificando vinhos na carta…",
+                  "Consultando sommelier…",
+                  "Avaliando compatibilidade…",
+                  "Finalizando recomendações…",
+                ]}
+                interval={3000}
+              />
             </motion.div>
           )}
 
