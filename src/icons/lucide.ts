@@ -4,6 +4,7 @@
 
 export { default as AlertCircle } from "lucide-react/dist/esm/icons/alert-circle.js";
 export { default as AlertTriangle } from "lucide-react/dist/esm/icons/alert-triangle.js";
+export { default as Award } from "lucide-react/dist/esm/icons/award.js";
 export { default as ArrowDown01 } from "lucide-react/dist/esm/icons/arrow-down-01.js";
 export { default as ArrowDownAZ } from "lucide-react/dist/esm/icons/arrow-down-az.js";
 export { default as ArrowDownRight } from "lucide-react/dist/esm/icons/arrow-down-right.js";

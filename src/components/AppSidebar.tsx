@@ -1,4 +1,4 @@
-import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings, Plus, Wine, Camera, PenLine, AlertTriangle, ClipboardList } from "@/icons/lucide";
+import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings, Plus, Wine, Camera, PenLine, AlertTriangle, ClipboardList, UtensilsCrossed, Sparkles } from "@/icons/lucide";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { BreakageDialog } from "@/components/BreakageDialog";
 import { SaleDialog } from "@/components/SaleDialog";
+import { DishToWineDialog } from "@/components/DishToWineDialog";
+import { WineListScannerDialog } from "@/components/WineListScannerDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
@@ -58,6 +60,8 @@ export function AppSidebar() {
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const [breakageOpen, setBreakageOpen] = useState(false);
   const [saleOpen, setSaleOpen] = useState(false);
+  const [dishToWineOpen, setDishToWineOpen] = useState(false);
+  const [wineListScanOpen, setWineListScanOpen] = useState(false);
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const isCommercial = profileType === "commercial";
 
@@ -157,6 +161,24 @@ export function AppSidebar() {
                     <Wine className="h-4 w-4 mr-1.5" />
                     Registrar consumo
                   </Button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="ghost"
+                      className="h-9 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
+                      onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
+                    >
+                      <UtensilsCrossed className="h-3.5 w-3.5 mr-1" />
+                      Harmonizar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="h-9 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
+                      onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1" />
+                      Analisar carta
+                    </Button>
+                  </div>
                 </div>
               </>
             )}
@@ -265,6 +287,14 @@ export function AppSidebar() {
       <SaleDialog
         open={saleOpen}
         onOpenChange={setSaleOpen}
+      />
+      <DishToWineDialog
+        open={dishToWineOpen}
+        onOpenChange={setDishToWineOpen}
+      />
+      <WineListScannerDialog
+        open={wineListScanOpen}
+        onOpenChange={setWineListScanOpen}
       />
     </>
   );
