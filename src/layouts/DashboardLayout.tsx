@@ -68,11 +68,11 @@ export default function DashboardLayout() {
 
             <div className="flex items-center gap-2">
               <span
-                className="hidden sm:inline-flex items-center h-6 px-2.5 rounded-md text-[9px] font-medium uppercase tracking-[0.08em] shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center h-6 px-2.5 rounded-md text-[10px] font-extrabold uppercase tracking-[0.08em] shrink-0 whitespace-nowrap"
                 style={{
-                  background: profileType === "commercial" ? "hsl(var(--accent) / 0.06)" : "hsl(var(--primary) / 0.04)",
+                  background: profileType === "commercial" ? "hsl(var(--accent) / 0.12)" : "hsl(var(--primary) / 0.08)",
                   color: profileType === "commercial" ? "hsl(var(--accent))" : "hsl(var(--primary))",
-                  border: `1px solid ${profileType === "commercial" ? "hsl(var(--accent) / 0.12)" : "hsl(var(--primary) / 0.08)"}`,
+                  border: `1px solid ${profileType === "commercial" ? "hsl(var(--accent) / 0.20)" : "hsl(var(--primary) / 0.15)"}`,
                 }}
               >
                 {profileType === "commercial" ? "Comercial" : "Pessoal"}
