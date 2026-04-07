@@ -1,0 +1,1 @@
+ALTER TABLE public.wines ADD COLUMN last_price_date date DEFAULT NULL;
