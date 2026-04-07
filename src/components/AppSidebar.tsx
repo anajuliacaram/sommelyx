@@ -1,4 +1,4 @@
-import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings, Plus, Wine, Camera, PenLine, AlertTriangle, ClipboardList } from "@/icons/lucide";
+import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings, Plus, Wine, Camera, PenLine, AlertTriangle, ClipboardList, UtensilsCrossed, Sparkles } from "@/icons/lucide";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { BreakageDialog } from "@/components/BreakageDialog";
 import { SaleDialog } from "@/components/SaleDialog";
+import { DishToWineDialog } from "@/components/DishToWineDialog";
+import { WineListScannerDialog } from "@/components/WineListScannerDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
@@ -58,6 +60,8 @@ export function AppSidebar() {
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
   const [breakageOpen, setBreakageOpen] = useState(false);
   const [saleOpen, setSaleOpen] = useState(false);
+  const [dishToWineOpen, setDishToWineOpen] = useState(false);
+  const [wineListScanOpen, setWineListScanOpen] = useState(false);
   const menu = profileType === "commercial" ? commercialMenu : personalMenu;
   const isCommercial = profileType === "commercial";
 
