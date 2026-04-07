@@ -51,20 +51,41 @@ export function useWines() {
 }
 
 export function useWineMetrics() {
-  const { data: wines, isLoading } = useWines();
+  const { user } = useAuth();
   const currentYear = new Date().getFullYear();
 
-  const totalBottles = wines?.reduce((sum, w) => sum + w.quantity, 0) ?? 0;
-  const totalValue = wines?.reduce((sum, w) => sum + (w.current_value ?? w.purchase_price ?? 0) * w.quantity, 0) ?? 0;
-  const drinkNow = wines?.filter(w => w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until).length ?? 0;
-  const recentCount = wines?.filter(w => {
-    const d = new Date(w.created_at);
-    const now = new Date();
-    return now.getTime() - d.getTime() < 30 * 24 * 60 * 60 * 1000;
-  }).length ?? 0;
-  const lowStock = wines?.filter(w => w.quantity > 0 && w.quantity <= 2).length ?? 0;
+  // Lightweight KPI query: only the 5 fields needed for cards
+  const { data: kpiRows, isLoading: kpiLoading } = useQuery({
+    queryKey: ["wines-kpi", user?.id],
+    queryFn: async () => {
+      if (!user) throw new Error("Not authenticated");
+      const { data, error } = await supabase
+        .from("wines")
+        .select("quantity,current_value,purchase_price,drink_from,drink_until")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data as Array<{
+        quantity: number;
+        current_value: number | null;
+        purchase_price: number | null;
+        drink_from: number | null;
+        drink_until: number | null;
+      }>;
+    },
+    enabled: !!user,
+    staleTime: 30_000, // avoid refetch on every mount
+  });
 
-  return { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines: wines ?? [], isLoading };
+  // Full wine list (deferred) — used by secondary sections
+  const { data: wines } = useWines();
+
+  const totalBottles = kpiRows?.reduce((sum, w) => sum + w.quantity, 0) ?? 0;
+  const totalValue = kpiRows?.reduce((sum, w) => sum + (w.current_value ?? w.purchase_price ?? 0) * w.quantity, 0) ?? 0;
+  const drinkNow = kpiRows?.filter(w => w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until).length ?? 0;
+  const recentCount = 0; // not used in KPIs, avoid extra query
+  const lowStock = kpiRows?.filter(w => w.quantity > 0 && w.quantity <= 2).length ?? 0;
+
+  return { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines: wines ?? [], isLoading: kpiLoading };
 }
 
 export function useAddWine() {
