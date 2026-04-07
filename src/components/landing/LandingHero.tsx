@@ -85,18 +85,18 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
           <div className="absolute -bottom-12 -right-12 h-72 w-72 rounded-full bg-gold/20 blur-[90px]" />
 
           {/* Mobile: compact mock (reduz scroll) */}
-          <div className="sm:hidden relative rounded-[26px] border border-black/[0.06] bg-white/70 p-4 shadow-[0_26px_72px_-52px_rgba(15,15,20,0.85)] ring-1 ring-white/50 backdrop-blur-2xl">
+          <div className="sm:hidden relative rounded-[22px] border border-black/[0.05] bg-white/70 p-4 shadow-[0_20px_60px_-40px_rgba(15,15,20,0.7)] ring-1 ring-white/40 backdrop-blur-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
-                  <Wine className="h-4.5 w-4.5" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-wine/8 text-wine ring-1 ring-black/[0.03]">
+                  <Wine className="h-4 w-4" />
                 </div>
                 <div className="leading-none">
-                  <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Dashboard</p>
-                  <p className="text-[14px] font-bold tracking-tight text-foreground">Painel executivo</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Dashboard</p>
+                  <p className="text-[14px] font-semibold tracking-tight text-foreground">Painel executivo</p>
                 </div>
               </div>
-              <div className="rounded-full border border-wine/15 bg-wine/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-wine">
+              <div className="rounded-full border border-wine/12 bg-wine/4 px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine">
                 Premium
               </div>
             </div>
@@ -108,72 +108,72 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 { label: "Giro", value: "37%" },
                 { label: "Reposição", value: "6 itens" },
               ].map((kpi) => (
-                <div key={kpi.label} className="rounded-2xl border border-black/[0.06] bg-white/75 p-3 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{kpi.label}</p>
-                  <p className="mt-1 text-[18px] font-black tracking-tight text-foreground">{kpi.value}</p>
+                <div key={kpi.label} className="rounded-xl border border-black/[0.04] bg-white/70 p-3 shadow-sm">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{kpi.label}</p>
+                  <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight text-foreground">{kpi.value}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Desktop/tablet: full mock */}
-          <div className="hidden sm:block relative rounded-[28px] border border-black/[0.06] bg-white/65 p-4 shadow-[0_32px_90px_-52px_rgba(15,15,20,0.9)] ring-1 ring-white/50 backdrop-blur-2xl">
+          <div className="hidden sm:block relative rounded-[22px] border border-black/[0.05] bg-white/60 p-5 shadow-[0_24px_70px_-40px_rgba(15,15,20,0.75)] ring-1 ring-white/40 backdrop-blur-2xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
-                  <Wine className="h-4.5 w-4.5" />
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-wine/8 text-wine ring-1 ring-black/[0.03]">
+                  <Wine className="h-4 w-4" />
                 </div>
                 <div className="leading-none">
-                  <p className="text-[12px] font-black uppercase tracking-[0.14em] text-muted-foreground">Dashboard</p>
-                  <p className="text-[15px] font-bold tracking-tight text-foreground">Painel executivo</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Dashboard</p>
+                  <p className="text-[15px] font-semibold tracking-tight text-foreground">Painel executivo</p>
                 </div>
               </div>
-              <div className="rounded-full border border-wine/15 bg-wine/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-wine">
+              <div className="rounded-full border border-wine/12 bg-wine/4 px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine">
                 Premium
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-2 gap-2.5">
               {[
-                { label: "Estoque total", value: "128 un.", tone: "wine" },
-                { label: "Valor imobilizado", value: "R$ 92k", tone: "gold" },
-                { label: "Giro mensal", value: "37%", tone: "wine" },
-                { label: "Reposição", value: "6 itens", tone: "wine" },
+                { label: "Estoque total", value: "128 un." },
+                { label: "Valor imobilizado", value: "R$ 92k" },
+                { label: "Giro mensal", value: "37%" },
+                { label: "Reposição", value: "6 itens" },
               ].map((kpi) => (
-                <div key={kpi.label} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{kpi.label}</p>
-                  <p className="mt-1 text-[18px] font-black tracking-tight text-foreground">{kpi.value}</p>
+                <div key={kpi.label} className="rounded-xl border border-black/[0.04] bg-white/65 p-3.5 shadow-sm">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{kpi.label}</p>
+                  <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight text-foreground">{kpi.value}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-3 grid grid-cols-12 gap-2">
-              <div className="col-span-7 rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Estoque atual</p>
-                <div className="mt-2 space-y-2">
+            <div className="mt-3 grid grid-cols-12 gap-2.5">
+              <div className="col-span-7 rounded-xl border border-black/[0.04] bg-white/65 p-3.5 shadow-sm">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Estoque atual</p>
+                <div className="mt-2.5 space-y-2">
                   {[
                     { name: "Brunello di Montalcino", qty: "2", tone: "low" },
                     { name: "Champagne Brut", qty: "8", tone: "ok" },
                     { name: "Barolo Riserva", qty: "1", tone: "low" },
                   ].map((row) => (
                     <div key={row.name} className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-gold"}`} />
-                      <p className="flex-1 truncate text-[12px] font-semibold text-foreground">{row.name}</p>
-                      <span className="rounded-full bg-black/[0.04] px-2 py-1 text-[10px] font-black text-muted-foreground">{row.qty}</span>
+                      <div className={`h-1.5 w-1.5 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-gold"}`} />
+                      <p className="flex-1 truncate text-[12px] font-medium text-foreground">{row.name}</p>
+                      <span className="rounded-md bg-black/[0.03] px-2 py-1 text-[10px] font-medium text-muted-foreground">{row.qty}</span>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="col-span-5 rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Vendas</p>
-                <div className="mt-2 grid grid-cols-6 items-end gap-1">
+              <div className="col-span-5 rounded-xl border border-black/[0.04] bg-white/65 p-3.5 shadow-sm">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Vendas</p>
+                <div className="mt-2.5 grid grid-cols-6 items-end gap-1">
                   {[4, 7, 6, 10, 9, 12].map((h, i) => (
-                    <div key={i} className="col-span-1 rounded-md bg-wine/15">
-                      <div className="rounded-md bg-wine" style={{ height: `${h * 6}px`, opacity: 0.9 }} />
+                    <div key={i} className="col-span-1 rounded-md bg-wine/12">
+                      <div className="rounded-md bg-wine" style={{ height: `${h * 6}px`, opacity: 0.85 }} />
                     </div>
                   ))}
                 </div>
-                <p className="mt-2 text-[11px] font-semibold text-muted-foreground">Últimos 6 meses</p>
+                <p className="mt-2 text-[10px] font-medium text-muted-foreground">Últimos 6 meses</p>
               </div>
             </div>
           </div>
