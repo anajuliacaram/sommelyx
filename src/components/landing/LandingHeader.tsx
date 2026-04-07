@@ -26,7 +26,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             variant="navbar"
             className="h-9 sm:h-10 md:h-11 lg:h-14 drop-shadow-[0_4px_12px_rgba(15,15,20,0.10)]"
           />
-          <span className="font-serif text-[17px] sm:text-[19px] md:text-[22px] lg:text-[30px] font-black tracking-tight text-wine">
+          <span className="font-serif text-[17px] sm:text-[19px] md:text-[22px] lg:text-[28px] font-bold tracking-[-0.01em] text-wine">
             Sommelyx
           </span>
         </a>
@@ -58,7 +58,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <MagneticButton>
             <Button
               variant="primary"
-              className="px-3.5 sm:px-6 h-9 sm:h-9 text-[11px] sm:text-[12px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.10em] rounded-xl shadow-float whitespace-nowrap"
+              className="px-3.5 sm:px-6 h-9 sm:h-9 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.06em] sm:tracking-[0.08em] rounded-xl shadow-float whitespace-nowrap"
               onClick={onSignup}
             >
               Começar grátis
