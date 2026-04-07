@@ -263,10 +263,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               )}
 
               <div className="flex items-center gap-2 py-2">
-                <div className="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center">
-                  <Check className="h-3.5 w-3.5 text-green-600" />
+                <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center">
+                  <Check className="h-3.5 w-3.5 text-success" />
                 </div>
-                <p className="text-xs font-medium text-green-700">Rótulo identificado com sucesso</p>
+                <p className="text-xs font-medium text-success">Rótulo identificado com sucesso</p>
               </div>
 
               <div className="glass-card p-4 space-y-3">
