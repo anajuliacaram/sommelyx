@@ -57,6 +57,11 @@ export interface TasteCompatibility {
   reason: string;
 }
 
+export interface WineInsight {
+  insight: string;
+  recommendation: string;
+}
+
 // ── Compact wine summary for AI context ──
 
 interface WineSummary {
@@ -168,6 +173,35 @@ export async function getTasteCompatibility(
     { timeoutMs: 20_000, retries: 1 },
   );
   return data || { compatibility: null, label: "Não disponível", reason: "" };
+}
+
+export async function getWineInsight(wine: {
+  name: string;
+  alertType: "drink_now" | "past_peak";
+  style?: string | null;
+  grape?: string | null;
+  region?: string | null;
+  country?: string | null;
+  vintage?: number | null;
+  drinkFrom?: number | null;
+  drinkUntil?: number | null;
+}): Promise<WineInsight> {
+  const data = await invokeEdgeFunction<WineInsight>(
+    "wine-insight",
+    {
+      alertType: wine.alertType,
+      wineName: wine.name,
+      style: wine.style,
+      grape: wine.grape,
+      region: wine.region,
+      country: wine.country,
+      vintage: wine.vintage,
+      drinkFrom: wine.drinkFrom,
+      drinkUntil: wine.drinkUntil,
+    },
+    { timeoutMs: 30_000, retries: 1 },
+  );
+  return data || { insight: "", recommendation: "" };
 }
 
 // ── Helpers ──
