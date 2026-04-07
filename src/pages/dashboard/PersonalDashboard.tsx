@@ -35,11 +35,11 @@ import { useWineEvent, useWineMetrics } from "@/hooks/useWines";
 import { cn } from "@/lib/utils";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 10 } as const,
+  hidden: { opacity: 0, y: 8 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.035, duration: 0.42, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.04, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -125,7 +125,6 @@ export default function PersonalDashboard() {
     }
   };
 
-  // Build priority items for "Hoje para decidir" block
   const priorityItems = useMemo(() => {
     const items: { label: string; detail: string; tone: "success" | "warning" | "wine"; action?: () => void }[] = [];
     if (drinkNow > 0) items.push({ label: `${drinkNow} vinho${drinkNow > 1 ? "s" : ""} em janela ideal`, detail: "Hora de abrir", tone: "success", action: () => navigate("/dashboard/cellar") });
@@ -153,29 +152,29 @@ export default function PersonalDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1320px] space-y-3">
-        {/* ─── Compact Header ─── */}
+      <div className="max-w-[1280px] space-y-5">
+        {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">Acervo pessoal</p>
-              <h1 className="mt-1 text-[20px] font-bold tracking-[-0.03em] text-foreground sm:text-[22px]">
-                Olá, <span className="font-serif italic text-wine">{firstName}</span>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Acervo pessoal</p>
+              <h1 className="mt-2 text-[26px] font-semibold tracking-[-0.02em] text-foreground sm:text-[30px]">
+                Olá, <span className="italic text-primary">{firstName}</span>
               </h1>
-              <p className="mt-0.5 text-[12px] font-medium text-muted-foreground">
+              <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
                 {totalBottles} garrafa{totalBottles !== 1 ? "s" : ""}
                 {lowStock > 0 && <> · <span className="text-warning">{lowStock} estoque baixo</span></>}
                 {drinkNow > 0 && <> · <span className="text-success">{drinkNow} para beber agora</span></>}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Button variant="primary" className="h-9 rounded-2xl text-[11px] font-black uppercase tracking-[0.10em]" onClick={() => setAddOpen(true)}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="primary" size="default" onClick={() => setAddOpen(true)}>
                 <Plus className="mr-1.5 h-3.5 w-3.5" /> Adicionar
               </Button>
-              <Button variant="ghost" className="h-9 rounded-2xl text-[11px] font-bold uppercase tracking-[0.10em] border border-border/50" onClick={() => setManageOpen(true)}>
+              <Button variant="outline" size="default" onClick={() => setManageOpen(true)}>
                 <Wine className="mr-1.5 h-3.5 w-3.5" /> Consumo
               </Button>
-              <Button variant="ghost" className="h-9 rounded-2xl text-[11px] font-bold uppercase tracking-[0.10em] border border-border/50" onClick={() => setCsvOpen(true)}>
+              <Button variant="ghost" size="default" onClick={() => setCsvOpen(true)}>
                 <Upload className="mr-1.5 h-3.5 w-3.5" /> Importar
               </Button>
             </div>
@@ -183,56 +182,61 @@ export default function PersonalDashboard() {
         </motion.div>
 
         {/* ─── KPI Strip ─── */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5}>
-          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="rounded-xl border border-border/40 bg-card/70 p-3">
-                  <Skeleton className="h-3 w-14" />
-                  <Skeleton className="mt-2 h-6 w-16" />
+                <div key={i} className="rounded-xl border border-border/30 bg-card/70 p-4">
+                  <Skeleton className="h-3 w-16 mb-3" />
+                  <Skeleton className="h-7 w-20" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="rounded-xl border border-border/40 bg-card/70 p-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-1.5">
-                    <kpi.icon className={cn("h-3.5 w-3.5", kpi.urgent ? "text-wine" : "text-muted-foreground/60")} />
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{kpi.label}</p>
+                <div key={kpi.label} className="rounded-xl border border-border/30 bg-card/70 p-4">
+                  <div className="flex items-center gap-2">
+                    <kpi.icon className={cn("h-3.5 w-3.5", kpi.urgent ? "text-primary" : "text-muted-foreground/50")} />
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{kpi.label}</p>
                   </div>
-                  <p className={cn("mt-1 text-[24px] font-black tracking-tight", kpi.urgent ? "text-wine" : "text-foreground")}>{kpi.value}</p>
+                  <p className={cn(
+                    "mt-2 font-serif text-[28px] font-semibold tracking-[-0.02em]",
+                    kpi.urgent ? "text-primary" : "text-foreground",
+                  )}>
+                    {kpi.value}
+                  </p>
                 </div>
               ))
             )}
           </div>
         </motion.div>
 
-        {/* ─── Priority Block: "Hoje para decidir" ─── */}
+        {/* ─── Priority Block ─── */}
         {priorityItems.length > 0 && (
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-            <div className="glass-card p-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground mb-2">Hoje para decidir</p>
-              <div className="grid gap-1.5">
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+            <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70 mb-3">Hoje para decidir</p>
+              <div className="grid gap-1">
                 {priorityItems.map((item, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={item.action}
                     className={cn(
-                      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all",
-                      item.action ? "cursor-pointer hover:bg-muted/40" : "cursor-default",
+                      "flex items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors",
+                      item.action ? "cursor-pointer hover:bg-muted/25" : "cursor-default",
                     )}
                   >
                     <div className={cn(
-                      "h-2 w-2 rounded-full shrink-0",
+                      "h-1.5 w-1.5 rounded-full shrink-0",
                       item.tone === "success" && "bg-success",
                       item.tone === "warning" && "bg-warning",
-                      item.tone === "wine" && "bg-wine",
+                      item.tone === "wine" && "bg-primary",
                     )} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-semibold text-foreground">{item.label}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{item.detail}</p>
+                      <p className="text-[13px] font-medium text-foreground">{item.label}</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">{item.detail}</p>
                     </div>
-                    {item.action && <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />}
+                    {item.action && <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />}
                   </button>
                 ))}
               </div>
@@ -240,40 +244,40 @@ export default function PersonalDashboard() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-12 gap-3">
+        <div className="grid grid-cols-12 gap-4">
           {/* ─── Ready to Drink ─── */}
-          <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-            <div className="glass-card p-3">
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <h2 className="text-[13px] font-bold tracking-tight text-foreground">Prontos para abrir</h2>
-                <Button variant="ghost" size="sm" className="h-7 rounded-lg text-[11px] font-bold text-muted-foreground" onClick={() => navigate("/dashboard/cellar")}>
+          <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+            <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="font-serif text-[18px] font-semibold tracking-[-0.01em] text-foreground">Prontos para abrir</h2>
+                <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/cellar")}>
                   Ver adega <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               </div>
 
-              <div className="grid gap-1.5">
+              <div className="grid gap-2">
                 {readyToDrink.length === 0 ? (
-                  <div className="rounded-xl border border-border/30 bg-muted/20 p-4 text-center">
-                    <GlassWater className="h-5 w-5 mx-auto text-muted-foreground/30 mb-1.5" />
-                    <p className="text-[12px] font-medium text-muted-foreground">Nenhum vinho em janela ideal</p>
-                    <p className="text-[11px] text-muted-foreground/60 mt-0.5">Adicione vinhos com janela de consumo para ver sugestões aqui.</p>
+                  <div className="rounded-lg border border-border/20 bg-muted/10 py-8 text-center">
+                    <GlassWater className="h-5 w-5 mx-auto text-muted-foreground/25 mb-2" />
+                    <p className="text-[13px] font-medium text-muted-foreground/70">Nenhum vinho em janela ideal</p>
+                    <p className="text-[12px] text-muted-foreground/50 mt-1 max-w-[260px] mx-auto leading-relaxed">Adicione vinhos com janela de consumo para ver sugestões aqui.</p>
                   </div>
                 ) : (
                   readyToDrink.map((w) => (
-                    <div key={w.id} className="flex items-center gap-2.5 rounded-xl border border-border/30 bg-card/50 px-3 py-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 text-success shrink-0">
+                    <div key={w.id} className="flex items-center gap-3 rounded-lg border border-border/20 bg-background/40 px-4 py-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/8 text-success shrink-0">
                         <GlassWater className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-semibold text-foreground">{w.name}</p>
-                        <p className="truncate text-[11px] text-muted-foreground">
+                        <p className="truncate text-[13px] font-medium text-foreground">{w.name}</p>
+                        <p className="truncate text-[12px] text-muted-foreground mt-0.5">
                           {[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.
                         </p>
                       </div>
                       <Button
-                        variant="secondary"
+                        variant="outline"
                         size="sm"
-                        className="h-7 rounded-lg text-[11px] font-bold shrink-0"
+                        className="h-8 text-[12px] shrink-0"
                         onClick={() => handleOpenBottle(w.id, w.name)}
                         disabled={wineEvent.isPending}
                       >
@@ -286,61 +290,61 @@ export default function PersonalDashboard() {
             </div>
           </motion.div>
 
-          {/* ─── Right Column: Alerts + Chart ─── */}
-          <div className="col-span-12 grid gap-3 lg:col-span-5">
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-              <div className="glass-card p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-[13px] font-bold tracking-tight text-foreground">Alertas</h2>
-                  <Button variant="ghost" size="sm" className="h-7 rounded-lg text-[11px] font-bold text-muted-foreground" onClick={() => navigate("/dashboard/alerts")}>
+          {/* ─── Right Column ─── */}
+          <div className="col-span-12 grid gap-4 lg:col-span-5">
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+              <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-serif text-[18px] font-semibold tracking-[-0.01em] text-foreground">Alertas</h2>
+                  <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/alerts")}>
                     Ver todos <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 </div>
-                <div className="grid gap-1.5">
+                <div className="grid gap-1">
                   {[
-                    { label: "Beber agora", value: drinkNow, tone: "text-success", bg: "bg-success/8" },
-                    { label: "Em guarda", value: inGuard, tone: "text-info", bg: "bg-info/8" },
-                    { label: "Passaram do pico", value: pastPeak, tone: "text-warning", bg: "bg-warning/8" },
-                    { label: "Baixo estoque", value: lowStock, tone: "text-wine", bg: "bg-wine/8" },
+                    { label: "Beber agora", value: drinkNow, tone: "text-success" },
+                    { label: "Em guarda", value: inGuard, tone: "text-info" },
+                    { label: "Passaram do pico", value: pastPeak, tone: "text-warning" },
+                    { label: "Baixo estoque", value: lowStock, tone: "text-primary" },
                   ].map((a) => (
                     <button
                       key={a.label}
                       type="button"
                       onClick={() => navigate("/dashboard/alerts")}
-                      className="flex items-center justify-between rounded-xl px-3 py-2 transition-colors hover:bg-muted/30"
+                      className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/20"
                     >
-                      <span className="text-[12px] font-medium text-muted-foreground">{a.label}</span>
-                      <span className={cn("text-[16px] font-black", a.value > 0 ? a.tone : "text-muted-foreground/40")}>{a.value}</span>
+                      <span className="text-[13px] text-muted-foreground">{a.label}</span>
+                      <span className={cn("font-serif text-[20px] font-semibold", a.value > 0 ? a.tone : "text-muted-foreground/30")}>{a.value}</span>
                     </button>
                   ))}
                 </div>
               </div>
             </motion.div>
 
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-              <div className="glass-card p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-[13px] font-bold tracking-tight text-foreground">Consumo</h2>
-                  <span className="rounded-full bg-muted/50 px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+              <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-serif text-[18px] font-semibold tracking-[-0.01em] text-foreground">Consumo</h2>
+                  <span className="text-[11px] font-medium text-muted-foreground/60">
                     {consumption.length} total
                   </span>
                 </div>
-                <div className="h-[150px]">
+                <div className="h-[160px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={consumptionMonthly}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.4)" vertical={false} />
-                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground)/0.6)" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
                       <Tooltip
                         contentStyle={{
                           background: "hsl(var(--card))",
                           border: "1px solid hsl(var(--border))",
-                          borderRadius: 12,
+                          borderRadius: 10,
                           fontSize: 12,
-                          boxShadow: "0 8px 24px -12px rgba(0,0,0,0.15)",
+                          boxShadow: "0 4px 12px -4px rgba(0,0,0,0.10)",
                         }}
                       />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="hsl(var(--wine))" />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

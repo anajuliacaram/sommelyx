@@ -40,11 +40,11 @@ import { useWineMetrics } from "@/hooks/useWines";
 import { cn } from "@/lib/utils";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 10 } as const,
+  hidden: { opacity: 0, y: 8 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.035, duration: 0.42, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.04, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -66,6 +66,14 @@ function buildMonthWindow(size: number) {
   }
   return months;
 }
+
+const chartTooltipStyle = {
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: 10,
+  fontSize: 12,
+  boxShadow: "0 4px 12px -4px rgba(0,0,0,0.10)",
+};
 
 export default function CommercialDashboard() {
   const { user } = useAuth();
@@ -133,34 +141,10 @@ export default function CommercialDashboard() {
 
   const kpis = useMemo(
     () => [
-      {
-        label: "Estoque total",
-        value: `${totalBottles} un.`,
-        detail: "Quantidade total de itens disponíveis",
-        icon: Layers,
-        tone: "wine" as const,
-      },
-      {
-        label: "Valor imobilizado",
-        value: formatCompactBRL(totalValue),
-        detail: "Valor investido no estoque",
-        icon: DollarSign,
-        tone: "gold" as const,
-      },
-      {
-        label: "Giro mensal",
-        value: `${turnover}%`,
-        detail: "Percentual de produtos movimentados no mês",
-        icon: TrendingUp,
-        tone: "wine" as const,
-      },
-      {
-        label: "Reposição",
-        value: `${lowStock}`,
-        detail: "Itens com estoque baixo (2 ou menos)",
-        icon: AlertTriangle,
-        tone: "wine" as const,
-      },
+      { label: "Estoque total", value: `${totalBottles}`, detail: "Itens disponíveis", icon: Layers },
+      { label: "Valor imobilizado", value: formatCompactBRL(totalValue), detail: "Investido no estoque", icon: DollarSign },
+      { label: "Giro mensal", value: `${turnover}%`, detail: "Movimentados no mês", icon: TrendingUp },
+      { label: "Reposição", value: `${lowStock}`, detail: "Estoque baixo", icon: AlertTriangle },
     ],
     [lowStock, totalBottles, totalValue, turnover],
   );
@@ -209,69 +193,53 @@ export default function CommercialDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1320px] space-y-3">
+      <div className="max-w-[1280px] space-y-5">
+        {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">Operação comercial</p>
-              <h1 className="mt-1 text-[20px] font-bold tracking-[-0.03em] text-foreground sm:text-[22px]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Operação comercial</p>
+              <h1 className="mt-2 text-[26px] font-semibold tracking-[-0.02em] text-foreground sm:text-[30px]">
                 Resumo da operação
               </h1>
-              <p className="mt-0.5 text-[12px] font-medium text-muted-foreground">
+              <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
                 {totalBottles} un. em estoque
                 {lowStock > 0 && <> · <span className="text-warning">{lowStock} para repor</span></>}
               </p>
             </div>
-
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Button
-                variant="primary"
-                className="h-9 rounded-2xl text-[11px] font-black uppercase tracking-[0.10em]"
-                onClick={() => setAddOpen(true)}
-              >
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="primary" size="default" onClick={() => setAddOpen(true)}>
                 <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar
               </Button>
-              <Button
-                variant="ghost"
-                className="h-9 rounded-2xl text-[11px] font-bold uppercase tracking-[0.10em] border border-border/50"
-                onClick={() => navigate("/dashboard/sales")}
-              >
+              <Button variant="outline" size="default" onClick={() => navigate("/dashboard/sales")}>
                 <ShoppingCart className="mr-1.5 h-3.5 w-3.5" /> Venda
               </Button>
-              <Button
-                variant="ghost"
-                className="h-9 rounded-2xl text-[11px] font-bold uppercase tracking-[0.10em] border border-border/50"
-                onClick={() => setCsvOpen(true)}
-              >
+              <Button variant="ghost" size="default" onClick={() => setCsvOpen(true)}>
                 <Upload className="mr-1.5 h-3.5 w-3.5" /> Importar
               </Button>
             </div>
           </div>
         </motion.div>
 
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5}>
-          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+        {/* ─── KPI Strip ─── */}
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="rounded-xl border border-border/40 bg-card/70 p-3">
-                  <Skeleton className="h-3 w-14" />
-                  <Skeleton className="mt-2 h-6 w-16" />
+                <div key={i} className="rounded-xl border border-border/30 bg-card/70 p-4">
+                  <Skeleton className="h-3 w-16 mb-3" />
+                  <Skeleton className="h-7 w-20" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="rounded-xl border border-border/40 bg-card/70 p-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-1.5">
-                    <div className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-lg",
-                      kpi.tone === "gold" ? "bg-gold/10 text-gold" : "bg-wine/10 text-wine",
-                    )}>
-                      <kpi.icon className="h-3.5 w-3.5" />
-                    </div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{kpi.label}</p>
+                <div key={kpi.label} className="rounded-xl border border-border/30 bg-card/70 p-4">
+                  <div className="flex items-center gap-2">
+                    <kpi.icon className="h-3.5 w-3.5 text-muted-foreground/50" />
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{kpi.label}</p>
                   </div>
-                  <p className="mt-1 text-[24px] font-black tracking-tight text-foreground">{kpi.value}</p>
-                  <p className="text-[10px] font-medium text-muted-foreground/70">{kpi.detail}</p>
+                  <p className="mt-2 font-serif text-[28px] font-semibold tracking-[-0.02em] text-foreground">{kpi.value}</p>
+                  <p className="text-[11px] text-muted-foreground/60 mt-1">{kpi.detail}</p>
                 </div>
               ))
             )}
@@ -295,90 +263,97 @@ export default function CommercialDashboard() {
           />
         ) : (
           <>
-            <div className="grid grid-cols-12 gap-3">
-              <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-                <div className="glass-card p-4">
-                  <div className="flex items-center justify-between gap-3">
+            <div className="grid grid-cols-12 gap-4">
+              {/* ─── Stock Table ─── */}
+              <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                  <div className="flex items-center justify-between gap-3 mb-4">
                     <div className="min-w-0">
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Estoque atual</p>
-                      <h2 className="mt-1 text-[16px] font-bold tracking-tight text-foreground">Itens de maior impacto</h2>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70">Estoque atual</p>
+                      <h2 className="mt-1 font-serif text-[18px] font-semibold tracking-[-0.01em] text-foreground">Itens de maior impacto</h2>
                     </div>
-                    <Button variant="ghost" className="h-9 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/inventory")}>
+                    <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/inventory")}>
                       Ver estoque
                     </Button>
                   </div>
 
-                  <div className="mt-3 overflow-hidden rounded-2xl border border-black/[0.06] bg-white/70">
-                    <div className="grid grid-cols-12 gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
+                  <div className="overflow-hidden rounded-lg border border-border/20">
+                    <div className="grid grid-cols-12 gap-2 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70 bg-muted/15">
                       <div className="col-span-7">Produto</div>
                       <div className="col-span-2 text-right">Qtd.</div>
                       <div className="col-span-3 text-right">Valor</div>
                     </div>
-                    <div className="divide-y divide-black/[0.06]">
+                    <div className="divide-y divide-border/15">
                       {stockRows.map((row) => (
-                        <Button
+                        <button
                           key={row.id}
                           type="button"
-                          variant="ghost"
                           onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(row.name)}`)}
-                          className="grid w-full grid-cols-12 items-center gap-2 px-3 py-2.5 text-left rounded-none h-auto justify-start hover:bg-muted/40"
+                          className="grid w-full grid-cols-12 items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-muted/15"
                         >
                           <div className="col-span-7 min-w-0">
                             <div className="flex items-center gap-2">
-                              <div className={`h-2 w-2 rounded-full ${row.low ? "bg-wine" : "bg-gold"}`} />
-                              <p className="truncate text-[13px] font-semibold text-foreground">{row.name}</p>
+                              <div className={cn("h-1.5 w-1.5 rounded-full", row.low ? "bg-primary" : "bg-accent")} />
+                              <p className="truncate text-[13px] font-medium text-foreground">{row.name}</p>
                             </div>
-                            <p className="mt-0.5 truncate text-[11px] font-medium text-muted-foreground">{row.producer || "—"}</p>
+                            <p className="mt-0.5 truncate text-[11px] text-muted-foreground pl-3.5">{row.producer || "—"}</p>
                           </div>
                           <div className="col-span-2 text-right">
-                            <span className={`text-[12px] font-black ${row.low ? "text-wine" : "text-foreground"}`}>{row.qty}</span>
+                            <span className={cn("text-[13px] font-semibold", row.low ? "text-primary" : "text-foreground")}>{row.qty}</span>
                           </div>
                           <div className="col-span-3 text-right">
-                            <span className="text-[12px] font-black text-foreground">{formatCompactBRL(row.value)}</span>
+                            <span className="text-[13px] font-medium text-foreground">{formatCompactBRL(row.value)}</span>
                           </div>
-                        </Button>
+                        </button>
                       ))}
                     </div>
                   </div>
                 </div>
               </motion.div>
 
-              <div className="col-span-12 grid gap-3 lg:col-span-5">
-                <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-                  <div className="glass-card p-4">
-                    <div className="flex items-center justify-between gap-3">
+              {/* ─── Right Column ─── */}
+              <div className="col-span-12 grid gap-4 lg:col-span-5">
+                <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+                  <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                    <div className="flex items-center justify-between gap-3 mb-4">
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Alertas</p>
-                        <h2 className="mt-1 text-[16px] font-bold tracking-tight text-foreground">Reposição</h2>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70">Alertas</p>
+                        <h2 className="mt-1 font-serif text-[18px] font-semibold tracking-[-0.01em] text-foreground">Reposição</h2>
                       </div>
-                      <Button variant="ghost" className="h-9 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]" onClick={() => navigate("/dashboard/inventory")}>
+                      <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/inventory")}>
                         Ajustar
                       </Button>
                     </div>
 
-                    <div className="mt-3 grid gap-2">
-                      {lowStockRows.map((w) => (
-                        <div key={w.id} className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white/70 px-3 py-2.5">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
-                            <ArrowDownRight className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[13px] font-semibold text-foreground">{w.name}</p>
-                            <p className="mt-0.5 truncate text-[11px] font-medium text-muted-foreground">{w.producer || "—"}</p>
-                          </div>
-                          <span className="rounded-full bg-wine/10 px-2.5 py-1 text-[11px] font-black text-wine ring-1 ring-wine/15">
-                            {w.quantity} un.
-                          </span>
+                    <div className="grid gap-2">
+                      {lowStockRows.length === 0 ? (
+                        <div className="rounded-lg border border-border/20 bg-muted/10 py-6 text-center">
+                          <p className="text-[13px] text-muted-foreground/60">Nenhum item com estoque baixo</p>
                         </div>
-                      ))}
+                      ) : (
+                        lowStockRows.map((w) => (
+                          <div key={w.id} className="flex items-center gap-3 rounded-lg border border-border/20 bg-background/40 px-4 py-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/6 text-primary shrink-0">
+                              <ArrowDownRight className="h-3.5 w-3.5" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-medium text-foreground">{w.name}</p>
+                              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{w.producer || "—"}</p>
+                            </div>
+                            <span className="rounded-md bg-primary/6 px-2 py-1 text-[11px] font-semibold text-primary">
+                              {w.quantity} un.
+                            </span>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </motion.div>
 
-                <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-                  <div className="glass-card p-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Atalhos</p>
-                    <div className="mt-3 grid grid-cols-2 gap-2">
+                <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+                  <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70 mb-3">Atalhos</p>
+                    <div className="grid grid-cols-2 gap-2">
                       {[
                         { icon: Package, label: "Estoque", route: "/dashboard/inventory" },
                         { icon: ShoppingCart, label: "Vendas", route: "/dashboard/sales" },
@@ -390,12 +365,10 @@ export default function CommercialDashboard() {
                           type="button"
                           variant="ghost"
                           onClick={() => navigate(item.route)}
-                          className="flex h-11 items-center gap-2 rounded-2xl border border-border/70 bg-background/50 px-3 text-left hover:bg-background"
+                          className="flex h-11 items-center gap-2.5 rounded-lg border border-border/25 bg-background/30 px-3 text-left hover:bg-muted/20"
                         >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-wine/10 text-wine ring-1 ring-black/[0.04]">
-                            <item.icon className="h-4 w-4" />
-                          </div>
-                          <span className="text-[12px] font-bold text-foreground">{item.label}</span>
+                          <item.icon className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+                          <span className="text-[12px] font-medium text-foreground">{item.label}</span>
                         </Button>
                       ))}
                     </div>
@@ -404,69 +377,22 @@ export default function CommercialDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-                <div className="glass-card p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Performance</p>
-                      <h3 className="mt-1 text-[15px] font-bold tracking-tight text-foreground">Vendas (R$)</h3>
-                    </div>
-                    <span className="rounded-full bg-black/[0.04] px-3 py-1 text-[11px] font-black text-muted-foreground">
-                      6 meses
-                    </span>
+            {/* ─── Charts ─── */}
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <h3 className="font-serif text-[16px] font-semibold tracking-[-0.01em] text-foreground">Vendas</h3>
+                    <span className="text-[10px] font-medium text-muted-foreground/50">6 meses</span>
                   </div>
-                  <div className="mt-3 h-[170px]">
+                  <div className="h-[160px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={salesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "rgba(23,20,29,0.6)", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "rgba(23,20,29,0.45)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip
-                          contentStyle={{
-                            background: "rgba(255,255,255,0.92)",
-                            border: "1px solid rgba(0,0,0,0.06)",
-                            borderRadius: 14,
-                            fontSize: 12,
-                            boxShadow: "0 16px 40px -28px rgba(15,15,20,0.65)",
-                          }}
-                          formatter={(v: any) => formatCompactBRL(Number(v))}
-                        />
-                        <Bar dataKey="value" radius={[10, 10, 0, 0]} fill="hsl(var(--wine))" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-                <div className="glass-card p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Estoque</p>
-                      <h3 className="mt-1 text-[15px] font-bold tracking-tight text-foreground">Movimentação (un.)</h3>
-                    </div>
-                    <span className="rounded-full bg-black/[0.04] px-3 py-1 text-[11px] font-black text-muted-foreground">
-                      6 meses
-                    </span>
-                  </div>
-                  <div className="mt-3 h-[170px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stockMovesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "rgba(23,20,29,0.6)", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "rgba(23,20,29,0.45)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip
-                          contentStyle={{
-                            background: "rgba(255,255,255,0.92)",
-                            border: "1px solid rgba(0,0,0,0.06)",
-                            borderRadius: 14,
-                            fontSize: 12,
-                            boxShadow: "0 16px 40px -28px rgba(15,15,20,0.65)",
-                          }}
-                        />
-                        <Bar dataKey="in" stackId="a" radius={[10, 10, 0, 0]} fill="hsl(var(--gold))" />
-                        <Bar dataKey="out" stackId="a" radius={[10, 10, 0, 0]} fill="hsl(var(--wine))" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
+                        <Tooltip contentStyle={chartTooltipStyle} formatter={(v: any) => formatCompactBRL(Number(v))} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -474,32 +400,40 @@ export default function CommercialDashboard() {
               </motion.div>
 
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-                <div className="glass-card p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground">Sinais</p>
-                      <h3 className="mt-1 text-[15px] font-bold tracking-tight text-foreground">Saldo mensal</h3>
-                    </div>
-                    <span className="rounded-full bg-black/[0.04] px-3 py-1 text-[11px] font-black text-muted-foreground">
-                      net
-                    </span>
+                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <h3 className="font-serif text-[16px] font-semibold tracking-[-0.01em] text-foreground">Movimentação</h3>
+                    <span className="text-[10px] font-medium text-muted-foreground/50">6 meses</span>
                   </div>
-                  <div className="mt-3 h-[170px]">
+                  <div className="h-[160px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={stockMovesMonthly}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
+                        <Tooltip contentStyle={chartTooltipStyle} />
+                        <Bar dataKey="in" stackId="a" radius={[4, 4, 0, 0]} fill="hsl(var(--accent))" />
+                        <Bar dataKey="out" stackId="a" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <h3 className="font-serif text-[16px] font-semibold tracking-[-0.01em] text-foreground">Saldo mensal</h3>
+                    <span className="text-[10px] font-medium text-muted-foreground/50">net</span>
+                  </div>
+                  <div className="h-[160px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stockMovesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "rgba(23,20,29,0.6)", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "rgba(23,20,29,0.45)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip
-                          contentStyle={{
-                            background: "rgba(255,255,255,0.92)",
-                            border: "1px solid rgba(0,0,0,0.06)",
-                            borderRadius: 14,
-                            fontSize: 12,
-                            boxShadow: "0 16px 40px -28px rgba(15,15,20,0.65)",
-                          }}
-                        />
-                        <Area type="monotone" dataKey="net" stroke="hsl(var(--wine))" fill="hsl(var(--wine) / 0.18)" strokeWidth={2} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
+                        <Tooltip contentStyle={chartTooltipStyle} />
+                        <Area type="monotone" dataKey="net" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.10)" strokeWidth={1.5} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
