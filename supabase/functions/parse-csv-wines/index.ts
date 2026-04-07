@@ -41,6 +41,9 @@ async function logAudit(
   durationMs: number,
   metadata?: Record<string, unknown>
 ) {
+  // Avoid writing DB logs for unauthenticated requests to prevent log-spam abuse.
+  if (!userId || userId === "anonymous") return;
+
   try {
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -70,22 +73,44 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      await logAudit("anonymous", 500, "internal_error", Date.now() - startTime, {
+        reason: "missing_supabase_env",
+      });
+      return new Response(JSON.stringify({ error: "Erro interno de configuração.", code: "CONFIG_ERROR" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const accessToken = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!accessToken) {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        reason: "empty_bearer_token",
+      });
+      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate token using service role to avoid false 401 when anon key runtime env is missing or stale.
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
     if (userError || !user) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        reason: "token_validation_failed",
+      });
+      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

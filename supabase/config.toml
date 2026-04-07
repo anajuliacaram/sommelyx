@@ -7,3 +7,9 @@ project_id = "enivxnikegzsshaiifdh"
     verify_jwt = true
   [functions.wishlist-wine-assistant]
     verify_jwt = true
+  [functions.parse-csv-wines]
+    verify_jwt = false
+  [functions.scan-wine-label]
+    verify_jwt = false
+  [functions.wine-intelligence]
+    verify_jwt = false
