@@ -35,11 +35,11 @@ import { useWineEvent, useWineMetrics } from "@/hooks/useWines";
 import { cn } from "@/lib/utils";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 8 } as const,
+  hidden: { opacity: 0, y: 10 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.04, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.05, duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -152,24 +152,24 @@ export default function PersonalDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1280px] space-y-4">
+      <div className="max-w-[1280px] space-y-5">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[22px] font-bold tracking-[-0.03em] text-foreground sm:text-[26px]">
-                Olá, <span className="text-primary">{firstName}</span>
+              <h1 className="text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
+                Olá, <span className="text-gradient-wine">{firstName}</span>
               </h1>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               <Button variant="primary" size="default" onClick={() => setAddOpen(true)}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Adicionar
+                <Plus className="mr-1.5 h-4 w-4" /> Adicionar
               </Button>
-              <Button variant="outline" size="default" onClick={() => setManageOpen(true)}>
-                <Wine className="mr-1.5 h-3.5 w-3.5" /> Consumo
+              <Button variant="secondary" size="default" onClick={() => setManageOpen(true)}>
+                <Wine className="mr-1.5 h-4 w-4" /> Consumo
               </Button>
               <Button variant="ghost" size="default" onClick={() => setCsvOpen(true)}>
-                <Upload className="mr-1.5 h-3.5 w-3.5" /> Importar
+                <Upload className="mr-1.5 h-4 w-4" /> Importar
               </Button>
             </div>
           </div>
@@ -177,23 +177,23 @@ export default function PersonalDashboard() {
 
         {/* ─── KPI Strip ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="rounded-xl border border-border bg-card p-3.5">
-                  <Skeleton className="h-3 w-20 mb-2.5 rounded" />
-                  <Skeleton className="h-7 w-16 rounded" />
+                <div key={i} className="glass-card p-5">
+                  <Skeleton className="h-3.5 w-20 mb-3 rounded-lg" />
+                  <Skeleton className="h-8 w-16 rounded-lg" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="rounded-xl border border-border bg-card p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <kpi.icon className={cn("h-3.5 w-3.5", kpi.urgent ? "text-primary" : "text-muted-foreground/60")} />
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{kpi.label}</p>
+                <div key={kpi.label} className="glass-card p-5">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <kpi.icon className={cn("h-4 w-4", kpi.urgent ? "text-primary" : "text-muted-foreground/50")} />
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{kpi.label}</p>
                   </div>
                   <p className={cn(
-                    "text-[26px] font-bold tracking-[-0.03em] leading-none tabular-nums",
+                    "text-[28px] font-bold tracking-[-0.03em] leading-none tabular-nums",
                     kpi.urgent ? "text-primary" : "text-foreground",
                   )}>
                     {kpi.value}
@@ -207,30 +207,30 @@ export default function PersonalDashboard() {
         {/* ─── Priority Block ─── */}
         {priorityItems.length > 0 && (
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-            <div className="rounded-xl border border-border bg-card p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-2.5">Hoje para decidir</p>
-              <div className="grid gap-0">
+            <div className="glass-card p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground mb-3">Hoje para decidir</p>
+              <div className="grid gap-0.5">
                 {priorityItems.map((item, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={item.action}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
-                      item.action ? "cursor-pointer hover:bg-muted/25" : "cursor-default",
+                      "flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-left transition-all duration-200",
+                      item.action ? "cursor-pointer hover:bg-muted/20" : "cursor-default",
                     )}
                   >
                     <div className={cn(
-                      "h-2 w-2 rounded-full shrink-0",
+                      "h-2.5 w-2.5 rounded-full shrink-0",
                       item.tone === "success" && "bg-success",
                       item.tone === "warning" && "bg-warning",
                       item.tone === "wine" && "bg-primary",
                     )} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-semibold text-foreground">{item.label}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{item.detail}</p>
+                      <p className="text-[14px] font-semibold text-foreground">{item.label}</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">{item.detail}</p>
                     </div>
-                    {item.action && <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />}
+                    {item.action && <ArrowRight className="h-4 w-4 text-muted-foreground/25 shrink-0" />}
                   </button>
                 ))}
               </div>
@@ -238,40 +238,40 @@ export default function PersonalDashboard() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-12 gap-2.5">
+        <div className="grid grid-cols-12 gap-3">
           {/* ─── Ready to Drink ─── */}
           <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-            <div className="rounded-xl border border-border bg-card p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <h2 className="text-[17px] font-bold tracking-[-0.02em] text-foreground">Prontos para abrir</h2>
-                <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/cellar")}>
-                  Ver adega <ArrowRight className="ml-1 h-3 w-3" />
+            <div className="glass-card p-5">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="text-[18px] font-bold tracking-[-0.02em] text-foreground">Prontos para abrir</h2>
+                <Button variant="ghost" size="sm" className="text-[13px] text-muted-foreground" onClick={() => navigate("/dashboard/cellar")}>
+                  Ver adega <ArrowRight className="ml-1 h-3.5 w-3.5" />
                 </Button>
               </div>
 
-              <div className="grid gap-1.5">
+              <div className="grid gap-2">
                 {readyToDrink.length === 0 ? (
-                  <div className="rounded-lg border border-border bg-muted/10 py-8 text-center">
-                    <GlassWater className="h-5 w-5 mx-auto text-muted-foreground/30 mb-2.5" />
-                    <p className="text-[13px] font-semibold text-muted-foreground/60">Nenhum vinho em janela ideal</p>
-                    <p className="text-[12px] text-muted-foreground/40 mt-1 max-w-[280px] mx-auto leading-relaxed">Adicione vinhos com janela de consumo para ver sugestões aqui.</p>
+                  <div className="rounded-2xl border border-border/30 bg-muted/10 py-10 text-center">
+                    <GlassWater className="h-6 w-6 mx-auto text-muted-foreground/25 mb-3" />
+                    <p className="text-[14px] font-semibold text-muted-foreground/50">Nenhum vinho em janela ideal</p>
+                    <p className="text-[13px] text-muted-foreground/35 mt-1.5 max-w-[300px] mx-auto leading-relaxed">Adicione vinhos com janela de consumo para ver sugestões aqui.</p>
                   </div>
                 ) : (
                   readyToDrink.map((w) => (
-                    <div key={w.id} className="flex items-center gap-3 rounded-lg border border-border bg-background px-3.5 py-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 text-success shrink-0">
-                        <GlassWater className="h-3.5 w-3.5" />
+                    <div key={w.id} className="flex items-center gap-3.5 rounded-2xl border border-border/30 bg-background/50 px-4 py-3.5 transition-all duration-200 hover:bg-background/80 hover:shadow-editorial">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-success/10 text-success shrink-0">
+                        <GlassWater className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-semibold text-foreground">{w.name}</p>
-                        <p className="truncate text-[12px] text-muted-foreground mt-0.5">
+                        <p className="truncate text-[14px] font-semibold text-foreground">{w.name}</p>
+                        <p className="truncate text-[13px] text-muted-foreground mt-0.5">
                           {[w.vintage, w.producer].filter(Boolean).join(" · ")} · {w.quantity} un.
                         </p>
                       </div>
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
-                        className="h-8 px-3.5 text-[11px] shrink-0"
+                        className="h-9 px-4 text-[12px] shrink-0"
                         onClick={() => handleOpenBottle(w.id, w.name)}
                         disabled={wineEvent.isPending}
                       >
@@ -285,16 +285,16 @@ export default function PersonalDashboard() {
           </motion.div>
 
           {/* ─── Right Column ─── */}
-          <div className="col-span-12 grid gap-2.5 lg:col-span-5">
+          <div className="col-span-12 grid gap-3 lg:col-span-5">
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-              <div className="rounded-xl border border-border bg-card p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              <div className="glass-card p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-foreground">Alertas</h2>
-                  <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/alerts")}>
-                    Ver todos <ArrowRight className="ml-1 h-3 w-3" />
+                  <h2 className="text-[18px] font-bold tracking-[-0.02em] text-foreground">Alertas</h2>
+                  <Button variant="ghost" size="sm" className="text-[13px] text-muted-foreground" onClick={() => navigate("/dashboard/alerts")}>
+                    Ver todos <ArrowRight className="ml-1 h-3.5 w-3.5" />
                   </Button>
                 </div>
-                <div className="grid gap-0">
+                <div className="grid gap-0.5">
                   {[
                     { label: "Beber agora", value: drinkNow, tone: "text-success" },
                     { label: "Em guarda", value: inGuard, tone: "text-info" },
@@ -305,10 +305,10 @@ export default function PersonalDashboard() {
                       key={a.label}
                       type="button"
                       onClick={() => navigate("/dashboard/alerts")}
-                      className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/20"
+                      className="flex items-center justify-between rounded-xl px-3.5 py-3 transition-all duration-200 hover:bg-muted/15"
                     >
-                      <span className="text-[13px] font-medium text-muted-foreground">{a.label}</span>
-                      <span className={cn("text-[22px] font-bold tabular-nums tracking-[-0.02em]", a.value > 0 ? a.tone : "text-muted-foreground/20")}>{a.value}</span>
+                      <span className="text-[14px] font-medium text-muted-foreground">{a.label}</span>
+                      <span className={cn("text-[24px] font-bold tabular-nums tracking-[-0.02em]", a.value > 0 ? a.tone : "text-muted-foreground/18")}>{a.value}</span>
                     </button>
                   ))}
                 </div>
@@ -316,29 +316,30 @@ export default function PersonalDashboard() {
             </motion.div>
 
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-              <div className="rounded-xl border border-border bg-card p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              <div className="glass-card p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-[17px] font-bold tracking-[-0.02em] text-foreground">Consumo</h2>
-                  <span className="text-[11px] font-semibold text-muted-foreground">
+                  <h2 className="text-[18px] font-bold tracking-[-0.02em] text-foreground">Consumo</h2>
+                  <span className="text-[12px] font-semibold text-muted-foreground">
                     {consumption.length} total
                   </span>
                 </div>
-                <div className="h-[140px]">
+                <div className="h-[150px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={consumptionMonthly}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.4)" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
                       <Tooltip
                         contentStyle={{
                           background: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: 8,
-                          fontSize: 12,
-                          boxShadow: "0 4px 12px -4px rgba(0,0,0,0.1)",
+                          border: "1px solid hsl(var(--border) / 0.4)",
+                          borderRadius: 14,
+                          fontSize: 13,
+                          boxShadow: "0 8px 24px -8px rgba(44,20,31,0.12)",
+                          backdropFilter: "blur(12px)",
                         }}
                       />
-                      <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="hsl(var(--primary))" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

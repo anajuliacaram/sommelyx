@@ -37,15 +37,15 @@ export default function DashboardLayout() {
       <div className="dashboard-shell min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 bg-background/90 backdrop-blur-xl border-b border-border">
+          <header className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/30">
             <SidebarTrigger
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "rounded-xl h-9 w-9 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground [&>svg]:h-4 [&>svg]:w-4",
+                "rounded-xl h-10 w-10 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground [&>svg]:h-4 [&>svg]:w-4",
               )}
             />
 
-            <div className="flex-1 flex items-center justify-start md:justify-center px-1 md:px-3">
+            <div className="flex-1 flex items-center justify-start md:justify-center px-1 md:px-4">
               <DashboardCommandMenu
                 profileType={profileType}
                 wines={wines ?? []}
@@ -66,10 +66,10 @@ export default function DashboardLayout() {
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span
                 className={[
-                  "hidden sm:inline-flex items-center h-6 px-2.5 rounded-md text-[10px] font-extrabold uppercase tracking-[0.1em] shrink-0 whitespace-nowrap",
+                  "hidden sm:inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-extrabold uppercase tracking-[0.08em] shrink-0 whitespace-nowrap",
                   profileType === "commercial"
                     ? "bg-accent/12 text-accent ring-1 ring-accent/20"
                     : "bg-primary/10 text-primary ring-1 ring-primary/18",
@@ -83,12 +83,12 @@ export default function DashboardLayout() {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/dashboard/alerts")}
-                className="h-9 w-9 rounded-lg relative text-muted-foreground hover:bg-muted/20"
+                className="h-10 w-10 rounded-xl relative text-muted-foreground hover:bg-muted/20"
                 title="Alertas"
               >
-                <Bell className="h-4 w-4" />
+                <Bell className="h-4.5 w-4.5" />
                 {alertCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-[8px] font-semibold flex items-center justify-center text-white bg-destructive">
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white bg-destructive shadow-sm">
                     {alertCount}
                   </span>
                 )}
@@ -98,7 +98,7 @@ export default function DashboardLayout() {
                 type="button"
                 variant="primary"
                 size="icon"
-                className="h-9 w-9 rounded-lg p-0 text-[11px] font-semibold"
+                className="h-10 w-10 rounded-xl p-0 text-[12px] font-semibold"
                 onClick={() => navigate("/dashboard/settings")}
               >
                 {initials}
@@ -106,7 +106,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] md:px-6 lg:px-8">
+          <div className="flex-1 px-5 pt-5 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-7 lg:px-10">
             <AnimatedOutlet />
           </div>
         </main>
