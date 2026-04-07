@@ -101,7 +101,7 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
       key={plan.name}
       className={`
         ${mobile ? "snap-start shrink-0 w-[88%] max-w-[380px]" : ""}
-        relative rounded-[${mobile ? "22" : "24"}px] overflow-hidden flex flex-col h-full transition-all duration-300
+        relative rounded-3xl overflow-hidden flex flex-col h-full transition-all duration-300
         ${isLight
           ? "bg-[#F8F6F3] shadow-[0_30px_92px_-62px_rgba(44,20,31,0.55)] ring-1 ring-black/[0.06]"
           : "bg-[linear-gradient(180deg,#2B2B2B_0%,#1F1C20_55%,#171518_100%)] shadow-[0_34px_100px_-68px_rgba(15,15,20,0.80)] ring-1 ring-white/[0.08]"
