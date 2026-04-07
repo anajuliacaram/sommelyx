@@ -125,22 +125,25 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         image_url: null,
       });
 
-      // Persist structured location (personal + commercial). For commercial, this becomes the first stock location.
-      // For personal, we keep quantity mirrored with the wine total.
+      // Persist structured location — non-blocking so wine save succeeds even if location RPC fails
       if (inserted?.id && user) {
-        const resp = typeof user.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : null;
-        await createLocation.mutateAsync({
-          wineId: inserted.id,
-          sector: location.sector ?? null,
-          zone: location.zone ?? null,
-          level: location.level ?? null,
-          position: location.position ?? null,
-          manualLabel: location.manualLabel ?? null,
-          quantity: parseInt(quantity) || 1,
-          responsibleName: isCommercial ? resp : null,
-          reason: isCommercial ? "Entrada manual" : null,
-          notes: null,
-        });
+        try {
+          const resp = typeof user.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : null;
+          await createLocation.mutateAsync({
+            wineId: inserted.id,
+            sector: location.sector ?? null,
+            zone: location.zone ?? null,
+            level: location.level ?? null,
+            position: location.position ?? null,
+            manualLabel: location.manualLabel ?? null,
+            quantity: parseInt(quantity) || 1,
+            responsibleName: isCommercial ? resp : null,
+            reason: isCommercial ? "Entrada manual" : null,
+            notes: null,
+          });
+        } catch (locErr) {
+          console.warn("Location save failed (wine was saved):", locErr);
+        }
       }
 
       setSuccess(true);
@@ -148,8 +151,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         reset();
         onOpenChange(false);
       }, 1200);
-    } catch {
-      toast({ title: isCommercial ? "Erro ao cadastrar produto" : "Erro ao adicionar vinho", variant: "destructive" });
+    } catch (err: any) {
+      console.error("Wine save error:", err);
+      toast({ title: isCommercial ? "Erro ao cadastrar produto" : "Erro ao adicionar vinho", description: err?.message || "Tente novamente", variant: "destructive" });
     }
   };
 
