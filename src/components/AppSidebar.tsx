@@ -85,10 +85,12 @@ export function AppSidebar() {
             className="flex items-center gap-3 px-1 py-1.5 mb-3 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
-            <Logo
-              variant="compact"
-              className="h-[120px] w-auto min-w-[46px] object-contain drop-shadow-[0_6px_14px_rgba(15,15,20,0.18)]"
-            />
+            <div className="relative flex h-[88px] w-[66px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
+              <Logo
+                variant="compact"
+                className="h-[170px] w-auto scale-[1.16] object-contain drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)]"
+              />
+            </div>
             <div className="flex flex-col">
               <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground leading-none">
                 Sommelyx
@@ -137,40 +139,50 @@ export function AppSidebar() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-2">
-                <Button
-                  variant="primary"
-                  className="h-9 text-[11px] font-medium rounded-lg"
-                  onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  Adicionar vinho
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-10 text-[11px] font-semibold rounded-xl border-primary/25 bg-primary/[0.04] text-primary shadow-sm hover:bg-primary/[0.08] hover:border-primary/35 hover:shadow-md transition-all"
-                  onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
-                >
-                  <Wine className="h-4 w-4 mr-1.5" />
-                  Registrar consumo
-                </Button>
-                <div className="grid grid-cols-2 gap-2">
+              <div
+                className="rounded-2xl border border-primary/10 bg-background/75 p-3.5 shadow-[0_10px_26px_-22px_rgba(25,18,22,0.4)] backdrop-blur-sm"
+              >
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
+                  Ações rápidas
+                </p>
+
+                <div className="space-y-4">
                   <Button
-                    variant="ghost"
-                    className="h-9 text-[10px] font-semibold rounded-xl border border-border/40 bg-background/60 shadow-sm hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-md transition-all"
-                    onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
+                    variant="primary"
+                    className="h-14 w-full rounded-2xl text-[14px] font-semibold tracking-[-0.01em] shadow-[0_14px_26px_-16px_hsl(var(--wine)/0.45)] hover:shadow-[0_18px_30px_-16px_hsl(var(--wine)/0.5)]"
+                    onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                   >
-                    <UtensilsCrossed className="h-3.5 w-3.5 mr-1" />
-                    Harmonizar
+                    <Plus className="h-4 w-4" />
+                    Adicionar vinho
                   </Button>
+
                   <Button
-                    variant="ghost"
-                    className="h-9 text-[10px] font-semibold rounded-xl border border-border/40 bg-background/60 shadow-sm hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-md transition-all"
-                    onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
+                    variant="secondary"
+                    className="h-14 w-full rounded-2xl border-primary/15 bg-primary/[0.04] text-[14px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
+                    onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
                   >
-                    <Sparkles className="h-3.5 w-3.5 mr-1" />
-                    Analisar carta
+                    <Wine className="h-[18px] w-[18px]" />
+                    Registrar consumo
                   </Button>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="ghost"
+                      className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
+                      onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
+                    >
+                      <UtensilsCrossed className="h-[18px] w-[18px]" />
+                      Harmonizar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
+                      onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
+                    >
+                      <Sparkles className="h-[18px] w-[18px]" />
+                      Analisar carta
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
