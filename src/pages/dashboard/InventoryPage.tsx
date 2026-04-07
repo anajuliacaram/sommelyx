@@ -522,7 +522,7 @@ export default function InventoryPage() {
             <div className="glass-card p-3 md:p-4 border-white/50 space-y-3">
                 <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1 min-w-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
                     <Input
                         placeholder="Pesquisar vinho, produtor, região, safra ou uva..."
                         value={search}

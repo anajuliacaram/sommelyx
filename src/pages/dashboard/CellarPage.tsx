@@ -266,14 +266,14 @@ export default function CellarPage() {
       </div>
 
       {/* Search + Actions */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2.5">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquise vinho, produtor, uva, safra…"
-            className="pl-9 h-10 text-sm rounded-xl bg-muted/30 border-border/40 w-full"
+            className="pl-9 h-10 text-[13px] font-medium rounded-xl bg-background/60 backdrop-blur-md border-border/40 shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all w-full"
           />
         </div>
 

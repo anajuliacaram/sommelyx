@@ -184,36 +184,40 @@ export default function SettingsPage() {
                 onClick={() => handleProfileSwitch(opt.type)}
                 variant="ghost"
                 className={cn(
-                  "relative h-auto w-full overflow-hidden rounded-[18px] border text-left transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(17,17,19,0.10)] hover:border-[#6E1E2A]/22 focus-visible:shadow-[0_0_0_4px_rgba(110,30,42,0.14)] flex flex-col items-start justify-start",
-                  "p-5 pt-5 pb-5",
+                  "h-auto w-full overflow-hidden rounded-[18px] border text-left transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(17,17,19,0.10)] hover:border-primary/22 focus-visible:shadow-[0_0_0_4px_rgba(110,30,42,0.14)] flex flex-col items-start justify-start",
+                  "p-5",
                   isActive
-                    ? "border-[#6E1E2A]/34 bg-[linear-gradient(135deg,rgba(110,30,42,0.085),rgba(255,255,255,0.66))] shadow-[0_14px_34px_rgba(110,30,42,0.12)]"
-                    : "border-[#6E1E2A]/12 bg-[linear-gradient(135deg,rgba(110,30,42,0.035),rgba(255,255,255,0.62))]",
+                    ? "border-primary/34 bg-[linear-gradient(135deg,hsl(var(--primary)/0.085),hsl(0_0%_100%/0.66))] shadow-[0_14px_34px_hsl(var(--primary)/0.12)]"
+                    : "border-primary/12 bg-[linear-gradient(135deg,hsl(var(--primary)/0.035),hsl(0_0%_100%/0.62))]",
                 )}
               >
-                <div className="flex items-center gap-3 w-full pr-[72px]">
+                {/* Row 1: Icon + Text */}
+                <div className="flex items-center gap-3 w-full">
                   <div
                     className={cn(
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border backdrop-blur-sm",
-                      isActive ? "border-[#6E1E2A]/15 bg-white/55" : "border-[#6E1E2A]/10 bg-white/50",
+                      isActive ? "border-primary/15 bg-white/55" : "border-primary/10 bg-white/50",
                     )}
                   >
-                    <opt.icon className={cn("h-4 w-4", isActive ? "text-[#6E1E2A]" : "text-[#7B1E3A]")} />
+                    <opt.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-primary/70")} />
                   </div>
-                  <div className="min-w-0">
-                    <p className={cn("text-[15px] font-bold leading-snug tracking-[-0.015em]", isActive ? "text-[#6E1E2A]" : "text-[#1C1C1E]")}>
+                  <div className="min-w-0 flex-1">
+                    <p className={cn("text-[14px] font-bold leading-snug tracking-[-0.015em] truncate", isActive ? "text-primary" : "text-foreground")}>
                       {opt.title}
                     </p>
-                    <p className="mt-0.5 text-[12px] leading-snug text-[#6B7280]">
+                    <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
                       {opt.desc}
                     </p>
                   </div>
                 </div>
+                {/* Row 2: Badge below content, not overlapping */}
                 {isActive && (
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-full border border-[#6E1E2A]/18 bg-white/60 px-2 py-[3px] text-[9px] font-bold uppercase tracking-[0.08em] text-[#6E1E2A] backdrop-blur-sm">
-                    <Check className="h-2.5 w-2.5" />
-                    Ativo
-                  </span>
+                  <div className="mt-3 w-full">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/18 bg-white/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-primary backdrop-blur-sm">
+                      <Check className="h-2.5 w-2.5" />
+                      Ativo
+                    </span>
+                  </div>
                 )}
               </Button>
             );
