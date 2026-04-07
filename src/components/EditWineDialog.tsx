@@ -48,7 +48,9 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
   const [region, setRegion] = useState("");
   const [grape, setGrape] = useState("");
   const [lastPaidSnapshot, setLastPaidSnapshot] = useState("");
+  const [lastPaidDateSnapshot, setLastPaidDateSnapshot] = useState("");
   const [lastPaid, setLastPaid] = useState("");
+  const [lastPaidDate, setLastPaidDate] = useState("");
   const [currentValue, setCurrentValue] = useState("");
   const [location, setLocation] = useState<StructuredLocation>({});
   const [drinkFrom, setDrinkFrom] = useState("");
@@ -102,7 +104,9 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setRegion(wine.region || "");
       setGrape(wine.grape || "");
       setLastPaidSnapshot(wine.purchase_price != null ? String(wine.purchase_price) : "");
+      setLastPaidDateSnapshot(wine.last_price_date || "");
       setLastPaid(wine.purchase_price ? String(wine.purchase_price) : "");
+      setLastPaidDate(wine.last_price_date || new Date().toISOString().split("T")[0]);
       setCurrentValue(wine.current_value ? String(wine.current_value) : "");
       setLocation(
         primaryLoc
@@ -153,6 +157,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       region: region || null,
       grape: grape || null,
       purchase_price: lastPaid ? parseFloat(lastPaid) : null,
+      last_price_date: lastPaid ? lastPaidDate : null,
       current_value: currentValue ? parseFloat(currentValue) : null,
       cellar_location: formattedLocation,
       drink_from: drinkFrom ? parseInt(drinkFrom) : null,
@@ -434,26 +439,30 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 <Label className="text-xs text-muted-foreground">Uva</Label>
                 <Input value={grape} onChange={e => setGrape(e.target.value)} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground">
-                    {isCommercial ? "Preço pago atual (R$)" : "Preço de compra (R$)"}
-                  </Label>
-                  {isCommercial && (
-                    <p className="mb-2 text-[11px] font-medium text-muted-foreground">
-                      Último preço pago:{" "}
+                  <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
+                  {lastPaidSnapshot && (
+                    <p className="mt-1 mb-2 text-[11px] text-muted-foreground rounded-lg bg-muted/40 px-3 py-2">
+                      Último registro:{" "}
                       <span className="font-semibold text-foreground">
-                        {lastPaidSnapshot ? `R$ ${Number(lastPaidSnapshot).toLocaleString("pt-BR")}` : "—"}
+                        R$ {Number(lastPaidSnapshot).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </span>
+                      {lastPaidDateSnapshot && (
+                        <span className="text-muted-foreground"> em {new Date(lastPaidDateSnapshot + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                      )}
                     </p>
                   )}
-                  <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
+                    <Input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} />
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground/80">Atualize o valor e a data da última compra.</p>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">
-                    {isCommercial ? "Preço de venda (R$)" : "Valor atual (R$)"}
-                  </Label>
-                  <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} />
+                  <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
+                  <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
+                  <p className="mt-1 text-[10px] text-muted-foreground/80">Referência de valor de mercado atual.</p>
                 </div>
               </div>
               <div>

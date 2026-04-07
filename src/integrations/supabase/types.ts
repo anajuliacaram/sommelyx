@@ -408,6 +408,7 @@ export type Database = {
           grape: string | null
           id: string
           image_url: string | null
+          last_price_date: string | null
           name: string
           producer: string | null
           purchase_price: number | null
@@ -431,6 +432,7 @@ export type Database = {
           grape?: string | null
           id?: string
           image_url?: string | null
+          last_price_date?: string | null
           name: string
           producer?: string | null
           purchase_price?: number | null
@@ -454,6 +456,7 @@ export type Database = {
           grape?: string | null
           id?: string
           image_url?: string | null
+          last_price_date?: string | null
           name?: string
           producer?: string | null
           purchase_price?: number | null
