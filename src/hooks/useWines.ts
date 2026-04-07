@@ -85,7 +85,7 @@ export function useAddWine() {
       }
       const { data, error } = await supabase
         .from("wines")
-        .insert({ ...wine, name, user_id: user.id })
+        .insert({ ...wine, name, user_id: user.id } as any)
         .select("id")
         .single();
       if (error) throw error;
@@ -119,7 +119,7 @@ export function useUpdateWine() {
       if (typeof safeUpdates.current_value === "number" && (!Number.isFinite(safeUpdates.current_value) || safeUpdates.current_value < 0)) {
         throw new Error("Valor atual inválido");
       }
-      const { error } = await supabase.from("wines").update(safeUpdates).eq("id", id).eq("user_id", user.id);
+      const { error } = await supabase.from("wines").update(safeUpdates as any).eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
