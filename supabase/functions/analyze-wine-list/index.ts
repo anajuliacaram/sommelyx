@@ -39,10 +39,10 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const body = await req.json();
-    const { imageBase64, userProfile } = body;
+    const { imageBase64, userProfile, mode, wineName } = body;
 
     if (!imageBase64 || typeof imageBase64 !== "string") {
-      return new Response(JSON.stringify({ error: "Envie uma foto da carta de vinhos" }), {
+      return new Response(JSON.stringify({ error: "Envie uma foto" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -55,15 +55,49 @@ serve(async (req) => {
     }
     cleanBase64 = cleanBase64.replace(/\s/g, "");
 
-    const profileContext = userProfile
-      ? `\nPerfil do usuário:
+    const isMenuMode = mode === "menu-for-wine" && wineName;
+
+    let systemPrompt: string;
+    let userMessage: string;
+
+    if (isMenuMode) {
+      // MODE: User has a wine, analyze menu/cardápio photo to suggest dishes
+      systemPrompt = `Você é um sommelier especialista. O cliente tem o vinho "${wineName}" e quer saber quais pratos do cardápio do restaurante harmonizam melhor.
+Analise a foto do cardápio e identifique os pratos visíveis. Para cada prato que harmonize bem com o vinho, forneça uma avaliação.
+
+Responda APENAS em JSON válido com este formato:
+{
+  "dishes": [
+    {
+      "name": "Nome do prato",
+      "price": 45.90,
+      "match": "perfeito" | "muito bom" | "bom",
+      "reason": "Explicação da harmonização com o vinho (2-3 frases)",
+      "highlight": "top-pick" | "best-value" | null
+    }
+  ],
+  "summary": "Resumo geral das melhores opções (1-2 frases)"
+}
+
+Regras:
+- Inclua apenas pratos que tenham pelo menos harmonização "bom" com o vinho
+- Ordene por qualidade de harmonização (perfeito > muito bom > bom)
+- Se preço não visível, use null
+- highlight: marque no máximo 2 pratos como destaque
+- reason: explique especificamente por que o prato combina com "${wineName}"`;
+
+      userMessage = `Analise este cardápio e sugira os melhores pratos para harmonizar com o vinho "${wineName}".`;
+    } else {
+      // MODE: Analyze wine list (default)
+      const profileContext = userProfile
+        ? `\nPerfil do usuário:
 - Estilos preferidos: ${userProfile.topStyles?.join(", ") || "variado"}
 - Uvas preferidas: ${userProfile.topGrapes?.join(", ") || "variado"}
 - Países preferidos: ${userProfile.topCountries?.join(", ") || "variado"}
 - Faixa de preço habitual: R$ ${userProfile.avgPrice || "variado"}`
-      : "";
+        : "";
 
-    const systemPrompt = `Você é um sommelier especialista analisando uma carta de vinhos de restaurante.
+      systemPrompt = `Você é um sommelier especialista analisando uma carta de vinhos de restaurante.
 Identifique todos os vinhos visíveis na foto e para cada um forneça uma avaliação detalhada.
 ${profileContext}
 
@@ -100,7 +134,10 @@ Regras:
 - Se preço não visível, use null
 - Ordene por rating decrescente`;
 
-    console.log("Calling AI gateway for wine list analysis...");
+      userMessage = "Analise esta carta de vinhos. Para cada vinho, forneça uma descrição detalhada do perfil sensorial e sugira pratos que harmonizam bem.";
+    }
+
+    console.log(`Calling AI gateway for ${isMenuMode ? 'menu' : 'wine list'} analysis...`);
 
     const aiResponse = await fetch(AI_URL, {
       method: "POST",
@@ -115,7 +152,7 @@ Regras:
           {
             role: "user",
             content: [
-              { type: "text", text: "Analise esta carta de vinhos. Para cada vinho, forneça uma descrição detalhada do perfil sensorial e sugira pratos que harmonizam bem." },
+              { type: "text", text: userMessage },
               { type: "image_url", image_url: { url: `data:image/jpeg;base64,${cleanBase64}` } },
             ],
           },
