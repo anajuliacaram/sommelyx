@@ -101,7 +101,7 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-2xl">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="flex items-center gap-2">
-          <Settings className="h-5 w-5" style={{ color: "#8F2D56" }} />
+          <Settings className="h-5 w-5 text-primary" />
           <h1 className="text-xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>Configurações</h1>
         </div>
         <p className="text-sm text-muted-foreground mt-1">Gerencie seu perfil e preferências</p>
@@ -110,8 +110,8 @@ export default function SettingsPage() {
       {/* Profile */}
       <motion.div className="glass-card p-6 space-y-5" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
         <div className="flex items-center gap-2 mb-1">
-          <User className="h-4 w-4" style={{ color: "#8F2D56" }} />
-          <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Perfil</h2>
+          <User className="h-4 w-4 text-primary" />
+          <h2 className="text-[15px] font-semibold font-sans text-foreground">Perfil</h2>
         </div>
 
         <div className="space-y-4">
@@ -122,7 +122,7 @@ export default function SettingsPage() {
           <div>
             <Label className="text-xs text-muted-foreground">Email</Label>
             <Input value={user?.email || ""} disabled className="mt-1 opacity-60" />
-            <p className="text-[10px] mt-1" style={{ color: "#9CA3AF" }}>O email não pode ser alterado por aqui.</p>
+            <p className="text-[10px] mt-1 text-muted-foreground/60">O email não pode ser alterado por aqui.</p>
           </div>
         </div>
       </motion.div>
@@ -130,29 +130,29 @@ export default function SettingsPage() {
       {/* Notifications */}
       <motion.div className="glass-card p-6 space-y-5" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
         <div className="flex items-center gap-2 mb-1">
-          <Bell className="h-4 w-4" style={{ color: "#8F2D56" }} />
-          <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Notificações</h2>
+          <Bell className="h-4 w-4 text-primary" />
+          <h2 className="text-[15px] font-semibold font-sans text-foreground">Notificações</h2>
         </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium" style={{ color: "#0F0F14" }}>Janela de consumo</p>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Avisar quando vinhos entrarem na janela ideal</p>
+              <p className="text-[13px] font-medium text-foreground">Janela de consumo</p>
+              <p className="text-[11px] text-muted-foreground">Avisar quando vinhos entrarem na janela ideal</p>
             </div>
             <Switch checked={notifDrinkWindow} onCheckedChange={setNotifDrinkWindow} />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium" style={{ color: "#0F0F14" }}>Estoque baixo</p>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Avisar quando um vinho tiver 2 ou menos garrafas</p>
+              <p className="text-[13px] font-medium text-foreground">Estoque baixo</p>
+              <p className="text-[11px] text-muted-foreground">Avisar quando um vinho tiver 2 ou menos garrafas</p>
             </div>
             <Switch checked={notifLowStock} onCheckedChange={setNotifLowStock} />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium" style={{ color: "#0F0F14" }}>Relatórios semanais</p>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Receber resumo semanal por email</p>
+              <p className="text-[13px] font-medium text-foreground">Relatórios semanais</p>
+              <p className="text-[11px] text-muted-foreground">Receber resumo semanal por email</p>
             </div>
             <Switch checked={notifReports} onCheckedChange={setNotifReports} />
           </div>
@@ -163,8 +163,8 @@ export default function SettingsPage() {
       <motion.div className="glass-card p-6 space-y-5 pb-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
         <div>
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" style={{ color: "#8F2D56" }} />
-            <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Tipo de conta</h2>
+            <Building2 className="h-4 w-4 text-primary" />
+            <h2 className="text-[15px] font-semibold font-sans text-foreground">Tipo de conta</h2>
           </div>
           <p className="mt-1 text-[12px] text-muted-foreground">
             Escolha como você usa o Sommelyx
@@ -184,36 +184,40 @@ export default function SettingsPage() {
                 onClick={() => handleProfileSwitch(opt.type)}
                 variant="ghost"
                 className={cn(
-                  "relative h-auto w-full overflow-hidden rounded-[18px] border text-left transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(17,17,19,0.10)] hover:border-[#6E1E2A]/22 focus-visible:shadow-[0_0_0_4px_rgba(110,30,42,0.14)] flex flex-col items-start justify-start",
-                  "p-5 pt-5 pb-5",
+                  "h-auto w-full overflow-hidden rounded-[18px] border text-left transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(17,17,19,0.10)] hover:border-primary/22 focus-visible:shadow-[0_0_0_4px_rgba(110,30,42,0.14)] flex flex-col items-start justify-start",
+                  "p-5",
                   isActive
-                    ? "border-[#6E1E2A]/34 bg-[linear-gradient(135deg,rgba(110,30,42,0.085),rgba(255,255,255,0.66))] shadow-[0_14px_34px_rgba(110,30,42,0.12)]"
-                    : "border-[#6E1E2A]/12 bg-[linear-gradient(135deg,rgba(110,30,42,0.035),rgba(255,255,255,0.62))]",
+                    ? "border-primary/34 bg-[linear-gradient(135deg,hsl(var(--primary)/0.085),hsl(0_0%_100%/0.66))] shadow-[0_14px_34px_hsl(var(--primary)/0.12)]"
+                    : "border-primary/12 bg-[linear-gradient(135deg,hsl(var(--primary)/0.035),hsl(0_0%_100%/0.62))]",
                 )}
               >
-                <div className="flex items-center gap-3 w-full pr-[72px]">
+                {/* Row 1: Icon + Text */}
+                <div className="flex items-center gap-3 w-full">
                   <div
                     className={cn(
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border backdrop-blur-sm",
-                      isActive ? "border-[#6E1E2A]/15 bg-white/55" : "border-[#6E1E2A]/10 bg-white/50",
+                      isActive ? "border-primary/15 bg-white/55" : "border-primary/10 bg-white/50",
                     )}
                   >
-                    <opt.icon className={cn("h-4 w-4", isActive ? "text-[#6E1E2A]" : "text-[#7B1E3A]")} />
+                    <opt.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-primary/70")} />
                   </div>
-                  <div className="min-w-0">
-                    <p className={cn("text-[15px] font-bold leading-snug tracking-[-0.015em]", isActive ? "text-[#6E1E2A]" : "text-[#1C1C1E]")}>
+                  <div className="min-w-0 flex-1">
+                    <p className={cn("text-[14px] font-bold leading-snug tracking-[-0.015em] truncate", isActive ? "text-primary" : "text-foreground")}>
                       {opt.title}
                     </p>
-                    <p className="mt-0.5 text-[12px] leading-snug text-[#6B7280]">
+                    <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
                       {opt.desc}
                     </p>
                   </div>
                 </div>
+                {/* Row 2: Badge below content, not overlapping */}
                 {isActive && (
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-full border border-[#6E1E2A]/18 bg-white/60 px-2 py-[3px] text-[9px] font-bold uppercase tracking-[0.08em] text-[#6E1E2A] backdrop-blur-sm">
-                    <Check className="h-2.5 w-2.5" />
-                    Ativo
-                  </span>
+                  <div className="mt-3 w-full">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/18 bg-white/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-primary backdrop-blur-sm">
+                      <Check className="h-2.5 w-2.5" />
+                      Ativo
+                    </span>
+                  </div>
                 )}
               </Button>
             );
