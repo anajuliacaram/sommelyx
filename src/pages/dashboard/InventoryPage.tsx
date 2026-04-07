@@ -521,13 +521,13 @@ export default function InventoryPage() {
             {/* --- QUICK ACTIONS & FILTERS --- */}
             <div className="glass-card p-3 md:p-4 border-white/50 space-y-3">
                 <div className="flex flex-col lg:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60 transition-colors" />
+                <div className="relative flex-1 min-w-0">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
                     <Input
                         placeholder="Pesquisar vinho, produtor, região, safra ou uva..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="pl-10 h-11 rounded-[16px] border-primary/10 bg-background/50 backdrop-blur-md shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all font-medium text-[13px]"
+                        className="pl-9 h-10 rounded-xl border-border/40 bg-background/60 backdrop-blur-md shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all font-medium text-[13px]"
                     />
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
