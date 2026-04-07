@@ -82,12 +82,12 @@ export function AppSidebar() {
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-2.5 px-2 py-1.5 mb-3 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-3 px-2 py-1.5 mb-3 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
             <Logo
               variant="compact"
-              className="h-[60px] w-auto"
+              className="h-[52px] w-[52px] min-w-[52px] object-contain drop-shadow-[0_2px_6px_rgba(15,15,20,0.12)]"
             />
             <div className="flex flex-col">
               <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground leading-none">
