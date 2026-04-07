@@ -46,15 +46,20 @@ export async function invokeEdgeFunction<T>(
 
   while (true) {
     try {
-      // Always send the current user access token explicitly.
+      // Try getSession first; if missing/expired, attempt a refresh (Safari ITP workaround).
       const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      let accessToken = sessionData.session?.access_token;
 
       if (!accessToken) {
-        throw new EdgeFunctionError(
-          "Sua sessão expirou. Faça login novamente para continuar.",
-          { status: 401, code: "SESSION_EXPIRED", retryable: false },
-        );
+        const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession();
+        if (refreshErr || !refreshData.session) {
+          console.error("[edge-invoke] Sessão expirada. refreshSession falhou:", refreshErr?.message);
+          throw new EdgeFunctionError(
+            "Sua sessão expirou. Faça login novamente para continuar.",
+            { status: 401, code: "SESSION_EXPIRED", retryable: false },
+          );
+        }
+        accessToken = refreshData.session.access_token;
       }
 
       const invokePromise = supabase.functions.invoke(name, {

@@ -47,6 +47,7 @@ export function useWines() {
       return data as Wine[];
     },
     enabled: !!user,
+    staleTime: 30_000,
   });
 }
 
