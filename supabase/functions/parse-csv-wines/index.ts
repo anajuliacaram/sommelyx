@@ -153,7 +153,7 @@ serve(async (req) => {
         reason: "csv_too_large",
         size_bytes: csvContent.length,
       });
-      return new Response(JSON.stringify({ error: "Arquivo CSV muito grande. Máximo 1MB." }), {
+      return new Response(JSON.stringify({ error: "Arquivo CSV muito grande. Máximo 2MB." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -207,7 +207,9 @@ Regras:
 7. SEMPRE retorne um array JSON válido de objetos com os campos mapeados.
 8. Ignore linhas completamente vazias ou totalizadores.
 9. Se não conseguir identificar o nome do vinho em nenhuma coluna, use a coluna que parecer mais provável.
-10. Se o conteúdo vier de PDF, trate como uma lista e extraia o máximo de campos possível a partir do texto.`;
+10. Se o conteúdo vier de PDF, trate como uma lista e extraia o máximo de campos possível a partir do texto.
+11. Não retorne cabeçalhos como vinho (ex.: "nome", "produto", "descrição", "total", "subtotal").
+12. Prefira qualidade: é melhor retornar menos linhas válidas do que várias linhas duvidosas.`;
 
     function normalizeStyle(value: unknown) {
       const v = typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -225,11 +227,26 @@ Regras:
     function normalizeNumber(value: unknown) {
       if (typeof value === "number" && Number.isFinite(value)) return value;
       if (typeof value === "string") {
-        const cleaned = value.replace(/[^\d.,-]/g, "").replace(",", ".");
+        const cleaned = value
+          .trim()
+          .replace(/\s/g, "")
+          .replace(/[^\d.,-]/g, "")
+          .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+          .replace(",", ".");
         const parsed = Number(cleaned);
         if (Number.isFinite(parsed)) return parsed;
       }
       return undefined;
+    }
+
+    function normalizeName(value: unknown) {
+      const name = typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
+      if (!name) return "";
+      const lower = name.toLowerCase();
+      const blocked = ["nome", "produto", "vinho", "descrição", "descricao", "total", "subtotal", "preço", "preco", "quantidade"];
+      if (blocked.includes(lower)) return "";
+      if (/^(linha|row)\s*\d+$/i.test(name)) return "";
+      return name;
     }
 
     async function callAi(chunkText: string) {
@@ -241,6 +258,7 @@ Regras:
         },
         body: JSON.stringify({
           model: OPENAI_MODEL,
+          temperature: 0.1,
           messages: [
             { role: "system", content: systemPrompt },
             {
@@ -359,12 +377,14 @@ Regras:
     // Normalize, default values, and dedupe.
     const dedup = new Map<string, Record<string, unknown>>();
     for (const w of allWines) {
-      const name = typeof w.name === "string" ? w.name.trim() : "";
+      const name = normalizeName(w.name);
       if (!name) continue;
 
       const producer = typeof w.producer === "string" ? w.producer.trim() : "";
       const vintage = normalizeNumber(w.vintage);
       const key = `${name.toLowerCase()}|${producer.toLowerCase()}|${vintage ?? ""}`;
+      const quantity = normalizeNumber(w.quantity);
+      const purchasePrice = normalizeNumber(w.purchase_price);
 
       const normalizedWine: Record<string, unknown> = {
         name,
@@ -374,8 +394,8 @@ Regras:
         country: typeof w.country === "string" ? w.country.trim() : undefined,
         region: typeof w.region === "string" ? w.region.trim() : undefined,
         grape: typeof w.grape === "string" ? w.grape.trim() : undefined,
-        quantity: normalizeNumber(w.quantity) ?? 1,
-        purchase_price: normalizeNumber(w.purchase_price),
+        quantity: quantity && quantity > 0 ? Math.trunc(quantity) : 1,
+        purchase_price: purchasePrice && purchasePrice >= 0 ? Number(purchasePrice.toFixed(2)) : undefined,
         cellar_location: typeof w.cellar_location === "string" ? w.cellar_location.trim() : undefined,
         drink_from: normalizeNumber(w.drink_from),
         drink_until: normalizeNumber(w.drink_until),

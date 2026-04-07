@@ -39,6 +39,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [importProgress, setImportProgress] = useState(0);
   const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
   const [fileName, setFileName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -47,6 +48,82 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const { toast } = useToast();
 
   const MAX_CLIENT_INPUT_CHARS = 1_900_000; // keep request under edge limit after JSON overhead
+
+  const normalizeText = (value: unknown) => {
+    if (typeof value !== "string") return undefined;
+    const cleaned = value.trim().replace(/\s+/g, " ");
+    return cleaned.length ? cleaned : undefined;
+  };
+
+  const parseNumberLoose = (value: unknown) => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const raw = value.trim();
+      if (!raw) return undefined;
+      const cleaned = raw
+        .replace(/\s/g, "")
+        .replace(/[R$r$€£]/gi, "")
+        .replace(/[^0-9,.-]/g, "")
+        .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+        .replace(",", ".");
+      const parsed = Number(cleaned);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return undefined;
+  };
+
+  const parseYear = (value: unknown) => {
+    const n = parseNumberLoose(value);
+    if (n === undefined) return undefined;
+    const year = Math.trunc(n);
+    const max = new Date().getFullYear() + 1;
+    if (year < 1900 || year > max) return undefined;
+    return year;
+  };
+
+  const parseQuantity = (value: unknown) => {
+    const n = parseNumberLoose(value);
+    if (n === undefined) return 1;
+    const qty = Math.max(1, Math.trunc(n));
+    return Number.isFinite(qty) ? qty : 1;
+  };
+
+  const parsePrice = (value: unknown) => {
+    const n = parseNumberLoose(value);
+    if (n === undefined || n < 0) return undefined;
+    return Number(n.toFixed(2));
+  };
+
+  const normalizeStyle = (value: unknown) => {
+    const style = normalizeText(value)?.toLowerCase();
+    if (!style) return undefined;
+    if (style.includes("espum") || style.includes("champ")) return "espumante";
+    if (style.includes("ros")) return "rose";
+    if (style.includes("fort")) return "fortificado";
+    if (style.includes("sobrem")) return "sobremesa";
+    if (style.includes("branc") || style.includes("white")) return "branco";
+    if (style.includes("tint") || style.includes("red")) return "tinto";
+    return style;
+  };
+
+  const getResponsibleName = () => {
+    const fullName = normalizeText(user?.user_metadata?.full_name);
+    const preferredName = normalizeText(user?.user_metadata?.name);
+    const emailName = normalizeText(user?.email?.split("@")[0]?.replace(/[._-]+/g, " "));
+    return fullName || preferredName || emailName || "Equipe Sommelyx";
+  };
+
+  const getImportErrorLabel = (err: unknown) => {
+    const e = err as any;
+    const message = String(e?.message || e?.details || e?.error_description || "Falha ao salvar no banco");
+    if (/not authenticated|auth required|jwt|session/i.test(message)) {
+      return "Sessão expirada. Faça login novamente para continuar.";
+    }
+    if (/safra inválida/i.test(message)) return "Safra inválida";
+    if (/quantidade inválida|invalid quantity/i.test(message)) return "Quantidade inválida";
+    if (/numeric|number|invalid input syntax/i.test(message)) return "Preço ou número inválido";
+    return message;
+  };
 
   const readTextFile = async (file: File) => {
     const text = await file.text();
@@ -104,6 +181,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setParseErrors([]);
     setImportProgress(0);
     setImportErrors([]);
+    setImportWarnings([]);
     setFileName("");
   };
 
@@ -129,25 +207,29 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }
 
       const wines: ParsedWine[] = (data?.wines || []).map((w: any) => ({
-        name: w.name || "",
-        producer: w.producer || undefined,
-        vintage: w.vintage ? Number(w.vintage) : undefined,
-        style: w.style || undefined,
-        country: w.country || undefined,
-        region: w.region || undefined,
-        grape: w.grape || undefined,
-        quantity: w.quantity ? Number(w.quantity) : 1,
-        purchase_price: w.purchase_price ? Number(w.purchase_price) : undefined,
-        cellar_location: w.cellar_location || undefined,
-        drink_from: w.drink_from ? Number(w.drink_from) : undefined,
-        drink_until: w.drink_until ? Number(w.drink_until) : undefined,
+        name: normalizeText(w.name) || "",
+        producer: normalizeText(w.producer),
+        vintage: parseYear(w.vintage),
+        style: normalizeStyle(w.style),
+        country: normalizeText(w.country),
+        region: normalizeText(w.region),
+        grape: normalizeText(w.grape),
+        quantity: parseQuantity(w.quantity),
+        purchase_price: parsePrice(w.purchase_price),
+        cellar_location: normalizeText(w.cellar_location),
+        drink_from: parseYear(w.drink_from),
+        drink_until: parseYear(w.drink_until),
       }));
 
-      setParsed(wines.filter((w) => w.name));
+      const validWines = wines.filter((w) => w.name.length >= 2);
+      setParsed(validWines);
       setColumnMapping(data?.column_mapping || {});
       setAiNotes(data?.notes || "");
       setParseErrors([]);
       setStep("preview");
+      if (validWines.length === 0) {
+        setParseErrors(["A IA não encontrou linhas válidas de vinho neste arquivo."]);
+      }
 
       if (raw.length > MAX_CLIENT_INPUT_CHARS) {
         toast({
@@ -172,19 +254,23 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const handleImport = async () => {
     setStep("importing");
     const errors: string[] = [];
+    const warnings: string[] = [];
+    const responsibleName = getResponsibleName();
+
     for (let i = 0; i < parsed.length; i++) {
       const w = parsed[i];
+      const wineName = w.name?.trim() || `Linha ${i + 1}`;
       try {
         const inserted = await addWine.mutateAsync({
-          name: w.name,
+          name: wineName,
           producer: w.producer || null,
-          quantity: w.quantity || 1,
+          quantity: Math.max(1, Math.trunc(w.quantity || 1)),
           vintage: w.vintage || null,
           style: w.style || null,
           country: w.country || null,
           region: w.region || null,
           grape: w.grape || null,
-          purchase_price: w.purchase_price || null,
+          purchase_price: typeof w.purchase_price === "number" ? w.purchase_price : null,
           current_value: null,
           cellar_location: w.cellar_location || null,
           drink_from: w.drink_from || null,
@@ -195,23 +281,41 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           image_url: null,
         });
 
-        if (inserted?.id && user) {
-          const resp = typeof user.user_metadata?.full_name === "string" ? String(user.user_metadata.full_name) : null;
-          await createLocation.mutateAsync({
-            wineId: inserted.id,
-            manualLabel: w.cellar_location || null,
-            quantity: w.quantity || 1,
-            responsibleName: isCommercial ? resp : null,
-            reason: isCommercial ? "Entrada manual" : null,
-            notes: null,
-          });
+        if (inserted?.id && user && (isCommercial || !!w.cellar_location)) {
+          try {
+            await createLocation.mutateAsync({
+              wineId: inserted.id,
+              manualLabel: w.cellar_location || null,
+              quantity: Math.max(1, Math.trunc(w.quantity || 1)),
+              responsibleName: isCommercial ? responsibleName : null,
+              reason: isCommercial ? "Entrada manual" : null,
+              notes: null,
+            });
+          } catch (locationError: any) {
+            const reason = getImportErrorLabel(locationError);
+            warnings.push(`"${wineName}" foi salvo, mas sem localização (${reason})`);
+            console.warn("location import warning", {
+              wineName,
+              reason,
+              location: w.cellar_location,
+            });
+          }
         }
-      } catch {
-        errors.push(`Erro ao importar "${w.name}"`);
+      } catch (err: any) {
+        const reason = getImportErrorLabel(err);
+        errors.push(`"${wineName}": ${reason}`);
+        console.error("wine import error", {
+          wineName,
+          error: err,
+          message: reason,
+          payload: w,
+          table: "wines",
+        });
       }
       setImportProgress(Math.round(((i + 1) / parsed.length) * 100));
     }
     setImportErrors(errors);
+    setImportWarnings(warnings);
     setStep("done");
   };
 
@@ -405,6 +509,25 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <p className="text-xs mt-2" style={{ color: "#f59e0b" }}>
                   {importErrors.length} erro(s) durante importação
                 </p>
+              )}
+              {importWarnings.length > 0 && (
+                <p className="text-xs mt-1.5" style={{ color: "#6B7280" }}>
+                  {importWarnings.length} aviso(s) de localização
+                </p>
+              )}
+              {importErrors.length > 0 && (
+                <div className="mt-4 text-left max-h-36 overflow-y-auto rounded-xl p-3" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>
+                  {importErrors.slice(0, 5).map((error, idx) => (
+                    <p key={idx} className="text-[11px] leading-relaxed" style={{ color: "#b45309" }}>
+                      • {error}
+                    </p>
+                  ))}
+                  {importErrors.length > 5 && (
+                    <p className="text-[10px] mt-1.5" style={{ color: "#9CA3AF" }}>
+                      ...e mais {importErrors.length - 5} erro(s)
+                    </p>
+                  )}
+                </div>
               )}
               <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 text-[13px]">
                 Fechar

@@ -143,17 +143,29 @@ export function useAddWine() {
 
   return useMutation({
     mutationFn: async (wine: Omit<WineInsert, "user_id">) => {
-      if (!user) throw new Error("Not authenticated");
+      let actorUserId = user?.id ?? null;
+      if (!actorUserId) {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData.user) {
+          throw new Error("Sessão expirada. Faça login novamente para continuar.");
+        }
+        actorUserId = authData.user.id;
+      }
       const name = wine.name?.trim();
       if (!name) throw new Error("Nome do vinho é obrigatório");
       if (!Number.isFinite(wine.quantity) || wine.quantity < 0) throw new Error("Quantidade inválida");
+      if (wine.purchase_price !== null && wine.purchase_price !== undefined) {
+        if (!Number.isFinite(wine.purchase_price) || wine.purchase_price < 0) {
+          throw new Error("Último valor pago inválido");
+        }
+      }
       if (wine.vintage !== null && wine.vintage !== undefined) {
         const currentYear = new Date().getFullYear();
         if (!Number.isInteger(wine.vintage) || wine.vintage < 1900 || wine.vintage > currentYear + 1) {
           throw new Error("Safra inválida");
         }
       }
-      const payload = sanitizeWineInsertPayload(wine, user.id);
+      const payload = sanitizeWineInsertPayload(wine, actorUserId);
 
       const { data, error } = await supabase
         .from("wines")
