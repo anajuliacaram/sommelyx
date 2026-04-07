@@ -7,10 +7,6 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-// AbacatePay public HMAC key for webhook signature verification
-const ABACATEPAY_PUBLIC_KEY =
-  "t9dXRhHHo3yDEj5pVDYz0frf7q6bMKyMRmxxCPIPp3RCplBfXRxqlC6ZpiWmOqj4L63qEaeUOtrCI8P0VMUgo6iIga2ri9ogaHFs0WIIywSMg0q7RmBfybe1E5XJcfC4IW3alNqym0tXoAKkzvfEjZxV6bE0oG2zJrNNYmUCKZyV0KZ3JS8Votf9EAWWYdiDkMkpbMdPggfh1EqHlVkMiTady6jOR3hyzGEHrIz2Ret0xHKMbiqkr9HS1JhNHDX9";
-
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -18,12 +14,12 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-async function verifyHmacSignature(rawBody: string, signatureFromHeader: string): Promise<boolean> {
+async function verifyHmacSignature(rawBody: string, signatureFromHeader: string, secret: string): Promise<boolean> {
   try {
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
       "raw",
-      encoder.encode(ABACATEPAY_PUBLIC_KEY),
+      encoder.encode(secret),
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["sign"],
@@ -72,16 +68,13 @@ serve(async (req) => {
   let statusCode = 200;
 
   try {
-    // ── Validate webhook secret from query string ──
-    const url = new URL(req.url);
-    const webhookSecret = url.searchParams.get("webhookSecret");
-    const expectedSecret = Deno.env.get("ABACATEPAY_WEBHOOK_SECRET");
-
-    if (!expectedSecret || !webhookSecret || webhookSecret !== expectedSecret) {
-      statusCode = 401;
-      outcome = "unauthorized";
-      console.error("Webhook secret mismatch");
-      return jsonResponse({ error: "Unauthorized" }, 401);
+    // ── Validate webhook secret ──
+    const webhookSecret = Deno.env.get("ABACATEPAY_WEBHOOK_SECRET");
+    if (!webhookSecret) {
+      console.error("ABACATEPAY_WEBHOOK_SECRET not configured");
+      statusCode = 500;
+      outcome = "misconfigured";
+      return jsonResponse({ error: "Server misconfigured" }, 500);
     }
 
     // ── Read raw body ──
@@ -92,16 +85,21 @@ serve(async (req) => {
       return jsonResponse({ error: "Empty body" }, 400);
     }
 
-    // ── Verify HMAC signature ──
+    // ── Require and verify HMAC signature from header ──
     const hmacSignature = req.headers.get("X-Webhook-Signature");
-    if (hmacSignature) {
-      const valid = await verifyHmacSignature(rawBody, hmacSignature);
-      if (!valid) {
-        statusCode = 401;
-        outcome = "invalid_signature";
-        console.error("HMAC signature verification failed");
-        return jsonResponse({ error: "Invalid signature" }, 401);
-      }
+    if (!hmacSignature) {
+      statusCode = 401;
+      outcome = "missing_signature";
+      console.error("Missing X-Webhook-Signature header");
+      return jsonResponse({ error: "Missing signature" }, 401);
+    }
+
+    const valid = await verifyHmacSignature(rawBody, hmacSignature, webhookSecret);
+    if (!valid) {
+      statusCode = 401;
+      outcome = "invalid_signature";
+      console.error("HMAC signature verification failed");
+      return jsonResponse({ error: "Invalid signature" }, 401);
     }
 
     // ── Parse payload ──
