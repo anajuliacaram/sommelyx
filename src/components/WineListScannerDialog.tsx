@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, Loader2, Star, Award, TrendingUp, Sparkles, RotateCcw, X } from "@/icons/lucide";
+import { Camera, Upload, Loader2, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
