@@ -104,9 +104,9 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setRegion(wine.region || "");
       setGrape(wine.grape || "");
       setLastPaidSnapshot(wine.purchase_price != null ? String(wine.purchase_price) : "");
-      setLastPaidDateSnapshot(wine.last_price_date || "");
+      setLastPaidDateSnapshot("");
       setLastPaid(wine.purchase_price ? String(wine.purchase_price) : "");
-      setLastPaidDate(wine.last_price_date || new Date().toISOString().split("T")[0]);
+      setLastPaidDate(new Date().toISOString().split("T")[0]);
       setCurrentValue(wine.current_value ? String(wine.current_value) : "");
       setLocation(
         primaryLoc
@@ -157,7 +157,6 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       region: region || null,
       grape: grape || null,
       purchase_price: lastPaid ? parseFloat(lastPaid) : null,
-      last_price_date: lastPaid ? lastPaidDate : null,
       current_value: currentValue ? parseFloat(currentValue) : null,
       cellar_location: formattedLocation,
       drink_from: drinkFrom ? parseInt(drinkFrom) : null,

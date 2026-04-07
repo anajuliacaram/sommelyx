@@ -14,7 +14,6 @@ export interface Wine {
   style: string | null;
   purchase_price: number | null;
   current_value: number | null;
-  last_price_date: string | null;
   quantity: number;
   rating: number | null;
   drink_from: number | null;
@@ -39,7 +38,7 @@ export function useWines() {
       const { data, error } = await supabase
         .from("wines")
         .select(
-          "id,user_id,name,producer,country,region,grape,vintage,style,purchase_price,current_value,last_price_date,quantity,rating,drink_from,drink_until,cellar_location,food_pairing,tasting_notes,image_url,created_at,updated_at",
+          "id,user_id,name,producer,country,region,grape,vintage,style,purchase_price,current_value,quantity,rating,drink_from,drink_until,cellar_location,food_pairing,tasting_notes,image_url,created_at,updated_at",
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
