@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, ArrowLeft, ChefHat } from "@/icons/lucide";
+import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -612,18 +613,21 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-3 py-10"
+                className="flex flex-col items-center gap-4 py-8"
               >
                 {preview && (
-                  <img src={preview} alt="Cardápio" className="w-24 h-24 object-cover rounded-xl border border-border/30 mb-2" />
+                  <img src={preview} alt="Cardápio" className="w-20 h-20 object-cover rounded-xl border border-border/30" />
                 )}
-                <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
-                <div className="text-center">
-                  <p className="text-sm font-medium text-foreground">Analisando o cardápio…</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Buscando os melhores pratos para "{extWineName}"
-                  </p>
-                </div>
+                <AiProgressiveLoader
+                  steps={[
+                    "Processando imagem…",
+                    "Lendo cardápio com IA…",
+                    "Identificando pratos…",
+                    "Avaliando harmonizações…",
+                  ]}
+                  interval={3000}
+                  subtitle={`Vinho: ${extWineName}`}
+                />
               </motion.div>
             )}
 
@@ -764,18 +768,21 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-3 py-10"
+                className="flex flex-col items-center gap-4 py-8"
               >
                 {preview && (
-                  <img src={preview} alt="Carta" className="w-24 h-24 object-cover rounded-xl border border-border/30 mb-2" />
+                  <img src={preview} alt="Carta" className="w-20 h-20 object-cover rounded-xl border border-border/30" />
                 )}
-                <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
-                <div className="text-center">
-                  <p className="text-sm font-medium text-foreground">Analisando a carta…</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Identificando os melhores vinhos para "{dish}"
-                  </p>
-                </div>
+                <AiProgressiveLoader
+                  steps={[
+                    "Processando imagem…",
+                    "Identificando vinhos na carta…",
+                    "Consultando sommelier…",
+                    "Selecionando os melhores para o prato…",
+                  ]}
+                  interval={3000}
+                  subtitle={`Prato: ${dish}`}
+                />
               </motion.div>
             )}
 
