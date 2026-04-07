@@ -97,7 +97,13 @@ export async function invokeEdgeFunction<T>(
           // ignore parse errors
         }
 
-        if (attempt < retries && (retryable ?? isRetriable(status))) {
+        // Sanitize raw JWT errors into friendly messages
+        if (message.toLowerCase().includes("invalid jwt") || message.toLowerCase().includes("jwt expired")) {
+          console.error(`[edge-invoke] JWT error from ${name}:`, message);
+          message = "Sua sessão expirou. Faça login novamente para continuar.";
+          code = "AUTH_REQUIRED";
+        }
+
           const backoff = 600 * Math.pow(2, attempt);
           attempt++;
           await sleep(backoff);
