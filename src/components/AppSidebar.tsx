@@ -161,6 +161,24 @@ export function AppSidebar() {
                     <Wine className="h-4 w-4 mr-1.5" />
                     Registrar consumo
                   </Button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="ghost"
+                      className="h-9 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
+                      onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
+                    >
+                      <UtensilsCrossed className="h-3.5 w-3.5 mr-1" />
+                      Harmonizar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="h-9 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
+                      onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1" />
+                      Analisar carta
+                    </Button>
+                  </div>
                 </div>
               </>
             )}
@@ -269,6 +287,14 @@ export function AppSidebar() {
       <SaleDialog
         open={saleOpen}
         onOpenChange={setSaleOpen}
+      />
+      <DishToWineDialog
+        open={dishToWineOpen}
+        onOpenChange={setDishToWineOpen}
+      />
+      <WineListScannerDialog
+        open={wineListScanOpen}
+        onOpenChange={setWineListScanOpen}
       />
     </>
   );
