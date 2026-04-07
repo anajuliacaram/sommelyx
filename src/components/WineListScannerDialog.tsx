@@ -1,10 +1,10 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, Loader2, Star, Award, TrendingUp, Sparkles, RotateCcw } from "@/icons/lucide";
+import { Camera, Upload, Loader2, Star, Award, TrendingUp, Sparkles, RotateCcw, X } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { analyzeWineList, buildUserProfile, compatibilityColor, type WineListAnalysis, type WineListItem } from "@/lib/sommelier-ai";
+import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem } from "@/lib/sommelier-ai";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -39,9 +39,9 @@ function StarRating({ rating }: { rating: number }) {
           className={cn(
             "h-3 w-3",
             i < full
-              ? "text-amber-400 fill-amber-400"
+              ? "text-[hsl(var(--gold))] fill-[hsl(var(--gold))]"
               : i === full && hasHalf
-                ? "text-amber-400 fill-amber-400/50"
+                ? "text-[hsl(var(--gold))] fill-[hsl(var(--gold))]/50"
                 : "text-border fill-transparent",
           )}
         />
@@ -152,14 +152,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-8"
+              className="flex flex-col items-center gap-5 pt-10"
             >
-              <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center" style={{ boxShadow: "0 8px 24px rgba(143,45,86,0.2)" }}>
-                <Camera className="h-7 w-7 text-white" />
+              <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center shadow-[0_8px_24px_hsl(var(--wine)/0.2)]">
+                <Camera className="h-7 w-7 text-primary-foreground" />
               </div>
               <div className="text-center">
                 <h3 className="text-base font-semibold text-foreground mb-1">Fotografe a carta</h3>
-                <p className="text-xs text-muted-foreground max-w-[280px]">
+                <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
                   Tire uma foto da carta de vinhos do restaurante. O sommelier vai avaliar cada vinho e sugerir a melhor escolha.
                 </p>
               </div>
@@ -168,7 +168,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 <Button
                   variant="primary"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="h-12 text-[13px] font-semibold"
+                  className="h-11 text-[13px] font-semibold"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Tirar Foto
@@ -176,7 +176,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 <Button
                   variant="ghost"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                  className="h-11 text-[13px] font-medium border border-border/60 bg-background/60 hover:bg-background"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Escolher da Galeria
@@ -194,7 +194,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-6"
+              className="flex flex-col items-center gap-5 pt-8"
             >
               {imagePreview && (
                 <div className="w-full aspect-[4/3] max-h-[220px] rounded-xl overflow-hidden border border-border/30">
@@ -217,13 +217,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-4 pt-3"
+              className="space-y-3 pt-5"
             >
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                   {results.wines.length} vinho{results.wines.length !== 1 ? "s" : ""} identificado{results.wines.length !== 1 ? "s" : ""}
                 </p>
-                <Button variant="ghost" size="sm" onClick={reset} className="h-7 px-2 text-[10px] text-muted-foreground">
+                <Button variant="ghost" size="sm" onClick={reset} className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground">
                   <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
                 </Button>
               </div>
@@ -242,15 +242,20 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-10"
+              className="flex flex-col items-center gap-5 pt-14"
             >
-              <p className="text-sm font-medium text-foreground">Não foi possível analisar</p>
-              <p className="text-xs text-muted-foreground text-center max-w-[260px]">{errorMsg}</p>
-              <div className="flex flex-col gap-2 w-full">
-                <Button onClick={() => (lastBase64 ? runScan(lastBase64) : reset())} variant="secondary" className="h-11 text-[13px]">
+              <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
+                <X className="h-7 w-7 text-destructive" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-foreground mb-1">Não foi possível analisar</p>
+                <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
+              </div>
+              <div className="flex flex-col gap-2.5 w-full">
+                <Button onClick={() => (lastBase64 ? runScan(lastBase64) : reset())} variant="secondary" className="h-11 text-[13px] font-semibold">
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
                 </Button>
-                <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-border/70">
+                <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-border/60">
                   Fechar
                 </Button>
               </div>
@@ -272,7 +277,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListI
       transition={{ delay: index * 0.05 }}
       className={cn(
         "glass-card p-3.5 space-y-2 list-none",
-        (isTopPick || isBestValue) && "border-primary/15 bg-primary/[0.02]",
+        (isTopPick || isBestValue) && "border-primary/15 bg-primary/[0.03]",
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -299,17 +304,15 @@ function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListI
 
       <div className="flex items-center justify-between gap-3">
         <StarRating rating={wine.rating} />
-        <div className="flex items-center gap-1.5">
-          <div className={cn(
-            "h-5 px-2 rounded-full flex items-center text-[9px] font-bold",
-            wine.compatibility >= 85 ? "bg-green-500/10 text-green-600" :
-            wine.compatibility >= 70 ? "bg-emerald-500/10 text-emerald-500" :
-            wine.compatibility >= 50 ? "bg-amber-500/10 text-amber-500" :
-            "bg-muted/40 text-muted-foreground",
-          )}>
-            {wine.compatibility}% compatível
-          </div>
-        </div>
+        <span className={cn(
+          "h-5 px-2 rounded-full flex items-center text-[9px] font-bold",
+          wine.compatibility >= 85 ? "bg-success/10 text-success" :
+          wine.compatibility >= 70 ? "bg-success/8 text-success/80" :
+          wine.compatibility >= 50 ? "bg-warning/10 text-warning" :
+          "bg-muted/40 text-muted-foreground",
+        )}>
+          {wine.compatibility}% compatível
+        </span>
       </div>
 
       <p className="text-[11px] text-muted-foreground leading-snug italic">

@@ -13,16 +13,10 @@ interface WinePairingPanelProps {
   existingPairing?: string | null;
 }
 
-const matchLabel: Record<string, string> = {
-  perfeito: "Perfeito",
-  "muito bom": "Muito bom",
-  bom: "Bom",
-};
-
 const matchDot: Record<string, string> = {
-  perfeito: "bg-green-500",
-  "muito bom": "bg-emerald-400",
-  bom: "bg-amber-400",
+  perfeito: "bg-success",
+  "muito bom": "bg-success/70",
+  bom: "bg-warning",
 };
 
 export function WinePairingPanel({
@@ -54,13 +48,12 @@ export function WinePairingPanel({
     }
   };
 
-  // If we already have pairings from scan, show them statically
   if (existingPairing && !pairings) {
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-1.5">
           <UtensilsCrossed className="h-3 w-3 text-primary/70" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
             Harmonização
           </span>
         </div>
@@ -84,7 +77,7 @@ export function WinePairingPanel({
       <div className="space-y-2">
         <div className="flex items-center gap-1.5">
           <UtensilsCrossed className="h-3 w-3 text-primary/70" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
             Harmonização
           </span>
         </div>
@@ -106,7 +99,7 @@ export function WinePairingPanel({
     <div className="space-y-2">
       <div className="flex items-center gap-1.5">
         <UtensilsCrossed className="h-3 w-3 text-primary/70" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
           Harmoniza com
         </span>
       </div>

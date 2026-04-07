@@ -178,8 +178,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               exit={{ opacity: 0 }}
               className="flex flex-col items-center gap-5 pt-10"
             >
-              <div className="w-20 h-20 rounded-2xl gradient-wine flex items-center justify-center" style={{ boxShadow: "0 8px 24px rgba(143,45,86,0.2)" }}>
-                <Camera className="h-9 w-9 text-white" />
+              <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center shadow-[0_8px_24px_hsl(var(--wine)/0.2)]">
+                <Camera className="h-7 w-7 text-primary-foreground" />
               </div>
               <div className="text-center">
                 <h3 className="text-base font-semibold text-foreground mb-1">Fotografe o rótulo</h3>

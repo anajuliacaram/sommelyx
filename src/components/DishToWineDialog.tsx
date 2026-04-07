@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, ArrowRight } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -14,9 +14,9 @@ interface DishToWineDialogProps {
 }
 
 const matchDot: Record<string, string> = {
-  perfeito: "bg-green-500",
-  "muito bom": "bg-emerald-400",
-  bom: "bg-amber-400",
+  perfeito: "bg-success",
+  "muito bom": "bg-success/70",
+  bom: "bg-warning",
 };
 
 const popularDishes = [
@@ -76,7 +76,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
           </SheetTitle>
         </SheetHeader>
 
-        <div className="space-y-5 pt-4">
+        <div className="space-y-5 pt-5">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
             <Input
@@ -90,7 +90,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
           {!suggestions && !loading && (
             <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Sugestões populares
               </p>
               <div className="flex flex-wrap gap-2">
@@ -141,7 +141,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   variant="ghost"
                   size="sm"
                   onClick={() => handleSearch()}
-                  className="mt-2 text-[11px] text-primary"
+                  className="mt-2 h-8 text-[11px] text-primary"
                 >
                   Tentar novamente
                 </Button>
@@ -158,7 +158,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               >
                 <div className="flex items-center gap-1.5 pb-1">
                   <Sparkles className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                     Vinhos sugeridos para "{dish}"
                   </span>
                 </div>
