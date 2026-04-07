@@ -18,6 +18,7 @@ export { default as Bookmark } from "lucide-react/dist/esm/icons/bookmark.js";
 export { default as BookmarkCheck } from "lucide-react/dist/esm/icons/bookmark-check.js";
 export { default as Building2 } from "lucide-react/dist/esm/icons/building-2.js";
 export { default as Calendar } from "lucide-react/dist/esm/icons/calendar.js";
+export { default as ChefHat } from "lucide-react/dist/esm/icons/chef-hat.js";
 export { default as CalendarDays } from "lucide-react/dist/esm/icons/calendar-days.js";
 export { default as Camera } from "lucide-react/dist/esm/icons/camera.js";
 export { default as Check } from "lucide-react/dist/esm/icons/check.js";
