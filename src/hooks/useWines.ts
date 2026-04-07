@@ -154,9 +154,13 @@ export function useAddWine() {
       const name = wine.name?.trim();
       if (!name) throw new Error("Nome do vinho é obrigatório");
       if (!Number.isFinite(wine.quantity) || wine.quantity < 0) throw new Error("Quantidade inválida");
+      if (wine.quantity > 9_999) throw new Error("Quantidade acima do limite permitido");
       if (wine.purchase_price !== null && wine.purchase_price !== undefined) {
         if (!Number.isFinite(wine.purchase_price) || wine.purchase_price < 0) {
           throw new Error("Último valor pago inválido");
+        }
+        if (wine.purchase_price > 200_000) {
+          throw new Error("Último valor pago acima do limite permitido");
         }
       }
       if (wine.vintage !== null && wine.vintage !== undefined) {

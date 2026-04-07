@@ -84,13 +84,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const parseQuantity = (value: unknown) => {
     const n = parseNumberLoose(value);
     if (n === undefined) return 1;
-    const qty = Math.max(1, Math.trunc(n));
+    const qty = Math.min(9_999, Math.max(1, Math.trunc(n)));
     return Number.isFinite(qty) ? qty : 1;
   };
 
   const parsePrice = (value: unknown) => {
     const n = parseNumberLoose(value);
-    if (n === undefined || n < 0) return undefined;
+    if (n === undefined || n < 0 || n > 200_000) return undefined;
     return Number(n.toFixed(2));
   };
 
@@ -221,7 +221,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         drink_until: parseYear(w.drink_until),
       }));
 
-      const validWines = wines.filter((w) => w.name.length >= 2);
+      const validWines = wines.filter((w) => w.name.length >= 2 && w.name.length <= 120);
       setParsed(validWines);
       setColumnMapping(data?.column_mapping || {});
       setAiNotes(data?.notes || "");
@@ -264,7 +264,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         const inserted = await addWine.mutateAsync({
           name: wineName,
           producer: w.producer || null,
-          quantity: Math.max(1, Math.trunc(w.quantity || 1)),
+          quantity: Math.min(9_999, Math.max(1, Math.trunc(w.quantity || 1))),
           vintage: w.vintage || null,
           style: w.style || null,
           country: w.country || null,
@@ -286,7 +286,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             await createLocation.mutateAsync({
               wineId: inserted.id,
               manualLabel: w.cellar_location || null,
-              quantity: Math.max(1, Math.trunc(w.quantity || 1)),
+              quantity: Math.min(9_999, Math.max(1, Math.trunc(w.quantity || 1))),
               responsibleName: isCommercial ? responsibleName : null,
               reason: isCommercial ? "Entrada manual" : null,
               notes: null,
@@ -507,7 +507,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               </p>
               {importErrors.length > 0 && (
                 <p className="text-xs mt-2" style={{ color: "#f59e0b" }}>
-                  {importErrors.length} erro(s) durante importação
+                  {importErrors.length} linha(s) não puderam ser importadas
                 </p>
               )}
               {importWarnings.length > 0 && (

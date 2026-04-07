@@ -246,6 +246,7 @@ Regras:
       const blocked = ["nome", "produto", "vinho", "descrição", "descricao", "total", "subtotal", "preço", "preco", "quantidade"];
       if (blocked.includes(lower)) return "";
       if (/^(linha|row)\s*\d+$/i.test(name)) return "";
+      if (name.length > 120) return "";
       return name;
     }
 
@@ -394,8 +395,8 @@ Regras:
         country: typeof w.country === "string" ? w.country.trim() : undefined,
         region: typeof w.region === "string" ? w.region.trim() : undefined,
         grape: typeof w.grape === "string" ? w.grape.trim() : undefined,
-        quantity: quantity && quantity > 0 ? Math.trunc(quantity) : 1,
-        purchase_price: purchasePrice && purchasePrice >= 0 ? Number(purchasePrice.toFixed(2)) : undefined,
+        quantity: quantity && quantity > 0 ? Math.min(9_999, Math.trunc(quantity)) : 1,
+        purchase_price: purchasePrice && purchasePrice >= 0 && purchasePrice <= 200_000 ? Number(purchasePrice.toFixed(2)) : undefined,
         cellar_location: typeof w.cellar_location === "string" ? w.cellar_location.trim() : undefined,
         drink_from: normalizeNumber(w.drink_from),
         drink_until: normalizeNumber(w.drink_until),
