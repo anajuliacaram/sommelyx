@@ -12,7 +12,7 @@ interface LandingHeaderProps {
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-4 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 bg-background/75 backdrop-blur-2xl border-b border-border/30"
+      className="fixed top-0 w-full z-50 px-3 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 bg-background/75 backdrop-blur-2xl border-b border-border/30"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
