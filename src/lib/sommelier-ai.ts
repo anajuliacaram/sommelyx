@@ -38,6 +38,19 @@ export interface WineListAnalysis {
   bestValue: string | null;
 }
 
+export interface MenuDishItem {
+  name: string;
+  price?: number | null;
+  match: "perfeito" | "muito bom" | "bom";
+  reason: string;
+  highlight?: "top-pick" | "best-value" | null;
+}
+
+export interface MenuAnalysis {
+  dishes: MenuDishItem[];
+  summary: string;
+}
+
 export interface TasteCompatibility {
   compatibility: number | null;
   label: string;
@@ -114,6 +127,18 @@ export async function analyzeWineList(
     { timeoutMs: 60_000, retries: 1 },
   );
   return data || { wines: [], topPick: null, bestValue: null };
+}
+
+export async function analyzeMenuForWine(
+  imageBase64: string,
+  wineName: string,
+): Promise<MenuAnalysis> {
+  const data = await invokeEdgeFunction<MenuAnalysis>(
+    "analyze-wine-list",
+    { imageBase64, mode: "menu-for-wine", wineName },
+    { timeoutMs: 60_000, retries: 1 },
+  );
+  return data || { dishes: [], summary: "" };
 }
 
 export async function getTasteCompatibility(
