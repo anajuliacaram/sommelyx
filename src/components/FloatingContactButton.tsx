@@ -57,7 +57,7 @@ export function FloatingContactButton({ className }: Props) {
           <PopoverTrigger asChild>
             <Button
               className={cn(
-                "rounded-full border border-border/30 bg-background text-wine shadow-[0_18px_50px_-28px_rgba(15,15,20,0.25)] hover:-translate-y-0.5 hover:shadow-[0_22px_64px_-34px_rgba(15,15,20,0.35)] active:scale-[0.98] backdrop-blur-xl",
+                "rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
                 collapsed ? "h-12 w-12 px-0" : "h-12 px-5",
               )}
               aria-label="Falar com um Sommelier"
