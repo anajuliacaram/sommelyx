@@ -95,8 +95,8 @@ export function AppSidebar() {
               </span>
               <span
                 className={[
-                  "mt-1 w-fit inline-flex items-center rounded-md px-2 py-0.5",
-                  "text-[10px] font-extrabold uppercase tracking-[0.1em] leading-none",
+                  "mt-1.5 w-fit inline-flex items-center rounded-md h-5 px-2",
+                  "text-[9px] font-extrabold uppercase tracking-[0.1em] leading-none",
                   isCommercial
                     ? "bg-accent/12 text-accent ring-1 ring-accent/20"
                     : "bg-primary/10 text-primary ring-1 ring-primary/18",
