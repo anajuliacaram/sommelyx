@@ -30,12 +30,12 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             Sommelyx
           </span>
         </a>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <a
             href="https://instagram.com/sommelyx"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
           >
             <Instagram size={15} />
           </a>
@@ -43,14 +43,14 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://www.linkedin.com/company/sommelyx/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
           >
             <Linkedin size={15} />
           </a>
           <Button
             variant="secondary"
             size="sm"
-            className="text-[13px] font-semibold bg-white/35 border border-wine/[0.10] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-wine/5 text-wine"
+            className="text-[12px] sm:text-[13px] font-semibold bg-white/35 border border-wine/[0.10] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-wine/5 text-wine px-3 sm:px-4"
             onClick={onLogin}
           >
             Entrar
@@ -58,7 +58,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <MagneticButton>
             <Button
               variant="primary"
-              className="px-5 sm:px-7 h-9 sm:h-10 text-[12px] sm:text-[13px] font-black uppercase tracking-[0.12em] rounded-full shadow-float"
+              className="px-3.5 sm:px-7 h-9 sm:h-10 text-[11px] sm:text-[13px] font-black uppercase tracking-[0.08em] sm:tracking-[0.12em] rounded-full shadow-float whitespace-nowrap"
               onClick={onSignup}
             >
               Começar grátis
