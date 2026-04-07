@@ -128,9 +128,10 @@ serve(async (req) => {
     }
 
     // ── Input Validation ──
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
+    if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is not configured");
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
@@ -232,14 +233,14 @@ Regras:
     }
 
     async function callAi(chunkText: string) {
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: OPENAI_MODEL,
           messages: [
             { role: "system", content: systemPrompt },
             {
@@ -305,7 +306,17 @@ Regras:
 
       const data = await response.json();
       const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-      if (!toolCall) return { errorStatus: 422 as number };
+      if (!toolCall) {
+        const content = data.choices?.[0]?.message?.content;
+        if (typeof content === "string" && content.trim().startsWith("{")) {
+          try {
+            return { result: JSON.parse(content) };
+          } catch {
+            // ignore and fallback to status error below
+          }
+        }
+        return { errorStatus: 422 as number };
+      }
 
       const result = JSON.parse(toolCall.function.arguments);
       return { result };
