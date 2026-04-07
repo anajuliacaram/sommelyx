@@ -41,7 +41,7 @@ export default function DashboardLayout() {
             <SidebarTrigger
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "rounded-lg [&>svg]:h-4 [&>svg]:w-4 text-muted-foreground hover:text-foreground",
+                "rounded-xl h-9 w-9 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground [&>svg]:h-4 [&>svg]:w-4",
               )}
             />
 
