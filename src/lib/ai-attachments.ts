@@ -10,12 +10,13 @@ export interface PreparedAiAnalysisAttachment extends AiAnalysisAttachmentPayloa
   sourceType: "image" | "pdf-text" | "pdf-image";
 }
 
-const MAX_IMAGE_DIMENSION = 1400;
-const MAX_IMAGE_QUALITY = 0.8;
+const MAX_IMAGE_DIMENSION = 1280;
+const MAX_IMAGE_QUALITY = 0.78;
+const MAX_IMAGE_BASE64_LENGTH = 1_800_000;
 const MAX_PDF_PAGES_FOR_TEXT = 10;
 const MAX_PDF_PAGES_FOR_RENDER = 2;
 const MIN_PDF_TEXT_LENGTH = 120;
-const MAX_EXTRACTED_TEXT_LENGTH = 16000;
+const MAX_EXTRACTED_TEXT_LENGTH = 12000;
 
 let pdfJsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
 
@@ -60,6 +61,45 @@ function downscaleCanvas(canvas: HTMLCanvasElement, maxWidth: number, maxHeight:
   return resized;
 }
 
+function exportOptimizedJpeg(
+  sourceCanvas: HTMLCanvasElement,
+  {
+    maxWidth = MAX_IMAGE_DIMENSION,
+    maxHeight = MAX_IMAGE_DIMENSION,
+    baseQuality = MAX_IMAGE_QUALITY,
+  }: {
+    maxWidth?: number;
+    maxHeight?: number;
+    baseQuality?: number;
+  } = {},
+) {
+  const qualities = [baseQuality, 0.7, 0.6, 0.52];
+  let workingCanvas = downscaleCanvas(sourceCanvas, maxWidth, maxHeight);
+  let fallbackPreviewUrl = workingCanvas.toDataURL("image/jpeg", 0.5);
+
+  for (let pass = 0; pass < 4; pass++) {
+    for (const quality of qualities) {
+      const previewUrl = workingCanvas.toDataURL("image/jpeg", quality);
+      const imageBase64 = dataUrlToBase64(previewUrl);
+      fallbackPreviewUrl = previewUrl;
+
+      if (imageBase64.length <= MAX_IMAGE_BASE64_LENGTH) {
+        return { previewUrl, imageBase64 };
+      }
+    }
+
+    const nextMaxWidth = Math.max(720, Math.round(workingCanvas.width * 0.82));
+    const nextMaxHeight = Math.max(720, Math.round(workingCanvas.height * 0.82));
+    if (nextMaxWidth === workingCanvas.width && nextMaxHeight === workingCanvas.height) break;
+    workingCanvas = downscaleCanvas(workingCanvas, nextMaxWidth, nextMaxHeight);
+  }
+
+  return {
+    previewUrl: fallbackPreviewUrl,
+    imageBase64: dataUrlToBase64(fallbackPreviewUrl),
+  };
+}
+
 async function fileToDataUrl(file: File) {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -72,21 +112,12 @@ async function fileToDataUrl(file: File) {
 async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
   const dataUrl = await fileToDataUrl(file);
 
-  const previewUrl = await new Promise<string>((resolve, reject) => {
+  const optimized = await new Promise<{ previewUrl: string; imageBase64: string }>((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      let width = img.width;
-      let height = img.height;
-
-      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
-        const scale = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
-        width = Math.round(width * scale);
-        height = Math.round(height * scale);
-      }
-
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = img.width;
+      canvas.height = img.height;
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
@@ -95,17 +126,17 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
       }
 
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL("image/jpeg", MAX_IMAGE_QUALITY));
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(exportOptimizedJpeg(canvas));
     };
     img.onerror = () => reject(new Error("Não foi possível carregar a imagem."));
     img.src = dataUrl;
   });
 
   return {
-    imageBase64: dataUrlToBase64(previewUrl),
-    previewUrl,
+    imageBase64: optimized.imageBase64,
+    previewUrl: optimized.previewUrl,
     mimeType: "image/jpeg",
     fileName: file.name,
     sourceType: "image",
@@ -140,7 +171,7 @@ async function renderPdfAsImage(file: File) {
 
   for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_RENDER); pageNumber++) {
     const page = await doc.getPage(pageNumber);
-    const viewport = page.getViewport({ scale: 1.2 });
+    const viewport = page.getViewport({ scale: 1.05 });
     const pageCanvas = document.createElement("canvas");
     pageCanvas.width = Math.round(viewport.width);
     pageCanvas.height = Math.round(viewport.height);
@@ -174,13 +205,11 @@ async function renderPdfAsImage(file: File) {
     y += pageCanvas.height + gap;
   }
 
-  const optimized = downscaleCanvas(combined, 1400, 1800);
-  const previewUrl = optimized.toDataURL("image/jpeg", 0.82);
-
-  return {
-    previewUrl,
-    imageBase64: dataUrlToBase64(previewUrl),
-  };
+  return exportOptimizedJpeg(combined, {
+    maxWidth: 1200,
+    maxHeight: 1700,
+    baseQuality: 0.74,
+  });
 }
 
 export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
