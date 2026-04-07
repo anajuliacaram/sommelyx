@@ -193,21 +193,20 @@ export default function CommercialDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1280px] space-y-5">
+      <div className="max-w-[1280px] space-y-6">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Operação comercial</p>
-              <h1 className="mt-2 text-[26px] font-semibold tracking-[-0.02em] text-foreground sm:text-[30px]">
+              <h1 className="font-serif text-[28px] font-bold tracking-[-0.015em] text-foreground sm:text-[32px]">
                 Resumo da operação
               </h1>
-              <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
+              <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">
                 {totalBottles} un. em estoque
                 {lowStock > 0 && <> · <span className="text-warning">{lowStock} para repor</span></>}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               <Button variant="primary" size="default" onClick={() => setAddOpen(true)}>
                 <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar
               </Button>
@@ -226,20 +225,20 @@ export default function CommercialDashboard() {
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="rounded-xl border border-border/30 bg-card/70 p-4">
-                  <Skeleton className="h-3 w-16 mb-3" />
-                  <Skeleton className="h-7 w-20" />
+                <div key={i} className="rounded-xl border border-border/30 bg-card/80 p-5">
+                  <Skeleton className="h-3 w-16 mb-4" />
+                  <Skeleton className="h-8 w-20" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="rounded-xl border border-border/30 bg-card/70 p-4">
-                  <div className="flex items-center gap-2">
-                    <kpi.icon className="h-3.5 w-3.5 text-muted-foreground/50" />
-                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{kpi.label}</p>
+                <div key={kpi.label} className="rounded-xl border border-border/30 bg-card/80 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <kpi.icon className="h-3.5 w-3.5 text-muted-foreground/40" />
+                    <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground">{kpi.label}</p>
                   </div>
-                  <p className="mt-2 font-serif text-[28px] font-semibold tracking-[-0.02em] text-foreground">{kpi.value}</p>
-                  <p className="text-[11px] text-muted-foreground/60 mt-1">{kpi.detail}</p>
+                  <p className="font-serif text-[26px] font-bold tracking-[-0.02em] text-foreground leading-none">{kpi.value}</p>
+                  <p className="text-[11px] text-muted-foreground/50 mt-2">{kpi.detail}</p>
                 </div>
               ))
             )}
