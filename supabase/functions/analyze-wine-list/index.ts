@@ -48,6 +48,13 @@ serve(async (req) => {
       });
     }
 
+    // Clean base64 — remove data URI prefix if present, strip whitespace
+    let cleanBase64 = imageBase64.trim();
+    if (cleanBase64.includes(",") && cleanBase64.startsWith("data:")) {
+      cleanBase64 = cleanBase64.split(",")[1];
+    }
+    cleanBase64 = cleanBase64.replace(/\s/g, "");
+
     const profileContext = userProfile
       ? `\nPerfil do usuário:
 - Estilos preferidos: ${userProfile.topStyles?.join(", ") || "variado"}
@@ -57,7 +64,7 @@ serve(async (req) => {
       : "";
 
     const systemPrompt = `Você é um sommelier especialista analisando uma carta de vinhos de restaurante.
-Identifique todos os vinhos visíveis na foto e para cada um forneça uma avaliação.
+Identifique todos os vinhos visíveis na foto e para cada um forneça uma avaliação detalhada.
 ${profileContext}
 
 Responda APENAS em JSON válido com este formato:
@@ -67,10 +74,14 @@ Responda APENAS em JSON válido com este formato:
       "name": "Nome do vinho",
       "producer": "Produtor (se visível)",
       "vintage": 2020,
-      "style": "tinto|branco|rose|espumante",
+      "style": "tinto|branco|rosé|espumante",
+      "grape": "Uva principal (ex: Cabernet Sauvignon, Chardonnay)",
+      "region": "Região de origem (ex: Mendoza, Bordeaux)",
       "price": 89.90,
       "rating": 4.2,
-      "verdict": "Texto curto: ex: Excelente custo-benefício, Escolha segura, Fora do comum",
+      "description": "Descrição detalhada do vinho: perfil aromático, corpo, taninos, acidez, notas de degustação prováveis. 2-3 frases.",
+      "pairings": ["Prato ideal 1", "Prato ideal 2", "Prato ideal 3"],
+      "verdict": "Frase resumo curta sobre o vinho (máx 10 palavras)",
       "compatibility": 85,
       "highlight": "best-value" | "top-pick" | "adventurous" | null
     }
@@ -82,12 +93,15 @@ Responda APENAS em JSON válido com este formato:
 Regras:
 - rating de 0 a 5 (1 casa decimal)
 - compatibility de 0 a 100 (baseado no perfil do usuário se disponível, senão avaliação geral de qualidade)
-- verdict: máximo 6 palavras, linguagem natural
+- description: descreva o perfil sensorial do vinho com riqueza de detalhes (aromas, corpo, taninos, acidez, notas)
+- pairings: sugira 3-4 pratos que harmonizam perfeitamente com cada vinho, considerando que são opções de um restaurante
+- verdict: máximo 10 palavras, linguagem natural
 - highlight: marque no máximo 2-3 vinhos como destaque
 - Se preço não visível, use null
 - Ordene por rating decrescente`;
 
-    // For image analysis, use gemini-2.5-flash which handles images well
+    console.log("Calling AI gateway for wine list analysis...");
+
     const aiResponse = await fetch(AI_URL, {
       method: "POST",
       headers: {
@@ -101,8 +115,8 @@ Regras:
           {
             role: "user",
             content: [
-              { type: "text", text: "Analise esta carta de vinhos e avalie cada vinho encontrado." },
-              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } },
+              { type: "text", text: "Analise esta carta de vinhos. Para cada vinho, forneça uma descrição detalhada do perfil sensorial e sugira pratos que harmonizam bem." },
+              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${cleanBase64}` } },
             ],
           },
         ],
@@ -111,6 +125,8 @@ Regras:
     });
 
     if (!aiResponse.ok) {
+      const errText = await aiResponse.text();
+      console.error("AI gateway error:", aiResponse.status, errText);
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em instantes." }), {
           status: 429,
@@ -123,11 +139,12 @@ Regras:
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
+      throw new Error(`AI gateway error: ${aiResponse.status} - ${errText}`);
     }
 
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || "";
+    console.log("AI response length:", content.length);
 
     let parsed;
     try {
@@ -138,7 +155,8 @@ Regras:
       } else {
         parsed = JSON.parse(content);
       }
-    } catch {
+    } catch (e) {
+      console.error("JSON parse error:", e, "Content:", content.substring(0, 500));
       parsed = { wines: [], topPick: null, bestValue: null };
     }
 
