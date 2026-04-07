@@ -37,6 +37,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useSales } from "@/hooks/useBusinessData";
 import { useWineMetrics } from "@/hooks/useWines";
+import { cn } from "@/lib/utils";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 } as const,
@@ -210,75 +211,70 @@ export default function CommercialDashboard() {
 
       <div className="max-w-[1320px] space-y-3">
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="glass-card p-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">Operação comercial</p>
-                <h1 className="mt-2 text-[28px] font-black tracking-[-0.04em] text-foreground sm:text-[34px]">
-                  Resumo da operação
-                </h1>
-                <p className="mt-3 max-w-[720px] text-[13px] font-medium leading-relaxed text-muted-foreground">
-                  Acompanhe seu estoque, vendas e reposições de forma rápida e clara.
-                </p>
-              </div>
-
-	              <div className="flex flex-col items-start gap-2 lg:items-end">
-	                <div className="flex flex-wrap items-center gap-2">
-	                  <Button
-	                    variant="primary"
-	                    className="h-10 rounded-2xl text-[12px] font-black uppercase tracking-[0.12em]"
-	                    onClick={() => setAddOpen(true)}
-	                  >
-	                    <Plus className="mr-2 h-4 w-4" /> Cadastrar produto
-	                  </Button>
-	                  <Button
-	                    variant="outline"
-	                    className="h-10 rounded-2xl text-[12px] font-bold uppercase tracking-[0.10em]"
-	                    onClick={() => navigate("/dashboard/sales")}
-	                  >
-	                    <ShoppingCart className="mr-2 h-4 w-4" /> Registrar venda
-	                  </Button>
-	                </div>
-
-	                <button
-	                  type="button"
-	                  onClick={() => setCsvOpen(true)}
-	                  className="inline-flex items-center gap-2 rounded-xl px-2 py-1 text-[12px] font-semibold text-muted-foreground transition-colors hover:text-[#6E1E2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E1E2A]/20"
-	                >
-	                  <Upload className="h-4 w-4 opacity-70" />
-	                  Importar planilha
-	                </button>
-	              </div>
-	            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-              {isLoading ? (
-                [1, 2, 3, 4].map((i) => (
-                  <div key={i} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="mt-3 h-7 w-24" />
-                  </div>
-                ))
-              ) : (
-                kpis.map((kpi) => (
-                  <div key={kpi.label} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={[
-                          "flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ring-black/[0.04]",
-                          kpi.tone === "gold" ? "bg-gold/10 text-gold" : "bg-wine/10 text-wine",
-                        ].join(" ")}
-                      >
-                        <kpi.icon className="h-4 w-4" />
-                      </div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">{kpi.label}</p>
-                    </div>
-                    <p className="mt-2 text-[20px] font-black tracking-tight text-foreground">{kpi.value}</p>
-                    <p className="mt-1 text-[11px] font-medium text-muted-foreground">{kpi.detail}</p>
-                  </div>
-                ))
-              )}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">Operação comercial</p>
+              <h1 className="mt-1 text-[20px] font-bold tracking-[-0.03em] text-foreground sm:text-[22px]">
+                Resumo da operação
+              </h1>
+              <p className="mt-0.5 text-[12px] font-medium text-muted-foreground">
+                {totalBottles} un. em estoque
+                {lowStock > 0 && <> · <span className="text-warning">{lowStock} para repor</span></>}
+              </p>
             </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Button
+                variant="primary"
+                className="h-9 rounded-2xl text-[11px] font-black uppercase tracking-[0.10em]"
+                onClick={() => setAddOpen(true)}
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-9 rounded-2xl text-[11px] font-bold uppercase tracking-[0.10em] border border-border/50"
+                onClick={() => navigate("/dashboard/sales")}
+              >
+                <ShoppingCart className="mr-1.5 h-3.5 w-3.5" /> Venda
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-9 rounded-2xl text-[11px] font-bold uppercase tracking-[0.10em] border border-border/50"
+                onClick={() => setCsvOpen(true)}
+              >
+                <Upload className="mr-1.5 h-3.5 w-3.5" /> Importar
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5}>
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+            {isLoading ? (
+              [1, 2, 3, 4].map((i) => (
+                <div key={i} className="rounded-xl border border-border/40 bg-card/70 p-3">
+                  <Skeleton className="h-3 w-14" />
+                  <Skeleton className="mt-2 h-6 w-16" />
+                </div>
+              ))
+            ) : (
+              kpis.map((kpi) => (
+                <div key={kpi.label} className="rounded-xl border border-border/40 bg-card/70 p-3 backdrop-blur-sm">
+                  <div className="flex items-center gap-1.5">
+                    <div className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-lg",
+                      kpi.tone === "gold" ? "bg-gold/10 text-gold" : "bg-wine/10 text-wine",
+                    )}>
+                      <kpi.icon className="h-3.5 w-3.5" />
+                    </div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{kpi.label}</p>
+                  </div>
+                  <p className="mt-1 text-[24px] font-black tracking-tight text-foreground">{kpi.value}</p>
+                  <p className="text-[10px] font-medium text-muted-foreground/70">{kpi.detail}</p>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
 
