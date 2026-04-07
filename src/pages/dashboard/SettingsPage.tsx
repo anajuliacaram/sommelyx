@@ -101,7 +101,7 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-2xl">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="flex items-center gap-2">
-          <Settings className="h-5 w-5" style={{ color: "#8F2D56" }} />
+          <Settings className="h-5 w-5 text-primary" />
           <h1 className="text-xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>Configurações</h1>
         </div>
         <p className="text-sm text-muted-foreground mt-1">Gerencie seu perfil e preferências</p>
@@ -110,8 +110,8 @@ export default function SettingsPage() {
       {/* Profile */}
       <motion.div className="glass-card p-6 space-y-5" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
         <div className="flex items-center gap-2 mb-1">
-          <User className="h-4 w-4" style={{ color: "#8F2D56" }} />
-          <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Perfil</h2>
+          <User className="h-4 w-4 text-primary" />
+          <h2 className="text-[15px] font-semibold font-sans text-foreground">Perfil</h2>
         </div>
 
         <div className="space-y-4">
@@ -122,7 +122,7 @@ export default function SettingsPage() {
           <div>
             <Label className="text-xs text-muted-foreground">Email</Label>
             <Input value={user?.email || ""} disabled className="mt-1 opacity-60" />
-            <p className="text-[10px] mt-1" style={{ color: "#9CA3AF" }}>O email não pode ser alterado por aqui.</p>
+            <p className="text-[10px] mt-1 text-muted-foreground/60">O email não pode ser alterado por aqui.</p>
           </div>
         </div>
       </motion.div>
@@ -130,29 +130,29 @@ export default function SettingsPage() {
       {/* Notifications */}
       <motion.div className="glass-card p-6 space-y-5" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
         <div className="flex items-center gap-2 mb-1">
-          <Bell className="h-4 w-4" style={{ color: "#8F2D56" }} />
-          <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Notificações</h2>
+          <Bell className="h-4 w-4 text-primary" />
+          <h2 className="text-[15px] font-semibold font-sans text-foreground">Notificações</h2>
         </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium" style={{ color: "#0F0F14" }}>Janela de consumo</p>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Avisar quando vinhos entrarem na janela ideal</p>
+              <p className="text-[13px] font-medium text-foreground">Janela de consumo</p>
+              <p className="text-[11px] text-muted-foreground">Avisar quando vinhos entrarem na janela ideal</p>
             </div>
             <Switch checked={notifDrinkWindow} onCheckedChange={setNotifDrinkWindow} />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium" style={{ color: "#0F0F14" }}>Estoque baixo</p>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Avisar quando um vinho tiver 2 ou menos garrafas</p>
+              <p className="text-[13px] font-medium text-foreground">Estoque baixo</p>
+              <p className="text-[11px] text-muted-foreground">Avisar quando um vinho tiver 2 ou menos garrafas</p>
             </div>
             <Switch checked={notifLowStock} onCheckedChange={setNotifLowStock} />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium" style={{ color: "#0F0F14" }}>Relatórios semanais</p>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Receber resumo semanal por email</p>
+              <p className="text-[13px] font-medium text-foreground">Relatórios semanais</p>
+              <p className="text-[11px] text-muted-foreground">Receber resumo semanal por email</p>
             </div>
             <Switch checked={notifReports} onCheckedChange={setNotifReports} />
           </div>
@@ -163,8 +163,8 @@ export default function SettingsPage() {
       <motion.div className="glass-card p-6 space-y-5 pb-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
         <div>
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" style={{ color: "#8F2D56" }} />
-            <h2 className="text-[15px] font-semibold font-sans" style={{ color: "#0F0F14" }}>Tipo de conta</h2>
+            <Building2 className="h-4 w-4 text-primary" />
+            <h2 className="text-[15px] font-semibold font-sans text-foreground">Tipo de conta</h2>
           </div>
           <p className="mt-1 text-[12px] text-muted-foreground">
             Escolha como você usa o Sommelyx
