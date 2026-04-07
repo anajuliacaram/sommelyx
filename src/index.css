@@ -391,7 +391,8 @@
   }
 
   .btn-glass:hover {
-    @apply bg-background/70 border-primary/12;
+    @apply bg-background/70;
+    border-color: hsl(var(--primary) / 0.12);
   }
 
   /* ── Page Transitions ── */
