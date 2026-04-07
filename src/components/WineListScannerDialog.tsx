@@ -291,9 +291,24 @@ function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListI
               </Badge>
             )}
           </div>
-          {wine.producer && (
-            <p className="text-[10px] text-muted-foreground mt-0.5">{wine.producer}{wine.vintage ? ` · ${wine.vintage}` : ""}</p>
-          )}
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            {wine.producer && (
+              <span className="text-[10px] text-muted-foreground">{wine.producer}</span>
+            )}
+            {wine.vintage && (
+              <span className="text-[10px] text-muted-foreground">· {wine.vintage}</span>
+            )}
+            {wine.grape && (
+              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                · <Grape className="h-2.5 w-2.5" /> {wine.grape}
+              </span>
+            )}
+            {wine.region && (
+              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                · <MapPin className="h-2.5 w-2.5" /> {wine.region}
+              </span>
+            )}
+          </div>
         </div>
         {wine.price != null && (
           <span className="text-[13px] font-bold text-foreground shrink-0">
@@ -315,9 +330,31 @@ function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListI
         </span>
       </div>
 
+      {wine.description && (
+        <p className="text-[11px] text-foreground/80 leading-relaxed">
+          {wine.description}
+        </p>
+      )}
+
       <p className="text-[11px] text-muted-foreground leading-snug italic">
         "{wine.verdict}"
       </p>
+
+      {wine.pairings && wine.pairings.length > 0 && (
+        <div className="pt-1 border-t border-border/30">
+          <div className="flex items-center gap-1 mb-1">
+            <UtensilsCrossed className="h-2.5 w-2.5 text-primary/60" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Harmoniza com</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {wine.pairings.map((p, i) => (
+              <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/[0.06] text-foreground/80 border border-primary/10">
+                {p}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.li>
   );
 }
