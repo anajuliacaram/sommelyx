@@ -9,7 +9,7 @@ export default defineConfig(async ({ mode }) => {
   // Keep `lovable-tagger` completely out of production builds.
   if (mode === "development") {
     const { componentTagger } = await import("lovable-tagger");
-    plugins.push(componentTagger());
+    plugins.push(componentTagger() as any);
   }
 
   return {
