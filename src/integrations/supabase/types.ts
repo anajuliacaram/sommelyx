@@ -396,6 +396,124 @@ export type Database = {
           },
         ]
       }
+      wine_location_events: {
+        Row: {
+          action_type: string
+          created_at: string
+          created_by_user_id: string | null
+          from_location_id: string | null
+          id: string
+          new_label: string | null
+          notes: string | null
+          previous_label: string | null
+          profile_type: string | null
+          quantity_moved: number | null
+          reason: string | null
+          responsible_name: string | null
+          to_location_id: string | null
+          user_id: string
+          wine_id: string
+        }
+        Insert: {
+          action_type?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          from_location_id?: string | null
+          id?: string
+          new_label?: string | null
+          notes?: string | null
+          previous_label?: string | null
+          profile_type?: string | null
+          quantity_moved?: number | null
+          reason?: string | null
+          responsible_name?: string | null
+          to_location_id?: string | null
+          user_id: string
+          wine_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          from_location_id?: string | null
+          id?: string
+          new_label?: string | null
+          notes?: string | null
+          previous_label?: string | null
+          profile_type?: string | null
+          quantity_moved?: number | null
+          reason?: string | null
+          responsible_name?: string | null
+          to_location_id?: string | null
+          user_id?: string
+          wine_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wine_location_events_wine_id_fkey"
+            columns: ["wine_id"]
+            isOneToOne: false
+            referencedRelation: "wines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wine_locations: {
+        Row: {
+          created_at: string
+          formatted_label: string | null
+          id: string
+          level: string | null
+          manual_label: string | null
+          position: string | null
+          profile_type: string | null
+          quantity: number
+          sector: string | null
+          updated_at: string
+          user_id: string
+          wine_id: string
+          zone: string | null
+        }
+        Insert: {
+          created_at?: string
+          formatted_label?: string | null
+          id?: string
+          level?: string | null
+          manual_label?: string | null
+          position?: string | null
+          profile_type?: string | null
+          quantity?: number
+          sector?: string | null
+          updated_at?: string
+          user_id: string
+          wine_id: string
+          zone?: string | null
+        }
+        Update: {
+          created_at?: string
+          formatted_label?: string | null
+          id?: string
+          level?: string | null
+          manual_label?: string | null
+          position?: string | null
+          profile_type?: string | null
+          quantity?: number
+          sector?: string | null
+          updated_at?: string
+          user_id?: string
+          wine_id?: string
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wine_locations_wine_id_fkey"
+            columns: ["wine_id"]
+            isOneToOne: false
+            referencedRelation: "wines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wines: {
         Row: {
           cellar_location: string | null
@@ -543,6 +661,31 @@ export type Database = {
         }
         Returns: number
       }
+      build_location_label: {
+        Args: {
+          _level: string
+          _manual_label: string
+          _position: string
+          _sector: string
+          _zone: string
+        }
+        Returns: string
+      }
+      create_wine_location: {
+        Args: {
+          _level?: string
+          _manual_label?: string
+          _notes?: string
+          _position?: string
+          _quantity?: number
+          _reason?: string
+          _responsible_name?: string
+          _sector?: string
+          _wine_id: string
+          _zone?: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -574,6 +717,32 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      transfer_wine_location_quantity: {
+        Args: {
+          _from_location_id: string
+          _notes?: string
+          _quantity: number
+          _reason?: string
+          _responsible_name?: string
+          _to_location_id: string
+          _wine_id: string
+        }
+        Returns: undefined
+      }
+      update_wine_location_meta: {
+        Args: {
+          _level?: string
+          _location_id: string
+          _manual_label?: string
+          _notes?: string
+          _position?: string
+          _reason?: string
+          _responsible_name?: string
+          _sector?: string
+          _zone?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
