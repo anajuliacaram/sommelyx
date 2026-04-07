@@ -5,6 +5,7 @@ import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
+import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 
 interface ScannedWineData {
   name: string | null;
@@ -234,17 +235,19 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               className="flex flex-col items-center gap-5 pt-8"
             >
               {imagePreview && (
-                <div className="w-full aspect-[3/4] max-h-[280px] rounded-xl overflow-hidden border border-border/30">
+                <div className="w-full aspect-[3/4] max-h-[220px] rounded-xl overflow-hidden border border-border/30">
                   <img src={imagePreview} alt="Label" className="w-full h-full object-cover" />
                 </div>
               )}
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
-                <div className="text-center">
-                  <p className="text-sm font-medium text-foreground">Analisando rótulo…</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">A IA está identificando as informações do vinho</p>
-                </div>
-              </div>
+              <AiProgressiveLoader
+                steps={[
+                  "Processando imagem…",
+                  "Lendo rótulo com IA…",
+                  "Extraindo informações…",
+                  "Verificando dados…",
+                ]}
+                interval={2500}
+              />
             </motion.div>
           )}
 

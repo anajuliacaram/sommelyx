@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
+import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -263,21 +264,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           )}
 
           {step === "analyzing" && (
-            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-5 pt-16 pb-12">
-              <div className="relative w-16 h-16">
-                <div className="absolute inset-0 rounded-2xl bg-primary/10 animate-pulse" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="h-7 w-7 animate-spin text-primary" />
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-foreground">
-                  Analisando planilha com IA…
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Identificando colunas e organizando os dados de <strong className="text-foreground/80">{fileName}</strong>
-                </p>
-              </div>
+            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-5 pt-14 pb-12">
+              <AiProgressiveLoader
+                steps={[
+                  "Lendo arquivo…",
+                  "Identificando colunas…",
+                  "Organizando dados com IA…",
+                  "Finalizando análise…",
+                ]}
+                interval={3000}
+                subtitle={fileName}
+              />
             </motion.div>
           )}
 
