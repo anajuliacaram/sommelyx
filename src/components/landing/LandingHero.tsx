@@ -29,7 +29,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={0}
-            className="max-w-[34rem] lg:max-w-[38rem] font-serif text-[36px] font-bold leading-[1.18] tracking-[-0.02em] sm:text-[48px] text-foreground"
+            className="max-w-[34rem] lg:max-w-[38rem] font-serif text-[32px] font-bold leading-[1.15] tracking-[-0.025em] sm:text-[44px] text-foreground"
           >
             Um painel executivo para sua adega, com clareza de estoque,{" "}
             <span className="whitespace-nowrap text-primary">valor e giro.</span>
@@ -40,7 +40,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="mt-6 max-w-xl text-[15px] font-normal leading-[1.7] text-muted-foreground sm:text-[17px]"
+            className="mt-5 max-w-xl text-[16px] font-normal leading-[1.7] text-muted-foreground sm:text-[18px]"
           >
             Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
@@ -49,7 +49,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             <MagneticButton>
               <Button
                 variant="primary"
-                className="group h-12 rounded-xl px-8 text-[13px] font-semibold uppercase tracking-[0.08em] shadow-float"
+                className="group h-12 rounded-xl px-8 text-[14px] font-semibold uppercase tracking-[0.06em] shadow-float"
                 onClick={onSignup}
               >
                 Começar grátis

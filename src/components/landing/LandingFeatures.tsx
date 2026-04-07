@@ -63,10 +63,10 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
           className="text-center mb-10 sm:mb-14"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold tracking-[-0.015em] text-foreground">
+          <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-serif font-bold tracking-[-0.02em] text-foreground">
             Tudo que você precisa para gerenciar sua adega
           </h2>
-          <p className="mt-3 text-[13px] sm:text-[15px] text-muted-foreground max-w-md mx-auto leading-relaxed">
+          <p className="mt-3 text-[14px] sm:text-[16px] text-muted-foreground max-w-md mx-auto leading-relaxed">
             Simples, inteligente e feito para quem ama vinho.
           </p>
         </motion.div>
@@ -93,14 +93,14 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
               </div>
 
               {/* Title */}
-              <h3 className="text-[17px] sm:text-lg font-serif font-bold text-foreground mb-3 tracking-[-0.01em]">
+              <h3 className="text-[18px] sm:text-[20px] font-serif font-bold text-foreground mb-3 tracking-[-0.02em]">
                 {block.title}
               </h3>
 
               {/* Bullets */}
               <ul className="space-y-2.5 flex-1 mb-5">
                 {block.bullets.map(b => (
-                  <li key={b} className="flex items-start gap-2 text-[13px] sm:text-[14px] text-muted-foreground font-medium leading-snug">
+                   <li key={b} className="flex items-start gap-2 text-[14px] sm:text-[15px] text-muted-foreground font-medium leading-snug">
                     <Check className="h-3.5 w-3.5 mt-0.5 shrink-0 text-gold" strokeWidth={2.5} />
                     {b}
                   </li>
@@ -137,13 +137,13 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
                 <block.icon className="h-5 w-5" style={{ color: block.accent }} strokeWidth={1.8} />
               </div>
 
-              <h3 className="text-[17px] sm:text-lg font-serif font-bold text-foreground mb-3 tracking-[-0.01em]">
+              <h3 className="text-[18px] sm:text-[20px] font-serif font-bold text-foreground mb-3 tracking-[-0.02em]">
                 {block.title}
               </h3>
 
               <ul className="space-y-2.5 flex-1 mb-5">
                 {block.bullets.map(b => (
-                  <li key={b} className="flex items-start gap-2 text-[13px] sm:text-[14px] text-muted-foreground font-medium leading-snug">
+                  <li key={b} className="flex items-start gap-2 text-[14px] sm:text-[15px] text-muted-foreground font-medium leading-snug">
                     <Check className="h-3.5 w-3.5 mt-0.5 shrink-0 text-gold" strokeWidth={2.5} />
                     {b}
                   </li>

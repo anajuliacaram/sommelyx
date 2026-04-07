@@ -135,9 +135,9 @@
   body {
     @apply bg-background text-foreground antialiased;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 14px;
-    letter-spacing: -0.006em;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 15px;
+    letter-spacing: -0.01em;
     line-height: 1.6;
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
@@ -152,14 +152,14 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Libre Baskerville', Georgia, serif;
-    letter-spacing: -0.015em;
-    line-height: 1.25;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
     font-weight: 700;
   }
 
-  h1 { font-size: 1.875rem; }
-  h2 { font-size: 1.375rem; }
-  h3 { font-size: 1.125rem; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
 }
 
 @layer base {
@@ -443,19 +443,19 @@
 
   /* ── Sidebar Premium ── */
   .sidebar-item {
-    @apply flex items-center gap-2.5 h-[38px] px-3 rounded-lg transition-all duration-200 relative cursor-pointer outline-none;
+    @apply flex items-center gap-2.5 h-[40px] px-3 rounded-lg transition-all duration-200 relative cursor-pointer outline-none;
     background: transparent;
     border: 1px solid transparent;
-    color: hsl(var(--muted-foreground));
-    font-size: 13px;
-    font-weight: 450;
-    letter-spacing: -0.006em;
+    color: hsl(var(--foreground) / 0.65);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
 
   .sidebar-item:hover,
   .sidebar-item:focus-visible {
-    background: hsl(var(--primary) / 0.04);
-    border-color: hsl(var(--primary) / 0.06);
+    background: hsl(var(--primary) / 0.05);
+    border-color: hsl(var(--primary) / 0.08);
     color: hsl(var(--foreground));
   }
 
@@ -464,10 +464,10 @@
   }
 
   .sidebar-item--active {
-    background: hsl(var(--primary) / 0.06);
-    border-color: hsl(var(--primary) / 0.10);
+    background: hsl(var(--primary) / 0.07);
+    border-color: hsl(var(--primary) / 0.12);
     color: hsl(var(--primary));
-    font-weight: 550;
+    font-weight: 600;
   }
 
   .sidebar-item--active::after {
