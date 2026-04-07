@@ -104,6 +104,7 @@ export async function invokeEdgeFunction<T>(
           code = "AUTH_REQUIRED";
         }
 
+        if (attempt < retries && (retryable ?? isRetriable(status))) {
           const backoff = 600 * Math.pow(2, attempt);
           attempt++;
           await sleep(backoff);
