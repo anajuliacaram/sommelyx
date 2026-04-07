@@ -40,11 +40,11 @@ import { useWineMetrics } from "@/hooks/useWines";
 import { cn } from "@/lib/utils";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 8 } as const,
+  hidden: { opacity: 0, y: 10 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.04, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.05, duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -69,10 +69,11 @@ function buildMonthWindow(size: number) {
 
 const chartTooltipStyle = {
   background: "hsl(var(--card))",
-  border: "1px solid hsl(var(--border))",
-  borderRadius: 10,
-  fontSize: 12,
-  boxShadow: "0 4px 12px -4px rgba(0,0,0,0.10)",
+  border: "1px solid hsl(var(--border) / 0.4)",
+  borderRadius: 14,
+  fontSize: 13,
+  boxShadow: "0 8px 24px -8px rgba(44,20,31,0.12)",
+  backdropFilter: "blur(12px)",
 };
 
 export default function CommercialDashboard() {
@@ -198,23 +199,23 @@ export default function CommercialDashboard() {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1 className="font-serif text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[30px]">
+              <h1 className="text-2xl font-bold tracking-[-0.02em] text-foreground sm:text-3xl">
                 Resumo da operação
               </h1>
-              <p className="mt-1.5 text-[14px] text-muted-foreground leading-relaxed">
+              <p className="mt-2 text-[15px] text-muted-foreground leading-relaxed">
                 {totalBottles} un. em estoque
-                {lowStock > 0 && <> · <span className="text-warning">{lowStock} para repor</span></>}
+                {lowStock > 0 && <> · <span className="text-warning font-medium">{lowStock} para repor</span></>}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               <Button variant="primary" size="default" onClick={() => setAddOpen(true)}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar
+                <Plus className="mr-1.5 h-4 w-4" /> Cadastrar
               </Button>
-              <Button variant="outline" size="default" onClick={() => navigate("/dashboard/sales")}>
-                <ShoppingCart className="mr-1.5 h-3.5 w-3.5" /> Venda
+              <Button variant="secondary" size="default" onClick={() => navigate("/dashboard/sales")}>
+                <ShoppingCart className="mr-1.5 h-4 w-4" /> Venda
               </Button>
               <Button variant="ghost" size="default" onClick={() => setCsvOpen(true)}>
-                <Upload className="mr-1.5 h-3.5 w-3.5" /> Importar
+                <Upload className="mr-1.5 h-4 w-4" /> Importar
               </Button>
             </div>
           </div>
@@ -225,20 +226,20 @@ export default function CommercialDashboard() {
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="rounded-xl border border-border/30 bg-card/90 p-4">
-                  <Skeleton className="h-3 w-20 mb-3 rounded" />
-                  <Skeleton className="h-7 w-16 rounded" />
+                <div key={i} className="glass-card p-5">
+                  <Skeleton className="h-3.5 w-20 mb-3 rounded-lg" />
+                  <Skeleton className="h-8 w-16 rounded-lg" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="rounded-xl border border-border/30 bg-card/90 p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <kpi.icon className="h-3.5 w-3.5 text-muted-foreground/50" />
+                <div key={kpi.label} className="glass-card p-5">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <kpi.icon className="h-4 w-4 text-muted-foreground/45" />
                     <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{kpi.label}</p>
                   </div>
-                  <p className="font-serif text-[28px] font-bold tracking-[-0.02em] text-foreground leading-none">{kpi.value}</p>
-                  <p className="text-[12px] text-muted-foreground/50 mt-1.5">{kpi.detail}</p>
+                  <p className="text-[28px] font-bold tracking-[-0.02em] text-foreground leading-none">{kpi.value}</p>
+                  <p className="text-[13px] text-muted-foreground/50 mt-2">{kpi.detail}</p>
                 </div>
               ))
             )}
@@ -265,19 +266,19 @@ export default function CommercialDashboard() {
             <div className="grid grid-cols-12 gap-4">
               {/* ─── Stock Table ─── */}
               <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
-                  <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="glass-card p-6">
+                  <div className="flex items-center justify-between gap-3 mb-5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70">Estoque atual</p>
-                      <h2 className="mt-1 font-serif text-[18px] font-semibold tracking-[-0.01em] text-foreground">Itens de maior impacto</h2>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">Estoque atual</p>
+                      <h2 className="mt-1.5 text-[19px] font-semibold tracking-[-0.01em] text-foreground">Itens de maior impacto</h2>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/inventory")}>
+                    <Button variant="ghost" size="sm" className="text-[13px] text-muted-foreground" onClick={() => navigate("/dashboard/inventory")}>
                       Ver estoque
                     </Button>
                   </div>
 
-                  <div className="overflow-hidden rounded-lg border border-border/20">
-                    <div className="grid grid-cols-12 gap-2 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70 bg-muted/15">
+                  <div className="overflow-hidden rounded-2xl border border-border/25">
+                    <div className="grid grid-cols-12 gap-2 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 bg-muted/15">
                       <div className="col-span-7">Produto</div>
                       <div className="col-span-2 text-right">Qtd.</div>
                       <div className="col-span-3 text-right">Valor</div>
@@ -288,20 +289,20 @@ export default function CommercialDashboard() {
                           key={row.id}
                           type="button"
                           onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(row.name)}`)}
-                          className="grid w-full grid-cols-12 items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-muted/15"
+                          className="grid w-full grid-cols-12 items-center gap-2 px-5 py-3.5 text-left transition-all duration-200 hover:bg-muted/12"
                         >
                           <div className="col-span-7 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <div className={cn("h-1.5 w-1.5 rounded-full", row.low ? "bg-primary" : "bg-accent")} />
-                              <p className="truncate text-[13px] font-medium text-foreground">{row.name}</p>
+                            <div className="flex items-center gap-2.5">
+                              <div className={cn("h-2 w-2 rounded-full", row.low ? "bg-primary" : "bg-accent")} />
+                              <p className="truncate text-[14px] font-medium text-foreground">{row.name}</p>
                             </div>
-                            <p className="mt-0.5 truncate text-[11px] text-muted-foreground pl-3.5">{row.producer || "—"}</p>
+                            <p className="mt-0.5 truncate text-[12px] text-muted-foreground pl-4.5">{row.producer || "—"}</p>
                           </div>
                           <div className="col-span-2 text-right">
-                            <span className={cn("text-[13px] font-semibold", row.low ? "text-primary" : "text-foreground")}>{row.qty}</span>
+                            <span className={cn("text-[14px] font-semibold", row.low ? "text-primary" : "text-foreground")}>{row.qty}</span>
                           </div>
                           <div className="col-span-3 text-right">
-                            <span className="text-[13px] font-medium text-foreground">{formatCompactBRL(row.value)}</span>
+                            <span className="text-[14px] font-medium text-foreground">{formatCompactBRL(row.value)}</span>
                           </div>
                         </button>
                       ))}
@@ -313,33 +314,33 @@ export default function CommercialDashboard() {
               {/* ─── Right Column ─── */}
               <div className="col-span-12 grid gap-4 lg:col-span-5">
                 <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-                  <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                  <div className="glass-card p-6">
                     <div className="flex items-center justify-between gap-3 mb-4">
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70">Alertas</p>
-                        <h2 className="mt-1 font-serif text-[18px] font-semibold tracking-[-0.01em] text-foreground">Reposição</h2>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">Alertas</p>
+                        <h2 className="mt-1.5 text-[19px] font-semibold tracking-[-0.01em] text-foreground">Reposição</h2>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-[12px] text-muted-foreground" onClick={() => navigate("/dashboard/inventory")}>
+                      <Button variant="ghost" size="sm" className="text-[13px] text-muted-foreground" onClick={() => navigate("/dashboard/inventory")}>
                         Ajustar
                       </Button>
                     </div>
 
                     <div className="grid gap-2">
                       {lowStockRows.length === 0 ? (
-                        <div className="rounded-lg border border-border/20 bg-muted/10 py-6 text-center">
-                          <p className="text-[13px] text-muted-foreground/60">Nenhum item com estoque baixo</p>
+                        <div className="rounded-2xl border border-border/25 bg-muted/10 py-8 text-center">
+                          <p className="text-[14px] text-muted-foreground/50">Nenhum item com estoque baixo</p>
                         </div>
                       ) : (
                         lowStockRows.map((w) => (
-                          <div key={w.id} className="flex items-center gap-3 rounded-lg border border-border/20 bg-background/40 px-4 py-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/6 text-primary shrink-0">
-                              <ArrowDownRight className="h-3.5 w-3.5" />
+                          <div key={w.id} className="flex items-center gap-3.5 rounded-2xl border border-border/25 bg-background/40 px-4 py-3.5 transition-all duration-200 hover:bg-background/60 hover:shadow-editorial">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/8 text-primary shrink-0">
+                              <ArrowDownRight className="h-4 w-4" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[13px] font-medium text-foreground">{w.name}</p>
-                              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{w.producer || "—"}</p>
+                              <p className="truncate text-[14px] font-medium text-foreground">{w.name}</p>
+                              <p className="mt-0.5 truncate text-[12px] text-muted-foreground">{w.producer || "—"}</p>
                             </div>
-                            <span className="rounded-md bg-primary/6 px-2 py-1 text-[11px] font-semibold text-primary">
+                            <span className="rounded-xl bg-primary/8 px-2.5 py-1 text-[12px] font-semibold text-primary">
                               {w.quantity} un.
                             </span>
                           </div>
@@ -350,9 +351,9 @@ export default function CommercialDashboard() {
                 </motion.div>
 
                 <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-                  <div className="rounded-xl border border-border/30 bg-card/70 p-5">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-muted-foreground/70 mb-3">Atalhos</p>
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="glass-card p-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 mb-3.5">Atalhos</p>
+                    <div className="grid grid-cols-2 gap-2.5">
                       {[
                         { icon: Package, label: "Estoque", route: "/dashboard/inventory" },
                         { icon: ShoppingCart, label: "Vendas", route: "/dashboard/sales" },
@@ -364,10 +365,10 @@ export default function CommercialDashboard() {
                           type="button"
                           variant="ghost"
                           onClick={() => navigate(item.route)}
-                          className="flex h-11 items-center gap-2.5 rounded-lg border border-border/25 bg-background/30 px-3 text-left hover:bg-muted/20"
+                          className="flex h-12 items-center gap-3 rounded-2xl border border-border/25 bg-background/30 px-4 text-left hover:bg-muted/15 hover:shadow-editorial transition-all duration-200"
                         >
-                          <item.icon className="h-4 w-4 text-muted-foreground/60 shrink-0" />
-                          <span className="text-[12px] font-medium text-foreground">{item.label}</span>
+                          <item.icon className="h-4.5 w-4.5 text-muted-foreground/50 shrink-0" />
+                          <span className="text-[13px] font-medium text-foreground">{item.label}</span>
                         </Button>
                       ))}
                     </div>
@@ -379,19 +380,19 @@ export default function CommercialDashboard() {
             {/* ─── Charts ─── */}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="font-serif text-[16px] font-semibold tracking-[-0.01em] text-foreground">Vendas</h3>
-                    <span className="text-[10px] font-medium text-muted-foreground/50">6 meses</span>
+                    <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-foreground">Vendas</h3>
+                    <span className="text-[11px] font-medium text-muted-foreground/45">6 meses</span>
                   </div>
-                  <div className="h-[160px]">
+                  <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={salesMonthly}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
                         <Tooltip contentStyle={chartTooltipStyle} formatter={(v: any) => formatCompactBRL(Number(v))} />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="hsl(var(--primary))" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -399,20 +400,20 @@ export default function CommercialDashboard() {
               </motion.div>
 
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="font-serif text-[16px] font-semibold tracking-[-0.01em] text-foreground">Movimentação</h3>
-                    <span className="text-[10px] font-medium text-muted-foreground/50">6 meses</span>
+                    <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-foreground">Movimentação</h3>
+                    <span className="text-[11px] font-medium text-muted-foreground/45">6 meses</span>
                   </div>
-                  <div className="h-[160px]">
+                  <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={stockMovesMonthly}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
                         <Tooltip contentStyle={chartTooltipStyle} />
-                        <Bar dataKey="in" stackId="a" radius={[4, 4, 0, 0]} fill="hsl(var(--accent))" />
-                        <Bar dataKey="out" stackId="a" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
+                        <Bar dataKey="in" stackId="a" radius={[6, 6, 0, 0]} fill="hsl(var(--accent))" />
+                        <Bar dataKey="out" stackId="a" radius={[6, 6, 0, 0]} fill="hsl(var(--primary))" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -420,19 +421,19 @@ export default function CommercialDashboard() {
               </motion.div>
 
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-                <div className="rounded-xl border border-border/30 bg-card/70 p-5">
+                <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="font-serif text-[16px] font-semibold tracking-[-0.01em] text-foreground">Saldo mensal</h3>
-                    <span className="text-[10px] font-medium text-muted-foreground/50">net</span>
+                    <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-foreground">Saldo mensal</h3>
+                    <span className="text-[11px] font-medium text-muted-foreground/45">net</span>
                   </div>
-                  <div className="h-[160px]">
+                  <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stockMovesMonthly}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground)/0.5)" }} axisLine={false} tickLine={false} width={30} />
                         <Tooltip contentStyle={chartTooltipStyle} />
-                        <Area type="monotone" dataKey="net" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.10)" strokeWidth={1.5} />
+                        <Area type="monotone" dataKey="net" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.08)" strokeWidth={2} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
