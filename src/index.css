@@ -135,30 +135,31 @@
   body {
     @apply bg-background text-foreground antialiased;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    letter-spacing: -0.005em;
-    line-height: 1.65;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    letter-spacing: -0.006em;
+    line-height: 1.6;
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     background-image:
-      radial-gradient(120% 80% at 15% 0%, hsl(var(--wine) / 0.03), transparent 58%),
-      radial-gradient(90% 70% at 100% 10%, hsl(var(--gold) / 0.04), transparent 55%);
+      radial-gradient(120% 80% at 15% 0%, hsl(var(--wine) / 0.02), transparent 58%),
+      radial-gradient(90% 70% at 100% 10%, hsl(var(--gold) / 0.03), transparent 55%);
     background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    font-weight: 600;
+    font-family: 'Libre Baskerville', Georgia, serif;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    font-weight: 700;
   }
 
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.25rem; }
+  h1 { font-size: 1.875rem; }
+  h2 { font-size: 1.375rem; }
+  h3 { font-size: 1.125rem; }
 }
 
 @layer base {
