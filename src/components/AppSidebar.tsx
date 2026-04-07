@@ -148,27 +148,27 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-9 text-[11px] font-medium rounded-lg"
+                  className="h-10 text-[11px] font-semibold rounded-xl border-primary/25 bg-primary/[0.04] text-primary shadow-sm hover:bg-primary/[0.08] hover:border-primary/35 hover:shadow-md transition-all"
                   onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
                 >
-                  <Wine className="h-3.5 w-3.5 mr-1.5" />
+                  <Wine className="h-4 w-4 mr-1.5" />
                   Registrar consumo
                 </Button>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-2 gap-2">
                   <Button
                     variant="ghost"
-                    className="h-8 text-[10px] font-medium rounded-lg border border-border/30 bg-background/30 hover:bg-primary/[0.03] hover:border-primary/10 hover:text-primary"
+                    className="h-9 text-[10px] font-semibold rounded-xl border border-border/40 bg-background/60 shadow-sm hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-md transition-all"
                     onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
                   >
-                    <UtensilsCrossed className="h-3 w-3 mr-1" />
+                    <UtensilsCrossed className="h-3.5 w-3.5 mr-1" />
                     Harmonizar
                   </Button>
                   <Button
                     variant="ghost"
-                    className="h-8 text-[10px] font-medium rounded-lg border border-border/30 bg-background/30 hover:bg-primary/[0.03] hover:border-primary/10 hover:text-primary"
+                    className="h-9 text-[10px] font-semibold rounded-xl border border-border/40 bg-background/60 shadow-sm hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-md transition-all"
                     onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
                   >
-                    <Sparkles className="h-3 w-3 mr-1" />
+                    <Sparkles className="h-3.5 w-3.5 mr-1" />
                     Analisar carta
                   </Button>
                 </div>
