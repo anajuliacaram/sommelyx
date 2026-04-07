@@ -77,29 +77,29 @@ export function AppSidebar() {
 
   return (
     <>
-      <Sidebar collapsible="offcanvas" className="border-r border-border/20" style={{ background: "hsl(var(--sidebar-background))" }}>
-        <SidebarHeader className="pt-4 md:pt-5 px-4">
+      <Sidebar collapsible="offcanvas" className="border-r border-border w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
+        <SidebarHeader className="pt-4 md:pt-4 px-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-2 py-2 mb-4 rounded-lg transition-colors hover:bg-muted/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-2.5 px-2 py-1.5 mb-3 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
             <Logo
               variant="compact"
-              className="h-10 sm:h-10 w-auto"
+              className="h-8 w-auto"
             />
             <div className="flex flex-col">
-              <span className="text-[17px] font-serif font-bold tracking-[-0.01em] text-primary leading-none">
+              <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground leading-none">
                 Sommelyx
               </span>
               <span
                 className={[
-                  "mt-1.5 w-fit inline-flex items-center rounded-md px-2 py-0.5",
-                  "text-[9px] font-medium uppercase tracking-[0.08em] leading-none",
+                  "mt-1 w-fit inline-flex items-center rounded-md px-1.5 py-0.5",
+                  "text-[8px] font-bold uppercase tracking-[0.1em] leading-none",
                   isCommercial
-                    ? "bg-accent/6 text-accent ring-1 ring-accent/15"
-                    : "bg-primary/[0.04] text-primary ring-1 ring-primary/10",
+                    ? "bg-accent/8 text-accent ring-1 ring-accent/15"
+                    : "bg-primary/[0.06] text-primary ring-1 ring-primary/12",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}
@@ -177,9 +177,9 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-4">
+        <SidebarContent className="px-3">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.10em] font-semibold text-muted-foreground/50 mb-2 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1.5 px-3">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -204,8 +204,8 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-3">
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.10em] font-semibold text-muted-foreground/50 mb-2 px-3">
+          <SidebarGroup className="mt-2">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1.5 px-3">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>

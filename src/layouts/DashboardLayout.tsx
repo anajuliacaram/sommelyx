@@ -37,7 +37,7 @@ export default function DashboardLayout() {
       <div className="dashboard-shell min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/20">
+          <header className="h-12 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 bg-background/90 backdrop-blur-xl border-b border-border">
             <SidebarTrigger
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
@@ -106,7 +106,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 px-4 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-6 lg:px-8">
+          <div className="flex-1 px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] md:px-6 lg:px-8">
             <AnimatedOutlet />
           </div>
         </main>
