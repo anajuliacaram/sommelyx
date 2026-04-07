@@ -63,10 +63,10 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
           className="text-center mb-10 sm:mb-14"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif font-black tracking-tight text-foreground">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold tracking-[-0.015em] text-foreground">
             Tudo que você precisa para gerenciar sua adega
           </h2>
-          <p className="mt-3 text-[13px] sm:text-[15px] text-muted-foreground font-medium max-w-md mx-auto">
+          <p className="mt-3 text-[13px] sm:text-[15px] text-muted-foreground max-w-md mx-auto leading-relaxed">
             Simples, inteligente e feito para quem ama vinho.
           </p>
         </motion.div>
@@ -93,7 +93,7 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
               </div>
 
               {/* Title */}
-              <h3 className="text-[17px] sm:text-lg font-serif font-bold text-foreground mb-3 tracking-tight">
+              <h3 className="text-[17px] sm:text-lg font-serif font-bold text-foreground mb-3 tracking-[-0.01em]">
                 {block.title}
               </h3>
 
@@ -137,7 +137,7 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
                 <block.icon className="h-5 w-5" style={{ color: block.accent }} strokeWidth={1.8} />
               </div>
 
-              <h3 className="text-[17px] sm:text-lg font-serif font-bold text-foreground mb-3 tracking-tight">
+              <h3 className="text-[17px] sm:text-lg font-serif font-bold text-foreground mb-3 tracking-[-0.01em]">
                 {block.title}
               </h3>
 
