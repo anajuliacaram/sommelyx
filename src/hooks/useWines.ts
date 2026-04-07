@@ -28,6 +28,55 @@ export interface Wine {
 
 export type WineInsert = Omit<Wine, "id" | "created_at" | "updated_at">;
 
+function sanitizeWineInsertPayload(wine: Omit<WineInsert, "user_id">, userId: string) {
+  return {
+    user_id: userId,
+    name: wine.name?.trim(),
+    producer: wine.producer ?? null,
+    country: wine.country ?? null,
+    region: wine.region ?? null,
+    grape: wine.grape ?? null,
+    vintage: wine.vintage ?? null,
+    style: wine.style ?? null,
+    purchase_price: wine.purchase_price ?? null,
+    current_value: wine.current_value ?? null,
+    quantity: wine.quantity,
+    rating: wine.rating ?? null,
+    drink_from: wine.drink_from ?? null,
+    drink_until: wine.drink_until ?? null,
+    cellar_location: wine.cellar_location ?? null,
+    food_pairing: wine.food_pairing ?? null,
+    tasting_notes: wine.tasting_notes ?? null,
+    image_url: wine.image_url ?? null,
+  };
+}
+
+function sanitizeWineUpdatePayload(updates: Partial<Omit<Wine, "id" | "created_at" | "updated_at" | "user_id">>) {
+  const allowedKeys = [
+    "name",
+    "producer",
+    "country",
+    "region",
+    "grape",
+    "vintage",
+    "style",
+    "purchase_price",
+    "current_value",
+    "quantity",
+    "rating",
+    "drink_from",
+    "drink_until",
+    "cellar_location",
+    "food_pairing",
+    "tasting_notes",
+    "image_url",
+  ] as const;
+
+  return Object.fromEntries(
+    Object.entries(updates).filter(([key]) => allowedKeys.includes(key as (typeof allowedKeys)[number])),
+  ) as Partial<Omit<Wine, "id" | "created_at" | "updated_at" | "user_id">>;
+}
+
 export function useWines() {
   const { user } = useAuth();
 
@@ -104,9 +153,11 @@ export function useAddWine() {
           throw new Error("Safra inválida");
         }
       }
+      const payload = sanitizeWineInsertPayload(wine, user.id);
+
       const { data, error } = await supabase
         .from("wines")
-        .insert({ ...wine, name, user_id: user.id } as any)
+        .insert(payload as any)
         .select("id")
         .single();
       if (error) throw error;
@@ -140,7 +191,8 @@ export function useUpdateWine() {
       if (typeof safeUpdates.current_value === "number" && (!Number.isFinite(safeUpdates.current_value) || safeUpdates.current_value < 0)) {
         throw new Error("Valor atual inválido");
       }
-      const { error } = await supabase.from("wines").update(safeUpdates as any).eq("id", id).eq("user_id", user.id);
+      const payload = sanitizeWineUpdatePayload(safeUpdates);
+      const { error } = await supabase.from("wines").update(payload as any).eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => {
