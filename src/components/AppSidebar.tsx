@@ -90,7 +90,7 @@ export function AppSidebar() {
               className="h-10 sm:h-10 w-auto"
             />
             <div className="flex flex-col">
-              <span className="text-[16px] font-serif font-bold tracking-[-0.01em] text-primary leading-none">
+              <span className="text-[17px] font-serif font-bold tracking-[-0.01em] text-primary leading-none">
                 Sommelyx
               </span>
               <span
@@ -179,7 +179,7 @@ export function AppSidebar() {
 
         <SidebarContent className="px-4">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.10em] font-medium text-muted-foreground/40 mb-2 px-3">
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.10em] font-semibold text-muted-foreground/50 mb-2 px-3">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -205,7 +205,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-3">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.10em] font-medium text-muted-foreground/40 mb-2 px-3">
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.10em] font-semibold text-muted-foreground/50 mb-2 px-3">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -241,8 +241,8 @@ export function AppSidebar() {
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold truncate text-foreground">{user?.user_metadata?.full_name || "Usuário"}</p>
-                <p className="text-[10px] truncate text-muted-foreground/60">{user?.email}</p>
+                <p className="text-[13px] font-semibold truncate text-foreground">{user?.user_metadata?.full_name || "Usuário"}</p>
+                <p className="text-[11px] truncate text-muted-foreground/60">{user?.email}</p>
               </div>
             </div>
             <SidebarMenu>

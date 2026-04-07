@@ -37,7 +37,7 @@ export default function DashboardLayout() {
       <div className="dashboard-shell min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-13 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 bg-background/75 backdrop-blur-2xl border-b border-border/15">
+          <header className="h-14 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/20">
             <SidebarTrigger
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
