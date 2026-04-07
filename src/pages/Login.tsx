@@ -54,7 +54,6 @@ export default function Login() {
     e.preventDefault();
     if (loading) return;
 
-    // Rate limiting: block if locked
     if (lockUntil && Date.now() < lockUntil) {
       const secsLeft = Math.ceil((lockUntil - Date.now()) / 1000);
       toast({ title: "Muitas tentativas", description: `Aguarde ${secsLeft}s antes de tentar novamente.`, variant: "destructive" });
@@ -71,7 +70,6 @@ export default function Login() {
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
 
-      // Lock after 5 failed attempts: 30s, then 60s, then 120s
       if (newAttempts >= 5) {
         const lockDuration = newAttempts >= 15 ? 120_000 : newAttempts >= 10 ? 60_000 : 30_000;
         setLockUntil(Date.now() + lockDuration);
@@ -90,75 +88,70 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F6F3F2] text-[#17141D] selection:bg-primary/20 selection:text-primary">
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground selection:bg-primary/15 selection:text-primary">
+      {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-[#8C2044]/20 via-[#B44A72]/10 to-transparent blur-[100px]" />
-        <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-[#DBB58E]/18 via-[#C87595]/10 to-transparent blur-[120px]" />
-        <div className="absolute inset-0 opacity-[0.3]" style={{ backgroundImage: "linear-gradient(rgba(23,20,29,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.035) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
+        <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
+        <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-gold/12 via-wine/6 to-transparent blur-[120px]" />
+        <div className="absolute inset-0 opacity-[0.25]" style={{ backgroundImage: "linear-gradient(rgba(23,20,29,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.025) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
       </div>
 
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">
-        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[28px] border border-black/[0.06] bg-white/70 p-6 shadow-[0_16px_40px_rgba(44,20,31,0.06)] backdrop-blur-xl sm:p-8 md:p-10 lg:order-1 lg:rounded-[36px] lg:p-12">
+        {/* Left panel */}
+        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] border border-border/40 bg-card/70 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_-16px_rgba(44,20,31,0.06)] backdrop-blur-xl sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12">
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
-              <Logo variant="navbar" className="h-10 sm:h-11 w-auto drop-shadow-[0_10px_26px_rgba(44,20,31,0.16)]" />
-              <span className="font-serif text-[26px] font-black tracking-tight text-[#7B1E3A]">Sommelyx</span>
+              <Logo variant="navbar" className="h-10 sm:h-11 w-auto drop-shadow-[0_4px_12px_rgba(44,20,31,0.10)]" />
+              <span className="font-serif text-[26px] font-black tracking-tight text-wine">Sommelyx</span>
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#8C2044]/15 bg-[#8C2044]/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-[#8C2044]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
               </span>
-              <h1 className="mt-5 max-w-[560px] text-[38px] font-black leading-[0.97] tracking-[-0.04em] text-[#17141D] sm:text-[46px] lg:text-[58px]">
-                A inteligência da sua <span className="font-serif italic text-[#8C2044]">adega</span> começa aqui.
+              <h1 className="mt-5 max-w-[560px] text-[36px] font-black leading-[0.97] tracking-[-0.03em] text-foreground sm:text-[44px] lg:text-[54px]">
+                A inteligência da sua <span className="font-serif italic text-wine">adega</span> começa aqui.
               </h1>
-              <p className="mt-6 max-w-[540px] text-[16px] font-medium leading-relaxed text-[#5B5564] sm:text-[18px]">
+              <p className="mt-6 max-w-[540px] text-[15px] font-medium leading-relaxed text-muted-foreground sm:text-[17px]">
                 Um ambiente preciso para gestão de acervo, operação comercial e decisões estratégicas com o padrão Sommelyx.
               </p>
             </motion.div>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-10 grid gap-3 sm:grid-cols-3">
-            <article className="rounded-2xl border border-black/[0.06] bg-[#FCFAF9] p-4 shadow-sm">
-              <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-[#8C2044]/10 text-[#8C2044]">
-                <BarChart3 className="h-4 w-4" />
-              </div>
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#887F8E]">Inteligência</p>
-              <p className="mt-1 text-[14px] font-semibold text-[#221E2A]">Visão de estoque em tempo real</p>
-            </article>
-            <article className="rounded-2xl border border-black/[0.06] bg-[#FCFAF9] p-4 shadow-sm">
-              <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-[#D49D69]/15 text-[#A46230]">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#887F8E]">Confiável</p>
-              <p className="mt-1 text-[14px] font-semibold text-[#221E2A]">Dados protegidos e operação estável</p>
-            </article>
-            <article className="rounded-2xl border border-black/[0.06] bg-[#FCFAF9] p-4 shadow-sm">
-              <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-[#8C2044]/10 text-[#8C2044]">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#887F8E]">Editorial</p>
-              <p className="mt-1 text-[14px] font-semibold text-[#221E2A]">Experiência elegante de ponta a ponta</p>
-            </article>
+            {[
+              { icon: BarChart3, label: "Inteligência", desc: "Visão de estoque em tempo real", bg: "bg-wine/[0.06]", color: "text-wine" },
+              { icon: ShieldCheck, label: "Confiável", desc: "Dados protegidos e operação estável", bg: "bg-gold/10", color: "text-gold" },
+              { icon: Sparkles, label: "Editorial", desc: "Experiência elegante de ponta a ponta", bg: "bg-wine/[0.06]", color: "text-wine" },
+            ].map((item) => (
+              <article key={item.label} className="rounded-xl border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
+                  <item.icon className="h-4 w-4" />
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{item.label}</p>
+                <p className="mt-1 text-[13px] font-semibold text-foreground">{item.desc}</p>
+              </article>
+            ))}
           </motion.div>
         </section>
 
+        {/* Right panel — Form */}
         <section className="order-1 flex items-center justify-center py-2 lg:order-2">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white/60 backdrop-blur-2xl p-8 md:p-10 rounded-[28px] shadow-[0_24px_64px_-24px_rgba(15,15,20,0.2),0_2px_8px_rgba(15,15,20,0.06)] border border-white/55 ring-1 ring-black/[0.03]"
+            className="w-full max-w-[520px] bg-card/65 backdrop-blur-2xl p-7 md:p-9 rounded-[24px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_12px_40px_-20px_rgba(15,15,20,0.10)] border border-border/40 ring-1 ring-white/[0.04]"
           >
-            <div className="mb-8">
-              <h2 className="text-[34px] font-serif font-bold italic leading-none tracking-tight text-[#17141D]">Acesse sua conta</h2>
-              <p className="mt-3 text-[15px] font-medium text-[#655E6E]">Use suas credenciais para continuar no dashboard Sommelyx.</p>
+            <div className="mb-7">
+              <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Acesse sua conta</h2>
+              <p className="mt-3 text-[14px] font-medium text-muted-foreground">Use suas credenciais para continuar no dashboard Sommelyx.</p>
             </div>
 
             {emailConfirmed && (
-              <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                <p className="text-[13px] font-semibold text-emerald-800">
+              <div className="mb-6 flex items-center gap-3 rounded-xl border border-success/20 bg-success/[0.04] px-4 py-3">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+                <p className="text-[13px] font-semibold text-success">
                   {autoSessionFallback
                     ? "Conta confirmada! Faça login para concluir seu acesso."
                     : "Conta verificada com sucesso!"}
@@ -166,9 +159,9 @@ export default function Login() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                   E-mail
                 </Label>
                 <Input
@@ -179,16 +172,16 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                  className="h-12 rounded-xl border-border/50 bg-background/60 px-4 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/25 focus:bg-background/90 focus:ring-2 focus:ring-primary/[0.06]"
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7A7382]">
+                  <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                     Senha
                   </Label>
-                  <Link to="/forgot-password" className="text-[12px] font-semibold text-[#8C2044] transition-colors hover:text-[#17141D] hover:underline">
+                  <Link to="/forgot-password" className="text-[12px] font-semibold text-wine transition-colors hover:text-foreground hover:underline">
                     Recuperar acesso
                   </Link>
                 </div>
@@ -201,7 +194,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-14 rounded-[16px] border-black/10 bg-[#FAF8F7] px-4 pr-12 text-[15px] font-medium text-[#17141D] placeholder:text-[#A6A0AD] transition-all focus:border-[#8C2044]/40 focus:bg-white focus:ring-4 focus:ring-[#8C2044]/10"
+                    className="h-12 rounded-xl border-border/50 bg-background/60 px-4 pr-12 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/25 focus:bg-background/90 focus:ring-2 focus:ring-primary/[0.06]"
                   />
                   <Button
                     type="button"
@@ -209,20 +202,20 @@ export default function Login() {
                     size="icon"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground focus-visible:ring-primary/20"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted/30 hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-1">
                 <MagneticButton disabled={loading}>
                   <Button
                     type="submit"
                     variant="primary"
                     disabled={loading}
-                    className="w-full h-12 rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] shadow-[0_12px_26px_-14px_rgba(15,15,20,0.35)]"
+                    className="w-full h-11 rounded-xl text-[13px] font-bold uppercase tracking-[0.10em] shadow-float"
                   >
                     {loading ? (
                       <span className="flex items-center gap-3">
@@ -236,7 +229,7 @@ export default function Login() {
                     ) : (
                       <span className="flex items-center gap-2">
                         Entrar
-                        <ArrowRight className="h-4.5 w-4.5" />
+                        <ArrowRight className="h-4 w-4" />
                       </span>
                     )}
                   </Button>
@@ -244,10 +237,10 @@ export default function Login() {
               </div>
             </form>
 
-            <div className="relative mt-6 flex items-center gap-3">
-              <div className="h-px flex-1 bg-black/[0.08]" />
-              <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#A6A0AD]">ou</span>
-              <div className="h-px flex-1 bg-black/[0.08]" />
+            <div className="relative mt-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border/50" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">ou</span>
+              <div className="h-px flex-1 bg-border/50" />
             </div>
 
             <Button
@@ -261,7 +254,7 @@ export default function Login() {
                   toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                 }
               }}
-              className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background/70 text-[13px] font-semibold text-foreground hover:bg-background hover:shadow-sm"
+              className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border/50 bg-background/60 text-[13px] font-semibold text-foreground hover:bg-background/90 hover:shadow-sm"
             >
               <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -272,19 +265,19 @@ export default function Login() {
               Entrar com Google
             </Button>
 
-            <div className="mt-6 border-t border-black/[0.06] pt-6 text-center">
-              <p className="text-[14px] font-medium text-[#6D6676]">
+            <div className="mt-5 border-t border-border/40 pt-5 text-center">
+              <p className="text-[13px] font-medium text-muted-foreground">
                 Ainda não tem acesso?{" "}
-                <Link to="/signup" className="font-bold text-[#17141D] transition-colors hover:text-[#8C2044] hover:underline">
+                <Link to="/signup" className="font-bold text-foreground transition-colors hover:text-wine hover:underline">
                   Crie sua conta
                 </Link>
               </p>
             </div>
 
-            <div className="mt-8 flex justify-center sm:justify-start">
+            <div className="mt-6 flex justify-center sm:justify-start">
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-[#938C9C] transition-colors hover:text-[#17141D]"
+                className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 transition-colors hover:text-foreground"
               >
                 <ChevronLeft className="h-3.5 w-3.5" /> Retornar
               </Link>

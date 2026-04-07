@@ -12,7 +12,7 @@ interface LandingHeaderProps {
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-4 sm:px-8 py-2.5 sm:py-3.5 lg:py-4 bg-background/70 backdrop-blur-2xl border-b border-border/40"
+      className="fixed top-0 w-full z-50 px-4 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 bg-background/75 backdrop-blur-2xl border-b border-border/30"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -20,37 +20,37 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
       <div className="mx-auto flex items-center justify-between max-w-6xl">
         <a
           href="/"
-          className="flex items-center gap-2 sm:gap-3 lg:gap-4 transition-opacity duration-300 hover:opacity-80 rounded-2xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          className="flex items-center gap-2 sm:gap-3 lg:gap-3.5 transition-opacity duration-200 hover:opacity-80 rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
         >
           <Logo
             variant="navbar"
-            className="h-10 sm:h-10 md:h-12 lg:h-16 drop-shadow-[0_16px_40px_rgba(15,15,20,0.18)]"
+            className="h-9 sm:h-10 md:h-11 lg:h-14 drop-shadow-[0_4px_12px_rgba(15,15,20,0.10)]"
           />
-          <span className="font-serif text-[18px] sm:text-[20px] md:text-[24px] lg:text-[34px] font-black tracking-tight text-[#7B1E3A]">
+          <span className="font-serif text-[17px] sm:text-[19px] md:text-[22px] lg:text-[30px] font-black tracking-tight text-wine">
             Sommelyx
           </span>
         </a>
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           <a
             href="https://instagram.com/sommelyx"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 text-muted-foreground/60 hover:bg-muted/20 hover:text-foreground transition-colors duration-200"
           >
-            <Instagram size={15} />
+            <Instagram size={14} />
           </a>
           <a
             href="https://www.linkedin.com/company/sommelyx/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full border border-wine/20 text-wine/70 hover:bg-wine/10 hover:text-wine transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 text-muted-foreground/60 hover:bg-muted/20 hover:text-foreground transition-colors duration-200"
           >
-            <Linkedin size={15} />
+            <Linkedin size={14} />
           </a>
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
-            className="text-[12px] sm:text-[13px] font-semibold bg-white/35 border border-wine/[0.10] shadow-[0_10px_26px_-18px_rgba(15,15,20,0.35)] hover:bg-wine/5 text-wine px-3 sm:px-4"
+            className="text-[12px] sm:text-[13px] font-semibold border border-border/40 text-foreground px-3 sm:px-4 hover:bg-muted/20"
             onClick={onLogin}
           >
             Entrar
@@ -58,7 +58,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <MagneticButton>
             <Button
               variant="primary"
-              className="px-3.5 sm:px-7 h-9 sm:h-10 text-[11px] sm:text-[13px] font-black uppercase tracking-[0.08em] sm:tracking-[0.12em] rounded-full shadow-float whitespace-nowrap"
+              className="px-3.5 sm:px-6 h-9 sm:h-9 text-[11px] sm:text-[12px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.10em] rounded-xl shadow-float whitespace-nowrap"
               onClick={onSignup}
             >
               Começar grátis
