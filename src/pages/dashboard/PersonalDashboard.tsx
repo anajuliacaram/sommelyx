@@ -346,7 +346,6 @@ export default function PersonalDashboard() {
             </motion.div>
           </div>
         </div>
-        </div>
       </div>
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
