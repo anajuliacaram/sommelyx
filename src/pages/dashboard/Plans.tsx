@@ -2,12 +2,13 @@ import { motion } from "framer-motion";
 import { Check, Crown, Zap } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 12 } as const,
+  hidden: { opacity: 0, y: 16 } as const,
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -16,26 +17,38 @@ const plans = [
     name: "Pro",
     price: "R$ 29",
     period: "/mês",
-    desc: "Para colecionadores sérios",
-    trial: "14 dias grátis",
-    features: ["Garrafas ilimitadas", "Alertas de consumo ideal", "Insights e relatórios", "Exportação CSV"],
-    highlighted: true,
-    cta: "Começar 14 dias grátis",
+    desc: "Para quem coleciona e quer controle total",
+    features: [
+      "Organize toda sua adega em um só lugar",
+      "Saiba o momento ideal de consumo",
+      "Histórico completo de degustações",
+      "Insights inteligentes da sua coleção",
+    ],
+    cta: "Começar grátis",
+    isLight: true,
   },
   {
     name: "Business",
     price: "R$ 59",
     period: "/mês",
     desc: "Para restaurantes, bares e lojas",
-    trial: "14 dias grátis",
-    features: ["Tudo do Pro", "Gestão de vendas e estoque", "Relatórios financeiros", "Curva ABC e giro"],
-    cta: "Começar 14 dias grátis",
+    features: [
+      "Controle total de estoque e vendas",
+      "Relatórios financeiros automáticos",
+      "Análise de giro e performance",
+      "Gestão operacional simplificada",
+    ],
+    cta: "Começar grátis",
+    isLight: false,
   },
 ];
 
 export default function Plans() {
+  const navigate = useNavigate();
+
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Meu Plano</h1>
         <p className="text-sm text-muted-foreground mt-1">Gerencie sua assinatura e recursos.</p>
@@ -63,58 +76,125 @@ export default function Plans() {
         </Button>
       </motion.div>
 
-      {/* Plans grid */}
-      <div className="grid md:grid-cols-2 gap-3 items-stretch max-w-2xl mx-auto">
-        {plans.map((plan, i) => (
-          <motion.div
-            key={plan.name}
-            className={`rounded-xl flex flex-col transition-all duration-200 relative ${
-              plan.highlighted
-                ? "p-5 md:p-6 gradient-wine text-primary-foreground shadow-wine glow-wine border border-wine-vivid/25"
-                : "p-5 md:p-6 card-depth"
-            }`}
-            initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
-          >
-            {plan.highlighted && (
-              <Badge className="mb-2 text-[10px] h-5 w-fit bg-primary-foreground/15 text-primary-foreground border-0">
-                Recomendado
-              </Badge>
-            )}
+      {/* Plans grid — same style as landing */}
+      <div className="grid md:grid-cols-2 gap-5 max-w-[760px] mx-auto items-stretch">
+        {plans.map((plan, i) => {
+          const isLight = plan.isLight;
+          const txt = isLight ? "#2B2B2B" : "#F8F6F3";
 
-            <h3 className="text-sm font-semibold font-sans tracking-tight">{plan.name}</h3>
-            <p className={`text-[11px] mb-3 ${plan.highlighted ? "text-primary-foreground/55" : "text-muted-foreground"}`}>
-              {plan.desc}
-            </p>
-
-            <div className="mb-1 border-b pb-4" style={{ borderColor: plan.highlighted ? "rgba(255,255,255,0.12)" : undefined }}>
-              <span className="text-3xl font-black font-sans tracking-tighter">{plan.price}</span>
-              <span className={`text-[11px] ml-1 ${plan.highlighted ? "text-primary-foreground/40" : "text-muted-foreground"}`}>
-                {plan.period}
-              </span>
-            </div>
-            <p className={`text-[10px] font-bold mb-3 tracking-wide ${plan.highlighted ? "text-gold-light" : "text-primary"}`}>
-              ✦ {plan.trial}
-            </p>
-
-            <ul className="space-y-2 mb-5">
-              {plan.features.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-[12px]">
-                  <Check className={`h-3 w-3 flex-shrink-0 ${plan.highlighted ? "text-gold-light" : "text-primary"}`} strokeWidth={3} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <Button
-              variant={plan.highlighted ? "ghost" : "primary"}
-              className={`mt-auto w-full rounded-lg h-9 text-[11px] font-semibold ${
-                plan.highlighted ? "bg-primary-foreground text-primary hover:bg-primary-foreground/95" : ""
-              }`}
+          return (
+            <motion.div
+              key={plan.name}
+              className={`
+                relative rounded-3xl overflow-hidden flex flex-col transition-all duration-300
+                ${isLight
+                  ? "bg-[#F8F6F3] shadow-[0_30px_92px_-62px_rgba(44,20,31,0.55)] ring-1 ring-black/[0.06]"
+                  : "bg-[linear-gradient(180deg,#2B2B2B_0%,#1F1C20_55%,#171518_100%)] shadow-[0_34px_100px_-68px_rgba(15,15,20,0.80)] ring-1 ring-white/[0.08]"
+                }
+              `}
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              custom={i + 2}
+              whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
             >
-              {plan.cta}
-            </Button>
-          </motion.div>
-        ))}
+              {/* Radial overlays */}
+              {isLight ? (
+                <>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.10),transparent_55%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_35%,rgba(198,167,104,0.10),transparent_55%)]" />
+                </>
+              ) : (
+                <>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.35),transparent_60%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_82%_18%,rgba(198,167,104,0.18),transparent_55%)]" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-[linear-gradient(90deg,transparent,rgba(198,167,104,0.65),transparent)]" />
+                </>
+              )}
+
+              <div className="relative p-6 sm:p-7 flex flex-col flex-1">
+                <h3
+                  className="text-[22px] font-serif font-bold tracking-tight"
+                  style={{ color: txt }}
+                >
+                  {plan.name}
+                </h3>
+                <p
+                  className="text-[13px] mt-2 mb-5 font-medium leading-relaxed"
+                  style={{ color: isLight ? "rgba(43,43,43,0.7)" : "rgba(248,246,243,0.7)" }}
+                >
+                  {plan.desc}
+                </p>
+
+                {/* Price */}
+                <div className="mb-4 flex items-end gap-2">
+                  <span
+                    className="text-[42px] sm:text-[48px] font-semibold font-sans tracking-[-0.03em] leading-none"
+                    style={{ color: txt }}
+                  >
+                    {plan.price}
+                  </span>
+                  <span
+                    className="pb-[5px] text-[13px] font-medium"
+                    style={{ color: isLight ? "rgba(43,43,43,0.55)" : "rgba(248,246,243,0.55)" }}
+                  >
+                    {plan.period}
+                  </span>
+                </div>
+
+                {/* Trial pill */}
+                <div className="mb-5 flex items-center gap-2.5">
+                  <span
+                    className={isLight
+                      ? "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-bold uppercase tracking-[0.12em] text-[#6E1E2A] ring-1 ring-[#6E1E2A]/15 bg-[linear-gradient(135deg,rgba(110,30,42,0.07),rgba(198,167,104,0.14))] shadow-[0_16px_40px_-26px_rgba(110,30,42,0.30)]"
+                      : "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-bold uppercase tracking-[0.12em] text-[#F8F6F3] ring-1 ring-[#C6A768]/30 bg-[linear-gradient(135deg,rgba(198,167,104,0.18),rgba(110,30,42,0.15))] shadow-[0_16px_44px_-28px_rgba(198,167,104,0.40)]"}
+                  >
+                    <Check className={isLight ? "h-3.5 w-3.5 text-[#6E1E2A]/80" : "h-3.5 w-3.5 text-[#C6A768]"} strokeWidth={2.5} />
+                    14 dias grátis
+                  </span>
+                </div>
+
+                {/* CTA */}
+                <Button
+                  variant="primary"
+                  className="w-full h-11 rounded-2xl px-6 text-[13px] font-semibold tracking-tight shadow-[0_18px_54px_-30px_rgba(110,30,42,0.55)] hover:-translate-y-0.5"
+                  onClick={() => navigate("/signup")}
+                >
+                  {plan.cta}
+                </Button>
+
+                {/* Divider */}
+                <div
+                  className="mt-5 mb-4 h-px w-full"
+                  style={{ background: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)" }}
+                />
+
+                {/* Features */}
+                <ul className="space-y-3 flex-1">
+                  {plan.features.map(f => (
+                    <li
+                      key={f}
+                      className="flex items-start gap-2.5 text-[13px] leading-relaxed font-medium"
+                      style={{ color: isLight ? "rgba(43,43,43,0.8)" : "rgba(248,246,243,0.8)" }}
+                    >
+                      <div
+                        className={isLight
+                          ? "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px] bg-[#6E1E2A]/8 ring-1 ring-[#6E1E2A]/12"
+                          : "w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px] bg-white/10 ring-1 ring-white/10"}
+                      >
+                        <Check
+                          className={isLight ? "h-3 w-3 text-[#6E1E2A]/70" : "h-3 w-3 text-[#C6A768]/80"}
+                          strokeWidth={2.5}
+                        />
+                      </div>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
