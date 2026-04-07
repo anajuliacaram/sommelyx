@@ -21,8 +21,12 @@ export interface WineListItem {
   producer?: string;
   vintage?: number;
   style?: string;
+  grape?: string;
+  region?: string;
   price?: number | null;
   rating: number;
+  description?: string;
+  pairings?: string[];
   verdict: string;
   compatibility: number;
   highlight?: "best-value" | "top-pick" | "adventurous" | null;
