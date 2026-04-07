@@ -184,6 +184,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           grape: w.grape || null,
           purchase_price: w.purchase_price || null,
           current_value: null,
+          last_price_date: null,
           cellar_location: w.cellar_location || null,
           drink_from: w.drink_from || null,
           drink_until: w.drink_until || null,
