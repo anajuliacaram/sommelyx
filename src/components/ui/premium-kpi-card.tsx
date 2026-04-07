@@ -76,11 +76,11 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
             onPointerCancel={handlePointerLeave}
             onClick={onClick}
             animate={{
-                scale: isPressing ? 0.98 : 1,
-                y: isHovering && interactive ? -2 : 0,
+                scale: isPressing ? 0.99 : 1,
+                y: isHovering && interactive ? -1 : 0,
                 boxShadow: isHovering && interactive
-                    ? "0 22px 54px -26px rgba(15,15,20,0.20), 0 0 0 1px rgba(15,15,20,0.04)"
-                    : "0 10px 26px -22px rgba(15,15,20,0.12), 0 0 0 1px rgba(15,15,20,0.04)"
+                    ? "0 8px 24px -12px rgba(15,15,20,0.12), 0 0 0 1px rgba(15,15,20,0.03)"
+                    : "0 2px 8px -4px rgba(15,15,20,0.06), 0 0 0 1px rgba(15,15,20,0.03)"
             }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             style={interactive ? {
@@ -91,8 +91,8 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
                 willChange: "transform, box-shadow",
             } : {}}
             className={cn(
-                "relative rounded-[24px] border border-border/70 bg-card/70 backdrop-blur-xl p-7 cursor-default transition-colors",
-                onClick && "cursor-pointer hover:bg-wine-light/45",
+                "relative rounded-2xl border border-border/50 bg-card/75 backdrop-blur-xl p-6 cursor-default transition-colors",
+                onClick && "cursor-pointer hover:bg-muted/20",
                 className
             )}
         >
