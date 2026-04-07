@@ -114,7 +114,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         region: region || null,
         grape: grape || null,
         purchase_price: lastPaid ? parseFloat(lastPaid) : null,
-        last_price_date: lastPaid ? lastPaidDate : null,
         current_value: currentValue ? parseFloat(currentValue) : null,
         cellar_location: formattedLocation,
         drink_from: drinkFrom ? parseInt(drinkFrom) : null,
