@@ -58,7 +58,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <MagneticButton>
             <Button
               variant="primary"
-              className="px-4 sm:px-6 h-10 sm:h-10 text-[12px] sm:text-[13px] font-semibold uppercase tracking-[0.06em] sm:tracking-[0.06em] rounded-xl shadow-float whitespace-nowrap"
+              className="px-3 sm:px-6 h-9 sm:h-10 text-[11px] sm:text-[13px] font-semibold uppercase tracking-[0.04em] sm:tracking-[0.06em] rounded-xl shadow-float whitespace-nowrap"
               onClick={onSignup}
             >
               Começar grátis
