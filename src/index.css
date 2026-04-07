@@ -4,69 +4,69 @@
 
 @layer base {
   :root {
-    /* ── Sommelyx Light Theme — Quiet Luxury Editorial ── */
-    --background: 30 15% 97%;
-    --foreground: 345 8% 18%;
+    /* ── Sommelyx Light — Premium Wine Dashboard ── */
+    --background: 30 8% 96%;
+    --foreground: 240 8% 12%;
 
-    --card: 30 12% 98%;
-    --card-foreground: 345 8% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 8% 12%;
 
-    --popover: 30 12% 98%;
-    --popover-foreground: 345 8% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 8% 12%;
 
-    /* Primary — Deep Wine (desaturated) */
-    --primary: 342 42% 30%;
-    --primary-foreground: 30 10% 97%;
+    /* Primary — Deep Wine */
+    --primary: 342 48% 26%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 10% 94%;
-    --secondary-foreground: 345 6% 28%;
+    --secondary: 30 6% 93%;
+    --secondary-foreground: 240 6% 22%;
 
-    --muted: 30 8% 94%;
-    --muted-foreground: 345 4% 48%;
+    --muted: 30 6% 93%;
+    --muted-foreground: 240 4% 44%;
 
-    /* Accent — Warm Gold (muted) */
-    --accent: 38 28% 55%;
-    --accent-foreground: 345 8% 18%;
+    /* Accent — Warm Gold */
+    --accent: 38 32% 50%;
+    --accent-foreground: 240 8% 12%;
 
-    /* Semantic States — Quiet, muted */
-    --success: 152 36% 40%;
+    /* Semantic States */
+    --success: 152 40% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 55% 50%;
+    --warning: 38 60% 48%;
     --warning-foreground: 0 0% 100%;
-    --destructive: 0 42% 48%;
+    --destructive: 0 48% 44%;
     --destructive-foreground: 0 0% 100%;
-    --info: 199 42% 48%;
+    --info: 199 48% 42%;
     --info-foreground: 0 0% 100%;
 
-    /* Warm neutrals */
-    --border: 30 6% 90%;
-    --input: 30 6% 90%;
-    --ring: 342 42% 30%;
+    /* Stronger borders */
+    --border: 30 6% 86%;
+    --input: 30 6% 86%;
+    --ring: 342 48% 26%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
 
-    /* Sidebar */
-    --sidebar-background: 30 8% 97%;
-    --sidebar-foreground: 345 4% 36%;
-    --sidebar-primary: 342 38% 34%;
+    /* Sidebar — slightly off-white */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 4% 36%;
+    --sidebar-primary: 342 48% 26%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 30 6% 95%;
-    --sidebar-accent-foreground: 345 8% 18%;
-    --sidebar-border: 30 6% 91%;
-    --sidebar-ring: 342 38% 34%;
+    --sidebar-accent-foreground: 240 8% 12%;
+    --sidebar-border: 30 6% 90%;
+    --sidebar-ring: 342 48% 26%;
 
-    /* ── Wine palette tokens ── */
-    --wine: 342 42% 30%;
+    /* Wine palette */
+    --wine: 342 48% 26%;
     --wine-foreground: 0 0% 100%;
-    --wine-light: 342 20% 94%;
-    --wine-vivid: 342 36% 40%;
+    --wine-light: 342 18% 93%;
+    --wine-vivid: 342 42% 36%;
 
-    --gold: 38 28% 55%;
+    --gold: 38 32% 50%;
     --gold-foreground: 0 0% 100%;
     --gold-light: 38 24% 82%;
 
-    --cream: 30 15% 97%;
-    --cream-dark: 30 8% 90%;
+    --cream: 30 8% 96%;
+    --cream-dark: 30 6% 88%;
   }
 
   .dark {
@@ -136,20 +136,29 @@
     @apply bg-background text-foreground antialiased;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: -0.01em;
-    line-height: 1.6;
+    line-height: 1.55;
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-image:
-      radial-gradient(120% 80% at 15% 0%, hsl(var(--wine) / 0.02), transparent 58%),
-      radial-gradient(90% 70% at 100% 10%, hsl(var(--gold) / 0.03), transparent 55%);
     background-attachment: fixed;
   }
 
+  /* Dashboard uses sans-serif headings for UI authority */
+  .dashboard-shell h1,
+  .dashboard-shell h2,
+  .dashboard-shell h3,
+  .dashboard-shell h4 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    font-weight: 700;
+  }
+
+  /* Landing/marketing keeps serif */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Libre Baskerville', Georgia, serif;
     letter-spacing: -0.02em;
@@ -157,9 +166,9 @@
     font-weight: 700;
   }
 
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.25rem; }
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.375rem; }
+  h3 { font-size: 1.125rem; }
 }
 
 @layer base {
@@ -344,19 +353,7 @@
 
   .dashboard-shell {
     position: relative;
-    background:
-      radial-gradient(circle at top left, hsl(var(--wine) / 0.02), transparent 30%),
-      radial-gradient(circle at top right, hsl(var(--gold) / 0.03), transparent 28%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(30 12% 96%) 100%);
-  }
-
-  .dashboard-shell::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0;
-    z-index: 0;
+    background: hsl(var(--background));
   }
 
   /* ── Premium Button System ── */
@@ -443,19 +440,18 @@
 
   /* ── Sidebar Premium ── */
   .sidebar-item {
-    @apply flex items-center gap-2.5 h-[40px] px-3 rounded-lg transition-all duration-200 relative cursor-pointer outline-none;
+    @apply flex items-center gap-2.5 h-[36px] px-3 rounded-lg transition-all duration-150 relative cursor-pointer outline-none;
     background: transparent;
     border: 1px solid transparent;
-    color: hsl(var(--foreground) / 0.65);
-    font-size: 14px;
+    color: hsl(var(--muted-foreground));
+    font-size: 13px;
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.005em;
   }
 
   .sidebar-item:hover,
   .sidebar-item:focus-visible {
-    background: hsl(var(--primary) / 0.05);
-    border-color: hsl(var(--primary) / 0.08);
+    background: hsl(var(--primary) / 0.06);
     color: hsl(var(--foreground));
   }
 
@@ -464,21 +460,11 @@
   }
 
   .sidebar-item--active {
-    background: hsl(var(--primary) / 0.07);
-    border-color: hsl(var(--primary) / 0.12);
+    background: hsl(var(--primary) / 0.08);
     color: hsl(var(--primary));
     font-weight: 600;
-  }
-
-  .sidebar-item--active::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 22%;
-    height: 56%;
-    width: 2.5px;
-    background: hsl(var(--primary));
-    border-radius: 0 2px 2px 0;
+    border-left: 3px solid hsl(var(--primary));
+    padding-left: 9px;
   }
 
   .sidebar-badge {
