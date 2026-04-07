@@ -406,7 +406,8 @@
   }
 
   .mobile-bottom-sheet-handle {
-    @apply w-8 h-0.5 rounded-full bg-muted-foreground/12 mx-auto mt-3;
+    @apply w-8 h-0.5 rounded-full mx-auto mt-3;
+    background-color: hsl(var(--muted-foreground) / 0.12);
   }
 
   /* ── Shimmer / Skeleton Animation ── */
