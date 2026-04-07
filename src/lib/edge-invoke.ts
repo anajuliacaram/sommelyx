@@ -42,16 +42,23 @@ export async function invokeEdgeFunction<T>(
   let attempt = 0;
   while (true) {
     try {
-      // Be explicit about Authorization to avoid cases where invoke() doesn't attach the session token.
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      // Try getSession first; if missing/expired, attempt a refresh (Safari ITP workaround).
+      let { data: sessionData } = await supabase.auth.getSession();
+      let accessToken = sessionData.session?.access_token;
+
       if (!accessToken) {
-        // Fail fast with a typed error so the UI can show the right message, instead of a generic 401.
-        throw new EdgeFunctionError(
-          "Sua sessão expirou. Faça login novamente para continuar.",
-          { status: 401, code: "AUTH_REQUIRED", retryable: false },
-        );
+        // Attempt silent refresh — handles Safari ITP and stale storage
+        const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession();
+        if (refreshErr || !refreshData.session) {
+          console.error("[edge-invoke] Sessão expirada. refreshSession falhou:", refreshErr?.message);
+          throw new EdgeFunctionError(
+            "Sua sessão expirou. Faça login novamente para continuar.",
+            { status: 401, code: "AUTH_REQUIRED", retryable: false },
+          );
+        }
+        accessToken = refreshData.session.access_token;
       }
+
       const invokePromise = supabase.functions.invoke(name, {
         body,
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -65,7 +72,6 @@ export async function invokeEdgeFunction<T>(
       // supabase-js wraps non-2xx as `error`
       if (error) {
         const status = typeof (error as any)?.status === "number" ? (error as any).status : undefined;
-        // Try to extract the real error message from the response context
         let message = "Não foi possível completar a solicitação.";
         let code: string | undefined;
         let requestId: string | undefined;
@@ -83,6 +89,13 @@ export async function invokeEdgeFunction<T>(
             message = error.message;
           }
         } catch { /* ignore parse errors */ }
+
+        // Sanitize raw JWT errors into friendly messages
+        if (message.toLowerCase().includes("invalid jwt") || message.toLowerCase().includes("jwt expired")) {
+          console.error(`[edge-invoke] JWT error from ${name}:`, message);
+          message = "Sua sessão expirou. Faça login novamente para continuar.";
+          code = "AUTH_REQUIRED";
+        }
 
         if (attempt < retries && (retryable ?? isRetriable(status))) {
           const backoff = 600 * Math.pow(2, attempt);
@@ -115,13 +128,24 @@ export async function invokeEdgeFunction<T>(
 
       return data as T;
     } catch (err) {
+      // Only retry retryable errors
       if (attempt < retries) {
-        const backoff = 600 * Math.pow(2, attempt);
-        attempt++;
-        await sleep(backoff);
-        continue;
+        const status =
+          err instanceof EdgeFunctionError
+            ? err.status
+            : typeof (err as any)?.status === "number"
+              ? ((err as any).status as number)
+              : undefined;
+        const retryable =
+          err instanceof EdgeFunctionError ? (err.retryable ?? isRetriable(status)) : isRetriable(status);
+
+        if (retryable) {
+          const backoff = 600 * Math.pow(2, attempt);
+          attempt++;
+          await sleep(backoff);
+          continue;
+        }
       }
-      // Preserve structured edge errors (requestId/code/retryable) for UX + suporte.
       if (err instanceof EdgeFunctionError) throw err;
       throw new Error(toErrorMessage(err));
     }
