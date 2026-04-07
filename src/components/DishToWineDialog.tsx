@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getDishWineSuggestions, getWinePairings, analyzeWineList, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis } from "@/lib/sommelier-ai";
+import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis } from "@/lib/sommelier-ai";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
@@ -16,8 +16,21 @@ interface DishToWineDialogProps {
 }
 
 type Source = null | "cellar" | "external";
-type CellarMode = null | "by-dish" | "by-wine";
-type Step = "source" | "cellar-mode" | "dish" | "select-wine" | "results" | "wine-results" | "photo" | "scanning" | "scan-results";
+type SubMode = null | "by-dish" | "by-wine";
+type Step =
+  | "source"
+  | "sub-mode"
+  | "dish"
+  | "select-wine"
+  | "results"
+  | "wine-results"
+  | "photo"
+  | "scanning"
+  | "scan-results"
+  | "ext-wine-input"
+  | "ext-menu-photo"
+  | "ext-menu-scanning"
+  | "ext-menu-results";
 
 const matchDot: Record<string, string> = {
   perfeito: "bg-success",
@@ -38,28 +51,33 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const { data: wines } = useWines();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
+  const menuFileRef = useRef<HTMLInputElement>(null);
 
   const [source, setSource] = useState<Source>(null);
-  const [cellarMode, setCellarMode] = useState<CellarMode>(null);
+  const [subMode, setSubMode] = useState<SubMode>(null);
   const [step, setStep] = useState<Step>("source");
   const [dish, setDish] = useState("");
+  const [extWineName, setExtWineName] = useState("");
   const [selectedWineId, setSelectedWineId] = useState("");
   const [suggestions, setSuggestions] = useState<WineSuggestion[] | null>(null);
   const [pairings, setPairings] = useState<PairingResult[] | null>(null);
   const [scanResults, setScanResults] = useState<WineListAnalysis | null>(null);
+  const [menuResults, setMenuResults] = useState<MenuAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const reset = () => {
     setSource(null);
-    setCellarMode(null);
+    setSubMode(null);
     setStep("source");
     setDish("");
+    setExtWineName("");
     setSelectedWineId("");
     setSuggestions(null);
     setPairings(null);
     setScanResults(null);
+    setMenuResults(null);
     setLoading(false);
     setError(null);
     setPreview(null);
@@ -72,19 +90,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   const handleSelectSource = (s: Source) => {
     setSource(s);
-    if (s === "cellar") {
-      setStep("cellar-mode");
-    } else {
-      setStep("dish");
-    }
+    setStep("sub-mode");
   };
 
-  const handleSelectCellarMode = (mode: CellarMode) => {
-    setCellarMode(mode);
-    if (mode === "by-dish") {
-      setStep("dish");
+  const handleSelectSubMode = (mode: SubMode) => {
+    setSubMode(mode);
+    if (source === "cellar") {
+      if (mode === "by-dish") setStep("dish");
+      else setStep("select-wine");
     } else {
-      setStep("select-wine");
+      if (mode === "by-dish") setStep("dish");
+      else setStep("ext-wine-input");
     }
   };
 
@@ -170,25 +186,54 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     e.target.value = "";
   };
 
+  const handleMenuFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = (reader.result as string).split(",")[1];
+      setPreview(reader.result as string);
+      setStep("ext-menu-scanning");
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await analyzeMenuForWine(base64, extWineName);
+        setMenuResults(result);
+        setStep("ext-menu-results");
+      } catch (err: any) {
+        setError(err.message || "Erro ao analisar o cardápio");
+        setStep("ext-menu-photo");
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const goBack = () => {
     setError(null);
-    if (step === "cellar-mode") {
+    if (step === "sub-mode") {
       setSource(null);
+      setSubMode(null);
       setStep("source");
     } else if (step === "dish") {
-      if (source === "cellar") {
-        setStep("cellar-mode");
-        setCellarMode(null);
-      } else {
-        setSource(null);
-        setStep("source");
-      }
+      setStep("sub-mode");
+      setSubMode(null);
     } else if (step === "select-wine") {
-      setStep("cellar-mode");
-      setCellarMode(null);
+      setStep("sub-mode");
+      setSubMode(null);
       setSelectedWineId("");
+    } else if (step === "ext-wine-input") {
+      setStep("sub-mode");
+      setSubMode(null);
+      setExtWineName("");
     } else if (step === "photo") {
       setStep("dish");
+      setPreview(null);
+    } else if (step === "ext-menu-photo") {
+      setStep("ext-wine-input");
       setPreview(null);
     } else if (step === "results") {
       setStep("dish");
@@ -199,11 +244,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     } else if (step === "scan-results") {
       setStep("photo");
       setScanResults(null);
+    } else if (step === "ext-menu-results") {
+      setStep("ext-menu-photo");
+      setMenuResults(null);
     }
   };
 
   const selectedWine = wines?.find((w) => w.id === selectedWineId);
   const availableWines = wines?.filter((w) => w.quantity > 0) || [];
+
+  const subModeTitle = source === "cellar" ? "Da minha adega" : "Adega externa";
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -273,7 +323,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <div>
                       <p className="text-[13px] font-semibold text-foreground">Adega externa</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Envie a foto da carta de vinhos do restaurante
+                        Envie a foto da carta de vinhos ou do cardápio
                       </p>
                     </div>
                   </div>
@@ -281,21 +331,21 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Step 1b: Cellar Mode (by dish or by wine) ── */}
-            {step === "cellar-mode" && (
+            {/* ── Step 1b: Sub-mode (by dish or by wine) ── */}
+            {step === "sub-mode" && (
               <motion.div
-                key="cellar-mode"
+                key="sub-mode"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3"
               >
                 <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                  Como quer harmonizar?
+                  {subModeTitle} — Como quer harmonizar?
                 </p>
 
                 <button
-                  onClick={() => handleSelectCellarMode("by-dish")}
+                  onClick={() => handleSelectSubMode("by-dish")}
                   className="w-full text-left rounded-xl border border-border/50 bg-background/60 hover:bg-primary/[0.04] hover:border-primary/20 p-4 transition-all duration-200 group"
                 >
                   <div className="flex items-center gap-3">
@@ -305,14 +355,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <div>
                       <p className="text-[13px] font-semibold text-foreground">Tenho um prato em mente</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        A IA sugere vinhos da sua adega para o prato
+                        {source === "cellar"
+                          ? "A IA sugere vinhos da sua adega para o prato"
+                          : "Digite o prato e envie a foto da carta de vinhos"}
                       </p>
                     </div>
                   </div>
                 </button>
 
                 <button
-                  onClick={() => handleSelectCellarMode("by-wine")}
+                  onClick={() => handleSelectSubMode("by-wine")}
                   className="w-full text-left rounded-xl border border-border/50 bg-background/60 hover:bg-primary/[0.04] hover:border-primary/20 p-4 transition-all duration-200 group"
                 >
                   <div className="flex items-center gap-3">
@@ -322,7 +374,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <div>
                       <p className="text-[13px] font-semibold text-foreground">Tenho um vinho em mente</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        A IA sugere pratos ideais para o vinho escolhido
+                        {source === "cellar"
+                          ? "A IA sugere pratos ideais para o vinho escolhido"
+                          : "Digite o vinho e envie a foto do cardápio"}
                       </p>
                     </div>
                   </div>
@@ -467,7 +521,196 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Photo Upload (external) ── */}
+            {/* ── Ext: Wine name input ── */}
+            {step === "ext-wine-input" && (
+              <motion.div
+                key="ext-wine-input"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-4"
+              >
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                    Qual vinho você quer harmonizar?
+                  </p>
+                  <div className="relative">
+                    <Wine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+                    <Input
+                      value={extWineName}
+                      onChange={(e) => setExtWineName(e.target.value)}
+                      placeholder="Nome do vinho (ex: Malbec Catena Zapata)…"
+                      className="pl-9 h-11 text-sm"
+                      onKeyDown={(e) => e.key === "Enter" && extWineName.trim() && setStep("ext-menu-photo")}
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => setStep("ext-menu-photo")}
+                  disabled={!extWineName.trim()}
+                  className="w-full h-10 text-[13px] font-medium"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Continuar — Enviar foto do cardápio
+                </Button>
+              </motion.div>
+            )}
+
+            {/* ── Ext: Menu photo upload ── */}
+            {step === "ext-menu-photo" && (
+              <motion.div
+                key="ext-menu-photo"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-4"
+              >
+                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
+                  <p className="text-[12px] font-medium text-foreground">
+                    Vinho: <span className="font-semibold">{extWineName}</span>
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-3">
+                    Envie a foto do cardápio do restaurante
+                  </p>
+
+                  <input
+                    ref={menuFileRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handleMenuFileChange}
+                  />
+
+                  <button
+                    onClick={() => menuFileRef.current?.click()}
+                    className="w-full h-32 rounded-xl border-2 border-dashed border-primary/20 bg-card/40 flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-200 group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <Camera className="h-5 w-5 text-primary" />
+                    </div>
+                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou escolher da galeria</p>
+                    <p className="text-[10px] text-muted-foreground">Cardápio de comidas do restaurante</p>
+                  </button>
+                </div>
+
+                {error && (
+                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                )}
+              </motion.div>
+            )}
+
+            {/* ── Ext: Menu scanning ── */}
+            {step === "ext-menu-scanning" && (
+              <motion.div
+                key="ext-menu-scanning"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center gap-3 py-10"
+              >
+                {preview && (
+                  <img src={preview} alt="Cardápio" className="w-24 h-24 object-cover rounded-xl border border-border/30 mb-2" />
+                )}
+                <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
+                <div className="text-center">
+                  <p className="text-sm font-medium text-foreground">Analisando o cardápio…</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Buscando os melhores pratos para "{extWineName}"
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── Ext: Menu results ── */}
+            {step === "ext-menu-results" && menuResults && (
+              <motion.div
+                key="ext-menu-results"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
+                  <p className="text-[12px] font-medium text-foreground">
+                    Vinho: <span className="font-semibold">{extWineName}</span>
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 pb-1">
+                  <ChefHat className="h-3 w-3 text-primary/60" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    Pratos do cardápio que harmonizam
+                  </span>
+                </div>
+
+                {menuResults.summary && (
+                  <p className="text-[11px] text-foreground/80 leading-relaxed italic">
+                    "{menuResults.summary}"
+                  </p>
+                )}
+
+                {menuResults.dishes.length === 0 ? (
+                  <p className="text-[12px] text-muted-foreground text-center py-4">
+                    Não foi possível identificar pratos no cardápio. Tente outra foto.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {menuResults.dishes.map((d, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                        className="glass-card p-3.5 space-y-1.5"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", matchDot[d.match] || "bg-primary/40")} />
+                            <span className="text-[13px] font-semibold text-foreground">{d.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {d.highlight && (
+                              <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/8 rounded-full px-2 py-[2px]">
+                                {d.highlight === "top-pick" ? "Melhor escolha" : "Melhor custo-benefício"}
+                              </span>
+                            )}
+                            {d.price != null && (
+                              <span className="text-[12px] font-bold text-foreground">
+                                R$ {d.price.toFixed(0)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-snug pl-3.5">
+                          {d.reason}
+                        </p>
+                      </motion.li>
+                    ))}
+                  </ul>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setMenuResults(null);
+                    setPreview(null);
+                    setStep("ext-menu-photo");
+                  }}
+                  className="w-full h-9 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border/40"
+                >
+                  Enviar outra foto
+                </Button>
+              </motion.div>
+            )}
+
+            {/* ── Photo Upload (external dish → wine list) ── */}
             {step === "photo" && (
               <motion.div
                 key="photo"
@@ -672,7 +915,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── External Scan Results ── */}
+            {/* ── External Scan Results (dish → wine list photo) ── */}
             {step === "scan-results" && scanResults && (
               <motion.div
                 key="scan-results"
