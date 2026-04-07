@@ -31,10 +31,10 @@ const buttonVariants = cva(
         glass: "btn-glass rounded-lg px-6 font-medium backdrop-blur-xl",
       },
       size: {
-        default: "h-10 px-5 text-[13px]",
+        default: "h-11 px-5 text-[14px]",
         sm: "h-9 px-4 text-[13px]",
-        lg: "h-11 px-7 text-[14px]",
-        icon: "h-10 w-10 p-0",
+        lg: "h-12 px-8 text-[15px]",
+        icon: "h-11 w-11 p-0",
       },
     },
     defaultVariants: {
