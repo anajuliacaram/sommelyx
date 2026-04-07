@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -9,12 +8,10 @@ const corsHeaders = {
 };
 
 const FUNCTION_NAME = "scan-wine-label";
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB (tamanho aproximado da string base64)
-const AI_TIMEOUT_MS = 35_000;
-const OPENAI_URL = "https://api.openai.com/v1/responses";
-const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const AI_TIMEOUT_MS = 60_000;
+const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-// ── Simple in-memory rate limiter ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 10;
 const RATE_WINDOW_MS = 60_000;
@@ -70,36 +67,20 @@ function normalizeBase64(input: string) {
 
 function parseImageDataUrl(input: string): { mime: string; base64: string } {
   const trimmed = input.trim();
-  // data:image/png;base64,....
   if (trimmed.startsWith("data:") && trimmed.includes(";base64,")) {
     const mime = trimmed.slice(5, trimmed.indexOf(";base64,")) || "image/jpeg";
     const base64 = trimmed.slice(trimmed.indexOf("base64,") + "base64,".length).trim();
     return { mime, base64 };
   }
-  // If no data-url prefix is present, default to jpeg.
   return { mime: "image/jpeg", base64: trimmed };
-}
-
-function safeJsonParse(value: unknown): unknown | null {
-  if (!value) return null;
-  if (typeof value === "object") return value;
-  if (typeof value === "string") {
-    try {
-      return JSON.parse(value);
-    } catch {
-      return null;
-    }
-  }
-  return null;
 }
 
 function extractJsonFromText(text: string) {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start === -1 || end === -1 || end <= start) return null;
-  const candidate = text.slice(start, end + 1);
   try {
-    return JSON.parse(candidate);
+    return JSON.parse(text.slice(start, end + 1));
   } catch {
     return null;
   }
@@ -140,7 +121,6 @@ async function logAudit(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SERVICE_ROLE_KEY")!,
     );
-
     await adminClient.from("edge_function_logs").insert({
       user_id: userId,
       function_name: FUNCTION_NAME,
@@ -167,7 +147,6 @@ serve(async (req) => {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "missing_or_invalid_authorization_header",
-        has_authorization_header: Boolean(authHeader),
       });
       return fail(401, {
         ok: false,
@@ -185,14 +164,11 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    // Passar o token explicitamente evita falhas quando o header global não é aplicado.
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "invalid_token",
-        supabase_error: userError ? { message: userError.message, status: (userError as any).status } : null,
-        token_length: token?.length ?? 0,
       });
       return fail(401, {
         ok: false,
@@ -260,12 +236,10 @@ serve(async (req) => {
       });
     }
 
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    const openaiModel = Deno.env.get("OPENAI_MODEL") || DEFAULT_OPENAI_MODEL;
-
-    if (!openaiKey) {
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing OPENAI_API_KEY`);
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_openai_key" });
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing LOVABLE_API_KEY`);
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_lovable_key" });
       return fail(500, {
         ok: false,
         code: "CONFIG_ERROR",
@@ -275,98 +249,68 @@ serve(async (req) => {
       });
     }
 
+    const systemPrompt =
+      `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão.\n\n` +
+      `Regras:\n` +
+      `- Retorne APENAS JSON válido seguindo o schema abaixo (sem texto extra, sem markdown).\n` +
+      `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado.\n` +
+      `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc).\n` +
+      `- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.\n` +
+      `- tasting_notes: 1-2 frases curtas em português (perfil esperado).\n` +
+      `- food_pairing: 2-3 sugestões em português.\n` +
+      `- Leia todo texto visível no rótulo (frente e verso, se aparecer).\n\n` +
+      `Schema JSON:\n` +
+      `{\n` +
+      `  "wine": {\n` +
+      `    "name": "string",\n` +
+      `    "producer": "string | null",\n` +
+      `    "vintage": "number | null",\n` +
+      `    "style": "tinto | branco | rose | espumante | sobremesa | fortificado | null",\n` +
+      `    "country": "string | null",\n` +
+      `    "region": "string | null",\n` +
+      `    "grape": "string | null",\n` +
+      `    "food_pairing": "string | null",\n` +
+      `    "tasting_notes": "string | null",\n` +
+      `    "cellar_location": "null",\n` +
+      `    "purchase_price": "null",\n` +
+      `    "drink_from": "number | null",\n` +
+      `    "drink_until": "number | null"\n` +
+      `  }\n` +
+      `}`;
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
-    const response = await fetch(OPENAI_URL, {
+    const aiResponse = await fetch(AI_URL, {
       method: "POST",
       signal: controller.signal,
       headers: {
-        Authorization: `Bearer ${openaiKey}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: openaiModel,
-        // Responses API: input items include text + image.
-        input: [
-          {
-            role: "system",
-            content: [
-              {
-                type: "input_text",
-                text:
-                  `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão.\n\n` +
-                  `Regras:\n` +
-                  `- Retorne APENAS JSON seguindo o schema (sem texto extra).\n` +
-                  `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado.\n` +
-                  `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc).\n` +
-                  `- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.\n` +
-                  `- tasting_notes: 1-2 frases curtas em português (perfil esperado).\n` +
-                  `- food_pairing: 2-3 sugestões em português.\n` +
-                  `- Leia todo texto visível no rótulo (frente e verso, se aparecer).`,
-              },
-            ],
-          },
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
           {
             role: "user",
             content: [
-              { type: "input_text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
-              // Preserve the correct mime type when the client uploads png/webp etc.
-              { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}` },
+              { type: "text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
+              { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
             ],
           },
         ],
-        // Enforce a strict JSON schema output for reliability.
-        // NOTE: In Responses API, structured output format lives under `text.format`.
-        // See: https://platform.openai.com/docs/api-reference/responses/create
-        text: {
-          format: {
-            type: "json_schema",
-            name: "wine_label",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                wine: {
-                  type: "object",
-                  properties: {
-                    name: { type: "string" },
-                    producer: { type: "string" },
-                    vintage: { anyOf: [{ type: "integer" }, { type: "null" }] },
-                    style: {
-                      anyOf: [
-                        { type: "string", enum: ["tinto", "branco", "rose", "espumante", "sobremesa", "fortificado"] },
-                        { type: "null" },
-                      ],
-                    },
-                    country: { anyOf: [{ type: "string" }, { type: "null" }] },
-                    region: { anyOf: [{ type: "string" }, { type: "null" }] },
-                    grape: { anyOf: [{ type: "string" }, { type: "null" }] },
-                    food_pairing: { anyOf: [{ type: "string" }, { type: "null" }] },
-                    tasting_notes: { anyOf: [{ type: "string" }, { type: "null" }] },
-                    cellar_location: { anyOf: [{ type: "string" }, { type: "null" }] },
-                    purchase_price: { anyOf: [{ type: "number" }, { type: "null" }] },
-                    drink_from: { anyOf: [{ type: "integer" }, { type: "null" }] },
-                    drink_until: { anyOf: [{ type: "integer" }, { type: "null" }] },
-                  },
-                  required: ["name"],
-                },
-              },
-              required: ["wine"],
-            },
-          },
-        },
         temperature: 0.1,
-        max_output_tokens: 900,
       }),
     });
 
     clearTimeout(timeout);
     const durationMs = Date.now() - startTime;
 
-    if (!response.ok) {
-      const bodyText = await response.text().catch(() => "");
-      if (response.status === 429) {
+    if (!aiResponse.ok) {
+      const bodyText = await aiResponse.text().catch(() => "");
+
+      if (aiResponse.status === 429) {
         await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
         return fail(429, {
           ok: false,
@@ -376,7 +320,7 @@ serve(async (req) => {
           retryable: true,
         });
       }
-      if (response.status === 402) {
+      if (aiResponse.status === 402) {
         await logAudit(userId, 402, "ai_error", durationMs, { request_id: requestId, reason: "credits_exhausted" });
         return fail(402, {
           ok: false,
@@ -387,43 +331,10 @@ serve(async (req) => {
         });
       }
 
-      // Invalid image / invalid request: return a helpful message instead of generic "unavailable".
-      if (response.status === 400) {
-        await logAudit(userId, 422, "ai_error", durationMs, {
-          request_id: requestId,
-          reason: "invalid_ai_request",
-          ai_body_preview: bodyText.slice(0, 400),
-        });
-        return fail(422, {
-          ok: false,
-          code: "IMAGE_INVALID",
-          error: "Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo.",
-          requestId,
-          retryable: false,
-        });
-      }
-
-      // Upstream auth/config error (invalid key, missing permission, suspended/billing issue, etc).
-      if (response.status === 401 || response.status === 403) {
-        await logAudit(userId, 500, "ai_error", durationMs, {
-          request_id: requestId,
-          reason: "ai_auth_error",
-          ai_status: response.status,
-          ai_body_preview: bodyText.slice(0, 400),
-        });
-        return fail(500, {
-          ok: false,
-          code: "AI_AUTH",
-          error: "A análise por IA não está configurada corretamente no momento. Tente novamente mais tarde.",
-          requestId,
-          retryable: false,
-        });
-      }
-
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} ai_status=${response.status} body=${bodyText.slice(0, 240)}`);
+      console.error(`[${FUNCTION_NAME}] request_id=${requestId} ai_status=${aiResponse.status} body=${bodyText.slice(0, 240)}`);
       await logAudit(userId, 502, "ai_error", durationMs, {
         request_id: requestId,
-        ai_status: response.status,
+        ai_status: aiResponse.status,
         ai_body_preview: bodyText.slice(0, 400),
       });
       return fail(502, {
@@ -435,8 +346,8 @@ serve(async (req) => {
       });
     }
 
-    const data = await response.json().catch(() => null);
-    if (!data) {
+    const aiData = await aiResponse.json().catch(() => null);
+    if (!aiData) {
       await logAudit(userId, 502, "ai_error", durationMs, { request_id: requestId, reason: "invalid_ai_json" });
       return fail(502, {
         ok: false,
@@ -447,27 +358,8 @@ serve(async (req) => {
       });
     }
 
-    // Responses API: prefer parsed output when available; otherwise read `output_text` / traverse `output[]`.
-    const outputParsed = safeJsonParse((data as any)?.output_parsed);
-    const rawTextDirect = typeof (data as any)?.output_text === "string" ? String((data as any).output_text) : "";
-
-    const outputItems = Array.isArray((data as any)?.output) ? (data as any).output : [];
-    const firstMessage =
-      outputItems.find((it: any) => it?.type === "message" && it?.role === "assistant") ??
-      outputItems.find((it: any) => it?.type === "message") ??
-      outputItems[0];
-    const content = Array.isArray(firstMessage?.content) ? firstMessage.content : [];
-    const contentItem =
-      content.find((c: any) => c?.type === "output_text") ??
-      content.find((c: any) => c?.type === "output_json") ??
-      content[0] ??
-      null;
-
-    const parsedFromContent = safeJsonParse((contentItem as any)?.parsed) ?? safeJsonParse((contentItem as any)?.json);
-    const rawTextFromItems = typeof (contentItem as any)?.text === "string" ? String((contentItem as any).text) : "";
-    const rawText = rawTextDirect || rawTextFromItems;
-
-    const parsedArgs = outputParsed ?? parsedFromContent ?? safeJsonParse(rawText) ?? extractJsonFromText(rawText);
+    const content = aiData.choices?.[0]?.message?.content || "";
+    const parsedArgs = extractJsonFromText(content);
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
       await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "no_structured_output" });
