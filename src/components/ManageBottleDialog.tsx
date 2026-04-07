@@ -498,11 +498,13 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                       <Button
                         key={opt.value}
                         type="button"
-                        variant={rating === opt.value ? "secondary" : "ghost"}
+                        variant="ghost"
                         size="sm"
                         className={cn(
-                          "text-[10px] px-2.5 h-7 border",
-                          rating === opt.value ? "border-transparent" : "border-border/60 bg-background/40 hover:bg-background",
+                          "text-[10px] px-2.5 h-7 border transition-all",
+                          rating === opt.value
+                            ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground"
+                            : "border-border/60 bg-background/40 hover:bg-background",
                         )}
                         onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
                       >
