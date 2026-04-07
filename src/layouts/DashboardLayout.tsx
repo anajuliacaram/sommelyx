@@ -37,11 +37,11 @@ export default function DashboardLayout() {
       <div className="dashboard-shell min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 md:h-13 flex items-center px-3 md:px-5 gap-2 md:gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/25">
+          <header className="h-13 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 bg-background/75 backdrop-blur-2xl border-b border-border/15">
             <SidebarTrigger
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "rounded-xl [&>svg]:h-4.5 [&>svg]:w-4.5 text-muted-foreground hover:text-foreground",
+                "rounded-lg [&>svg]:h-4 [&>svg]:w-4 text-muted-foreground hover:text-foreground",
               )}
             />
 
@@ -66,13 +66,13 @@ export default function DashboardLayout() {
               />
             </div>
 
-            <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="flex items-center gap-2">
               <span
-                className="hidden sm:inline-flex items-center h-6 px-2.5 rounded-md text-[9px] font-bold uppercase tracking-[0.10em] shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center h-6 px-2.5 rounded-md text-[9px] font-medium uppercase tracking-[0.08em] shrink-0 whitespace-nowrap"
                 style={{
-                  background: profileType === "commercial" ? "hsl(var(--gold) / 0.06)" : "hsl(var(--primary) / 0.05)",
-                  color: profileType === "commercial" ? "hsl(var(--gold))" : "hsl(var(--primary))",
-                  border: `1px solid ${profileType === "commercial" ? "hsl(var(--gold) / 0.15)" : "hsl(var(--primary) / 0.10)"}`,
+                  background: profileType === "commercial" ? "hsl(var(--accent) / 0.06)" : "hsl(var(--primary) / 0.04)",
+                  color: profileType === "commercial" ? "hsl(var(--accent))" : "hsl(var(--primary))",
+                  border: `1px solid ${profileType === "commercial" ? "hsl(var(--accent) / 0.12)" : "hsl(var(--primary) / 0.08)"}`,
                 }}
               >
                 {profileType === "commercial" ? "Comercial" : "Pessoal"}
@@ -83,12 +83,12 @@ export default function DashboardLayout() {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/dashboard/alerts")}
-                className="h-9 w-9 rounded-xl relative text-muted-foreground hover:bg-muted/25"
+                className="h-9 w-9 rounded-lg relative text-muted-foreground hover:bg-muted/20"
                 title="Alertas"
               >
                 <Bell className="h-4 w-4" />
                 {alertCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-[8px] font-bold flex items-center justify-center text-white bg-destructive">
+                  <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-[8px] font-semibold flex items-center justify-center text-white bg-destructive">
                     {alertCount}
                   </span>
                 )}
@@ -98,7 +98,7 @@ export default function DashboardLayout() {
                 type="button"
                 variant="primary"
                 size="icon"
-                className="h-9 w-9 rounded-xl p-0 font-bold shadow-premium text-[11px]"
+                className="h-9 w-9 rounded-lg p-0 text-[11px] font-semibold"
                 onClick={() => navigate("/dashboard/settings")}
               >
                 {initials}
@@ -106,7 +106,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 px-3 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] md:p-4 lg:p-5">
+          <div className="flex-1 px-4 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-6 lg:px-8">
             <AnimatedOutlet />
           </div>
         </main>

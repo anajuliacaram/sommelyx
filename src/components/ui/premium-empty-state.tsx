@@ -36,27 +36,27 @@ export function PremiumEmptyState({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "flex flex-col items-center justify-center p-10 lg:p-16 text-center rounded-2xl bg-card/60 backdrop-blur-2xl border border-border/40 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_-16px_rgba(15,15,20,0.08)] relative overflow-hidden",
+                "flex flex-col items-center justify-center py-16 lg:py-20 px-8 text-center rounded-xl bg-card/60 border border-border/25 relative overflow-hidden",
                 className
             )}
         >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[360px] max-h-[360px] bg-gradient-to-br from-wine/[0.06] to-transparent blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[280px] max-h-[280px] bg-gradient-to-br from-primary/[0.04] to-transparent blur-[60px] rounded-full pointer-events-none" />
 
             <motion.div
-                animate={reducedMotion ? {} : { y: [-3, 3, -3] }}
+                animate={reducedMotion ? {} : { y: [-2, 2, -2] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="relative flex items-center justify-center w-20 h-20 mb-6"
+                className="relative flex items-center justify-center w-16 h-16 mb-8"
             >
-                <div className="absolute inset-0 bg-wine/[0.06] rounded-full blur-xl pointer-events-none" />
-                <div className="relative z-10 w-14 h-14 rounded-xl bg-card shadow-[0_2px_8px_-2px_rgba(15,15,20,0.08)] border border-border/40 flex items-center justify-center">
-                    <Icon className="w-6 h-6 text-wine" strokeWidth={1.5} />
+                <div className="absolute inset-0 bg-primary/[0.04] rounded-full blur-lg pointer-events-none" />
+                <div className="relative z-10 w-12 h-12 rounded-lg bg-card border border-border/30 flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-primary/70" strokeWidth={1.5} />
                 </div>
             </motion.div>
 
-            <h3 className="text-[24px] font-serif font-bold text-foreground tracking-tight mb-2">
+            <h3 className="font-serif text-[22px] font-semibold text-foreground tracking-[-0.01em] mb-2">
                 {title}
             </h3>
-            <p className="text-[14px] text-muted-foreground font-medium max-w-[380px] leading-relaxed mb-8">
+            <p className="text-[14px] text-muted-foreground max-w-[340px] leading-relaxed mb-8">
                 {description}
             </p>
 
@@ -65,7 +65,7 @@ export function PremiumEmptyState({
                     <Button
                         variant="primary"
                         onClick={primaryAction.onClick}
-                        className="h-10 px-7 rounded-xl text-[13px] font-bold uppercase tracking-[0.08em] shadow-float"
+                        size="lg"
                     >
                         {primaryAction.icon && <span className="mr-2">{primaryAction.icon}</span>}
                         {primaryAction.label}
@@ -73,9 +73,9 @@ export function PremiumEmptyState({
                 )}
                 {secondaryAction && (
                     <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={secondaryAction.onClick}
-                        className="h-10 px-7 rounded-xl text-[13px] font-bold uppercase tracking-[0.08em] border border-border/40 bg-background/50 hover:bg-background shadow-sm"
+                        size="lg"
                     >
                         {secondaryAction.label}
                     </Button>
