@@ -152,10 +152,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       if (!currentValue) missing.push("valor atual");
 
       if (missing.length > 0) {
-        toast({
-          title: "💡 Dica",
-          description: `Campos como ${missing.join(", ")} não foram preenchidos. Alguns relatórios e alertas podem ficar incompletos.`,
-          duration: 6000,
+        toast.warning(`Campos como ${missing.join(", ")} não foram preenchidos. Alguns relatórios e alertas podem ficar incompletos.`, {
+          duration: 7000,
+          important: true,
         });
       }
 
