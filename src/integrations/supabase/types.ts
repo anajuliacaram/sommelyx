@@ -226,6 +226,51 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          dev_mode: boolean
+          external_id: string
+          id: string
+          metadata: Json | null
+          plan: string
+          provider_id: string | null
+          provider_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          dev_mode?: boolean
+          external_id: string
+          id?: string
+          metadata?: Json | null
+          plan: string
+          provider_id?: string | null
+          provider_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          dev_mode?: boolean
+          external_id?: string
+          id?: string
+          metadata?: Json | null
+          plan?: string
+          provider_id?: string | null
+          provider_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
