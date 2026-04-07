@@ -12,7 +12,7 @@ interface LandingHeaderProps {
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-4 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 bg-background/75 backdrop-blur-2xl border-b border-border/30"
+      className="fixed top-0 w-full z-50 px-3 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 bg-background/75 backdrop-blur-2xl border-b border-border/30"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -58,7 +58,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <MagneticButton>
             <Button
               variant="primary"
-              className="px-4 sm:px-6 h-10 sm:h-10 text-[12px] sm:text-[13px] font-semibold uppercase tracking-[0.06em] sm:tracking-[0.06em] rounded-xl shadow-float whitespace-nowrap"
+              className="px-3 sm:px-6 h-9 sm:h-10 text-[11px] sm:text-[13px] font-semibold uppercase tracking-[0.04em] sm:tracking-[0.06em] rounded-xl shadow-float whitespace-nowrap"
               onClick={onSignup}
             >
               Começar grátis
