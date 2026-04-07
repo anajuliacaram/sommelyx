@@ -146,6 +146,20 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         }
       }
 
+      // Lembrete sobre campos opcionais não preenchidos
+      const missing: string[] = [];
+      if (!lastPaid) missing.push("último valor pago");
+      if (!drinkFrom && !drinkUntil) missing.push("prazo para beber");
+      if (!currentValue) missing.push("valor atual");
+
+      if (missing.length > 0) {
+        toast({
+          title: "💡 Dica",
+          description: `Campos como ${missing.join(", ")} não foram preenchidos. Alguns relatórios e alertas podem ficar incompletos.`,
+          duration: 6000,
+        });
+      }
+
       setSuccess(true);
       setTimeout(() => {
         reset();
