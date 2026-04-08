@@ -83,7 +83,7 @@ export function AppSidebar() {
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-2 px-1 py-2 mb-2 rounded-lg bg-white transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-0 px-1 py-2 mb-2 rounded-lg bg-white transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
             <div className="flex h-[150px] w-[95px] shrink-0 items-center justify-center">
