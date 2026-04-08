@@ -170,23 +170,18 @@ export function DashboardCommandMenu({
               ? "Pesquisar telas, ações e produtos..."
               : "Pesquisar telas, ações e rótulos..."
           }
-          className="h-14 text-[15px]"
         />
-        <CommandList className="max-h-[440px]">
-          <CommandEmpty>Nada encontrado. Tente outro termo.</CommandEmpty>
+        <CommandList className="max-h-[440px] py-1">
+          <CommandEmpty className="py-8 text-center text-[13px] font-medium text-muted-foreground/60">Nada encontrado. Tente outro termo.</CommandEmpty>
 
-          <CommandGroup
-            heading="Navegação"
-            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-muted-foreground"
-          >
+          <CommandGroup heading="Navegação">
             {navItems.map((item) => (
               <CommandItem
                 key={item.label}
-                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-primary/10 data-[selected=true]:text-foreground"
                 onSelect={() => runAction(item.onSelect)}
               >
-                <item.icon className="h-4 w-4 text-primary" />
-                <span>{item.label}</span>
+                <item.icon className="h-4 w-4 text-primary/70" />
+                <span className="font-medium text-foreground/80">{item.label}</span>
                 {item.shortcut ? <CommandShortcut>{item.shortcut}</CommandShortcut> : null}
               </CommandItem>
             ))}
@@ -194,18 +189,14 @@ export function DashboardCommandMenu({
 
           <CommandSeparator />
 
-          <CommandGroup
-            heading="Ações rápidas"
-            className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-muted-foreground"
-          >
+          <CommandGroup heading="Ações rápidas">
             {actionItems.map((item) => (
               <CommandItem
                 key={item.label}
-                className="rounded-2xl px-3 py-3 data-[selected=true]:bg-primary/10 data-[selected=true]:text-foreground"
                 onSelect={() => runAction(item.onSelect)}
               >
-                <item.icon className="h-4 w-4 text-primary" />
-                <span>{item.label}</span>
+                <item.icon className="h-4 w-4 text-primary/70" />
+                <span className="font-medium text-foreground/80">{item.label}</span>
                 {item.shortcut ? <CommandShortcut>{item.shortcut}</CommandShortcut> : null}
               </CommandItem>
             ))}
@@ -214,23 +205,19 @@ export function DashboardCommandMenu({
           {wineResults.length > 0 ? (
             <>
               <CommandSeparator />
-              <CommandGroup
-                heading={isCommercial ? "Produtos em destaque" : "Rótulos em destaque"}
-                className="[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:text-[#8A808E]"
-              >
+              <CommandGroup heading={isCommercial ? "Produtos em destaque" : "Rótulos em destaque"}>
                 {wineResults.map((wine) => (
                   <CommandItem
                     key={wine.id}
-                    className="rounded-2xl px-3 py-3 data-[selected=true]:bg-[#8C2044]/10 data-[selected=true]:text-[#17141D]"
                     value={`${wine.name} ${wine.producer ?? ""} ${wine.country ?? ""} ${wine.region ?? ""}`}
                     onSelect={() => handleNavigateToWine(wine.name)}
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#8C2044]/10 text-[#8C2044]">
-                      <Wine className="h-4 w-4" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/[0.08]">
+                      <Wine className="h-3.5 w-3.5 text-primary" />
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate font-semibold text-[#17141D]">{wine.name}</span>
-                      <span className="truncate text-[12px] text-[#7A7080]">
+                      <span className="truncate text-[13px] font-semibold text-foreground">{wine.name}</span>
+                      <span className="truncate text-[11px] text-muted-foreground/60 font-medium">
                         {[wine.producer, wine.vintage, wine.region || wine.country].filter(Boolean).join(" · ")}
                       </span>
                     </div>
