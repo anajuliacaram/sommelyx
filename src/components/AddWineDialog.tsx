@@ -358,6 +358,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         onOpenChange={setScanOpen}
         onScanComplete={handleScanComplete}
       />
+      <ImportCsvDialog open={importCsvOpen} onOpenChange={setImportCsvOpen} />
     </>
   );
 }
