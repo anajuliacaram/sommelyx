@@ -9,6 +9,7 @@ import { BreakageDialog } from "@/components/BreakageDialog";
 import { SaleDialog } from "@/components/SaleDialog";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
+import { QuickActions } from "@/components/QuickActions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
@@ -139,52 +140,14 @@ export function AppSidebar() {
                 </Button>
               </div>
             ) : (
-              <div
-                className="rounded-2xl border border-primary/10 bg-background/75 p-3.5 shadow-[0_10px_26px_-22px_rgba(25,18,22,0.4)] backdrop-blur-sm"
-              >
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
-                  Ações rápidas
-                </p>
-
-                <div className="space-y-4">
-                  <Button
-                    variant="primary"
-                    className="h-14 w-full rounded-2xl text-[14px] font-semibold tracking-[-0.01em] shadow-[0_14px_26px_-16px_hsl(var(--wine)/0.45)] hover:shadow-[0_18px_30px_-16px_hsl(var(--wine)/0.5)]"
-                    onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Adicionar vinho
-                  </Button>
-
-                  <Button
-                    variant="secondary"
-                    className="h-14 w-full rounded-2xl border-primary/15 bg-primary/[0.04] text-[14px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
-                    onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
-                  >
-                    <Wine className="h-[18px] w-[18px]" />
-                    Registrar consumo
-                  </Button>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      variant="ghost"
-                      className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
-                      onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
-                    >
-                      <UtensilsCrossed className="h-[18px] w-[18px]" />
-                      Harmonizar
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
-                      onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
-                    >
-                      <Sparkles className="h-[18px] w-[18px]" />
-                      Analisar carta
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <QuickActions
+                variant={isCommercial ? "commercial" : "personal"}
+                layout="stacked"
+                onAddWine={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
+                onRegisterConsumption={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
+                onHarmonize={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
+                onAnalyzeList={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
+              />
             )}
           </div>
         </SidebarHeader>
