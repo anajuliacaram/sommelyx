@@ -79,23 +79,23 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="offcanvas" className="border-r border-border w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
-        <SidebarHeader className="pt-3 md:pt-3 px-3">
+        <SidebarHeader className="pt-2 md:pt-2 px-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-0 px-1 py-2 mb-2 rounded-lg bg-white transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-0 px-1 py-1 mb-1 rounded-lg transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
-            <div className="flex h-[150px] w-[95px] shrink-0 items-center justify-center">
+            <div className="flex h-[100px] w-[70px] shrink-0 items-center justify-center">
               <img
                 src="/logo-sommelyx-mark.png"
                 alt="Sommelyx"
                 draggable={false}
-                className="h-[150px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
+                className="h-[100px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[35px] font-bold tracking-[-0.01em] text-primary leading-none font-serif mx-0 px-0 border-solid opacity-100 shadow-sm text-left mr-0 border-white">
+              <span className="text-[25px] font-bold tracking-[-0.01em] text-primary leading-none font-serif">
                 Sommelyx
               </span>
               <span
@@ -113,7 +113,7 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="px-0 pb-2">
+          <div className="px-0 pb-1">
             {isCommercial ? (
               <div className="grid grid-cols-2 gap-2">
                 <Button
