@@ -82,10 +82,6 @@ export function QuickActions({
       animate="visible"
       variants={containerVariants}
     >
-      <p className="mb-3.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
-        Ações rápidas
-      </p>
-
       <div className="space-y-3">
         {/* ── Primary: full-width, tallest ── */}
         <motion.div variants={itemVariants}>
