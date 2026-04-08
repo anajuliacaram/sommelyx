@@ -86,12 +86,12 @@ export function AppSidebar() {
             className="flex items-center gap-3 px-1 py-2 mb-2 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
-            <div className="flex h-[64px] w-[40px] shrink-0 items-center justify-center">
+            <div className="flex h-[88px] w-[56px] shrink-0 items-center justify-center">
               <img
                 src="/logo-sommelyx-mark.png"
                 alt="Sommelyx"
                 draggable={false}
-                className="h-[64px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)]"
+                className="h-[88px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)]"
               />
             </div>
             <div className="flex flex-col">
