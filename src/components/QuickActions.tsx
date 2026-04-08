@@ -88,9 +88,9 @@ export function QuickActions({
           <Button
             variant="primary"
             onClick={onAddWine}
-            className="h-14 w-full rounded-2xl text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_20px_-12px_hsl(var(--wine)/0.35)] hover:shadow-[0_12px_24px_-12px_hsl(var(--wine)/0.4)]"
+            className="h-14 w-full rounded-2xl text-[13px] font-semibold tracking-[-0.01em] gap-2 shadow-[0_8px_20px_-12px_hsl(var(--wine)/0.35)] hover:shadow-[0_12px_24px_-12px_hsl(var(--wine)/0.4)]"
           >
-            <Plus className="h-[18px] w-[18px]" />
+            <Plus className="h-4 w-4 shrink-0" />
             {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
           </Button>
         </motion.div>
@@ -101,9 +101,9 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onRegisterConsumption}
-              className="h-14 w-full rounded-2xl border border-border/40 bg-card/40 text-[12px] font-medium text-foreground/70 backdrop-blur-sm hover:bg-card/60 hover:border-border/60 hover:text-foreground/90"
+              className="h-14 w-full rounded-2xl border border-border/40 bg-card/40 text-[12px] font-medium text-foreground/70 gap-2 backdrop-blur-sm hover:bg-card/60 hover:border-border/60 hover:text-foreground/90"
             >
-              <Wine className="h-4 w-4" />
+              <Wine className="h-4 w-4 shrink-0" />
               {isCommercial ? "Registrar venda" : "Registrar consumo"}
             </Button>
           </motion.div>
@@ -116,9 +116,9 @@ export function QuickActions({
               <Button
                 variant="ghost"
                 onClick={onHarmonize}
-                className="h-11 w-full rounded-xl text-[11px] font-normal text-muted-foreground/70 tracking-[-0.01em] shadow-none hover:bg-muted/10 hover:text-muted-foreground"
+                className="h-11 w-full rounded-xl text-[11px] font-normal text-muted-foreground/70 gap-2 tracking-[-0.01em] shadow-none hover:bg-muted/10 hover:text-muted-foreground"
               >
-                <UtensilsCrossed className="h-3.5 w-3.5" />
+                <UtensilsCrossed className="h-4 w-4 shrink-0" />
                 Harmonizar
               </Button>
             )}
@@ -126,9 +126,9 @@ export function QuickActions({
               <Button
                 variant="ghost"
                 onClick={onAnalyzeList}
-                className="h-11 w-full rounded-xl text-[11px] font-normal text-muted-foreground/70 tracking-[-0.01em] shadow-none hover:bg-muted/10 hover:text-muted-foreground"
+                className="h-11 w-full rounded-xl text-[11px] font-normal text-muted-foreground/70 gap-2 tracking-[-0.01em] shadow-none hover:bg-muted/10 hover:text-muted-foreground"
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="h-4 w-4 shrink-0" />
                 Analisar carta
               </Button>
             )}
