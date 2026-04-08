@@ -111,14 +111,14 @@ export function QuickActions({
 
         {/* ── Tertiary pair: equal-width grid ── */}
         {(onHarmonize || onAnalyzeList) && (
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
             {onHarmonize && (
               <Button
                 variant="ghost"
                 onClick={onHarmonize}
-                className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
+                className="h-9 w-full rounded-xl border border-border/30 bg-background/60 text-[11px] font-medium text-muted-foreground tracking-[-0.01em] shadow-none transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted/15 hover:border-border/50 hover:text-foreground"
               >
-                <UtensilsCrossed className="h-[18px] w-[18px]" />
+                <UtensilsCrossed className="h-3.5 w-3.5" />
                 Harmonizar
               </Button>
             )}
@@ -126,9 +126,9 @@ export function QuickActions({
               <Button
                 variant="ghost"
                 onClick={onAnalyzeList}
-                className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
+                className="h-9 w-full rounded-xl border border-border/30 bg-background/60 text-[11px] font-medium text-muted-foreground tracking-[-0.01em] shadow-none transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted/15 hover:border-border/50 hover:text-foreground"
               >
-                <Sparkles className="h-[18px] w-[18px]" />
+                <Sparkles className="h-3.5 w-3.5" />
                 Analisar carta
               </Button>
             )}
