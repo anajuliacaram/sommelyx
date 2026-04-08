@@ -224,6 +224,25 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     </div>
                   </motion.div>
 
+                  {/* Import CSV Button */}
+                  <motion.div
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative group cursor-pointer"
+                    onClick={() => { setImportCsvOpen(true); }}
+                  >
+                    <div className="relative h-14 rounded-2xl border border-accent/20 bg-accent/[0.06] flex items-center justify-center gap-2.5 px-4 transition-all duration-200 group-hover:border-accent/35 group-hover:bg-accent/[0.10] group-hover:shadow-[0_4px_12px_-4px_hsl(var(--accent)/0.15)]">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                        <Upload className="h-4 w-4 text-accent" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <p className="text-[13px] font-semibold text-foreground/80">Importar via planilha</p>
+                        <p className="text-[10px] text-muted-foreground/60">Leitura inteligente com IA</p>
+                      </div>
+                      <Sparkles className="h-3.5 w-3.5 text-accent/50 ml-auto" />
+                    </div>
+                  </motion.div>
+
                   {/* Essential fields */}
                   <div className="space-y-4">
                     <div>
