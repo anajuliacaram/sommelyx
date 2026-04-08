@@ -6,12 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Check, Camera } from "@/icons/lucide";
+import { ChevronDown, Plus, Check, Camera, Upload } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { LocationFields } from "@/components/LocationFields";
 import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
@@ -54,6 +55,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [moreOpen, setMoreOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
+  const [importCsvOpen, setImportCsvOpen] = useState(false);
 
   const addWine = useAddWine();
   const createLocation = useCreateWineLocation();
