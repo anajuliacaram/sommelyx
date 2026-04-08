@@ -22,7 +22,7 @@ const variantClasses: Record<LogoVariant, string> = {
 
 function getBaseName(variant: LogoVariant, tone: LogoTone) {
   // Compact = icon (vertical mark). Hero/navbar = horizontal (laid down).
-  if (variant === "compact") return tone === "mono" ? "logo-sommelyx-mono" : "7a378efc-4db3-40dd-bb01-5c69086ec8e6";
+  if (variant === "compact") return tone === "mono" ? "logo-sommelyx-mono" : "eeadba20-5e4a-4ed6-9633-b8022aae84f6";
   return tone === "mono" ? "logo-sommelyx-horizontal-mono" : "logo-sommelyx-horizontal";
 }
 
