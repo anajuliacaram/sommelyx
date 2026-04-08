@@ -93,29 +93,29 @@ export function QuickActions({
           </motion.div>
         )}
 
-        {/* ── Tertiary pair: tinted backgrounds ── */}
-        {(onHarmonize || onAnalyzeList) && (
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
-            {onHarmonize && (
-              <Button
-                variant="ghost"
-                onClick={onHarmonize}
-                className="h-12 w-full rounded-2xl border border-accent/20 bg-accent/[0.08] text-[12px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-accent/[0.14] hover:text-foreground/90 hover:border-accent/30 hover:shadow-[0_6px_16px_-6px_hsl(var(--accent)/0.18)] active:translate-y-[0.5px]"
-              >
-                <UtensilsCrossed className="h-[18px] w-[18px] shrink-0" />
-                Harmonizar
-              </Button>
-            )}
-            {onAnalyzeList && (
-              <Button
-                variant="ghost"
-                onClick={onAnalyzeList}
-                className="h-12 w-full rounded-2xl border border-primary/15 bg-primary/[0.05] text-[12px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:text-foreground/90 hover:border-primary/25 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
-              >
-                <Sparkles className="h-[18px] w-[18px] shrink-0" />
-                Analisar carta
-              </Button>
-            )}
+        {/* ── Tertiary: full-width vertical stack ── */}
+        {onHarmonize && (
+          <motion.div variants={itemVariants}>
+            <Button
+              variant="ghost"
+              onClick={onHarmonize}
+              className="h-12 w-full rounded-2xl border border-accent/20 bg-accent/[0.08] text-[13px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-accent/[0.14] hover:text-foreground/90 hover:border-accent/30 hover:shadow-[0_6px_16px_-6px_hsl(var(--accent)/0.18)] active:translate-y-[0.5px]"
+            >
+              <UtensilsCrossed className="h-[18px] w-[18px] shrink-0" />
+              Harmonizar
+            </Button>
+          </motion.div>
+        )}
+        {onAnalyzeList && (
+          <motion.div variants={itemVariants}>
+            <Button
+              variant="ghost"
+              onClick={onAnalyzeList}
+              className="h-12 w-full rounded-2xl border border-primary/15 bg-primary/[0.05] text-[13px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:text-foreground/90 hover:border-primary/25 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
+            >
+              <Sparkles className="h-[18px] w-[18px] shrink-0" />
+              Analisar carta
+            </Button>
           </motion.div>
         )}
       </div>
