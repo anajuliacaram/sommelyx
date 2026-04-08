@@ -151,33 +151,33 @@ function CellarWineCard({
 
   return (
     <motion.div
-      className="group relative overflow-hidden rounded-3xl border border-border/45 bg-gradient-to-br from-background/95 via-background/88 to-primary/5 p-2.5 shadow-[0_8px_20px_-18px_rgba(122,32,57,0.38)] backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_12px_22px_-18px_rgba(122,32,57,0.34)]"
+      className="group relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-background/98 via-background/94 to-primary/[0.03] p-2 shadow-[0_6px_18px_-18px_rgba(122,32,57,0.34)] backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_10px_20px_-18px_rgba(122,32,57,0.32)]"
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.015, duration: 0.3 }}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 pr-1">
-          <h3 className="line-clamp-2 text-[0.9rem] font-serif font-semibold leading-[1.02] text-foreground">
+        <div className="min-w-0 flex-1 pr-1">
+          <h3 className="line-clamp-2 text-[0.84rem] font-serif font-semibold leading-[1.03] text-foreground">
             {wine.name}
           </h3>
-          <div className="mt-0.5 flex items-center gap-1.5 text-[9px] font-medium text-muted-foreground">
+          <div className="mt-0.5 flex items-center gap-1 text-[8px] font-medium text-muted-foreground/85">
             <span>{formatVintageLabel(wine.vintage)}</span>
-            <span className="text-muted-foreground/50">•</span>
+            <span className="text-muted-foreground/40">•</span>
             <span className="truncate">{wine.region || "Região n/i"}</span>
           </div>
         </div>
 
-        <div className="pointer-events-none mt-0.5 h-7 w-7 shrink-0 rounded-full border border-border/45 bg-background/72 p-1 shadow-sm backdrop-blur-sm">
+        <div className="pointer-events-none mt-[1px] h-6 w-6 shrink-0 rounded-full border border-border/45 bg-background/72 p-[3px] shadow-sm backdrop-blur-sm">
           <div className={cn("h-full w-full rounded-full shadow-inner", getWineTone(wine.style))} />
         </div>
       </div>
 
-      <div className="mt-1 flex flex-wrap items-center gap-1">
+      <div className="mt-[3px] flex flex-wrap items-center gap-1">
         {status && (
           <Badge
             variant="outline"
-            className={cn("h-[17px] rounded-full border px-1.25 text-[7px] font-semibold tracking-wide", statusColor[status])}
+            className={cn("h-[16px] rounded-full border px-1.5 text-[6.5px] font-semibold tracking-wide", statusColor[status])}
           >
             {statusLabel[status]}
           </Badge>
@@ -185,45 +185,45 @@ function CellarWineCard({
         {wine.style && (
           <Badge
             variant="outline"
-            className={cn("h-[17px] rounded-full border px-1.25 text-[7px] font-semibold capitalize", getStyleBadgeClass(wine.style))}
+            className={cn("h-[16px] rounded-full border px-1.5 text-[6.5px] font-semibold capitalize", getStyleBadgeClass(wine.style))}
           >
             {wine.style}
           </Badge>
         )}
         {wine.country && (
-          <Badge variant="outline" className="h-[17px] rounded-full border border-black/10 bg-black/[0.025] px-1.25 text-[7px] font-medium text-muted-foreground">
-            <MapPin className="mr-1 h-2.5 w-2.5" />
+          <Badge variant="outline" className="h-[16px] rounded-full border border-black/10 bg-black/[0.025] px-1.5 text-[6.5px] font-medium text-muted-foreground">
+            <MapPin className="mr-0.5 h-2.5 w-2.5" />
             {wine.country}
           </Badge>
         )}
       </div>
 
-      <div className="mt-1 rounded-2xl border border-border/35 bg-background/65 px-3 py-1.5 backdrop-blur-sm">
-        <div className="flex items-center justify-between gap-2.5">
+      <div className="mt-[3px] rounded-2xl border border-border/35 bg-background/68 px-2.5 py-1 backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[7px] uppercase tracking-wide text-muted-foreground">Preço</p>
-            <p className="text-[0.85rem] font-semibold leading-none text-foreground">
+            <p className="text-[6px] uppercase tracking-[0.12em] text-muted-foreground/80">Preço</p>
+            <p className="text-[0.8rem] font-semibold leading-none text-foreground">
               {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "R$ —"}
             </p>
             {hasPriceVariance && (
-              <p className="mt-0.5 text-[6.5px] font-medium text-muted-foreground/65">
+              <p className="mt-0.5 text-[6px] font-medium text-muted-foreground/60">
                 Preços diferentes agrupados
               </p>
             )}
           </div>
-          <div className="h-6 w-px bg-border/40" />
+          <div className="h-5 w-px bg-border/40" />
           <div className="text-right">
-            <p className="text-[7px] uppercase tracking-wide text-muted-foreground">Quantidade</p>
-            <p className="text-[0.85rem] font-semibold leading-none text-foreground">{wine.quantity}</p>
+            <p className="text-[6px] uppercase tracking-[0.12em] text-muted-foreground/80">Quantidade</p>
+            <p className="text-[0.8rem] font-semibold leading-none text-foreground">{wine.quantity}</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-1 flex items-center gap-1.5">
+      <div className="mt-[3px] flex items-center gap-1">
         <Button
           size="sm"
           variant="secondary"
-          className="h-9 flex-1 justify-start rounded-2xl border border-border/45 bg-background/75 px-2.5 text-[8px] font-semibold shadow-sm transition-all duration-200 hover:-translate-y-[1px] hover:bg-background"
+          className="h-8 flex-1 justify-start rounded-2xl border border-border/45 bg-background/76 px-2.5 text-[7.5px] font-semibold shadow-sm transition-all duration-200 hover:-translate-y-[1px] hover:bg-background"
           onClick={onConsume}
         >
           <UtensilsCrossed className="mr-1 h-3 w-3 shrink-0" />
@@ -232,7 +232,7 @@ function CellarWineCard({
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 w-9 rounded-xl border border-border/35 p-0 text-muted-foreground/70 transition-all duration-200 hover:-translate-y-[1px] hover:text-foreground"
+          className="h-8 w-8 rounded-xl border border-border/35 p-0 text-muted-foreground/70 transition-all duration-200 hover:-translate-y-[1px] hover:text-foreground"
           onClick={onEdit}
           title="Editar"
         >
@@ -241,7 +241,7 @@ function CellarWineCard({
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 w-9 rounded-xl border border-border/35 p-0 text-muted-foreground/65 transition-all duration-200 hover:-translate-y-[1px] hover:text-destructive"
+          className="h-8 w-8 rounded-xl border border-border/35 p-0 text-muted-foreground/65 transition-all duration-200 hover:-translate-y-[1px] hover:text-destructive"
           onClick={onDelete}
           title="Remover"
         >
@@ -250,27 +250,27 @@ function CellarWineCard({
       </div>
 
       {hasGroupDetails && (
-        <div className="mt-1">
+        <div className="mt-[3px]">
           <button
             type="button"
             onClick={onToggleExpanded}
-            className="inline-flex items-center gap-1 rounded-full border border-border/35 bg-background/70 px-2 py-0.5 text-[6.5px] font-semibold text-muted-foreground transition-all duration-200 hover:-translate-y-[1px] hover:border-primary/20 hover:text-primary"
+            className="inline-flex items-center gap-1 rounded-full border border-border/35 bg-background/70 px-2 py-0.5 text-[6px] font-semibold text-muted-foreground transition-all duration-200 hover:-translate-y-[1px] hover:border-primary/20 hover:text-primary"
           >
             {isExpanded ? "Ocultar registros" : `Ver ${wine.entries.length} registros`}
           </button>
           {isExpanded && (
-            <div className="mt-1 space-y-1 rounded-2xl border border-border/35 bg-background/55 p-1.5">
+            <div className="mt-[3px] space-y-1 rounded-2xl border border-border/35 bg-background/55 p-[5px]">
               {wine.entries.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between gap-2 rounded-xl bg-background/80 px-2.5 py-0.75">
+                <div key={entry.id} className="flex items-center justify-between gap-2 rounded-xl bg-background/80 px-2 py-0.5">
                   <div className="min-w-0">
-                    <p className="truncate text-[8px] font-semibold text-foreground">
+                    <p className="truncate text-[7px] font-semibold text-foreground">
                       {entry.cellar_location || "Localização não informada"}
                     </p>
-                    <p className="text-[6.5px] font-medium text-muted-foreground/70">
+                    <p className="text-[6px] font-medium text-muted-foreground/70">
                       {formatVintageLabel(entry.vintage)} · {entry.quantity} garrafa{entry.quantity !== 1 ? "s" : ""}
                     </p>
                   </div>
-                  <span className="text-[7px] font-semibold text-primary">
+                  <span className="text-[6.5px] font-semibold text-primary">
                     {entry.purchase_price != null ? `R$ ${entry.purchase_price.toFixed(0)}` : "R$ —"}
                   </span>
                 </div>
@@ -662,7 +662,7 @@ export default function CellarPage() {
           } : undefined}
         />
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((wine, i) => {
             const status = drinkStatus(wine) as WineStatus;
             const isExpanded = !!expandedGroups[wine.groupKey];
