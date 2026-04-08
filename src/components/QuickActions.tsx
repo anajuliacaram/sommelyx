@@ -72,7 +72,7 @@ export function QuickActions({
           <Button
             variant="primary"
             onClick={onAddWine}
-            className="h-14 w-full rounded-2xl text-[13px] font-semibold tracking-[-0.01em] gap-2 shadow-[0_8px_20px_-12px_hsl(var(--wine)/0.35)] hover:shadow-[0_12px_24px_-12px_hsl(var(--wine)/0.4)]"
+            className="h-14 w-full rounded-2xl text-[14px] font-semibold tracking-[-0.01em] gap-2 shadow-[0_8px_20px_-12px_hsl(var(--wine)/0.35)] hover:shadow-[0_12px_24px_-12px_hsl(var(--wine)/0.4)]"
           >
             <Plus className="h-4 w-4 shrink-0" />
             {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
