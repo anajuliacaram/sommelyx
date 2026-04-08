@@ -77,18 +77,18 @@ export function QuickActions({
   /* ── Stacked layout (sidebar) ── */
   return (
     <motion.div
-      className="rounded-2xl border border-primary/10 bg-background/75 p-4 shadow-[0_10px_26px_-22px_rgba(25,18,22,0.4)] backdrop-blur-sm"
+      className="rounded-2xl border border-primary/10 bg-background/75 p-3 shadow-[0_10px_26px_-22px_rgba(25,18,22,0.4)] backdrop-blur-sm"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {/* ── Primary: full-width, tallest ── */}
         <motion.div variants={itemVariants}>
           <Button
             variant="primary"
             onClick={onAddWine}
-            className="h-14 w-full rounded-2xl text-[14px] font-semibold tracking-[-0.01em] shadow-[0_14px_26px_-16px_hsl(var(--wine)/0.45)] hover:shadow-[0_18px_30px_-16px_hsl(var(--wine)/0.5)]"
+            className="h-12 w-full rounded-2xl text-[13px] font-semibold tracking-[-0.01em] shadow-[0_14px_26px_-16px_hsl(var(--wine)/0.45)] hover:shadow-[0_18px_30px_-16px_hsl(var(--wine)/0.5)]"
           >
             <Plus className="h-[18px] w-[18px]" />
             {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
@@ -101,7 +101,7 @@ export function QuickActions({
             <Button
               variant="secondary"
               onClick={onRegisterConsumption}
-              className="h-14 w-full rounded-2xl border-primary/15 bg-primary/[0.04] text-[14px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
+              className="h-11 w-full rounded-2xl border-primary/15 bg-primary/[0.04] text-[13px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
             >
               <Wine className="h-[18px] w-[18px]" />
               {isCommercial ? "Registrar venda" : "Registrar consumo"}
