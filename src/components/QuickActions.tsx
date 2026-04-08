@@ -111,14 +111,14 @@ export function QuickActions({
 
         {/* ── Tertiary pair: subtle, minimal ── */}
         {(onHarmonize || onAnalyzeList) && (
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-1.5">
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
             {onHarmonize && (
               <Button
                 variant="ghost"
                 onClick={onHarmonize}
-                className="h-11 w-full rounded-xl text-[11px] font-normal text-muted-foreground/70 gap-2 tracking-[-0.01em] shadow-none hover:bg-muted/10 hover:text-muted-foreground"
+                className="h-11 w-full rounded-xl border border-primary/12 bg-primary/[0.04] text-[11px] font-medium text-foreground/55 gap-2.5 tracking-[-0.01em] shadow-none transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1.5px] hover:bg-primary/[0.08] hover:text-foreground/75 hover:border-primary/20 hover:shadow-[0_4px_12px_-6px_hsl(var(--primary)/0.12)]"
               >
-                <UtensilsCrossed className="h-4 w-4 shrink-0" />
+                <UtensilsCrossed className="h-4 w-4 shrink-0 opacity-70" />
                 Harmonizar
               </Button>
             )}
@@ -126,9 +126,9 @@ export function QuickActions({
               <Button
                 variant="ghost"
                 onClick={onAnalyzeList}
-                className="h-11 w-full rounded-xl text-[11px] font-normal text-muted-foreground/70 gap-2 tracking-[-0.01em] shadow-none hover:bg-muted/10 hover:text-muted-foreground"
+                className="h-11 w-full rounded-xl border border-primary/12 bg-primary/[0.04] text-[11px] font-medium text-foreground/55 gap-2.5 tracking-[-0.01em] shadow-none transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1.5px] hover:bg-primary/[0.08] hover:text-foreground/75 hover:border-primary/20 hover:shadow-[0_4px_12px_-6px_hsl(var(--primary)/0.12)]"
               >
-                <Sparkles className="h-4 w-4 shrink-0" />
+                <Sparkles className="h-4 w-4 shrink-0 opacity-70" />
                 Analisar carta
               </Button>
             )}
