@@ -72,7 +72,7 @@ export function QuickActions({
           <Button
             variant="primary"
             onClick={onAddWine}
-            className="h-14 w-full rounded-2xl text-[13px] font-semibold tracking-[-0.01em] gap-2 shadow-[0_8px_20px_-12px_hsl(var(--wine)/0.35)] hover:shadow-[0_12px_24px_-12px_hsl(var(--wine)/0.4)]"
+            className="h-14 w-full rounded-2xl text-[14px] font-semibold tracking-[-0.01em] gap-2 shadow-[0_8px_20px_-12px_hsl(var(--wine)/0.35)] hover:shadow-[0_12px_24px_-12px_hsl(var(--wine)/0.4)]"
           >
             <Plus className="h-4 w-4 shrink-0" />
             {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
@@ -85,7 +85,7 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onRegisterConsumption}
-              className="h-14 w-full rounded-2xl border border-primary/15 bg-primary/[0.06] text-[12px] font-semibold text-foreground/80 gap-2 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:border-primary/25 hover:text-foreground/95 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
+              className="h-14 w-full rounded-2xl border border-primary/15 bg-primary/[0.06] text-[13px] font-semibold text-foreground/80 gap-2 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:border-primary/25 hover:text-foreground/95 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
             >
               <Wine className="h-[18px] w-[18px] shrink-0" />
               {isCommercial ? "Registrar venda" : "Registrar consumo"}
@@ -93,29 +93,29 @@ export function QuickActions({
           </motion.div>
         )}
 
-        {/* ── Tertiary pair: tinted backgrounds ── */}
-        {(onHarmonize || onAnalyzeList) && (
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
-            {onHarmonize && (
-              <Button
-                variant="ghost"
-                onClick={onHarmonize}
-                className="h-12 w-full rounded-2xl border border-accent/20 bg-accent/[0.08] text-[12px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-accent/[0.14] hover:text-foreground/90 hover:border-accent/30 hover:shadow-[0_6px_16px_-6px_hsl(var(--accent)/0.18)] active:translate-y-[0.5px]"
-              >
-                <UtensilsCrossed className="h-[18px] w-[18px] shrink-0" />
-                Harmonizar
-              </Button>
-            )}
-            {onAnalyzeList && (
-              <Button
-                variant="ghost"
-                onClick={onAnalyzeList}
-                className="h-12 w-full rounded-2xl border border-primary/15 bg-primary/[0.05] text-[12px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:text-foreground/90 hover:border-primary/25 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
-              >
-                <Sparkles className="h-[18px] w-[18px] shrink-0" />
-                Analisar carta
-              </Button>
-            )}
+        {/* ── Tertiary: full-width vertical stack ── */}
+        {onHarmonize && (
+          <motion.div variants={itemVariants}>
+            <Button
+              variant="ghost"
+              onClick={onHarmonize}
+              className="h-12 w-full rounded-2xl border border-accent/20 bg-accent/[0.08] text-[13px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-accent/[0.14] hover:text-foreground/90 hover:border-accent/30 hover:shadow-[0_6px_16px_-6px_hsl(var(--accent)/0.18)] active:translate-y-[0.5px]"
+            >
+              <UtensilsCrossed className="h-[18px] w-[18px] shrink-0" />
+              Harmonizar
+            </Button>
+          </motion.div>
+        )}
+        {onAnalyzeList && (
+          <motion.div variants={itemVariants}>
+            <Button
+              variant="ghost"
+              onClick={onAnalyzeList}
+              className="h-12 w-full rounded-2xl border border-primary/15 bg-primary/[0.05] text-[13px] font-semibold text-foreground/75 gap-2 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:text-foreground/90 hover:border-primary/25 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
+            >
+              <Sparkles className="h-[18px] w-[18px] shrink-0" />
+              Analisar carta
+            </Button>
           </motion.div>
         )}
       </div>
