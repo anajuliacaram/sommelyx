@@ -28,6 +28,9 @@ import { AddWineDialog } from "@/components/AddWineDialog";
 import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { QuickActions } from "@/components/QuickActions";
+import { DishToWineDialog } from "@/components/DishToWineDialog";
+import { WineListScannerDialog } from "@/components/WineListScannerDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
@@ -72,6 +75,8 @@ export default function PersonalDashboard() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
+  const [dishToWineOpen, setDishToWineOpen] = useState(false);
+  const [wineListScanOpen, setWineListScanOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_personal"));
 
   const currentYear = new Date().getFullYear();
@@ -161,17 +166,14 @@ export default function PersonalDashboard() {
                 Olá, <span className="text-gradient-wine">{firstName}</span>
               </h1>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Button variant="primary" size="default" onClick={() => setAddOpen(true)}>
-                <Plus className="mr-1.5 h-4 w-4" /> Adicionar
-              </Button>
-              <Button variant="secondary" size="default" onClick={() => setManageOpen(true)}>
-                <Wine className="mr-1.5 h-4 w-4" /> Consumo
-              </Button>
-              <Button variant="ghost" size="default" onClick={() => setCsvOpen(true)}>
-                <Upload className="mr-1.5 h-4 w-4" /> Importar
-              </Button>
-            </div>
+             <QuickActions
+                variant="personal"
+                layout="inline"
+                onAddWine={() => setAddOpen(true)}
+                onRegisterConsumption={() => setManageOpen(true)}
+                onHarmonize={() => setDishToWineOpen(true)}
+                onAnalyzeList={() => setWineListScanOpen(true)}
+              />
           </div>
         </motion.div>
 
@@ -352,6 +354,8 @@ export default function PersonalDashboard() {
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab="open" />
       <ImportCsvDialog open={csvOpen} onOpenChange={setCsvOpen} />
+      <DishToWineDialog open={dishToWineOpen} onOpenChange={setDishToWineOpen} />
+      <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
     </>
   );
 }
