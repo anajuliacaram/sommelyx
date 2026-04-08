@@ -22,7 +22,7 @@ const variantClasses: Record<LogoVariant, string> = {
 
 function getBaseName(variant: LogoVariant, tone: LogoTone) {
   // Compact = icon (vertical mark). Hero/navbar = horizontal (laid down).
-  if (variant === "compact") return tone === "mono" ? "logo-sommelyx-mono" : "logo-sommelyx-mark";
+  if (variant === "compact") return tone === "mono" ? "logo-sommelyx-mono" : "7a378efc-4db3-40dd-bb01-5c69086ec8e6";
   return tone === "mono" ? "logo-sommelyx-horizontal-mono" : "logo-sommelyx-horizontal";
 }
 
@@ -48,7 +48,7 @@ export const Logo = React.forwardRef<HTMLImageElement, Props>(function Logo(
         draggable={false}
         loading={resolvedLoading}
         {...fetchPriorityProps}
-        className={cn("object-contain select-none", variantClasses[variant], className)}
+        className={cn("select-none", variantClasses[variant], className, "object-contain")}
         {...props}
       />
     </picture>
