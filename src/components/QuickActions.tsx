@@ -54,22 +54,6 @@ export function QuickActions({
             </Button>
           </motion.div>
         )}
-        {onHarmonize && (
-          <motion.div variants={itemVariants}>
-            <Button variant="outline" size="default" onClick={onHarmonize}>
-              <UtensilsCrossed className="mr-1.5 h-4 w-4" />
-              Harmonizar
-            </Button>
-          </motion.div>
-        )}
-        {onAnalyzeList && (
-          <motion.div variants={itemVariants}>
-            <Button variant="outline" size="default" onClick={onAnalyzeList}>
-              <Sparkles className="mr-1.5 h-4 w-4" />
-              Analisar carta
-            </Button>
-          </motion.div>
-        )}
       </motion.div>
     );
   }
