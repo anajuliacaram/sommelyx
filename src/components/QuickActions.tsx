@@ -85,7 +85,7 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onRegisterConsumption}
-              className="h-14 w-full rounded-2xl border border-primary/15 bg-primary/[0.06] text-[12px] font-semibold text-foreground/80 gap-2 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:border-primary/25 hover:text-foreground/95 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
+              className="h-14 w-full rounded-2xl border border-primary/15 bg-primary/[0.06] text-[13px] font-semibold text-foreground/80 gap-2 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:border-primary/25 hover:text-foreground/95 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
             >
               <Wine className="h-[18px] w-[18px] shrink-0" />
               {isCommercial ? "Registrar venda" : "Registrar consumo"}
