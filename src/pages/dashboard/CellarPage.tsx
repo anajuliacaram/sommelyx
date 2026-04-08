@@ -267,6 +267,7 @@ export default function CellarPage() {
     if (selectedStyles.length > 0) list = list.filter(w => w.style && selectedStyles.includes(w.style));
     if (selectedCountries.length > 0) list = list.filter(w => w.country && selectedCountries.includes(w.country));
     if (selectedGrapes.length > 0) list = list.filter(w => w.grape && selectedGrapes.includes(w.grape));
+    if (selectedVintages.length > 0) list = list.filter(w => w.vintage && selectedVintages.includes(String(w.vintage)));
     if (vintageActive) list = list.filter(w => w.vintage && w.vintage >= vintageRange[0] && w.vintage <= vintageRange[1]);
     if (priceActive) list = list.filter(w => {
       const price = w.purchase_price ?? 0;
@@ -297,7 +298,7 @@ export default function CellarPage() {
       return 0;
     });
     return list;
-  }, [groupedWines, search, sortBy, selectedStyles, selectedCountries, selectedGrapes, vintageRange, priceRange, selectedDrinkWindows, lowStock, vintageActive, priceActive]);
+  }, [groupedWines, search, sortBy, selectedStyles, selectedCountries, selectedGrapes, selectedVintages, vintageRange, priceRange, selectedDrinkWindows, lowStock, vintageActive, priceActive]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -330,6 +331,9 @@ export default function CellarPage() {
   });
   selectedGrapes.forEach(g => {
     activeChips.push({ label: g, onRemove: () => setSelectedGrapes(prev => prev.filter(v => v !== g)) });
+  });
+  selectedVintages.forEach(v => {
+    activeChips.push({ label: `Safra ${v}`, onRemove: () => setSelectedVintages(prev => prev.filter(x => x !== v)) });
   });
   if (vintageActive) {
     activeChips.push({ label: `Safra ${vintageRange[0]}–${vintageRange[1]}`, onRemove: () => setVintageRange([dynamicOptions.minVintage, dynamicOptions.maxVintage]) });
@@ -380,6 +384,7 @@ export default function CellarPage() {
             <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
             <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
             <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
+            <MultiSelectDropdown title="Safra" options={dynamicOptions.vintageOptions || []} selected={selectedVintages} onChange={(v) => { setSelectedVintages(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedVintages([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar safra..." />
             <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
             <Button
               type="button"
