@@ -79,17 +79,17 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="offcanvas" className="border-r border-border w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
-        <SidebarHeader className="pt-4 md:pt-4 px-3">
+        <SidebarHeader className="pt-3 md:pt-3 px-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-1 py-1.5 mb-3 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-3 px-1 py-1 mb-2 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
-            <div className="relative flex h-[88px] w-[66px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
+            <div className="relative flex h-[72px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
               <Logo
                 variant="compact"
-                className="h-[170px] w-auto scale-[1.16] object-contain drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)]"
+                className="h-[140px] w-auto scale-[1.16] object-contain drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)]"
               />
             </div>
             <div className="flex flex-col">
@@ -111,7 +111,7 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="px-0 pb-3">
+          <div className="px-0 pb-2">
             {isCommercial ? (
               <div className="grid grid-cols-2 gap-2">
                 <Button
@@ -152,9 +152,9 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-3">
+        <SidebarContent className="px-3 pt-1">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1.5 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1 px-3">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -179,8 +179,8 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-2">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1.5 px-3">
+          <SidebarGroup className="mt-1">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1 px-3">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
