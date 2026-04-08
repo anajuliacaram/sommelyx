@@ -83,22 +83,22 @@ export function AppSidebar() {
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-1 py-1 mb-2 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-4 px-1 py-2 mb-2 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
-            <div className="relative flex h-[72px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
+            <div className="relative flex h-[120px] w-[80px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
               <Logo
                 variant="compact"
-                className="h-[140px] w-auto scale-[1.16] drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)] shadow-sm border-none px-0 mx-0 my-0 object-fill border-0 rounded-sm opacity-100"
+                className="h-[280px] w-auto drop-shadow-[0_12px_24px_rgba(15,15,20,0.28)] border-none px-0 mx-0 my-0 object-fill border-0 rounded-sm opacity-100"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground leading-none">
+              <span className="text-[17px] font-bold tracking-[-0.02em] text-foreground leading-none">
                 Sommelyx
               </span>
               <span
                 className={[
-                  "mt-1.5 w-fit inline-flex items-center rounded-md h-5 px-2",
+                  "mt-2 w-fit inline-flex items-center rounded-md h-5 px-2",
                   "text-[9px] font-extrabold uppercase tracking-[0.1em] leading-none",
                   isCommercial
                     ? "bg-accent/12 text-accent ring-1 ring-accent/20"
