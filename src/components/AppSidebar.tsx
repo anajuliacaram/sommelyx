@@ -89,7 +89,7 @@ export function AppSidebar() {
             <div className="relative flex h-[72px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
               <Logo
                 variant="compact"
-                className="h-[140px] w-auto scale-[1.16] drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)]"
+                className="h-[140px] w-auto scale-[1.16] drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)] object-cover rounded-none shadow-sm border-none px-0 mx-0 my-[20px]"
               />
             </div>
             <div className="flex flex-col">
