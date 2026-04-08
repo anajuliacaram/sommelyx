@@ -101,9 +101,9 @@ export function QuickActions({
             <Button
               variant="secondary"
               onClick={onRegisterConsumption}
-              className="h-11 w-full rounded-2xl border-primary/15 bg-primary/[0.04] text-[13px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
+              className="h-10 w-full rounded-2xl border-primary/12 bg-primary/[0.03] text-[12px] font-medium text-primary/80 hover:bg-primary/[0.07] hover:border-primary/20 hover:text-primary"
             >
-              <Wine className="h-[18px] w-[18px]" />
+              <Wine className="h-4 w-4" />
               {isCommercial ? "Registrar venda" : "Registrar consumo"}
             </Button>
           </motion.div>
