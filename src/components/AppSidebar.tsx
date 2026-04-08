@@ -78,11 +78,11 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="offcanvas" className="border-r border-border w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
-        <SidebarHeader className="pt-4 md:pt-4 px-3">
+        <SidebarHeader className="pt-3 md:pt-3 px-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-1 py-1.5 mb-3 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-3 px-1 py-1.5 mb-2 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
             <div className="relative flex h-[88px] w-[66px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
@@ -110,81 +110,79 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="px-0 pb-3">
+          <div className="px-0 pb-2.5">
             {isCommercial ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <Button
                   variant="primary"
-                  className="col-span-2 h-9 text-[11px] font-medium rounded-lg"
+                  className="col-span-2 h-10 justify-start rounded-2xl px-3 text-[10.5px] font-semibold"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  <Plus className="h-3.5 w-3.5 shrink-0" />
                   Cadastrar produto
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-9 text-[11px] font-medium rounded-lg"
+                  className="h-9 justify-start rounded-2xl px-3 text-[10.5px] font-semibold"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+                  <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
                   Venda
                 </Button>
                 <Button
                   variant="danger"
-                  className="h-9 text-[11px] font-medium rounded-lg"
+                  className="h-9 justify-start rounded-2xl px-3 text-[10.5px] font-semibold"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
-                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                   Ruptura
                 </Button>
               </div>
             ) : (
-              <div
-                className="rounded-2xl border border-primary/10 bg-background/75 p-3.5 shadow-[0_10px_26px_-22px_rgba(25,18,22,0.4)] backdrop-blur-sm"
-              >
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
-                  Ações rápidas
+              <section className="flex flex-col gap-3.5 rounded-3xl border border-primary/10 bg-background/78 p-2.5 shadow-[0_10px_26px_-22px_rgba(25,18,22,0.38)] backdrop-blur-sm">
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70">
+                  AÇÕES RÁPIDAS
                 </p>
 
-                <div className="space-y-4">
+                <div className="flex flex-col gap-3.5">
                   <Button
                     variant="primary"
-                    className="h-14 w-full rounded-2xl text-[14px] font-semibold tracking-[-0.01em] shadow-[0_14px_26px_-16px_hsl(var(--wine)/0.45)] hover:shadow-[0_18px_30px_-16px_hsl(var(--wine)/0.5)]"
+                    className="h-12 w-full justify-start rounded-2xl px-3.5 text-[12px] font-semibold tracking-[-0.01em] shadow-[0_14px_26px_-16px_hsl(var(--wine)/0.45)] hover:shadow-[0_18px_30px_-16px_hsl(var(--wine)/0.5)]"
                     onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3.5 w-3.5 shrink-0" />
                     Adicionar vinho
                   </Button>
 
                   <Button
                     variant="secondary"
-                    className="h-14 w-full rounded-2xl border-primary/15 bg-primary/[0.04] text-[14px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
+                    className="h-12 w-full justify-start rounded-2xl border-primary/15 bg-primary/[0.04] px-3.5 text-[12px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
                     onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
                   >
-                    <Wine className="h-[18px] w-[18px]" />
+                    <Wine className="h-3.5 w-3.5 shrink-0" />
                     Registrar consumo
                   </Button>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <Button
                       variant="ghost"
-                      className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
+                      className="h-10 w-full justify-start rounded-2xl border border-border/45 bg-background/80 px-3 text-[10px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.38)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.42)]"
                       onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
                     >
-                      <UtensilsCrossed className="h-[18px] w-[18px]" />
+                      <UtensilsCrossed className="h-3.5 w-3.5 shrink-0" />
                       Harmonizar
                     </Button>
                     <Button
                       variant="ghost"
-                      className="h-12 w-full rounded-2xl border border-border/45 bg-background/80 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.45)]"
+                      className="h-10 w-full justify-start rounded-2xl border border-border/45 bg-background/80 px-3 text-[10px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.38)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.42)]"
                       onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
                     >
-                      <Sparkles className="h-[18px] w-[18px]" />
+                      <Sparkles className="h-3.5 w-3.5 shrink-0" />
                       Analisar carta
                     </Button>
                   </div>
                 </div>
-              </div>
+              </section>
             )}
           </div>
         </SidebarHeader>
