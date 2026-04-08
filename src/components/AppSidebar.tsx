@@ -91,7 +91,7 @@ export function AppSidebar() {
                 src="/logo-sommelyx-mark.png"
                 alt="Sommelyx"
                 draggable={false}
-                className="h-[150px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)]"
+                className="h-[150px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
               />
             </div>
             <div className="flex flex-col">
