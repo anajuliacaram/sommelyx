@@ -133,6 +133,7 @@ export default function CellarPage() {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedGrapes, setSelectedGrapes] = useState<string[]>([]);
   const [selectedDrinkWindows, setSelectedDrinkWindows] = useState<string[]>([]);
+  const [selectedVintages, setSelectedVintages] = useState<string[]>([]);
   const [lowStock, setLowStock] = useState(false);
   const [vintageRange, setVintageRange] = useState<[number, number]>([1980, currentYear]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
@@ -149,7 +150,7 @@ export default function CellarPage() {
 
   // Derive dynamic filter options from wine data
   const dynamicOptions = useMemo(() => {
-    if (!wines) return { countries: [], grapes: [], styles: [], maxPrice: 5000, minVintage: 1980, maxVintage: currentYear };
+    if (!wines) return { countries: [], grapes: [], styles: [], vintages: [], maxPrice: 5000, minVintage: 1980, maxVintage: currentYear };
     
     // Count wines per country
     const countryMap: Record<string, number> = {};
@@ -170,13 +171,18 @@ export default function CellarPage() {
     const dwMap: Record<string, number> = {};
     wines.forEach(w => { const s = drinkStatus(w); if (s) dwMap[s] = (dwMap[s] || 0) + w.quantity; });
     const drinkWindows = drinkWindowOptions.map(d => ({ ...d, count: dwMap[d.value] || 0 }));
+
+    // Count wines per vintage
+    const vintageMap: Record<string, number> = {};
+    wines.forEach(w => { if (w.vintage) vintageMap[String(w.vintage)] = (vintageMap[String(w.vintage)] || 0) + w.quantity; });
+    const vintages = Object.entries(vintageMap).sort(([a], [b]) => Number(b) - Number(a)).map(([v, c]) => ({ value: v, label: v, count: c }));
     
     const prices = wines.map(w => w.purchase_price ?? 0).filter(p => p > 0);
     const maxPrice = prices.length > 0 ? Math.ceil(Math.max(...prices) / 100) * 100 : 5000;
     const vintages = wines.map(w => w.vintage).filter(Boolean) as number[];
     const minVintage = vintages.length > 0 ? Math.min(...vintages) : 1980;
     const maxVintage = vintages.length > 0 ? Math.max(...vintages) : currentYear;
-    return { countries, grapes, styles, drinkWindows, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
+    return { countries, grapes, styles, drinkWindows, vintages, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
   }, [wines]);
 
   const groupedWines = useMemo<CellarWineGroup[]>(() => {
@@ -228,6 +234,7 @@ export default function CellarPage() {
     setSelectedStyles([]);
     setSelectedCountries([]);
     setSelectedGrapes([]);
+    setSelectedVintages([]);
     setSelectedDrinkWindows([]);
     setLowStock(false);
     setVintageRange([dynamicOptions.minVintage, dynamicOptions.maxVintage]);
@@ -238,7 +245,7 @@ export default function CellarPage() {
 
   const vintageActive = vintageRange[0] !== dynamicOptions.minVintage || vintageRange[1] !== dynamicOptions.maxVintage;
   const priceActive = priceRange[0] !== 0 || priceRange[1] !== dynamicOptions.maxPrice;
-  const activeFilterCount = selectedStyles.length + selectedCountries.length + selectedGrapes.length + selectedDrinkWindows.length + (lowStock ? 1 : 0) + (vintageActive ? 1 : 0) + (priceActive ? 1 : 0);
+  const activeFilterCount = selectedStyles.length + selectedCountries.length + selectedGrapes.length + selectedVintages.length + selectedDrinkWindows.length + (lowStock ? 1 : 0) + (vintageActive ? 1 : 0) + (priceActive ? 1 : 0);
   const hasActiveFilters = activeFilterCount > 0 || !!search;
 
   const filtered = useMemo(() => {
