@@ -93,7 +93,7 @@ export function AppSidebar() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[17px] font-bold tracking-[-0.02em] text-foreground leading-none">
+              <span className="text-[19px] font-bold tracking-[-0.01em] text-primary leading-none font-serif">
                 Sommelyx
               </span>
               <span
