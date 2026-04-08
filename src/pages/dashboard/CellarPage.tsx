@@ -175,14 +175,14 @@ export default function CellarPage() {
     // Count wines per vintage
     const vintageMap: Record<string, number> = {};
     wines.forEach(w => { if (w.vintage) vintageMap[String(w.vintage)] = (vintageMap[String(w.vintage)] || 0) + w.quantity; });
-    const vintages = Object.entries(vintageMap).sort(([a], [b]) => Number(b) - Number(a)).map(([v, c]) => ({ value: v, label: v, count: c }));
+    const vintageOptions = Object.entries(vintageMap).sort(([a], [b]) => Number(b) - Number(a)).map(([v, c]) => ({ value: v, label: v, count: c }));
     
     const prices = wines.map(w => w.purchase_price ?? 0).filter(p => p > 0);
     const maxPrice = prices.length > 0 ? Math.ceil(Math.max(...prices) / 100) * 100 : 5000;
-    const vintages = wines.map(w => w.vintage).filter(Boolean) as number[];
-    const minVintage = vintages.length > 0 ? Math.min(...vintages) : 1980;
-    const maxVintage = vintages.length > 0 ? Math.max(...vintages) : currentYear;
-    return { countries, grapes, styles, drinkWindows, vintages, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
+    const vintageNums = wines.map(w => w.vintage).filter(Boolean) as number[];
+    const minVintage = vintageNums.length > 0 ? Math.min(...vintageNums) : 1980;
+    const maxVintage = vintageNums.length > 0 ? Math.max(...vintageNums) : currentYear;
+    return { countries, grapes, styles, drinkWindows, vintageOptions, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
   }, [wines]);
 
   const groupedWines = useMemo<CellarWineGroup[]>(() => {
