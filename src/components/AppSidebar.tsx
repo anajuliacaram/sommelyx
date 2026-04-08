@@ -96,7 +96,6 @@ export function AppSidebar() {
               <span className="text-[19px] font-bold tracking-[-0.01em] text-primary leading-none font-serif">
                 Sommelyx
               </span>
-              </span>
               <span
                 className={[
                   "mt-2 w-fit inline-flex items-center rounded-md h-5 px-2",
