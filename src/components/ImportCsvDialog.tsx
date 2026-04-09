@@ -211,7 +211,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const data = await invokeEdgeFunction<any>(
         "parse-csv-wines",
         { csvContent, fileName: file.name, fileType: file.type || null },
-        { timeoutMs: 75_000, retries: 2 },
+        { timeoutMs: 45_000, retries: 1 },
       );
 
       if (data?.error) {
