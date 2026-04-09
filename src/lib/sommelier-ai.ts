@@ -257,44 +257,48 @@ function buildCellarReason(w: WineSummary, dish: string, harmonyType: string): s
   const style = (w.style || "").toLowerCase();
   const grape = w.grape || "";
   const region = w.region || "";
+  const producer = w.producer || "";
   const parts: string[] = [];
 
-  if (grape && region) {
-    parts.push(`${w.name}, um ${style} de ${grape} da região de ${region}, traz um perfil sensorial distinto para esta harmonização.`);
-  } else if (grape) {
-    parts.push(`A uva ${grape} confere a este ${style} características que interagem de forma específica com "${dish}".`);
-  } else {
-    parts.push(`Este ${style || "vinho"} possui estrutura que dialoga com os componentes de "${dish}".`);
-  }
+  // Always start with the wine's name for specificity
+  const contextParts: string[] = [];
+  if (producer) contextParts.push(`produzido por ${producer}`);
+  if (grape && region) contextParts.push(`um ${style || "vinho"} de ${grape} da região de ${region}`);
+  else if (grape) contextParts.push(`de ${grape}`);
+  else if (region) contextParts.push(`da região de ${region}`);
+  
+  const intro = contextParts.length > 0
+    ? `${w.name}, ${contextParts.join(", ")},`
+    : `${w.name}`;
 
   if (harmonyType === "contraste") {
     if (analysis.fat === "alta" || analysis.fat === "moderada") {
-      parts.push(`A acidez do vinho funciona em contraste com a ${analysis.fat === "alta" ? "gordura pronunciada" : "textura untuosa"} do prato, limpando o paladar entre cada garfada.`);
+      parts.push(`${intro} tende a ter acidez que funciona em contraste com a ${analysis.fat === "alta" ? "gordura pronunciada" : "textura untuosa"} de "${dish}", limpando o paladar entre cada garfada.`);
     } else {
-      parts.push(`O corpo do vinho cria um contraste de texturas com a leveza do prato, adicionando camadas de complexidade.`);
+      parts.push(`${intro} cria um contraste de texturas com a leveza de "${dish}", adicionando camadas de complexidade.`);
     }
   } else if (harmonyType === "semelhança") {
     if (style === "branco" && analysis.intensity === "leve") {
-      parts.push(`A delicadeza deste branco espelha a leveza do prato — ambos se encontram na mesma faixa de intensidade.`);
+      parts.push(`A delicadeza de ${intro} espelha a leveza de "${dish}" — ambos se encontram na mesma faixa de intensidade.`);
     } else {
-      parts.push(`O peso e a intensidade do vinho espelham a robustez do prato, criando uma experiência onde nenhum elemento domina.`);
+      parts.push(`O peso e a intensidade de ${intro} espelham a robustez de "${dish}", criando uma experiência onde nenhum elemento domina.`);
     }
   } else if (harmonyType === "complemento") {
     if (analysis.flavors.length > 0) {
-      parts.push(`Os aromas do vinho complementam ${analysis.flavors[0]}, criando uma experiência mais completa e integrada.`);
+      parts.push(`Os aromas de ${intro} complementam ${analysis.flavors[0]} de "${dish}", criando uma experiência mais integrada.`);
     } else {
-      parts.push(`As notas aromáticas do vinho adicionam uma dimensão extra aos sabores do prato.`);
+      parts.push(`As notas aromáticas de ${intro} adicionam dimensão extra aos sabores de "${dish}".`);
     }
   } else if (harmonyType === "equilíbrio") {
-    parts.push(`O corpo ${style === "tinto" ? "encorpado" : "médio"} do vinho mantém proporção equilibrada com a intensidade de "${dish}".`);
+    parts.push(`${intro} mantém proporção equilibrada entre seu corpo e a intensidade de "${dish}".`);
   } else {
-    parts.push(`A acidez natural do vinho reseta o paladar entre cada mordida, renovando a percepção dos sabores.`);
+    parts.push(`A acidez natural de ${intro} reseta o paladar entre cada mordida de "${dish}", renovando a percepção dos sabores.`);
   }
 
   if (w.vintage) {
     const age = new Date().getFullYear() - w.vintage;
-    if (age > 5) parts.push(`Com ${age} anos de evolução, seus taninos estão mais integrados e suaves.`);
-    else if (age <= 2) parts.push(`Sendo um vinho jovem, preserva frescor e vivacidade que complementam o prato.`);
+    if (age > 5) parts.push(`Com ${age} anos de evolução, ${w.name} apresenta taninos mais integrados e suaves.`);
+    else if (age <= 2) parts.push(`Sendo um vinho jovem, ${w.name} preserva frescor e vivacidade que complementam o prato.`);
   }
 
   return parts.join(" ");
@@ -389,39 +393,50 @@ function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): Win
   return genericSuggestions;
 }
 
-function fallbackPairingsForWine(wine: { style?: string | null }): PairingResult[] {
+function fallbackPairingsForWine(wine: { name?: string; style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }): PairingResult[] {
   const style = (wine.style || "tinto").toLowerCase();
+  const name = wine.name || "Este vinho";
+  const grape = wine.grape || "";
+  const region = wine.region || "";
+  const producer = wine.producer || "";
+
+  const contextParts: string[] = [];
+  if (producer) contextParts.push(`produzido por ${producer}`);
+  if (grape) contextParts.push(`de ${grape}`);
+  if (region) contextParts.push(`da região de ${region}`);
+  const context = contextParts.length > 0 ? `${name}, ${contextParts.join(", ")},` : `${name}`;
+
   const pairingMap: Record<string, PairingResult[]> = {
     tinto: [
-      { dish: "Picanha na brasa com sal grosso", reason: "A gordura intramuscular da picanha suaviza os taninos do tinto, enquanto a crosta de sal amplifica os aromas frutados. O resultado é uma textura aveludada no paladar.", match: "perfeito", category: "classico", harmony_type: "equilíbrio", harmony_label: "gordura que suaviza taninos" },
-      { dish: "Risoto de cogumelos porcini", reason: "As notas terrosas dos cogumelos espelham os aromas de solo e folhas secas típicos de tintos maduros. A manteiga do risoto adiciona cremosidade que envolve o vinho.", match: "perfeito", category: "afinidade", harmony_type: "semelhança", harmony_label: "notas terrosas em sintonia" },
-      { dish: "Cordeiro assado com ervas e alho", reason: "A intensidade aromática do cordeiro pede um tinto com corpo e personalidade. Os taninos firmes cortam a gordura natural da carne, limpando o paladar.", match: "muito bom", category: "classico", harmony_type: "limpeza", harmony_label: "taninos que cortam gordura" },
-      { dish: "Ragu de carne com pappardelle", reason: "O cozimento longo do ragu concentra umami e gordura, que encontram nos taninos do tinto um contraponto que renova o paladar a cada garfada.", match: "muito bom", category: "classico", harmony_type: "contraste", harmony_label: "acidez vs untuosidade do molho" },
-      { dish: "Tábua de queijos maturados", reason: "A gordura e o sal dos queijos maturados neutralizam a adstringência dos taninos, revelando notas frutadas e especiadas que estavam mascaradas.", match: "bom", category: "contraste", harmony_type: "complemento", harmony_label: "sal que revela fruta" },
-      { dish: "Berinjela à parmegiana gratinada", reason: "A textura macia da berinjela e a acidez do molho de tomate criam uma base versátil que aceita tintos de corpo médio sem competir.", match: "bom", category: "afinidade", harmony_type: "equilíbrio", harmony_label: "peso proporcional" },
+      { dish: "Picanha na brasa com sal grosso", reason: `${context} tende a ter taninos que encontram na gordura intramuscular da picanha um parceiro natural — a proteína suaviza a adstringência enquanto o sal amplifica a percepção aromática.`, match: "perfeito", category: "classico", harmony_type: "equilíbrio", harmony_label: "gordura que suaviza taninos" },
+      { dish: "Risoto de cogumelos porcini", reason: `As notas terrosas dos cogumelos porcini dialogam com o perfil de ${context} — a manteiga do risoto envolve o vinho e a umami dos funghi amplifica a complexidade.`, match: "perfeito", category: "afinidade", harmony_type: "semelhança", harmony_label: "notas terrosas em sintonia" },
+      { dish: "Cordeiro assado com ervas e alho", reason: `A intensidade aromática do cordeiro pede a estrutura que ${context} oferece. Os taninos cortam a gordura natural da carne, renovando o paladar.`, match: "muito bom", category: "classico", harmony_type: "limpeza", harmony_label: "taninos que cortam gordura" },
+      { dish: "Ragu de carne com pappardelle", reason: `O cozimento longo do ragu concentra umami e gordura — ${context} funciona como contraponto com sua acidez, renovando o paladar entre garfadas.`, match: "muito bom", category: "classico", harmony_type: "contraste", harmony_label: "acidez vs untuosidade do molho" },
+      { dish: "Tábua de queijos maturados", reason: `A gordura e o sal dos queijos maturados neutralizam a adstringência dos taninos de ${context}, revelando camadas aromáticas mais sutis.`, match: "bom", category: "contraste", harmony_type: "complemento", harmony_label: "sal que revela fruta" },
+      { dish: "Berinjela à parmegiana gratinada", reason: `A textura macia da berinjela e a acidez do tomate criam uma base que acolhe ${context} sem competir — equilíbrio de peso e intensidade.`, match: "bom", category: "afinidade", harmony_type: "equilíbrio", harmony_label: "peso proporcional" },
     ],
     branco: [
-      { dish: "Salmão grelhado com molho de limão siciliano", reason: "A acidez cítrica do branco espelha o limão do molho, enquanto a mineralidade realça a textura delicada do salmão sem mascará-la.", match: "perfeito", category: "afinidade", harmony_type: "semelhança", harmony_label: "citricidade em sintonia" },
-      { dish: "Camarão ao alho e óleo com ervas frescas", reason: "O alho dourado e o azeite criam uma gordura sutil que a acidez do branco corta com precisão, renovando o paladar entre cada camarão.", match: "perfeito", category: "classico", harmony_type: "limpeza", harmony_label: "acidez que limpa o azeite" },
-      { dish: "Ceviche de peixe branco com coentro", reason: "A frescura ácida do ceviche encontra no branco mineral um espelho perfeito — ambos trabalham na mesma frequência de leveza e vivacidade.", match: "muito bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "frescor que se espelha" },
-      { dish: "Risoto de limão e ervas finas", reason: "A manteiga do risoto pede a acidez do branco para não pesar, enquanto as ervas encontram nos aromas herbáceos do vinho um complemento natural.", match: "muito bom", category: "contraste", harmony_type: "complemento", harmony_label: "ervas que se completam" },
-      { dish: "Frango ao molho de mostarda e estragão", reason: "A cremosidade do molho de mostarda encontra na acidez do branco um contraponto que equilibra a riqueza, sem que nenhum elemento domine.", match: "bom", category: "contraste", harmony_type: "contraste", harmony_label: "acidez vs cremosidade" },
-      { dish: "Salada de folhas com queijo de cabra e nozes", reason: "A acidez mineral do branco liga os elementos: a leve amargura das folhas, a tanginess do queijo de cabra e a oleosidade das nozes.", match: "bom", category: "classico", harmony_type: "equilíbrio", harmony_label: "peso equilibrado" },
+      { dish: "Salmão grelhado com molho de limão siciliano", reason: `A acidez mineral de ${context} espelha o limão do molho, enquanto sua textura realça a delicadeza do salmão sem mascará-la.`, match: "perfeito", category: "afinidade", harmony_type: "semelhança", harmony_label: "citricidade em sintonia" },
+      { dish: "Camarão ao alho e óleo com ervas frescas", reason: `O alho dourado e o azeite criam uma gordura sutil que a acidez de ${context} corta com precisão, renovando o paladar.`, match: "perfeito", category: "classico", harmony_type: "limpeza", harmony_label: "acidez que limpa o azeite" },
+      { dish: "Ceviche de peixe branco com coentro", reason: `A frescura ácida do ceviche encontra em ${context} um espelho de leveza e vivacidade — ambos trabalham na mesma frequência.`, match: "muito bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "frescor que se espelha" },
+      { dish: "Risoto de limão e ervas finas", reason: `A manteiga do risoto pede a acidez de ${context} para equilibrar, enquanto as ervas encontram complemento nos aromas do vinho.`, match: "muito bom", category: "contraste", harmony_type: "complemento", harmony_label: "ervas que se completam" },
+      { dish: "Frango ao molho de mostarda e estragão", reason: `A cremosidade do molho de mostarda encontra na acidez de ${context} um contraponto que equilibra sem dominar.`, match: "bom", category: "contraste", harmony_type: "contraste", harmony_label: "acidez vs cremosidade" },
+      { dish: "Salada de folhas com queijo de cabra e nozes", reason: `A acidez de ${context} liga os elementos: amargura das folhas, tanginess do queijo de cabra e oleosidade das nozes.`, match: "bom", category: "classico", harmony_type: "equilíbrio", harmony_label: "peso equilibrado" },
     ],
     rosé: [
-      { dish: "Salada mediterrânea com azeite e orégano", reason: "A leveza frutada do rosé espelha a frescura dos vegetais, enquanto sua sutil acidez corta o azeite extra-virgem sem competir com as ervas.", match: "perfeito", category: "classico", harmony_type: "semelhança", harmony_label: "frescor mediterrâneo" },
-      { dish: "Sushi variado com sashimi", reason: "A versatilidade do rosé — nem tão ácido quanto um branco, nem tão tânico quanto um tinto — acompanha a variedade de texturas do sushi sem dominar.", match: "muito bom", category: "afinidade", harmony_type: "equilíbrio", harmony_label: "versatilidade textural" },
-      { dish: "Bruschetta de tomate fresco com manjericão", reason: "A acidez natural do tomate encontra no rosé um parceiro de mesma intensidade, criando uma harmonia de verão despretensiosa e precisa.", match: "muito bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "acidez em sintonia" },
-      { dish: "Frango grelhado com limão e alcaparras", reason: "A proteína branca leve e o toque ácido das alcaparras pedem um rosé com corpo suficiente para acompanhar, mas sem peso excessivo.", match: "bom", category: "classico", harmony_type: "complemento", harmony_label: "leveza que complementa" },
-      { dish: "Pizza margherita com mozzarella fresca", reason: "A gordura da mozzarella e a acidez do tomate da pizza encontram no rosé seco o equilíbrio ideal entre frescor e substância.", match: "bom", category: "contraste", harmony_type: "limpeza", harmony_label: "frescor que limpa gordura" },
+      { dish: "Salada mediterrânea com azeite e orégano", reason: `A leveza frutada de ${context} espelha a frescura dos vegetais, enquanto sua acidez corta o azeite sem competir.`, match: "perfeito", category: "classico", harmony_type: "semelhança", harmony_label: "frescor mediterrâneo" },
+      { dish: "Sushi variado com sashimi", reason: `A versatilidade de ${context} acompanha a variedade textural do sushi sem dominar nenhum elemento individual.`, match: "muito bom", category: "afinidade", harmony_type: "equilíbrio", harmony_label: "versatilidade textural" },
+      { dish: "Bruschetta de tomate fresco com manjericão", reason: `A acidez natural do tomate encontra em ${context} um parceiro de mesma intensidade — harmonia despretensiosa e precisa.`, match: "muito bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "acidez em sintonia" },
+      { dish: "Frango grelhado com limão e alcaparras", reason: `A proteína branca e o toque ácido das alcaparras pedem ${context} — corpo suficiente para acompanhar sem peso excessivo.`, match: "bom", category: "classico", harmony_type: "complemento", harmony_label: "leveza que complementa" },
+      { dish: "Pizza margherita com mozzarella fresca", reason: `A gordura da mozzarella e a acidez do tomate encontram em ${context} o equilíbrio entre frescor e substância.`, match: "bom", category: "contraste", harmony_type: "limpeza", harmony_label: "frescor que limpa gordura" },
     ],
     espumante: [
-      { dish: "Ostras frescas com limão", reason: "A salinidade mineral das ostras amplifica a perlage do espumante, criando uma explosão de frescor. A acidez alta corta a textura cremosa do molusco.", match: "perfeito", category: "classico", harmony_type: "contraste", harmony_label: "bolhas que amplificam salinidade" },
-      { dish: "Salmão defumado com cream cheese e alcaparras", reason: "As bolhas agem como micro-limpadores entre a gordura do salmão e a untuosidade do cream cheese, renovando o paladar a cada garfada.", match: "perfeito", category: "classico", harmony_type: "limpeza", harmony_label: "perlage que renova o paladar" },
-      { dish: "Canapés de patê de foie gras", reason: "A riqueza concentrada do foie gras precisa da acidez vibrante e das bolhas do espumante para não saturar o paladar. Um clássico incontestável.", match: "muito bom", category: "classico", harmony_type: "contraste", harmony_label: "acidez vs riqueza" },
-      { dish: "Tempura de legumes com molho ponzu", reason: "A crocância da tempura e a leveza do ponzu encontram nas bolhas finas um parceiro que adiciona textura sem peso.", match: "muito bom", category: "afinidade", harmony_type: "complemento", harmony_label: "texturas que se complementam" },
-      { dish: "Frutas frescas com calda de maracujá", reason: "A acidez tropical do maracujá espelha a vivacidade do espumante, criando uma sobremesa leve onde ambos se elevam mutuamente.", match: "bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "acidez tropical em sintonia" },
-      { dish: "Risoto de açafrão com parmesão", reason: "O umami do parmesão e a elegância do açafrão pedem um espumante com corpo para acompanhar sem ser ofuscado pela complexidade do prato.", match: "bom", category: "contraste", harmony_type: "equilíbrio", harmony_label: "peso proporcional ao umami" },
+      { dish: "Ostras frescas com limão", reason: `A salinidade mineral das ostras amplifica a perlage de ${context}, criando uma explosão de frescor — a acidez corta a cremosidade do molusco.`, match: "perfeito", category: "classico", harmony_type: "contraste", harmony_label: "bolhas que amplificam salinidade" },
+      { dish: "Salmão defumado com cream cheese e alcaparras", reason: `As bolhas de ${context} agem como micro-limpadores entre a gordura do salmão e a untuosidade do cream cheese.`, match: "perfeito", category: "classico", harmony_type: "limpeza", harmony_label: "perlage que renova o paladar" },
+      { dish: "Canapés de patê de foie gras", reason: `A riqueza concentrada do foie gras precisa da acidez vibrante e das bolhas de ${context} para não saturar o paladar.`, match: "muito bom", category: "classico", harmony_type: "contraste", harmony_label: "acidez vs riqueza" },
+      { dish: "Tempura de legumes com molho ponzu", reason: `A crocância da tempura e a leveza do ponzu encontram nas bolhas finas de ${context} um parceiro que adiciona textura sem peso.`, match: "muito bom", category: "afinidade", harmony_type: "complemento", harmony_label: "texturas que se complementam" },
+      { dish: "Frutas frescas com calda de maracujá", reason: `A acidez tropical do maracujá espelha a vivacidade de ${context}, criando uma sobremesa leve onde ambos se elevam.`, match: "bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "acidez tropical em sintonia" },
+      { dish: "Risoto de açafrão com parmesão", reason: `O umami do parmesão e a elegância do açafrão pedem ${context} com corpo para acompanhar sem ser ofuscado.`, match: "bom", category: "contraste", harmony_type: "equilíbrio", harmony_label: "peso proporcional ao umami" },
     ],
   };
 
@@ -468,7 +483,7 @@ export async function getWinePairings(wine: {
         wineVintage: wine.vintage,
         wineCountry: wine.country,
       },
-      { timeoutMs: 30_000, retries: 1 },
+      { timeoutMs: 55_000, retries: 1 },
     );
 
     if (isValidPairings(data)) {
@@ -505,7 +520,7 @@ export async function getDishWineSuggestions(
           producer: w.producer,
         })),
       },
-      { timeoutMs: 30_000, retries: 1 },
+      { timeoutMs: 55_000, retries: 1 },
     );
 
     if (isValidSuggestions(data)) {

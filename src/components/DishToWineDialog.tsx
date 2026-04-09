@@ -166,6 +166,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         style: w.style,
         grape: w.grape,
         region: w.region,
+        country: w.country,
+        producer: w.producer,
+        vintage: w.vintage,
       }));
       const result = await getDishWineSuggestions(query, cellarWines);
       setSuggestions(result.suggestions);
