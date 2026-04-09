@@ -82,6 +82,49 @@ serve(async (req) => {
       return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
     }
     const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines } = body as Record<string, any>;
+    const wineProducer = (body as any).wineProducer || null;
+    const wineVintage = (body as any).wineVintage || null;
+    const wineCountry = (body as any).wineCountry || null;
+
+    // ── Wine Technical Profile Construction Instructions (injected into all prompts) ──
+    const PROFILE_CONSTRUCTION_RULES = `
+CONSTRUÇÃO OBRIGATÓRIA DO PERFIL TÉCNICO (WineTechnicalProfile):
+Antes de responder QUALQUER coisa, você DEVE construir internamente um perfil técnico para cada vinho mencionado.
+
+O perfil deve conter:
+- wineName: nome completo do rótulo
+- producer: quem produz, escala, filosofia
+- country/region: origem e o que ela implica (clima, solo, tradição)
+- vintage: idade e o que isso significa para taninos/evolução
+- grapes: variedade(s) — mas NUNCA descreva a uva genericamente
+- wineType: tinto/branco/rosé/espumante/fortificado
+- body: leve/médio/encorpado (inferido do rótulo, NÃO da uva)
+- acidity: baixa/média/alta (inferido da região e estilo)
+- tannin: baixo/médio/alto (inferido do rótulo e idade)
+- complexity: baixa/média/alta
+- style: elegante/potente/gastronômico/frutado/mineral/etc
+- confidence: alta (muitos dados) / média (boa inferência) / baixa (poucos dados)
+- inferenceBasis: lista do que sustentou a análise ["região", "produtor", "estilo da linha"]
+
+REGRAS DE CONSTRUÇÃO:
+1. PRIORIDADE ABSOLUTA: o rótulo específico, NUNCA a uva isolada
+2. Don Melchor ≠ qualquer Cabernet. Testamatta ≠ qualquer Sangiovese. Barolo ≠ qualquer Nebbiolo.
+3. Se faltam dados, INFIRA com base em: origem, estilo típico daquela região, posicionamento do rótulo, categoria/linha, produtor
+4. Use linguagem como "Este rótulo tende a apresentar..." ou "Vinhos dessa origem geralmente..." quando inferindo
+5. NUNCA faça afirmações absolutas sem dados suficientes
+
+ANTI-GENERICIDADE (CHECAGEM OBRIGATÓRIA):
+Antes de finalizar CADA explicação, aplique este teste:
+"Se eu trocar o nome deste vinho por outro da mesma uva, esta frase ainda funciona?"
+→ Se SIM → REESCREVA. A frase DEVE ser específica para ESTE rótulo.
+→ Se NÃO → OK, pode manter.
+
+FRASES PROIBIDAS (resultam em rejeição automática):
+- "[Uva] possui notas de..."
+- "[Uva] é conhecida por..."
+- "combina bem", "harmoniza perfeitamente", "complementa os sabores"
+- Qualquer frase que funcione para QUALQUER vinho da mesma uva
+- Descrições genéricas copiadas de enciclopédias de vinho`;
 
     let systemPrompt: string;
     let userPrompt: string;
@@ -89,27 +132,18 @@ serve(async (req) => {
     if (mode === "wine-to-food") {
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
-REGRA #1 — FALE DO RÓTULO, NUNCA DA UVA GENÉRICA:
-- ERRADO: "Carmenère possui notas de frutas escuras e especiarias"
-- CERTO: "O Casillero del Diablo Carmenère, produzido pela Concha y Toro no Valle Central chileno, tem um perfil mais comercial com taninos macios e leve nota herbácea que é marca registrada dos Carmenères de clima quente"
+${PROFILE_CONSTRUCTION_RULES}
 
-ANTES DE QUALQUER SUGESTÃO, construa um PERFIL MENTAL deste rótulo:
-1. O que se sabe sobre ESTE produtor? (escala, filosofia, faixa de preço)
-2. O que a REGIÃO de origem implica? (clima, solo, estilo típico)
-3. Se tem SAFRA, qual a idade? Taninos integrados ou jovens?
-4. Qual o POSICIONAMENTO do vinho? (entrada de linha, reserva, ícone)
-5. Corpo, acidez, taninos PROVÁVEIS baseado em tudo acima
+FLUXO OBRIGATÓRIO:
+1. Construa o WineTechnicalProfile internamente
+2. Use o perfil para gerar o campo "summary" do wineProfile (2-3 frases que DIFERENCIEM este rótulo de outros da mesma uva)
+3. Para CADA prato sugerido, explique a INTERAÇÃO FÍSICA entre o perfil técnico do vinho e os componentes do prato
 
 CADA EXPLICAÇÃO deve:
 - Citar o NOME do vinho (não "este vinho" ou "o Carmenère")
 - Referenciar características que SÓ este rótulo/produtor/região teria
 - Explicar a INTERAÇÃO FÍSICA entre vinho e prato (ex: "os taninos ainda jovens do [nome] precisam de gordura para se suavizar")
 - Usar uma lógica de harmonização DIFERENTE por sugestão: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
-
-PROIBIDO ABSOLUTAMENTE:
-- "[Uva] possui notas de..." — isso é Wikipedia, não sommelier
-- "combina bem", "harmoniza perfeitamente", "complementa os sabores"
-- Qualquer frase que funcione para QUALQUER vinho da mesma uva
 
 REGRAS ENOLÓGICAS:
 1. Peso equivalente: corpo do vinho ∝ intensidade do prato
@@ -123,37 +157,41 @@ JULGAMENTO HONESTO — nem todo prato é "perfeito":
 - bom: funciona, mas não é memorável`;
 
       userPrompt = `Vinho: ${wineName || "Desconhecido"}
-Produtor: ${(body as any).wineProducer || "Não informado"}
+Produtor: ${wineProducer || "Não informado"}
 Estilo: ${wineStyle || "Não informado"}
 Uva: ${wineGrape || "Não informada"}
-Região/País: ${wineRegion || "Não informada"}
-Safra: ${(body as any).wineVintage || "Não informada"}
+Região: ${wineRegion || "Não informada"}
+País: ${wineCountry || "Não informado"}
+Safra: ${wineVintage || "Não informada"}
 
-Analise o perfil ESPECÍFICO deste rótulo (não da uva genérica) e sugira 6-8 pratos. Sempre cite "${wineName}" pelo nome nas explicações. Varie entre entradas, pratos principais e queijos/sobremesa.`;
+INSTRUÇÕES:
+1. Construa o WineTechnicalProfile deste rótulo com base nos dados acima + seu conhecimento enológico
+2. Use o perfil para preencher wineProfile.summary com 2-3 frases ESPECÍFICAS sobre ESTE rótulo (não sobre a uva)
+3. Sugira 6-8 pratos, sempre citando "${wineName}" pelo nome nas explicações
+4. Varie entre entradas, pratos principais e queijos/sobremesa
+5. Aplique o teste anti-genericidade em CADA explicação antes de finalizar`;
 
     } else if (mode === "food-to-wine") {
       const hasCellar = userWines?.length > 0;
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
-${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE priorizar rótulos REAIS. Use o NOME EXATO de cada vinho sugerido. NUNCA responda com categorias genéricas ("vinho branco seco") se há vinhos reais compatíveis.
+${PROFILE_CONSTRUCTION_RULES}
 
-Se NENHUM vinho da adega combina adequadamente, diga isso honestamente e sugira o perfil ideal que o usuário deveria buscar.` : "Sugira tipos específicos de vinho com rótulos de referência."}
+${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE:
+1. Construir um WineTechnicalProfile para CADA vinho da adega antes de avaliar
+2. Usar o perfil técnico para determinar compatibilidade com o prato
+3. Priorizar rótulos REAIS. NUNCA responda com categorias genéricas ("vinho branco seco") se há vinhos reais compatíveis.
+4. Se NENHUM vinho da adega combina adequadamente, diga isso honestamente.` : "Sugira tipos específicos de vinho com rótulos de referência."}
 
-REGRA #1 — FALE DO RÓTULO, NUNCA DA UVA GENÉRICA:
-- ERRADO: "Um Malbec argentino possui taninos aveludados..."
-- CERTO: "O Catena Zapata Malbec 2019, do terroir de altitude de Mendoza (~1000m), desenvolve taninos mais refinados e acidez mais viva que Malbecs de planície, o que o torna ideal para..."
-
-PARA CADA VINHO DA ADEGA, considere:
-1. O que se sabe sobre o PRODUTOR? (escala, filosofia)
-2. O que a REGIÃO implica sobre o estilo?
-3. A SAFRA indica maturidade? (ex: 2018 = ~8 anos, taninos integrados)
-4. O POSICIONAMENTO do vinho (linha básica vs reserva)
-
-CADA EXPLICAÇÃO deve:
-- Citar o vinho PELO NOME (não "este Malbec")
-- Explicar por que ESTE rótulo específico funciona (ou não) com ESTE prato
-- Referenciar componentes REAIS do prato (gordura, sal, umami, textura, cocção)
-- Descrever a INTERAÇÃO FÍSICA (ex: "a acidez alta do [nome] corta a gordura da picanha")
+FLUXO OBRIGATÓRIO:
+1. Analise o prato tecnicamente (proteína, gordura, cocção, intensidade, texturas)
+2. Para cada vinho candidato, construa o WineTechnicalProfile
+3. Compare perfil do vinho vs perfil do prato usando lógica técnica:
+   - acidez × gordura
+   - tanino × proteína
+   - intensidade × intensidade
+   - textura × textura
+4. Classifique honestamente cada sugestão
 
 JULGAMENTO HONESTO — use toda a escala:
 - Excelente escolha: harmonia excepcional
@@ -163,16 +201,19 @@ JULGAMENTO HONESTO — use toda a escala:
 - Escolha ousada: pode funcionar mas é arriscado
 - Pouco indicado: não recomendo
 
-NEM TODOS os vinhos devem ser positivos. Se um vinho da adega é ruim para o prato, diga.
-
-PROIBIDO: "[Uva] possui notas de...", "combina bem", "harmoniza", qualquer frase genérica.`;
+NEM TODOS os vinhos devem ser positivos. Se um vinho da adega é ruim para o prato, diga.`;
 
       const cellarContext = hasCellar
         ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"}`).join("\n")}`
         : "";
       userPrompt = `Prato: "${dish}"${cellarContext}
 
-Analise o prato tecnicamente e sugira os melhores vinhos. Para cada um, cite o NOME do vinho e explique por que ESTE rótulo específico (não a uva genérica) funciona com este prato. Use julgamento honesto — nem todos precisam ser positivos.`;
+INSTRUÇÕES:
+1. Decomponha o prato tecnicamente (proteína, gordura, cocção, intensidade)
+2. Para cada vinho candidato, construa o WineTechnicalProfile internamente
+3. Compare o perfil técnico do vinho vs os componentes do prato
+4. Cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não) com ESTE prato
+5. Aplique o teste anti-genericidade em CADA explicação`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
