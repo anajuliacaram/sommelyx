@@ -270,7 +270,7 @@ export async function getWinePairings(wine: {
         wineGrape: wine.grape,
         wineRegion: wine.region,
       },
-      { timeoutMs: 8_000, retries: 1 },
+      { timeoutMs: 20_000, retries: 1 },
     );
 
     if (isValidPairings(data)) {
@@ -307,9 +307,12 @@ export async function getDishWineSuggestions(
           style: w.style,
           grape: w.grape,
           region: w.region,
+          country: w.country,
+          vintage: w.vintage,
+          producer: w.producer,
         })),
       },
-      { timeoutMs: 8_000, retries: 1 },
+      { timeoutMs: 20_000, retries: 1 },
     );
 
     if (isValidSuggestions(data)) {
