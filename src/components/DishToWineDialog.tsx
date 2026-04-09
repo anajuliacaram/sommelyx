@@ -5,7 +5,7 @@ import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis } from "@/lib/sommelier-ai";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
