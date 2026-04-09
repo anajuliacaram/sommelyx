@@ -12,6 +12,25 @@ const fadeUp = {
   }),
 } as const;
 
+/* ── Glass card style (reused) ── */
+const glassCard = {
+  background: "rgba(255,255,255,0.45)",
+  backdropFilter: "blur(16px) saturate(1.4)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+  border: "1px solid rgba(255,255,255,0.55)",
+  boxShadow:
+    "0 8px 32px -8px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)",
+} as const;
+
+const glassCardDark = {
+  background: "rgba(30,20,20,0.05)",
+  backdropFilter: "blur(16px) saturate(1.4)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+  border: "1px solid rgba(255,255,255,0.45)",
+  boxShadow:
+    "0 12px 40px -12px rgba(30,20,20,0.12), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)",
+} as const;
+
 interface LandingHeroProps {
   onSignup: () => void;
 }
@@ -22,14 +41,13 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Left */}
         <div className="text-left">
-          {/* Logo removido — presente apenas no header fixo */}
-
           <motion.h1
             initial="hidden"
             animate="visible"
             variants={fadeUp}
             custom={0}
-            className="max-w-[34rem] lg:max-w-[38rem] font-serif text-[32px] font-bold leading-[1.15] tracking-[-0.025em] sm:text-[44px] text-foreground"
+            className="max-w-[34rem] lg:max-w-[38rem] font-serif text-[32px] font-bold leading-[1.15] tracking-[-0.025em] sm:text-[44px]"
+            style={{ color: "#1A1A1A" }}
           >
             Um painel executivo para sua adega, com clareza de estoque,{" "}
             <span className="whitespace-nowrap text-primary">valor e giro.</span>
@@ -40,7 +58,8 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="mt-5 max-w-xl text-[16px] font-normal leading-[1.7] text-muted-foreground sm:text-[18px]"
+            className="mt-5 max-w-xl text-[16px] font-normal leading-[1.7] sm:text-[18px]"
+            style={{ color: "#555" }}
           >
             Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
@@ -49,18 +68,27 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             <MagneticButton>
               <Button
                 variant="primary"
-                className="group h-12 rounded-xl px-8 text-[14px] font-semibold uppercase tracking-[0.06em] shadow-float"
+                className="group h-12 rounded-xl px-8 text-[14px] font-semibold uppercase tracking-[0.06em]"
+                style={{
+                  boxShadow: "0 4px 20px -4px rgba(110,30,42,0.4), 0 0 0 1px rgba(110,30,42,0.1), inset 0 1px 0 rgba(255,255,255,0.15)",
+                }}
                 onClick={onSignup}
               >
                 Começar grátis
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </MagneticButton>
-            <div className="flex items-center gap-3 text-[12px] font-medium text-muted-foreground">
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/6 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.10em] text-emerald-700 backdrop-blur-xl">
-                <Check className="h-3.5 w-3.5 text-emerald-600" /> 14 dias grátis
-              </span>
-            </div>
+            <span
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.10em]"
+              style={{
+                ...glassCard,
+                color: "#2d6a4f",
+                background: "rgba(16,185,129,0.08)",
+                border: "1px solid rgba(16,185,129,0.18)",
+              }}
+            >
+              <Check className="h-3.5 w-3.5" style={{ color: "#10b981" }} /> 14 dias grátis
+            </span>
           </motion.div>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-5 grid max-w-xl grid-cols-3 gap-2.5">
@@ -69,10 +97,14 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               { label: "Giro", icon: TrendingUp },
               { label: "Reposição", icon: AlertTriangle },
             ].map((item) => (
-              <div key={item.label} className="rounded-xl border border-black/[0.05] bg-white/50 px-3.5 py-3 backdrop-blur-xl">
+              <div
+                key={item.label}
+                className="rounded-2xl px-3.5 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                style={glassCard}
+              >
                 <div className="flex items-center gap-2">
                   <item.icon className="h-4 w-4 text-wine" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">{item.label}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#2B2B2B" }}>{item.label}</span>
                 </div>
               </div>
             ))}
@@ -81,22 +113,31 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
 
         {/* Right: Mock Dashboard */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2} className="relative">
-          <div className="absolute -left-10 -top-10 h-56 w-56 rounded-full bg-wine/20 blur-[70px]" />
-          <div className="absolute -bottom-12 -right-12 h-72 w-72 rounded-full bg-gold/20 blur-[90px]" />
+          <div className="absolute -left-10 -top-10 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.12)", filter: "blur(70px)" }} />
+          <div className="absolute -bottom-12 -right-12 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.12)", filter: "blur(90px)" }} />
 
-          {/* Mobile: compact mock (reduz scroll) */}
-          <div className="sm:hidden relative rounded-[22px] border border-black/[0.05] bg-white/70 p-4 shadow-[0_20px_60px_-40px_rgba(15,15,20,0.7)] ring-1 ring-white/40 backdrop-blur-2xl">
+          {/* Mobile mock */}
+          <div
+            className="sm:hidden relative rounded-[22px] p-4"
+            style={{
+              ...glassCardDark,
+              boxShadow: "0 20px 60px -20px rgba(30,20,20,0.2), 0 1px 2px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)",
+            }}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-wine/8 text-wine ring-1 ring-black/[0.03]">
-                  <Wine className="h-4 w-4" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(110,30,42,0.08)", border: "1px solid rgba(110,30,42,0.12)" }}>
+                  <Wine className="h-4 w-4 text-wine" />
                 </div>
                 <div className="leading-none">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Dashboard</p>
-                  <p className="text-[14px] font-semibold tracking-tight text-foreground">Painel executivo</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>Dashboard</p>
+                  <p className="text-[14px] font-semibold tracking-tight" style={{ color: "#1A1A1A" }}>Painel executivo</p>
                 </div>
               </div>
-              <div className="rounded-full border border-wine/12 bg-wine/4 px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine">
+              <div
+                className="rounded-full px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine"
+                style={{ background: "rgba(110,30,42,0.06)", border: "1px solid rgba(110,30,42,0.12)" }}
+              >
                 Premium
               </div>
             </div>
@@ -108,27 +149,36 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 { label: "Giro", value: "37%" },
                 { label: "Reposição", value: "6 itens" },
               ].map((kpi) => (
-                <div key={kpi.label} className="rounded-xl border border-black/[0.04] bg-white/70 p-3 shadow-sm">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{kpi.label}</p>
-                  <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight text-foreground">{kpi.value}</p>
+                <div key={kpi.label} className="rounded-xl p-3" style={glassCard}>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>{kpi.label}</p>
+                  <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight" style={{ color: "#1A1A1A" }}>{kpi.value}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Desktop/tablet: full mock */}
-          <div className="hidden sm:block relative rounded-[22px] border border-black/[0.05] bg-white/60 p-5 shadow-[0_24px_70px_-40px_rgba(15,15,20,0.75)] ring-1 ring-white/40 backdrop-blur-2xl">
+          {/* Desktop mock */}
+          <div
+            className="hidden sm:block relative rounded-[22px] p-5"
+            style={{
+              ...glassCardDark,
+              boxShadow: "0 24px 70px -24px rgba(30,20,20,0.22), 0 1px 2px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)",
+            }}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-wine/8 text-wine ring-1 ring-black/[0.03]">
-                  <Wine className="h-4 w-4" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(110,30,42,0.08)", border: "1px solid rgba(110,30,42,0.12)" }}>
+                  <Wine className="h-4 w-4 text-wine" />
                 </div>
                 <div className="leading-none">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Dashboard</p>
-                  <p className="text-[15px] font-semibold tracking-tight text-foreground">Painel executivo</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>Dashboard</p>
+                  <p className="text-[15px] font-semibold tracking-tight" style={{ color: "#1A1A1A" }}>Painel executivo</p>
                 </div>
               </div>
-              <div className="rounded-full border border-wine/12 bg-wine/4 px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine">
+              <div
+                className="rounded-full px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine"
+                style={{ background: "rgba(110,30,42,0.06)", border: "1px solid rgba(110,30,42,0.12)" }}
+              >
                 Premium
               </div>
             </div>
@@ -140,16 +190,16 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 { label: "Giro mensal", value: "37%" },
                 { label: "Reposição", value: "6 itens" },
               ].map((kpi) => (
-                <div key={kpi.label} className="rounded-xl border border-black/[0.04] bg-white/65 p-3.5 shadow-sm">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{kpi.label}</p>
-                  <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight text-foreground">{kpi.value}</p>
+                <div key={kpi.label} className="rounded-xl p-3.5" style={glassCard}>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>{kpi.label}</p>
+                  <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight" style={{ color: "#1A1A1A" }}>{kpi.value}</p>
                 </div>
               ))}
             </div>
 
             <div className="mt-3 grid grid-cols-12 gap-2.5">
-              <div className="col-span-7 rounded-xl border border-black/[0.04] bg-white/65 p-3.5 shadow-sm">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Estoque atual</p>
+              <div className="col-span-7 rounded-xl p-3.5" style={glassCard}>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>Estoque atual</p>
                 <div className="mt-2.5 space-y-2">
                   {[
                     { name: "Brunello di Montalcino", qty: "2", tone: "low" },
@@ -158,14 +208,14 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                   ].map((row) => (
                     <div key={row.name} className="flex items-center gap-2">
                       <div className={`h-1.5 w-1.5 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-gold"}`} />
-                      <p className="flex-1 truncate text-[12px] font-medium text-foreground">{row.name}</p>
-                      <span className="rounded-md bg-black/[0.03] px-2 py-1 text-[10px] font-medium text-muted-foreground">{row.qty}</span>
+                      <p className="flex-1 truncate text-[12px] font-medium" style={{ color: "#2B2B2B" }}>{row.name}</p>
+                      <span className="rounded-md px-2 py-1 text-[10px] font-medium" style={{ background: "rgba(0,0,0,0.04)", color: "#888" }}>{row.qty}</span>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="col-span-5 rounded-xl border border-black/[0.04] bg-white/65 p-3.5 shadow-sm">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Vendas</p>
+              <div className="col-span-5 rounded-xl p-3.5" style={glassCard}>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>Vendas</p>
                 <div className="mt-2.5 grid grid-cols-6 items-end gap-1">
                   {[4, 7, 6, 10, 9, 12].map((h, i) => (
                     <div key={i} className="col-span-1 rounded-md bg-wine/12">
@@ -173,7 +223,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                     </div>
                   ))}
                 </div>
-                <p className="mt-2 text-[10px] font-medium text-muted-foreground">Últimos 6 meses</p>
+                <p className="mt-2 text-[10px] font-medium" style={{ color: "#888" }}>Últimos 6 meses</p>
               </div>
             </div>
           </div>
