@@ -197,7 +197,7 @@ export default function WishlistPage() {
     await requestAiSuggestion({ query: wineName, file, force: true });
     toast({
       title: "Foto recebida",
-      description: "A IA analisou a imagem e preencheu os campos com o máximo de contexto possível.",
+      description: "Nossa inteligência analisou a imagem e preencheu os campos automaticamente.",
     });
   };
 
@@ -276,9 +276,9 @@ export default function WishlistPage() {
     <div className="space-y-5 max-w-[980px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Wishlist com IA</h1>
+          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Wishlist inteligente</h1>
           <p className="text-[12px] text-muted-foreground">
-            Digite um rótulo, produtor ou safra e deixe a IA completar os detalhes. Se preferir, anexe uma foto do vinho.
+            Digite um rótulo, produtor ou safra e o Sommelyx completa os detalhes. Se preferir, anexe uma foto do vinho.
           </p>
         </div>
         <Button variant="primary" size="sm" className="h-9 px-4 text-[11px] font-bold" onClick={() => setShowForm((value) => !value)}>

@@ -234,12 +234,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       if (raw.length > MAX_CLIENT_INPUT_CHARS) {
         toast({
           title: "Arquivo muito grande",
-          description: "Importamos uma amostra do arquivo para manter a qualidade da análise com IA. Se precisar, importe em partes.",
+          description: "Importamos uma amostra do arquivo para manter a qualidade da análise. Se precisar, importe em partes.",
         });
       }
     } catch (err: any) {
       console.error("AI parse error:", err);
-      setParseErrors([err?.message || "Erro ao analisar o arquivo com IA."]);
+      setParseErrors([err?.message || "Erro ao analisar o arquivo. Tente novamente."]);
       setParsed([]);
       setStep("preview");
     }
@@ -327,7 +327,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
             <Sparkles className="h-4 w-4" style={{ color: "#8F2D56" }} />
-            Importar com IA
+            Importação inteligente
           </SheetTitle>
         </SheetHeader>
 
@@ -362,7 +362,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   <Sparkles className="h-3.5 w-3.5" /> IA inteligente
                 </p>
                 <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>
-                  Não se preocupe com a ordem ou nome das colunas. Nossa IA analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.
+                  Não se preocupe com a ordem ou nome das colunas. O Sommelyx analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.
                 </p>
               </div>
             </motion.div>
@@ -380,7 +380,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </div>
               </div>
               <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
-                Analisando planilha com IA...
+                Analisando sua planilha…
               </p>
               <p className="text-xs mt-1.5" style={{ color: "#9CA3AF" }}>
                 Identificando colunas e organizando os dados de <strong>{fileName}</strong>
@@ -424,7 +424,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               {aiNotes && (
                 <div className="p-3 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#8F2D56" }}>
-                    Observações da IA
+                    Observações do Sommelyx
                   </p>
                   <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>{aiNotes}</p>
                 </div>

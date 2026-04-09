@@ -370,7 +370,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       <p className="text-[13px] font-semibold text-foreground">Tenho um prato em mente</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
                         {source === "cellar"
-                          ? "A IA sugere vinhos da sua adega para o prato"
+                          ? "Nossa inteligência sugere vinhos da sua adega para o prato"
                           : "Digite o prato e envie a foto da carta de vinhos"}
                       </p>
                     </div>
@@ -389,7 +389,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       <p className="text-[13px] font-semibold text-foreground">Tenho um vinho em mente</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
                         {source === "cellar"
-                          ? "A IA sugere pratos ideais para o vinho escolhido"
+                          ? "Nossa inteligência sugere pratos ideais para o vinho escolhido"
                           : "Digite o vinho e envie a foto do cardápio"}
                       </p>
                     </div>
@@ -646,7 +646,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 <AiProgressiveLoader
                   steps={[
                     "Processando imagem…",
-                    "Lendo cardápio com IA…",
+                    "Lendo cardápio com inteligência Sommelyx…",
                     "Identificando pratos…",
                     "Avaliando harmonizações…",
                   ]}

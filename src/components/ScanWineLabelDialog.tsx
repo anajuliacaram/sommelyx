@@ -185,7 +185,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <div className="text-center">
                 <h3 className="text-base font-semibold text-foreground mb-1">Fotografe o rótulo</h3>
                 <p className="text-xs text-muted-foreground max-w-[260px]">
-                  Tire uma foto nítida do rótulo frontal da garrafa. A IA vai extrair todas as informações automaticamente.
+                  Tire uma foto nítida do rótulo frontal da garrafa. Nossa inteligência vai extrair todas as informações automaticamente.
                 </p>
               </div>
 
@@ -242,7 +242,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <AiProgressiveLoader
                 steps={[
                   "Processando imagem…",
-                  "Lendo rótulo com IA…",
+                  "Lendo rótulo com inteligência Sommelyx…",
                   "Extraindo informações…",
                   "Verificando dados…",
                 ]}
