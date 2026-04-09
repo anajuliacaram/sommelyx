@@ -46,6 +46,32 @@ const matchBadge: Record<string, { label: string; className: string }> = {
   bom: { label: "boa combinação", className: "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]" },
 };
 
+const styleTint: Record<string, string> = {
+  tinto: "bg-[hsl(348,40%,50%/0.06)] border-[hsl(348,40%,50%/0.12)]",
+  branco: "bg-[hsl(45,50%,55%/0.06)] border-[hsl(45,50%,55%/0.12)]",
+  rosé: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
+  rose: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
+  espumante: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
+  champagne: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
+};
+
+function getStyleTint(style?: string | null): string {
+  if (!style) return "";
+  const lower = style.toLowerCase();
+  for (const [key, val] of Object.entries(styleTint)) {
+    if (lower.includes(key)) return val;
+  }
+  return "";
+}
+
+const harmonyLabel: Record<string, string> = {
+  contraste: "harmonia por contraste",
+  semelhança: "harmonia por semelhança",
+  complemento: "aromas complementares",
+  equilíbrio: "equilíbrio de intensidade",
+  limpeza: "limpeza de paladar",
+};
+
 const popularDishes = [
   "Picanha na brasa",
   "Risoto de funghi",
