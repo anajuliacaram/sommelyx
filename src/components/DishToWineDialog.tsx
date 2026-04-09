@@ -46,6 +46,32 @@ const matchBadge: Record<string, { label: string; className: string }> = {
   bom: { label: "boa combinação", className: "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]" },
 };
 
+const styleTint: Record<string, string> = {
+  tinto: "bg-[hsl(348,40%,50%/0.06)] border-[hsl(348,40%,50%/0.12)]",
+  branco: "bg-[hsl(45,50%,55%/0.06)] border-[hsl(45,50%,55%/0.12)]",
+  rosé: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
+  rose: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
+  espumante: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
+  champagne: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
+};
+
+function getStyleTint(style?: string | null): string {
+  if (!style) return "";
+  const lower = style.toLowerCase();
+  for (const [key, val] of Object.entries(styleTint)) {
+    if (lower.includes(key)) return val;
+  }
+  return "";
+}
+
+const harmonyLabel: Record<string, string> = {
+  contraste: "harmonia por contraste",
+  semelhança: "harmonia por semelhança",
+  complemento: "aromas complementares",
+  equilíbrio: "equilíbrio de intensidade",
+  limpeza: "limpeza de paladar",
+};
+
 const popularDishes = [
   "Picanha na brasa",
   "Risoto de funghi",
@@ -991,6 +1017,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <ul className="space-y-3">
                     {suggestions.map((s, i) => {
                       const badge = matchBadge[s.match];
+                      const tint = getStyleTint(s.style);
+                      const meta = [s.grape, s.vintage ? `Safra ${s.vintage}` : null, s.region, s.country].filter(Boolean).join(" · ");
+                      const hLabel = s.harmony_label || (s.harmony_type && harmonyLabel[s.harmony_type]);
                       return (
                         <motion.li
                           key={i}
@@ -998,16 +1027,26 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
                           className={cn(
-                            "glass-card p-4 space-y-2 cursor-default",
-                            s.fromCellar && "border-primary/20 bg-primary/[0.04]",
+                            "rounded-2xl border p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
+                            tint || "bg-card/60 border-border/30",
+                            s.fromCellar && !tint && "border-primary/20 bg-primary/[0.04]",
                           )}
                         >
+                          {/* Top: wine identity */}
                           <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[s.match] || "bg-primary/40")} />
-                              <span className="text-[15px] font-bold text-foreground tracking-tight">
-                                {s.wineName}
-                              </span>
+                            <div className="min-w-0 space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[s.match] || "bg-primary/40")} />
+                                <span className="text-[15px] font-bold text-foreground tracking-tight">
+                                  {s.wineName}
+                                </span>
+                              </div>
+                              {meta && (
+                                <p className="text-[11px] text-muted-foreground/70 pl-[18px]">{meta}</p>
+                              )}
+                              {s.style && (
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50 pl-[18px]">{s.style}</p>
+                              )}
                             </div>
                             {s.fromCellar && (
                               <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -1016,16 +1055,25 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               </span>
                             )}
                           </div>
-                          <p className="text-[13px] text-foreground/65 leading-relaxed pl-5">
+
+                          {/* Middle: explanation */}
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {s.reason}
                           </p>
-                          {badge && (
-                            <div className="pl-5">
+
+                          {/* Bottom: badges */}
+                          <div className="flex items-center gap-2 pl-[18px] flex-wrap">
+                            {hLabel && (
+                              <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70">
+                                {hLabel}
+                              </span>
+                            )}
+                            {badge && (
                               <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
                                 {badge.label}
                               </span>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </motion.li>
                       );
                     })}
@@ -1085,23 +1133,29 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <ul className="space-y-3">
                     {pairings.map((p, i) => {
                       const badge = matchBadge[p.match];
+                      const hLabel = p.harmony_label || (p.harmony_type && harmonyLabel[p.harmony_type]);
                       return (
                         <motion.li
                           key={i}
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="glass-card p-4 space-y-2 cursor-default"
+                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
                           <div className="flex items-center gap-2.5">
                             <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
                             <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
                           </div>
-                          <p className="text-[13px] text-foreground/65 leading-relaxed pl-5">
+                          {hLabel && (
+                            <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70 ml-[18px]">
+                              {hLabel}
+                            </span>
+                          )}
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {p.reason}
                           </p>
                           {badge && (
-                            <div className="pl-5">
+                            <div className="pl-[18px]">
                               <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
                                 {badge.label}
                               </span>

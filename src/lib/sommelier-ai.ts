@@ -8,6 +8,7 @@ export interface PairingResult {
   reason: string;
   match: "perfeito" | "muito bom" | "bom";
   harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
+  harmony_label?: string;
 }
 
 export interface WineSuggestion {
@@ -17,6 +18,11 @@ export interface WineSuggestion {
   fromCellar: boolean;
   match: "perfeito" | "muito bom" | "bom";
   harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
+  harmony_label?: string;
+  grape?: string;
+  vintage?: number;
+  region?: string;
+  country?: string;
 }
 
 export interface WineListItem {
