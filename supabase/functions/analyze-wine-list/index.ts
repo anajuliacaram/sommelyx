@@ -247,8 +247,12 @@ serve(async (req) => {
 
     console.log(`Calling AI gateway for ${isMenuMode ? "menu" : "wine list"} analysis...`);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90_000);
+
     const aiResponse = await fetch(AI_URL, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -264,6 +268,8 @@ serve(async (req) => {
         temperature: 0.3,
       }),
     });
+
+    clearTimeout(timeout);
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();

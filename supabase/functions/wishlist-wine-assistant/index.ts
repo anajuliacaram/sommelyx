@@ -248,8 +248,12 @@ Regras:
       content: userContent,
     });
 
+    const controller = new AbortController();
+    const wineTimeout = setTimeout(() => controller.abort(), 60_000);
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
@@ -293,6 +297,8 @@ Regras:
         max_tokens: 700,
       }),
     });
+
+    clearTimeout(wineTimeout);
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {

@@ -315,8 +315,12 @@ PROIBIDO: "combina bem", "harmoniza com", "boa opção", "complementa os sabores
       ? { type: "function" as const, function: { name: "return_pairings" } }
       : { type: "function" as const, function: { name: "return_suggestions" } };
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 75_000);
+
     const aiResponse = await fetch(AI_URL, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -332,6 +336,8 @@ PROIBIDO: "combina bem", "harmoniza com", "boa opção", "complementa os sabores
         temperature: 0.75,
       }),
     });
+
+    clearTimeout(timeout);
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text().catch(() => "");
