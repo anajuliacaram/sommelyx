@@ -58,6 +58,8 @@ function extractToolArguments(aiData: any) {
 
 function normalizeWineListPayload(payload: any) {
   const wines = Array.isArray(payload?.wines) ? payload.wines : [];
+  const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"];
+  const validCompLabels = ["mais leve", "mais encorpado", "mais complexo", "mais fácil de beber"];
   return {
     wines: wines.map((wine: any) => ({
       name: String(wine?.name || "Vinho não identificado"),
@@ -69,10 +71,20 @@ function normalizeWineListPayload(payload: any) {
       price: typeof wine?.price === "number" ? wine.price : null,
       rating: typeof wine?.rating === "number" ? Math.max(0, Math.min(5, wine.rating)) : 0,
       description: wine?.description ? String(wine.description) : null,
-      pairings: Array.isArray(wine?.pairings) ? wine.pairings.map((item: unknown) => String(item)) : [],
+      pairings: Array.isArray(wine?.pairings) ? wine.pairings.map((p: any) => {
+        if (typeof p === "object" && p !== null) {
+          return { dish: String(p.dish || ""), why: String(p.why || p.reason || "") };
+        }
+        return { dish: String(p), why: "" };
+      }) : [],
       verdict: wine?.verdict ? String(wine.verdict) : "Sem resumo",
-      compatibility: typeof wine?.compatibility === "number" ? Math.max(0, Math.min(100, Math.round(wine.compatibility))) : 0,
-      highlight: ["best-value", "top-pick", "adventurous"].includes(wine?.highlight) ? wine.highlight : null,
+      compatibilityLabel: validCompatLabels.includes(wine?.compatibilityLabel) ? wine.compatibilityLabel : "Boa opção",
+      highlight: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"].includes(wine?.highlight) ? wine.highlight : null,
+      body: wine?.body ? String(wine.body) : null,
+      acidity: wine?.acidity ? String(wine.acidity) : null,
+      tannin: wine?.tannin ? String(wine.tannin) : null,
+      occasion: wine?.occasion ? String(wine.occasion) : null,
+      comparativeLabels: Array.isArray(wine?.comparativeLabels) ? wine.comparativeLabels.filter((l: any) => typeof l === "string").slice(0, 3) : [],
     })),
     topPick: payload?.topPick ? String(payload.topPick) : null,
     bestValue: payload?.bestValue ? String(payload.bestValue) : null,
@@ -183,13 +195,28 @@ serve(async (req) => {
 - Faixa de preço habitual: R$ ${userProfile.avgPrice || "variado"}`
         : "";
 
-      systemPrompt = `Você é um sommelier especialista em cartas de vinhos de restaurante. Use apenas o conteúdo claramente legível do anexo, não invente rótulos ausentes e mantenha a saída estruturada.${profileContext}`;
-      userInstructions = "Analise a carta anexada. Identifique os vinhos visíveis, estime os campos apenas quando houver evidência suficiente e devolva uma curadoria confiável e rápida.";
+      systemPrompt = `Você é um sommelier profissional analisando uma carta de vinhos para ajudar o cliente a decidir rapidamente o que pedir.${profileContext}
+
+REGRAS DE ANÁLISE:
+1. DESCRIÇÃO ÚTIL: Descreva cada vinho com informações que ajudem na decisão — corpo (leve/médio/encorpado), acidez, taninos, estilo (gastronômico ou fácil de beber), e para qual ocasião serve melhor. Evite frases genéricas como "bom equilíbrio" sem contexto.
+
+2. COMPARAÇÃO RELATIVA: Analise cada vinho em relação aos outros da carta. Atribua labels comparativas como "mais leve da carta", "mais encorpado", "mais complexo", "mais fácil de beber" quando aplicável.
+
+3. COMPATIBILIDADE SEMÂNTICA: Não use porcentagem. Classifique como: "Excelente escolha", "Alta compatibilidade", "Boa opção" ou "Funciona bem".
+
+4. HARMONIZAÇÃO EXPANDIDA: Sugira 3-5 pratos específicos com breve explicação da lógica sensorial (gordura, acidez, textura, intensidade).
+
+5. VEREDICTO: Uma frase opinativa direta, como um sommelier falaria ao cliente. Ex: "Para quem quer algo fácil e refrescante sem gastar muito" ou "O mais interessante da carta se você busca complexidade".
+
+6. Use apenas conteúdo legível do anexo. Não invente rótulos.`;
+
+      userInstructions = "Analise a carta de vinhos anexada como um sommelier profissional. Para cada vinho, forneça análise técnica útil para decisão (corpo, acidez, taninos, ocasião), compare com os demais da carta, classifique compatibilidade semanticamente e sugira 3-5 harmonizações específicas com lógica sensorial.";
+
       tools = [{
         type: "function",
         function: {
           name: "return_wine_list_analysis",
-          description: "Retorna a análise estruturada da carta de vinhos.",
+          description: "Retorna a análise estruturada e comparativa da carta de vinhos.",
           parameters: {
             type: "object",
             properties: {
@@ -201,18 +228,35 @@ serve(async (req) => {
                     name: { type: "string" },
                     producer: { type: "string" },
                     vintage: { type: "number" },
-                    style: { type: "string" },
+                    style: { type: "string", description: "Ex: Tinto, Branco, Rosé, Espumante" },
                     grape: { type: "string" },
                     region: { type: "string" },
                     price: { type: "number" },
-                    rating: { type: "number" },
-                    description: { type: "string" },
-                    pairings: { type: "array", items: { type: "string" } },
-                    verdict: { type: "string" },
-                    compatibility: { type: "number" },
-                    highlight: { type: "string", enum: ["best-value", "top-pick", "adventurous"] },
+                    rating: { type: "number", description: "0-5" },
+                    body: { type: "string", description: "Leve, Médio, Encorpado" },
+                    acidity: { type: "string", description: "Baixa, Média, Alta, Vibrante" },
+                    tannin: { type: "string", description: "Suave, Médio, Firme, Robusto (tintos)" },
+                    occasion: { type: "string", description: "Breve descrição da ocasião ideal. Ex: 'Aperitivo descontraído', 'Jantar especial', 'Almoço casual'" },
+                    description: { type: "string", description: "Análise técnica útil para decisão — evite genéricos" },
+                    pairings: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          dish: { type: "string" },
+                          why: { type: "string", description: "Lógica sensorial breve" },
+                        },
+                        required: ["dish", "why"],
+                        additionalProperties: false,
+                      },
+                      description: "3-5 harmonizações com explicação",
+                    },
+                    verdict: { type: "string", description: "Frase direta opinativa como sommelier falaria ao cliente" },
+                    compatibilityLabel: { type: "string", enum: ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"] },
+                    highlight: { type: "string", enum: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"] },
+                    comparativeLabels: { type: "array", items: { type: "string" }, description: "Labels comparativas: mais leve, mais encorpado, mais complexo, mais fácil de beber, melhor para carne, melhor para peixe, etc." },
                   },
-                  required: ["name", "rating", "verdict", "compatibility"],
+                  required: ["name", "rating", "verdict", "compatibilityLabel", "description", "pairings"],
                   additionalProperties: false,
                 },
               },

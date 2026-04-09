@@ -25,6 +25,11 @@ export interface WineSuggestion {
   country?: string;
 }
 
+export interface WineListPairing {
+  dish: string;
+  why: string;
+}
+
 export interface WineListItem {
   name: string;
   producer?: string;
@@ -35,10 +40,15 @@ export interface WineListItem {
   price?: number | null;
   rating: number;
   description?: string;
-  pairings?: string[];
+  pairings?: WineListPairing[];
   verdict: string;
-  compatibility: number;
-  highlight?: "best-value" | "top-pick" | "adventurous" | null;
+  compatibilityLabel: string;
+  highlight?: "best-value" | "top-pick" | "adventurous" | "lightest" | "boldest" | "most-complex" | "easiest" | null;
+  body?: string | null;
+  acidity?: string | null;
+  tannin?: string | null;
+  occasion?: string | null;
+  comparativeLabels?: string[];
 }
 
 export interface WineListAnalysis {

@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin, FileText, Wine as WineIcon } from "@/icons/lucide";
+import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin, FileText, Wine as WineIcon, Bookmark, ChevronDown, ChevronUp, Zap, Feather, Dumbbell, Brain, Smile, Heart } from "@/icons/lucide";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem } from "@/lib/sommelier-ai";
+import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem, type WineListPairing } from "@/lib/sommelier-ai";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
@@ -22,12 +22,20 @@ const highlightIcon: Record<string, typeof Award> = {
   "best-value": TrendingUp,
   "top-pick": Award,
   adventurous: Sparkles,
+  lightest: Feather,
+  boldest: Dumbbell,
+  "most-complex": Brain,
+  easiest: Smile,
 };
 
 const highlightLabel: Record<string, string> = {
   "best-value": "Melhor custo-benefício",
   "top-pick": "Melhor escolha",
   adventurous: "Para experimentar",
+  lightest: "Mais leve da carta",
+  boldest: "Mais encorpado",
+  "most-complex": "Mais complexo",
+  easiest: "Mais fácil de beber",
 };
 
 /* ── Wine type color system ── */
@@ -117,6 +125,13 @@ const wineTypeConfig: Record<WineType, {
   },
 };
 
+const compatLabelConfig: Record<string, { color: string; bg: string; border: string }> = {
+  "Excelente escolha": { color: "#047857", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.18)" },
+  "Alta compatibilidade": { color: "#0e7a5a", bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.13)" },
+  "Boa opção": { color: "#b45309", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.15)" },
+  "Funciona bem": { color: "#777", bg: "rgba(0,0,0,0.04)", border: "rgba(0,0,0,0.08)" },
+};
+
 function StarRating({ rating, wineType = "unknown" }: { rating: number; wineType?: WineType }) {
   const full = Math.floor(rating);
   const hasHalf = rating - full >= 0.3;
@@ -138,6 +153,8 @@ function StarRating({ rating, wineType = "unknown" }: { rating: number; wineType
   );
 }
 
+type FilterMode = "all" | "tinto" | "branco" | "rosé" | "espumante";
+
 export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDialogProps) {
   const { data: wines } = useWines();
   const { toast } = useToast();
@@ -146,6 +163,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const [results, setResults] = useState<WineListAnalysis | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [lastAttachment, setLastAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
+  const [savedWines, setSavedWines] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -155,6 +174,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     setResults(null);
     setErrorMsg("");
     setLastAttachment(null);
+    setFilterMode("all");
+    setSavedWines(new Set());
   };
 
   const handleClose = (v: boolean) => {
@@ -207,6 +228,23 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       setStep("error");
     }
   }, [runScan, toast]);
+
+  const toggleSave = (wineName: string) => {
+    setSavedWines(prev => {
+      const next = new Set(prev);
+      if (next.has(wineName)) next.delete(wineName);
+      else next.add(wineName);
+      return next;
+    });
+    toast({ title: savedWines.has(wineName) ? "Removido dos favoritos" : "Salvo nos favoritos ✓" });
+  };
+
+  const filteredWines = results?.wines.filter(w => {
+    if (filterMode === "all") return true;
+    return detectWineType(w.style) === filterMode;
+  }) || [];
+
+  const availableTypes = results ? [...new Set(results.wines.map(w => detectWineType(w.style)).filter(t => t !== "unknown"))] : [];
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -286,9 +324,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 steps={[
                   "Processando imagem…",
                   "Identificando vinhos na carta…",
-                  "Consultando sommelier…",
-                  "Avaliando compatibilidade…",
-                  "Finalizando recomendações…",
+                  "Analisando estrutura de cada vinho…",
+                  "Comparando opções da carta…",
+                  "Montando recomendações…",
                 ]}
                 interval={3000}
               />
@@ -305,16 +343,55 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             >
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#888" }}>
-                  {results.wines.length} vinho{results.wines.length !== 1 ? "s" : ""} identificado{results.wines.length !== 1 ? "s" : ""}
+                  {filteredWines.length} vinho{filteredWines.length !== 1 ? "s" : ""}{filterMode !== "all" ? ` (${filterMode})` : ""}
                 </p>
                 <Button variant="ghost" size="sm" onClick={reset} className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground">
                   <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
                 </Button>
               </div>
 
+              {/* Filter pills */}
+              {availableTypes.length > 1 && (
+                <div className="flex gap-1.5 flex-wrap">
+                  <button
+                    onClick={() => setFilterMode("all")}
+                    className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
+                    style={{
+                      background: filterMode === "all" ? "rgba(110,30,42,0.12)" : "rgba(0,0,0,0.04)",
+                      color: filterMode === "all" ? "#5a1528" : "#888",
+                      border: `1px solid ${filterMode === "all" ? "rgba(110,30,42,0.2)" : "rgba(0,0,0,0.06)"}`,
+                    }}
+                  >
+                    Todos
+                  </button>
+                  {availableTypes.map(type => (
+                    <button
+                      key={type}
+                      onClick={() => setFilterMode(type as FilterMode)}
+                      className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
+                      style={{
+                        background: filterMode === type ? wineTypeConfig[type].badgeBg : "rgba(0,0,0,0.04)",
+                        color: filterMode === type ? wineTypeConfig[type].badgeText : "#888",
+                        border: `1px solid ${filterMode === type ? wineTypeConfig[type].badgeBorder : "rgba(0,0,0,0.06)"}`,
+                      }}
+                    >
+                      {wineTypeConfig[type].label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <ul className="space-y-3">
-                {results.wines.map((wine, i) => (
-                  <WineListCard key={i} wine={wine} index={i} isTopPick={wine.name === results.topPick} isBestValue={wine.name === results.bestValue} />
+                {filteredWines.map((wine, i) => (
+                  <WineListCard
+                    key={`${wine.name}-${i}`}
+                    wine={wine}
+                    index={i}
+                    isTopPick={wine.name === results.topPick}
+                    isBestValue={wine.name === results.bestValue}
+                    isSaved={savedWines.has(wine.name)}
+                    onToggleSave={() => toggleSave(wine.name)}
+                  />
                 ))}
               </ul>
             </motion.div>
@@ -351,10 +428,19 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   );
 }
 
-function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListItem; index: number; isTopPick: boolean; isBestValue: boolean }) {
-  const HighlightIcon = wine.highlight ? highlightIcon[wine.highlight] : null;
+function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, onToggleSave }: {
+  wine: WineListItem;
+  index: number;
+  isTopPick: boolean;
+  isBestValue: boolean;
+  isSaved: boolean;
+  onToggleSave: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const HighlightIcon = wine.highlight ? highlightIcon[wine.highlight] || Sparkles : null;
   const wineType = detectWineType(wine.style);
   const config = wineTypeConfig[wineType];
+  const compatStyle = compatLabelConfig[wine.compatibilityLabel] || compatLabelConfig["Boa opção"];
 
   return (
     <motion.li
@@ -377,43 +463,61 @@ function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListI
         {/* ── Row 1: Name + Price ── */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-[15px] font-bold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
-                {wine.name}
-              </h4>
-            </div>
+            <h4 className="text-[15px] font-bold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
+              {wine.name}
+            </h4>
 
-            {/* Highlight badge */}
-            {wine.highlight && HighlightIcon && (
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em]"
-                style={{
-                  background: config.badgeBg,
-                  color: config.badgeText,
-                  border: `1px solid ${config.badgeBorder}`,
-                }}
-              >
-                <HighlightIcon className="h-2.5 w-2.5" />
-                {highlightLabel[wine.highlight]}
-              </span>
-            )}
+            {/* Badges row */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {wine.highlight && HighlightIcon && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em]"
+                  style={{
+                    background: config.badgeBg,
+                    color: config.badgeText,
+                    border: `1px solid ${config.badgeBorder}`,
+                  }}
+                >
+                  <HighlightIcon className="h-2.5 w-2.5" />
+                  {highlightLabel[wine.highlight] || wine.highlight}
+                </span>
+              )}
+              {wine.comparativeLabels?.map((label, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold"
+                  style={{
+                    background: "rgba(0,0,0,0.04)",
+                    color: "#666",
+                    border: "1px solid rgba(0,0,0,0.06)",
+                  }}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
 
-          {wine.price != null && (
-            <span className="text-[16px] font-bold shrink-0 tracking-tight" style={{ color: "#1A1A1A" }}>
-              R$ {wine.price.toFixed(0)}
-            </span>
-          )}
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            {wine.price != null && (
+              <span className="text-[16px] font-bold tracking-tight" style={{ color: "#1A1A1A" }}>
+                R$ {wine.price.toFixed(0)}
+              </span>
+            )}
+            <button
+              onClick={onToggleSave}
+              className="p-1 rounded-md transition-colors hover:bg-black/5"
+              title={isSaved ? "Remover dos favoritos" : "Salvar"}
+            >
+              <Bookmark className="h-3.5 w-3.5" style={{ color: isSaved ? config.badgeText : "#ccc", fill: isSaved ? config.badgeText : "transparent" }} />
+            </button>
+          </div>
         </div>
 
         {/* ── Row 2: Meta Info ── */}
         <div className="flex items-center gap-1.5 flex-wrap" style={{ color: "#666" }}>
-          {wine.producer && (
-            <span className="text-[11px] font-medium">{wine.producer}</span>
-          )}
-          {wine.vintage && (
-            <span className="text-[11px] font-medium">· {wine.vintage}</span>
-          )}
+          {wine.producer && <span className="text-[11px] font-medium">{wine.producer}</span>}
+          {wine.vintage && <span className="text-[11px] font-medium">· {wine.vintage}</span>}
           {wine.grape && (
             <span className="text-[11px] font-medium flex items-center gap-0.5">
               · <Grape className="h-2.5 w-2.5" /> {wine.grape}
@@ -447,16 +551,45 @@ function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListI
             )}
           </div>
           <span
-            className="h-6 px-2.5 rounded-full flex items-center text-[10px] font-bold"
+            className="h-6 px-2.5 rounded-full flex items-center text-[10px] font-bold whitespace-nowrap"
             style={{
-              background: wine.compatibility >= 70 ? "rgba(16,185,129,0.08)" : wine.compatibility >= 50 ? "rgba(245,158,11,0.08)" : "rgba(0,0,0,0.04)",
-              color: wine.compatibility >= 70 ? "#047857" : wine.compatibility >= 50 ? "#b45309" : "#888",
-              border: `1px solid ${wine.compatibility >= 70 ? "rgba(16,185,129,0.15)" : wine.compatibility >= 50 ? "rgba(245,158,11,0.15)" : "rgba(0,0,0,0.08)"}`,
+              background: compatStyle.bg,
+              color: compatStyle.color,
+              border: `1px solid ${compatStyle.border}`,
             }}
           >
-            {wine.compatibility}% compatível
+            {wine.compatibilityLabel}
           </span>
         </div>
+
+        {/* ── Technical specs row ── */}
+        {(wine.body || wine.acidity || wine.tannin) && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {wine.body && (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md" style={{ background: "rgba(0,0,0,0.04)", color: "#555" }}>
+                Corpo: {wine.body}
+              </span>
+            )}
+            {wine.acidity && (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md" style={{ background: "rgba(0,0,0,0.04)", color: "#555" }}>
+                Acidez: {wine.acidity}
+              </span>
+            )}
+            {wine.tannin && (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md" style={{ background: "rgba(0,0,0,0.04)", color: "#555" }}>
+                Tanino: {wine.tannin}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* ── Occasion ── */}
+        {wine.occasion && (
+          <div className="flex items-center gap-1.5" style={{ color: "#666" }}>
+            <Heart className="h-3 w-3" />
+            <span className="text-[11px] font-medium italic">{wine.occasion}</span>
+          </div>
+        )}
 
         {/* ── Row 4: Description ── */}
         {wine.description && (
@@ -470,28 +603,77 @@ function WineListCard({ wine, index, isTopPick, isBestValue }: { wine: WineListI
           "{wine.verdict}"
         </p>
 
-        {/* ── Row 6: Pairings ── */}
+        {/* ── Expandable pairings ── */}
         {wine.pairings && wine.pairings.length > 0 && (
           <div className="pt-2.5 mt-1" style={{ borderTop: `1px solid ${config.accentLine}` }}>
-            <div className="flex items-center gap-1.5 mb-2">
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center gap-1.5 mb-2 w-full group"
+            >
               <UtensilsCrossed className="h-3 w-3" style={{ color: config.badgeText }} />
-              <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "#888" }}>Harmoniza com</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {wine.pairings.map((p, i) => (
-                <span
-                  key={i}
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-full"
-                  style={{
-                    background: config.chipBg,
-                    border: `1px solid ${config.chipBorder}`,
-                    color: config.chipText,
-                  }}
+              <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "#888" }}>
+                Harmoniza com ({wine.pairings.length})
+              </span>
+              <span className="ml-auto">
+                {expanded
+                  ? <ChevronUp className="h-3 w-3" style={{ color: "#aaa" }} />
+                  : <ChevronDown className="h-3 w-3" style={{ color: "#aaa" }} />
+                }
+              </span>
+            </button>
+            <AnimatePresence>
+              {expanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden space-y-1.5"
                 >
-                  {p}
-                </span>
-              ))}
-            </div>
+                  {wine.pairings.map((p, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg px-3 py-2"
+                      style={{
+                        background: config.chipBg,
+                        border: `1px solid ${config.chipBorder}`,
+                      }}
+                    >
+                      <span className="text-[12px] font-semibold block" style={{ color: config.chipText }}>
+                        {p.dish}
+                      </span>
+                      {p.why && (
+                        <span className="text-[10px] leading-snug block mt-0.5" style={{ color: "#777" }}>
+                          {p.why}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {!expanded && (
+              <div className="flex flex-wrap gap-1.5">
+                {wine.pairings.slice(0, 3).map((p, i) => (
+                  <span
+                    key={i}
+                    className="text-[11px] font-medium px-2.5 py-1 rounded-full"
+                    style={{
+                      background: config.chipBg,
+                      border: `1px solid ${config.chipBorder}`,
+                      color: config.chipText,
+                    }}
+                  >
+                    {p.dish}
+                  </span>
+                ))}
+                {wine.pairings.length > 3 && (
+                  <span className="text-[10px] font-medium px-2 py-1 text-muted-foreground">
+                    +{wine.pairings.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
