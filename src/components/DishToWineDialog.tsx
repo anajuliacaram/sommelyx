@@ -1,11 +1,11 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, ArrowLeft, ChefHat, FileText } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History } from "@/icons/lucide";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis } from "@/lib/sommelier-ai";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
@@ -76,7 +76,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [preview, setPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
   const [lastWineListAttachment, setLastWineListAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
   const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
-
+  const [wineSearchState, setWineSearchState] = useState("");
+  const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
   const reset = () => {
     setSource(null);
     setSubMode(null);
@@ -93,6 +94,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setPreview(null);
     setLastWineListAttachment(null);
     setLastMenuAttachment(null);
+    setWineSearchState("");
+    setWineSortState("az");
   };
 
   const handleClose = (v: boolean) => {
@@ -475,8 +478,40 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
-            {/* ── Step 2b: Select Wine from Cellar ── */}
-            {step === "select-wine" && (
+            {/* ── Step 2b: Select Wine from Cellar (Premium Finder) ── */}
+            {step === "select-wine" && (() => {
+              type SortKey = "az" | "za" | "newest" | "oldest";
+              const wineSearch = wineSearchState;
+              const setWineSearch = setWineSearchState;
+              const sortKey = wineSortState;
+              const setSortKey = setWineSortState;
+
+              const sortOptions: { key: SortKey; label: string; icon: typeof ArrowDownAZ }[] = [
+                { key: "az", label: "A → Z", icon: ArrowDownAZ },
+                { key: "za", label: "Z → A", icon: ArrowUpAZ },
+                { key: "newest", label: "Mais recentes", icon: Clock },
+                { key: "oldest", label: "Mais antigos", icon: History },
+              ];
+
+              const filtered = availableWines
+                .filter((w) => {
+                  if (!wineSearch.trim()) return true;
+                  const q = wineSearch.toLowerCase();
+                  return (
+                    w.name.toLowerCase().includes(q) ||
+                    (w.producer && w.producer.toLowerCase().includes(q)) ||
+                    (w.grape && w.grape.toLowerCase().includes(q)) ||
+                    (w.vintage && String(w.vintage).includes(q))
+                  );
+                })
+                .sort((a, b) => {
+                  if (sortKey === "az") return a.name.localeCompare(b.name, "pt-BR");
+                  if (sortKey === "za") return b.name.localeCompare(a.name, "pt-BR");
+                  if (sortKey === "newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                });
+
+              return (
               <motion.div
                 key="select-wine"
                 initial={{ opacity: 0, y: 8 }}
@@ -488,20 +523,123 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
                     Qual vinho da sua adega?
                   </p>
-                  <Select value={selectedWineId} onValueChange={setSelectedWineId}>
-                    <SelectTrigger className="h-11 text-[13px]">
-                      <SelectValue placeholder="Selecione um vinho…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableWines.map((w) => (
-                        <SelectItem key={w.id} value={w.id}>
-                          {w.name} {w.vintage ? `(${w.vintage})` : ""} — {w.quantity} garrafa{w.quantity !== 1 ? "s" : ""}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
+                  {/* Search input */}
+                  <div className="relative">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={wineSearch}
+                      onChange={(e) => setWineSearch(e.target.value)}
+                      placeholder="Buscar vinho na sua adega..."
+                      className="flex h-12 w-full rounded-2xl border border-border/50 bg-background/60 pl-10 pr-4 py-2.5 text-[14px] font-medium text-foreground backdrop-blur-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-3 focus:ring-primary/[0.10] focus:border-primary/30 transition-all duration-200"
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Sort controls */}
+                  <div className="flex items-center gap-1.5 mt-3">
+                    {sortOptions.map((opt) => {
+                      const Icon = opt.icon;
+                      const active = sortKey === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          onClick={() => setSortKey(opt.key)}
+                          className={cn(
+                            "flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
+                            active
+                              ? "bg-primary/10 text-primary border border-primary/20"
+                              : "bg-background/40 text-muted-foreground/60 border border-border/30 hover:bg-muted/30 hover:text-muted-foreground"
+                          )}
+                        >
+                          <Icon className="h-3 w-3" />
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
+                {/* Wine list */}
+                <ScrollArea className="h-[280px] -mx-1 px-1">
+                  <div className="space-y-1.5">
+                    {filtered.map((w) => {
+                      const isSelected = selectedWineId === w.id;
+                      const meta = [w.style, w.grape, w.region].filter(Boolean).join(" · ");
+                      return (
+                        <button
+                          key={w.id}
+                          onClick={() => setSelectedWineId(w.id)}
+                          className={cn(
+                            "w-full text-left rounded-2xl p-3.5 transition-all duration-[160ms] ease-[cubic-bezier(0.22,1,0.36,1)] group",
+                            isSelected
+                              ? "bg-primary/[0.08] border border-primary/20 shadow-[0_2px_12px_-4px_hsl(var(--primary)/0.12)]"
+                              : "bg-background/40 border border-border/25 hover:bg-muted/30 hover:border-border/40 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.08)] active:scale-[0.99]"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-150",
+                              isSelected ? "bg-primary/15" : "bg-muted/30"
+                            )}>
+                              {isSelected ? (
+                                <Check className="h-4 w-4 text-primary" />
+                              ) : (
+                                <Wine className="h-4 w-4 text-muted-foreground/50" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={cn(
+                                "text-[13.5px] font-semibold truncate",
+                                isSelected ? "text-foreground" : "text-foreground/90"
+                              )}>
+                                {w.name}
+                                {w.vintage ? <span className="text-muted-foreground/60 font-normal ml-1.5">({w.vintage})</span> : null}
+                              </p>
+                              {meta && (
+                                <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5">{meta}</p>
+                              )}
+                            </div>
+                            <span className={cn(
+                              "text-[11px] font-semibold tabular-nums shrink-0 px-2 py-0.5 rounded-lg",
+                              isSelected ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50"
+                            )}>
+                              {w.quantity}×
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+
+                    {/* Empty state */}
+                    {filtered.length === 0 && availableWines.length > 0 && (
+                      <div className="text-center py-10 space-y-2">
+                        <Search className="h-7 w-7 text-muted-foreground/30 mx-auto" />
+                        <p className="text-[13px] font-medium text-muted-foreground/70">
+                          Nenhum vinho encontrado na sua adega
+                        </p>
+                        <p className="text-[11px] text-muted-foreground/45">
+                          Tente outro nome, produtor ou uva
+                        </p>
+                      </div>
+                    )}
+
+                    {availableWines.length === 0 && (
+                      <div className="text-center py-10 space-y-2">
+                        <Wine className="h-7 w-7 text-muted-foreground/30 mx-auto" />
+                        <p className="text-[13px] font-medium text-muted-foreground/70">
+                          Sua adega está vazia no momento
+                        </p>
+                        <p className="text-[11px] text-muted-foreground/45">
+                          Adicione vinhos para usar a harmonização
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+
+                {/* Selected wine preview */}
                 {selectedWine && (
                   <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 space-y-0.5">
                     <p className="text-[13px] font-semibold text-foreground">{selectedWine.name}</p>
@@ -514,7 +652,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 <Button
                   onClick={handleSearchWinePairings}
                   disabled={!selectedWineId || loading}
-                  className="w-full h-10 text-[13px] font-medium"
+                  className="w-full h-11 text-[13px] font-medium"
                 >
                   {loading ? (
                     <>
@@ -532,14 +670,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 {error && (
                   <p className="text-[12px] text-destructive/80 text-center">{error}</p>
                 )}
-
-                {availableWines.length === 0 && (
-                  <p className="text-[12px] text-muted-foreground text-center py-4">
-                    Nenhum vinho com estoque na adega.
-                  </p>
-                )}
               </motion.div>
-            )}
+              );
+            })()}
 
             {/* ── Ext: Wine name input ── */}
             {step === "ext-wine-input" && (
