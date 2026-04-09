@@ -1105,14 +1105,19 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                           {/* Bottom: badges */}
                           <div className="flex items-center gap-2 pl-[18px] flex-wrap">
+                            {s.compatibilityLabel && (
+                              <span className={cn(
+                                "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
+                                s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
+                                s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                                "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
+                              )}>
+                                {s.compatibilityLabel}
+                              </span>
+                            )}
                             {hLabel && (
                               <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70">
                                 {hLabel}
-                              </span>
-                            )}
-                            {badge && (
-                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
-                                {badge.label}
                               </span>
                             )}
                           </div>
@@ -1147,11 +1152,30 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-3"
               >
                 {selectedWine && (
-                  <div className="glass-card p-4 space-y-1">
+                  <div className="glass-card p-4 space-y-2">
                     <p className="text-[15px] font-bold text-foreground tracking-tight">{selectedWine.name}</p>
                     <p className="text-[12px] text-foreground/55">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
                     </p>
+                    {wineProfile && (wineProfile.body || wineProfile.acidity || wineProfile.tannin) && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {wineProfile.body && (
+                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            Corpo {wineProfile.body}
+                          </span>
+                        )}
+                        {wineProfile.acidity && (
+                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            Acidez {wineProfile.acidity}
+                          </span>
+                        )}
+                        {wineProfile.tannin && wineProfile.tannin !== "n/a" && (
+                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            Taninos {wineProfile.tannin}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
