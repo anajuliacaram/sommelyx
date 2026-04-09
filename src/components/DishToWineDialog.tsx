@@ -190,6 +190,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         style: wine.style,
         grape: wine.grape,
         region: wine.region,
+        producer: wine.producer,
+        vintage: wine.vintage,
+        country: wine.country,
       });
       setPairings(result.pairings);
       setWineProfile(result.wineProfile || null);
