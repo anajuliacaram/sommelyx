@@ -176,12 +176,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   return (
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card/80 backdrop-blur-2xl border-l border-white/10 shadow-premium p-0">
-          <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto p-0 border-l border-[#E5E2DC] shadow-[0_0_40px_-10px_rgba(0,0,0,0.12)]" style={{ backgroundColor: '#F4F1EC' }}>
 
-          <div className="p-6 h-full flex flex-col relative z-10">
-            <SheetHeader className="mb-6">
-              <SheetTitle className="font-serif text-2xl font-black italic text-gradient-wine">
+          <div className="px-6 pt-6 pb-8 h-full flex flex-col">
+            <SheetHeader className="mb-7">
+              <SheetTitle className="font-serif text-[28px] font-semibold tracking-[-0.01em]" style={{ color: '#1F1F1F' }}>
                 {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
               </SheetTitle>
             </SheetHeader>
@@ -190,85 +189,108 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
               {success ? (
                 <motion.div
                   key="success"
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center justify-center py-16 gap-4"
                 >
-                  <div className="w-14 h-14 rounded-full gradient-wine flex items-center justify-center glow-wine">
-                    <Check className="h-7 w-7 text-primary-foreground" />
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6F7F5B' }}>
+                    <Check className="h-7 w-7 text-white" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="text-[15px] font-medium" style={{ color: '#1F1F1F' }}>
                     {isCommercial ? "Produto cadastrado!" : `${parseInt(quantity) || 1} garrafa(s) adicionada(s)!`}
                   </p>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit} className="space-y-5 mt-6">
-                  {/* Scan Label Button / Dropzone */}
-                  <motion.div
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative group cursor-pointer"
+                <motion.form key="form" onSubmit={handleSubmit} className="space-y-5">
+                  {/* Scan Label Card */}
+                  <div
+                    className="group cursor-pointer rounded-2xl border bg-white p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
+                    style={{ borderColor: '#E5E2DC' }}
                     onClick={() => setScanOpen(true)}
                   >
-                    <div className="absolute inset-0 bg-primary/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="relative h-24 sm:h-28 rounded-2xl border-2 border-dashed border-primary/20 bg-card/40 backdrop-blur-sm flex flex-col items-center justify-center p-4 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/[0.02]">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                        <Camera className="h-6 w-6 text-primary" />
-                      </div>
-                      <p className="text-[13px] font-bold text-foreground">Escanear rótulo</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Extração instantânea de dados do rótulo</p>
-
-                      {/* Shimmer overlay */}
-                      <div className="absolute inset-x-4 top-0 h-[1px] shimmer-premium opacity-50" />
-                      <div className="absolute inset-x-4 bottom-0 h-[1px] shimmer-premium opacity-50" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
+                      <Camera className="h-5 w-5" style={{ color: '#6F7F5B' }} />
                     </div>
-                  </motion.div>
+                    <div className="flex flex-col">
+                      <p className="text-[14px] font-semibold" style={{ color: '#1F1F1F' }}>Escanear rótulo</p>
+                      <p className="text-[12px] mt-0.5" style={{ color: '#6B6B6B' }}>Extração instantânea dos dados do rótulo</p>
+                    </div>
+                  </div>
 
-                  {/* Import CSV Button */}
-                  <motion.div
-                    whileHover={{ y: -1 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative group cursor-pointer"
-                    onClick={() => { setImportCsvOpen(true); }}
+                  {/* Import File Card */}
+                  <div
+                    className="group cursor-pointer rounded-2xl border bg-white p-4 flex items-center gap-3.5 transition-all duration-200 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
+                    style={{ borderColor: '#E5E2DC' }}
+                    onClick={() => setImportCsvOpen(true)}
                   >
-                    <div className="relative h-14 rounded-2xl border border-accent/20 bg-accent/[0.06] flex items-center justify-center gap-2.5 px-4 transition-all duration-200 group-hover:border-accent/35 group-hover:bg-accent/[0.10] group-hover:shadow-[0_4px_12px_-4px_hsl(var(--accent)/0.15)]">
-                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                        <Upload className="h-4 w-4 text-accent" />
-                      </div>
-                      <div className="flex flex-col items-start">
-                        <p className="text-[13px] font-semibold text-foreground/80">Importar arquivo</p>
-                        <p className="text-[10px] text-muted-foreground/60">Leitura inteligente do Sommelyx</p>
-                      </div>
-                      <Sparkles className="h-3.5 w-3.5 text-accent/50 ml-auto" />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
+                      <Upload className="h-4 w-4" style={{ color: '#C8A96A' }} />
                     </div>
-                  </motion.div>
+                    <div className="flex flex-col">
+                      <p className="text-[13px] font-semibold" style={{ color: '#1F1F1F' }}>Importar arquivo</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6B6B' }}>Leitura inteligente do Sommelyx</p>
+                    </div>
+                  </div>
 
                   {/* Essential fields */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-1">
                     <div>
-                      <Label htmlFor="name" className="text-xs text-muted-foreground">{isCommercial ? "Nome do produto *" : "Nome do vinho *"}</Label>
-                      <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Malbec Reserva" required />
+                      <label htmlFor="name" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>{isCommercial ? "Nome do produto *" : "Nome do vinho *"}</label>
+                      <input
+                        id="name"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        placeholder="Ex: Malbec Reserva"
+                        required
+                        className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
+                        style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                      />
                     </div>
                     <div>
-                      <Label htmlFor="producer" className="text-xs text-muted-foreground">Produtor</Label>
-                      <Input id="producer" value={producer} onChange={e => setProducer(e.target.value)} placeholder="Ex: Catena Zapata" />
+                      <label htmlFor="producer" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Produtor</label>
+                      <input
+                        id="producer"
+                        value={producer}
+                        onChange={e => setProducer(e.target.value)}
+                        placeholder="Ex: Catena Zapata"
+                        className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
+                        style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="qty" className="text-xs text-muted-foreground">Quantidade</Label>
-                        <Input id="qty" type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} />
+                        <label htmlFor="qty" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Quantidade</label>
+                        <input
+                          id="qty"
+                          type="number"
+                          min="1"
+                          value={quantity}
+                          onChange={e => setQuantity(e.target.value)}
+                          className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
+                          style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                        />
                       </div>
                       <div>
-                        <Label htmlFor="vintage" className="text-xs text-muted-foreground">Safra</Label>
-                        <Input id="vintage" type="number" value={vintage} onChange={e => setVintage(e.target.value)} placeholder="2020" />
+                        <label htmlFor="vintage" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Safra</label>
+                        <input
+                          id="vintage"
+                          type="number"
+                          value={vintage}
+                          onChange={e => setVintage(e.target.value)}
+                          placeholder="2020"
+                          className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
+                          style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                        />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Estilo</Label>
+                      <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Estilo</label>
                       <Select value={style} onValueChange={setStyle}>
-                        <SelectTrigger><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                        <SelectContent>
-                          {styles.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                        <SelectTrigger className="h-12 rounded-[14px] border bg-white text-[16px] px-4 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)] transition-all duration-150" style={{ borderColor: '#E5E2DC', color: style ? '#1F1F1F' : '#9A9A9A' }}>
+                          <SelectValue placeholder="Selecionar estilo..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border bg-white shadow-lg" style={{ borderColor: '#E5E2DC' }}>
+                          {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[15px]" style={{ color: '#1F1F1F' }}>{s.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
@@ -277,40 +299,44 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   {/* Collapsible advanced fields */}
                   <Collapsible open={moreOpen} onOpenChange={setMoreOpen}>
                     <CollapsibleTrigger asChild>
-                      <Button type="button" variant="ghost" className="w-full justify-between text-xs text-muted-foreground h-9 px-2">
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-between text-[13px] font-semibold h-10 px-3 rounded-xl transition-colors duration-150 hover:bg-white/60"
+                        style={{ color: '#6F7F5B' }}
+                      >
                         Mais detalhes
-                        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
-                      </Button>
+                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} style={{ color: '#6F7F5B' }} />
+                      </button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-4 pt-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs text-muted-foreground">País</Label>
-                          <Input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" />
+                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>País</label>
+                          <input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                         </div>
                         <div>
-                          <Label className="text-xs text-muted-foreground">Região</Label>
-                          <Input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" />
+                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Região</label>
+                          <input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Uva</Label>
-                        <Input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" />
+                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Uva</label>
+                        <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
+                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Último valor pago (R$)</label>
                         <div className="grid grid-cols-2 gap-2 mt-1">
-                          <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
-                          <Input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} />
+                          <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                          <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                         </div>
-                        <p className="mt-1 text-[10px] text-muted-foreground/80">
+                        <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
                           Quanto e quando você pagou por último.
                         </p>
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
-                        <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
-                        <p className="mt-1 text-[10px] text-muted-foreground/80">
+                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Valor atual (R$)</label>
+                        <input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                        <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
                           Referência de valor de mercado atual.
                         </p>
                       </div>
@@ -323,29 +349,41 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs text-muted-foreground">Beber a partir de</Label>
-                          <Input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" />
+                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Beber a partir de</label>
+                          <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                         </div>
                         <div>
-                          <Label className="text-xs text-muted-foreground">Beber até</Label>
-                          <Input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" />
+                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Beber até</label>
+                          <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Harmonização</Label>
-                        <Input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" />
+                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Harmonização</label>
+                        <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Notas de degustação</Label>
-                        <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Aromas, sabores, impressões..." rows={3} />
+                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Notas de degustação</label>
+                        <textarea
+                          value={notes}
+                          onChange={e => setNotes(e.target.value)}
+                          placeholder="Aromas, sabores, impressões..."
+                          rows={3}
+                          className="w-full px-4 py-3 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)] resize-none"
+                          style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                        />
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
 
-                  <Button variant="primary" type="submit" disabled={addWine.isPending || !name.trim()} className="w-full h-11 text-[13px] font-medium">
-                    <Plus className="h-4 w-4 mr-1.5" />
-                    {addWine.isPending ? "Salvando..." : isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
-                  </Button>
+                  <button
+                    type="submit"
+                    disabled={addWine.isPending || !name.trim()}
+                    className="w-full h-[52px] rounded-[14px] text-[15px] font-semibold text-white flex items-center justify-center gap-2 transition-all duration-150 hover:brightness-95 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#6F7F5B' }}
+                  >
+                    <Plus className="h-4 w-4" />
+                    {addWine.isPending ? "Salvando..." : isCommercial ? "Cadastrar produto" : "Salvar vinho"}
+                  </button>
                 </motion.form>
               )}
             </AnimatePresence>
