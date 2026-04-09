@@ -1241,16 +1241,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
+                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2.5">
                               <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
                               <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
                             </div>
-                            {p.category && (
-                              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 mt-0.5">
-                                {p.category === "classico" ? "clássico" : p.category === "afinidade" ? "afinidade" : "contraste"}
+                            {badge && (
+                              <span className={cn("shrink-0 inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide", badge.className)}>
+                                {badge.label}
                               </span>
                             )}
                           </div>
@@ -1259,14 +1259,26 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               {hLabel}
                             </span>
                           )}
+                          {p.dish_profile && (
+                            <div className="flex flex-wrap gap-1 pl-[18px]">
+                              {p.dish_profile.intensity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.intensity}</span>}
+                              {p.dish_profile.texture && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.texture}</span>}
+                              {p.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.highlight}</span>}
+                            </div>
+                          )}
                           <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {p.reason}
                           </p>
-                          {badge && (
+                          {p.recipe && (
                             <div className="pl-[18px]">
-                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
-                                {badge.label}
-                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })}
+                                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                              >
+                                <BookOpen className="h-3 w-3" />
+                                Ver receita
+                              </button>
                             </div>
                           )}
                         </motion.li>
