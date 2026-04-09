@@ -12,12 +12,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AlertsSheet } from "@/components/AlertsSheet";
 
 export default function DashboardLayout() {
   const { user, profileType } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
+  const [alertsOpen, setAlertsOpen] = useState(false);
   const navigate = useNavigate();
   const { drinkNow, lowStock } = useWineMetrics();
   const { data: wines } = useWines();
@@ -97,7 +99,7 @@ export default function DashboardLayout() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/dashboard/alerts")}
+                onClick={() => isMobile ? setAlertsOpen(true) : navigate("/dashboard/alerts")}
                 className="h-10 w-10 rounded-xl relative text-muted-foreground hover:bg-muted/20"
                 title="Alertas"
               >
@@ -129,6 +131,7 @@ export default function DashboardLayout() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
+      <AlertsSheet open={alertsOpen} onOpenChange={setAlertsOpen} />
     </SidebarProvider>
   );
 }
