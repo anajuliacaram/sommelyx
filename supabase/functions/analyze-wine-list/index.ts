@@ -93,6 +93,7 @@ function normalizeWineListPayload(payload: any) {
 
 function normalizeMenuPayload(payload: any) {
   const dishes = Array.isArray(payload?.dishes) ? payload.dishes : [];
+  const validCompatLabels = ["Combinação perfeita", "Alta compatibilidade", "Harmonização elegante", "Boa opção", "Escolha ousada", "Pouco indicado"];
   return {
     dishes: dishes.map((dish: any) => ({
       name: String(dish?.name || "Prato não identificado"),
@@ -100,8 +101,30 @@ function normalizeMenuPayload(payload: any) {
       match: ["perfeito", "muito bom", "bom"].includes(dish?.match) ? dish.match : "bom",
       reason: dish?.reason ? String(dish.reason) : "Boa compatibilidade geral.",
       highlight: ["top-pick", "best-value"].includes(dish?.highlight) ? dish.highlight : null,
+      compatibilityLabel: validCompatLabels.includes(dish?.compatibilityLabel) ? dish.compatibilityLabel : null,
+      harmony_type: ["contraste", "semelhança", "complemento", "equilíbrio", "limpeza"].includes(dish?.harmony_type) ? dish.harmony_type : null,
+      harmony_label: dish?.harmony_label ? String(dish.harmony_label) : null,
+      dish_profile: dish?.dish_profile ? {
+        intensity: dish.dish_profile.intensity ? String(dish.dish_profile.intensity) : null,
+        texture: dish.dish_profile.texture ? String(dish.dish_profile.texture) : null,
+        highlight: dish.dish_profile.highlight ? String(dish.dish_profile.highlight) : null,
+      } : null,
+      recipe: dish?.recipe ? {
+        description: String(dish.recipe.description || ""),
+        ingredients: Array.isArray(dish.recipe.ingredients) ? dish.recipe.ingredients.map(String) : [],
+        steps: Array.isArray(dish.recipe.steps) ? dish.recipe.steps.map(String) : [],
+        wine_reason: String(dish.recipe.wine_reason || ""),
+      } : null,
     })),
     summary: payload?.summary ? String(payload.summary) : "",
+    wineProfile: payload?.wineProfile ? {
+      body: payload.wineProfile.body ? String(payload.wineProfile.body) : null,
+      acidity: payload.wineProfile.acidity ? String(payload.wineProfile.acidity) : null,
+      tannin: payload.wineProfile.tannin ? String(payload.wineProfile.tannin) : null,
+      style: payload.wineProfile.style ? String(payload.wineProfile.style) : null,
+      complexity: payload.wineProfile.complexity ? String(payload.wineProfile.complexity) : null,
+      summary: payload.wineProfile.summary ? String(payload.wineProfile.summary) : null,
+    } : null,
   };
 }
 
@@ -153,16 +176,54 @@ serve(async (req) => {
     let toolChoice: Record<string, unknown>;
 
     if (isMenuMode) {
-      systemPrompt = `Você é um sommelier especialista em leitura de cardápios. Use apenas o conteúdo legível do anexo e seja conservador quando algo estiver pouco nítido. Priorize precisão, velocidade e objetividade.`;
-      userInstructions = `Analise o cardápio anexado e selecione apenas pratos que harmonizem pelo menos bem com o vinho "${wineName}". Explique a lógica sensorial de forma clara, sem inventar itens que não estejam legíveis.`;
+      systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
+
+REGRA #1 — FALE DO RÓTULO, NUNCA DA UVA GENÉRICA:
+Ao explicar cada harmonização, cite o vinho "${wineName}" PELO NOME. Não diga "este vinho" ou descreva a uva genericamente.
+
+ANTES DE ANALISAR O CARDÁPIO, construa um PERFIL MENTAL do vinho "${wineName}":
+1. O que se sabe sobre o produtor? (escala, filosofia)
+2. O que a região/país implica sobre o estilo?
+3. Corpo, acidez, taninos PROVÁVEIS
+4. Qual o posicionamento do vinho? (entrada de linha, reserva, ícone)
+
+PARA CADA PRATO DO CARDÁPIO:
+- Explique a INTERAÇÃO FÍSICA entre "${wineName}" e o prato (acidez × gordura, tanino × proteína, intensidade × intensidade)
+- Use uma lógica de harmonização DIFERENTE por prato: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
+- Forneça perfil do prato (intensidade, textura, destaque)
+- Inclua receita resumida para cada prato
+
+CLASSIFICAÇÃO (usar toda a escala):
+- Combinação perfeita / Alta compatibilidade / Harmonização elegante / Boa opção / Escolha ousada / Pouco indicado
+
+ORDENAR do melhor para o pior. Nem todos devem ser positivos.
+
+PROIBIDO: "[Uva] possui notas de...", "combina bem", frases genéricas.
+Use apenas pratos LEGÍVEIS no cardápio. Não invente itens.`;
+
+      userInstructions = `Analise o cardápio anexado como sommelier para o vinho "${wineName}". Selecione 5-8 pratos, ordene por qualidade de harmonização, forneça explicações técnicas citando "${wineName}" pelo nome, perfil do prato e receita resumida.`;
       tools = [{
         type: "function",
         function: {
           name: "return_menu_analysis",
-          description: "Retorna os pratos do cardápio que harmonizam com o vinho informado.",
+          description: "Retorna os pratos do cardápio que harmonizam com o vinho informado, com análise de sommelier.",
           parameters: {
             type: "object",
             properties: {
+              wineProfile: {
+                type: "object",
+                description: "Perfil técnico do vinho analisado",
+                properties: {
+                  body: { type: "string", enum: ["leve", "médio", "encorpado"] },
+                  acidity: { type: "string", enum: ["baixa", "média", "alta"] },
+                  tannin: { type: "string", enum: ["n/a", "sedosos", "firmes", "estruturados"] },
+                  style: { type: "string" },
+                  complexity: { type: "string", enum: ["simples", "moderado", "complexo"] },
+                  summary: { type: "string", description: "2-3 frases sobre o perfil ESPECÍFICO deste rótulo" },
+                },
+                required: ["body", "acidity", "tannin", "summary"],
+                additionalProperties: false,
+              },
               dishes: {
                 type: "array",
                 items: {
@@ -171,16 +232,40 @@ serve(async (req) => {
                     name: { type: "string" },
                     price: { type: "number" },
                     match: { type: "string", enum: ["perfeito", "muito bom", "bom"] },
-                    reason: { type: "string" },
+                    reason: { type: "string", description: "2-3 frases técnicas citando o NOME do vinho e explicando a interação" },
                     highlight: { type: "string", enum: ["top-pick", "best-value"] },
+                    compatibilityLabel: { type: "string", enum: ["Combinação perfeita", "Alta compatibilidade", "Harmonização elegante", "Boa opção", "Escolha ousada", "Pouco indicado"] },
+                    harmony_type: { type: "string", enum: ["contraste", "semelhança", "complemento", "equilíbrio", "limpeza"] },
+                    harmony_label: { type: "string", description: "Frase curta (ex: 'acidez que corta a gordura')" },
+                    dish_profile: {
+                      type: "object",
+                      properties: {
+                        intensity: { type: "string", enum: ["leve", "média", "alta"] },
+                        texture: { type: "string" },
+                        highlight: { type: "string" },
+                      },
+                      required: ["intensity", "texture", "highlight"],
+                      additionalProperties: false,
+                    },
+                    recipe: {
+                      type: "object",
+                      properties: {
+                        description: { type: "string" },
+                        ingredients: { type: "array", items: { type: "string" } },
+                        steps: { type: "array", items: { type: "string" } },
+                        wine_reason: { type: "string" },
+                      },
+                      required: ["description", "ingredients", "steps", "wine_reason"],
+                      additionalProperties: false,
+                    },
                   },
-                  required: ["name", "match", "reason"],
+                  required: ["name", "match", "reason", "compatibilityLabel", "harmony_type", "harmony_label", "dish_profile", "recipe"],
                   additionalProperties: false,
                 },
               },
               summary: { type: "string" },
             },
-            required: ["dishes", "summary"],
+            required: ["wineProfile", "dishes", "summary"],
             additionalProperties: false,
           },
         },
