@@ -70,6 +70,13 @@ export interface PairingResponse {
   wineProfile?: WineProfile | null;
 }
 
+export interface WineSuggestionProfile {
+  body?: string | null;
+  acidity?: string | null;
+  tannin?: string | null;
+  style?: string | null;
+}
+
 export interface WineSuggestion {
   wineName: string;
   style: string;
@@ -83,6 +90,7 @@ export interface WineSuggestion {
   region?: string;
   country?: string;
   compatibilityLabel?: string;
+  wineProfile?: WineSuggestionProfile | null;
 }
 
 export interface SuggestionResponse {
