@@ -292,7 +292,12 @@ serve(async (req) => {
 
     return jsonResponse(isMenuMode ? normalizeMenuPayload(parsed) : normalizeWineListPayload(parsed));
   } catch (e) {
-    console.error("analyze-wine-list error:", e);
-    return jsonResponse({ error: e instanceof Error ? e.message : "Erro interno" }, 500);
+    const errMsg = e instanceof Error ? e.message : "Erro interno";
+    const isAbort = errMsg.toLowerCase().includes("abort");
+    console.error("analyze-wine-list error:", errMsg);
+    if (isAbort) {
+      return jsonResponse({ error: "A análise demorou mais que o esperado. Tente novamente." }, 504);
+    }
+    return jsonResponse({ error: "Não foi possível analisar a carta. Tente novamente." }, 500);
   }
 });
