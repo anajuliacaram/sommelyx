@@ -109,6 +109,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
   const [wineSearchState, setWineSearchState] = useState("");
   const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
+  const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const reset = () => {
     setSource(null);
     setSubMode(null);
