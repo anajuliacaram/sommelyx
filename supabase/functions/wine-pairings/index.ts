@@ -258,7 +258,7 @@ Analise o prato tecnicamente e sugira os melhores vinhos. Para cada um, cite o N
                     match: { type: "string", enum: ["perfeito", "muito bom", "bom"] },
                     harmony_type: { type: "string", enum: ["contraste", "semelhança", "complemento", "equilíbrio", "limpeza"] },
                     harmony_label: { type: "string" },
-                    compatibilityLabel: { type: "string", enum: ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"] },
+                    compatibilityLabel: { type: "string", enum: ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"] },
                   },
                   required: ["wineName", "style", "reason", "fromCellar", "match", "harmony_type", "harmony_label", "compatibilityLabel"],
                   additionalProperties: false,
