@@ -516,7 +516,7 @@ export async function getDishWineSuggestions(
           producer: w.producer,
         })),
       },
-      { timeoutMs: 30_000, retries: 1 },
+      { timeoutMs: 55_000, retries: 1 },
     );
 
     if (isValidSuggestions(data)) {
