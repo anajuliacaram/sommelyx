@@ -40,6 +40,130 @@ async function logToDb(
   } catch { /* Silent */ }
 }
 
+// ── Anti-Genericity Validation ──
+const GENERIC_PATTERNS = [
+  /cabernet sauvignon (?:possui|tem|apresenta|é conhecid)/i,
+  /merlot (?:possui|tem|apresenta|é conhecid)/i,
+  /chardonnay (?:possui|tem|apresenta|é conhecid)/i,
+  /pinot noir (?:possui|tem|apresenta|é conhecid)/i,
+  /sauvignon blanc (?:possui|tem|apresenta|é conhecid)/i,
+  /carmenère (?:possui|tem|apresenta|é conhecid)/i,
+  /malbec (?:possui|tem|apresenta|é conhecid)/i,
+  /sangiovese (?:possui|tem|apresenta|é conhecid)/i,
+  /syrah (?:possui|tem|apresenta|é conhecid)/i,
+  /tempranillo (?:possui|tem|apresenta|é conhecid)/i,
+  /nebbiolo (?:possui|tem|apresenta|é conhecid)/i,
+  /combina (?:muito )?bem/i,
+  /harmoniza perfeitamente/i,
+  /complementa os sabores/i,
+  /é? um vinho (?:versátil|equilibrado|elegante) que/i,
+  /notas? de frutas (?:vermelhas|escuras|tropicais|cítricas) e/i,
+];
+
+function validateWineSpecificity(
+  texts: string[],
+  wineName: string,
+  grape?: string | null,
+): { passed: boolean; failures: string[] } {
+  const failures: string[] = [];
+  const wineNameLower = wineName.toLowerCase();
+  const grapeClean = grape?.toLowerCase().replace(/\s+/g, " ").trim() || "";
+
+  for (const text of texts) {
+    if (!text || text.length < 20) continue;
+    const lower = text.toLowerCase();
+
+    // Check if wine name is actually mentioned
+    const mentionsWine = lower.includes(wineNameLower) || 
+      wineNameLower.split(" ").filter(w => w.length > 3).some(w => lower.includes(w));
+
+    if (!mentionsWine && texts.length <= 10) {
+      failures.push(`Missing wine name reference: "${text.slice(0, 60)}..."`);
+    }
+
+    // Check for generic grape descriptions
+    for (const pattern of GENERIC_PATTERNS) {
+      if (pattern.test(text)) {
+        failures.push(`Generic pattern found: "${text.slice(0, 60)}..."`);
+        break;
+      }
+    }
+
+    // Check if explanation is just about the grape (only the grape, nothing about producer/region/style)
+    if (grapeClean && grapeClean.length > 3) {
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
+      const genericSentences = sentences.filter(s => {
+        const sl = s.toLowerCase();
+        // Sentence mentions grape but NOT the wine name or region-specific terms
+        return sl.includes(grapeClean) && !mentionsWine && 
+          !sl.match(/regiã|produtor|safra|rótulo|vinícola|região|vale |serra |douro|bordeaux|toscana|mendoza|napa|rioja|barossa|maipo|casablanca|colchagua/i);
+      });
+      if (genericSentences.length > sentences.length / 2) {
+        failures.push(`Grape-only description without label context`);
+      }
+    }
+  }
+
+  return { passed: failures.length === 0, failures };
+}
+
+async function callAI(
+  apiKey: string,
+  systemPrompt: string,
+  userPrompt: string,
+  tools: unknown[],
+  toolChoice: unknown,
+  signal: AbortSignal,
+) {
+  const aiResponse = await fetch(AI_URL, {
+    method: "POST",
+    signal,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      tools,
+      tool_choice: toolChoice,
+      temperature: 0.75,
+    }),
+  });
+
+  if (!aiResponse.ok) {
+    const errText = await aiResponse.text().catch(() => "");
+    return { ok: false, status: aiResponse.status, errText, parsed: null };
+  }
+
+  const aiData = await aiResponse.json();
+  let parsed;
+  try {
+    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.arguments) {
+      parsed = typeof toolCall.function.arguments === "string"
+        ? JSON.parse(toolCall.function.arguments)
+        : toolCall.function.arguments;
+    } else {
+      const content = aiData.choices?.[0]?.message?.content || "";
+      const jsonStart = content.indexOf("{");
+      const jsonEnd = content.lastIndexOf("}");
+      if (jsonStart !== -1 && jsonEnd > jsonStart) {
+        parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
+      } else {
+        parsed = JSON.parse(content);
+      }
+    }
+  } catch {
+    parsed = null;
+  }
+
+  return { ok: true, status: 200, errText: "", parsed };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -86,45 +210,49 @@ serve(async (req) => {
     const wineVintage = (body as any).wineVintage || null;
     const wineCountry = (body as any).wineCountry || null;
 
-    // ── Wine Technical Profile Construction Instructions (injected into all prompts) ──
+    // ── Wine Technical Profile Construction Instructions ──
     const PROFILE_CONSTRUCTION_RULES = `
 CONSTRUÇÃO OBRIGATÓRIA DO PERFIL TÉCNICO (WineTechnicalProfile):
 Antes de responder QUALQUER coisa, você DEVE construir internamente um perfil técnico para cada vinho mencionado.
 
-O perfil deve conter:
-- wineName: nome completo do rótulo
-- producer: quem produz, escala, filosofia
-- country/region: origem e o que ela implica (clima, solo, tradição)
-- vintage: idade e o que isso significa para taninos/evolução
-- grapes: variedade(s) — mas NUNCA descreva a uva genericamente
-- wineType: tinto/branco/rosé/espumante/fortificado
-- body: leve/médio/encorpado (inferido do rótulo, NÃO da uva)
-- acidity: baixa/média/alta (inferido da região e estilo)
-- tannin: baixo/médio/alto (inferido do rótulo e idade)
-- complexity: baixa/média/alta
-- style: elegante/potente/gastronômico/frutado/mineral/etc
-- confidence: alta (muitos dados) / média (boa inferência) / baixa (poucos dados)
-- inferenceBasis: lista do que sustentou a análise ["região", "produtor", "estilo da linha"]
+PROCESSO OBRIGATÓRIO EM 5 ETAPAS:
+ETAPA 1 — IDENTIFICAÇÃO DO PRODUTOR: Quem é ${wineProducer || "o produtor"}? Qual a filosofia, escala, posicionamento? É entrada de linha, reserva, gran reserva, ícone?
+ETAPA 2 — CONTEXTO REGIONAL: ${wineRegion || "A região"} + ${wineCountry || "o país"} implicam que tipo de clima, solo, tradição?
+ETAPA 3 — POSICIONAMENTO: Este é um vinho de R$30 ou R$300? O nome/linha sugere qual segmento?
+ETAPA 4 — SAFRA: ${wineVintage || "A safra"} — o que isso significa para evolução, taninos, frescor?
+ETAPA 5 — ESTRUTURA RESULTANTE: Com base nas 4 etapas anteriores (NÃO na uva genérica), defina:
+  - body: leve/médio/encorpado
+  - acidity: baixa/média/alta
+  - tannin: n/a/sedosos/firmes/estruturados
+  - style: elegante/potente/gastronômico/frutado/mineral/etc
+  - complexity: simples/moderado/complexo
 
-REGRAS DE CONSTRUÇÃO:
-1. PRIORIDADE ABSOLUTA: o rótulo específico, NUNCA a uva isolada
+REGRAS ABSOLUTAS:
+1. PRIORIDADE: o rótulo "${wineName}" específico, NUNCA a uva "${wineGrape || ""}" isolada
 2. Don Melchor ≠ qualquer Cabernet. Testamatta ≠ qualquer Sangiovese. Barolo ≠ qualquer Nebbiolo.
-3. Se faltam dados, INFIRA com base em: origem, estilo típico daquela região, posicionamento do rótulo, categoria/linha, produtor
-4. Use linguagem como "Este rótulo tende a apresentar..." ou "Vinhos dessa origem geralmente..." quando inferindo
+3. Se faltam dados, INFIRA com base em: origem, estilo típico daquela região, posicionamento do rótulo
+4. Use linguagem como "O ${wineName} tende a apresentar..." quando inferindo
 5. NUNCA faça afirmações absolutas sem dados suficientes
 
-ANTI-GENERICIDADE (CHECAGEM OBRIGATÓRIA):
-Antes de finalizar CADA explicação, aplique este teste:
-"Se eu trocar o nome deste vinho por outro da mesma uva, esta frase ainda funciona?"
-→ Se SIM → REESCREVA. A frase DEVE ser específica para ESTE rótulo.
-→ Se NÃO → OK, pode manter.
+ANTI-GENERICIDADE (VALIDAÇÃO AUTOMÁTICA NO SERVIDOR):
+⚠️ O servidor VALIDA automaticamente suas respostas. Se detectar:
+- Frases que funcionariam para qualquer vinho da mesma uva
+- Descrições genéricas da uva sem contexto do rótulo
+- Ausência do nome "${wineName}" nas explicações
+→ A resposta será REJEITADA e você será chamado novamente.
 
-FRASES PROIBIDAS (resultam em rejeição automática):
+PROIBIDO (causa rejeição automática):
 - "[Uva] possui notas de..."
-- "[Uva] é conhecida por..."
+- "[Uva] é conhecida por..."  
 - "combina bem", "harmoniza perfeitamente", "complementa os sabores"
+- "um vinho versátil/equilibrado/elegante que..."
 - Qualquer frase que funcione para QUALQUER vinho da mesma uva
-- Descrições genéricas copiadas de enciclopédias de vinho`;
+- Descrever "notas de frutas vermelhas/escuras/tropicais e..." sem contexto do rótulo
+
+OBRIGATÓRIO em CADA explicação:
+- Citar "${wineName}" pelo nome (não "este vinho" ou "o ${wineGrape || "vinho"}")
+- Referenciar pelo menos UM aspecto único deste rótulo (produtor, região, posicionamento, safra)
+- Explicar a INTERAÇÃO FÍSICA entre vinho e prato (acidez × gordura, tanino × proteína, etc.)`;
 
     let systemPrompt: string;
     let userPrompt: string;
@@ -135,21 +263,21 @@ FRASES PROIBIDAS (resultam em rejeição automática):
 ${PROFILE_CONSTRUCTION_RULES}
 
 FLUXO OBRIGATÓRIO:
-1. Construa o WineTechnicalProfile internamente
-2. Use o perfil para gerar o campo "summary" do wineProfile (2-3 frases que DIFERENCIEM este rótulo de outros da mesma uva)
-3. Para CADA prato sugerido, explique a INTERAÇÃO FÍSICA entre o perfil técnico do vinho e os componentes do prato
+1. Execute as 5 ETAPAS do perfil técnico para "${wineName}"
+2. Use o perfil para gerar o campo "summary" do wineProfile — 2-3 frases que DIFERENCIEM "${wineName}" de outros vinhos da mesma uva "${wineGrape || ""}"
+3. Para CADA prato sugerido, explique a INTERAÇÃO FÍSICA entre o perfil técnico de "${wineName}" e os componentes do prato
 
-CADA EXPLICAÇÃO deve:
-- Citar o NOME do vinho (não "este vinho" ou "o Carmenère")
-- Referenciar características que SÓ este rótulo/produtor/região teria
-- Explicar a INTERAÇÃO FÍSICA entre vinho e prato (ex: "os taninos ainda jovens do [nome] precisam de gordura para se suavizar")
-- Usar uma lógica de harmonização DIFERENTE por sugestão: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
+O summary DEVE:
+- Começar com "O ${wineName}..." ou "Este ${wineName}..."
+- Mencionar o produtor/região/posicionamento
+- Explicar o que DIFERENCIA este rótulo de outros da mesma uva
+- NUNCA ser uma descrição genérica da uva
 
 REGRAS ENOLÓGICAS:
 1. Peso equivalente: corpo do vinho ∝ intensidade do prato
 2. Tanino + peixe delicado = metálico → NUNCA
 3. Álcool alto + picante = desastre → NUNCA
-4. Regionalidade: priorize quando fizer sentido (ex: Chianti com ragù toscano)
+4. Regionalidade: priorize quando fizer sentido
 
 JULGAMENTO HONESTO — nem todo prato é "perfeito":
 - perfeito: harmonia excepcional, elevam um ao outro
@@ -165,11 +293,12 @@ País: ${wineCountry || "Não informado"}
 Safra: ${wineVintage || "Não informada"}
 
 INSTRUÇÕES:
-1. Construa o WineTechnicalProfile deste rótulo com base nos dados acima + seu conhecimento enológico
-2. Use o perfil para preencher wineProfile.summary com 2-3 frases ESPECÍFICAS sobre ESTE rótulo (não sobre a uva)
-3. Sugira 6-8 pratos, sempre citando "${wineName}" pelo nome nas explicações
+1. Execute as 5 ETAPAS do perfil técnico para "${wineName}" — NÃO pule nenhuma etapa
+2. Preencha wineProfile.summary com 2-3 frases ESPECÍFICAS sobre "${wineName}" (começando com "O ${wineName}...")
+3. Sugira 6-8 pratos, SEMPRE citando "${wineName}" pelo nome em CADA explicação
 4. Varie entre entradas, pratos principais e queijos/sobremesa
-5. Aplique o teste anti-genericidade em CADA explicação antes de finalizar`;
+5. Em CADA reason, cite ao menos 1 característica ESPECÍFICA de "${wineName}" (não da uva genérica)
+6. Varie os harmony_type (contraste/semelhança/complemento/equilíbrio/limpeza)`;
 
     } else if (mode === "food-to-wine") {
       const hasCellar = userWines?.length > 0;
@@ -178,14 +307,15 @@ INSTRUÇÕES:
 ${PROFILE_CONSTRUCTION_RULES}
 
 ${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE:
-1. Construir um WineTechnicalProfile para CADA vinho da adega antes de avaliar
-2. Usar o perfil técnico para determinar compatibilidade com o prato
-3. Priorizar rótulos REAIS. NUNCA responda com categorias genéricas ("vinho branco seco") se há vinhos reais compatíveis.
-4. Se NENHUM vinho da adega combina adequadamente, diga isso honestamente.` : "Sugira tipos específicos de vinho com rótulos de referência."}
+1. Executar as 5 ETAPAS do perfil técnico para CADA vinho da adega
+2. Usar o perfil técnico para determinar compatibilidade com o prato "${dish}"
+3. Priorizar rótulos REAIS. NUNCA responda com categorias genéricas ("vinho branco seco")
+4. Se NENHUM vinho da adega combina adequadamente, diga isso honestamente.
+5. Para cada vinho, a explicação DEVE citar o nome do rótulo e uma característica específica dele.` : "Sugira tipos específicos de vinho com rótulos de referência."}
 
 FLUXO OBRIGATÓRIO:
-1. Analise o prato tecnicamente (proteína, gordura, cocção, intensidade, texturas)
-2. Para cada vinho candidato, construa o WineTechnicalProfile
+1. Analise "${dish}" tecnicamente (proteína, gordura, cocção, intensidade, texturas)
+2. Para cada vinho candidato, execute as 5 ETAPAS do perfil técnico
 3. Compare perfil do vinho vs perfil do prato usando lógica técnica:
    - acidez × gordura
    - tanino × proteína
@@ -201,7 +331,7 @@ JULGAMENTO HONESTO — use toda a escala:
 - Escolha ousada: pode funcionar mas é arriscado
 - Pouco indicado: não recomendo
 
-NEM TODOS os vinhos devem ser positivos. Se um vinho da adega é ruim para o prato, diga.`;
+NEM TODOS os vinhos devem ser positivos. Se um vinho é ruim para o prato, diga.`;
 
       const cellarContext = hasCellar
         ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"}`).join("\n")}`
@@ -209,11 +339,11 @@ NEM TODOS os vinhos devem ser positivos. Se um vinho da adega é ruim para o pra
       userPrompt = `Prato: "${dish}"${cellarContext}
 
 INSTRUÇÕES:
-1. Decomponha o prato tecnicamente (proteína, gordura, cocção, intensidade)
-2. Para cada vinho candidato, construa o WineTechnicalProfile internamente
-3. Compare o perfil técnico do vinho vs os componentes do prato
-4. Cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não) com ESTE prato
-5. Aplique o teste anti-genericidade em CADA explicação`;
+1. Decomponha "${dish}" tecnicamente (proteína, gordura, cocção, intensidade)
+2. Para cada vinho, execute as 5 ETAPAS do perfil técnico
+3. Na explicação, cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não)
+4. Em cada reason, mencione ao menos 1 aspecto que diferencia este rótulo de outro da mesma uva
+5. Use compatibilityLabel honestamente — nem tudo é "Excelente escolha"`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
@@ -230,14 +360,14 @@ INSTRUÇÕES:
             properties: {
               wineProfile: {
                 type: "object",
-                description: "Technical profile of the wine analyzed",
+                description: "Technical profile of the specific wine label analyzed",
                 properties: {
                   body: { type: "string", enum: ["leve", "médio", "encorpado"] },
                   acidity: { type: "string", enum: ["baixa", "média", "alta"] },
                   tannin: { type: "string", enum: ["n/a", "sedosos", "firmes", "estruturados"] },
-                  style: { type: "string", description: "Gastro style: aperitivo, versátil, gastronomico, sobremesa" },
-                  complexity: { type: "string", enum: ["simples", "moderado", "complexo"], description: "Nível de complexidade do vinho" },
-                  summary: { type: "string", description: "2-3 frases descrevendo o perfil ESPECÍFICO deste rótulo, citando o nome do vinho. Deve diferenciar de outros vinhos da mesma uva." },
+                  style: { type: "string", description: "Estilo gastronômico: elegante, potente, gastronômico, frutado, mineral, etc" },
+                  complexity: { type: "string", enum: ["simples", "moderado", "complexo"] },
+                  summary: { type: "string", description: "2-3 frases ESPECÍFICAS sobre ESTE rótulo, começando com o nome do vinho. Deve diferenciar de outros da mesma uva." },
                 },
                 required: ["body", "acidity", "tannin", "style", "summary"],
                 additionalProperties: false,
@@ -248,11 +378,11 @@ INSTRUÇÕES:
                   type: "object",
                   properties: {
                     dish: { type: "string", description: "Nome específico do prato com preparo" },
-                    category: { type: "string", enum: ["classico", "afinidade", "contraste"], description: "Categoria da harmonização" },
-                    reason: { type: "string", description: "2-3 frases técnicas citando o NOME do vinho e explicando a interação físico-química" },
+                    category: { type: "string", enum: ["classico", "afinidade", "contraste"] },
+                    reason: { type: "string", description: "2-3 frases técnicas citando o NOME do vinho e explicando a interação físico-química específica deste rótulo com o prato" },
                     match: { type: "string", enum: ["perfeito", "muito bom", "bom"] },
                     harmony_type: { type: "string", enum: ["contraste", "semelhança", "complemento", "equilíbrio", "limpeza"] },
-                    harmony_label: { type: "string", description: "Frase curta (ex: 'acidez que corta a gordura')" },
+                    harmony_label: { type: "string", description: "Frase curta técnica (ex: 'acidez que corta a gordura')" },
                     dish_profile: {
                       type: "object",
                       properties: {
@@ -267,10 +397,10 @@ INSTRUÇÕES:
                       type: "object",
                       description: "Receita resumida do prato",
                       properties: {
-                        description: { type: "string", description: "1-2 frases sobre o prato" },
-                        ingredients: { type: "array", items: { type: "string" }, description: "Lista de ingredientes principais (6-10)" },
-                        steps: { type: "array", items: { type: "string" }, description: "5-8 passos de preparo curtos" },
-                        wine_reason: { type: "string", description: "Por que este prato harmoniza com o vinho — resumo técnico curto citando o nome do vinho" },
+                        description: { type: "string" },
+                        ingredients: { type: "array", items: { type: "string" } },
+                        steps: { type: "array", items: { type: "string" } },
+                        wine_reason: { type: "string", description: "Por que este prato harmoniza com o vinho — citando o nome do rótulo" },
                       },
                       required: ["description", "ingredients", "steps", "wine_reason"],
                       additionalProperties: false,
@@ -312,20 +442,32 @@ INSTRUÇÕES:
                 items: {
                   type: "object",
                   properties: {
-                    wineName: { type: "string", description: "Nome EXATO do vinho (da adega) ou tipo detalhado" },
+                    wineName: { type: "string", description: "Nome EXATO do vinho da adega ou tipo detalhado" },
                     style: { type: "string", enum: ["tinto", "branco", "rosé", "espumante"] },
                     grape: { type: "string" },
                     vintage: { type: "number" },
                     region: { type: "string" },
                     country: { type: "string" },
-                    reason: { type: "string", description: "2-3 frases técnicas ÚNICAS" },
+                    reason: { type: "string", description: "2-3 frases técnicas ÚNICAS citando o NOME do rótulo e aspectos específicos dele" },
                     fromCellar: { type: "boolean" },
                     match: { type: "string", enum: ["perfeito", "muito bom", "bom"] },
                     harmony_type: { type: "string", enum: ["contraste", "semelhança", "complemento", "equilíbrio", "limpeza"] },
                     harmony_label: { type: "string" },
                     compatibilityLabel: { type: "string", enum: ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"] },
+                    wineProfile: {
+                      type: "object",
+                      description: "Perfil técnico deste rótulo específico",
+                      properties: {
+                        body: { type: "string", enum: ["leve", "médio", "encorpado"] },
+                        acidity: { type: "string", enum: ["baixa", "média", "alta"] },
+                        tannin: { type: "string", enum: ["n/a", "sedosos", "firmes", "estruturados"] },
+                        style: { type: "string" },
+                      },
+                      required: ["body", "acidity", "tannin", "style"],
+                      additionalProperties: false,
+                    },
                   },
-                  required: ["wineName", "style", "reason", "fromCellar", "match", "harmony_type", "harmony_label", "compatibilityLabel"],
+                  required: ["wineName", "style", "reason", "fromCellar", "match", "harmony_type", "harmony_label", "compatibilityLabel", "wineProfile"],
                   additionalProperties: false,
                 },
               },
@@ -341,65 +483,79 @@ INSTRUÇÕES:
       ? { type: "function" as const, function: { name: "return_pairings" } }
       : { type: "function" as const, function: { name: "return_suggestions" } };
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60_000);
+    // ── Retry loop with anti-genericity validation ──
+    const MAX_ATTEMPTS = 2;
+    let lastParsed: any = null;
+    let validationResult: { passed: boolean; failures: string[] } = { passed: false, failures: [] };
 
-    const aiResponse = await fetch(AI_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55_000);
+
+      const retryHint = attempt > 0
+        ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre "${wineName}". Cite o nome do vinho, mencione produtor/região/posicionamento.`
+        : "";
+
+      const result = await callAI(
+        LOVABLE_API_KEY,
+        systemPrompt,
+        userPrompt + retryHint,
         tools,
-        tool_choice: toolChoice,
-        temperature: 0.7,
-      }),
-    });
+        toolChoice,
+        controller.signal,
+      );
 
-    clearTimeout(timeout);
+      clearTimeout(timeout);
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text().catch(() => "");
-      const outcome = aiResponse.status === 429 ? "rate_limited" : "ai_error";
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", aiResponse.status, outcome, Date.now() - startTime, { ai_status: aiResponse.status });
-
-      if (aiResponse.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
-      if (aiResponse.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
-      console.error("AI gateway error:", aiResponse.status, errText);
-      return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
-    }
-
-    const aiData = await aiResponse.json();
-
-    let parsed;
-    try {
-      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-      if (toolCall?.function?.arguments) {
-        parsed = typeof toolCall.function.arguments === "string"
-          ? JSON.parse(toolCall.function.arguments)
-          : toolCall.function.arguments;
-      } else {
-        const content = aiData.choices?.[0]?.message?.content || "";
-        const jsonStart = content.indexOf("{");
-        const jsonEnd = content.lastIndexOf("}");
-        if (jsonStart !== -1 && jsonEnd > jsonStart) {
-          parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
-        } else {
-          parsed = JSON.parse(content);
-        }
+      if (!result.ok) {
+        if (result.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
+        if (result.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+        console.error("AI gateway error:", result.status, result.errText);
+        return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
       }
-    } catch (parseErr) {
-      console.error("AI parse error:", parseErr, JSON.stringify(aiData).slice(0, 500));
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_parse_error", Date.now() - startTime);
-      parsed = mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] };
+
+      if (!result.parsed) {
+        console.error("AI parse error on attempt", attempt);
+        continue;
+      }
+
+      lastParsed = result.parsed;
+
+      // ── Validate anti-genericity ──
+      const textsToValidate: string[] = [];
+      if (mode === "wine-to-food") {
+        if (lastParsed.wineProfile?.summary) textsToValidate.push(lastParsed.wineProfile.summary);
+        for (const p of (lastParsed.pairings || [])) {
+          if (p.reason) textsToValidate.push(p.reason);
+        }
+        validationResult = validateWineSpecificity(textsToValidate, wineName || "", wineGrape);
+      } else {
+        for (const s of (lastParsed.suggestions || [])) {
+          if (s.reason) textsToValidate.push(s.reason);
+        }
+        // For food-to-wine, validate each wine's specificity
+        const allPassed: boolean[] = [];
+        for (const s of (lastParsed.suggestions || [])) {
+          if (s.reason) {
+            const v = validateWineSpecificity([s.reason], s.wineName || "", s.grape);
+            allPassed.push(v.passed);
+            if (!v.passed) validationResult.failures.push(...v.failures);
+          }
+        }
+        validationResult.passed = allPassed.length === 0 || allPassed.filter(p => p).length >= allPassed.length * 0.6;
+      }
+
+      console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
+
+      if (validationResult.passed) break;
+
+      // If last attempt, use what we have
+      if (attempt === MAX_ATTEMPTS - 1) {
+        console.log("Max retries reached, using best result available");
+      }
     }
+
+    const parsed = lastParsed || (mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] });
 
     if (mode === "wine-to-food" && (!Array.isArray(parsed.pairings) || parsed.pairings.length === 0)) {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_empty_response", Date.now() - startTime);
@@ -413,6 +569,8 @@ INSTRUÇÕES:
     await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success", Date.now() - startTime, {
       mode,
       result_count: mode === "wine-to-food" ? parsed.pairings?.length : parsed.suggestions?.length,
+      validation_passed: validationResult.passed,
+      validation_failures: validationResult.failures.length,
     });
 
     return jsonResponse(parsed);
