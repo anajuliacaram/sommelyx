@@ -35,9 +35,15 @@ type Step =
   | "ext-menu-results";
 
 const matchDot: Record<string, string> = {
-  perfeito: "bg-success",
-  "muito bom": "bg-success/70",
-  bom: "bg-warning",
+  perfeito: "bg-[hsl(152,42%,42%)]",
+  "muito bom": "bg-[hsl(152,32%,52%)]",
+  bom: "bg-[hsl(38,52%,50%)]",
+};
+
+const matchBadge: Record<string, { label: string; className: string }> = {
+  perfeito: { label: "combinação perfeita", className: "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" },
+  "muito bom": { label: "harmonia elegante", className: "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" },
+  bom: { label: "boa combinação", className: "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]" },
 };
 
 const popularDishes = [
