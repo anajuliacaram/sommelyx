@@ -329,20 +329,29 @@ Sugira 3-5 opções.`;
     }
 
     const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content || "";
-
+    
+    // Try tool calling response first, then fall back to content parsing
     let parsed;
     try {
-      const jsonStart = content.indexOf("{");
-      const jsonEnd = content.lastIndexOf("}");
-      if (jsonStart !== -1 && jsonEnd > jsonStart) {
-        parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
+      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall?.function?.arguments) {
+        parsed = typeof toolCall.function.arguments === "string"
+          ? JSON.parse(toolCall.function.arguments)
+          : toolCall.function.arguments;
       } else {
-        parsed = JSON.parse(content);
+        // Fallback: parse from content
+        const content = aiData.choices?.[0]?.message?.content || "";
+        const jsonStart = content.indexOf("{");
+        const jsonEnd = content.lastIndexOf("}");
+        if (jsonStart !== -1 && jsonEnd > jsonStart) {
+          parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
+        } else {
+          parsed = JSON.parse(content);
+        }
       }
-    } catch {
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_parse_error", Date.now() - startTime, { raw_length: content.length });
-      // Return empty but valid structure so frontend triggers fallback
+    } catch (parseErr) {
+      console.error("AI parse error:", parseErr, JSON.stringify(aiData).slice(0, 500));
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_parse_error", Date.now() - startTime);
       parsed = mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] };
     }
 
