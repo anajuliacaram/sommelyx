@@ -178,30 +178,31 @@ serve(async (req) => {
     if (isMenuMode) {
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
-REGRA #1 — FALE DO RÓTULO, NUNCA DA UVA GENÉRICA:
-Ao explicar cada harmonização, cite o vinho "${wineName}" PELO NOME. Não diga "este vinho" ou descreva a uva genericamente.
+REGRA ABSOLUTA — ANÁLISE DO RÓTULO "${wineName}", NÃO DA UVA:
 
-ANTES DE ANALISAR O CARDÁPIO, construa um PERFIL MENTAL do vinho "${wineName}":
-1. O que se sabe sobre o produtor? (escala, filosofia)
-2. O que a região/país implica sobre o estilo?
-3. Corpo, acidez, taninos PROVÁVEIS
-4. Qual o posicionamento do vinho? (entrada de linha, reserva, ícone)
+PROCESSO OBRIGATÓRIO — Antes de analisar o cardápio, construa o perfil de "${wineName}":
+1. PRODUTOR: Quem faz? Cooperativa, boutique, familiar? Filosofia?
+2. REGIÃO + CLIMA: De onde vem? Clima quente/frio? Altitude? O que isso implica no estilo?
+3. POSICIONAMENTO: Entrada de linha, premium, ícone? (dicas no nome: "Reserva", "Gran", "Single Vineyard")
+4. ESTRUTURA RESULTANTE: Corpo, acidez, taninos PROVÁVEIS baseado em tudo acima — NÃO na uva genericamente
 
 PARA CADA PRATO DO CARDÁPIO:
-- Explique a INTERAÇÃO FÍSICA entre "${wineName}" e o prato (acidez × gordura, tanino × proteína, intensidade × intensidade)
-- Use uma lógica de harmonização DIFERENTE por prato: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
-- Forneça perfil do prato (intensidade, textura, destaque)
-- Inclua receita resumida para cada prato
+- Cite "${wineName}" PELO NOME em cada explicação (nunca "este vinho" ou "o [uva]")
+- Explique a INTERAÇÃO FÍSICA específica (acidez × gordura, tanino × proteína, intensidade × intensidade)
+- Referencie algo que SÓ "${wineName}" teria (não qualquer vinho da mesma uva)
+- Use lógica de harmonização DIFERENTE por prato: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
 
-CLASSIFICAÇÃO (usar toda a escala):
-- Combinação perfeita / Alta compatibilidade / Harmonização elegante / Boa opção / Escolha ousada / Pouco indicado
+TESTE DE QUALIDADE: "Se eu trocar '${wineName}' por outro vinho da mesma uva, esta frase ainda funciona?" Se SIM → reescreva.
 
+QUANDO INFORMAÇÃO É LIMITADA: Infira pelo contexto (nome, estilo provável). Use "este rótulo tende a...", "pela origem, espera-se...". Nunca invente, mas trabalhe com inteligência.
+
+CLASSIFICAÇÃO: Combinação perfeita / Alta compatibilidade / Harmonização elegante / Boa opção / Escolha ousada / Pouco indicado
 ORDENAR do melhor para o pior. Nem todos devem ser positivos.
 
-PROIBIDO: "[Uva] possui notas de...", "combina bem", frases genéricas.
+PROIBIDO: "[Uva] possui notas de...", "combina bem", frases genéricas, descrições de Wikipedia.
 Use apenas pratos LEGÍVEIS no cardápio. Não invente itens.`;
 
-      userInstructions = `Analise o cardápio anexado como sommelier para o vinho "${wineName}". Selecione 5-8 pratos, ordene por qualidade de harmonização, forneça explicações técnicas citando "${wineName}" pelo nome, perfil do prato e receita resumida.`;
+      userInstructions = `Analise o cardápio anexado como sommelier para "${wineName}". Primeiro construa o perfil específico do rótulo (não da uva), depois selecione 5-8 pratos, ordene por qualidade, forneça explicações técnicas que SÓ funcionem para "${wineName}" (não para qualquer vinho da mesma uva).`;
       tools = [{
         type: "function",
         function: {
