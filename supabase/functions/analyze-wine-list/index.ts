@@ -41,6 +41,69 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+// ── Anti-Genericity Validation (same as wine-pairings) ──
+const GENERIC_PATTERNS = [
+  /cabernet sauvignon (?:possui|tem|apresenta|é conhecid)/i,
+  /merlot (?:possui|tem|apresenta|é conhecid)/i,
+  /chardonnay (?:possui|tem|apresenta|é conhecid)/i,
+  /pinot noir (?:possui|tem|apresenta|é conhecid)/i,
+  /sauvignon blanc (?:possui|tem|apresenta|é conhecid)/i,
+  /carmenère (?:possui|tem|apresenta|é conhecid)/i,
+  /malbec (?:possui|tem|apresenta|é conhecid)/i,
+  /sangiovese (?:possui|tem|apresenta|é conhecid)/i,
+  /syrah (?:possui|tem|apresenta|é conhecid)/i,
+  /tempranillo (?:possui|tem|apresenta|é conhecid)/i,
+  /nebbiolo (?:possui|tem|apresenta|é conhecid)/i,
+  /combina (?:muito )?bem/i,
+  /harmoniza perfeitamente/i,
+  /complementa os sabores/i,
+  /é? um vinho (?:versátil|equilibrado|elegante) que/i,
+  /notas? de frutas (?:vermelhas|escuras|tropicais|cítricas) e/i,
+];
+
+function validateWineSpecificity(
+  texts: string[],
+  wineName: string,
+  grape?: string | null,
+): { passed: boolean; failures: string[] } {
+  const failures: string[] = [];
+  const wineNameLower = wineName.toLowerCase();
+  const grapeClean = grape?.toLowerCase().replace(/\s+/g, " ").trim() || "";
+
+  for (const text of texts) {
+    if (!text || text.length < 20) continue;
+    const lower = text.toLowerCase();
+
+    const mentionsWine = lower.includes(wineNameLower) ||
+      wineNameLower.split(" ").filter(w => w.length > 3).some(w => lower.includes(w));
+
+    if (!mentionsWine && texts.length <= 10) {
+      failures.push(`Missing wine name reference: "${text.slice(0, 60)}..."`);
+    }
+
+    for (const pattern of GENERIC_PATTERNS) {
+      if (pattern.test(text)) {
+        failures.push(`Generic pattern found: "${text.slice(0, 60)}..."`);
+        break;
+      }
+    }
+
+    if (grapeClean && grapeClean.length > 3) {
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
+      const genericSentences = sentences.filter(s => {
+        const sl = s.toLowerCase();
+        return sl.includes(grapeClean) && !mentionsWine &&
+          !sl.match(/regiã|produtor|safra|rótulo|vinícola|região|vale |serra |douro|bordeaux|toscana|mendoza|napa|rioja|barossa|maipo|casablanca|colchagua/i);
+      });
+      if (genericSentences.length > sentences.length / 2) {
+        failures.push(`Grape-only description without label context`);
+      }
+    }
+  }
+
+  return { passed: failures.length === 0, failures };
+}
+
 function extractToolArguments(aiData: any) {
   const toolCallArgs = aiData?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (typeof toolCallArgs === "string" && toolCallArgs.trim()) return JSON.parse(toolCallArgs);
