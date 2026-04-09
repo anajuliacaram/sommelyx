@@ -137,7 +137,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const sheetName = wb.SheetNames?.[0];
     if (!sheetName) return "";
     const ws = wb.Sheets[sheetName];
-    // Convert first sheet to CSV so our edge function can map columns.
     return XLSX.utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
   };
 
@@ -161,6 +160,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return pages.join("\n");
   };
 
+  const readWordAsText = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const mammoth = await import("mammoth");
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    return result.value || "";
+  };
+
   const fileToCsvLikeText = async (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     if (ext === "xlsx" || ext === "xls" || ext === "ods") {
@@ -169,7 +175,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (ext === "pdf") {
       return await readPdfAsText(file);
     }
-    // csv/tsv/txt fallback
+    if (ext === "docx" || ext === "doc") {
+      return await readWordAsText(file);
+    }
+    // csv/tsv/txt and any other text file fallback
     return await readTextFile(file);
   };
 
@@ -345,14 +354,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
                   Arraste o arquivo ou clique para selecionar
                 </p>
-                <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
-                  CSV, Excel (XLS/XLSX) ou PDF
-                </p>
+                 <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
+                   CSV, Excel, PDF, Word, TXT — qualquer formato
+                 </p>
               </div>
               <input
                 ref={fileRef}
                 type="file"
-                accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,.doc,.docx,.rtf,text/plain,text/csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
               />
