@@ -1,12 +1,13 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen } from "@/icons/lucide";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile } from "@/lib/sommelier-ai";
+import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile, type Recipe } from "@/lib/sommelier-ai";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
@@ -108,6 +109,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
   const [wineSearchState, setWineSearchState] = useState("");
   const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
+  const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const reset = () => {
     setSource(null);
     setSubMode(null);
@@ -1039,10 +1041,42 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="flex items-center gap-2 pb-2">
+                {/* Dish profile section */}
+                {dishProfile && (dishProfile.protein || dishProfile.intensity) && (
+                  <div className="rounded-xl border border-primary/10 bg-primary/[0.03] p-3 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <ChefHat className="h-3 w-3 text-primary/60" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70">Perfil do prato</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {dishProfile.protein && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          {dishProfile.protein}
+                        </span>
+                      )}
+                      {dishProfile.cooking && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          {dishProfile.cooking}
+                        </span>
+                      )}
+                      {dishProfile.fat && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          gordura {dishProfile.fat}
+                        </span>
+                      )}
+                      {dishProfile.intensity && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          intensidade {dishProfile.intensity}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 pb-1">
                   <Sparkles className="h-4 w-4 text-primary/70" />
                   <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Vinhos da sua adega para "{dish}"
+                    Vinhos para "{dish}"
                   </span>
                 </div>
 
@@ -1058,10 +1092,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 ) : (
                   <ul className="space-y-3">
                     {suggestions.map((s, i) => {
-                      const badge = matchBadge[s.match];
                       const tint = getStyleTint(s.style);
                       const meta = [s.grape, s.vintage ? `Safra ${s.vintage}` : null, s.region, s.country].filter(Boolean).join(" · ");
                       const hLabel = s.harmony_label || (s.harmony_type && harmonyLabel[s.harmony_type]);
+
+                      const compatColor = s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
+                        s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                        s.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
+                        s.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
+                        "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
+
                       return (
                         <motion.li
                           key={i}
@@ -1069,12 +1109,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
                           className={cn(
-                            "rounded-2xl border p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
+                            "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
                             tint || "bg-card/60 border-border/30",
                             s.fromCellar && !tint && "border-primary/20 bg-primary/[0.04]",
                           )}
                         >
-                          {/* Top: wine identity */}
+                          {/* Top: wine identity + classification */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 space-y-0.5">
                               <div className="flex items-center gap-2">
@@ -1086,9 +1126,6 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               {meta && (
                                 <p className="text-[11px] text-muted-foreground/70 pl-[18px]">{meta}</p>
                               )}
-                              {s.style && (
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50 pl-[18px]">{s.style}</p>
-                              )}
                             </div>
                             {s.fromCellar && (
                               <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -1098,21 +1135,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             )}
                           </div>
 
-                          {/* Middle: explanation */}
+                          {/* Explanation */}
                           <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {s.reason}
                           </p>
 
-                          {/* Bottom: badges */}
+                          {/* Badges: classification + harmony */}
                           <div className="flex items-center gap-2 pl-[18px] flex-wrap">
                             {s.compatibilityLabel && (
                               <span className={cn(
                                 "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
-                                s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
-                                s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
-                                s.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
-                                s.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
-                                "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
+                                compatColor,
                               )}>
                                 {s.compatibilityLabel}
                               </span>
@@ -1159,23 +1192,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <p className="text-[12px] text-foreground/55">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
                     </p>
-                    {wineProfile && (wineProfile.body || wineProfile.acidity || wineProfile.tannin) && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {wineProfile.body && (
-                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                            Corpo {wineProfile.body}
-                          </span>
+                    {wineProfile && (wineProfile.body || wineProfile.summary) && (
+                      <div className="space-y-1.5 pt-1">
+                        {wineProfile.summary && (
+                          <p className="text-[12px] text-foreground/60 leading-relaxed italic">{wineProfile.summary}</p>
                         )}
-                        {wineProfile.acidity && (
-                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                            Acidez {wineProfile.acidity}
-                          </span>
-                        )}
-                        {wineProfile.tannin && wineProfile.tannin !== "n/a" && (
-                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                            Taninos {wineProfile.tannin}
-                          </span>
-                        )}
+                        <div className="flex flex-wrap gap-1.5">
+                          {wineProfile.body && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Corpo {wineProfile.body}</span>}
+                          {wineProfile.acidity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Acidez {wineProfile.acidity}</span>}
+                          {wineProfile.tannin && wineProfile.tannin !== "n/a" && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Taninos {wineProfile.tannin}</span>}
+                          {wineProfile.complexity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{wineProfile.complexity}</span>}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1208,16 +1235,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
+                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2.5">
                               <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
                               <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
                             </div>
-                            {p.category && (
-                              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 mt-0.5">
-                                {p.category === "classico" ? "clássico" : p.category === "afinidade" ? "afinidade" : "contraste"}
+                            {badge && (
+                              <span className={cn("shrink-0 inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide", badge.className)}>
+                                {badge.label}
                               </span>
                             )}
                           </div>
@@ -1226,14 +1253,26 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               {hLabel}
                             </span>
                           )}
+                          {p.dish_profile && (
+                            <div className="flex flex-wrap gap-1 pl-[18px]">
+                              {p.dish_profile.intensity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.intensity}</span>}
+                              {p.dish_profile.texture && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.texture}</span>}
+                              {p.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.highlight}</span>}
+                            </div>
+                          )}
                           <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {p.reason}
                           </p>
-                          {badge && (
+                          {p.recipe && (
                             <div className="pl-[18px]">
-                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
-                                {badge.label}
-                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })}
+                                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                              >
+                                <BookOpen className="h-3 w-3" />
+                                Ver receita
+                              </button>
                             </div>
                           )}
                         </motion.li>
