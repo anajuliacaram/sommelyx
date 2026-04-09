@@ -247,8 +247,12 @@ serve(async (req) => {
 
     console.log(`Calling AI gateway for ${isMenuMode ? "menu" : "wine list"} analysis...`);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90_000);
+
     const aiResponse = await fetch(AI_URL, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -264,6 +268,8 @@ serve(async (req) => {
         temperature: 0.3,
       }),
     });
+
+    clearTimeout(timeout);
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
@@ -286,7 +292,12 @@ serve(async (req) => {
 
     return jsonResponse(isMenuMode ? normalizeMenuPayload(parsed) : normalizeWineListPayload(parsed));
   } catch (e) {
-    console.error("analyze-wine-list error:", e);
-    return jsonResponse({ error: e instanceof Error ? e.message : "Erro interno" }, 500);
+    const errMsg = e instanceof Error ? e.message : "Erro interno";
+    const isAbort = errMsg.toLowerCase().includes("abort");
+    console.error("analyze-wine-list error:", errMsg);
+    if (isAbort) {
+      return jsonResponse({ error: "A análise demorou mais que o esperado. Tente novamente." }, 504);
+    }
+    return jsonResponse({ error: "Não foi possível analisar a carta. Tente novamente." }, 500);
   }
 });

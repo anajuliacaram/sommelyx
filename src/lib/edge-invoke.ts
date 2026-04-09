@@ -33,16 +33,20 @@ function isRetriable(status?: number) {
 function isTransportErrorMessage(message: string) {
   const normalized = message.toLowerCase();
   return (
-    normalized.includes("failed to send a request to the edge function") ||
     normalized.includes("failed to fetch") ||
     normalized.includes("networkerror") ||
     normalized.includes("load failed")
   );
 }
 
+function isSdkRelayError(message: string) {
+  return message.toLowerCase().includes("failed to send a request to the edge function");
+}
+
 function classifyEdgeError(message: string, status?: number): string {
   if (status === 401) return "Sessão expirada. Faça login novamente.";
   if (isTransportErrorMessage(message)) return "Sem conexão. Verifique sua internet.";
+  if (isSdkRelayError(message)) return "A solicitação não pôde ser enviada. Tente novamente.";
   if (message.toLowerCase().includes("tempo limite")) return "A busca demorou mais que o esperado. Tente novamente.";
   if (status === 429) return "Muitas requisições. Aguarde um momento e tente novamente.";
   if (status === 402) return "Limite de uso atingido. Tente novamente mais tarde.";
@@ -167,7 +171,7 @@ export async function invokeEdgeFunction<T>(
       const retryable =
         err instanceof EdgeFunctionError
           ? (err.retryable ?? isRetriable(err.status))
-          : rawMessage.includes("demorou") || isTransportErrorMessage(rawMessage);
+          : rawMessage.includes("demorou") || isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage);
 
       if (attempt < retries && retryable) {
         attempt++;

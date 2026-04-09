@@ -315,8 +315,12 @@ PROIBIDO: "combina bem", "harmoniza com", "boa opção", "complementa os sabores
       ? { type: "function" as const, function: { name: "return_pairings" } }
       : { type: "function" as const, function: { name: "return_suggestions" } };
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 75_000);
+
     const aiResponse = await fetch(AI_URL, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -332,6 +336,8 @@ PROIBIDO: "combina bem", "harmoniza com", "boa opção", "complementa os sabores
         temperature: 0.75,
       }),
     });
+
+    clearTimeout(timeout);
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text().catch(() => "");
@@ -388,10 +394,15 @@ PROIBIDO: "combina bem", "harmoniza com", "boa opção", "complementa os sabores
 
     return jsonResponse(parsed);
   } catch (e) {
-    console.error("wine-pairings error:", e);
+    const errMsg = e instanceof Error ? e.message : "unknown";
+    const isAbort = errMsg.toLowerCase().includes("abort");
+    console.error("wine-pairings error:", errMsg);
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 500, "internal_error", Date.now() - startTime, { error: e instanceof Error ? e.message : "unknown" });
+    await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { error: errMsg, aborted: isAbort });
+    if (isAbort) {
+      return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
+    }
     return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
   }
 });

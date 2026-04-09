@@ -102,10 +102,12 @@ function classifyError(err: unknown): ClassifiedError {
     lower.includes("failed to fetch") ||
     lower.includes("networkerror") ||
     lower.includes("load failed") ||
-    lower.includes("sem conexão") ||
-    lower.includes("failed to send")
+    lower.includes("sem conexão")
   ) {
     return { type: "network", message: "Sem conexão. Verifique sua internet." };
+  }
+  if (lower.includes("failed to send")) {
+    return { type: "ai_fail", message: "A solicitação não pôde ser enviada. Tente novamente." };
   }
   if (
     lower.includes("créditos") ||

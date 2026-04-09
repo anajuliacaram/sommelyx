@@ -119,7 +119,7 @@ async function logAudit(
   try {
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
     await adminClient.from("edge_function_logs").insert({
       user_id: userId,

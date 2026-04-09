@@ -146,13 +146,14 @@ serve(async (req) => {
       });
     }
 
+    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -247,8 +248,12 @@ Regras:
       content: userContent,
     });
 
+    const controller = new AbortController();
+    const wineTimeout = setTimeout(() => controller.abort(), 60_000);
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
@@ -292,6 +297,8 @@ Regras:
         max_tokens: 700,
       }),
     });
+
+    clearTimeout(wineTimeout);
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
@@ -359,10 +366,16 @@ Regras:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro interno";
-    await logAudit(userId, 500, "internal_error", Date.now() - startTime, { message });
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
+    const errMsg = error instanceof Error ? error.message : "Erro interno";
+    const isAbort = errMsg.toLowerCase().includes("abort");
+    const sanitizedMsg = isAbort
+      ? "A análise demorou mais que o esperado. Tente novamente."
+      : /api_key|lovable|config|supabase/i.test(errMsg)
+        ? "Erro interno no serviço. Tente novamente."
+        : errMsg;
+    await logAudit(userId, isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { message: errMsg });
+    return new Response(JSON.stringify({ error: sanitizedMsg }), {
+      status: isAbort ? 504 : 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

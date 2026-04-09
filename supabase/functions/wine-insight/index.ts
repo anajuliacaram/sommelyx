@@ -143,8 +143,12 @@ Explique tecnicamente o que pode ter acontecido com o vinho (oxidação, perda d
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("wine-insight error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro interno" }), {
+    const errMsg = e instanceof Error ? e.message : "Erro interno";
+    console.error("wine-insight error:", errMsg);
+    const sanitizedMsg = /api_key|lovable|config|supabase/i.test(errMsg)
+      ? "Não foi possível gerar a análise agora. Tente novamente."
+      : errMsg;
+    return new Response(JSON.stringify({ error: sanitizedMsg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
