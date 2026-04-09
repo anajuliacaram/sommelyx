@@ -76,7 +76,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [preview, setPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
   const [lastWineListAttachment, setLastWineListAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
   const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
-
+  const [wineSearchState, setWineSearchState] = useState("");
+  const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
   const reset = () => {
     setSource(null);
     setSubMode(null);
