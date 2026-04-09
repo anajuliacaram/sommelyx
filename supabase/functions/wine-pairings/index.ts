@@ -82,6 +82,49 @@ serve(async (req) => {
       return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
     }
     const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines } = body as Record<string, any>;
+    const wineProducer = (body as any).wineProducer || null;
+    const wineVintage = (body as any).wineVintage || null;
+    const wineCountry = (body as any).wineCountry || null;
+
+    // ── Wine Technical Profile Construction Instructions (injected into all prompts) ──
+    const PROFILE_CONSTRUCTION_RULES = `
+CONSTRUÇÃO OBRIGATÓRIA DO PERFIL TÉCNICO (WineTechnicalProfile):
+Antes de responder QUALQUER coisa, você DEVE construir internamente um perfil técnico para cada vinho mencionado.
+
+O perfil deve conter:
+- wineName: nome completo do rótulo
+- producer: quem produz, escala, filosofia
+- country/region: origem e o que ela implica (clima, solo, tradição)
+- vintage: idade e o que isso significa para taninos/evolução
+- grapes: variedade(s) — mas NUNCA descreva a uva genericamente
+- wineType: tinto/branco/rosé/espumante/fortificado
+- body: leve/médio/encorpado (inferido do rótulo, NÃO da uva)
+- acidity: baixa/média/alta (inferido da região e estilo)
+- tannin: baixo/médio/alto (inferido do rótulo e idade)
+- complexity: baixa/média/alta
+- style: elegante/potente/gastronômico/frutado/mineral/etc
+- confidence: alta (muitos dados) / média (boa inferência) / baixa (poucos dados)
+- inferenceBasis: lista do que sustentou a análise ["região", "produtor", "estilo da linha"]
+
+REGRAS DE CONSTRUÇÃO:
+1. PRIORIDADE ABSOLUTA: o rótulo específico, NUNCA a uva isolada
+2. Don Melchor ≠ qualquer Cabernet. Testamatta ≠ qualquer Sangiovese. Barolo ≠ qualquer Nebbiolo.
+3. Se faltam dados, INFIRA com base em: origem, estilo típico daquela região, posicionamento do rótulo, categoria/linha, produtor
+4. Use linguagem como "Este rótulo tende a apresentar..." ou "Vinhos dessa origem geralmente..." quando inferindo
+5. NUNCA faça afirmações absolutas sem dados suficientes
+
+ANTI-GENERICIDADE (CHECAGEM OBRIGATÓRIA):
+Antes de finalizar CADA explicação, aplique este teste:
+"Se eu trocar o nome deste vinho por outro da mesma uva, esta frase ainda funciona?"
+→ Se SIM → REESCREVA. A frase DEVE ser específica para ESTE rótulo.
+→ Se NÃO → OK, pode manter.
+
+FRASES PROIBIDAS (resultam em rejeição automática):
+- "[Uva] possui notas de..."
+- "[Uva] é conhecida por..."
+- "combina bem", "harmoniza perfeitamente", "complementa os sabores"
+- Qualquer frase que funcione para QUALQUER vinho da mesma uva
+- Descrições genéricas copiadas de enciclopédias de vinho`;
 
     let systemPrompt: string;
     let userPrompt: string;
@@ -89,44 +132,24 @@ serve(async (req) => {
     if (mode === "wine-to-food") {
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
-REGRA ABSOLUTA — ANÁLISE DO RÓTULO ESPECÍFICO:
-Você NUNCA está analisando uma uva. Você está analisando UM VINHO ESPECÍFICO com nome, produtor, região e história.
+${PROFILE_CONSTRUCTION_RULES}
 
-PROCESSO OBRIGATÓRIO — Antes de qualquer sugestão, execute esta análise interna:
-1. PRODUTOR: Quem faz este vinho? É uma cooperativa grande, uma vinícola boutique, um produtor familiar? Qual a filosofia? (ex: Concha y Toro = escala industrial; Catena Zapata = altitude e terroir; Penfolds = blends de prestígio)
-2. REGIÃO + CLIMA: De onde vem? Clima quente = mais corpo, menos acidez, taninos maduros. Clima frio = mais acidez, mais elegância, taninos mais firmes. Altitude = acidez preservada mesmo em clima quente.
-3. POSICIONAMENTO: É entrada de linha (ex: Casillero del Diablo), linha premium (ex: Marqués de Casa Concha), ou ícone (ex: Don Melchor)? Isso define complexidade e preço.
-4. SAFRA: Se informada, calcule a idade. Vinho jovem (<3 anos) = taninos ainda ásperos, frutado primário. Maduro (5-10) = taninos integrados, notas terciárias. Velho (>10) = fragilidade possível.
-5. ESTRUTURA RESULTANTE: Com base em TUDO acima (não na uva genericamente), determine corpo, acidez, taninos e estilo gastronômico DESTE vinho específico.
+FLUXO OBRIGATÓRIO:
+1. Construa o WineTechnicalProfile internamente
+2. Use o perfil para gerar o campo "summary" do wineProfile (2-3 frases que DIFERENCIEM este rótulo de outros da mesma uva)
+3. Para CADA prato sugerido, explique a INTERAÇÃO FÍSICA entre o perfil técnico do vinho e os componentes do prato
 
-EXEMPLO DE ANÁLISE CORRETA:
-- Vinho: "Casillero del Diablo Carmenère 2022"
-- Análise: "Produzido pela Concha y Toro no Valle Central chileno, é um vinho de escala comercial — espere corpo médio-encorpado, taninos acessíveis e macios (típicos da linha Casillero), com a nota herbácea sutil que é assinatura do Carmenère de clima quente. Sendo safra 2022, ainda jovem, o frutado escuro (ameixa, cereja preta) deve estar em primeiro plano. Posicionamento: entrada de linha, versátil e descomplicado."
+CADA EXPLICAÇÃO deve:
+- Citar o NOME do vinho (não "este vinho" ou "o Carmenère")
+- Referenciar características que SÓ este rótulo/produtor/região teria
+- Explicar a INTERAÇÃO FÍSICA entre vinho e prato (ex: "os taninos ainda jovens do [nome] precisam de gordura para se suavizar")
+- Usar uma lógica de harmonização DIFERENTE por sugestão: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
 
-EXEMPLO DO QUE É PROIBIDO:
-- "Carmenère possui taninos firmes e notas de frutas escuras" ← Isso é Wikipedia. Não diferencia NENHUM Carmenère de outro.
-- "Este vinho harmoniza bem com carnes" ← Genérico demais. QUAL interação? POR QUÊ este rótulo especificamente?
-
-CADA SUGESTÃO DE PRATO deve:
-- Começar citando o nome COMPLETO do vinho (ex: "O Casillero del Diablo Carmenère 2022...")
-- Explicar a INTERAÇÃO FÍSICA específica (ex: "os taninos macios desta linha comercial não precisam de proteína pesada para se equilibrar — funcionam com pratos de intensidade média")
-- Usar lógica de harmonização DIFERENTE por sugestão: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
-- Referenciar algo que SÓ este rótulo/produtor/região teria
-
-QUANDO A INFORMAÇÃO É LIMITADA (só o nome):
-- Infira pelo nome: "Château" sugere Bordeaux/francês; "Reserve" sugere seleção superior; nomes em italiano sugerem Itália
-- Use linguagem como "este rótulo tende a apresentar...", "pela origem, espera-se..."
-- NUNCA invente dados. Trabalhe com o que tem, mas com inteligência contextual.
-
-TESTE DE QUALIDADE — Antes de finalizar cada explicação, verifique:
-"Se eu trocar o nome deste vinho por outro da mesma uva, esta frase ainda funciona?"
-Se SIM → reescreva. A frase DEVE ser específica para ESTE rótulo.
-
-REGRAS ENOLÓGICAS INVIOLÁVEIS:
+REGRAS ENOLÓGICAS:
 1. Peso equivalente: corpo do vinho ∝ intensidade do prato
-2. Tanino + peixe delicado = sabor metálico → PROIBIDO
-3. Álcool alto + pimenta = amplifica ardência → PROIBIDO
-4. Regionalidade: priorize quando fizer sentido (Chianti com ragù toscano, Albariño com frutos do mar galegos)
+2. Tanino + peixe delicado = metálico → NUNCA
+3. Álcool alto + picante = desastre → NUNCA
+4. Regionalidade: priorize quando fizer sentido (ex: Chianti com ragù toscano)
 
 JULGAMENTO HONESTO — nem todo prato é "perfeito":
 - perfeito: harmonia excepcional, elevam um ao outro
@@ -134,62 +157,51 @@ JULGAMENTO HONESTO — nem todo prato é "perfeito":
 - bom: funciona, mas não é memorável`;
 
       userPrompt = `Vinho: ${wineName || "Desconhecido"}
-Produtor: ${(body as any).wineProducer || "Não informado"}
+Produtor: ${wineProducer || "Não informado"}
 Estilo: ${wineStyle || "Não informado"}
 Uva: ${wineGrape || "Não informada"}
-Região/País: ${wineRegion || "Não informada"}
-Safra: ${(body as any).wineVintage || "Não informada"}
+Região: ${wineRegion || "Não informada"}
+País: ${wineCountry || "Não informado"}
+Safra: ${wineVintage || "Não informada"}
 
 INSTRUÇÕES:
-1. Primeiro, construa o perfil ESPECÍFICO deste rótulo seguindo o processo obrigatório (produtor → região → posicionamento → safra → estrutura)
-2. Depois, sugira 6-8 pratos que funcionem com ESTE vinho específico
-3. Em CADA explicação, cite "${wineName}" pelo nome e explique por que este RÓTULO (não a uva) funciona
+1. Construa o WineTechnicalProfile deste rótulo com base nos dados acima + seu conhecimento enológico
+2. Use o perfil para preencher wineProfile.summary com 2-3 frases ESPECÍFICAS sobre ESTE rótulo (não sobre a uva)
+3. Sugira 6-8 pratos, sempre citando "${wineName}" pelo nome nas explicações
 4. Varie entre entradas, pratos principais e queijos/sobremesa
-5. Aplique o teste de qualidade: se a frase funcionar para qualquer vinho da mesma uva, reescreva`;
+5. Aplique o teste anti-genericidade em CADA explicação antes de finalizar`;
 
     } else if (mode === "food-to-wine") {
       const hasCellar = userWines?.length > 0;
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
-${hasCellar ? `CONTEXTO: O usuário tem vinhos NA ADEGA. Você DEVE analisar cada rótulo INDIVIDUALMENTE e recomendar os melhores para este prato.
+${PROFILE_CONSTRUCTION_RULES}
 
-PROCESSO OBRIGATÓRIO PARA CADA VINHO DA ADEGA:
-1. PRODUTOR: Identifique quem faz este vinho. Cooperativa grande? Vinícola boutique? Produtor familiar? (ex: se o nome contém "Reserva", "Gran Reserva", "Single Vineyard" = posicionamento superior)
-2. REGIÃO: O que a região de origem diz sobre o estilo? (ex: Mendoza = corpo, fruta madura; Borgonha = elegância, acidez; Douro = concentração, robustez)
-3. SAFRA: Se informada, calcule a idade e o que isso implica para taninos e evolução
-4. POSICIONAMENTO: Entrada de linha vs premium vs ícone — isso define a complexidade esperada
-5. ESTRUTURA: Com base em TUDO acima, determine o perfil PROVÁVEL deste rótulo específico
+${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE:
+1. Construir um WineTechnicalProfile para CADA vinho da adega antes de avaliar
+2. Usar o perfil técnico para determinar compatibilidade com o prato
+3. Priorizar rótulos REAIS. NUNCA responda com categorias genéricas ("vinho branco seco") se há vinhos reais compatíveis.
+4. Se NENHUM vinho da adega combina adequadamente, diga isso honestamente.` : "Sugira tipos específicos de vinho com rótulos de referência."}
 
-Se NENHUM vinho da adega é adequado, diga honestamente e sugira o perfil ideal.` : "Sugira rótulos específicos de referência (não categorias genéricas como 'vinho branco seco')."}
+FLUXO OBRIGATÓRIO:
+1. Analise o prato tecnicamente (proteína, gordura, cocção, intensidade, texturas)
+2. Para cada vinho candidato, construa o WineTechnicalProfile
+3. Compare perfil do vinho vs perfil do prato usando lógica técnica:
+   - acidez × gordura
+   - tanino × proteína
+   - intensidade × intensidade
+   - textura × textura
+4. Classifique honestamente cada sugestão
 
-REGRA ABSOLUTA — ANÁLISE DO RÓTULO, NUNCA DA UVA:
-- PROIBIDO: "Um Malbec argentino possui taninos aveludados..." ← Isso descreve TODOS os Malbecs
-- CORRETO: "O Catena Zapata Malbec 2019, cultivado a ~1000m de altitude em Mendoza, desenvolve taninos mais refinados e acidez mais viva que Malbecs de planície — essa acidez extra é exatamente o que corta a gordura da picanha"
-
-CADA EXPLICAÇÃO deve:
-- Citar o vinho PELO NOME COMPLETO
-- Explicar por que ESTE rótulo (não a uva) funciona ou não com o prato
-- Referenciar a interação FÍSICA (gordura, sal, umami, textura, cocção do prato × corpo, acidez, taninos do vinho)
-- Incluir algo que diferencie este rótulo de outros da mesma uva
-
-TESTE DE QUALIDADE: "Se eu trocar o nome deste vinho por outro da mesma uva, esta frase ainda funciona?" Se SIM → reescreva.
-
-QUANDO A INFORMAÇÃO É LIMITADA:
-- Infira pelo nome e contexto disponível
-- Use "este rótulo tende a...", "pela origem, espera-se..."
-- NUNCA invente dados, mas trabalhe com inteligência contextual
-
-JULGAMENTO HONESTO — use TODA a escala:
-- Excelente escolha: harmonia excepcional, eleva ambos
-- Alta compatibilidade: muito boa, recomendação segura
+JULGAMENTO HONESTO — use toda a escala:
+- Excelente escolha: harmonia excepcional
+- Alta compatibilidade: muito boa combinação
 - Boa opção: funciona bem
-- Funciona bem: aceitável mas não memorável
-- Escolha ousada: arriscado, pode funcionar ou não
-- Pouco indicado: não recomendo para este prato
+- Funciona bem: aceitável
+- Escolha ousada: pode funcionar mas é arriscado
+- Pouco indicado: não recomendo
 
-NEM TODOS devem ser positivos. Se um vinho da adega é ruim para o prato, DIGA.
-
-PROIBIDO: "[Uva] possui notas de...", "combina bem", "harmoniza perfeitamente", qualquer frase genérica que sirva para qualquer vinho.`;
+NEM TODOS os vinhos devem ser positivos. Se um vinho da adega é ruim para o prato, diga.`;
 
       const cellarContext = hasCellar
         ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"}`).join("\n")}`
@@ -197,12 +209,11 @@ PROIBIDO: "[Uva] possui notas de...", "combina bem", "harmoniza perfeitamente", 
       userPrompt = `Prato: "${dish}"${cellarContext}
 
 INSTRUÇÕES:
-1. Analise o prato tecnicamente (proteína, gordura, cocção, intensidade)
-2. Para CADA vinho sugerido, siga o processo obrigatório (produtor → região → safra → posicionamento → estrutura)
-3. Cite o NOME COMPLETO do vinho e explique por que ESTE rótulo específico funciona (não a uva genérica)
-4. Ordene do melhor ao pior match
-5. Aplique o teste de qualidade: se a frase funcionar para qualquer vinho da mesma uva, reescreva
-6. Use julgamento honesto — nem todos precisam ser positivos`;
+1. Decomponha o prato tecnicamente (proteína, gordura, cocção, intensidade)
+2. Para cada vinho candidato, construa o WineTechnicalProfile internamente
+3. Compare o perfil técnico do vinho vs os componentes do prato
+4. Cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não) com ESTE prato
+5. Aplique o teste anti-genericidade em CADA explicação`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);

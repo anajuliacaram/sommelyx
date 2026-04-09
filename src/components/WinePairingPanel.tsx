@@ -114,6 +114,8 @@ export function WinePairingPanel({
         style: wineStyle,
         grape: wineGrape,
         region: wineRegion,
+        producer: wineProducer,
+        vintage: wineVintage,
       });
       setPairings(result.pairings);
       setWineProfile(result.wineProfile || null);

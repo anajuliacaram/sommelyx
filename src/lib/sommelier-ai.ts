@@ -3,6 +3,28 @@ import type { AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 
 // ── Types ──
 
+export interface WineTechnicalProfile {
+  wineName: string;
+  producer?: string | null;
+  country?: string | null;
+  region?: string | null;
+  vintage?: number | null;
+  grapes?: string[];
+  wineType?: "tinto" | "branco" | "rosé" | "espumante" | "fortificado";
+  body?: "leve" | "médio" | "encorpado";
+  acidity?: "baixa" | "média" | "alta";
+  tannin?: "baixo" | "médio" | "alto";
+  alcohol?: "baixo" | "médio" | "alto";
+  complexity?: "baixa" | "média" | "alta";
+  style?: string;
+  aromaticProfile?: string[];
+  serviceMoment?: string;
+  culinaryAffinity?: string[];
+  pairingLogic?: string[];
+  confidence?: "baixa" | "média" | "alta";
+  inferenceBasis?: string[];
+}
+
 export interface WineProfile {
   body?: string | null;
   acidity?: string | null;
@@ -421,6 +443,9 @@ export async function getWinePairings(wine: {
   style?: string | null;
   grape?: string | null;
   region?: string | null;
+  producer?: string | null;
+  vintage?: number | null;
+  country?: string | null;
 }): Promise<PairingResponse> {
   try {
     const data = await invokeEdgeFunction<PairingResponse>(
@@ -431,6 +456,9 @@ export async function getWinePairings(wine: {
         wineStyle: wine.style,
         wineGrape: wine.grape,
         wineRegion: wine.region,
+        wineProducer: wine.producer,
+        wineVintage: wine.vintage,
+        wineCountry: wine.country,
       },
       { timeoutMs: 30_000, retries: 1 },
     );
