@@ -1004,47 +1004,57 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
-                  <p className="text-[12px] font-medium text-foreground">
-                    Prato: <span className="font-semibold">{dish}</span>
+                <div className="glass-card p-4">
+                  <p className="text-sm font-medium text-foreground">
+                    Prato: <span className="font-bold">{dish}</span>
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 pb-1">
-                  <Sparkles className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                <div className="flex items-center gap-2 pb-2">
+                  <Sparkles className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Melhores opções da carta
                   </span>
                 </div>
 
                 {scanResults.wines.length === 0 ? (
-                  <p className="text-[12px] text-muted-foreground text-center py-4">
-                    Não foi possível identificar vinhos na imagem. Tente outra foto.
-                  </p>
+                  <div className="glass-card p-6 text-center space-y-2">
+                    <p className="text-sm text-foreground/70 font-medium">
+                      Não foi possível identificar vinhos na imagem.
+                    </p>
+                    <p className="text-xs text-muted-foreground">Tente outra foto com melhor iluminação.</p>
+                  </div>
                 ) : (
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {scanResults.wines.map((w, i) => (
                       <motion.li
                         key={i}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.06 }}
-                        className="glass-card p-3.5 space-y-1"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.08, duration: 0.3 }}
+                        className="glass-card p-4 space-y-2 cursor-default"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <span className="text-[13px] font-semibold text-foreground">{w.name}</span>
+                          <span className="text-[15px] font-bold text-foreground tracking-tight">{w.name}</span>
                           {w.price && (
-                            <span className="shrink-0 text-[12px] font-bold text-foreground">
+                            <span className="shrink-0 text-[14px] font-bold text-foreground">
                               R$ {w.price}
                             </span>
                           )}
                         </div>
                         {w.highlight && (
-                          <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/8 rounded-full px-2 py-[2px]">
+                          <span className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
+                            w.highlight === "best-value"
+                              ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
+                              : w.highlight === "top-pick"
+                              ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]"
+                              : "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]"
+                          )}>
                             {w.highlight === "best-value" ? "Melhor custo-benefício" : w.highlight === "top-pick" ? "Melhor escolha" : "Para experimentar"}
                           </span>
                         )}
-                        <p className="text-[11px] text-muted-foreground leading-snug">{w.verdict}</p>
+                        <p className="text-[13px] text-foreground/65 leading-relaxed">{w.verdict}</p>
                       </motion.li>
                     ))}
                   </ul>
@@ -1058,7 +1068,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setPreview(null);
                     setStep("photo");
                   }}
-                  className="w-full h-9 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border/40"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Enviar outra foto
                 </Button>
