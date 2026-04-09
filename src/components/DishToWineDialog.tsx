@@ -117,6 +117,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setSelectedWineId("");
     setSuggestions(null);
     setPairings(null);
+    setWineProfile(null);
+    setDishProfile(null);
     setScanResults(null);
     setMenuResults(null);
     setLoading(false);
