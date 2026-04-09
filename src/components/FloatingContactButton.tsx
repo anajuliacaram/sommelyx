@@ -49,29 +49,16 @@ export function FloatingContactButton({ className }: Props) {
 
   return (
     <div
-      className={cn("fixed right-4 z-50", className)}
-      style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+      className={cn("fixed z-50", className)}
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)", right: "16px" }}
     >
       <Popover>
         <div className="flex items-center gap-2">
-          <PopoverTrigger asChild>
-            <Button
-              className={cn(
-                "rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
-                collapsed ? "h-12 w-12 px-0" : "h-auto min-h-12 px-5 py-2.5",
-              )}
-              aria-label="Envie suas dúvidas e sugestões para a Sommelière"
-            >
-              <MessageCircle className="h-4 w-4 shrink-0" />
-              {!collapsed && <span className="text-[12px] leading-tight font-black tracking-tight text-left">Envie suas dúvidas e sugestões para a Sommelière</span>}
-            </Button>
-          </PopoverTrigger>
-
           {!collapsed && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full border border-black/[0.06] bg-white/50 backdrop-blur-xl shadow-[0_16px_44px_-34px_rgba(15,15,20,0.55)] hover:bg-white/65"
+              className="h-10 w-10 rounded-full border border-border/40 bg-white shadow-sm hover:bg-white/90"
               aria-label="Minimizar botão de contato"
               onClick={(e) => {
                 e.preventDefault();
@@ -79,9 +66,26 @@ export function FloatingContactButton({ className }: Props) {
                 setCollapsed(true);
               }}
             >
-              <X className="h-4 w-4 text-[#7B1E3A]" />
+              <X className="h-4 w-4 text-primary" />
             </Button>
           )}
+
+          <PopoverTrigger asChild>
+            <Button
+              className={cn(
+                "rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
+                collapsed ? "h-12 w-12 px-0" : "h-auto min-h-12 px-4 py-2",
+              )}
+              aria-label="Envie suas dúvidas e sugestões para a Sommelière"
+            >
+              <MessageCircle className="h-4 w-4 shrink-0" />
+              {!collapsed && (
+                <span className="text-[11px] leading-[1.3] font-black tracking-tight text-left">
+                  Envie suas dúvidas e<br />sugestões para a Sommelière
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
         </div>
 
         <PopoverContent
