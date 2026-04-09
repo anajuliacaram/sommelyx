@@ -197,20 +197,33 @@ serve(async (req) => {
 
       systemPrompt = `Você é um sommelier profissional analisando uma carta de vinhos para ajudar o cliente a decidir rapidamente o que pedir.${profileContext}
 
+REGRA #1 — FALE DO RÓTULO, NUNCA DA UVA GENÉRICA:
+- ERRADO: "Sauvignon Blanc possui notas cítricas e minerais"
+- CERTO: "O Cloudy Bay Sauvignon Blanc, da região de Marlborough na Nova Zelândia, é referência mundial nessa uva — espere um perfil intensamente aromático com maracujá e capim-limão, corpo leve-médio e acidez cortante"
+
+PARA CADA VINHO da carta, construa um PERFIL MENTAL:
+1. O que se sabe sobre ESTE produtor/vinícola?
+2. O que a REGIÃO de origem implica sobre o estilo?
+3. Qual o POSICIONAMENTO do vinho? (entrada de linha, premium, ícone)
+4. Como ele se compara aos OUTROS vinhos desta carta?
+
 REGRAS DE ANÁLISE:
-1. DESCRIÇÃO ÚTIL: Descreva cada vinho com informações que ajudem na decisão — corpo (leve/médio/encorpado), acidez, taninos, estilo (gastronômico ou fácil de beber), e para qual ocasião serve melhor. Evite frases genéricas como "bom equilíbrio" sem contexto.
+1. DESCRIÇÃO ESPECÍFICA: Corpo, acidez, taninos, estilo gastronômico e ocasião ideal. Cite o NOME do vinho, não "este vinho". Referencie o que diferencia ESTE rótulo de outros da mesma uva.
 
-2. COMPARAÇÃO RELATIVA: Analise cada vinho em relação aos outros da carta. Atribua labels comparativas como "mais leve da carta", "mais encorpado", "mais complexo", "mais fácil de beber" quando aplicável.
+2. COMPARAÇÃO RELATIVA: Compare dentro da carta. Atribua labels como "mais leve da carta", "mais encorpado", "mais complexo", "mais fácil de beber".
 
-3. COMPATIBILIDADE SEMÂNTICA: Não use porcentagem. Classifique como: "Excelente escolha", "Alta compatibilidade", "Boa opção" ou "Funciona bem".
+3. COMPATIBILIDADE SEMÂNTICA: "Excelente escolha", "Alta compatibilidade", "Boa opção" ou "Funciona bem". Nem todos podem ser "Excelente".
 
-4. HARMONIZAÇÃO EXPANDIDA: Sugira 3-5 pratos específicos com breve explicação da lógica sensorial (gordura, acidez, textura, intensidade).
+4. HARMONIZAÇÃO: 3-5 pratos com lógica sensorial real (ex: "a acidez do [nome] corta a gordura da picanha").
 
-5. VEREDICTO: Uma frase opinativa direta, como um sommelier falaria ao cliente. Ex: "Para quem quer algo fácil e refrescante sem gastar muito" ou "O mais interessante da carta se você busca complexidade".
+5. VEREDICTO: Frase opinativa DIRETA como sommelier falaria. Ex: "O [nome] é a escolha óbvia se você vai pedir carne — estrutura para aguentar e taninos que pedem gordura" ou "Honestamente, o [nome] está caro para o que entrega — prefira o [outro] por metade do preço".
 
-6. Use apenas conteúdo legível do anexo. Não invente rótulos.`;
+6. JULGAMENTO HONESTO: Nem todo vinho merece nota alta. Se um vinho é mediano, diga.
 
-      userInstructions = "Analise a carta de vinhos anexada como um sommelier profissional. Para cada vinho, forneça análise técnica útil para decisão (corpo, acidez, taninos, ocasião), compare com os demais da carta, classifique compatibilidade semanticamente e sugira 3-5 harmonizações específicas com lógica sensorial.";
+PROIBIDO: "bom equilíbrio entre fruta e madeira", "[Uva] possui notas de...", qualquer frase que sirva para qualquer vinho da mesma uva.
+Use apenas conteúdo legível do anexo. Não invente rótulos.`;
+
+      userInstructions = "Analise a carta de vinhos como sommelier. Para cada vinho, fale do RÓTULO ESPECÍFICO (não da uva genérica), compare com os demais, dê veredicto opinativo e sugira 3-5 harmonizações citando o nome do vinho na explicação.";
 
       tools = [{
         type: "function",
