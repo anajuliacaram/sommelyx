@@ -14,9 +14,15 @@ interface WinePairingPanelProps {
 }
 
 const matchDot: Record<string, string> = {
-  perfeito: "bg-success",
-  "muito bom": "bg-success/70",
-  bom: "bg-warning",
+  perfeito: "bg-[hsl(152,42%,42%)]",
+  "muito bom": "bg-[hsl(152,32%,52%)]",
+  bom: "bg-[hsl(38,52%,50%)]",
+};
+
+const matchBadge: Record<string, { label: string; className: string }> = {
+  perfeito: { label: "combinação perfeita", className: "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" },
+  "muito bom": { label: "harmonia elegante", className: "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" },
+  bom: { label: "boa combinação", className: "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]" },
 };
 
 export function WinePairingPanel({
@@ -50,22 +56,22 @@ export function WinePairingPanel({
 
   if (existingPairing && !pairings) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-1.5">
-          <UtensilsCrossed className="h-3 w-3 text-primary/70" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          <UtensilsCrossed className="h-3.5 w-3.5 text-primary/70" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
             Harmonização
           </span>
         </div>
-        <p className="text-[12px] text-foreground/80 leading-relaxed">{existingPairing}</p>
+        <p className="text-[13px] text-foreground/75 leading-relaxed">{existingPairing}</p>
         <Button
           variant="ghost"
           size="sm"
           onClick={handleFetch}
           disabled={loading}
-          className="h-7 px-2.5 text-[10px] font-semibold text-primary/70 hover:text-primary hover:bg-primary/5"
+          className="h-8 px-3 text-[11px] font-semibold text-primary/70 hover:text-primary hover:bg-primary/5 rounded-xl"
         >
-          <Sparkles className="h-3 w-3 mr-1" />
+          <Sparkles className="h-3 w-3 mr-1.5" />
           Sugestões inteligentes
         </Button>
       </div>
@@ -74,10 +80,10 @@ export function WinePairingPanel({
 
   if (!pairings && !loading) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-1.5">
-          <UtensilsCrossed className="h-3 w-3 text-primary/70" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          <UtensilsCrossed className="h-3.5 w-3.5 text-primary/70" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
             Harmonização
           </span>
         </div>
@@ -86,9 +92,9 @@ export function WinePairingPanel({
           size="sm"
           onClick={handleFetch}
           disabled={loading}
-          className="h-8 px-3 text-[11px] font-semibold border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary text-muted-foreground"
+          className="h-9 px-3.5 text-[12px] font-semibold border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/5 hover:border-primary/20 hover:text-primary text-muted-foreground rounded-xl transition-all duration-200"
         >
-          <Sparkles className="h-3 w-3 mr-1.5" />
+          <Sparkles className="h-3.5 w-3.5 mr-1.5" />
           Sugerir pratos
         </Button>
       </div>
@@ -96,10 +102,10 @@ export function WinePairingPanel({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <div className="flex items-center gap-1.5">
-        <UtensilsCrossed className="h-3 w-3 text-primary/70" />
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+        <UtensilsCrossed className="h-3.5 w-3.5 text-primary/70" />
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
           Harmoniza com
         </span>
       </div>
@@ -111,10 +117,10 @@ export function WinePairingPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex items-center gap-2 py-3"
+            className="flex items-center gap-2.5 py-4"
           >
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary/60" />
-            <span className="text-[11px] text-muted-foreground">Analisando harmonizações…</span>
+            <Loader2 className="h-4 w-4 animate-spin text-primary/60" />
+            <span className="text-[12px] text-foreground/60">Analisando harmonizações…</span>
           </motion.div>
         ) : error ? (
           <motion.div
@@ -122,14 +128,14 @@ export function WinePairingPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="py-2"
+            className="py-3"
           >
-            <p className="text-[11px] text-destructive/80">{error}</p>
+            <p className="text-[12px] text-destructive/80 font-medium">{error}</p>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleFetch}
-              className="h-7 mt-1 px-2 text-[10px] text-primary/70"
+              className="h-8 mt-1.5 px-3 text-[11px] text-primary/70 rounded-xl"
             >
               Tentar novamente
             </Button>
@@ -139,23 +145,31 @@ export function WinePairingPanel({
             key="pairings"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-1.5"
+            className="space-y-2"
           >
-            {pairings.map((p, i) => (
-              <motion.li
-                key={i}
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.06 }}
-                className="flex items-start gap-2 py-1"
-              >
-                <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", matchDot[p.match] || "bg-primary/40")} />
-                <div className="min-w-0">
-                  <span className="text-[12px] font-semibold text-foreground">{p.dish}</span>
-                  <p className="text-[10px] text-muted-foreground leading-snug">{p.reason}</p>
-                </div>
-              </motion.li>
-            ))}
+            {pairings.map((p, i) => {
+              const badge = matchBadge[p.match];
+              return (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07, duration: 0.25 }}
+                  className="flex items-start gap-2.5 py-1.5"
+                >
+                  <div className={cn("w-2 h-2 rounded-full mt-1.5 shrink-0 ring-2 ring-white/50", matchDot[p.match] || "bg-primary/40")} />
+                  <div className="min-w-0 space-y-0.5">
+                    <span className="text-[13px] font-bold text-foreground">{p.dish}</span>
+                    <p className="text-[11px] text-foreground/55 leading-snug">{p.reason}</p>
+                    {badge && (
+                      <span className={cn("inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide mt-0.5", badge.className)}>
+                        {badge.label}
+                      </span>
+                    )}
+                  </div>
+                </motion.li>
+              );
+            })}
           </motion.ul>
         ) : null}
       </AnimatePresence>
