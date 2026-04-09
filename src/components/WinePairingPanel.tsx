@@ -4,6 +4,7 @@ import { UtensilsCrossed, Loader2, Sparkles } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { getWinePairings, type PairingResult } from "@/lib/sommelier-ai";
 import { cn } from "@/lib/utils";
+import { normalizeAppError } from "@/lib/app-error";
 
 interface WinePairingPanelProps {
   wineName: string;
@@ -55,8 +56,8 @@ export function WinePairingPanel({
         region: wineRegion,
       });
       setPairings(result);
-    } catch (err: any) {
-      setError(err.message || "Não foi possível gerar sugestões");
+    } catch (err) {
+      setError(normalizeAppError(err).userMessage);
     } finally {
       setLoading(false);
     }

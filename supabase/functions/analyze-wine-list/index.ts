@@ -1,15 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
+import {
+  authenticateRequest,
+  corsHeaders,
+  extractToolArguments,
+  failResponse,
+  FunctionError,
+  jsonResponse,
+  logAudit,
+  openAiChatCompletion,
+} from "../_shared/runtime.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const FUNCTION_NAME = "analyze-wine-list";
 
 const UserProfileSchema = z.object({
   topStyles: z.array(z.string()).optional(),
@@ -33,28 +35,6 @@ const BodySchema = z.object({
   message: "Informe o vinho para analisar o cardápio",
   path: ["wineName"],
 });
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
-function extractToolArguments(aiData: any) {
-  const toolCallArgs = aiData?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-  if (typeof toolCallArgs === "string" && toolCallArgs.trim()) return JSON.parse(toolCallArgs);
-
-  const content = aiData?.choices?.[0]?.message?.content || "";
-  const jsonStart = content.indexOf("{");
-  const jsonEnd = content.lastIndexOf("}");
-  if (jsonStart !== -1 && jsonEnd > jsonStart) {
-    return JSON.parse(content.slice(jsonStart, jsonEnd + 1));
-  }
-
-  if (typeof content === "string" && content.trim()) return JSON.parse(content);
-  return null;
-}
 
 function normalizeWineListPayload(payload: any) {
   const wines = Array.isArray(payload?.wines) ? payload.wines : [];
@@ -96,42 +76,33 @@ function normalizeMenuPayload(payload: any) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  const startedAt = Date.now();
+  const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
+  let userId = "anonymous";
+
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return jsonResponse({ error: "Autenticação necessária" }, 401);
-    }
-
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
-      return jsonResponse({ error: "Sessão inválida" }, 401);
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const auth = await authenticateRequest(req, FUNCTION_NAME, requestId, startedAt);
+    userId = auth.userId;
 
     const parsedBody = BodySchema.safeParse(await req.json());
     if (!parsedBody.success) {
-      return jsonResponse({ error: parsedBody.error.flatten().fieldErrors }, 400);
+      throw new FunctionError(400, "INVALID_REQUEST", "Não conseguimos ler esse arquivo. Tente outra imagem ou PDF mais nítido.", {
+        requestId,
+        retryable: false,
+        message: JSON.stringify(parsedBody.error.flatten().fieldErrors),
+      });
     }
 
     const { imageBase64, extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
-
     const cleanBase64 = imageBase64?.includes(",")
       ? imageBase64.split(",")[1].replace(/\s/g, "")
       : imageBase64?.replace(/\s/g, "");
-
     const isMenuMode = mode === "menu-for-wine";
+
     const inputSummary = [
       fileName ? `Arquivo: ${fileName}` : null,
       mimeType ? `Tipo: ${mimeType}` : null,
-      extractedText ? "Entrada principal: texto extraído de PDF/anexo" : null,
+      extractedText ? "Entrada principal: texto extraído do anexo" : null,
       cleanBase64 ? "Entrada complementar: imagem renderizada/comprimida" : null,
     ].filter(Boolean).join("\n");
 
@@ -141,8 +112,8 @@ serve(async (req) => {
     let toolChoice: Record<string, unknown>;
 
     if (isMenuMode) {
-      systemPrompt = `Você é um sommelier especialista em leitura de cardápios. Use apenas o conteúdo legível do anexo e seja conservador quando algo estiver pouco nítido. Priorize precisão, velocidade e objetividade.`;
-      userInstructions = `Analise o cardápio anexado e selecione apenas pratos que harmonizem pelo menos bem com o vinho "${wineName}". Explique a lógica sensorial de forma clara, sem inventar itens que não estejam legíveis.`;
+      systemPrompt = "Você é um sommelier especialista em leitura de cardápios. Use apenas o conteúdo legível do anexo e seja conservador quando algo estiver pouco nítido. Priorize precisão, velocidade e objetividade.";
+      userInstructions = `Analise o cardápio anexado e selecione apenas pratos que harmonizem pelo menos bem com o vinho \"${wineName}\". Explique a lógica sensorial de forma clara, sem inventar itens que não estejam legíveis.`;
       tools = [{
         type: "function",
         function: {
@@ -176,11 +147,7 @@ serve(async (req) => {
       toolChoice = { type: "function", function: { name: "return_menu_analysis" } };
     } else {
       const profileContext = userProfile
-        ? `\nPerfil do usuário:
-- Estilos preferidos: ${userProfile.topStyles?.join(", ") || "variado"}
-- Uvas preferidas: ${userProfile.topGrapes?.join(", ") || "variado"}
-- Países preferidos: ${userProfile.topCountries?.join(", ") || "variado"}
-- Faixa de preço habitual: R$ ${userProfile.avgPrice || "variado"}`
+        ? `\nPerfil do usuário:\n- Estilos preferidos: ${userProfile.topStyles?.join(", ") || "variado"}\n- Uvas preferidas: ${userProfile.topGrapes?.join(", ") || "variado"}\n- Países preferidos: ${userProfile.topCountries?.join(", ") || "variado"}\n- Faixa de preço habitual: R$ ${userProfile.avgPrice || "variado"}`
         : "";
 
       systemPrompt = `Você é um sommelier especialista em cartas de vinhos de restaurante. Use apenas o conteúdo claramente legível do anexo, não invente rótulos ausentes e mantenha a saída estruturada.${profileContext}`;
@@ -232,10 +199,7 @@ serve(async (req) => {
     ];
 
     if (extractedText) {
-      userContent.push({
-        type: "text",
-        text: `Texto extraído do anexo:\n${extractedText}`,
-      });
+      userContent.push({ type: "text", text: `Texto extraído do anexo:\n${extractedText}` });
     }
 
     if (cleanBase64) {
@@ -245,48 +209,52 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Calling AI gateway for ${isMenuMode ? "menu" : "wine list"} analysis...`);
+    const aiData = await openAiChatCompletion({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent },
+      ],
+      tools,
+      tool_choice: toolChoice,
+      temperature: 0.25,
+      max_tokens: 1800,
+    }, { requestId, timeoutMs: 75_000 });
 
-    const aiResponse = await fetch(AI_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userContent },
-        ],
-        tools,
-        tool_choice: toolChoice,
-        temperature: 0.3,
-      }),
+    const parsed = extractToolArguments(aiData);
+    if (!parsed) {
+      throw new FunctionError(422, "EMPTY_RESULT", "Não foi possível identificar dados suficientes nesse arquivo ou imagem.", {
+        requestId,
+        retryable: true,
+      });
+    }
+
+    const responseBody = isMenuMode ? normalizeMenuPayload(parsed) : normalizeWineListPayload(parsed);
+    await logAudit(userId, FUNCTION_NAME, 200, "success", Date.now() - startedAt, {
+      request_id: requestId,
+      mode: isMenuMode ? "menu-for-wine" : "wine-list",
+      file_name: fileName,
+      mime_type: mimeType,
+      has_image: Boolean(cleanBase64),
+      has_text: Boolean(extractedText),
+      result_count: isMenuMode ? responseBody.dishes.length : responseBody.wines.length,
     });
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errText);
-      if (aiResponse.status === 429) {
-        return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
-      }
-      if (aiResponse.status === 402) {
-        return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
-      }
-      throw new Error(`AI gateway error: ${aiResponse.status} - ${errText}`);
-    }
+    return jsonResponse(responseBody);
+  } catch (error) {
+    const failure = error instanceof FunctionError
+      ? error
+      : new FunctionError(500, "INTERNAL_ERROR", "O serviço está temporariamente indisponível. Tente novamente em instantes.", {
+          requestId,
+          retryable: true,
+          message: error instanceof Error ? error.message : "unknown_error",
+        });
 
-    const aiData = await aiResponse.json();
-    const parsed = extractToolArguments(aiData);
-
-    if (!parsed) {
-      throw new Error("Não foi possível interpretar a resposta da IA.");
-    }
-
-    return jsonResponse(isMenuMode ? normalizeMenuPayload(parsed) : normalizeWineListPayload(parsed));
-  } catch (e) {
-    console.error("analyze-wine-list error:", e);
-    return jsonResponse({ error: e instanceof Error ? e.message : "Erro interno" }, 500);
+    console.error(`[${FUNCTION_NAME}] request_id=${requestId}`, failure.message);
+    await logAudit(userId, FUNCTION_NAME, failure.status, "error", Date.now() - startedAt, {
+      request_id: requestId,
+      code: failure.code,
+      technical_message: failure.message,
+    });
+    return failResponse(failure);
   }
 });

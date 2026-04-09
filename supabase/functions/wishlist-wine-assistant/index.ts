@@ -1,17 +1,19 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import {
+  authenticateRequest,
+  corsHeaders,
+  extractToolArguments,
+  failResponse,
+  FunctionError,
+  jsonResponse,
+  logAudit,
+  openAiChatCompletion,
+} from "../_shared/runtime.ts";
 
 const FUNCTION_NAME = "wishlist-wine-assistant";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
-// ── Simple in-memory rate limiter ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 10;
 const RATE_WINDOW_MS = 60_000;
@@ -49,32 +51,6 @@ type AssistantResult = {
   image_url: string | null;
 };
 
-async function logAudit(
-  userId: string,
-  statusCode: number,
-  outcome: string,
-  durationMs: number,
-  metadata?: Record<string, unknown>,
-) {
-  try {
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-
-    await adminClient.from("edge_function_logs").insert({
-      user_id: userId,
-      function_name: FUNCTION_NAME,
-      status_code: statusCode,
-      outcome,
-      duration_ms: durationMs,
-      metadata: metadata ?? {},
-    });
-  } catch (error) {
-    console.error("Audit log failed:", error instanceof Error ? error.message : "unknown");
-  }
-}
-
 function normalizeValue(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
@@ -104,7 +80,6 @@ function normalizeStyle(value: unknown) {
 
 async function getImageFromOpenFoodFacts(query: string) {
   const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=12&fields=product_name,brands,image_url,image_front_url,categories_tags`;
-
   const response = await fetch(url);
   if (!response.ok) return null;
 
@@ -133,41 +108,18 @@ async function getImageFromOpenFoodFacts(query: string) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const startTime = Date.now();
+  const startedAt = Date.now();
+  const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
   let userId = "anonymous";
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    userId = user.id;
+    const auth = await authenticateRequest(req, FUNCTION_NAME, requestId, startedAt);
+    userId = auth.userId;
 
     if (!checkRateLimit(userId)) {
-      await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+      throw new FunctionError(429, "RATE_LIMIT", "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente.", {
+        requestId,
+        retryable: true,
       });
     }
 
@@ -175,158 +127,85 @@ serve(async (req) => {
     const safeQuery = typeof query === "string" ? query.trim() : "";
 
     if (!safeQuery && (!imageBase64 || typeof imageBase64 !== "string")) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_input" });
-      return new Response(JSON.stringify({ error: "Informe um texto ou imagem." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      throw new FunctionError(400, "INVALID_REQUEST", "Informe um texto ou imagem para continuar.", {
+        requestId,
+        retryable: false,
       });
     }
 
     if (typeof imageBase64 === "string" && imageBase64.length > MAX_IMAGE_SIZE) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "image_too_large" });
-      return new Response(JSON.stringify({ error: "Imagem muito grande. Máximo 10MB." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      throw new FunctionError(413, "FILE_TOO_LARGE", "Esse arquivo é grande demais. Envie uma versão menor.", {
+        requestId,
+        retryable: false,
       });
     }
-
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) {
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const messages: Array<Record<string, unknown>> = [
-      {
-        role: "system",
-        content: `Você é um especialista em vinhos e assistente de wishlist premium. Receba um texto livre do cliente e, opcionalmente, uma foto do rótulo. Devolva APENAS via tool_call com os campos abaixo. Use null quando não souber com boa confiança.
-
-{
-  "wine_name": "Nome principal do vinho",
-  "producer": "Vinicola/produtor",
-  "vintage": 2020,
-  "style": "tinto|branco|rose|espumante|sobremesa|fortificado",
-  "country": "Pais em portugues",
-  "region": "Regiao",
-  "grape": "Uva ou corte",
-  "target_price": 199.9,
-  "ai_summary": "Resumo curto em portugues explicando por que este vinho e interessante para wishlist",
-  "notes": "Frase curta para pre-preencher observacoes do usuario"
-}
-
-Regras:
-- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado.
-- Se o texto vier incompleto, infira apenas o que for razoavelmente confiável.
-- Em ai_summary, escreva no máximo 2 frases curtas e elegantes.
-- Em notes, escreva algo curto como oportunidade de compra, ocasião de consumo ou diferencial do rótulo.
-- Se houver foto, priorize a foto sobre o texto.`,
-      },
-    ];
 
     const userContent: Array<Record<string, unknown>> = [];
     if (safeQuery) {
-      userContent.push({
-        type: "text",
-        text: `Texto informado pelo cliente: ${safeQuery}`,
-      });
+      userContent.push({ type: "text", text: `Texto informado pelo cliente: ${safeQuery}` });
     }
     if (typeof imageBase64 === "string" && imageBase64.trim().length > 0) {
       userContent.push({
         type: "image_url",
-        image_url: {
-          url: `data:image/jpeg;base64,${imageBase64}`,
-        },
+        image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
       });
     }
 
-    messages.push({
-      role: "user",
-      content: userContent,
-    });
-
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages,
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "suggest_wishlist_wine",
-              description: "Gerar sugestão estruturada para wishlist",
-              parameters: {
-                type: "object",
-                properties: {
-                  suggestion: {
-                    type: "object",
-                    properties: {
-                      wine_name: { type: "string" },
-                      producer: { type: "string" },
-                      vintage: { type: "number" },
-                      style: { type: "string" },
-                      country: { type: "string" },
-                      region: { type: "string" },
-                      grape: { type: "string" },
-                      target_price: { type: "number" },
-                      ai_summary: { type: "string" },
-                      notes: { type: "string" },
-                    },
-                    required: ["wine_name"],
+    const aiData = await openAiChatCompletion({
+      messages: [
+        {
+          role: "system",
+          content: `Você é um especialista em vinhos e assistente de wishlist premium. Receba um texto livre do cliente e, opcionalmente, uma foto do rótulo. Devolva APENAS via tool_call os dados estruturados do vinho, usando null quando não souber com boa confiança.`,
+        },
+        {
+          role: "user",
+          content: userContent,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "suggest_wishlist_wine",
+            description: "Gerar sugestão estruturada para wishlist",
+            parameters: {
+              type: "object",
+              properties: {
+                suggestion: {
+                  type: "object",
+                  properties: {
+                    wine_name: { type: "string" },
+                    producer: { type: "string" },
+                    vintage: { type: "number" },
+                    style: { type: "string" },
+                    country: { type: "string" },
+                    region: { type: "string" },
+                    grape: { type: "string" },
+                    target_price: { type: "number" },
+                    ai_summary: { type: "string" },
+                    notes: { type: "string" },
                   },
+                  required: ["wine_name"],
                 },
-                required: ["suggestion"],
               },
+              required: ["suggestion"],
             },
           },
-        ],
-        tool_choice: { type: "function", function: { name: "suggest_wishlist_wine" } },
-        temperature: 0.2,
-        max_tokens: 700,
-      }),
-    });
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "suggest_wishlist_wine" } },
+      temperature: 0.2,
+      max_tokens: 700,
+    }, { requestId, timeoutMs: 60_000 });
 
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
-        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
-        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: aiResponse.status });
-      return new Response(JSON.stringify({ error: "Serviço de IA indisponível." }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const parsed = extractToolArguments(aiData) as Record<string, unknown> | null;
+    const suggestionRaw = (parsed?.suggestion ?? {}) as Record<string, unknown>;
+    if (!suggestionRaw || !normalizeValue(suggestionRaw.wine_name)) {
+      throw new FunctionError(422, "EMPTY_RESULT", "Não foi possível identificar dados suficientes nessa imagem ou descrição.", {
+        requestId,
+        retryable: true,
       });
     }
-
-    const aiData = await aiResponse.json();
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "no_tool_call" });
-      return new Response(JSON.stringify({ error: "Não foi possível gerar sugestões." }), {
-        status: 422,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const parsed = JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
-    const suggestionRaw = (parsed.suggestion ?? {}) as Record<string, unknown>;
 
     const searchBasis = [normalizeValue(suggestionRaw.wine_name), normalizeValue(suggestionRaw.producer), normalizeValue(suggestionRaw.vintage)]
       .filter(Boolean)
@@ -349,21 +228,28 @@ Regras:
       image_url: imageUrl,
     };
 
-    await logAudit(userId, 200, "success", Date.now() - startTime, {
+    await logAudit(userId, FUNCTION_NAME, 200, "success", Date.now() - startedAt, {
+      request_id: requestId,
       query: safeQuery || "image_only",
       found_image: !!imageUrl,
       wine_name: result.wine_name,
     });
 
-    return new Response(JSON.stringify({ suggestion: result }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ suggestion: result });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro interno";
-    await logAudit(userId, 500, "internal_error", Date.now() - startTime, { message });
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const failure = error instanceof FunctionError
+      ? error
+      : new FunctionError(500, "INTERNAL_ERROR", "O serviço está temporariamente indisponível. Tente novamente em instantes.", {
+          requestId,
+          retryable: true,
+          message: error instanceof Error ? error.message : "unknown_error",
+        });
+    console.error(`[${FUNCTION_NAME}] request_id=${requestId}`, failure.message);
+    await logAudit(userId, FUNCTION_NAME, failure.status, "error", Date.now() - startedAt, {
+      request_id: requestId,
+      code: failure.code,
+      technical_message: failure.message,
     });
+    return failResponse(failure);
   }
 });

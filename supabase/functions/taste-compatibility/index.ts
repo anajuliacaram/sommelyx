@@ -1,53 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import {
+  authenticateRequest,
+  corsHeaders,
+  extractToolArguments,
+  failResponse,
+  FunctionError,
+  jsonResponse,
+  logAudit,
+  openAiChatCompletion,
+} from "../_shared/runtime.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const FUNCTION_NAME = "taste-compatibility";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const startedAt = Date.now();
+  const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
+  let userId = "anonymous";
+
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Autenticação necessária" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Sessão inválida" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const auth = await authenticateRequest(req, FUNCTION_NAME, requestId, startedAt);
+    userId = auth.userId;
 
     const body = await req.json();
     const { targetWine, userCellar } = body;
 
-    if (!targetWine || !userCellar?.length) {
-      return new Response(JSON.stringify({ compatibility: null, label: "Sem dados suficientes" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!targetWine || !Array.isArray(userCellar) || userCellar.length === 0) {
+      return jsonResponse({ compatibility: null, label: "Sem dados suficientes", reason: "" });
     }
 
-    // Build a concise profile from user's cellar
     const styleCount: Record<string, number> = {};
     const grapeCount: Record<string, number> = {};
     const countryCount: Record<string, number> = {};
@@ -63,96 +45,81 @@ serve(async (req) => {
     const topN = (obj: Record<string, number>, n: number) =>
       Object.entries(obj).sort(([, a], [, b]) => b - a).slice(0, n).map(([k]) => k);
 
-    const profileSummary = `Perfil do colecionador:
-- Estilos preferidos: ${topN(styleCount, 3).join(", ") || "variado"}
-- Uvas preferidas: ${topN(grapeCount, 5).join(", ") || "variado"}
-- Países preferidos: ${topN(countryCount, 3).join(", ") || "variado"}
-- Regiões preferidas: ${topN(regionCount, 4).join(", ") || "variado"}
-- Total de rótulos: ${userCellar.length}`;
+    const profileSummary = `Perfil do colecionador:\n- Estilos preferidos: ${topN(styleCount, 3).join(", ") || "variado"}\n- Uvas preferidas: ${topN(grapeCount, 5).join(", ") || "variado"}\n- Países preferidos: ${topN(countryCount, 3).join(", ") || "variado"}\n- Regiões preferidas: ${topN(regionCount, 4).join(", ") || "variado"}\n- Total de rótulos: ${userCellar.length}`;
 
-    const systemPrompt = `Você é um sommelier que analisa compatibilidade de um vinho com o perfil de gosto de um colecionador.
-Avalie de 0 a 100 o quão compatível esse vinho é com o perfil descrito.
+    const aiData = await openAiChatCompletion({
+      messages: [
+        {
+          role: "system",
+          content: `Você é um sommelier que analisa compatibilidade de um vinho com o perfil de gosto de um colecionador.\nAvalie de 0 a 100 o quão compatível esse vinho é com o perfil descrito.`,
+        },
+        {
+          role: "user",
+          content: `${profileSummary}\n\nVinho a avaliar:\n- Nome: ${targetWine.name || "Desconhecido"}\n- Estilo: ${targetWine.style || "Não informado"}\n- Uva: ${targetWine.grape || "Não informada"}\n- País: ${targetWine.country || "Não informado"}\n- Região: ${targetWine.region || "Não informada"}\n- Produtor: ${targetWine.producer || "Não informado"}`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "return_taste_compatibility",
+            description: "Retorna compatibilidade do vinho com o perfil do usuário.",
+            parameters: {
+              type: "object",
+              properties: {
+                compatibility: { type: "number" },
+                label: { type: "string" },
+                reason: { type: "string" },
+              },
+              required: ["compatibility", "label", "reason"],
+              additionalProperties: false,
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "return_taste_compatibility" } },
+      temperature: 0.2,
+      max_tokens: 500,
+    }, { requestId, timeoutMs: 30_000 });
 
-Responda APENAS em JSON válido:
-{
-  "compatibility": 82,
-  "label": "Alta chance de gostar",
-  "reason": "Explicação curta de 1 frase em português"
-}
-
-Regras para label:
-- 85-100: "Alta chance de gostar"
-- 70-84: "Combina com seu perfil"  
-- 50-69: "Pode surpreender"
-- 30-49: "Fora do seu perfil habitual"
-- 0-29: "Estilo bem diferente do seu"`;
-
-    const userPrompt = `${profileSummary}
-
-Vinho a avaliar:
-- Nome: ${targetWine.name || "Desconhecido"}
-- Estilo: ${targetWine.style || "Não informado"}
-- Uva: ${targetWine.grape || "Não informada"}
-- País: ${targetWine.country || "Não informado"}
-- Região: ${targetWine.region || "Não informada"}
-- Produtor: ${targetWine.producer || "Não informado"}`;
-
-    const aiResponse = await fetch(AI_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.2,
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos esgotados." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
+    const parsed = extractToolArguments(aiData);
+    if (!parsed) {
+      throw new FunctionError(422, "EMPTY_RESULT", "Não foi possível calcular a compatibilidade agora. Tente novamente.", {
+        requestId,
+        retryable: true,
+      });
     }
 
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content || "";
+    const compatibility = typeof (parsed as any).compatibility === "number"
+      ? Math.max(0, Math.min(100, Math.round((parsed as any).compatibility)))
+      : null;
+    const result = {
+      compatibility,
+      label: typeof (parsed as any).label === "string" ? (parsed as any).label : "Não disponível",
+      reason: typeof (parsed as any).reason === "string" ? (parsed as any).reason : "",
+    };
 
-    let parsed;
-    try {
-      const jsonStart = content.indexOf("{");
-      const jsonEnd = content.lastIndexOf("}");
-      if (jsonStart !== -1 && jsonEnd > jsonStart) {
-        parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
-      } else {
-        parsed = JSON.parse(content);
-      }
-    } catch {
-      parsed = { compatibility: null, label: "Não disponível", reason: "" };
-    }
+    await logAudit(userId, FUNCTION_NAME, 200, "success", Date.now() - startedAt, {
+      request_id: requestId,
+      compatibility,
+      cellar_size: userCellar.length,
+    });
 
-    return new Response(JSON.stringify(parsed), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return jsonResponse(result);
+  } catch (error) {
+    const failure = error instanceof FunctionError
+      ? error
+      : new FunctionError(500, "INTERNAL_ERROR", "O serviço está temporariamente indisponível. Tente novamente em instantes.", {
+          requestId,
+          retryable: true,
+          message: error instanceof Error ? error.message : "unknown_error",
+        });
+    console.error(`[${FUNCTION_NAME}] request_id=${requestId}`, failure.message);
+    await logAudit(userId, FUNCTION_NAME, failure.status, "error", Date.now() - startedAt, {
+      request_id: requestId,
+      code: failure.code,
+      technical_message: failure.message,
     });
-  } catch (e) {
-    console.error("taste-compatibility error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro interno" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return failResponse(failure);
   }
 });

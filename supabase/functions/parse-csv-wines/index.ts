@@ -7,6 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ── Simple in-memory rate limiter ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 10;
 const RATE_WINDOW_MS = 60_000;
@@ -30,7 +31,7 @@ setInterval(() => {
   }
 }, 120_000);
 
-const MAX_CSV_SIZE = 2_000_000;
+const MAX_CSV_SIZE = 2_000_000; // 2MB
 const FUNCTION_NAME = "parse-csv-wines";
 
 async function logAudit(
@@ -40,7 +41,9 @@ async function logAudit(
   durationMs: number,
   metadata?: Record<string, unknown>
 ) {
+  // Avoid writing DB logs for unauthenticated requests to prevent log-spam abuse.
   if (!userId || userId === "anonymous") return;
+
   try {
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -64,31 +67,54 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let userId = "anonymous";
+  const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
 
   try {
-    const authHeader = req.headers.get("Authorization");
+    // ── JWT Authentication ──
+    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, { request_id: requestId });
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized", code: "AUTH_REQUIRED", userMessage: "Sua sessão expirou. Entre novamente para continuar.", requestId, retryable: false }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      return new Response(JSON.stringify({ error: "Erro interno de configuração.", code: "CONFIG_ERROR" }), {
+      await logAudit("anonymous", 500, "internal_error", Date.now() - startTime, {
+        reason: "missing_supabase_env",
+        request_id: requestId,
+      });
+      return new Response(JSON.stringify({ ok: false, error: "Erro interno de configuração.", code: "CONFIG_ERROR", userMessage: "O serviço está temporariamente indisponível. Tente novamente em instantes.", requestId, retryable: true }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const accessToken = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!accessToken) {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        reason: "empty_bearer_token",
+        request_id: requestId,
+      });
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized", code: "AUTH_REQUIRED", userMessage: "Sua sessão expirou. Entre novamente para continuar.", requestId, retryable: false }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate token using service role to avoid false 401 when anon key runtime env is missing or stale.
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
     const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        reason: "token_validation_failed",
+        request_id: requestId,
+      });
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized", code: "AUTH_REQUIRED", userMessage: "Sua sessão expirou. Entre novamente para continuar.", requestId, retryable: false }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -96,19 +122,22 @@ serve(async (req) => {
 
     userId = user.id;
 
+    // ── Rate Limiting ──
     if (!checkRateLimit(userId)) {
       await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
+      return new Response(JSON.stringify({ ok: false, error: "Muitas requisições. Tente novamente em 1 minuto.", code: "RATE_LIMIT", userMessage: "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente.", requestId, retryable: true }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
+    // ── Input Validation ──
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
+    if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is not configured");
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key", request_id: requestId });
+      return new Response(JSON.stringify({ ok: false, error: "Erro de configuração do serviço.", code: "CONFIG_ERROR", userMessage: "O serviço está temporariamente indisponível. Tente novamente em instantes.", requestId, retryable: true }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -116,15 +145,21 @@ serve(async (req) => {
 
     const { csvContent, fileName, fileType } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
-      return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_csv" });
+      return new Response(JSON.stringify({ ok: false, error: "csvContent é obrigatório", code: "INVALID_REQUEST", userMessage: "Não foi possível ler a planilha. Revise o arquivo e tente novamente.", requestId, retryable: false }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (csvContent.length > MAX_CSV_SIZE) {
-      return new Response(JSON.stringify({ error: "Arquivo muito grande. Máximo 2MB." }), {
-        status: 400,
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        reason: "csv_too_large",
+        size_bytes: csvContent.length,
+        request_id: requestId,
+      });
+      return new Response(JSON.stringify({ ok: false, error: "Arquivo CSV muito grande. Máximo 2MB.", code: "FILE_TOO_LARGE", userMessage: "Esse arquivo é grande demais. Envie uma versão menor.", requestId, retryable: false }), {
+        status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -132,10 +167,11 @@ serve(async (req) => {
     const normalized = csvContent.replace(/\r\n/g, "\n").trim();
     const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
 
+    // Chunk input to keep token usage reasonable while still importing more than ~50 lines.
     const header = lines[0] || "";
     const dataLines = lines.slice(1);
-    const CHUNK_SIZE = 150;
-    const MAX_CHUNKS = 5;
+    const CHUNK_SIZE = 120;
+    const MAX_CHUNKS = 6; // max ~720 rows + header
 
     const chunks: string[] = [];
     if (lines.length <= CHUNK_SIZE + 1) {
@@ -150,20 +186,35 @@ serve(async (req) => {
 
     const wasTruncated = dataLines.length > chunks.length * CHUNK_SIZE;
 
-    const systemPrompt = `Você é um especialista em dados de vinhos. Receba conteúdo bruto de arquivo (CSV/TSV, planilha ou PDF) e extraia dados de vinhos mapeando colunas para campos corretos.
+    const systemPrompt = `Você é um especialista em dados de vinhos. Sua tarefa é receber o conteúdo bruto de um arquivo (CSV/TSV, planilha convertida em texto ou texto extraído de PDF) e extrair os dados de vinhos, mapeando automaticamente as colunas para os campos corretos.
 
-Campos: name (OBRIGATÓRIO), producer, vintage (number), style (tinto/branco/rose/espumante/sobremesa/fortificado), country, region, grape, quantity (number, padrão 1), purchase_price (number), cellar_location, drink_from (number), drink_until (number).
+Os campos possíveis são:
+- name (string, OBRIGATÓRIO): nome do vinho
+- producer (string): produtor/vinícola
+- vintage (number): safra/ano
+- style (string): tipo do vinho (tinto, branco, rosé, espumante, sobremesa, fortificado)
+- country (string): país de origem
+- region (string): região
+- grape (string): uva/casta principal
+- quantity (number): quantidade de garrafas (padrão: 1)
+- purchase_price (number): preço de compra (apenas número, sem símbolo de moeda)
+- cellar_location (string): localização na adega
+- drink_from (number): ano para começar a beber
+- drink_until (number): ano limite para beber
 
 Regras:
-1. Identifique colunas independente de nome/idioma/ordem.
-2. Separe dados mistos (ex: "Malbec 2020" → grape + vintage).
-3. Infira estilo pela uva/nome se ausente.
+1. Analise o cabeçalho e os dados para identificar qual coluna corresponde a qual campo, independente do nome, idioma ou ordem das colunas.
+2. Se uma coluna contiver dados mistos (ex: "Malbec 2020"), separe em campos distintos.
+3. Se o estilo não estiver explícito, tente inferir pela uva ou nome (ex: "Champagne" → espumante).
 4. Normalize estilos para: tinto, branco, rose, espumante, sobremesa, fortificado.
-5. Limpe preços (remova R$/$, vírgula→ponto).
-6. Quantidade ausente = 1.
-7. Ignore linhas vazias/totalizadores.
-8. Não retorne cabeçalhos como vinho.
-9. Prefira qualidade sobre quantidade.`;
+5. Limpe preços removendo símbolos (R$, $, €) e convertendo vírgula decimal para ponto.
+6. Se quantidade estiver ausente, use 1.
+7. SEMPRE retorne um array JSON válido de objetos com os campos mapeados.
+8. Ignore linhas completamente vazias ou totalizadores.
+9. Se não conseguir identificar o nome do vinho em nenhuma coluna, use a coluna que parecer mais provável.
+10. Se o conteúdo vier de PDF, trate como uma lista e extraia o máximo de campos possível a partir do texto.
+11. Não retorne cabeçalhos como vinho (ex.: "nome", "produto", "descrição", "total", "subtotal").
+12. Prefira qualidade: é melhor retornar menos linhas válidas do que várias linhas duvidosas.`;
 
     function normalizeStyle(value: unknown) {
       const v = typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -181,7 +232,12 @@ Regras:
     function normalizeNumber(value: unknown) {
       if (typeof value === "number" && Number.isFinite(value)) return value;
       if (typeof value === "string") {
-        const cleaned = value.trim().replace(/\s/g, "").replace(/[^\d.,-]/g, "").replace(/\.(?=\d{3}(?:\D|$))/g, "").replace(",", ".");
+        const cleaned = value
+          .trim()
+          .replace(/\s/g, "")
+          .replace(/[^\d.,-]/g, "")
+          .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+          .replace(",", ".");
         const parsed = Number(cleaned);
         if (Number.isFinite(parsed)) return parsed;
       }
@@ -199,71 +255,77 @@ Regras:
       return name;
     }
 
-    const toolDef = {
-      type: "function" as const,
-      function: {
-        name: "extract_wines",
-        description: "Extract wine data from tabular or semi-structured content",
-        parameters: {
-          type: "object",
-          properties: {
-            wines: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  producer: { type: "string" },
-                  vintage: { type: "number" },
-                  style: { type: "string" },
-                  country: { type: "string" },
-                  region: { type: "string" },
-                  grape: { type: "string" },
-                  quantity: { type: "number" },
-                  purchase_price: { type: "number" },
-                  cellar_location: { type: "string" },
-                  drink_from: { type: "number" },
-                  drink_until: { type: "number" },
-                },
-                required: ["name"],
-              },
-            },
-            column_mapping: {
-              type: "object",
-              description: "Mapeamento das colunas originais para os campos do sistema",
-              additionalProperties: { type: "string" },
-            },
-            notes: { type: "string" },
-          },
-          required: ["wines"],
-        },
-      },
-    };
-
-    async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    async function callAi(chunkText: string) {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
+          model: OPENAI_MODEL,
           temperature: 0.1,
           messages: [
             { role: "system", content: systemPrompt },
             {
               role: "user",
-              content: `Analise o conteúdo abaixo e extraia os dados de vinhos. Retorne APENAS via tool_call.\n\n${chunkText}`,
+              content:
+                `Analise o conteúdo abaixo e extraia os dados de vinhos mapeando colunas corretamente. ` +
+                `Retorne APENAS via tool_call.\n\n` +
+                chunkText,
             },
           ],
-          tools: [toolDef],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "extract_wines",
+                description: "Extract wine data from tabular or semi-structured content",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    wines: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          name: { type: "string" },
+                          producer: { type: "string" },
+                          vintage: { type: "number" },
+                          style: { type: "string" },
+                          country: { type: "string" },
+                          region: { type: "string" },
+                          grape: { type: "string" },
+                          quantity: { type: "number" },
+                          purchase_price: { type: "number" },
+                          cellar_location: { type: "string" },
+                          drink_from: { type: "number" },
+                          drink_until: { type: "number" },
+                        },
+                        required: ["name"],
+                      },
+                    },
+                    column_mapping: {
+                      type: "object",
+                      description: "Mapeamento das colunas originais para os campos do sistema",
+                      additionalProperties: { type: "string" },
+                    },
+                    notes: {
+                      type: "string",
+                      description: "Observações sobre decisões de mapeamento",
+                    },
+                  },
+                  required: ["wines"],
+                },
+              },
+            },
+          ],
           tool_choice: { type: "function", function: { name: "extract_wines" } },
         }),
       });
 
       if (!response.ok) {
-        return { errorStatus: response.status };
+        return { errorStatus: response.status as number };
       }
 
       const data = await response.json();
@@ -271,30 +333,26 @@ Regras:
       if (!toolCall) {
         const content = data.choices?.[0]?.message?.content;
         if (typeof content === "string" && content.trim().startsWith("{")) {
-          try { return { result: JSON.parse(content) }; } catch { /* ignore */ }
+          try {
+            return { result: JSON.parse(content) };
+          } catch {
+            // ignore and fallback to status error below
+          }
         }
-        return { errorStatus: 422 };
+        return { errorStatus: 422 as number };
       }
 
       const result = JSON.parse(toolCall.function.arguments);
       return { result };
     }
 
-    // ── PARALLEL chunk processing for speed ──
-    console.log(`Processing ${chunks.length} chunk(s) in parallel...`);
-    const chunkResults = await Promise.allSettled(chunks.map((chunk) => callAi(chunk)));
-
     const allWines: Array<Record<string, unknown>> = [];
     let column_mapping: Record<string, unknown> | undefined = undefined;
     const notes: string[] = [];
     const failures: number[] = [];
 
-    for (const settled of chunkResults) {
-      if (settled.status === "rejected") {
-        failures.push(500);
-        continue;
-      }
-      const { result, errorStatus } = settled.value;
+    for (let i = 0; i < chunks.length; i++) {
+      const { result, errorStatus } = await callAi(chunks[i]);
       if (errorStatus) {
         failures.push(errorStatus);
         continue;
@@ -313,15 +371,16 @@ Regras:
       const status = failures.includes(429) ? 429 : failures.includes(402) ? 402 : 422;
       const message =
         status === 429 ? "Muitas requisições. Tente novamente em alguns segundos."
-          : status === 402 ? "Créditos de IA esgotados. Adicione créditos em Configurações > Workspace > Uso."
+          : status === 402 ? "Créditos de IA esgotados."
           : "Não foi possível extrair dados do arquivo.";
-      await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length });
-      return new Response(JSON.stringify({ error: message }), {
+      await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length, request_id: requestId });
+      return new Response(JSON.stringify({ ok: false, error: message, code: status === 429 ? "RATE_LIMIT" : status === 402 ? "UPSTREAM_ERROR" : "EMPTY_RESULT", userMessage: status === 429 ? "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente." : status === 402 ? "O serviço está temporariamente indisponível. Tente novamente em instantes." : "Não foi possível identificar dados suficientes na planilha.", requestId, retryable: status !== 422 }), {
         status,
         headers: { ...corsHeaders, "Content-Type": "application/json", ...(status === 429 ? { "Retry-After": "60" } : {}) },
       });
     }
 
+    // Normalize, default values, and dedupe.
     const dedup = new Map<string, Record<string, unknown>>();
     for (const w of allWines) {
       const name = normalizeName(w.name);
@@ -362,6 +421,7 @@ Regras:
       wines: Array.from(dedup.values()),
       column_mapping: column_mapping ?? {},
       notes: notes.filter(Boolean).join(" "),
+      requestId,
       metadata: {
         fileName: typeof fileName === "string" ? fileName : null,
         fileType: typeof fileType === "string" ? fileType : null,
@@ -375,20 +435,18 @@ Regras:
       csv_lines: lines.length,
       chunks: chunks.length,
       truncated: wasTruncated,
+      request_id: requestId,
     });
 
     return new Response(JSON.stringify(result), {
-      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("parse-csv-wines error:", err);
-    await logAudit(userId, 500, "internal_error", Date.now() - startTime, {
-      error: err instanceof Error ? err.message : "unknown",
-    });
-    return new Response(JSON.stringify({ error: "Erro interno ao processar arquivo." }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch (e) {
+    console.error("parse-csv-wines error:", e instanceof Error ? e.message : "unknown");
+    await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId });
+    return new Response(
+      JSON.stringify({ ok: false, error: "Erro ao processar CSV. Tente novamente.", code: "INTERNAL_ERROR", userMessage: "Não foi possível ler a planilha agora. Tente novamente em instantes.", requestId, retryable: true }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
