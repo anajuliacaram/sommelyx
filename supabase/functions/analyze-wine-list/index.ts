@@ -58,7 +58,7 @@ function extractToolArguments(aiData: any) {
 
 function normalizeWineListPayload(payload: any) {
   const wines = Array.isArray(payload?.wines) ? payload.wines : [];
-  const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"];
+  const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"];
   const validCompLabels = ["mais leve", "mais encorpado", "mais complexo", "mais fácil de beber"];
   return {
     wines: wines.map((wine: any) => ({
