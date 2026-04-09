@@ -166,7 +166,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         region: w.region,
       }));
       const result = await getDishWineSuggestions(query, cellarWines);
-      setSuggestions(result);
+      setSuggestions(result.suggestions);
+      setDishProfile(result.dishProfile || null);
       setStep("results");
     } catch (err: any) {
       setError(err.message || "Não foi possível buscar sugestões");
@@ -188,7 +189,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         grape: wine.grape,
         region: wine.region,
       });
-      setPairings(result);
+      setPairings(result.pairings);
+      setWineProfile(result.wineProfile || null);
       setStep("wine-results");
     } catch (err: any) {
       setError(err.message || "Não foi possível buscar sugestões");

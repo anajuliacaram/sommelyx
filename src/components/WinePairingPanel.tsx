@@ -54,7 +54,7 @@ export function WinePairingPanel({
         grape: wineGrape,
         region: wineRegion,
       });
-      setPairings(result);
+      setPairings(result.pairings);
     } catch (err: any) {
       setError(err.message || "Não foi possível gerar sugestões");
     } finally {
