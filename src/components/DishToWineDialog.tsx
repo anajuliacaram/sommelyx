@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis } from "@/lib/sommelier-ai";
+import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile } from "@/lib/sommelier-ai";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
@@ -97,6 +97,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [selectedWineId, setSelectedWineId] = useState("");
   const [suggestions, setSuggestions] = useState<WineSuggestion[] | null>(null);
   const [pairings, setPairings] = useState<PairingResult[] | null>(null);
+  const [wineProfile, setWineProfile] = useState<WineProfile | null>(null);
+  const [dishProfile, setDishProfile] = useState<DishProfile | null>(null);
   const [scanResults, setScanResults] = useState<WineListAnalysis | null>(null);
   const [menuResults, setMenuResults] = useState<MenuAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
