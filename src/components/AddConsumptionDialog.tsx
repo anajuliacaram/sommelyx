@@ -112,13 +112,13 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-6">
-        <DialogHeader className="pb-1">
-          <DialogTitle className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-foreground">
+      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-8">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-foreground font-serif">
             <WineIcon className="h-5 w-5 text-primary" />
             Registrar Consumo
           </DialogTitle>
-          <p className="text-[13px] text-muted-foreground">Registre uma degustação da sua adega ou externa</p>
+          <p className="text-sm text-muted-foreground">Registre uma degustação da sua adega ou externa</p>
         </DialogHeader>
 
         <div className="space-y-5 pt-3">
