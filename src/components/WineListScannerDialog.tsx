@@ -148,7 +148,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               <div className="text-center">
                 <h3 className="text-base font-semibold text-foreground mb-1">Fotografe a carta</h3>
                   <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
-                    Envie uma foto ou PDF da carta de vinhos. A IA avalia os rótulos visíveis e aponta as melhores escolhas.
+                    Envie uma foto ou PDF da carta de vinhos. Nossa inteligência avalia os rótulos e aponta as melhores escolhas para você.
                 </p>
               </div>
 

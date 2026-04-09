@@ -45,7 +45,7 @@ function classifyEdgeError(message: string, status?: number): string {
   if (isTransportErrorMessage(message)) return "Sem conexão. Verifique sua internet.";
   if (message.toLowerCase().includes("tempo limite")) return "A busca demorou mais que o esperado. Tente novamente.";
   if (status === 429) return "Muitas requisições. Aguarde um momento e tente novamente.";
-  if (status === 402) return "Créditos de IA esgotados.";
+  if (status === 402) return "Limite de uso atingido. Tente novamente mais tarde.";
   return message || "Não foi possível completar a solicitação.";
 }
 

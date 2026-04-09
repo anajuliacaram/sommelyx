@@ -56,15 +56,15 @@ const faqs = [
   },
   {
     q: "Consigo importar minha planilha?",
-    a: "Sim. Você pode importar CSV e Excel (XLS/XLSX) e também PDF. A IA mapeia as colunas e você confirma antes de salvar.",
+    a: "Sim. Você pode importar CSV, Excel e PDF. O Sommelyx mapeia as colunas automaticamente e você confirma antes de salvar.",
   },
   {
-    q: "A IA preenche os dados automaticamente?",
-    a: "Sim. Em importações e na wishlist, a IA tenta identificar rótulo, produtor, safra, país, região e outros detalhes para acelerar seu cadastro.",
+    q: "Os dados são preenchidos automaticamente?",
+    a: "Sim. Em importações e na wishlist, nossa inteligência identifica rótulo, produtor, safra, país, região e outros detalhes para acelerar seu cadastro.",
   },
   {
     q: "Posso cadastrar vinhos por foto do rótulo?",
-    a: "Sim. Você pode enviar uma foto nítida do rótulo e a IA extrai as informações para preencher o cadastro.",
+    a: "Sim. Envie uma foto nítida do rótulo e o Sommelyx extrai as informações para preencher o cadastro.",
   },
   {
     q: "Meus dados ficam privados?",

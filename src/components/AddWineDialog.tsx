@@ -215,7 +215,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
                         <Camera className="h-6 w-6 text-primary" />
                       </div>
-                      <p className="text-[13px] font-bold text-foreground">Escanear com IA</p>
+                      <p className="text-[13px] font-bold text-foreground">Escanear rótulo</p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">Extração instantânea de dados do rótulo</p>
 
                       {/* Shimmer overlay */}
@@ -237,7 +237,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       </div>
                       <div className="flex flex-col items-start">
                         <p className="text-[13px] font-semibold text-foreground/80">Importar via planilha</p>
-                        <p className="text-[10px] text-muted-foreground/60">Leitura inteligente com IA</p>
+                        <p className="text-[10px] text-muted-foreground/60">Leitura inteligente do Sommelyx</p>
                       </div>
                       <Sparkles className="h-3.5 w-3.5 text-accent/50 ml-auto" />
                     </div>
