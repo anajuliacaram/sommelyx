@@ -156,53 +156,73 @@ export default function ConsumptionPage() {
 
       {/* Period + Source Filters */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-col sm:flex-row gap-3">
-        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-white/55 bg-white/60 p-1.5 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
+        <div className="flex flex-wrap items-center gap-1 rounded-2xl border border-white/55 bg-white/60 p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
           {([
             { value: "week", label: "Semana" },
             { value: "month", label: "Mês" },
             { value: "year", label: "Ano" },
             { value: "all", label: "Tudo" },
-          ] as { value: Period; label: string }[]).map(p => (
-            <Button
-              key={p.value}
-              size="sm"
-              variant="ghost"
-              aria-pressed={period === p.value}
-              className={cn(
-                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em]",
-                period === p.value
-                  ? "bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/15"
-                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
-              )}
-              onClick={() => setPeriod(p.value)}
-            >
-              {p.label}
-            </Button>
-          ))}
+          ] as { value: Period; label: string }[]).map(p => {
+            const isActive = period === p.value;
+            return (
+              <button
+                key={p.value}
+                aria-pressed={isActive}
+                className={cn(
+                  "relative h-10 rounded-xl px-4 text-[11px] font-black uppercase tracking-[0.14em] transition-all duration-200 ease-out",
+                  "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isActive
+                    ? "text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/60",
+                )}
+                onClick={() => setPeriod(p.value)}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="period-pill"
+                    className="absolute inset-0 rounded-xl bg-primary shadow-md"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{p.label}</span>
+              </button>
+            );
+          })}
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-white/55 bg-white/60 p-1.5 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
+        <div className="flex flex-wrap items-center gap-1 rounded-2xl border border-white/55 bg-white/60 p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
           {([
             { value: "all", label: "Todos", icon: null },
             { value: "cellar", label: "Adega", icon: GlassWater },
             { value: "external", label: "Externo", icon: MapPin },
-          ] as { value: Source; label: string; icon: any }[]).map(s => (
-            <Button
-              key={s.value}
-              size="sm"
-              variant="ghost"
-              aria-pressed={source === s.value}
-              className={cn(
-                "h-10 rounded-2xl px-4 text-[11px] font-black uppercase tracking-[0.14em] gap-2",
-                source === s.value
-                  ? "bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/15"
-                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
-              )}
-              onClick={() => setSource(s.value)}
-            >
-              {s.icon && <s.icon className="h-4 w-4 opacity-85" />}
-              {s.label}
-            </Button>
-          ))}
+          ] as { value: Source; label: string; icon: any }[]).map(s => {
+            const isActive = source === s.value;
+            return (
+              <button
+                key={s.value}
+                aria-pressed={isActive}
+                className={cn(
+                  "relative h-10 rounded-xl px-4 text-[11px] font-black uppercase tracking-[0.14em] flex items-center gap-2 transition-all duration-200 ease-out",
+                  "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isActive
+                    ? "text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/60",
+                )}
+                onClick={() => setSource(s.value)}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="source-pill"
+                    className="absolute inset-0 rounded-xl bg-primary shadow-md"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  {s.icon && <s.icon className="h-4 w-4 opacity-85" />}
+                  {s.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </motion.div>
 
