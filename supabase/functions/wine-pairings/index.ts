@@ -17,33 +17,70 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+async function logToDb(
+  supabaseUrl: string,
+  serviceKey: string,
+  userId: string,
+  functionName: string,
+  statusCode: number,
+  outcome: string,
+  durationMs: number,
+  metadata?: Record<string, unknown>,
+) {
+  try {
+    const adminClient = createClient(supabaseUrl, serviceKey);
+    await adminClient.from("edge_function_logs").insert({
+      user_id: userId,
+      function_name: functionName,
+      status_code: statusCode,
+      outcome,
+      duration_ms: durationMs,
+      metadata: metadata || {},
+    });
+  } catch {
+    // Silent fail for logging
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const startTime = Date.now();
+  let userId = "unknown";
 
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return jsonResponse({ error: "Autenticação necessária" }, 401);
+      return jsonResponse({ error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
-      return jsonResponse({ error: "Sessão inválida" }, 401);
+      await logToDb(supabaseUrl, serviceKey, "unknown", "wine-pairings", 401, "unauthorized", Date.now() - startTime);
+      return jsonResponse({ error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
     }
+    userId = user.id;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!LOVABLE_API_KEY) {
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
+      return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
+    }
 
     let body: Record<string, unknown>;
     try {
       body = await req.json();
     } catch {
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime);
       return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
     }
     const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines } = body;
@@ -77,10 +114,11 @@ Responda APENAS em JSON válido com este formato:
 }
 Sugira 3-5 opções. Linguagem natural e acessível.`;
       const cellarContext = userWines?.length
-        ? `\nVinhos na adega do usuário:\n${userWines.map((w: any) => `- ${w.name} (${w.style || "?"}, ${w.grape || "?"}, ${w.region || "?"})`).join("\n")}`
+        ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} (${w.style || "?"}, ${w.grape || "?"}, ${w.region || "?"})`).join("\n")}`
         : "";
       userPrompt = `Prato escolhido: ${dish}${cellarContext}\n\nSugira vinhos ideais para este prato.`;
     } else {
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
     }
 
@@ -101,17 +139,19 @@ Sugira 3-5 opções. Linguagem natural e acessível.`;
     });
 
     if (!aiResponse.ok) {
-      if (aiResponse.status === 429) return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
-      if (aiResponse.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
       const errText = await aiResponse.text().catch(() => "");
+      const outcome = aiResponse.status === 429 ? "rate_limited" : "ai_error";
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", aiResponse.status, outcome, Date.now() - startTime, { ai_status: aiResponse.status });
+
+      if (aiResponse.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
+      if (aiResponse.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
       console.error("AI gateway error:", aiResponse.status, errText);
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
+      return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
     }
 
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || "";
 
-    // Extract JSON from response
     let parsed;
     try {
       const jsonStart = content.indexOf("{");
@@ -122,12 +162,32 @@ Sugira 3-5 opções. Linguagem natural e acessível.`;
         parsed = JSON.parse(content);
       }
     } catch {
-      parsed = { pairings: [], suggestions: [] };
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_parse_error", Date.now() - startTime, { raw_length: content.length });
+      // Return empty but valid structure so frontend triggers fallback
+      parsed = mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] };
     }
+
+    // Validate response structure
+    if (mode === "wine-to-food" && (!Array.isArray(parsed.pairings) || parsed.pairings.length === 0)) {
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_empty_response", Date.now() - startTime);
+      return jsonResponse({ pairings: [] });
+    }
+    if (mode === "food-to-wine" && (!Array.isArray(parsed.suggestions) || parsed.suggestions.length === 0)) {
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_empty_response", Date.now() - startTime);
+      return jsonResponse({ suggestions: [] });
+    }
+
+    await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success", Date.now() - startTime, {
+      mode,
+      result_count: mode === "wine-to-food" ? parsed.pairings?.length : parsed.suggestions?.length,
+    });
 
     return jsonResponse(parsed);
   } catch (e) {
     console.error("wine-pairings error:", e);
-    return jsonResponse({ error: e instanceof Error ? e.message : "Erro interno" }, 500);
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 500, "internal_error", Date.now() - startTime, { error: e instanceof Error ? e.message : "unknown" });
+    return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
   }
 });
