@@ -83,7 +83,7 @@ serve(async (req) => {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime);
       return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
     }
-    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines } = body;
+    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines } = body as Record<string, any>;
 
     let systemPrompt: string;
     let userPrompt: string;
@@ -219,13 +219,85 @@ Responda APENAS em JSON válido:
 }
 Sugira 3-5 opções.`;
       const cellarContext = userWines?.length
-        ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} (${w.style || "?"}, uva: ${w.grape || "?"}, região: ${w.region || "?"}, safra: ${w.vintage || "?"})`).join("\n")}`
+        ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} (estilo: ${w.style || "?"}, uva: ${w.grape || "?"}, região: ${w.region || "?"}, país: ${w.country || "?"}, safra: ${w.vintage || "?"}, produtor: ${w.producer || "?"})`).join("\n")}`
         : "";
-      userPrompt = `Prato: ${dish}${cellarContext}\n\nINSTRUÇÃO: Primeiro analise a textura, gordura, sal, umami, método de preparo e sabores dominantes deste prato. Depois sugira APENAS vinhos cuja interação físico-química com o prato é comprovada. Para cada vinho, escreva uma explicação ÚNICA e DIFERENTE das outras — se dois vinhos combinam, explique por razões distintas.`;
+      userPrompt = `Prato: ${dish}${cellarContext}\n\nINSTRUÇÃO CRÍTICA: Primeiro analise a textura, gordura, sal, umami, método de preparo e sabores dominantes de "${dish}". Depois, para CADA vinho sugerido, escreva uma explicação de 3-4 frases que:\n1. Descreva propriedades ESPECÍFICAS daquele vinho (taninos, acidez, corpo, aromas da uva)\n2. Explique como essas propriedades INTERAGEM FISICAMENTE com os componentes do prato\n3. Seja ÚNICA — não repita a mesma estrutura ou vocabulário entre sugestões\n4. Se há vinhos IGUAIS na adega, sugira APENAS UM deles e use os slots para sugestões diferentes\n\nNÃO USE frases genéricas como "combina bem", "harmoniza com", "boa opção". Cada frase deve ser específica o suficiente para não servir para nenhum outro vinho ou prato.`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
     }
+
+    const tools = mode === "wine-to-food" ? [
+      {
+        type: "function" as const,
+        function: {
+          name: "return_pairings",
+          description: "Return dish pairing suggestions for a wine",
+          parameters: {
+            type: "object",
+            properties: {
+              pairings: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    dish: { type: "string", description: "Nome específico do prato com método de preparo" },
+                    reason: { type: "string", description: "3-4 frases técnicas explicando a interação físico-química entre ESTE vinho e ESTE prato. Cite propriedades reais do vinho (taninos, acidez, corpo) e do prato (gordura, sal, textura). NUNCA use frases genéricas." },
+                    match: { type: "string", enum: ["perfeito", "muito bom", "bom"] },
+                    harmony_type: { type: "string", enum: ["contraste", "semelhança", "complemento", "equilíbrio", "limpeza"] },
+                    harmony_label: { type: "string", description: "Frase curta descrevendo a harmonia (ex: 'acidez que corta a gordura')" },
+                  },
+                  required: ["dish", "reason", "match", "harmony_type", "harmony_label"],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ["pairings"],
+            additionalProperties: false,
+          },
+        },
+      },
+    ] : [
+      {
+        type: "function" as const,
+        function: {
+          name: "return_suggestions",
+          description: "Return wine suggestions for a dish",
+          parameters: {
+            type: "object",
+            properties: {
+              suggestions: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    wineName: { type: "string", description: "Nome específico do vinho" },
+                    style: { type: "string", enum: ["tinto", "branco", "rosé", "espumante"] },
+                    grape: { type: "string", description: "Uva principal" },
+                    vintage: { type: "number", description: "Safra" },
+                    region: { type: "string" },
+                    country: { type: "string" },
+                    reason: { type: "string", description: "3-4 frases técnicas ÚNICAS explicando por que ESTE vinho combina com ESTE prato. Cite propriedades reais (taninos, acidez, corpo, aromas da uva). PROIBIDO usar frases genéricas como 'combina bem' ou 'harmoniza com'. Cada sugestão DEVE ter explicação completamente diferente." },
+                    fromCellar: { type: "boolean" },
+                    match: { type: "string", enum: ["perfeito", "muito bom", "bom"] },
+                    harmony_type: { type: "string", enum: ["contraste", "semelhança", "complemento", "equilíbrio", "limpeza"] },
+                    harmony_label: { type: "string", description: "Frase curta descrevendo a harmonia" },
+                  },
+                  required: ["wineName", "style", "reason", "fromCellar", "match", "harmony_type", "harmony_label"],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ["suggestions"],
+            additionalProperties: false,
+          },
+        },
+      },
+    ];
+
+    const toolChoice = mode === "wine-to-food"
+      ? { type: "function" as const, function: { name: "return_pairings" } }
+      : { type: "function" as const, function: { name: "return_suggestions" } };
 
     const aiResponse = await fetch(AI_URL, {
       method: "POST",
@@ -234,12 +306,14 @@ Sugira 3-5 opções.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.7,
+        tools,
+        tool_choice: toolChoice,
+        temperature: 0.75,
       }),
     });
 
