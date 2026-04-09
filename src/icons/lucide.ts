@@ -16,6 +16,7 @@ export { default as ArrowUpDown } from "lucide-react/dist/esm/icons/arrow-up-dow
 export { default as BarChart3 } from "lucide-react/dist/esm/icons/bar-chart-3.js";
 export { default as Bell } from "lucide-react/dist/esm/icons/bell.js";
 export { default as Bookmark } from "lucide-react/dist/esm/icons/bookmark.js";
+export { default as Brain } from "lucide-react/dist/esm/icons/brain.js";
 export { default as BookmarkCheck } from "lucide-react/dist/esm/icons/bookmark-check.js";
 export { default as Building2 } from "lucide-react/dist/esm/icons/building-2.js";
 export { default as Calendar } from "lucide-react/dist/esm/icons/calendar.js";
@@ -78,6 +79,7 @@ export { default as Save } from "lucide-react/dist/esm/icons/save.js";
 export { default as Search } from "lucide-react/dist/esm/icons/search.js";
 export { default as Settings } from "lucide-react/dist/esm/icons/settings.js";
 export { default as ShieldCheck } from "lucide-react/dist/esm/icons/shield-check.js";
+export { default as Smile } from "lucide-react/dist/esm/icons/smile.js";
 export { default as ShoppingCart } from "lucide-react/dist/esm/icons/shopping-cart.js";
 export { default as SlidersHorizontal } from "lucide-react/dist/esm/icons/sliders-horizontal.js";
 export { default as Smartphone } from "lucide-react/dist/esm/icons/smartphone.js";
