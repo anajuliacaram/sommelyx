@@ -479,7 +479,7 @@ export async function getWinePairings(wine: {
         wineVintage: wine.vintage,
         wineCountry: wine.country,
       },
-      { timeoutMs: 30_000, retries: 1 },
+      { timeoutMs: 55_000, retries: 1 },
     );
 
     if (isValidPairings(data)) {
