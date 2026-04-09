@@ -12,7 +12,12 @@ interface LandingHeaderProps {
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-3 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 bg-background/75 backdrop-blur-2xl border-b border-border/30"
+      className="fixed top-0 w-full z-50 px-3 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 border-b border-white/30"
+      style={{
+        background: "rgba(244, 240, 235, 0.65)",
+        backdropFilter: "blur(24px) saturate(1.6)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.6)",
+      }}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -35,7 +40,12 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://instagram.com/sommelyx"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 text-muted-foreground/60 hover:bg-muted/20 hover:text-foreground transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground/60 hover:text-foreground transition-colors duration-200"
+            style={{
+              background: "rgba(255,255,255,0.5)",
+              border: "1px solid rgba(255,255,255,0.6)",
+              backdropFilter: "blur(8px)",
+            }}
           >
             <Instagram size={14} />
           </a>
@@ -43,14 +53,25 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://www.linkedin.com/company/sommelyx/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg border border-border/40 text-muted-foreground/60 hover:bg-muted/20 hover:text-foreground transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground/60 hover:text-foreground transition-colors duration-200"
+            style={{
+              background: "rgba(255,255,255,0.5)",
+              border: "1px solid rgba(255,255,255,0.6)",
+              backdropFilter: "blur(8px)",
+            }}
           >
             <Linkedin size={14} />
           </a>
           <Button
             variant="ghost"
             size="sm"
-            className="text-[13px] sm:text-[14px] font-semibold border border-border/40 text-foreground px-4 sm:px-5 hover:bg-muted/20"
+            className="text-[13px] sm:text-[14px] font-semibold text-foreground px-4 sm:px-5 rounded-xl transition-all duration-200 hover:shadow-sm"
+            style={{
+              background: "rgba(255,255,255,0.6)",
+              border: "1px solid rgba(255,255,255,0.7)",
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+            }}
             onClick={onLogin}
           >
             Entrar
