@@ -523,7 +523,7 @@ export async function analyzeMenuForWine(
       { timeoutMs: 45_000, retries: 1 },
     );
     if (data && Array.isArray(data.dishes) && data.dishes.length > 0) {
-      return data;
+      return { dishes: data.dishes, summary: data.summary || "", wineProfile: (data as any).wineProfile || null };
     }
     throw new Error("Nenhum prato encontrado no cardápio");
   } catch (err) {
