@@ -1192,23 +1192,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     <p className="text-[12px] text-foreground/55">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
                     </p>
-                    {wineProfile && (wineProfile.body || wineProfile.acidity || wineProfile.tannin) && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {wineProfile.body && (
-                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                            Corpo {wineProfile.body}
-                          </span>
+                    {wineProfile && (wineProfile.body || wineProfile.summary) && (
+                      <div className="space-y-1.5 pt-1">
+                        {wineProfile.summary && (
+                          <p className="text-[12px] text-foreground/60 leading-relaxed italic">{wineProfile.summary}</p>
                         )}
-                        {wineProfile.acidity && (
-                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                            Acidez {wineProfile.acidity}
-                          </span>
-                        )}
-                        {wineProfile.tannin && wineProfile.tannin !== "n/a" && (
-                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                            Taninos {wineProfile.tannin}
-                          </span>
-                        )}
+                        <div className="flex flex-wrap gap-1.5">
+                          {wineProfile.body && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Corpo {wineProfile.body}</span>}
+                          {wineProfile.acidity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Acidez {wineProfile.acidity}</span>}
+                          {wineProfile.tannin && wineProfile.tannin !== "n/a" && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Taninos {wineProfile.tannin}</span>}
+                          {wineProfile.complexity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{wineProfile.complexity}</span>}
+                        </div>
                       </div>
                     )}
                   </div>
