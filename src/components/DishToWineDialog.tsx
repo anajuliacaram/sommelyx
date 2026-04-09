@@ -1110,6 +1110,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                                 "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
                                 s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
                                 s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                                s.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
+                                s.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
                                 "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
                               )}>
                                 {s.compatibilityLabel}
