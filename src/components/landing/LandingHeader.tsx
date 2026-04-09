@@ -65,12 +65,14 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-[13px] sm:text-[14px] font-semibold text-foreground px-4 sm:px-5 rounded-xl transition-all duration-200 hover:shadow-sm"
+            className="text-[13px] sm:text-[14px] font-semibold px-4 sm:px-5 rounded-xl transition-all duration-250 hover:-translate-y-0.5"
             style={{
-              background: "rgba(255,255,255,0.6)",
-              border: "1px solid rgba(255,255,255,0.7)",
-              backdropFilter: "blur(12px)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+              background: "rgba(110,30,42,0.07)",
+              border: "1px solid rgba(110,30,42,0.14)",
+              backdropFilter: "blur(16px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+              boxShadow: "0 2px 8px rgba(110,30,42,0.06), inset 0 1px 0 rgba(255,255,255,0.45)",
+              color: "#5a1528",
             }}
             onClick={onLogin}
           >

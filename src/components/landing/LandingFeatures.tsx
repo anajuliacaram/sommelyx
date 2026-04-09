@@ -69,7 +69,7 @@ function FeatureCard({ block, i, onSignup, mobile = false }: { block: typeof blo
       key={block.title}
       className={`
         ${mobile ? "snap-start shrink-0 w-[86%] max-w-[340px]" : ""}
-        group flex flex-col items-start p-5 sm:p-7 rounded-2xl transition-all duration-250
+        group relative flex flex-col items-start p-4 sm:p-5 rounded-2xl transition-all duration-250
         hover:-translate-y-1 hover:shadow-[0_16px_48px_-12px_rgba(30,20,20,0.15)]
       `}
       style={glassStyle}
@@ -79,39 +79,34 @@ function FeatureCard({ block, i, onSignup, mobile = false }: { block: typeof blo
       variants={fadeUp}
       custom={i + 1}
     >
-      {/* Top highlight line */}
       <div
         className="absolute top-0 left-4 right-4 h-[1px] rounded-full pointer-events-none"
         style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent)" }}
       />
 
-      {/* Icon */}
       <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
+        className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
         style={{ background: block.accentBg, border: `1px solid ${block.accentBorder}` }}
       >
-        <block.icon className="h-5 w-5" style={{ color: block.accent }} strokeWidth={1.8} />
+        <block.icon className="h-4.5 w-4.5" style={{ color: block.accent }} strokeWidth={1.8} />
       </div>
 
-      {/* Title */}
-      <h3 className="text-[18px] sm:text-[20px] font-serif font-bold mb-3 tracking-[-0.02em]" style={{ color: "#1A1A1A" }}>
+      <h3 className="text-[17px] sm:text-[18px] font-serif font-bold mb-2 tracking-[-0.02em]" style={{ color: "#1A1A1A" }}>
         {block.title}
       </h3>
 
-      {/* Bullets */}
-      <ul className="space-y-2.5 flex-1 mb-5">
+      <ul className="space-y-1.5 flex-1 mb-3">
         {block.bullets.map(b => (
-          <li key={b} className="flex items-start gap-2 text-[14px] sm:text-[15px] font-medium leading-snug" style={{ color: "#555" }}>
+          <li key={b} className="flex items-start gap-2 text-[13px] sm:text-[14px] font-medium leading-snug" style={{ color: "#555" }}>
             <Check className="h-3.5 w-3.5 mt-0.5 shrink-0 text-gold" strokeWidth={2.5} />
             {b}
           </li>
         ))}
       </ul>
 
-      {/* CTA */}
       <Button
         variant="ghost"
-        className="text-[13px] font-semibold text-wine hover:text-wine-vivid px-0 h-auto group/btn"
+        className="text-[12px] font-semibold text-wine hover:text-wine-vivid px-0 h-auto group/btn"
         onClick={onSignup}
       >
         Começar grátis
