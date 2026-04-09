@@ -228,7 +228,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setParseErrors([]);
       setStep("preview");
       if (validWines.length === 0) {
-        setParseErrors(["A IA não encontrou linhas válidas de vinho neste arquivo."]);
+        setParseErrors(["Não encontramos linhas válidas de vinho neste arquivo."]);
       }
 
       if (raw.length > MAX_CLIENT_INPUT_CHARS) {
@@ -359,7 +359,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
               <div className="mt-5 p-4 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
                 <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: "#8F2D56" }}>
-                  <Sparkles className="h-3.5 w-3.5" /> IA inteligente
+                  <Sparkles className="h-3.5 w-3.5" /> Inteligência Sommelyx
                 </p>
                 <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>
                   Não se preocupe com a ordem ou nome das colunas. O Sommelyx analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.

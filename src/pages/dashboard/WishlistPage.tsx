@@ -170,13 +170,13 @@ export default function WishlistPage() {
       );
 
       if (data?.error) throw new Error(String(data.error));
-      if (!data?.suggestion) throw new Error("A IA não conseguiu sugerir este vinho.");
+      if (!data?.suggestion) throw new Error("Não foi possível identificar este vinho agora.");
 
       applySuggestion(data.suggestion as WishlistSuggestion, !!force);
       if (safeQuery) setLastAiQuery(safeQuery);
     } catch (error) {
       toast({
-        title: "IA indisponível no momento",
+        title: "Inteligência indisponível no momento",
         description: getErrorMessage(error),
         variant: "destructive",
       });
@@ -311,7 +311,7 @@ export default function WishlistPage() {
                   />
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  Conforme o cliente digita, a IA tenta identificar rótulo, produtor, safra e contexto de compra.
+                  Conforme o cliente digita, o Sommelyx identifica rótulo, produtor, safra e contexto de compra.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -323,7 +323,7 @@ export default function WishlistPage() {
                     disabled={!wineName.trim() || isAiLoading}
                   >
                     {isAiLoading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1.5" />}
-                    Pesquisar com IA
+                    Pesquisar com Sommelyx
                   </Button>
                   {lastAiQuery ? (
                     <span className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -387,7 +387,7 @@ export default function WishlistPage() {
                 </div>
 
                 <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
-                  A IA ajusta os textos, sugere contexto de venda e tenta puxar uma imagem de referência do vinho automaticamente.
+                  O Sommelyx ajusta os textos, sugere contexto de venda e busca uma imagem de referência do vinho automaticamente.
                 </p>
 
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -452,10 +452,10 @@ export default function WishlistPage() {
               <div className="rounded-[24px] border border-border/60 bg-card/80 p-4">
                 <div className="flex items-center gap-2">
                   <Wine className="h-4 w-4 text-primary" />
-                  <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Texto sugerido pela IA</p>
+                  <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Texto sugerido pelo Sommelyx</p>
                 </div>
                 <Textarea
-                  placeholder="A IA vai sugerir um texto elegante para apoiar a venda ou a recomendação do vinho."
+                  placeholder="O Sommelyx vai sugerir um texto elegante para apoiar a venda ou a recomendação do vinho."
                   value={aiSummary}
                   onChange={(event) => setAiSummary(event.target.value)}
                   className="mt-3 min-h-[120px] text-[12px]"
@@ -481,7 +481,7 @@ export default function WishlistPage() {
             </Button>
             <Button type="button" size="sm" variant="secondary" className="h-9 text-[11px] font-bold" onClick={() => void requestAiSuggestion({ query: wineName, force: true })} disabled={!wineName.trim() || isAiLoading}>
               <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-              Pesquisar com IA
+              Pesquisar com Sommelyx
             </Button>
           </div>
         </motion.div>
@@ -541,7 +541,7 @@ export default function WishlistPage() {
                     </span>
                   ) : null}
                   <span className="rounded-full border border-border/60 bg-background/80 px-2.5 py-1 text-[10px] font-semibold text-muted-foreground uppercase">
-                    {item.source === "image" ? "Foto do cliente" : item.source === "ai" ? "Assistido por IA" : "Manual"}
+                    {item.source === "image" ? "Foto do cliente" : item.source === "ai" ? "Assistido por Sommelyx" : "Manual"}
                   </span>
                 </div>
               </div>
@@ -561,7 +561,7 @@ export default function WishlistPage() {
         <PremiumEmptyState
           icon={Heart}
           title="Wishlist inteligente"
-          description="Adicione um vinho digitando o nome ou anexando a foto. A IA ajuda a completar os dados e a organizar melhor cada interesse do cliente."
+          description="Adicione um vinho digitando o nome ou anexando a foto. O Sommelyx ajuda a completar os dados e organizar cada interesse do cliente."
           primaryAction={{ label: "Criar primeiro item", onClick: () => setShowForm(true), icon: <Plus className="h-4 w-4" /> }}
         />
       ) : (
