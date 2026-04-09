@@ -838,49 +838,64 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="flex items-center gap-1.5 pb-1">
-                  <Sparkles className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                <div className="flex items-center gap-2 pb-2">
+                  <Sparkles className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Vinhos da sua adega para "{dish}"
                   </span>
                 </div>
 
                 {suggestions.length === 0 ? (
-                  <p className="text-[12px] text-muted-foreground text-center py-4">
-                    Nenhum vinho na sua adega combina com esse prato. Tente outro prato.
-                  </p>
+                  <div className="glass-card p-6 text-center space-y-2">
+                    <p className="text-sm text-foreground/70 font-medium">
+                      Nenhum vinho na sua adega combina com esse prato.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Experimente outro prato ou adicione mais vinhos à adega.
+                    </p>
+                  </div>
                 ) : (
-                  <ul className="space-y-2">
-                    {suggestions.map((s, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.07 }}
-                        className={cn(
-                          "glass-card p-3.5 space-y-1.5",
-                          s.fromCellar && "border-primary/15 bg-primary/[0.03]",
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", matchDot[s.match] || "bg-primary/40")} />
-                            <span className="text-[13px] font-semibold text-foreground truncate">
-                              {s.wineName}
-                            </span>
-                          </div>
-                          {s.fromCellar && (
-                            <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/8 px-2 py-[2px] text-[9px] font-bold uppercase tracking-wider text-primary">
-                              <Wine className="h-2.5 w-2.5" />
-                              Na adega
-                            </span>
+                  <ul className="space-y-3">
+                    {suggestions.map((s, i) => {
+                      const badge = matchBadge[s.match];
+                      return (
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
+                          className={cn(
+                            "glass-card p-4 space-y-2 cursor-default",
+                            s.fromCellar && "border-primary/20 bg-primary/[0.04]",
                           )}
-                        </div>
-                        <p className="text-[11px] text-muted-foreground leading-snug pl-3.5">
-                          {s.reason}
-                        </p>
-                      </motion.li>
-                    ))}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[s.match] || "bg-primary/40")} />
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">
+                                {s.wineName}
+                              </span>
+                            </div>
+                            {s.fromCellar && (
+                              <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                                <Wine className="h-3 w-3" />
+                                Na adega
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[13px] text-foreground/65 leading-relaxed pl-5">
+                            {s.reason}
+                          </p>
+                          {badge && (
+                            <div className="pl-5">
+                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
+                                {badge.label}
+                              </span>
+                            </div>
+                          )}
+                        </motion.li>
+                      );
+                    })}
                   </ul>
                 )}
 
@@ -892,7 +907,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setDish("");
                     setStep("dish");
                   }}
-                  className="w-full h-9 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border/40"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Buscar outro prato
                 </Button>
