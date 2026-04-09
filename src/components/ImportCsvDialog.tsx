@@ -132,12 +132,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const readSpreadsheetAsCsv = async (file: File) => {
     const buffer = await file.arrayBuffer();
-    const XLSX = await import("xlsx");
-    const wb = XLSX.read(buffer, { type: "array" });
+    const xlsxModule = await import("xlsx");
+    const XLSX = xlsxModule.default || xlsxModule;
+    const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
     const sheetName = wb.SheetNames?.[0];
     if (!sheetName) return "";
     const ws = wb.Sheets[sheetName];
-    return XLSX.utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
+    const utils = XLSX.utils || xlsxModule.utils;
+    return utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
   };
 
   const readPdfAsText = async (file: File) => {
@@ -368,7 +370,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
               <div className="mt-5 p-4 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
                 <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: "#8F2D56" }}>
-                  <Sparkles className="h-3.5 w-3.5" /> Inteligência Sommelyx
+                  <Sparkles className="h-3.5 w-3.5" /> Sommelyx Inteligente
                 </p>
                 <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>
                   Não se preocupe com a ordem ou nome das colunas. O Sommelyx analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.
@@ -389,7 +391,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </div>
               </div>
               <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
-                Analisando sua planilha…
+                Sommelyx está analisando…
               </p>
               <p className="text-xs mt-1.5" style={{ color: "#9CA3AF" }}>
                 Identificando colunas e organizando os dados de <strong>{fileName}</strong>
@@ -413,7 +415,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               {mappingEntries.length > 0 && (
                 <div className="p-3 rounded-xl" style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.12)" }}>
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: "#16a34a" }}>
-                    Mapeamento automático
+                    Mapeamento Sommelyx
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {mappingEntries.map(([from, to]) => (
@@ -433,17 +435,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               {aiNotes && (
                 <div className="p-3 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#8F2D56" }}>
-                    Observações do Sommelyx
+                    Observações Sommelyx
                   </p>
                   <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>{aiNotes}</p>
                 </div>
               )}
 
               {parseErrors.length > 0 && (
-                <div className="p-3 rounded-xl space-y-1" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>
+                <div className="p-3.5 rounded-xl space-y-1.5" style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)" }}>
                   {parseErrors.map((e, i) => (
-                    <p key={i} className="text-[11px] flex items-center gap-1" style={{ color: "#d97706" }}>
-                      <AlertTriangle className="h-3 w-3 shrink-0" /> {e}
+                    <p key={i} className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: "#b45309" }}>
+                      <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: "#d97706" }} /> {e}
                     </p>
                   ))}
                 </div>
