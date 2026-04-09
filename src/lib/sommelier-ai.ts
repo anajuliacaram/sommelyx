@@ -183,8 +183,20 @@ function classifyError(err: unknown): ClassifiedError {
   if (lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais")) {
     return { type: "timeout", message: "A busca demorou mais que o esperado. Tente novamente." };
   }
-  if (lower.includes("failed to fetch") || lower.includes("networkerror") || lower.includes("load failed") || lower.includes("sem conexão")) {
-    return { type: "network", message: "Sem conexão. Verifique sua internet." };
+  if (
+    lower.includes("failed to fetch") ||
+    lower.includes("networkerror") ||
+    lower.includes("load failed") ||
+    lower.includes("sem conexão") ||
+    lower.includes("failed to send")
+  ) {
+    const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+    return {
+      type: "network",
+      message: offline
+        ? "Sem conexão. Verifique sua internet."
+        : "O serviço está temporariamente indisponível. Tente novamente em instantes.",
+    };
   }
   if (lower.includes("failed to send")) {
     return { type: "ai_fail", message: "A solicitação não pôde ser enviada. Tente novamente." };
@@ -193,6 +205,94 @@ function classifyError(err: unknown): ClassifiedError {
     return { type: "ai_fail", message: "Não conseguimos gerar a sugestão agora. Tente novamente em instantes." };
   }
   return { type: "unknown", message: "Não conseguimos gerar a sugestão agora." };
+}
+
+const GENERIC_RESPONSE_PHRASES = [
+  "combina bem",
+  "harmoniza bem",
+  "boa opção",
+  "complementa os sabores",
+  "acidez do vinho combina",
+  "frutas frescas",
+  "paladar",
+  "equilibrado",
+  "versátil",
+  "clássico",
+];
+
+function hasGenericWineLanguage(text?: string | null) {
+  if (!text) return false;
+  const normalized = text.toLowerCase();
+  if (normalized.length < 30) return true;
+  return GENERIC_RESPONSE_PHRASES.some((phrase) => normalized.includes(phrase));
+}
+
+function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kind: "pairings" | "suggestions" | "wineList" | "menu" | "insight"): boolean {
+  if (!data || typeof data !== "object") return false;
+
+  if (kind === "pairings") {
+    const pairings = Array.isArray(data.pairings) ? data.pairings : [];
+    if (pairings.length === 0) return false;
+    return pairings.every((item: any) =>
+      typeof item?.dish === "string" &&
+      typeof item?.reason === "string" &&
+      typeof item?.match === "string" &&
+      item.dish.trim().length > 0 &&
+      item.reason.trim().length >= 45 &&
+      !hasGenericWineLanguage(item.reason) &&
+      !hasGenericWineLanguage(item.harmony_label),
+    );
+  }
+
+  if (kind === "suggestions") {
+    const suggestions = Array.isArray(data.suggestions) ? data.suggestions : [];
+    if (suggestions.length === 0) return false;
+    return suggestions.every((item: any) =>
+      typeof item?.wineName === "string" &&
+      typeof item?.reason === "string" &&
+      item.wineName.trim().length > 0 &&
+      item.reason.trim().length >= 45 &&
+      !hasGenericWineLanguage(item.reason) &&
+      !hasGenericWineLanguage(item.harmony_label),
+    );
+  }
+
+  if (kind === "wineList") {
+    const wines = Array.isArray(data.wines) ? data.wines : [];
+    if (wines.length === 0) return false;
+    return wines.every((item: any) =>
+      typeof item?.name === "string" &&
+      item.name.trim().length > 0 &&
+      typeof item?.verdict === "string" &&
+      !hasGenericWineLanguage(item.verdict) &&
+      typeof item?.compatibility === "number",
+    );
+  }
+
+  if (kind === "menu") {
+    const dishes = Array.isArray(data.dishes) ? data.dishes : [];
+    if (dishes.length === 0) return false;
+    return dishes.every((item: any) =>
+      typeof item?.name === "string" &&
+      item.name.trim().length > 0 &&
+      typeof item?.reason === "string" &&
+      item.reason.trim().length >= 45 &&
+      !hasGenericWineLanguage(item.reason),
+    );
+  }
+
+  if (kind === "insight") {
+    return (
+      typeof data.insight === "string" &&
+      data.insight.trim().length >= 20 &&
+      !hasGenericWineLanguage(data.insight) &&
+      typeof data.recommendation === "string" &&
+      data.recommendation.trim().length >= 20 &&
+      !hasGenericWineLanguage(data.recommendation)
+    );
+  }
+
+  return false;
 }
 
 // ── Local Fallback Rules ──
@@ -469,9 +569,9 @@ export async function getWinePairings(wine: {
   producer?: string | null;
   vintage?: number | null;
   country?: string | null;
-}): Promise<PairingResponse> {
+}): Promise<PairingResult[]> {
   try {
-    const data = await invokeEdgeFunction<PairingResponse>(
+    const request = () => invokeEdgeFunction<{ pairings: PairingResult[] }>(
       "wine-pairings",
       {
         mode: "wine-to-food",
@@ -485,27 +585,32 @@ export async function getWinePairings(wine: {
       },
       { timeoutMs: 55_000, retries: 1 },
     );
-
-    if (isValidPairings(data)) {
-      return { pairings: data.pairings, wineProfile: (data as any).wineProfile || null };
+    const data = await request();
+    if (isValidPairings(data) && validateWineSpecificity(data, "pairings")) {
+      return data.pairings;
     }
 
-    console.warn("[sommelier-ai] Invalid AI pairing response, using fallback");
-    return { pairings: fallbackPairingsForWine(wine), wineProfile: null };
+    const retryData = await request().catch(() => null);
+    if (retryData && isValidPairings(retryData) && validateWineSpecificity(retryData, "pairings")) {
+      return retryData.pairings;
+    }
+
+    console.warn("[sommelier-ai] Invalid or generic AI pairing response, using fallback");
+    return fallbackPairingsForWine(wine);
   } catch (err) {
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getWinePairings error:", classified.type, classified.message);
     if (classified.type === "auth") throw new Error(classified.message);
-    return { pairings: fallbackPairingsForWine(wine), wineProfile: null };
+    return fallbackPairingsForWine(wine);
   }
 }
 
 export async function getDishWineSuggestions(
   dish: string,
   userWines?: WineSummary[],
-): Promise<SuggestionResponse> {
+): Promise<WineSuggestion[]> {
   try {
-    const data = await invokeEdgeFunction<SuggestionResponse>(
+    const request = () => invokeEdgeFunction<{ suggestions: WineSuggestion[] }>(
       "wine-pairings",
       {
         mode: "food-to-wine",
@@ -522,18 +627,23 @@ export async function getDishWineSuggestions(
       },
       { timeoutMs: 55_000, retries: 1 },
     );
-
-    if (isValidSuggestions(data)) {
-      return { suggestions: data.suggestions, dishProfile: (data as any).dishProfile || null };
+    const data = await request();
+    if (isValidSuggestions(data) && validateWineSpecificity(data, "suggestions")) {
+      return data.suggestions;
     }
 
-    console.warn("[sommelier-ai] Invalid AI suggestion response, using fallback");
-    return { suggestions: fallbackPairingsForDish(dish, userWines), dishProfile: null };
+    const retryData = await request().catch(() => null);
+    if (retryData && isValidSuggestions(retryData) && validateWineSpecificity(retryData, "suggestions")) {
+      return retryData.suggestions;
+    }
+
+    console.warn("[sommelier-ai] Invalid or generic AI suggestion response, using fallback");
+    return fallbackPairingsForDish(dish, userWines);
   } catch (err) {
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getDishWineSuggestions error:", classified.type, classified.message);
     if (classified.type === "auth") throw new Error(classified.message);
-    return { suggestions: fallbackPairingsForDish(dish, userWines), dishProfile: null };
+    return fallbackPairingsForDish(dish, userWines);
   }
 }
 
@@ -547,15 +657,20 @@ export async function analyzeWineList(
   },
 ): Promise<WineListAnalysis> {
   try {
-    const data = await invokeEdgeFunction<WineListAnalysis>(
+    const request = () => invokeEdgeFunction<WineListAnalysis>(
       "analyze-wine-list",
       { ...attachment, userProfile },
       { timeoutMs: 45_000, retries: 1 },
     );
-    if (data && Array.isArray(data.wines) && data.wines.length > 0) {
+    const data = await request();
+    if (data && Array.isArray(data.wines) && data.wines.length > 0 && validateWineSpecificity(data, "wineList")) {
       return data;
     }
-    throw new Error("Resposta vazia da análise");
+    const retryData = await request().catch(() => null);
+    if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0 && validateWineSpecificity(retryData, "wineList")) {
+      return retryData;
+    }
+    throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
     const classified = classifyError(err);
     if (classified.type === "auth") throw new Error(classified.message);
@@ -568,15 +683,20 @@ export async function analyzeMenuForWine(
   wineName: string,
 ): Promise<MenuAnalysis> {
   try {
-    const data = await invokeEdgeFunction<MenuAnalysis>(
+    const request = () => invokeEdgeFunction<MenuAnalysis>(
       "analyze-wine-list",
       { ...attachment, mode: "menu-for-wine", wineName },
       { timeoutMs: 45_000, retries: 1 },
     );
-    if (data && Array.isArray(data.dishes) && data.dishes.length > 0) {
-      return { dishes: data.dishes, summary: data.summary || "", wineProfile: (data as any).wineProfile || null };
+    const data = await request();
+    if (data && Array.isArray(data.dishes) && data.dishes.length > 0 && validateWineSpecificity(data, "menu")) {
+      return data;
     }
-    throw new Error("Nenhum prato encontrado no cardápio");
+    const retryData = await request().catch(() => null);
+    if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0 && validateWineSpecificity(retryData, "menu")) {
+      return retryData;
+    }
+    throw new Error("A análise do cardápio não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
     const classified = classifyError(err);
     if (classified.type === "auth") throw new Error(classified.message);
@@ -634,7 +754,7 @@ export async function getWineInsight(wine: {
   drinkUntil?: number | null;
 }): Promise<WineInsight> {
   try {
-    const data = await invokeEdgeFunction<WineInsight>(
+    const request = () => invokeEdgeFunction<WineInsight>(
       "wine-insight",
       {
         alertType: wine.alertType,
@@ -649,8 +769,13 @@ export async function getWineInsight(wine: {
       },
       { timeoutMs: 8_000, retries: 1 },
     );
-    if (data && (data.insight || data.recommendation)) {
+    const data = await request();
+    if (data && validateWineSpecificity(data, "insight")) {
       return data;
+    }
+    const retryData = await request().catch(() => null);
+    if (retryData && validateWineSpecificity(retryData, "insight")) {
+      return retryData;
     }
     return {
       insight: wine.alertType === "drink_now"

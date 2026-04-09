@@ -94,7 +94,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       const data = await invokeEdgeFunction<any>(
         "scan-wine-label",
         { imageBase64: base64 },
-        { timeoutMs: 75_000, retries: 2 },
+        { timeoutMs: 55_000, retries: 2 },
       );
 
       if (!data?.wine) throw new Error("Nenhum dado encontrado");

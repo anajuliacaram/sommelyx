@@ -45,11 +45,17 @@ function isSdkRelayError(message: string) {
 
 function classifyEdgeError(message: string, status?: number): string {
   if (status === 401) return "Sessão expirada. Faça login novamente.";
-  if (isTransportErrorMessage(message)) return "Sem conexão. Verifique sua internet.";
+  if (isTransportErrorMessage(message)) {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      return "Sem conexão. Verifique sua internet.";
+    }
+    return "O serviço está temporariamente indisponível. Tente novamente em instantes.";
+  }
   if (isSdkRelayError(message)) return "A solicitação não pôde ser enviada. Tente novamente.";
   if (message.toLowerCase().includes("tempo limite")) return "A busca demorou mais que o esperado. Tente novamente.";
   if (status === 429) return "Muitas requisições. Aguarde um momento e tente novamente.";
   if (status === 402) return "Limite de uso atingido. Tente novamente mais tarde.";
+  if (status === 503 || status === 504) return "O serviço está temporariamente indisponível. Tente novamente em instantes.";
   return message || "Não foi possível completar a solicitação.";
 }
 
