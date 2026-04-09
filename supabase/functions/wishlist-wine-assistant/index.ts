@@ -366,10 +366,16 @@ Regras:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro interno";
-    await logAudit(userId, 500, "internal_error", Date.now() - startTime, { message });
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
+    const errMsg = error instanceof Error ? error.message : "Erro interno";
+    const isAbort = errMsg.toLowerCase().includes("abort");
+    const sanitizedMsg = isAbort
+      ? "A análise demorou mais que o esperado. Tente novamente."
+      : /api_key|lovable|config|supabase/i.test(errMsg)
+        ? "Erro interno no serviço. Tente novamente."
+        : errMsg;
+    await logAudit(userId, isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { message: errMsg });
+    return new Response(JSON.stringify({ error: sanitizedMsg }), {
+      status: isAbort ? 504 : 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

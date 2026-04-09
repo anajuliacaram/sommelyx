@@ -149,8 +149,12 @@ Vinho a avaliar:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("taste-compatibility error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro interno" }), {
+    const errMsg = e instanceof Error ? e.message : "Erro interno";
+    console.error("taste-compatibility error:", errMsg);
+    const sanitizedMsg = /api_key|lovable|config|supabase/i.test(errMsg)
+      ? "Não foi possível calcular a compatibilidade agora."
+      : errMsg;
+    return new Response(JSON.stringify({ error: sanitizedMsg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
