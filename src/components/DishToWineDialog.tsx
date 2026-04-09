@@ -1039,10 +1039,42 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="flex items-center gap-2 pb-2">
+                {/* Dish profile section */}
+                {dishProfile && (dishProfile.protein || dishProfile.intensity) && (
+                  <div className="rounded-xl border border-primary/10 bg-primary/[0.03] p-3 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <ChefHat className="h-3 w-3 text-primary/60" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70">Perfil do prato</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {dishProfile.protein && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          {dishProfile.protein}
+                        </span>
+                      )}
+                      {dishProfile.cooking && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          {dishProfile.cooking}
+                        </span>
+                      )}
+                      {dishProfile.fat && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          gordura {dishProfile.fat}
+                        </span>
+                      )}
+                      {dishProfile.intensity && (
+                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                          intensidade {dishProfile.intensity}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 pb-1">
                   <Sparkles className="h-4 w-4 text-primary/70" />
                   <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Vinhos da sua adega para "{dish}"
+                    Vinhos para "{dish}"
                   </span>
                 </div>
 
@@ -1058,10 +1090,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 ) : (
                   <ul className="space-y-3">
                     {suggestions.map((s, i) => {
-                      const badge = matchBadge[s.match];
                       const tint = getStyleTint(s.style);
                       const meta = [s.grape, s.vintage ? `Safra ${s.vintage}` : null, s.region, s.country].filter(Boolean).join(" · ");
                       const hLabel = s.harmony_label || (s.harmony_type && harmonyLabel[s.harmony_type]);
+
+                      const compatColor = s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
+                        s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                        s.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
+                        s.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
+                        "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
+
                       return (
                         <motion.li
                           key={i}
@@ -1069,12 +1107,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
                           className={cn(
-                            "rounded-2xl border p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
+                            "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
                             tint || "bg-card/60 border-border/30",
                             s.fromCellar && !tint && "border-primary/20 bg-primary/[0.04]",
                           )}
                         >
-                          {/* Top: wine identity */}
+                          {/* Top: wine identity + classification */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 space-y-0.5">
                               <div className="flex items-center gap-2">
@@ -1086,9 +1124,6 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               {meta && (
                                 <p className="text-[11px] text-muted-foreground/70 pl-[18px]">{meta}</p>
                               )}
-                              {s.style && (
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50 pl-[18px]">{s.style}</p>
-                              )}
                             </div>
                             {s.fromCellar && (
                               <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -1098,21 +1133,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             )}
                           </div>
 
-                          {/* Middle: explanation */}
+                          {/* Explanation */}
                           <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {s.reason}
                           </p>
 
-                          {/* Bottom: badges */}
+                          {/* Badges: classification + harmony */}
                           <div className="flex items-center gap-2 pl-[18px] flex-wrap">
                             {s.compatibilityLabel && (
                               <span className={cn(
                                 "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
-                                s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
-                                s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
-                                s.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
-                                s.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
-                                "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
+                                compatColor,
                               )}>
                                 {s.compatibilityLabel}
                               </span>
