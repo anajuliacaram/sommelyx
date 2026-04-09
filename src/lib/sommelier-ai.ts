@@ -18,6 +18,7 @@ export interface WineSuggestion {
   fromCellar: boolean;
   match: "perfeito" | "muito bom" | "bom";
   harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
+  harmony_label?: string;
   grape?: string;
   vintage?: number;
   region?: string;
