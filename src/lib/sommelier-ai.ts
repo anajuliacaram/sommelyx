@@ -8,6 +8,8 @@ export interface WineProfile {
   acidity?: string | null;
   tannin?: string | null;
   style?: string | null;
+  complexity?: string | null;
+  summary?: string | null;
 }
 
 export interface DishProfile {
@@ -17,6 +19,19 @@ export interface DishProfile {
   intensity?: string | null;
 }
 
+export interface DishItemProfile {
+  intensity?: string | null;
+  texture?: string | null;
+  highlight?: string | null;
+}
+
+export interface Recipe {
+  description: string;
+  ingredients: string[];
+  steps: string[];
+  wine_reason: string;
+}
+
 export interface PairingResult {
   dish: string;
   reason: string;
@@ -24,6 +39,8 @@ export interface PairingResult {
   harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
   harmony_label?: string;
   category?: "classico" | "afinidade" | "contraste";
+  dish_profile?: DishItemProfile | null;
+  recipe?: Recipe | null;
 }
 
 export interface PairingResponse {
