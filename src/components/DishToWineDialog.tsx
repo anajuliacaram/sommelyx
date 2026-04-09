@@ -1208,9 +1208,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           transition={{ delay: i * 0.08, duration: 0.3 }}
                           className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
-                            <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                              <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
+                            </div>
+                            {p.category && (
+                              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 mt-0.5">
+                                {p.category === "classico" ? "clássico" : p.category === "afinidade" ? "afinidade" : "contraste"}
+                              </span>
+                            )}
                           </div>
                           {hLabel && (
                             <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70 ml-[18px]">
