@@ -106,11 +106,17 @@ export interface MenuDishItem {
   match: "perfeito" | "muito bom" | "bom";
   reason: string;
   highlight?: "top-pick" | "best-value" | null;
+  compatibilityLabel?: string | null;
+  harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
+  harmony_label?: string | null;
+  dish_profile?: DishItemProfile | null;
+  recipe?: Recipe | null;
 }
 
 export interface MenuAnalysis {
   dishes: MenuDishItem[];
   summary: string;
+  wineProfile?: WineProfile | null;
 }
 
 export interface TasteCompatibility {
@@ -517,7 +523,7 @@ export async function analyzeMenuForWine(
       { timeoutMs: 45_000, retries: 1 },
     );
     if (data && Array.isArray(data.dishes) && data.dishes.length > 0) {
-      return data;
+      return { dishes: data.dishes, summary: data.summary || "", wineProfile: (data as any).wineProfile || null };
     }
     throw new Error("Nenhum prato encontrado no cardápio");
   } catch (err) {
