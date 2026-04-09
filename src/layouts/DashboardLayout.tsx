@@ -38,12 +38,27 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/30">
-            <SidebarTrigger
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "icon" }),
-                "rounded-xl h-10 w-10 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground [&>svg]:h-4 [&>svg]:w-4",
-              )}
-            />
+            {/* Desktop: icon-only trigger */}
+            {!isMobile && (
+              <SidebarTrigger
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                  "rounded-xl h-10 w-10 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground [&>svg]:h-4 [&>svg]:w-4",
+                )}
+              />
+            )}
+
+            {/* Mobile: larger, labeled trigger */}
+            {isMobile && (
+              <SidebarTrigger
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "rounded-xl h-11 min-w-[80px] px-3 gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:text-primary-foreground active:scale-95 transition-transform duration-150 [&>svg]:h-5 [&>svg]:w-5",
+                )}
+              >
+                <span className="text-[13px] font-semibold leading-none">Menu</span>
+              </SidebarTrigger>
+            )}
 
             <div className="flex-1 flex items-center justify-start md:justify-center px-1 md:px-4">
               <DashboardCommandMenu
