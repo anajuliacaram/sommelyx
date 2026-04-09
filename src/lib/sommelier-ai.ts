@@ -227,6 +227,13 @@ function hasGenericWineLanguage(text?: string | null) {
   return GENERIC_RESPONSE_PHRASES.some((phrase) => normalized.includes(phrase));
 }
 
+function isUserFacingAnalysisError(message: string) {
+  return (
+    message.startsWith("A análise não ficou específica o suficiente.") ||
+    message.startsWith("A análise do cardápio não ficou específica o suficiente.")
+  );
+}
+
 function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kind: "pairings" | "suggestions" | "wineList" | "menu" | "insight"): boolean {
   if (!data || typeof data !== "object") return false;
 
@@ -569,7 +576,7 @@ export async function getWinePairings(wine: {
   producer?: string | null;
   vintage?: number | null;
   country?: string | null;
-}): Promise<PairingResult[]> {
+}): Promise<PairingResponse> {
   try {
     const request = () => invokeEdgeFunction<{ pairings: PairingResult[] }>(
       "wine-pairings",
@@ -587,28 +594,29 @@ export async function getWinePairings(wine: {
     );
     const data = await request();
     if (isValidPairings(data) && validateWineSpecificity(data, "pairings")) {
-      return data.pairings;
+      return data;
     }
 
     const retryData = await request().catch(() => null);
     if (retryData && isValidPairings(retryData) && validateWineSpecificity(retryData, "pairings")) {
-      return retryData.pairings;
+      return retryData;
     }
 
-    console.warn("[sommelier-ai] Invalid or generic AI pairing response, using fallback");
-    return fallbackPairingsForWine(wine);
+    throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
+    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
+      throw err;
+    }
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getWinePairings error:", classified.type, classified.message);
-    if (classified.type === "auth") throw new Error(classified.message);
-    return fallbackPairingsForWine(wine);
+    throw new Error(classified.message);
   }
 }
 
 export async function getDishWineSuggestions(
   dish: string,
   userWines?: WineSummary[],
-): Promise<WineSuggestion[]> {
+): Promise<SuggestionResponse> {
   try {
     const request = () => invokeEdgeFunction<{ suggestions: WineSuggestion[] }>(
       "wine-pairings",
@@ -629,21 +637,22 @@ export async function getDishWineSuggestions(
     );
     const data = await request();
     if (isValidSuggestions(data) && validateWineSpecificity(data, "suggestions")) {
-      return data.suggestions;
+      return data;
     }
 
     const retryData = await request().catch(() => null);
     if (retryData && isValidSuggestions(retryData) && validateWineSpecificity(retryData, "suggestions")) {
-      return retryData.suggestions;
+      return retryData;
     }
 
-    console.warn("[sommelier-ai] Invalid or generic AI suggestion response, using fallback");
-    return fallbackPairingsForDish(dish, userWines);
+    throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
+    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
+      throw err;
+    }
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getDishWineSuggestions error:", classified.type, classified.message);
-    if (classified.type === "auth") throw new Error(classified.message);
-    return fallbackPairingsForDish(dish, userWines);
+    throw new Error(classified.message);
   }
 }
 
@@ -672,6 +681,9 @@ export async function analyzeWineList(
     }
     throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
+    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
+      throw err;
+    }
     const classified = classifyError(err);
     if (classified.type === "auth") throw new Error(classified.message);
     throw new Error(classified.message);
@@ -698,6 +710,9 @@ export async function analyzeMenuForWine(
     }
     throw new Error("A análise do cardápio não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
+    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
+      throw err;
+    }
     const classified = classifyError(err);
     if (classified.type === "auth") throw new Error(classified.message);
     throw new Error(classified.message);

@@ -126,30 +126,6 @@ export function WinePairingPanel({
     }
   };
 
-  if (existingPairing && !pairings) {
-    return (
-      <div className="space-y-2.5">
-        <div className="flex items-center gap-1.5">
-          <UtensilsCrossed className="h-3.5 w-3.5 text-primary/70" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Harmonização
-          </span>
-        </div>
-        <p className="text-[13px] text-foreground/75 leading-relaxed">{existingPairing}</p>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleFetch}
-          disabled={loading}
-          className="h-8 px-3 text-[11px] font-semibold text-primary/70 hover:text-primary hover:bg-primary/5 rounded-xl"
-        >
-          <Sparkles className="h-3 w-3 mr-1.5" />
-          Sugestões inteligentes
-        </Button>
-      </div>
-    );
-  }
-
   if (!pairings && !loading) {
     return (
       <div className="space-y-2.5">
