@@ -58,12 +58,12 @@ export function FloatingContactButton({ className }: Props) {
             <Button
               className={cn(
                 "rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
-                collapsed ? "h-12 w-12 px-0" : "h-12 px-5",
+                collapsed ? "h-12 w-12 px-0" : "h-auto min-h-12 px-5 py-2.5",
               )}
-              aria-label="Falar com um Sommelier"
+              aria-label="Envie suas dúvidas e sugestões para a Sommelière"
             >
-              <MessageCircle className="h-4 w-4" />
-              {!collapsed && <span className="text-[13px] font-black tracking-tight">Falar com um Sommelier</span>}
+              <MessageCircle className="h-4 w-4 shrink-0" />
+              {!collapsed && <span className="text-[12px] leading-tight font-black tracking-tight text-left">Envie suas dúvidas e sugestões para a Sommelière</span>}
             </Button>
           </PopoverTrigger>
 
