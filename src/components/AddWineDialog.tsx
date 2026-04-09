@@ -236,7 +236,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         <Upload className="h-4 w-4 text-accent" />
                       </div>
                       <div className="flex flex-col items-start">
-                        <p className="text-[13px] font-semibold text-foreground/80">Importar via planilha</p>
+                        <p className="text-[13px] font-semibold text-foreground/80">Importar arquivo</p>
                         <p className="text-[10px] text-muted-foreground/60">Leitura inteligente do Sommelyx</p>
                       </div>
                       <Sparkles className="h-3.5 w-3.5 text-accent/50 ml-auto" />
