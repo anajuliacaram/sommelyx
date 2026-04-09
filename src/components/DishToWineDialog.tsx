@@ -924,44 +924,59 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-3"
               >
                 {selectedWine && (
-                  <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 space-y-0.5">
-                    <p className="text-[13px] font-semibold text-foreground">{selectedWine.name}</p>
-                    <p className="text-[11px] text-muted-foreground">
+                  <div className="glass-card p-4 space-y-1">
+                    <p className="text-[15px] font-bold text-foreground tracking-tight">{selectedWine.name}</p>
+                    <p className="text-[12px] text-foreground/55">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
                     </p>
                   </div>
                 )}
 
-                <div className="flex items-center gap-1.5 pb-1">
-                  <ChefHat className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                <div className="flex items-center gap-2 pb-2">
+                  <ChefHat className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Pratos sugeridos
                   </span>
                 </div>
 
                 {pairings.length === 0 ? (
-                  <p className="text-[12px] text-muted-foreground text-center py-4">
-                    Nenhuma sugestão encontrada. Tente outro vinho.
-                  </p>
+                  <div className="glass-card p-6 text-center space-y-2">
+                    <p className="text-sm text-foreground/70 font-medium">
+                      Nenhuma sugestão encontrada.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Experimente outro vinho da sua adega.
+                    </p>
+                  </div>
                 ) : (
-                  <ul className="space-y-2">
-                    {pairings.map((p, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.06 }}
-                        className="glass-card p-3.5 space-y-1"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", matchDot[p.match] || "bg-primary/40")} />
-                          <span className="text-[13px] font-semibold text-foreground">{p.dish}</span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground leading-snug pl-3.5">
-                          {p.reason}
-                        </p>
-                      </motion.li>
-                    ))}
+                  <ul className="space-y-3">
+                    {pairings.map((p, i) => {
+                      const badge = matchBadge[p.match];
+                      return (
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
+                          className="glass-card p-4 space-y-2 cursor-default"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
+                            <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
+                          </div>
+                          <p className="text-[13px] text-foreground/65 leading-relaxed pl-5">
+                            {p.reason}
+                          </p>
+                          {badge && (
+                            <div className="pl-5">
+                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
+                                {badge.label}
+                              </span>
+                            </div>
+                          )}
+                        </motion.li>
+                      );
+                    })}
                   </ul>
                 )}
 
@@ -973,7 +988,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setSelectedWineId("");
                     setStep("select-wine");
                   }}
-                  className="w-full h-9 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border/40"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Escolher outro vinho
                 </Button>
