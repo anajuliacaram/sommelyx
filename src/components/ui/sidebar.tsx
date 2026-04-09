@@ -217,7 +217,7 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = "Sidebar";
 
 const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.ComponentProps<typeof Button>>(
-  ({ className, onClick, ...props }, ref) => {
+  ({ className, onClick, children, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
 
     return (
@@ -225,7 +225,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         ref={ref}
         data-sidebar="trigger"
         variant="ghost"
-        size="icon"
+        size={children ? "default" : "icon"}
         className={cn(
           "relative h-9 w-9 rounded-2xl text-white ring-1 ring-black/[0.06] bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(123,30,43,0.28)] hover:brightness-[1.03] active:brightness-[0.98]",
           className,
@@ -237,12 +237,16 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         {...props}
       >
         <PanelLeft className="h-4 w-4" />
-        {/* Wine "etiqueta" indicator (brand accent) */}
-        <span
-          aria-hidden="true"
-          className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-wine ring-2 ring-background shadow-[0_10px_24px_-18px_rgba(110,30,42,0.85)]"
-        />
-        <span className="sr-only">Toggle Sidebar</span>
+        {children}
+        {!children && (
+          <>
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-wine ring-2 ring-background shadow-[0_10px_24px_-18px_rgba(110,30,42,0.85)]"
+            />
+            <span className="sr-only">Toggle Sidebar</span>
+          </>
+        )}
       </Button>
     );
   },
