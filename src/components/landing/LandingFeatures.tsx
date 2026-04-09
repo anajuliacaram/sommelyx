@@ -122,20 +122,20 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
       <div className="mx-auto max-w-5xl">
         {/* Section header */}
         <motion.div
-          className="text-center mb-10 sm:mb-14"
+          className="text-center mb-8 sm:mb-10"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
           <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-serif font-bold tracking-[-0.02em]" style={{ color: "#1A1A1A" }}>
             Tudo que você precisa para gerenciar sua adega
           </h2>
-          <p className="mt-3 text-[14px] sm:text-[16px] max-w-md mx-auto leading-relaxed" style={{ color: "#666" }}>
+          <p className="mt-2 text-[14px] sm:text-[16px] max-w-md mx-auto leading-relaxed" style={{ color: "#666" }}>
             Simples, inteligente e feito para quem ama vinho.
           </p>
         </motion.div>
 
         {/* Mobile carousel */}
         <div className="md:hidden -mx-4 px-4 overflow-x-auto pb-2 scrollbar-hide">
-          <div className="flex gap-3 snap-x snap-mandatory">
+          <div className="flex gap-2.5 snap-x snap-mandatory">
             {blocks.map((block, i) => (
               <FeatureCard key={block.title} block={block} i={i} onSignup={onSignup} mobile />
             ))}
@@ -143,7 +143,7 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
         </div>
 
         {/* Desktop */}
-        <div className="hidden md:grid grid-cols-3 gap-5">
+        <div className="hidden md:grid grid-cols-3 gap-4">
           {blocks.map((block, i) => (
             <FeatureCard key={block.title} block={block} i={i} onSignup={onSignup} />
           ))}
