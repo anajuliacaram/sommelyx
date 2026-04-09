@@ -7,6 +7,7 @@ export interface PairingResult {
   dish: string;
   reason: string;
   match: "perfeito" | "muito bom" | "bom";
+  harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
 }
 
 export interface WineSuggestion {
@@ -15,6 +16,7 @@ export interface WineSuggestion {
   reason: string;
   fromCellar: boolean;
   match: "perfeito" | "muito bom" | "bom";
+  harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
 }
 
 export interface WineListItem {

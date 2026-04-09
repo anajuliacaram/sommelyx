@@ -19,6 +19,14 @@ const matchDot: Record<string, string> = {
   bom: "bg-[hsl(38,52%,50%)]",
 };
 
+const harmonyLabel: Record<string, string> = {
+  contraste: "harmonia por contraste",
+  semelhança: "harmonia por semelhança",
+  complemento: "aromas complementares",
+  equilíbrio: "equilíbrio de intensidade",
+  limpeza: "limpeza de paladar",
+};
+
 const matchBadge: Record<string, { label: string; className: string }> = {
   perfeito: { label: "combinação perfeita", className: "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" },
   "muito bom": { label: "harmonia elegante", className: "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" },
@@ -158,14 +166,19 @@ export function WinePairingPanel({
                   className="flex items-start gap-2.5 py-1.5"
                 >
                   <div className={cn("w-2 h-2 rounded-full mt-1.5 shrink-0 ring-2 ring-white/50", matchDot[p.match] || "bg-primary/40")} />
-                  <div className="min-w-0 space-y-0.5">
-                    <span className="text-[13px] font-bold text-foreground">{p.dish}</span>
-                    <p className="text-[11px] text-foreground/55 leading-snug">{p.reason}</p>
-                    {badge && (
-                      <span className={cn("inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide mt-0.5", badge.className)}>
-                        {badge.label}
-                      </span>
-                    )}
+                   <div className="min-w-0 space-y-0.5">
+                     <span className="text-[13px] font-bold text-foreground">{p.dish}</span>
+                     {p.harmony_type && harmonyLabel[p.harmony_type] && (
+                       <span className="block text-[10px] font-semibold uppercase tracking-wider text-primary/60">
+                         {harmonyLabel[p.harmony_type]}
+                       </span>
+                     )}
+                     <p className="text-[11px] text-foreground/55 leading-snug">{p.reason}</p>
+                     {badge && (
+                       <span className={cn("inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide mt-0.5", badge.className)}>
+                         {badge.label}
+                       </span>
+                     )}
                   </div>
                 </motion.li>
               );
