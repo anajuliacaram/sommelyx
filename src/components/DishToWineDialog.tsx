@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis } from "@/lib/sommelier-ai";
+import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile } from "@/lib/sommelier-ai";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
@@ -97,6 +97,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [selectedWineId, setSelectedWineId] = useState("");
   const [suggestions, setSuggestions] = useState<WineSuggestion[] | null>(null);
   const [pairings, setPairings] = useState<PairingResult[] | null>(null);
+  const [wineProfile, setWineProfile] = useState<WineProfile | null>(null);
+  const [dishProfile, setDishProfile] = useState<DishProfile | null>(null);
   const [scanResults, setScanResults] = useState<WineListAnalysis | null>(null);
   const [menuResults, setMenuResults] = useState<MenuAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
@@ -115,6 +117,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setSelectedWineId("");
     setSuggestions(null);
     setPairings(null);
+    setWineProfile(null);
+    setDishProfile(null);
     setScanResults(null);
     setMenuResults(null);
     setLoading(false);
@@ -162,7 +166,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         region: w.region,
       }));
       const result = await getDishWineSuggestions(query, cellarWines);
-      setSuggestions(result);
+      setSuggestions(result.suggestions);
+      setDishProfile(result.dishProfile || null);
       setStep("results");
     } catch (err: any) {
       setError(err.message || "Não foi possível buscar sugestões");
@@ -184,7 +189,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         grape: wine.grape,
         region: wine.region,
       });
-      setPairings(result);
+      setPairings(result.pairings);
+      setWineProfile(result.wineProfile || null);
       setStep("wine-results");
     } catch (err: any) {
       setError(err.message || "Não foi possível buscar sugestões");
@@ -1099,14 +1105,19 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                           {/* Bottom: badges */}
                           <div className="flex items-center gap-2 pl-[18px] flex-wrap">
+                            {s.compatibilityLabel && (
+                              <span className={cn(
+                                "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
+                                s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
+                                s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                                "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
+                              )}>
+                                {s.compatibilityLabel}
+                              </span>
+                            )}
                             {hLabel && (
                               <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70">
                                 {hLabel}
-                              </span>
-                            )}
-                            {badge && (
-                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
-                                {badge.label}
                               </span>
                             )}
                           </div>
@@ -1141,11 +1152,30 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-3"
               >
                 {selectedWine && (
-                  <div className="glass-card p-4 space-y-1">
+                  <div className="glass-card p-4 space-y-2">
                     <p className="text-[15px] font-bold text-foreground tracking-tight">{selectedWine.name}</p>
                     <p className="text-[12px] text-foreground/55">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
                     </p>
+                    {wineProfile && (wineProfile.body || wineProfile.acidity || wineProfile.tannin) && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {wineProfile.body && (
+                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            Corpo {wineProfile.body}
+                          </span>
+                        )}
+                        {wineProfile.acidity && (
+                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            Acidez {wineProfile.acidity}
+                          </span>
+                        )}
+                        {wineProfile.tannin && wineProfile.tannin !== "n/a" && (
+                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                            Taninos {wineProfile.tannin}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1178,9 +1208,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           transition={{ delay: i * 0.08, duration: 0.3 }}
                           className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
-                            <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                              <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
+                            </div>
+                            {p.category && (
+                              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 mt-0.5">
+                                {p.category === "classico" ? "clássico" : p.category === "afinidade" ? "afinidade" : "contraste"}
+                              </span>
+                            )}
                           </div>
                           {hLabel && (
                             <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70 ml-[18px]">
