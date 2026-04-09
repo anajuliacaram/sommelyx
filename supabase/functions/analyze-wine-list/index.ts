@@ -41,69 +41,6 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-// ── Anti-Genericity Validation (same as wine-pairings) ──
-const GENERIC_PATTERNS = [
-  /cabernet sauvignon (?:possui|tem|apresenta|é conhecid)/i,
-  /merlot (?:possui|tem|apresenta|é conhecid)/i,
-  /chardonnay (?:possui|tem|apresenta|é conhecid)/i,
-  /pinot noir (?:possui|tem|apresenta|é conhecid)/i,
-  /sauvignon blanc (?:possui|tem|apresenta|é conhecid)/i,
-  /carmenère (?:possui|tem|apresenta|é conhecid)/i,
-  /malbec (?:possui|tem|apresenta|é conhecid)/i,
-  /sangiovese (?:possui|tem|apresenta|é conhecid)/i,
-  /syrah (?:possui|tem|apresenta|é conhecid)/i,
-  /tempranillo (?:possui|tem|apresenta|é conhecid)/i,
-  /nebbiolo (?:possui|tem|apresenta|é conhecid)/i,
-  /combina (?:muito )?bem/i,
-  /harmoniza perfeitamente/i,
-  /complementa os sabores/i,
-  /é? um vinho (?:versátil|equilibrado|elegante) que/i,
-  /notas? de frutas (?:vermelhas|escuras|tropicais|cítricas) e/i,
-];
-
-function validateWineSpecificity(
-  texts: string[],
-  wineName: string,
-  grape?: string | null,
-): { passed: boolean; failures: string[] } {
-  const failures: string[] = [];
-  const wineNameLower = wineName.toLowerCase();
-  const grapeClean = grape?.toLowerCase().replace(/\s+/g, " ").trim() || "";
-
-  for (const text of texts) {
-    if (!text || text.length < 20) continue;
-    const lower = text.toLowerCase();
-
-    const mentionsWine = lower.includes(wineNameLower) ||
-      wineNameLower.split(" ").filter(w => w.length > 3).some(w => lower.includes(w));
-
-    if (!mentionsWine && texts.length <= 10) {
-      failures.push(`Missing wine name reference: "${text.slice(0, 60)}..."`);
-    }
-
-    for (const pattern of GENERIC_PATTERNS) {
-      if (pattern.test(text)) {
-        failures.push(`Generic pattern found: "${text.slice(0, 60)}..."`);
-        break;
-      }
-    }
-
-    if (grapeClean && grapeClean.length > 3) {
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
-      const genericSentences = sentences.filter(s => {
-        const sl = s.toLowerCase();
-        return sl.includes(grapeClean) && !mentionsWine &&
-          !sl.match(/regiã|produtor|safra|rótulo|vinícola|região|vale |serra |douro|bordeaux|toscana|mendoza|napa|rioja|barossa|maipo|casablanca|colchagua/i);
-      });
-      if (genericSentences.length > sentences.length / 2) {
-        failures.push(`Grape-only description without label context`);
-      }
-    }
-  }
-
-  return { passed: failures.length === 0, failures };
-}
-
 function extractToolArguments(aiData: any) {
   const toolCallArgs = aiData?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (typeof toolCallArgs === "string" && toolCallArgs.trim()) return JSON.parse(toolCallArgs);
@@ -452,106 +389,50 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
 
     console.log(`Calling AI gateway for ${isMenuMode ? "menu" : "wine list"} analysis...`);
 
-    // ── Retry loop with anti-genericity validation ──
-    const MAX_ATTEMPTS = 2;
-    let lastParsed: any = null;
-    let validationResult: { passed: boolean; failures: string[] } = { passed: false, failures: [] };
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90_000);
 
-    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 90_000);
+    const aiResponse = await fetch(AI_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userContent },
+        ],
+        tools,
+        tool_choice: toolChoice,
+        temperature: 0.3,
+      }),
+    });
 
-      const retryHint = attempt > 0
-        ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre cada rótulo. Cite nomes dos vinhos, mencione produtores/regiões/posicionamento.`
-        : "";
+    clearTimeout(timeout);
 
-      const messagesForAI = [
-        { role: "system" as const, content: systemPrompt },
-        { role: "user" as const, content: retryHint
-          ? [...userContent, { type: "text" as const, text: retryHint }]
-          : userContent },
-      ];
-
-      const aiResponse = await fetch(AI_URL, {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: messagesForAI,
-          tools,
-          tool_choice: toolChoice,
-          temperature: 0.3,
-        }),
-      });
-
-      clearTimeout(timeout);
-
-      if (!aiResponse.ok) {
-        const errText = await aiResponse.text();
-        console.error("AI gateway error:", aiResponse.status, errText);
-        if (aiResponse.status === 429) {
-          return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
-        }
-        if (aiResponse.status === 402) {
-          return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
-        }
-        throw new Error(`AI gateway error: ${aiResponse.status} - ${errText}`);
+    if (!aiResponse.ok) {
+      const errText = await aiResponse.text();
+      console.error("AI gateway error:", aiResponse.status, errText);
+      if (aiResponse.status === 429) {
+        return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
       }
-
-      const aiData = await aiResponse.json();
-      const parsed = extractToolArguments(aiData);
-
-      if (!parsed) {
-        console.error("AI parse error on attempt", attempt);
-        continue;
+      if (aiResponse.status === 402) {
+        return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
       }
-
-      lastParsed = parsed;
-
-      // ── Validate anti-genericity ──
-      const textsToValidate: string[] = [];
-      if (isMenuMode) {
-        if (lastParsed.wineProfile?.summary) textsToValidate.push(lastParsed.wineProfile.summary);
-        for (const d of (lastParsed.dishes || [])) {
-          if (d.reason) textsToValidate.push(d.reason);
-        }
-        validationResult = validateWineSpecificity(textsToValidate, wineName || "", null);
-      } else {
-        for (const w of (lastParsed.wines || [])) {
-          if (w.description) textsToValidate.push(w.description);
-          if (w.verdict) textsToValidate.push(w.verdict);
-        }
-        // For wine list, validate each wine individually
-        const allPassed: boolean[] = [];
-        for (const w of (lastParsed.wines || [])) {
-          const wTexts = [w.description, w.verdict].filter(Boolean);
-          if (wTexts.length > 0) {
-            const v = validateWineSpecificity(wTexts, w.name || "", w.grape);
-            allPassed.push(v.passed);
-            if (!v.passed) validationResult.failures.push(...v.failures);
-          }
-        }
-        validationResult.passed = allPassed.length === 0 || allPassed.filter(p => p).length >= allPassed.length * 0.6;
-      }
-
-      console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
-
-      if (validationResult.passed) break;
-
-      if (attempt === MAX_ATTEMPTS - 1) {
-        console.log("Max retries reached, using best result available");
-      }
+      throw new Error(`AI gateway error: ${aiResponse.status} - ${errText}`);
     }
 
-    if (!lastParsed) {
+    const aiData = await aiResponse.json();
+    const parsed = extractToolArguments(aiData);
+
+    if (!parsed) {
       throw new Error("Não foi possível interpretar a resposta da IA.");
     }
 
-    return jsonResponse(isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed));
+    return jsonResponse(isMenuMode ? normalizeMenuPayload(parsed) : normalizeWineListPayload(parsed));
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "Erro interno";
     const isAbort = errMsg.toLowerCase().includes("abort");
