@@ -257,44 +257,48 @@ function buildCellarReason(w: WineSummary, dish: string, harmonyType: string): s
   const style = (w.style || "").toLowerCase();
   const grape = w.grape || "";
   const region = w.region || "";
+  const producer = w.producer || "";
   const parts: string[] = [];
 
-  if (grape && region) {
-    parts.push(`${w.name}, um ${style} de ${grape} da região de ${region}, traz um perfil sensorial distinto para esta harmonização.`);
-  } else if (grape) {
-    parts.push(`A uva ${grape} confere a este ${style} características que interagem de forma específica com "${dish}".`);
-  } else {
-    parts.push(`Este ${style || "vinho"} possui estrutura que dialoga com os componentes de "${dish}".`);
-  }
+  // Always start with the wine's name for specificity
+  const contextParts: string[] = [];
+  if (producer) contextParts.push(`produzido por ${producer}`);
+  if (grape && region) contextParts.push(`um ${style || "vinho"} de ${grape} da região de ${region}`);
+  else if (grape) contextParts.push(`de ${grape}`);
+  else if (region) contextParts.push(`da região de ${region}`);
+  
+  const intro = contextParts.length > 0
+    ? `${w.name}, ${contextParts.join(", ")},`
+    : `${w.name}`;
 
   if (harmonyType === "contraste") {
     if (analysis.fat === "alta" || analysis.fat === "moderada") {
-      parts.push(`A acidez do vinho funciona em contraste com a ${analysis.fat === "alta" ? "gordura pronunciada" : "textura untuosa"} do prato, limpando o paladar entre cada garfada.`);
+      parts.push(`${intro} tende a ter acidez que funciona em contraste com a ${analysis.fat === "alta" ? "gordura pronunciada" : "textura untuosa"} de "${dish}", limpando o paladar entre cada garfada.`);
     } else {
-      parts.push(`O corpo do vinho cria um contraste de texturas com a leveza do prato, adicionando camadas de complexidade.`);
+      parts.push(`${intro} cria um contraste de texturas com a leveza de "${dish}", adicionando camadas de complexidade.`);
     }
   } else if (harmonyType === "semelhança") {
     if (style === "branco" && analysis.intensity === "leve") {
-      parts.push(`A delicadeza deste branco espelha a leveza do prato — ambos se encontram na mesma faixa de intensidade.`);
+      parts.push(`A delicadeza de ${intro} espelha a leveza de "${dish}" — ambos se encontram na mesma faixa de intensidade.`);
     } else {
-      parts.push(`O peso e a intensidade do vinho espelham a robustez do prato, criando uma experiência onde nenhum elemento domina.`);
+      parts.push(`O peso e a intensidade de ${intro} espelham a robustez de "${dish}", criando uma experiência onde nenhum elemento domina.`);
     }
   } else if (harmonyType === "complemento") {
     if (analysis.flavors.length > 0) {
-      parts.push(`Os aromas do vinho complementam ${analysis.flavors[0]}, criando uma experiência mais completa e integrada.`);
+      parts.push(`Os aromas de ${intro} complementam ${analysis.flavors[0]} de "${dish}", criando uma experiência mais integrada.`);
     } else {
-      parts.push(`As notas aromáticas do vinho adicionam uma dimensão extra aos sabores do prato.`);
+      parts.push(`As notas aromáticas de ${intro} adicionam dimensão extra aos sabores de "${dish}".`);
     }
   } else if (harmonyType === "equilíbrio") {
-    parts.push(`O corpo ${style === "tinto" ? "encorpado" : "médio"} do vinho mantém proporção equilibrada com a intensidade de "${dish}".`);
+    parts.push(`${intro} mantém proporção equilibrada entre seu corpo e a intensidade de "${dish}".`);
   } else {
-    parts.push(`A acidez natural do vinho reseta o paladar entre cada mordida, renovando a percepção dos sabores.`);
+    parts.push(`A acidez natural de ${intro} reseta o paladar entre cada mordida de "${dish}", renovando a percepção dos sabores.`);
   }
 
   if (w.vintage) {
     const age = new Date().getFullYear() - w.vintage;
-    if (age > 5) parts.push(`Com ${age} anos de evolução, seus taninos estão mais integrados e suaves.`);
-    else if (age <= 2) parts.push(`Sendo um vinho jovem, preserva frescor e vivacidade que complementam o prato.`);
+    if (age > 5) parts.push(`Com ${age} anos de evolução, ${w.name} apresenta taninos mais integrados e suaves.`);
+    else if (age <= 2) parts.push(`Sendo um vinho jovem, ${w.name} preserva frescor e vivacidade que complementam o prato.`);
   }
 
   return parts.join(" ");
