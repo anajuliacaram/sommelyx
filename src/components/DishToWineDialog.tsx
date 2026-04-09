@@ -1385,37 +1385,80 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   </div>
                 ) : (
                   <ul className="space-y-3">
-                    {scanResults.wines.map((w, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.08, duration: 0.3 }}
-                        className="glass-card p-4 space-y-2 cursor-default"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="text-[15px] font-bold text-foreground tracking-tight">{w.name}</span>
-                          {w.price && (
-                            <span className="shrink-0 text-[14px] font-bold text-foreground">
-                              R$ {w.price}
-                            </span>
+                    {scanResults.wines.map((w, i) => {
+                      const tint = getStyleTint(w.style);
+                      const meta = [w.grape, w.vintage ? `Safra ${w.vintage}` : null, w.region].filter(Boolean).join(" · ");
+                      const compatColor = w.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
+                        w.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                        w.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
+                        w.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
+                        "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
+                      return (
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
+                          className={cn(
+                            "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
+                            tint || "bg-card/60 border-border/30",
                           )}
-                        </div>
-                        {w.highlight && (
-                          <span className={cn(
-                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
-                            w.highlight === "best-value"
-                              ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
-                              : w.highlight === "top-pick"
-                              ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]"
-                              : "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]"
-                          )}>
-                            {w.highlight === "best-value" ? "Melhor custo-benefício" : w.highlight === "top-pick" ? "Melhor escolha" : "Para experimentar"}
-                          </span>
-                        )}
-                        <p className="text-[13px] text-foreground/65 leading-relaxed">{w.verdict}</p>
-                      </motion.li>
-                    ))}
+                        >
+                          {/* Header: wine name + price */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 space-y-0.5">
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">{w.name}</span>
+                              {meta && <p className="text-[11px] text-muted-foreground/70">{meta}</p>}
+                            </div>
+                            {w.price != null && (
+                              <span className="shrink-0 text-[14px] font-bold text-foreground">
+                                R$ {w.price}
+                              </span>
+                            )}
+                          </div>
+                          {/* Badges: compatibility + highlight */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {w.compatibilityLabel && (
+                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", compatColor)}>
+                                {w.compatibilityLabel}
+                              </span>
+                            )}
+                            {w.highlight && (
+                              <span className={cn(
+                                "inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                                w.highlight === "best-value"
+                                  ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
+                                  : w.highlight === "top-pick"
+                                  ? "bg-primary/8 text-primary"
+                                  : "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]"
+                              )}>
+                                {w.highlight === "best-value" ? "Melhor custo-benefício" : w.highlight === "top-pick" ? "Melhor escolha" : "Para experimentar"}
+                              </span>
+                            )}
+                          </div>
+                          {/* Wine structure pills */}
+                          {(w.body || w.acidity || w.tannin) && (
+                            <div className="flex flex-wrap gap-1">
+                              {w.body && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Corpo {w.body}</span>}
+                              {w.acidity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Acidez {w.acidity}</span>}
+                              {w.tannin && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Taninos {w.tannin}</span>}
+                            </div>
+                          )}
+                          {/* Verdict */}
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed">{w.verdict}</p>
+                          {/* Comparative labels */}
+                          {w.comparativeLabels && w.comparativeLabels.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {w.comparativeLabels.map((label, j) => (
+                                <span key={j} className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-[1px] text-[8px] font-semibold uppercase tracking-wider text-primary/70">
+                                  {label}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </motion.li>
+                      );
+                    })}
                   </ul>
                 )}
 
