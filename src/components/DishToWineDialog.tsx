@@ -360,23 +360,23 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3"
               >
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                   {subModeTitle} — Como quer harmonizar?
                 </p>
 
                 <button
                   onClick={() => handleSelectSubMode("by-dish")}
-                  className="w-full text-left rounded-xl border border-border/50 bg-background/60 hover:bg-primary/[0.04] hover:border-primary/20 p-4 transition-all duration-200 group"
+                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
                       <ChefHat className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold text-foreground">Tenho um prato em mente</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                      <p className="text-[14px] font-semibold text-foreground">Tenho um prato em mente</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">
                         {source === "cellar"
-                          ? "Nossa inteligência sugere vinhos da sua adega para o prato"
+                          ? "O Sommelyx sugere vinhos da sua adega para o prato"
                           : "Digite o prato e envie a foto da carta de vinhos"}
                       </p>
                     </div>
@@ -385,17 +385,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 <button
                   onClick={() => handleSelectSubMode("by-wine")}
-                  className="w-full text-left rounded-xl border border-border/50 bg-background/60 hover:bg-primary/[0.04] hover:border-primary/20 p-4 transition-all duration-200 group"
+                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
                       <Wine className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold text-foreground">Tenho um vinho em mente</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                      <p className="text-[14px] font-semibold text-foreground">Tenho um vinho em mente</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">
                         {source === "cellar"
-                          ? "Nossa inteligência sugere pratos ideais para o vinho escolhido"
+                          ? "O Sommelyx sugere pratos ideais para o vinho escolhido"
                           : "Digite o vinho e envie a foto do cardápio"}
                       </p>
                     </div>
