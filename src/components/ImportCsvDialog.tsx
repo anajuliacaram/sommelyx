@@ -144,8 +144,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const readPdfAsText = async (file: File) => {
     const buffer = await file.arrayBuffer();
-    const pdfjs = await import("pdfjs-dist");
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+    const pdfjsModule = await import("pdfjs-dist");
+    const pdfjs = pdfjsModule.default || pdfjsModule;
+    if (pdfjs.GlobalWorkerOptions) {
+      pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+    }
 
     const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
     const maxPages = Math.min(doc.numPages, 12);
@@ -164,7 +167,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const readWordAsText = async (file: File) => {
     const buffer = await file.arrayBuffer();
-    const mammoth = await import("mammoth");
+    const mammothModule = await import("mammoth");
+    const mammoth = mammothModule.default || mammothModule;
     const result = await mammoth.extractRawText({ arrayBuffer: buffer });
     return result.value || "";
   };
