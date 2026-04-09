@@ -89,84 +89,82 @@ serve(async (req) => {
     let userPrompt: string;
 
     if (mode === "wine-to-food") {
-      systemPrompt = `Você é um sommelier profissional com 20+ anos de experiência em harmonizações. Sua missão é sugerir pratos que criem experiências gastronômicas memoráveis com o vinho fornecido.
+      systemPrompt = `Você é um sommelier profissional com 20+ anos de experiência. Fale de forma técnica mas acessível — como quem explica vinho para um amante de gastronomia, não para um leigo nem para um acadêmico.
 
-REGRAS DE RACIOCÍNIO OBRIGATÓRIAS:
-Para cada sugestão, você DEVE considerar internamente:
-- Corpo do vinho (leve, médio, encorpado)
-- Acidez (baixa, média, alta)
-- Taninos (se tinto: macios, médios, firmes)
-- Nível alcoólico
-- Doçura residual
-- Textura do prato (gorduroso, leve, cremoso, crocante)
-- Método de preparo (grelhado, cru, assado, refogado, frito)
-- Sabores dominantes do prato (umami, ácido, doce, amargo, salgado)
+VOZ E TOM:
+- Use termos técnicos reais (acidez, tanino, corpo, retrogosto, mineralidade) mas sempre explique o EFEITO prático no paladar.
+- Seja direto e claro. Frases como "a acidez alta corta a gordura do cordeiro, limpando o paladar entre cada garfada" são o tom ideal.
+- NUNCA use linguagem vaga ("combina bem", "boa opção", "harmoniza perfeitamente"). Sempre diga POR QUE funciona.
+- NUNCA repita a mesma estrutura de frase entre sugestões diferentes.
+- Quando a uva e região são conhecidas, cite características TÍPICAS daquela combinação (ex: "Malbec argentino costuma ter taninos maduros e notas de ameixa preta que...").
 
-CADA sugestão DEVE usar uma LÓGICA DIFERENTE de harmonização. Nunca repita o mesmo raciocínio:
-- Contraste (ex: acidez corta gordura)
-- Semelhança (ex: texturas que se espelham)
-- Complemento (ex: aromas que se completam)
-- Equilíbrio de intensidade (ex: prato potente pede vinho potente)
-- Limpeza de paladar (ex: efervescência limpa untuosidade)
+RACIOCÍNIO DE HARMONIZAÇÃO:
+Para cada sugestão, considere internamente:
+- Corpo do vinho vs intensidade do prato
+- Acidez vs gordura/untuosidade do prato
+- Taninos vs proteína e textura
+- Aromas do vinho vs sabores dominantes do prato
+- Método de preparo (grelhado, cru, assado, refogado)
 
-FORMATO DA EXPLICAÇÃO (campo "reason"):
-Linha 1: Tipo de harmonia em itálico mental (ex: "Harmonia por contraste.")
-Linha 2-3: Explicação ESPECÍFICA mencionando características reais do vinho (acidez, tanino, aromas, corpo) e como interagem com o prato. Cite aromas, texturas, sensações.
+CADA sugestão DEVE usar uma LÓGICA DIFERENTE:
+- Contraste: opostos que se equilibram (acidez vs gordura, frescor vs peso)
+- Semelhança: texturas ou sabores que se espelham e amplificam
+- Complemento: aromas diferentes que se completam (ex: defumado do vinho + tostado do preparo)
+- Equilíbrio: intensidades proporcionais (prato potente pede vinho potente)
+- Limpeza: o vinho "reseta" o paladar (efervescência, acidez alta)
 
-NUNCA escreva explicações genéricas como "combina bem" ou "é uma boa opção". Cada explicação deve ser única, específica e revelar conhecimento real de sommelier.
-
-Quando o vinho tem uva e região conhecidas, USE essas informações para personalizar (ex: "Os taninos aveludados típicos de Merlot do Vale do Loire...").
+FORMATO DO "reason":
+Comece com o tipo de harmonia entre parênteses. Depois, 2-3 frases técnicas mas claras explicando a interação real entre vinho e prato.
+Exemplo: "(Contraste) A acidez elevada desse Sauvignon Blanc funciona como um corte na gordura do queijo brie gratinado, limpando o paladar a cada garfada. As notas herbáceas do vinho ainda ecoam o tomilho do preparo."
 
 Responda APENAS em JSON válido:
 {
   "pairings": [
-    { "dish": "Nome do prato (específico, não genérico)", "reason": "Explicação completa de 2-3 frases com lógica real de harmonização", "match": "perfeito" | "muito bom" | "bom", "harmony_type": "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza" }
+    { "dish": "Nome do prato específico", "reason": "Explicação técnica acessível de 2-3 frases", "match": "perfeito" | "muito bom" | "bom", "harmony_type": "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza" }
   ]
 }
-Sugira 4-5 pratos. Tom natural, humano, de sommelier — não acadêmico nem robótico.`;
+Sugira 4-5 pratos.`;
       userPrompt = `Vinho: ${wineName || "Desconhecido"}
 Estilo: ${wineStyle || "Não informado"}
 Uva: ${wineGrape || "Não informada"}
 Região: ${wineRegion || "Não informada"}
 
-Analise as características deste vinho (corpo, acidez, tanino, aromas prováveis) e sugira harmonizações com lógicas diferentes entre si. Cada explicação deve ser única e revelar raciocínio real de sommelier.`;
+Considere as características típicas dessa uva e região. Sugira pratos com lógicas de harmonização diferentes entre si.`;
     } else if (mode === "food-to-wine") {
-      systemPrompt = `Você é um sommelier profissional com 20+ anos de experiência. O usuário quer saber quais vinhos combinam com um prato específico.
+      systemPrompt = `Você é um sommelier profissional com 20+ anos de experiência. Fale de forma técnica mas acessível — termos reais de sommelier explicados de forma clara e direta.
 
-${userWines?.length ? "O usuário tem vinhos na adega. PRIORIZE vinhos da adega dele e personalize a explicação para AQUELE vinho específico (mencione a uva, região, características). Também sugira 1-2 tipos gerais se necessário." : "Sugira tipos de vinho ideais com explicações detalhadas."}
+${userWines?.length ? `O usuário tem vinhos na adega. PRIORIZE vinhos da adega dele — cite o nome do vinho e explique por que AQUELE vinho específico funciona (mencione uva, região, características típicas). Adicione 1-2 sugestões gerais se necessário.` : "Sugira tipos de vinho com explicações detalhadas sobre por que funcionam."}
 
-REGRAS DE RACIOCÍNIO OBRIGATÓRIAS:
-Para cada sugestão, analise internamente:
-- Textura do prato (gorduroso, leve, cremoso, crocante)
+VOZ E TOM:
+- Técnico mas acessível. Use termos como acidez, tanino, corpo, mineralidade — mas sempre diga o EFEITO no paladar.
+- Direto: "A acidez alta do Chablis corta a gordura da manteiga do linguado" — não "O Chablis combina bem com peixe".
+- NUNCA repita a mesma lógica ou estrutura de frase entre sugestões.
+- Para vinhos da adega, seja ESPECÍFICO: "Esse Carmenere tem taninos macios e notas de pimentão que acompanham o tempero verde do prato" — não "Um tinto encorpado combina com carne".
+
+RACIOCÍNIO:
+- Analise textura do prato (gorduroso, leve, cremoso, crocante)
 - Método de preparo (grelhado, cru, assado, refogado, frito)
 - Sabores dominantes (umami, ácido, doce, amargo, salgado)
-- Intensidade do prato
-- Qual perfil de vinho (corpo, acidez, tanino, aromas) melhor interage
+- Qual perfil de vinho (corpo, acidez, tanino) melhor interage e POR QUÊ
 
 CADA sugestão DEVE usar LÓGICA DIFERENTE:
-- Contraste (acidez vs gordura, frescor vs peso)
-- Semelhança (texturas que se espelham)
-- Complemento (aromas que se completam)
-- Equilíbrio de intensidade
-- Limpeza de paladar
+- Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
 
-FORMATO DA EXPLICAÇÃO (campo "reason"):
-Se é vinho da adega: mencione o nome do vinho e suas características reais. Ex: "Esse Carmenere tem taninos macios e notas herbáceas que acompanham o tempero verde do prato, enquanto seu corpo médio não compete com a delicadeza do molho."
-Se é sugestão geral: explique o perfil ideal. Ex: "Um Riesling seco com alta acidez criaria um contraste refrescante com a gordura do porco, enquanto suas notas cítricas ecoam o limão do molho."
-
-NUNCA use frases genéricas como "combina bem com carne" ou "boa opção para o prato".
+FORMATO DO "reason":
+Comece com o tipo entre parênteses. Depois 2-3 frases claras e técnicas.
+Exemplo para vinho da adega: "(Complemento) Esse Malbec da Mendoza tem notas de ameixa preta e cacau que conversam com o molho de redução do prato. Os taninos firmes abraçam a proteína da carne, enquanto o corpo encorpado não se perde diante do tempero."
 
 Responda APENAS em JSON válido:
 {
   "suggestions": [
-    { "wineName": "Nome específico ou tipo detalhado", "style": "tinto|branco|rose|espumante", "reason": "Explicação de 2-3 frases com lógica real", "fromCellar": true/false, "match": "perfeito" | "muito bom" | "bom", "harmony_type": "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza" }
+    { "wineName": "Nome específico ou tipo detalhado", "style": "tinto|branco|rose|espumante", "reason": "Explicação técnica acessível de 2-3 frases", "fromCellar": true/false, "match": "perfeito" | "muito bom" | "bom", "harmony_type": "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza" }
   ]
 }
-Sugira 3-5 opções. Tom natural, humano, de sommelier.`;
+Sugira 3-5 opções.`;
       const cellarContext = userWines?.length
         ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} (${w.style || "?"}, uva: ${w.grape || "?"}, região: ${w.region || "?"}, safra: ${w.vintage || "?"})`).join("\n")}`
         : "";
-      userPrompt = `Prato escolhido: ${dish}${cellarContext}\n\nAnalise a textura, método de preparo, intensidade e sabores dominantes deste prato. Sugira vinhos com lógicas de harmonização diferentes entre si. Cada explicação deve ser única e específica.`;
+      userPrompt = `Prato: ${dish}${cellarContext}\n\nAnalise a textura, preparo e sabores dominantes deste prato. Sugira vinhos com lógicas diferentes entre si.`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
