@@ -32,4 +32,3 @@ supabase/.temp/
 playwright-report/
 test-results/
 .tmp/
-.vercel

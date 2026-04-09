@@ -9,6 +9,7 @@ import { BreakageDialog } from "@/components/BreakageDialog";
 import { SaleDialog } from "@/components/SaleDialog";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
+import { QuickActions } from "@/components/QuickActions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
@@ -82,17 +83,19 @@ export function AppSidebar() {
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="mb-4 flex items-center gap-4 px-1 py-1.5 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex items-center gap-0 px-1 py-1 mb-1 rounded-lg transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
-            <div className="relative flex h-[104px] w-[78px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
-              <Logo
-                variant="compact"
-                className="h-[190px] w-auto scale-[1.12] object-contain drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)]"
+            <div className="flex h-[100px] w-[70px] shrink-0 items-center justify-center">
+              <img
+                src="/logo-sommelyx-mark.png"
+                alt="Sommelyx"
+                draggable={false}
+                className="h-[100px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[16px] font-bold tracking-[-0.02em] text-foreground leading-none">
+              <span className="text-[25px] font-bold tracking-[-0.01em] text-primary leading-none font-serif">
                 Sommelyx
               </span>
               <span
@@ -110,82 +113,50 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="px-0 pb-2.5">
+          <div className="px-0 pb-1">
             {isCommercial ? (
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="primary"
-                  className="col-span-2 h-10 justify-start rounded-2xl px-3 text-[10.5px] font-semibold"
+                  className="col-span-2 h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
-                  <Plus className="h-3.5 w-3.5 shrink-0" />
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
                   Cadastrar produto
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-9 justify-start rounded-2xl px-3 text-[10.5px] font-semibold"
+                  className="h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+                  <ShoppingCart className="h-3.5 w-3.5 mr-1" />
                   Venda
                 </Button>
                 <Button
                   variant="danger"
-                  className="h-9 justify-start rounded-2xl px-3 text-[10.5px] font-semibold"
+                  className="h-9 text-[11px] font-medium rounded-lg"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
                   Ruptura
                 </Button>
               </div>
             ) : (
-            <section className="rounded-3xl border border-primary/8 bg-background/72 p-2.5 shadow-[0_8px_22px_-20px_rgba(25,18,22,0.34)] backdrop-blur-md">
-              <div className="flex flex-col gap-2.5">
-                <Button
-                  variant="primary"
-                  className="h-12 w-full justify-start gap-2 rounded-2xl px-4 text-[12px] font-semibold tracking-[-0.01em] shadow-[0_10px_22px_-18px_hsl(var(--wine)/0.36)] hover:shadow-[0_14px_24px_-18px_hsl(var(--wine)/0.42)]"
-                  onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
-                >
-                  <Plus className="h-3.5 w-3.5 shrink-0" />
-                  Adicionar vinho
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  className="h-12 w-full justify-start gap-2 rounded-2xl border-primary/12 bg-background/72 px-4 text-[12px] font-semibold text-primary/90 shadow-[0_6px_14px_-18px_rgba(25,18,22,0.28)] hover:bg-background/82 hover:border-primary/18"
-                  onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
-                >
-                  <Wine className="h-3.5 w-3.5 shrink-0" />
-                  Registrar consumo
-                </Button>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <Button
-                    variant="ghost"
-                    className="h-10 w-full justify-start gap-2 rounded-2xl border border-border/35 bg-background/68 px-3.5 text-[10px] font-semibold tracking-[-0.01em] shadow-[0_6px_14px_-18px_rgba(20,15,18,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.05] hover:border-accent/20 hover:text-accent hover:shadow-[0_10px_18px_-16px_rgba(20,15,18,0.34)]"
-                    onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
-                  >
-                    <UtensilsCrossed className="h-3.5 w-3.5 shrink-0" />
-                    Harmonizar
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="h-10 w-full justify-start gap-2 rounded-2xl border border-border/35 bg-background/68 px-3.5 text-[10px] font-semibold tracking-[-0.01em] shadow-[0_6px_14px_-18px_rgba(20,15,18,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.05] hover:border-accent/20 hover:text-accent hover:shadow-[0_10px_18px_-16px_rgba(20,15,18,0.34)]"
-                    onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0" />
-                    Analisar carta
-                  </Button>
-                </div>
-              </div>
-            </section>
-          )}
+              <QuickActions
+                variant={isCommercial ? "commercial" : "personal"}
+                layout="stacked"
+                onAddWine={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
+                onRegisterConsumption={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
+                onHarmonize={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
+                onAnalyzeList={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
+              />
+            )}
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-3 pt-1.5">
+        <SidebarContent className="px-3 pt-1">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1.5 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1 px-3">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -210,8 +181,8 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-1.5">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1.5 px-3">
+          <SidebarGroup className="mt-1">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1 px-3">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -238,8 +209,8 @@ export function AppSidebar() {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="px-3 pt-2.5 pb-[calc(14px+env(safe-area-inset-bottom))]">
-            <div className="flex items-center gap-2.5 px-2 mb-2.5">
+          <div className="px-3 pt-3 pb-[calc(14px+env(safe-area-inset-bottom))]">
+            <div className="flex items-center gap-2.5 px-2 mb-3">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
                 style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--wine-vivid)))" }}

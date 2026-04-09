@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
-import { normalizeAppError } from "@/lib/app-error";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -133,19 +132,23 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const readSpreadsheetAsCsv = async (file: File) => {
     const buffer = await file.arrayBuffer();
-    const XLSX = await import("xlsx");
-    const wb = XLSX.read(buffer, { type: "array" });
+    const xlsxModule = await import("xlsx");
+    const XLSX = xlsxModule.default || xlsxModule;
+    const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
     const sheetName = wb.SheetNames?.[0];
     if (!sheetName) return "";
     const ws = wb.Sheets[sheetName];
-    // Convert first sheet to CSV so our edge function can map columns.
-    return XLSX.utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
+    const utils = XLSX.utils || xlsxModule.utils;
+    return utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
   };
 
   const readPdfAsText = async (file: File) => {
     const buffer = await file.arrayBuffer();
-    const pdfjs = await import("pdfjs-dist");
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+    const pdfjsModule = await import("pdfjs-dist");
+    const pdfjs = pdfjsModule.default || pdfjsModule;
+    if (pdfjs.GlobalWorkerOptions) {
+      pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+    }
 
     const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
     const maxPages = Math.min(doc.numPages, 12);
@@ -162,6 +165,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return pages.join("\n");
   };
 
+  const readWordAsText = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const mammothModule = await import("mammoth");
+    const mammoth = mammothModule.default || mammothModule;
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    return result.value || "";
+  };
+
   const fileToCsvLikeText = async (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     if (ext === "xlsx" || ext === "xls" || ext === "ods") {
@@ -170,7 +181,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (ext === "pdf") {
       return await readPdfAsText(file);
     }
-    // csv/tsv/txt fallback
+    if (ext === "docx" || ext === "doc") {
+      return await readWordAsText(file);
+    }
+    // csv/tsv/txt and any other text file fallback
     return await readTextFile(file);
   };
 
@@ -197,11 +211,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const data = await invokeEdgeFunction<any>(
         "parse-csv-wines",
         { csvContent, fileName: file.name, fileType: file.type || null },
-        { timeoutMs: 75_000, retries: 2 },
+        { timeoutMs: 45_000, retries: 1 },
       );
 
       if (data?.error) {
-        setParseErrors([String(data.userMessage || data.error)]);
+        setParseErrors([String(data.error)]);
         setParsed([]);
         setStep("preview");
         return;
@@ -229,19 +243,18 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setParseErrors([]);
       setStep("preview");
       if (validWines.length === 0) {
-        setParseErrors(["A IA não encontrou linhas válidas de vinho neste arquivo."]);
+        setParseErrors(["Não encontramos linhas válidas de vinho neste arquivo."]);
       }
 
       if (raw.length > MAX_CLIENT_INPUT_CHARS) {
         toast({
           title: "Arquivo muito grande",
-          description: "Importamos uma amostra do arquivo para manter a qualidade da análise com IA. Se precisar, importe em partes.",
+          description: "Importamos uma amostra do arquivo para manter a qualidade da análise. Se precisar, importe em partes.",
         });
       }
     } catch (err: any) {
-      const normalized = normalizeAppError(err);
-      console.error("AI parse error:", { err, normalized, fileName: file.name });
-      setParseErrors([normalized.userMessage]);
+      console.error("AI parse error:", err);
+      setParseErrors([err?.message || "Erro ao analisar o arquivo. Tente novamente."]);
       setParsed([]);
       setStep("preview");
     }
@@ -329,7 +342,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
             <Sparkles className="h-4 w-4" style={{ color: "#8F2D56" }} />
-            Importar com IA
+            Importação inteligente
           </SheetTitle>
         </SheetHeader>
 
@@ -347,24 +360,24 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
                   Arraste o arquivo ou clique para selecionar
                 </p>
-                <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
-                  CSV, Excel (XLS/XLSX) ou PDF
-                </p>
+                 <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
+                   CSV, Excel, PDF, Word, TXT — qualquer formato
+                 </p>
               </div>
               <input
                 ref={fileRef}
                 type="file"
-                accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,.doc,.docx,.rtf,text/plain,text/csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
               />
 
               <div className="mt-5 p-4 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
                 <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: "#8F2D56" }}>
-                  <Sparkles className="h-3.5 w-3.5" /> IA inteligente
+                  <Sparkles className="h-3.5 w-3.5" /> Sommelyx Inteligente
                 </p>
                 <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>
-                  Não se preocupe com a ordem ou nome das colunas. Nossa IA analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.
+                  Não se preocupe com a ordem ou nome das colunas. O Sommelyx analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.
                 </p>
               </div>
             </motion.div>
@@ -382,7 +395,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </div>
               </div>
               <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
-                Analisando planilha com IA...
+                Sommelyx está analisando…
               </p>
               <p className="text-xs mt-1.5" style={{ color: "#9CA3AF" }}>
                 Identificando colunas e organizando os dados de <strong>{fileName}</strong>
@@ -406,7 +419,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               {mappingEntries.length > 0 && (
                 <div className="p-3 rounded-xl" style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.12)" }}>
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: "#16a34a" }}>
-                    Mapeamento automático
+                    Mapeamento Sommelyx
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {mappingEntries.map(([from, to]) => (
@@ -426,17 +439,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               {aiNotes && (
                 <div className="p-3 rounded-xl" style={{ background: "rgba(143,45,86,0.04)", border: "1px solid rgba(143,45,86,0.08)" }}>
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#8F2D56" }}>
-                    Observações da IA
+                    Observações Sommelyx
                   </p>
                   <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>{aiNotes}</p>
                 </div>
               )}
 
               {parseErrors.length > 0 && (
-                <div className="p-3 rounded-xl space-y-1" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>
+                <div className="p-3.5 rounded-xl space-y-1.5" style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)" }}>
                   {parseErrors.map((e, i) => (
-                    <p key={i} className="text-[11px] flex items-center gap-1" style={{ color: "#d97706" }}>
-                      <AlertTriangle className="h-3 w-3 shrink-0" /> {e}
+                    <p key={i} className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: "#b45309" }}>
+                      <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: "#d97706" }} /> {e}
                     </p>
                   ))}
                 </div>

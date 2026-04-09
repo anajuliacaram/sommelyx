@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
-import { normalizeAppError } from "@/lib/app-error";
 
 interface ScannedWineData {
   name: string | null;
@@ -104,13 +103,28 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setStep("preview");
     } catch (err: unknown) {
       console.error("Scan error:", err);
-      const normalized = normalizeAppError(err);
+
+      const e = err as any;
+      const code = e?.code as string | undefined;
+
+      let msg = e?.message || "Não foi possível analisar o rótulo";
       if (err instanceof EdgeFunctionError) {
-        setSupportCode(err.requestId ?? normalized.requestId ?? null);
-      } else {
-        setSupportCode(normalized.requestId ?? null);
+        setSupportCode(err.requestId ?? null);
       }
-      setErrorMsg(normalized.userMessage);
+
+      if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
+        msg = "Sua sessão expirou. Faça login novamente para continuar.";
+      } else if (code === "IMAGE_TOO_LARGE") {
+        msg = "A imagem está muito grande. Tente uma foto mais leve.";
+      } else if (code === "LABEL_NOT_IDENTIFIED") {
+        msg = "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
+      } else if (code === "AI_TIMEOUT") {
+        msg = "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.";
+      } else if (code === "AI_UNAVAILABLE" || code === "AI_RATE_LIMIT") {
+        msg = "A análise não pôde ser concluída agora. Tente novamente em instantes.";
+      }
+
+      setErrorMsg(msg);
       setStep("error");
     }
   }, []);
@@ -131,9 +145,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       await runScan(base64);
     } catch (err: any) {
       console.error("Image error:", err);
-      const normalized = normalizeAppError(err);
-      setSupportCode(normalized.requestId ?? null);
-      setErrorMsg(normalized.userMessage);
+      setSupportCode(null);
+      setErrorMsg("Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo.");
       setStep("error");
     }
   }, [compressImage, runScan, toast]);
