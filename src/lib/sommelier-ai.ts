@@ -132,52 +132,113 @@ interface WineSummary {
 }
 
 const PAIRING_RULES: { keywords: string[]; styles: string[]; explanation: string }[] = [
-  { keywords: ["carne", "churrasco", "picanha", "costela", "bife", "cordeiro", "assado"], styles: ["tinto"], explanation: "Vinhos tintos encorpados complementam carnes vermelhas grelhadas" },
-  { keywords: ["peixe", "salmão", "atum", "bacalhau", "camarão", "frutos do mar", "marisco", "lula"], styles: ["branco", "espumante", "rosé"], explanation: "Brancos e espumantes realçam a delicadeza de peixes e frutos do mar" },
-  { keywords: ["massa", "pasta", "risoto", "lasanha", "nhoque"], styles: ["tinto", "branco"], explanation: "Massas são versáteis e harmonizam com tintos de corpo médio ou brancos encorpados" },
+  { keywords: ["carne", "churrasco", "picanha", "costela", "bife", "cordeiro", "assado", "hambúrguer", "burger"], styles: ["tinto"], explanation: "Taninos estruturados equilibram a gordura e a proteína de carnes vermelhas" },
+  { keywords: ["peixe", "salmão", "atum", "bacalhau", "camarão", "frutos do mar", "marisco", "lula", "lagosta", "polvo"], styles: ["branco", "espumante", "rosé"], explanation: "A acidez mineral de brancos realça a delicadeza de peixes e frutos do mar" },
+  { keywords: ["massa", "pasta", "risoto", "lasanha", "nhoque", "macarrão", "espaguete"], styles: ["tinto", "branco"], explanation: "Massas e risotos pedem vinhos com corpo médio que acompanhem o molho" },
   { keywords: ["pizza"], styles: ["tinto", "rosé"], explanation: "Pizzas pedem tintos jovens e frutados ou rosés refrescantes" },
-  { keywords: ["salada", "legume", "vegetal", "vegetariano"], styles: ["branco", "rosé", "espumante"], explanation: "Saladas e vegetais combinam com vinhos leves e frescos" },
-  { keywords: ["queijo", "fondue", "tábua"], styles: ["tinto", "branco", "espumante"], explanation: "Queijos harmonizam bem com tintos maduros ou espumantes" },
-  { keywords: ["sobremesa", "chocolate", "doce", "torta", "bolo"], styles: ["sobremesa", "tinto"], explanation: "Sobremesas pedem vinhos doces ou tintos com notas frutadas" },
-  { keywords: ["frango", "ave", "peru"], styles: ["branco", "rosé", "tinto"], explanation: "Aves são versáteis e aceitam brancos encorpados ou tintos leves" },
-  { keywords: ["sushi", "japonesa", "oriental"], styles: ["branco", "espumante", "rosé"], explanation: "Culinária japonesa combina com brancos minerais e espumantes secos" },
+  { keywords: ["salada", "legume", "vegetal", "vegetariano", "verdura"], styles: ["branco", "rosé", "espumante"], explanation: "Vegetais e saladas combinam com vinhos de acidez viva e corpo leve" },
+  { keywords: ["queijo", "fondue", "tábua"], styles: ["tinto", "branco", "espumante"], explanation: "Queijos harmonizam com tintos maduros ou espumantes pela gordura e sal" },
+  { keywords: ["sobremesa", "chocolate", "doce", "torta", "bolo", "pudim", "brigadeiro"], styles: ["sobremesa", "tinto"], explanation: "A doçura residual do vinho equilibra sobremesas" },
+  { keywords: ["frango", "ave", "peru", "pato"], styles: ["branco", "rosé", "tinto"], explanation: "Aves são versáteis e aceitam brancos encorpados ou tintos leves" },
+  { keywords: ["sushi", "japonesa", "oriental", "tailandesa"], styles: ["branco", "espumante", "rosé"], explanation: "Culinária oriental combina com brancos minerais e espumantes secos" },
+  { keywords: ["ovo", "omelete", "fritada", "torta de ovo"], styles: ["branco", "rosé", "espumante"], explanation: "A textura cremosa do ovo pede vinhos com boa acidez que limpem o paladar" },
+  { keywords: ["arroz", "paella", "pilaf", "biryani"], styles: ["branco", "rosé", "tinto"], explanation: "Arroz é neutro e versátil — o vinho deve complementar o acompanhamento" },
+  { keywords: ["feijoada", "feijão", "bean"], styles: ["tinto"], explanation: "Pratos com feijão pedem tintos com corpo e acidez para equilibrar a densidade" },
+  { keywords: ["porco", "leitão", "lombo", "pernil", "bacon", "linguiça", "salsicha"], styles: ["tinto", "branco", "rosé"], explanation: "A gordura suculenta do porco harmoniza com tintos médios ou brancos encorpados" },
+  { keywords: ["curry", "picante", "apimentado", "pimenta"], styles: ["branco", "rosé", "espumante"], explanation: "Pratos picantes pedem vinhos com açúcar residual ou baixo álcool para não amplificar a ardência" },
+  { keywords: ["sopa", "caldo", "creme"], styles: ["branco", "espumante"], explanation: "Sopas cremosas pedem brancos com textura que espelhem a untuosidade" },
+  { keywords: ["empadão", "empanada", "torta salgada", "quiche"], styles: ["branco", "rosé", "tinto"], explanation: "Tortas salgadas combinam com vinhos de acidez moderada que equilibrem a massa amanteigada" },
+  { keywords: ["strogonoff", "stroganoff"], styles: ["tinto", "branco"], explanation: "O molho cremoso do strogonoff pede tintos de acidez alta ou brancos encorpados" },
+  { keywords: ["moqueca", "bobó", "acarajé", "baiana"], styles: ["branco", "rosé"], explanation: "Pratos com leite de coco pedem brancos aromáticos que complementem a tropicalidade" },
 ];
+
+// Analysis helpers for building dish-aware explanations
+function analyzeDish(dish: string): { intensity: string; fat: string; protein: string; cooking: string; flavors: string[] } {
+  const lower = dish.toLowerCase();
+  const result = { intensity: "média", fat: "moderada", protein: "", cooking: "", flavors: [] as string[] };
+  
+  if (lower.match(/grelhad|brasa|churras|assad|frit[oa]/)) { result.cooking = "grelhado/assado"; result.intensity = "alta"; }
+  else if (lower.match(/cozid|vapor|refogad/)) { result.cooking = "cozido"; result.intensity = "média"; }
+  else if (lower.match(/cru|tartare|ceviche/)) { result.cooking = "cru"; result.intensity = "leve"; }
+  
+  if (lower.match(/carne|picanha|costela|bife|cordeiro/)) { result.protein = "vermelha"; result.fat = "alta"; }
+  else if (lower.match(/frango|ave|peru/)) { result.protein = "branca"; result.fat = "moderada"; }
+  else if (lower.match(/peixe|salmão|atum|camarão/)) { result.protein = "peixe"; result.fat = "leve"; }
+  else if (lower.match(/ovo|omelete/)) { result.protein = "ovo"; result.fat = "moderada"; result.flavors.push("cremosidade"); }
+  else if (lower.match(/queijo|fondue/)) { result.protein = "laticínio"; result.fat = "alta"; }
+  
+  if (lower.match(/arroz/)) result.flavors.push("neutralidade do arroz");
+  if (lower.match(/molho|creme/)) result.flavors.push("untuosidade do molho");
+  if (lower.match(/erva|tempero|alho|cebola/)) result.flavors.push("aromaticidade");
+  if (lower.match(/limão|cítric|vinagre/)) result.flavors.push("acidez cítrica");
+  if (lower.match(/tomate/)) result.flavors.push("acidez do tomate");
+  
+  return result;
+}
+
+function buildCellarReason(w: WineSummary, dish: string, harmonyType: string): string {
+  const analysis = analyzeDish(dish);
+  const style = (w.style || "").toLowerCase();
+  const grape = w.grape || "";
+  const region = w.region || "";
+  const parts: string[] = [];
+
+  // Wine-specific opening
+  if (grape && region) {
+    parts.push(`${w.name}, um ${style} de ${grape} da região de ${region}, traz um perfil sensorial distinto para esta harmonização.`);
+  } else if (grape) {
+    parts.push(`A uva ${grape} confere a este ${style} características que interagem de forma específica com "${dish}".`);
+  } else {
+    parts.push(`Este ${style || "vinho"} possui estrutura que dialoga com os componentes de "${dish}".`);
+  }
+
+  // Dish-specific interaction based on harmony type
+  if (harmonyType === "contraste") {
+    if (analysis.fat === "alta" || analysis.fat === "moderada") {
+      parts.push(`A acidez do vinho funciona em contraste com a ${analysis.fat === "alta" ? "gordura pronunciada" : "textura untuosa"} do prato, limpando o paladar entre cada garfada.`);
+    } else {
+      parts.push(`O corpo do vinho cria um contraste de texturas com a leveza do prato, adicionando camadas de complexidade.`);
+    }
+  } else if (harmonyType === "semelhança") {
+    if (style === "branco" && analysis.intensity === "leve") {
+      parts.push(`A delicadeza deste branco espelha a leveza do prato — ambos se encontram na mesma faixa de intensidade, sem que um se sobreponha ao outro.`);
+    } else {
+      parts.push(`O peso e a intensidade do vinho espelham a robustez do prato, criando uma experiência onde nenhum elemento domina.`);
+    }
+  } else if (harmonyType === "complemento") {
+    if (analysis.flavors.length > 0) {
+      parts.push(`Os aromas do vinho complementam ${analysis.flavors[0]}, criando uma experiência mais completa e integrada no paladar.`);
+    } else {
+      parts.push(`As notas aromáticas do vinho adicionam uma dimensão extra aos sabores do prato, completando a experiência gustativa.`);
+    }
+  } else if (harmonyType === "equilíbrio") {
+    parts.push(`O corpo ${style === "tinto" ? "encorpado" : "médio"} do vinho mantém proporção equilibrada com a intensidade de "${dish}", sem dominar nem desaparecer.`);
+  } else {
+    parts.push(`A acidez natural do vinho reseta o paladar entre cada mordida, renovando a percepção dos sabores do prato.`);
+  }
+
+  // Vintage context
+  if (w.vintage) {
+    const age = new Date().getFullYear() - w.vintage;
+    if (age > 5) parts.push(`Com ${age} anos de evolução, seus taninos estão mais integrados e suaves.`);
+    else if (age <= 2) parts.push(`Sendo um vinho jovem, preserva frescor e vivacidade que complementam o prato.`);
+  }
+
+  return parts.join(" ");
+}
 
 function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): WineSuggestion[] {
   const lower = dish.toLowerCase();
   const matchedRules = PAIRING_RULES.filter((r) => r.keywords.some((k) => lower.includes(k)));
-  const rules = matchedRules.length > 0 ? matchedRules : PAIRING_RULES.slice(0, 2);
+  // If no keyword matches, use versatile/generic rules instead of defaulting to meat
+  const rules = matchedRules.length > 0 ? matchedRules : [
+    { keywords: [], styles: ["branco", "rosé", "tinto"], explanation: "Para pratos do dia a dia, vinhos versáteis de corpo leve a médio são seguros" },
+  ];
 
   const matchedStyles = new Set(rules.flatMap((r) => r.styles));
 
-  // Build dish-specific explanations based on actual wine + dish interaction
-  const buildCellarReason = (w: WineSummary, ruleExplanation: string): string => {
-    const parts: string[] = [];
-    const style = (w.style || "").toLowerCase();
-    const grape = w.grape || "";
-    const region = w.region || "";
-    
-    if (grape) {
-      parts.push(`A uva ${grape} traz características próprias que interagem com os sabores de "${dish}".`);
-    }
-    if (region) {
-      parts.push(`Produzido na região de ${region}, este vinho carrega tipicidade que pode complementar o prato.`);
-    }
-    if (style === "tinto" && lower.match(/carne|churrasco|picanha|costela|bife/)) {
-      parts.push("Os taninos presentes ajudam a limpar o paladar entre as mordidas, equilibrando a gordura da proteína.");
-    } else if (style === "branco" && lower.match(/peixe|salmão|camarão|frutos/)) {
-      parts.push("A acidez natural deste branco realça a frescura do prato sem competir com a delicadeza dos ingredientes.");
-    } else if (style === "espumante") {
-      parts.push("A efervescência natural funciona como um limpador de paladar, renovando a percepção a cada gole.");
-    } else {
-      parts.push(ruleExplanation + ".");
-    }
-    if (w.vintage) {
-      const age = new Date().getFullYear() - w.vintage;
-      if (age > 5) parts.push(`Com ${age} anos de guarda, os taninos já estão mais integrados.`);
-    }
-    return parts.join(" ");
-  };
+  const harmonyTypes = ["equilíbrio", "complemento", "contraste", "semelhança", "limpeza"] as const;
+  const harmonyLabels = ["peso proporcional", "aromas complementares", "opostos que equilibram", "texturas semelhantes", "paladar renovado"];
 
   if (cellarWines?.length) {
     const cellarMatches = cellarWines.filter(
@@ -185,7 +246,6 @@ function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): Win
     );
 
     if (cellarMatches.length > 0) {
-      // Deduplicate by name to avoid identical cards
       const seen = new Set<string>();
       const unique = cellarMatches.filter(w => {
         if (seen.has(w.name)) return false;
@@ -199,33 +259,35 @@ function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): Win
         vintage: w.vintage || undefined,
         region: w.region || undefined,
         country: w.country || undefined,
-        reason: buildCellarReason(w, rules[0]?.explanation || "Sugestão baseada em regras clássicas"),
+        reason: buildCellarReason(w, dish, harmonyTypes[i % 5]),
         fromCellar: true,
         match: i === 0 ? "muito bom" : "bom",
-        harmony_type: (["equilíbrio", "complemento", "contraste", "semelhança", "limpeza"] as const)[i % 5],
-        harmony_label: (["peso proporcional", "aromas complementares", "opostos que equilibram", "texturas semelhantes", "paladar renovado"])[i % 5],
+        harmony_type: harmonyTypes[i % 5],
+        harmony_label: harmonyLabels[i % 5],
       }));
     }
   }
 
+  const analysis = analyzeDish(dish);
   const genericSuggestions: WineSuggestion[] = [];
   const styleDetails: Record<string, { name: string; reason: string }> = {
-    tinto: { name: "Vinho tinto encorpado", reason: `Para "${dish}", um tinto de corpo médio a encorpado oferece estrutura de taninos que equilibra a intensidade dos sabores. Procure vinhos com boa acidez para manter o paladar fresco.` },
-    branco: { name: "Vinho branco seco", reason: `A acidez cítrica de um bom branco seco corta a gordura e realça os ingredientes mais delicados de "${dish}". Prefira exemplares com boa mineralidade.` },
-    rosé: { name: "Vinho rosé refrescante", reason: `Um rosé seco e fresco traz versatilidade para "${dish}" — corpo suficiente para não desaparecer, mas leveza que não compete com o prato.` },
-    espumante: { name: "Espumante brut", reason: `A perlage fina de um espumante brut funciona como limpador natural do paladar entre cada garfada de "${dish}", renovando a experiência a cada gole.` },
-    sobremesa: { name: "Vinho de sobremesa", reason: `A doçura residual equilibra e complementa os sabores de "${dish}", criando um final harmonioso onde nenhum elemento se sobrepõe.` },
+    tinto: { name: "Vinho tinto de corpo médio", reason: `Para "${dish}" (intensidade ${analysis.intensity}), um tinto de corpo médio oferece taninos suaves que ${analysis.protein === "ovo" ? "contrastam com a cremosidade do ovo" : analysis.fat === "alta" ? "equilibram a gordura da proteína" : "complementam os sabores sem dominar"}. ${analysis.flavors.length > 0 ? `A ${analysis.flavors[0]} do prato se beneficia da estrutura do vinho.` : "Procure exemplares com boa acidez para manter o frescor."}` },
+    branco: { name: "Vinho branco seco", reason: `A acidez cítrica de um branco seco ${analysis.protein === "ovo" ? "corta a textura rica do ovo, trazendo leveza" : analysis.protein === "peixe" ? "realça a frescura do peixe sem competir" : `traz frescor e contraste para "${dish}"`}. ${analysis.cooking ? `O preparo ${analysis.cooking} do prato pede essa vivacidade mineral.` : "Prefira exemplares com boa mineralidade."}` },
+    rosé: { name: "Vinho rosé seco", reason: `Um rosé seco oferece o equilíbrio ideal para "${dish}" — ${analysis.intensity === "leve" ? "sua delicadeza espelha a leveza do prato" : "corpo suficiente para acompanhar sem dominar"}. ${analysis.protein === "ovo" ? "A frutosidade sutil complementa a simplicidade reconfortante do ovo." : "Versatilidade que se adapta aos diferentes componentes."}` },
+    espumante: { name: "Espumante brut", reason: `A perlage fina funciona como limpador natural do paladar entre cada garfada de "${dish}". ${analysis.fat !== "leve" ? "As bolhas cortam a untuosidade e renovam a percepção gustativa." : "A acidez viva traz energia e contraste ao prato."}` },
+    sobremesa: { name: "Vinho de sobremesa", reason: `A doçura residual equilibra e complementa os sabores de "${dish}", criando um final harmonioso.` },
   };
 
   for (const style of matchedStyles) {
-    const detail = styleDetails[style] || { name: `Vinho ${style}`, reason: `Sugestão clássica para acompanhar "${dish}".` };
+    const detail = styleDetails[style] || { name: `Vinho ${style}`, reason: `Sugestão clássica para "${dish}".` };
     genericSuggestions.push({
       wineName: detail.name,
       style,
       reason: detail.reason,
       fromCellar: false,
       match: genericSuggestions.length === 0 ? "muito bom" : "bom",
-      harmony_type: (["equilíbrio", "complemento", "contraste"] as const)[genericSuggestions.length % 3],
+      harmony_type: harmonyTypes[genericSuggestions.length % 5],
+      harmony_label: harmonyLabels[genericSuggestions.length % 5],
     });
     if (genericSuggestions.length >= 3) break;
   }
@@ -233,17 +295,19 @@ function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): Win
   while (genericSuggestions.length < 3) {
     const idx = genericSuggestions.length;
     const fallbacks = [
-      { name: "Vinho tinto de corpo médio", reason: `Um tinto versátil com taninos macios se adapta bem a "${dish}" sem dominar os sabores principais.` },
-      { name: "Vinho branco frutado", reason: `Notas frutadas e acidez equilibrada complementam a textura e os temperos de "${dish}".` },
-      { name: "Espumante seco", reason: `A efervescência limpa o paladar e a acidez viva mantém o frescor durante toda a refeição.` },
+      { name: "Vinho branco aromático", style: "branco", reason: `Para "${dish}", um branco aromático traz frescor e notas frutadas que complementam pratos do cotidiano sem competir com os sabores principais.` },
+      { name: "Rosé seco e fresco", style: "rosé", reason: `A versatilidade de um rosé seco se adapta naturalmente a "${dish}" — corpo leve o suficiente para não dominar, mas com personalidade.` },
+      { name: "Espumante brut", style: "espumante", reason: `As bolhas finas de um espumante brut limpam o paladar e adicionam uma dimensão de frescor a qualquer refeição.` },
     ];
-    const fb = fallbacks[idx] || { name: "Vinho versátil", reason: "Opção equilibrada para este prato." };
+    const fb = fallbacks[idx] || fallbacks[0];
     genericSuggestions.push({
       wineName: fb.name,
-      style: "tinto",
+      style: fb.style,
       reason: fb.reason,
       fromCellar: false,
       match: "bom",
+      harmony_type: harmonyTypes[idx % 5],
+      harmony_label: harmonyLabels[idx % 5],
     });
   }
 

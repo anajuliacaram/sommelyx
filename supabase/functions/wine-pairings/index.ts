@@ -221,7 +221,23 @@ Sugira 3-5 opções.`;
       const cellarContext = userWines?.length
         ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} (estilo: ${w.style || "?"}, uva: ${w.grape || "?"}, região: ${w.region || "?"}, país: ${w.country || "?"}, safra: ${w.vintage || "?"}, produtor: ${w.producer || "?"})`).join("\n")}`
         : "";
-      userPrompt = `Prato: ${dish}${cellarContext}\n\nINSTRUÇÃO CRÍTICA: Primeiro analise a textura, gordura, sal, umami, método de preparo e sabores dominantes de "${dish}". Depois, para CADA vinho sugerido, escreva uma explicação de 3-4 frases que:\n1. Descreva propriedades ESPECÍFICAS daquele vinho (taninos, acidez, corpo, aromas da uva)\n2. Explique como essas propriedades INTERAGEM FISICAMENTE com os componentes do prato\n3. Seja ÚNICA — não repita a mesma estrutura ou vocabulário entre sugestões\n4. Se há vinhos IGUAIS na adega, sugira APENAS UM deles e use os slots para sugestões diferentes\n\nNÃO USE frases genéricas como "combina bem", "harmoniza com", "boa opção". Cada frase deve ser específica o suficiente para não servir para nenhum outro vinho ou prato.`;
+      userPrompt = `Prato: "${dish}"${cellarContext}
+
+PASSO 1 — ANÁLISE OBRIGATÓRIA DO PRATO (faça internamente antes de sugerir):
+- Qual é a proteína principal? (carne vermelha, branca, peixe, ovo, vegetal, laticínio)
+- Qual o método de cocção? (grelhado, frito, cozido, cru, assado, refogado)
+- Qual a gordura dominante? (manteiga, azeite, gordura animal, leite de coco)
+- Quais temperos/molhos? (sal, ervas, especiarias, molho de tomate, creme)
+- Qual a INTENSIDADE geral do prato? (leve, média, intensa)
+- Quais sabores dominam? (umami, doce, ácido, amargo, salgado)
+
+PASSO 2 — Para CADA vinho sugerido, sua explicação DEVE:
+1. Citar como propriedades ESPECÍFICAS do vinho (ex: "taninos de textura sedosa", "acidez málica", "12.5% álcool") interagem com componentes REAIS do prato
+2. Explicar O QUE ACONTECE no paladar (ex: "os taninos suavizam ao encontrar a gordura do ovo frito, criando uma textura aveludada")
+3. Ser IMPOSSÍVEL de copiar para outro prato — se trocar o nome do prato e a frase ainda fizer sentido, está ERRADA
+4. Se há vinhos IGUAIS na adega, sugira APENAS UM deles
+
+PROIBIDO: "combina bem", "harmoniza com", "boa opção", "complementa os sabores". Cada frase DEVE ser específica o suficiente para não servir para nenhum outro vinho ou prato.`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
@@ -306,7 +322,7 @@ Sugira 3-5 opções.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
