@@ -128,6 +128,7 @@ interface WineSummary {
   region?: string | null;
   producer?: string | null;
   quantity?: number;
+  vintage?: number | null;
 }
 
 const PAIRING_RULES: { keywords: string[]; styles: string[]; explanation: string }[] = [
