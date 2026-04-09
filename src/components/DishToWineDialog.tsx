@@ -94,6 +94,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setPreview(null);
     setLastWineListAttachment(null);
     setLastMenuAttachment(null);
+    setWineSearchState("");
+    setWineSortState("az");
   };
 
   const handleClose = (v: boolean) => {
@@ -479,8 +481,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
             {/* ── Step 2b: Select Wine from Cellar (Premium Finder) ── */}
             {step === "select-wine" && (() => {
               type SortKey = "az" | "za" | "newest" | "oldest";
-              const [wineSearch, setWineSearch] = [wineSearchState, setWineSearchState];
-              const [sortKey, setSortKey] = [wineSortState, setWineSortState];
+              const wineSearch = wineSearchState;
+              const setWineSearch = setWineSearchState;
+              const sortKey = wineSortState;
+              const setSortKey = setWineSortState;
 
               const sortOptions: { key: SortKey; label: string; icon: typeof ArrowDownAZ }[] = [
                 { key: "az", label: "A → Z", icon: ArrowDownAZ },
