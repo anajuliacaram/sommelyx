@@ -248,6 +248,11 @@ export function WinePairingPanel({
                       {wineProfile.complexity}
                     </span>
                   )}
+                  {wineProfile.style && (
+                    <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-0.5 text-[9px] font-semibold text-primary/60">
+                      {wineProfile.style}
+                    </span>
+                  )}
                 </div>
               </div>
             )}

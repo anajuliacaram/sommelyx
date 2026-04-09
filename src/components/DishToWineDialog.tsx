@@ -1196,6 +1196,32 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             )}
                           </div>
 
+                          {/* Wine structure pills */}
+                          {s.wineProfile && (s.wineProfile.body || s.wineProfile.acidity || s.wineProfile.tannin) && (
+                            <div className="flex flex-wrap gap-1.5 pl-[18px]">
+                              {s.wineProfile.body && (
+                                <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                                  Corpo {s.wineProfile.body}
+                                </span>
+                              )}
+                              {s.wineProfile.acidity && (
+                                <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                                  Acidez {s.wineProfile.acidity}
+                                </span>
+                              )}
+                              {s.wineProfile.tannin && s.wineProfile.tannin !== "n/a" && (
+                                <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                                  Taninos {s.wineProfile.tannin}
+                                </span>
+                              )}
+                              {s.wineProfile.style && (
+                                <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-0.5 text-[9px] font-semibold text-primary/60">
+                                  {s.wineProfile.style}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           {/* Explanation */}
                           <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {s.reason}
