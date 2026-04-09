@@ -261,6 +261,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
       const result = await analyzeMenuForWine(payload, extWineName);
       setMenuResults(result);
+      setWineProfile(result.wineProfile || null);
       setStep("ext-menu-results");
     } catch (err: any) {
       setError(err.message || "Erro ao analisar o cardápio");
@@ -857,16 +858,28 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
-                  <p className="text-[12px] font-medium text-foreground">
-                    Vinho: <span className="font-semibold">{extWineName}</span>
-                  </p>
+                {/* Wine profile card (same as wine-results) */}
+                <div className="glass-card p-4 space-y-2">
+                  <p className="text-[15px] font-bold text-foreground tracking-tight">{extWineName}</p>
+                  {wineProfile && (wineProfile.body || wineProfile.summary) && (
+                    <div className="space-y-1.5 pt-1">
+                      {wineProfile.summary && (
+                        <p className="text-[12px] text-foreground/60 leading-relaxed italic">{wineProfile.summary}</p>
+                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {wineProfile.body && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Corpo {wineProfile.body}</span>}
+                        {wineProfile.acidity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Acidez {wineProfile.acidity}</span>}
+                        {wineProfile.tannin && wineProfile.tannin !== "n/a" && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Taninos {wineProfile.tannin}</span>}
+                        {wineProfile.complexity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{wineProfile.complexity}</span>}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-1.5 pb-1">
-                  <ChefHat className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                    Pratos do cardápio que harmonizam
+                <div className="flex items-center gap-2 pb-1">
+                  <ChefHat className="h-4 w-4 text-primary/70" />
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    Pratos do cardápio
                   </span>
                 </div>
 
@@ -881,38 +894,82 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     Não foi possível identificar pratos no cardápio. Tente outra foto.
                   </p>
                 ) : (
-                  <ul className="space-y-2">
-                    {menuResults.dishes.map((d, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.06 }}
-                        className="glass-card p-3.5 space-y-1.5"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", matchDot[d.match] || "bg-primary/40")} />
-                            <span className="text-[13px] font-semibold text-foreground">{d.name}</span>
+                  <ul className="space-y-3">
+                    {menuResults.dishes.map((d, i) => {
+                      const compatColor = d.compatibilityLabel === "Combinação perfeita" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
+                        d.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                        d.compatibilityLabel === "Harmonização elegante" ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" :
+                        d.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
+                        d.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
+                        "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
+                      const hLabel = d.harmony_label || (d.harmony_type && harmonyLabel[d.harmony_type]);
+                      return (
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
+                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                              <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[d.match] || "bg-primary/40")} />
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">{d.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {d.highlight && (
+                                <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/8 rounded-full px-2 py-[2px]">
+                                  {d.highlight === "top-pick" ? "Melhor escolha" : "Melhor custo-benefício"}
+                                </span>
+                              )}
+                              {d.price != null && (
+                                <span className="text-[12px] font-bold text-foreground">
+                                  R$ {d.price.toFixed(0)}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            {d.highlight && (
-                              <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/8 rounded-full px-2 py-[2px]">
-                                {d.highlight === "top-pick" ? "Melhor escolha" : "Melhor custo-benefício"}
+                          {/* Compatibility + harmony badges */}
+                          <div className="flex items-center gap-2 pl-[18px] flex-wrap">
+                            {d.compatibilityLabel && (
+                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", compatColor)}>
+                                {d.compatibilityLabel}
                               </span>
                             )}
-                            {d.price != null && (
-                              <span className="text-[12px] font-bold text-foreground">
-                                R$ {d.price.toFixed(0)}
+                            {hLabel && (
+                              <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70">
+                                {hLabel}
                               </span>
                             )}
                           </div>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground leading-snug pl-3.5">
-                          {d.reason}
-                        </p>
-                      </motion.li>
-                    ))}
+                          {/* Dish profile pills */}
+                          {d.dish_profile && (
+                            <div className="flex flex-wrap gap-1 pl-[18px]">
+                              {d.dish_profile.intensity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{d.dish_profile.intensity}</span>}
+                              {d.dish_profile.texture && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{d.dish_profile.texture}</span>}
+                              {d.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{d.dish_profile.highlight}</span>}
+                            </div>
+                          )}
+                          {/* Explanation */}
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
+                            {d.reason}
+                          </p>
+                          {/* Recipe button */}
+                          {d.recipe && (
+                            <div className="pl-[18px]">
+                              <button
+                                type="button"
+                                onClick={() => setRecipeModal({ recipe: d.recipe!, dish: d.name })}
+                                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                              >
+                                <BookOpen className="h-3 w-3" />
+                                Ver receita
+                              </button>
+                            </div>
+                          )}
+                        </motion.li>
+                      );
+                    })}
                   </ul>
                 )}
 
@@ -922,9 +979,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   onClick={() => {
                     setMenuResults(null);
                     setPreview(null);
+                    setWineProfile(null);
                     setStep("ext-menu-photo");
                   }}
-                  className="w-full h-9 text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border/40"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Enviar outra foto
                 </Button>
