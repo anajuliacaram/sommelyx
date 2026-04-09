@@ -1133,23 +1133,29 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <ul className="space-y-3">
                     {pairings.map((p, i) => {
                       const badge = matchBadge[p.match];
+                      const hLabel = p.harmony_label || (p.harmony_type && harmonyLabel[p.harmony_type]);
                       return (
                         <motion.li
                           key={i}
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="glass-card p-4 space-y-2 cursor-default"
+                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2.5 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
                           <div className="flex items-center gap-2.5">
                             <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
                             <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
                           </div>
-                          <p className="text-[13px] text-foreground/65 leading-relaxed pl-5">
+                          {hLabel && (
+                            <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70 ml-[18px]">
+                              {hLabel}
+                            </span>
+                          )}
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {p.reason}
                           </p>
                           {badge && (
-                            <div className="pl-5">
+                            <div className="pl-[18px]">
                               <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", badge.className)}>
                                 {badge.label}
                               </span>
