@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History } from "@/icons/lucide";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -85,7 +85,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const { data: wines } = useWines();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
+  const fileGalleryRef = useRef<HTMLInputElement>(null);
   const menuFileRef = useRef<HTMLInputElement>(null);
+  const menuGalleryRef = useRef<HTMLInputElement>(null);
 
   const [source, setSource] = useState<Source>(null);
   const [subMode, setSubMode] = useState<SubMode>(null);
@@ -765,17 +767,34 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     className="hidden"
                     onChange={handleMenuFileChange}
                   />
+                  <input
+                    ref={menuGalleryRef}
+                    type="file"
+                    accept="image/*,application/pdf,.pdf"
+                    className="hidden"
+                    onChange={handleMenuFileChange}
+                  />
 
-                  <button
-                    onClick={() => menuFileRef.current?.click()}
-                    className="w-full h-32 rounded-xl border-2 border-dashed border-primary/20 bg-card/40 flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-200 group"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <Camera className="h-5 w-5 text-primary" />
-                    </div>
-                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou anexar PDF</p>
-                    <p className="text-[10px] text-muted-foreground">Cardápio de comidas do restaurante</p>
-                  </button>
+                  <div className="flex flex-col gap-2.5 w-full">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => menuFileRef.current?.click()}
+                      className="h-12 text-[13px] font-semibold"
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Tirar Foto
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => menuGalleryRef.current?.click()}
+                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Escolher da Galeria ou PDF
+                    </Button>
+                  </div>
                 </div>
 
                 {error && (
@@ -932,17 +951,34 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     className="hidden"
                     onChange={handleFileChange}
                   />
+                  <input
+                    ref={fileGalleryRef}
+                    type="file"
+                    accept="image/*,application/pdf,.pdf"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
 
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    className="w-full h-32 rounded-xl border-2 border-dashed border-primary/20 bg-card/40 flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-200 group"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <Camera className="h-5 w-5 text-primary" />
-                    </div>
-                    <p className="text-[12px] font-medium text-foreground">Tirar foto ou anexar PDF</p>
-                    <p className="text-[10px] text-muted-foreground">Carta de vinhos, garrafa ou PDF do restaurante</p>
-                  </button>
+                  <div className="flex flex-col gap-2.5 w-full">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => fileRef.current?.click()}
+                      className="h-12 text-[13px] font-semibold"
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Tirar Foto
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => fileGalleryRef.current?.click()}
+                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Escolher da Galeria ou PDF
+                    </Button>
+                  </div>
                 </div>
 
                 {error && (
