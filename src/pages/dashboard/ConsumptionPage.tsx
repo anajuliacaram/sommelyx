@@ -8,10 +8,10 @@ import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fn
 import { ptBR } from "date-fns/locale/pt-BR";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -61,8 +61,8 @@ export default function ConsumptionPage() {
   const deleteConsumption = useDeleteConsumption();
   const [source, setSource] = useState<Source>("all");
   const [period, setPeriod] = useState<Period>("all");
+  const isMobile = useIsMobile();
 
-  // Period filtering
   const periodStart = useMemo(() => {
     const now = new Date();
     if (period === "week") return startOfWeek(now, { weekStartsOn: 1 });
@@ -79,7 +79,6 @@ export default function ConsumptionPage() {
     });
   }, [entries, source, period, periodStart]);
 
-  // Analytics
   const totalCount = filtered.length;
   const cellarCount = filtered.filter(e => e.source === "cellar").length;
   const externalCount = filtered.filter(e => e.source === "external").length;
@@ -132,33 +131,36 @@ export default function ConsumptionPage() {
     }
   };
 
+  // Chart height: compact on mobile
+  const chartH = isMobile ? 140 : 200;
+
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-64 rounded-xl" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-48 rounded-xl" />
+        <div className="grid grid-cols-4 gap-2">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
-        <div className="grid gap-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        <div className="grid gap-2">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5 max-w-[1200px]">
+    <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Meu Consumo</h1>
         <p className="text-[11px] text-muted-foreground">Histórico, análises e insights sobre seus vinhos</p>
       </motion.div>
 
-      {/* Period + Source Filters */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-col sm:flex-row gap-3">
-        <div className="flex flex-wrap items-center gap-1 rounded-2xl border border-white/55 bg-white/60 p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
+      {/* Period + Source Filters — compact on mobile */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-wrap items-center gap-0.5 rounded-2xl border border-white/55 bg-white/60 p-0.5 sm:p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
           {([
-            { value: "week", label: "Semana" },
+            { value: "week", label: "Sem" },
             { value: "month", label: "Mês" },
             { value: "year", label: "Ano" },
             { value: "all", label: "Tudo" },
@@ -169,7 +171,7 @@ export default function ConsumptionPage() {
                 key={p.value}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative h-10 rounded-xl px-4 text-[11px] font-black uppercase tracking-[0.14em] transition-all duration-200 ease-out",
+                  "relative h-8 sm:h-10 rounded-xl px-3 sm:px-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.14em] transition-all duration-200 ease-out",
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
                     ? "text-primary-foreground shadow-md"
@@ -189,11 +191,11 @@ export default function ConsumptionPage() {
             );
           })}
         </div>
-        <div className="flex flex-wrap items-center gap-1 rounded-2xl border border-white/55 bg-white/60 p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
+        <div className="flex flex-wrap items-center gap-0.5 rounded-2xl border border-white/55 bg-white/60 p-0.5 sm:p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
           {([
             { value: "all", label: "Todos", icon: null },
             { value: "cellar", label: "Adega", icon: GlassWater },
-            { value: "external", label: "Externo", icon: MapPin },
+            { value: "external", label: "Ext.", icon: MapPin },
           ] as { value: Source; label: string; icon: any }[]).map(s => {
             const isActive = source === s.value;
             return (
@@ -201,7 +203,7 @@ export default function ConsumptionPage() {
                 key={s.value}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative h-10 rounded-xl px-4 text-[11px] font-black uppercase tracking-[0.14em] flex items-center gap-2 transition-all duration-200 ease-out",
+                  "relative h-8 sm:h-10 rounded-xl px-3 sm:px-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.14em] flex items-center gap-1.5 transition-all duration-200 ease-out",
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
                     ? "text-primary-foreground shadow-md"
@@ -216,8 +218,8 @@ export default function ConsumptionPage() {
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <span className="relative z-10 flex items-center gap-2">
-                  {s.icon && <s.icon className="h-4 w-4 opacity-85" />}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {s.icon && <s.icon className="h-3.5 w-3.5 opacity-85" />}
                   {s.label}
                 </span>
               </button>
@@ -226,134 +228,34 @@ export default function ConsumptionPage() {
         </div>
       </motion.div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* KPI Cards — ultra-compact on mobile: single row of 4 */}
+      <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
         {[
-          { label: "Consumidos", value: totalCount, sub: periodLabel, icon: Wine, color: "#8F2D56" },
-          { label: "Da adega", value: cellarCount, sub: `${totalCount > 0 ? Math.round((cellarCount / totalCount) * 100) : 0}% do total`, icon: GlassWater, color: "#C9A86A" },
-          { label: "Externos", value: externalCount, sub: `${totalCount > 0 ? Math.round((externalCount / totalCount) * 100) : 0}% do total`, icon: MapPin, color: "#C44569" },
-          { label: "Avaliação média", value: avgRating, sub: `${filtered.filter(e => e.rating).length} avaliados`, icon: Star, color: "#22c55e" },
+          { label: "Total", value: totalCount, icon: Wine, color: "#8F2D56" },
+          { label: "Adega", value: cellarCount, icon: GlassWater, color: "#C9A86A" },
+          { label: "Ext.", value: externalCount, icon: MapPin, color: "#C44569" },
+          { label: "Média", value: avgRating, icon: Star, color: "#22c55e" },
         ].map((m, i) => (
           <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
-            <PremiumKpiCard className="!p-4">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-2" style={{ background: `${m.color}12` }}>
+            <PremiumKpiCard className="!p-2 sm:!p-4">
+              <div className="hidden sm:flex w-8 h-8 rounded-xl items-center justify-center mb-2" style={{ background: `${m.color}12` }}>
                 <m.icon className="h-4 w-4" style={{ color: m.color }} />
               </div>
-              <p className="text-2xl font-black font-sans tracking-tight text-foreground">{m.value}</p>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
-              <p className="text-[9px] text-muted-foreground/60 mt-0.5">{m.sub}</p>
+              <p className="text-lg sm:text-2xl font-black font-sans tracking-tight text-foreground text-center sm:text-left">{m.value}</p>
+              <p className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em] text-center sm:text-left">{m.label}</p>
             </PremiumKpiCard>
           </motion.div>
         ))}
       </div>
 
-      {/* Charts */}
-      {totalCount > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {/* By Country */}
-          {topCountries.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                Por país
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie data={topCountries} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value" label={({ name, value }) => `${name} (${value})`} labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}>
-                    {topCountries.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip content={<CustomPieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-3 mt-2">
-                {topCountries.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
-                    <span className="text-xs text-foreground font-medium">{d.name} ({d.value})</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Rating distribution */}
-          {ratingDistribution.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <Star className="h-4 w-4 text-muted-foreground" />
-                Distribuição de avaliações
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={ratingDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={25} allowDecimals={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                    {ratingDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
-          )}
-
-          {/* Top grapes */}
-          {topGrapes.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
-              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <Grape className="h-4 w-4 text-muted-foreground" />
-                Uvas mais consumidas
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={topGrapes} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 13, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} width={110} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" fill="#8F2D56" radius={[0, 8, 8, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
-          )}
-
-          {/* Top wines */}
-          {topWines.length > 0 && (
-            <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={9}>
-              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                Mais consumidos
-              </h3>
-              <div className="space-y-3">
-                {topWines.map(([name, data], i) => (
-                  <div key={name} className="flex items-center gap-3">
-                    <span className="text-sm font-black w-6 text-muted-foreground/50">#{i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-foreground">{name}</p>
-                      <p className="text-xs text-muted-foreground">{data.producer || "—"}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-black text-foreground">{data.count}×</p>
-                      {data.rating && (
-                        <p className={`text-xs font-semibold ${ratingColor(data.rating)}`}>{ratingLabel(data.rating)}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </div>
-      )}
-
-      {/* Consumption list header */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={10}>
-        <div className="flex items-center gap-2 mb-3">
+      {/* ── HISTORY FIRST on mobile ── */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+        <div className="flex items-center gap-2 mb-2">
           <h2 className="text-[13px] font-serif font-bold text-foreground">Histórico</h2>
           <Badge variant="outline" className="text-[9px] font-bold">{filtered.length}</Badge>
         </div>
       </motion.div>
 
-      {/* Content */}
       {filtered.length === 0 ? (
         <PremiumEmptyState
           icon={Wine}
@@ -365,7 +267,7 @@ export default function ConsumptionPage() {
         />
       ) : (
         <AnimatePresence mode="popLayout">
-          <div className="grid gap-2.5">
+          <div className="grid gap-1.5 sm:gap-2.5">
             {filtered.map((entry, i) => (
               <motion.div
                 key={entry.id}
@@ -374,64 +276,59 @@ export default function ConsumptionPage() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: Math.min(i * 0.02, 0.3) }}
               >
-                <div className="glass-card p-3.5 hover:shadow-md transition-all group">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-[13px] text-foreground truncate">
+                <div className="glass-card p-3 sm:p-3.5 hover:shadow-md transition-all group">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      {/* Row 1: name + source badge */}
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <h3 className="font-bold text-[14px] sm:text-[13px] text-foreground truncate">
                           {entry.wine_name}
                         </h3>
                         {entry.vintage && (
-                          <span className="text-[11px] text-muted-foreground/60">({entry.vintage})</span>
+                          <span className="text-[11px] text-muted-foreground/50 shrink-0">{entry.vintage}</span>
                         )}
-                        <Badge
-                          variant={entry.source === "cellar" ? "default" : "secondary"}
-                          className="text-[9px] shrink-0 h-5"
-                        >
+                      </div>
+
+                      {/* Row 2: source + rating + date — more prominent */}
+                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                        <span className={cn(
+                          "inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md",
+                          entry.source === "cellar"
+                            ? "bg-success/10 text-success"
+                            : "bg-amber-500/10 text-amber-600"
+                        )}>
+                          {entry.source === "cellar" ? <GlassWater className="h-2.5 w-2.5" /> : <MapPin className="h-2.5 w-2.5" />}
                           {entry.source === "cellar" ? "Adega" : "Externo"}
-                        </Badge>
-                        {entry.rating && (
-                          <Badge variant="outline" className={`text-[9px] h-5 font-semibold ${ratingColor(entry.rating)} border-current/20`}>
-                            {ratingLabel(entry.rating)}
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2.5 text-[11px] text-muted-foreground flex-wrap">
-                        {entry.producer && <span>{entry.producer}</span>}
-                        {entry.country && <span className="opacity-60">•</span>}
-                        {entry.country && <span>{entry.country}{entry.region ? `, ${entry.region}` : ""}</span>}
-                        {entry.grape && <span className="opacity-60">•</span>}
-                        {entry.grape && <span>{entry.grape}</span>}
-                      </div>
-
-                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground/60 flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(entry.consumed_at), "dd MMM yyyy", { locale: ptBR })}
                         </span>
-                        {entry.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {entry.location}
+                        {entry.rating && (
+                          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted/15", ratingColor(entry.rating))}>
+                            {ratingLabel(entry.rating)}
                           </span>
                         )}
+                        <span className="text-[11px] font-medium text-muted-foreground ml-auto shrink-0">
+                          {format(new Date(entry.consumed_at), "dd MMM", { locale: ptBR })}
+                        </span>
                       </div>
 
-                      {entry.tasting_notes && (
-                        <p className="text-[10px] text-muted-foreground/50 italic line-clamp-1 mt-0.5">
-                          "{entry.tasting_notes}"
-                        </p>
-                      )}
+                      {/* Row 3: origin info — compact */}
+                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 flex-wrap">
+                        {entry.country && <span>{entry.country}{entry.region ? ` · ${entry.region}` : ""}</span>}
+                        {entry.grape && (
+                          <>
+                            {entry.country && <span className="opacity-40">|</span>}
+                            <span>{entry.grape}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 md:h-7 md:w-7 shrink-0 text-muted-foreground/50 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                      className="h-8 w-8 shrink-0 text-muted-foreground/40 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       onClick={() => handleDelete(entry.id)}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -439,6 +336,99 @@ export default function ConsumptionPage() {
             ))}
           </div>
         </AnimatePresence>
+      )}
+
+      {/* Charts — AFTER history, reduced height on mobile */}
+      {totalCount > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
+          {topCountries.length > 0 && (
+            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={10}>
+              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                Por país
+              </h3>
+              <ResponsiveContainer width="100%" height={chartH}>
+                <PieChart>
+                  <Pie data={topCountries} cx="50%" cy="50%" innerRadius={isMobile ? 28 : 40} outerRadius={isMobile ? 50 : 70} paddingAngle={3} dataKey="value" label={isMobile ? false : ({ name, value }) => `${name} (${value})`} labelLine={isMobile ? false : { stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}>
+                    {topCountries.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip content={<CustomPieTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap justify-center gap-2 mt-1">
+                {topCountries.map((d, i) => (
+                  <div key={d.name} className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+                    <span className="text-[10px] text-foreground font-medium">{d.name} ({d.value})</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {ratingDistribution.length > 0 && (
+            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={11}>
+              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <Star className="h-3.5 w-3.5 text-muted-foreground" />
+                Avaliações
+              </h3>
+              <ResponsiveContainer width="100%" height={chartH}>
+                <BarChart data={ratingDistribution}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: isMobile ? 10 : 12, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    {ratingDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </motion.div>
+          )}
+
+          {topGrapes.length > 0 && (
+            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={12}>
+              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <Grape className="h-3.5 w-3.5 text-muted-foreground" />
+                Uvas
+              </h3>
+              <ResponsiveContainer width="100%" height={chartH}>
+                <BarChart data={topGrapes} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: isMobile ? 11 : 13, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} width={isMobile ? 80 : 110} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="value" fill="#8F2D56" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </motion.div>
+          )}
+
+          {topWines.length > 0 && (
+            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={13}>
+              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                Mais consumidos
+              </h3>
+              <div className="space-y-2">
+                {topWines.map(([name, data], i) => (
+                  <div key={name} className="flex items-center gap-2">
+                    <span className="text-[12px] font-black w-5 text-muted-foreground/40">#{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold truncate text-foreground">{name}</p>
+                    </div>
+                    <div className="text-right shrink-0 flex items-center gap-2">
+                      {data.rating && (
+                        <span className={cn("text-[10px] font-semibold", ratingColor(data.rating))}>{ratingLabel(data.rating)}</span>
+                      )}
+                      <span className="text-[12px] font-black text-foreground">{data.count}×</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </div>
       )}
     </div>
   );
