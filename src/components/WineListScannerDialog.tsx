@@ -130,6 +130,8 @@ const compatLabelConfig: Record<string, { color: string; bg: string; border: str
   "Alta compatibilidade": { color: "#0e7a5a", bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.13)" },
   "Boa opção": { color: "#b45309", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.15)" },
   "Funciona bem": { color: "#777", bg: "rgba(0,0,0,0.04)", border: "rgba(0,0,0,0.08)" },
+  "Escolha ousada": { color: "#9333ea", bg: "rgba(147,51,234,0.08)", border: "rgba(147,51,234,0.15)" },
+  "Pouco indicado": { color: "#dc2626", bg: "rgba(220,38,38,0.08)", border: "rgba(220,38,38,0.15)" },
 };
 
 function StarRating({ rating, wineType = "unknown" }: { rating: number; wineType?: WineType }) {
