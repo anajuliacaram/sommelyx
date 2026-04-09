@@ -106,11 +106,17 @@ export interface MenuDishItem {
   match: "perfeito" | "muito bom" | "bom";
   reason: string;
   highlight?: "top-pick" | "best-value" | null;
+  compatibilityLabel?: string | null;
+  harmony_type?: "contraste" | "semelhança" | "complemento" | "equilíbrio" | "limpeza";
+  harmony_label?: string | null;
+  dish_profile?: DishItemProfile | null;
+  recipe?: Recipe | null;
 }
 
 export interface MenuAnalysis {
   dishes: MenuDishItem[];
   summary: string;
+  wineProfile?: WineProfile | null;
 }
 
 export interface TasteCompatibility {
