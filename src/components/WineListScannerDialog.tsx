@@ -10,6 +10,7 @@ import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { normalizeAppError } from "@/lib/app-error";
 
 interface WineListScannerDialogProps {
   open: boolean;
@@ -87,8 +88,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       if (!data.wines?.length) throw new Error("Nenhum vinho identificado na imagem");
       setResults(data);
       setStep("results");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Não foi possível analisar a carta");
+    } catch (err) {
+      const normalized = normalizeAppError(err);
+      setErrorMsg(normalized.userMessage);
       setStep("error");
     }
   }, [wines]);
@@ -118,7 +120,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       setLastAttachment(payload);
       await runScan(payload);
     } catch (error) {
-      setErrorMsg(error instanceof Error ? error.message : "Não conseguimos ler esse anexo.");
+      const normalized = normalizeAppError(error);
+      setErrorMsg(normalized.userMessage);
       setStep("error");
     }
   }, [runScan, toast]);

@@ -41,8 +41,15 @@ function isTransportErrorMessage(message: string) {
 }
 
 function humanizeEdgeErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+  if (normalized.includes("tempo limite")) {
+    return "A análise demorou mais do que o esperado. Tente novamente.";
+  }
   if (isTransportErrorMessage(message)) {
-    return "Não foi possível conectar com a inteligência do Sommelyx agora. Verifique sua conexão e tente novamente.";
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      return "Sem conexão. Verifique sua internet e tente novamente.";
+    }
+    return "O serviço não respondeu como esperado. Tente novamente em instantes.";
   }
   return message || "Não foi possível completar a solicitação.";
 }
@@ -77,12 +84,19 @@ export async function invokeEdgeFunction<T>(
     try {
       // Prefer explicit Authorization; fallback to invoke default headers if token is temporarily unavailable.
       const accessToken = await resolveAccessToken(explicitAccessToken, forceTokenRefresh);
+      const requestId = crypto.randomUUID();
       const invokePromise = supabase.functions.invoke(name, accessToken
         ? {
             body,
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "x-request-id": requestId,
+            },
           }
-        : { body });
+        : {
+            body,
+            headers: { "x-request-id": requestId },
+          });
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Tempo limite excedido. Tente novamente.")), timeoutMs),
       );
@@ -100,7 +114,8 @@ export async function invokeEdgeFunction<T>(
         try {
           if (typeof (error as any)?.context?.json === "function") {
             const body = await (error as any).context.json();
-            if (body?.error) message = String(body.error);
+            if (body?.userMessage) message = String(body.userMessage);
+            else if (body?.error) message = String(body.error);
             else if (body?.message) message = String(body.message);
             if (body?.code) code = String(body.code);
             if (body?.requestId) requestId = String(body.requestId);
@@ -140,7 +155,7 @@ export async function invokeEdgeFunction<T>(
       if (data && typeof data === "object") {
         const rec = data as Record<string, unknown>;
         if (rec.ok === false) {
-          const msg = String(rec.error || rec.message || "Não foi possível completar a solicitação.");
+          const msg = String(rec.userMessage || rec.error || rec.message || "Não foi possível completar a solicitação.");
           throw new EdgeFunctionError(msg, {
             status: typeof rec.status === "number" ? (rec.status as number) : undefined,
             code: rec.code ? String(rec.code) : undefined,
@@ -173,7 +188,7 @@ export async function invokeEdgeFunction<T>(
       }
       // Preserve structured edge errors (requestId/code/retryable) for UX + suporte.
       if (err instanceof EdgeFunctionError) throw err;
-      throw new Error(humanizeEdgeErrorMessage(toErrorMessage(err)));
+      throw new EdgeFunctionError(humanizeEdgeErrorMessage(toErrorMessage(err)));
     }
   }
 }

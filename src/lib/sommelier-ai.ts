@@ -92,7 +92,7 @@ export async function getWinePairings(wine: {
       wineGrape: wine.grape,
       wineRegion: wine.region,
     },
-    { timeoutMs: 30_000, retries: 1 },
+    { timeoutMs: 35_000, retries: 2 },
   );
   return data?.pairings || [];
 }
@@ -113,7 +113,7 @@ export async function getDishWineSuggestions(
         region: w.region,
       })),
     },
-    { timeoutMs: 30_000, retries: 1 },
+    { timeoutMs: 35_000, retries: 2 },
   );
   return data?.suggestions || [];
 }
@@ -130,7 +130,7 @@ export async function analyzeWineList(
   const data = await invokeEdgeFunction<WineListAnalysis>(
     "analyze-wine-list",
     { ...attachment, userProfile },
-    { timeoutMs: 60_000, retries: 1 },
+    { timeoutMs: 70_000, retries: 2 },
   );
   return data || { wines: [], topPick: null, bestValue: null };
 }
@@ -142,7 +142,7 @@ export async function analyzeMenuForWine(
   const data = await invokeEdgeFunction<MenuAnalysis>(
     "analyze-wine-list",
     { ...attachment, mode: "menu-for-wine", wineName },
-    { timeoutMs: 60_000, retries: 1 },
+    { timeoutMs: 70_000, retries: 2 },
   );
   return data || { dishes: [], summary: "" };
 }
@@ -171,7 +171,7 @@ export async function getTasteCompatibility(
         quantity: w.quantity,
       })),
     },
-    { timeoutMs: 20_000, retries: 1 },
+    { timeoutMs: 25_000, retries: 2 },
   );
   return data || { compatibility: null, label: "Não disponível", reason: "" };
 }
@@ -200,7 +200,7 @@ export async function getWineInsight(wine: {
       drinkFrom: wine.drinkFrom,
       drinkUntil: wine.drinkUntil,
     },
-    { timeoutMs: 30_000, retries: 1 },
+    { timeoutMs: 35_000, retries: 2 },
   );
   return data || { insight: "", recommendation: "" };
 }

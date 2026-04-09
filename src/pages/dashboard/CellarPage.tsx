@@ -42,7 +42,7 @@ function normalizeGroupValue(value?: string | null) {
 }
 
 function formatVintageLabel(vintage: number | null | undefined) {
-  return vintage == null ? "Sem safra" : String(vintage);
+  return typeof vintage === "number" && Number.isFinite(vintage) && vintage > 0 ? String(vintage) : "Sem safra";
 }
 
 function drinkStatus(w: { drink_from: number | null; drink_until: number | null }) {
@@ -55,9 +55,9 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 
 const statusLabel = { now: "Beber agora", past: "Passou do ponto", young: "Em guarda" };
 const statusColor = {
-  now: "bg-emerald-100/80 text-emerald-700 border-emerald-300/70",
-  past: "bg-amber-100/80 text-amber-700 border-amber-300/70",
-  young: "bg-amber-50/90 text-amber-800 border-amber-200/80",
+  now: "bg-emerald-50/65 text-emerald-700 border-emerald-100/75",
+  past: "bg-black/[0.03] text-muted-foreground/85 border-border/70",
+  young: "bg-[#F5E7C7]/75 text-[#8B6A2D] border-[#E3CF9A]/80",
 };
 
 function getWineTone(style?: string | null) {
@@ -71,11 +71,11 @@ function getWineTone(style?: string | null) {
 
 function getStyleBadgeClass(style?: string | null) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#7B1E3A]/10 text-[#7B1E3A] border-[#7B1E3A]/20";
-  if (s.includes("branco")) return "bg-[#DDBD74]/18 text-[#836329] border-[#DDBD74]/35";
-  if (s.includes("rose")) return "bg-[#C97A93]/14 text-[#93435F] border-[#C97A93]/25";
-  if (s.includes("espum")) return "bg-[#C6A768]/16 text-[#8B6A2D] border-[#C6A768]/30";
-  return "bg-primary/8 text-primary border-primary/20";
+  if (s.includes("tinto")) return "bg-background/72 text-foreground/72 border-border/60";
+  if (s.includes("branco")) return "bg-background/72 text-foreground/72 border-border/60";
+  if (s.includes("rose")) return "bg-background/72 text-foreground/72 border-border/60";
+  if (s.includes("espum")) return "bg-background/72 text-foreground/72 border-border/60";
+  return "bg-background/72 text-foreground/72 border-border/60";
 }
 
 const styleOptions = [
@@ -151,19 +151,19 @@ function CellarWineCard({
 
   return (
     <motion.div
-      className="group relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-background/98 via-background/94 to-primary/[0.03] p-2 shadow-[0_6px_18px_-18px_rgba(122,32,57,0.34)] backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_10px_20px_-18px_rgba(122,32,57,0.32)]"
+      className="group relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-background/98 via-background/94 to-primary/[0.03] p-2 shadow-[0_6px_18px_-18px_rgba(122,32,57,0.34)] backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-[2px] hover:shadow-[0_14px_28px_-18px_rgba(122,32,57,0.34)]"
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.015, duration: 0.3 }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1 pr-1">
-          <h3 className="line-clamp-2 text-[0.84rem] font-serif font-semibold leading-[1.03] text-foreground">
+          <h3 className="line-clamp-2 text-[0.92rem] font-serif font-bold leading-[1.02] text-foreground">
             {wine.name}
           </h3>
-          <div className="mt-0.5 flex items-center gap-1 text-[8px] font-medium text-muted-foreground/85">
+          <div className="mt-0.5 flex items-center gap-1 text-[7px] font-normal text-muted-foreground/70">
             <span>{formatVintageLabel(wine.vintage)}</span>
-            <span className="text-muted-foreground/40">•</span>
+            <span className="text-muted-foreground/35">•</span>
             <span className="truncate">{wine.region || "Região n/i"}</span>
           </div>
         </div>
@@ -191,7 +191,7 @@ function CellarWineCard({
           </Badge>
         )}
         {wine.country && (
-          <Badge variant="outline" className="h-[16px] rounded-full border border-black/10 bg-black/[0.025] px-1.5 text-[6.5px] font-medium text-muted-foreground">
+          <Badge variant="outline" className="h-[16px] rounded-full border border-black/8 bg-black/[0.03] px-1.5 text-[6.5px] font-medium text-muted-foreground/78">
             <MapPin className="mr-0.5 h-2.5 w-2.5" />
             {wine.country}
           </Badge>
@@ -201,52 +201,15 @@ function CellarWineCard({
       <div className="mt-[3px] rounded-2xl border border-border/35 bg-background/68 px-2.5 py-1 backdrop-blur-sm">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[6px] uppercase tracking-[0.12em] text-muted-foreground/80">Preço</p>
             <p className="text-[0.8rem] font-semibold leading-none text-foreground">
               {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "R$ —"}
             </p>
-            {hasPriceVariance && (
-              <p className="mt-0.5 text-[6px] font-medium text-muted-foreground/60">
-                Preços diferentes agrupados
-              </p>
-            )}
           </div>
           <div className="h-5 w-px bg-border/40" />
           <div className="text-right">
-            <p className="text-[6px] uppercase tracking-[0.12em] text-muted-foreground/80">Quantidade</p>
             <p className="text-[0.8rem] font-semibold leading-none text-foreground">{wine.quantity}</p>
           </div>
         </div>
-      </div>
-
-      <div className="mt-[3px] flex items-center gap-1">
-        <Button
-          size="sm"
-          variant="secondary"
-          className="h-8 flex-1 justify-start rounded-2xl border border-border/45 bg-background/76 px-2.5 text-[7.5px] font-semibold shadow-sm transition-all duration-200 hover:-translate-y-[1px] hover:bg-background"
-          onClick={onConsume}
-        >
-          <UtensilsCrossed className="mr-1 h-3 w-3 shrink-0" />
-          Registrar consumo
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 rounded-xl border border-border/35 p-0 text-muted-foreground/70 transition-all duration-200 hover:-translate-y-[1px] hover:text-foreground"
-          onClick={onEdit}
-          title="Editar"
-        >
-          <Pencil className="h-3 w-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 rounded-xl border border-border/35 p-0 text-muted-foreground/65 transition-all duration-200 hover:-translate-y-[1px] hover:text-destructive"
-          onClick={onDelete}
-          title="Remover"
-        >
-          <Trash2 className="h-3 w-3" />
-        </Button>
       </div>
 
       {hasGroupDetails && (
@@ -279,6 +242,36 @@ function CellarWineCard({
           )}
         </div>
       )}
+
+      <div className="mt-[3px] flex items-center gap-1">
+        <Button
+          size="sm"
+          variant="secondary"
+          className="h-8 flex-1 justify-start rounded-2xl border border-border/45 bg-background/76 px-2.5 text-[7.5px] font-semibold shadow-sm transition-all duration-200 hover:-translate-y-[1px] hover:bg-background"
+          onClick={onConsume}
+        >
+          <UtensilsCrossed className="mr-1 h-3 w-3 shrink-0" />
+          Registrar consumo
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 rounded-xl border border-border/35 p-0 text-muted-foreground/70 transition-all duration-200 hover:-translate-y-[1px] hover:text-foreground"
+          onClick={onEdit}
+          title="Editar"
+        >
+          <Pencil className="h-3 w-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 rounded-xl border border-border/35 p-0 text-muted-foreground/65 transition-all duration-200 hover:-translate-y-[1px] hover:text-destructive"
+          onClick={onDelete}
+          title="Remover"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </div>
     </motion.div>
   );
 }
@@ -662,7 +655,7 @@ export default function CellarPage() {
           } : undefined}
         />
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((wine, i) => {
             const status = drinkStatus(wine) as WineStatus;
             const isExpanded = !!expandedGroups[wine.groupKey];
@@ -706,7 +699,7 @@ export default function CellarPage() {
                       <p className="text-[9px] text-muted-foreground">{[wine.producer, formatVintageLabel(wine.vintage), wine.country].filter(Boolean).join(" · ")}</p>
                     </td>
                     <td className="px-3 py-2 hidden sm:table-cell">
-                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded capitalize bg-primary/5 text-primary">{wine.style || "—"}</span>
+                      <span className="rounded-full border border-border/60 bg-background/70 px-1.5 py-0.5 text-[9px] font-medium capitalize text-foreground/75">{wine.style || "—"}</span>
                     </td>
                     <td className="px-3 py-2 text-right hidden md:table-cell">
                       <span className="text-[10px] font-semibold text-muted-foreground">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>

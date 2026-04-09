@@ -1,152 +1,118 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import {
+  authenticateRequest,
+  corsHeaders,
+  extractToolArguments,
+  failResponse,
+  FunctionError,
+  jsonResponse,
+  logAudit,
+  openAiChatCompletion,
+} from "../_shared/runtime.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const FUNCTION_NAME = "wine-insight";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const startedAt = Date.now();
+  const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
+  let userId = "anonymous";
+
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Autenticação necessária" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Sessão inválida" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const auth = await authenticateRequest(req, FUNCTION_NAME, requestId, startedAt);
+    userId = auth.userId;
 
     const body = await req.json();
     const { alertType, wineName, style, grape, region, country, vintage, drinkFrom, drinkUntil } = body;
 
     if (!alertType || !wineName) {
-      return new Response(JSON.stringify({ error: "alertType e wineName são obrigatórios" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      throw new FunctionError(400, "INVALID_REQUEST", "Informações insuficientes para gerar a análise.", {
+        requestId,
+        retryable: false,
       });
     }
 
     const currentYear = new Date().getFullYear();
-
-    const systemPrompt = `Você é um sommelier experiente e enólogo. Forneça uma análise técnica breve (2-3 frases) sobre o estado de evolução de um vinho.
-Seja específico com base na uva, região e safra quando disponíveis.
-Use linguagem acessível mas com autoridade técnica.
-Responda APENAS em JSON válido:
-{
-  "insight": "Texto da análise técnica",
-  "recommendation": "Uma recomendação prática curta (1 frase)"
-}`;
-
     let userPrompt: string;
 
     if (alertType === "drink_now") {
-      userPrompt = `Este vinho está na janela ideal de consumo (${drinkFrom || "?"}–${drinkUntil || "?"}, estamos em ${currentYear}).
-
-Vinho: ${wineName}
-Estilo: ${style || "Não informado"}
-Uva: ${grape || "Não informada"}
-Região: ${region || "Não informada"}
-País: ${country || "Não informado"}
-Safra: ${vintage || "Não informada"}
-
-Explique por que este é o momento ideal para abri-lo, com base nas características de evolução da uva/região/estilo. Sugira como melhor apreciá-lo.`;
+      userPrompt = `Este vinho está na janela ideal de consumo (${drinkFrom || "?"}–${drinkUntil || "?"}, estamos em ${currentYear}).\n\nVinho: ${wineName}\nEstilo: ${style || "Não informado"}\nUva: ${grape || "Não informada"}\nRegião: ${region || "Não informada"}\nPaís: ${country || "Não informado"}\nSafra: ${vintage || "Não informada"}\n\nExplique por que este é o momento ideal para abri-lo e como melhor apreciá-lo.`;
     } else if (alertType === "past_peak") {
       const yearsOver = drinkUntil ? currentYear - drinkUntil : 0;
-      userPrompt = `Este vinho passou da janela ideal de consumo (janela era ${drinkFrom || "?"}–${drinkUntil || "?"}, estamos em ${currentYear}, ${yearsOver} ano(s) além).
-
-Vinho: ${wineName}
-Estilo: ${style || "Não informado"}
-Uva: ${grape || "Não informada"}
-Região: ${region || "Não informada"}
-País: ${country || "Não informado"}
-Safra: ${vintage || "Não informada"}
-
-Explique tecnicamente o que pode ter acontecido com o vinho (oxidação, perda de frescor, taninos, etc.) com base na uva e estilo. Dê uma recomendação prática (abrir logo, usar em culinária, etc.).`;
+      userPrompt = `Este vinho passou da janela ideal de consumo (janela era ${drinkFrom || "?"}–${drinkUntil || "?"}, estamos em ${currentYear}, ${yearsOver} ano(s) além).\n\nVinho: ${wineName}\nEstilo: ${style || "Não informado"}\nUva: ${grape || "Não informada"}\nRegião: ${region || "Não informada"}\nPaís: ${country || "Não informado"}\nSafra: ${vintage || "Não informada"}\n\nExplique tecnicamente o que pode ter acontecido com o vinho e dê uma recomendação prática.`;
     } else {
-      return new Response(JSON.stringify({ error: "alertType deve ser 'drink_now' ou 'past_peak'" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      throw new FunctionError(400, "INVALID_REQUEST", "Tipo de alerta inválido para análise.", {
+        requestId,
+        retryable: false,
       });
     }
 
-    const aiResponse = await fetch(AI_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.6,
-      }),
-    });
+    const aiData = await openAiChatCompletion({
+      messages: [
+        {
+          role: "system",
+          content: "Você é um sommelier experiente e enólogo. Forneça uma análise técnica breve (2-3 frases) sobre o estado de evolução de um vinho. Use linguagem acessível e objetiva.",
+        },
+        { role: "user", content: userPrompt },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "return_wine_insight",
+            description: "Retorna uma análise estruturada sobre o momento ideal de consumo do vinho.",
+            parameters: {
+              type: "object",
+              properties: {
+                insight: { type: "string" },
+                recommendation: { type: "string" },
+              },
+              required: ["insight", "recommendation"],
+              additionalProperties: false,
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "return_wine_insight" } },
+      temperature: 0.35,
+      max_tokens: 700,
+    }, { requestId, timeoutMs: 35_000 });
 
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em instantes." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
+    const parsed = extractToolArguments(aiData);
+    if (!parsed) {
+      throw new FunctionError(422, "EMPTY_RESULT", "Não foi possível gerar a análise agora. Tente novamente.", {
+        requestId,
+        retryable: true,
+      });
     }
 
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content || "";
+    const result = {
+      insight: typeof (parsed as any).insight === "string" ? (parsed as any).insight : "",
+      recommendation: typeof (parsed as any).recommendation === "string" ? (parsed as any).recommendation : "",
+    };
 
-    let parsed;
-    try {
-      const jsonStart = content.indexOf("{");
-      const jsonEnd = content.lastIndexOf("}");
-      if (jsonStart !== -1 && jsonEnd > jsonStart) {
-        parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
-      } else {
-        parsed = JSON.parse(content);
-      }
-    } catch {
-      parsed = { insight: content.trim(), recommendation: "" };
-    }
+    await logAudit(userId, FUNCTION_NAME, 200, "success", Date.now() - startedAt, {
+      request_id: requestId,
+      alert_type: alertType,
+      wine_name: wineName,
+    });
 
-    return new Response(JSON.stringify(parsed), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return jsonResponse(result);
+  } catch (error) {
+    const failure = error instanceof FunctionError
+      ? error
+      : new FunctionError(500, "INTERNAL_ERROR", "O serviço está temporariamente indisponível. Tente novamente em instantes.", {
+          requestId,
+          retryable: true,
+          message: error instanceof Error ? error.message : "unknown_error",
+        });
+    console.error(`[${FUNCTION_NAME}] request_id=${requestId}`, failure.message);
+    await logAudit(userId, FUNCTION_NAME, failure.status, "error", Date.now() - startedAt, {
+      request_id: requestId,
+      code: failure.code,
+      technical_message: failure.message,
     });
-  } catch (e) {
-    console.error("wine-insight error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro interno" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return failResponse(failure);
   }
 });

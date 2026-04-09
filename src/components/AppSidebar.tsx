@@ -78,21 +78,21 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="offcanvas" className="border-r border-border w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
-        <SidebarHeader className="pt-2.5 md:pt-2.5 px-3">
+        <SidebarHeader className="pt-2 md:pt-2 px-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-1 py-1.5 mb-1.5 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="mb-4 flex items-center gap-4 px-1 py-1.5 rounded-lg transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
             aria-label="Ir para o início do dashboard"
           >
-            <div className="relative flex h-[88px] w-[66px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
+            <div className="relative flex h-[104px] w-[78px] shrink-0 items-center justify-center overflow-hidden rounded-xl">
               <Logo
                 variant="compact"
-                className="h-[170px] w-auto scale-[1.16] object-contain drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)]"
+                className="h-[190px] w-auto scale-[1.12] object-contain drop-shadow-[0_10px_18px_rgba(15,15,20,0.22)]"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground leading-none">
+              <span className="text-[16px] font-bold tracking-[-0.02em] text-foreground leading-none">
                 Sommelyx
               </span>
               <span
@@ -139,48 +139,41 @@ export function AppSidebar() {
                 </Button>
               </div>
             ) : (
-            <section className="rounded-3xl border border-primary/10 bg-background/86 p-3 shadow-[0_10px_26px_-22px_rgba(25,18,22,0.40)] backdrop-blur-md">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-[8.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">
-                  AÇÕES RÁPIDAS
-                </p>
-                <span className="h-1.5 w-1.5 rounded-full bg-primary/25" aria-hidden="true" />
-              </div>
-
-              <div className="flex flex-col gap-4">
+            <section className="rounded-3xl border border-primary/8 bg-background/72 p-2.5 shadow-[0_8px_22px_-20px_rgba(25,18,22,0.34)] backdrop-blur-md">
+              <div className="flex flex-col gap-2.5">
                 <Button
                   variant="primary"
-                  className="h-14 w-full justify-start gap-2.5 rounded-2xl px-4 text-[13px] font-semibold tracking-[-0.01em] shadow-[0_14px_28px_-18px_hsl(var(--wine)/0.48)] hover:shadow-[0_18px_30px_-18px_hsl(var(--wine)/0.55)]"
+                  className="h-12 w-full justify-start gap-2 rounded-2xl px-4 text-[12px] font-semibold tracking-[-0.01em] shadow-[0_10px_22px_-18px_hsl(var(--wine)/0.36)] hover:shadow-[0_14px_24px_-18px_hsl(var(--wine)/0.42)]"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
-                  <Plus className="h-4 w-4 shrink-0" />
+                  <Plus className="h-3.5 w-3.5 shrink-0" />
                   Adicionar vinho
                 </Button>
 
                 <Button
                   variant="secondary"
-                  className="h-14 w-full justify-start gap-2.5 rounded-2xl border-primary/15 bg-primary/[0.04] px-4 text-[13px] font-semibold text-primary hover:bg-primary/[0.08] hover:border-primary/25"
+                  className="h-12 w-full justify-start gap-2 rounded-2xl border-primary/12 bg-background/72 px-4 text-[12px] font-semibold text-primary/90 shadow-[0_6px_14px_-18px_rgba(25,18,22,0.28)] hover:bg-background/82 hover:border-primary/18"
                   onClick={() => { setManageOpen(true); setManageTab("open"); closeMobileSidebar(); }}
                 >
-                  <Wine className="h-4 w-4 shrink-0" />
+                  <Wine className="h-3.5 w-3.5 shrink-0" />
                   Registrar consumo
                 </Button>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5">
                   <Button
                     variant="ghost"
-                    className="h-12 w-full justify-start gap-2.5 rounded-2xl border border-border/45 bg-background/82 px-3.5 text-[10.5px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.38)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.42)]"
+                    className="h-10 w-full justify-start gap-2 rounded-2xl border border-border/35 bg-background/68 px-3.5 text-[10px] font-semibold tracking-[-0.01em] shadow-[0_6px_14px_-18px_rgba(20,15,18,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.05] hover:border-accent/20 hover:text-accent hover:shadow-[0_10px_18px_-16px_rgba(20,15,18,0.34)]"
                     onClick={() => { setDishToWineOpen(true); closeMobileSidebar(); }}
                   >
-                    <UtensilsCrossed className="h-4 w-4 shrink-0" />
+                    <UtensilsCrossed className="h-3.5 w-3.5 shrink-0" />
                     Harmonizar
                   </Button>
                   <Button
                     variant="ghost"
-                    className="h-12 w-full justify-start gap-2.5 rounded-2xl border border-border/45 bg-background/82 px-3.5 text-[10.5px] font-semibold tracking-[-0.01em] shadow-[0_8px_18px_-18px_rgba(20,15,18,0.38)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.06] hover:border-accent/25 hover:text-accent hover:shadow-[0_12px_20px_-16px_rgba(20,15,18,0.42)]"
+                    className="h-10 w-full justify-start gap-2 rounded-2xl border border-border/35 bg-background/68 px-3.5 text-[10px] font-semibold tracking-[-0.01em] shadow-[0_6px_14px_-18px_rgba(20,15,18,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/[0.05] hover:border-accent/20 hover:text-accent hover:shadow-[0_10px_18px_-16px_rgba(20,15,18,0.34)]"
                     onClick={() => { setWineListScanOpen(true); closeMobileSidebar(); }}
                   >
-                    <Sparkles className="h-4 w-4 shrink-0" />
+                    <Sparkles className="h-3.5 w-3.5 shrink-0" />
                     Analisar carta
                   </Button>
                 </div>

@@ -1,16 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import {
+  authenticateRequest,
+  corsHeaders,
+  extractToolArguments,
+  failResponse,
+  FunctionError,
+  jsonResponse,
+  logAudit,
+  openAiChatCompletion,
+} from "../_shared/runtime.ts";
 
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const AI_TIMEOUT_MS = 60_000;
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 10;
@@ -35,29 +36,6 @@ setInterval(() => {
   }
 }, 120_000);
 
-type FailPayload = {
-  ok: false;
-  error: string;
-  code: string;
-  requestId: string;
-  retryable?: boolean;
-};
-
-function jsonResponse(status: number, body: Record<string, unknown>) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
-function fail(status: number, payload: FailPayload) {
-  return jsonResponse(status, payload);
-}
-
-function getBearerToken(authHeader: string) {
-  return authHeader.replace(/^Bearer\s+/i, "").trim();
-}
-
 function normalizeBase64(input: string) {
   const trimmed = input.trim();
   const idx = trimmed.indexOf("base64,");
@@ -73,17 +51,6 @@ function parseImageDataUrl(input: string): { mime: string; base64: string } {
     return { mime, base64 };
   }
   return { mime: "image/jpeg", base64: trimmed };
-}
-
-function extractJsonFromText(text: string) {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
-  try {
-    return JSON.parse(text.slice(start, end + 1));
-  } catch {
-    return null;
-  }
 }
 
 function normalizeStyle(value: unknown) {
@@ -109,84 +76,19 @@ function normalizeNumber(value: unknown) {
   return null;
 }
 
-async function logAudit(
-  userId: string,
-  statusCode: number,
-  outcome: string,
-  durationMs: number,
-  metadata?: Record<string, unknown>,
-) {
-  try {
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SERVICE_ROLE_KEY")!,
-    );
-    await adminClient.from("edge_function_logs").insert({
-      user_id: userId,
-      function_name: FUNCTION_NAME,
-      status_code: statusCode,
-      outcome,
-      duration_ms: durationMs,
-      metadata: metadata || {},
-    });
-  } catch (e) {
-    console.error("Audit log failed:", e instanceof Error ? e.message : "unknown");
-  }
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const startTime = Date.now();
+  const startedAt = Date.now();
+  const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
   let userId = "anonymous";
-  const requestId = crypto.randomUUID();
 
   try {
-    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
-        request_id: requestId,
-        reason: "missing_or_invalid_authorization_header",
-      });
-      return fail(401, {
-        ok: false,
-        code: "AUTH_REQUIRED",
-        error: "Sua sessão expirou. Faça login novamente para continuar.",
-        requestId,
-        retryable: false,
-      });
-    }
-
-    const token = getBearerToken(authHeader);
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
-        request_id: requestId,
-        reason: "invalid_token",
-      });
-      return fail(401, {
-        ok: false,
-        code: "AUTH_INVALID",
-        error: "Sua sessão não é válida. Faça login novamente para continuar.",
-        requestId,
-        retryable: false,
-      });
-    }
-
-    userId = user.id;
+    const auth = await authenticateRequest(req, FUNCTION_NAME, requestId, startedAt);
+    userId = auth.userId;
 
     if (!checkRateLimit(userId)) {
-      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, { request_id: requestId });
-      return fail(429, {
-        ok: false,
-        code: "RATE_LIMITED",
-        error: "Muitas tentativas em pouco tempo. Tente novamente em instantes.",
+      throw new FunctionError(429, "RATE_LIMIT", "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente.", {
         requestId,
         retryable: true,
       });
@@ -196,23 +98,15 @@ serve(async (req) => {
     try {
       payload = await req.json();
     } catch {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "invalid_json" });
-      return fail(400, {
-        ok: false,
-        code: "INVALID_REQUEST",
-        error: "Não foi possível ler sua solicitação. Tente novamente.",
+      throw new FunctionError(400, "INVALID_REQUEST", "Não foi possível ler sua solicitação. Tente novamente.", {
         requestId,
-        retryable: true,
+        retryable: false,
       });
     }
 
     const imageBase64Raw = payload?.imageBase64;
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "missing_image" });
-      return fail(400, {
-        ok: false,
-        code: "MISSING_IMAGE",
-        error: "Envie uma foto do rótulo para analisar.",
+      throw new FunctionError(400, "MISSING_IMAGE", "Envie uma foto do rótulo para analisar.", {
         requestId,
         retryable: false,
       });
@@ -222,158 +116,74 @@ serve(async (req) => {
     const imageMime = parsedImage.mime;
     const imageBase64 = normalizeBase64(parsedImage.base64);
     if (imageBase64.length > MAX_IMAGE_SIZE) {
-      await logAudit(userId, 413, "validation_error", Date.now() - startTime, {
-        request_id: requestId,
-        reason: "image_too_large",
-        size_bytes: imageBase64.length,
-      });
-      return fail(413, {
-        ok: false,
-        code: "IMAGE_TOO_LARGE",
-        error: "A imagem está muito grande. Tente novamente com uma foto mais leve.",
+      throw new FunctionError(413, "IMAGE_TOO_LARGE", "Esse arquivo é grande demais. Envie uma versão menor.", {
         requestId,
         retryable: false,
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing LOVABLE_API_KEY`);
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_lovable_key" });
-      return fail(500, {
-        ok: false,
-        code: "CONFIG_ERROR",
-        error: "A análise não pôde ser concluída agora. Tente novamente mais tarde.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    const systemPrompt =
-      `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão.\n\n` +
-      `Regras:\n` +
-      `- Retorne APENAS JSON válido seguindo o schema abaixo (sem texto extra, sem markdown).\n` +
-      `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado.\n` +
-      `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc).\n` +
-      `- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.\n` +
-      `- tasting_notes: 1-2 frases curtas em português (perfil esperado).\n` +
-      `- food_pairing: 2-3 sugestões em português.\n` +
-      `- Leia todo texto visível no rótulo (frente e verso, se aparecer).\n\n` +
-      `Schema JSON:\n` +
-      `{\n` +
-      `  "wine": {\n` +
-      `    "name": "string",\n` +
-      `    "producer": "string | null",\n` +
-      `    "vintage": "number | null",\n` +
-      `    "style": "tinto | branco | rose | espumante | sobremesa | fortificado | null",\n` +
-      `    "country": "string | null",\n` +
-      `    "region": "string | null",\n` +
-      `    "grape": "string | null",\n` +
-      `    "food_pairing": "string | null",\n` +
-      `    "tasting_notes": "string | null",\n` +
-      `    "cellar_location": "null",\n` +
-      `    "purchase_price": "null",\n` +
-      `    "drink_from": "number | null",\n` +
-      `    "drink_until": "number | null"\n` +
-      `  }\n` +
-      `}`;
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
-
-    const aiResponse = await fetch(AI_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
-              { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
-            ],
+    const aiData = await openAiChatCompletion({
+      messages: [
+        {
+          role: "system",
+          content: `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão. Use apenas o que estiver visível e confiável.`,
+        },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
+            { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
+          ],
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "return_wine_label",
+            description: "Retorna os dados extraídos do rótulo de vinho.",
+            parameters: {
+              type: "object",
+              properties: {
+                wine: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    producer: { type: "string" },
+                    vintage: { type: "number" },
+                    style: { type: "string" },
+                    country: { type: "string" },
+                    region: { type: "string" },
+                    grape: { type: "string" },
+                    food_pairing: { type: "string" },
+                    tasting_notes: { type: "string" },
+                    cellar_location: { type: "string" },
+                    purchase_price: { type: "number" },
+                    drink_from: { type: "number" },
+                    drink_until: { type: "number" },
+                  },
+                  required: ["name"],
+                },
+              },
+              required: ["wine"],
+              additionalProperties: false,
+            },
           },
-        ],
-        temperature: 0.1,
-      }),
-    });
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "return_wine_label" } },
+      temperature: 0.1,
+      max_tokens: 1200,
+    }, { requestId, timeoutMs: 60_000 });
 
-    clearTimeout(timeout);
-    const durationMs = Date.now() - startTime;
-
-    if (!aiResponse.ok) {
-      const bodyText = await aiResponse.text().catch(() => "");
-
-      if (aiResponse.status === 429) {
-        await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
-        return fail(429, {
-          ok: false,
-          code: "AI_RATE_LIMIT",
-          error: "Muitas requisições agora. Tente novamente em instantes.",
-          requestId,
-          retryable: true,
-        });
-      }
-      if (aiResponse.status === 402) {
-        await logAudit(userId, 402, "ai_error", durationMs, { request_id: requestId, reason: "credits_exhausted" });
-        return fail(402, {
-          ok: false,
-          code: "AI_CREDITS_EXHAUSTED",
-          error: "A análise não está disponível no momento. Tente novamente mais tarde.",
-          requestId,
-          retryable: true,
-        });
-      }
-
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} ai_status=${aiResponse.status} body=${bodyText.slice(0, 240)}`);
-      await logAudit(userId, 502, "ai_error", durationMs, {
-        request_id: requestId,
-        ai_status: aiResponse.status,
-        ai_body_preview: bodyText.slice(0, 400),
-      });
-      return fail(502, {
-        ok: false,
-        code: "AI_UNAVAILABLE",
-        error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    const aiData = await aiResponse.json().catch(() => null);
-    if (!aiData) {
-      await logAudit(userId, 502, "ai_error", durationMs, { request_id: requestId, reason: "invalid_ai_json" });
-      return fail(502, {
-        ok: false,
-        code: "AI_INVALID_RESPONSE",
-        error: "O serviço de análise retornou uma resposta inválida. Tente novamente.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    const content = aiData.choices?.[0]?.message?.content || "";
-    const parsedArgs = extractJsonFromText(content);
-
-    if (!parsedArgs || typeof parsedArgs !== "object") {
-      await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "no_structured_output" });
-      return fail(422, {
-        ok: false,
-        code: "LABEL_NOT_IDENTIFIED",
-        error: "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.",
+    const parsed = extractToolArguments(aiData) as Record<string, unknown> | null;
+    const wine = (parsed?.wine ?? parsed) as Record<string, unknown> | undefined;
+    if (!wine || typeof wine !== "object") {
+      throw new FunctionError(422, "LABEL_NOT_IDENTIFIED", "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.", {
         requestId,
         retryable: false,
       });
     }
-
-    const parsed = parsedArgs as Record<string, unknown>;
-    const wine = (parsed?.wine ?? parsed) as Record<string, unknown>;
 
     const normalizedWine = {
       name: typeof wine.name === "string" ? wine.name.trim() : null,
@@ -392,51 +202,33 @@ serve(async (req) => {
     };
 
     if (!normalizedWine.name) {
-      await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "missing_name" });
-      return fail(422, {
-        ok: false,
-        code: "LABEL_NOT_IDENTIFIED",
-        error: "Não foi possível identificar o nome do vinho com segurança. Tente outra foto ou cadastre manualmente.",
+      throw new FunctionError(422, "LABEL_NOT_IDENTIFIED", "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.", {
         requestId,
         retryable: false,
       });
     }
 
-    await logAudit(userId, 200, "success", durationMs, {
+    await logAudit(userId, FUNCTION_NAME, 200, "success", Date.now() - startedAt, {
       request_id: requestId,
-      wine_name: normalizedWine.name || "unknown",
+      wine_name: normalizedWine.name,
     });
 
-    return jsonResponse(200, { ok: true, wine: normalizedWine, requestId });
+    return jsonResponse({ ok: true, wine: normalizedWine, requestId });
   } catch (error) {
-    const durationMs = Date.now() - startTime;
-    const errMsg = error instanceof Error ? error.message : "unknown";
-    const isAbort = errMsg.toLowerCase().includes("aborted") || errMsg.toLowerCase().includes("abort");
+    const failure = error instanceof FunctionError
+      ? error
+      : new FunctionError(500, "INTERNAL_ERROR", "O serviço está temporariamente indisponível. Tente novamente em instantes.", {
+          requestId,
+          retryable: true,
+          message: error instanceof Error ? error.message : "unknown_error",
+        });
 
-    console.error(`[${FUNCTION_NAME}] request_id=${requestId} user_id=${userId} error=${errMsg}`);
-
-    await logAudit(userId, isAbort ? 504 : 500, "internal_error", durationMs, {
+    console.error(`[${FUNCTION_NAME}] request_id=${requestId}`, failure.message);
+    await logAudit(userId, FUNCTION_NAME, failure.status, "error", Date.now() - startedAt, {
       request_id: requestId,
-      error: errMsg,
-      aborted: isAbort,
+      code: failure.code,
+      technical_message: failure.message,
     });
-
-    if (isAbort) {
-      return fail(504, {
-        ok: false,
-        code: "AI_TIMEOUT",
-        error: "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    return fail(500, {
-      ok: false,
-      code: "INTERNAL_ERROR",
-      error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
-      requestId,
-      retryable: true,
-    });
+    return failResponse(failure);
   }
 });

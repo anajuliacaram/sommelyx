@@ -67,25 +67,27 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let userId = "anonymous";
+  const requestId = req.headers.get("x-request-id") || crypto.randomUUID();
 
   try {
     // ── JWT Authentication ──
-    const authHeader = req.headers.get("Authorization");
+    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, { request_id: requestId });
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized", code: "AUTH_REQUIRED", userMessage: "Sua sessão expirou. Entre novamente para continuar.", requestId, retryable: false }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       await logAudit("anonymous", 500, "internal_error", Date.now() - startTime, {
         reason: "missing_supabase_env",
+        request_id: requestId,
       });
-      return new Response(JSON.stringify({ error: "Erro interno de configuração.", code: "CONFIG_ERROR" }), {
+      return new Response(JSON.stringify({ ok: false, error: "Erro interno de configuração.", code: "CONFIG_ERROR", userMessage: "O serviço está temporariamente indisponível. Tente novamente em instantes.", requestId, retryable: true }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -95,8 +97,9 @@ serve(async (req) => {
     if (!accessToken) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         reason: "empty_bearer_token",
+        request_id: requestId,
       });
-      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized", code: "AUTH_REQUIRED", userMessage: "Sua sessão expirou. Entre novamente para continuar.", requestId, retryable: false }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -109,8 +112,9 @@ serve(async (req) => {
     if (userError || !user) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         reason: "token_validation_failed",
+        request_id: requestId,
       });
-      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized", code: "AUTH_REQUIRED", userMessage: "Sua sessão expirou. Entre novamente para continuar.", requestId, retryable: false }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -121,7 +125,7 @@ serve(async (req) => {
     // ── Rate Limiting ──
     if (!checkRateLimit(userId)) {
       await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
+      return new Response(JSON.stringify({ ok: false, error: "Muitas requisições. Tente novamente em 1 minuto.", code: "RATE_LIMIT", userMessage: "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente.", requestId, retryable: true }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
       });
@@ -132,8 +136,8 @@ serve(async (req) => {
     const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
     if (!OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY is not configured");
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key", request_id: requestId });
+      return new Response(JSON.stringify({ ok: false, error: "Erro de configuração do serviço.", code: "CONFIG_ERROR", userMessage: "O serviço está temporariamente indisponível. Tente novamente em instantes.", requestId, retryable: true }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -142,7 +146,7 @@ serve(async (req) => {
     const { csvContent, fileName, fileType } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_csv" });
-      return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
+      return new Response(JSON.stringify({ ok: false, error: "csvContent é obrigatório", code: "INVALID_REQUEST", userMessage: "Não foi possível ler a planilha. Revise o arquivo e tente novamente.", requestId, retryable: false }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -152,9 +156,10 @@ serve(async (req) => {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
         reason: "csv_too_large",
         size_bytes: csvContent.length,
+        request_id: requestId,
       });
-      return new Response(JSON.stringify({ error: "Arquivo CSV muito grande. Máximo 2MB." }), {
-        status: 400,
+      return new Response(JSON.stringify({ ok: false, error: "Arquivo CSV muito grande. Máximo 2MB.", code: "FILE_TOO_LARGE", userMessage: "Esse arquivo é grande demais. Envie uma versão menor.", requestId, retryable: false }), {
+        status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -368,8 +373,8 @@ Regras:
         status === 429 ? "Muitas requisições. Tente novamente em alguns segundos."
           : status === 402 ? "Créditos de IA esgotados."
           : "Não foi possível extrair dados do arquivo.";
-      await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length });
-      return new Response(JSON.stringify({ error: message }), {
+      await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length, request_id: requestId });
+      return new Response(JSON.stringify({ ok: false, error: message, code: status === 429 ? "RATE_LIMIT" : status === 402 ? "UPSTREAM_ERROR" : "EMPTY_RESULT", userMessage: status === 429 ? "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente." : status === 402 ? "O serviço está temporariamente indisponível. Tente novamente em instantes." : "Não foi possível identificar dados suficientes na planilha.", requestId, retryable: status !== 422 }), {
         status,
         headers: { ...corsHeaders, "Content-Type": "application/json", ...(status === 429 ? { "Retry-After": "60" } : {}) },
       });
@@ -416,6 +421,7 @@ Regras:
       wines: Array.from(dedup.values()),
       column_mapping: column_mapping ?? {},
       notes: notes.filter(Boolean).join(" "),
+      requestId,
       metadata: {
         fileName: typeof fileName === "string" ? fileName : null,
         fileType: typeof fileType === "string" ? fileType : null,
@@ -429,6 +435,7 @@ Regras:
       csv_lines: lines.length,
       chunks: chunks.length,
       truncated: wasTruncated,
+      request_id: requestId,
     });
 
     return new Response(JSON.stringify(result), {
@@ -436,9 +443,9 @@ Regras:
     });
   } catch (e) {
     console.error("parse-csv-wines error:", e instanceof Error ? e.message : "unknown");
-    await logAudit(userId, 500, "internal_error", Date.now() - startTime);
+    await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId });
     return new Response(
-      JSON.stringify({ error: "Erro ao processar CSV. Tente novamente." }),
+      JSON.stringify({ ok: false, error: "Erro ao processar CSV. Tente novamente.", code: "INTERNAL_ERROR", userMessage: "Não foi possível ler a planilha agora. Tente novamente em instantes.", requestId, retryable: true }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

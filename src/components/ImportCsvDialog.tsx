@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
+import { normalizeAppError } from "@/lib/app-error";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -200,7 +201,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       );
 
       if (data?.error) {
-        setParseErrors([String(data.error)]);
+        setParseErrors([String(data.userMessage || data.error)]);
         setParsed([]);
         setStep("preview");
         return;
@@ -238,8 +239,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         });
       }
     } catch (err: any) {
-      console.error("AI parse error:", err);
-      setParseErrors([err?.message || "Erro ao analisar o arquivo com IA."]);
+      const normalized = normalizeAppError(err);
+      console.error("AI parse error:", { err, normalized, fileName: file.name });
+      setParseErrors([normalized.userMessage]);
       setParsed([]);
       setStep("preview");
     }

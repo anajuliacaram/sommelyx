@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { getWineInsight, type WineInsight } from "@/lib/sommelier-ai";
 import { useToast } from "@/hooks/use-toast";
+import { normalizeAppError } from "@/lib/app-error";
 
 const currentYear = new Date().getFullYear();
 
@@ -114,7 +115,7 @@ export default function AlertsPage() {
       });
       setInsights(prev => ({ ...prev, [alert.id]: result }));
     } catch (err) {
-      toast({ title: "Não foi possível gerar a análise", description: err instanceof Error ? err.message : "Tente novamente.", variant: "destructive" });
+      toast({ title: "Não foi possível gerar a análise", description: normalizeAppError(err).userMessage, variant: "destructive" });
       setExpandedId(null);
     } finally {
       setLoadingInsight(null);

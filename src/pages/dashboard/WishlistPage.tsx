@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
+import { normalizeAppError } from "@/lib/app-error";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -35,7 +36,7 @@ type WishlistSuggestion = {
   image_url: string | null;
 };
 
-const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Tente novamente em instantes.");
+const getErrorMessage = (error: unknown) => normalizeAppError(error).userMessage;
 
 export default function WishlistPage() {
   const { data: items = [], isLoading } = useWishlist();
@@ -188,6 +189,14 @@ export default function WishlistPage() {
   const handleImageSelected = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Selecione uma imagem válida", variant: "destructive" });
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "Envie uma imagem menor para continuar.",
+        variant: "destructive",
+      });
       return;
     }
 

@@ -11,6 +11,7 @@ import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
+import { normalizeAppError } from "@/lib/app-error";
 
 interface DishToWineDialogProps {
   open: boolean;
@@ -127,8 +128,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       const result = await getDishWineSuggestions(query, cellarWines);
       setSuggestions(result);
       setStep("results");
-    } catch (err: any) {
-      setError(err.message || "Não foi possível buscar sugestões");
+    } catch (err) {
+      setError(normalizeAppError(err).userMessage);
     } finally {
       setLoading(false);
     }
@@ -149,8 +150,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       });
       setPairings(result);
       setStep("wine-results");
-    } catch (err: any) {
-      setError(err.message || "Não foi possível buscar sugestões");
+    } catch (err) {
+      setError(normalizeAppError(err).userMessage);
     } finally {
       setLoading(false);
     }
@@ -187,8 +188,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       const result = await analyzeWineList(payload, profile);
       setScanResults(result);
       setStep("scan-results");
-    } catch (err: any) {
-      setError(err.message || "Erro ao analisar a carta");
+    } catch (err) {
+      setError(normalizeAppError(err).userMessage);
       setStep("photo");
     } finally {
       setLoading(false);
@@ -217,8 +218,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       const result = await analyzeMenuForWine(payload, extWineName);
       setMenuResults(result);
       setStep("ext-menu-results");
-    } catch (err: any) {
-      setError(err.message || "Erro ao analisar o cardápio");
+    } catch (err) {
+      setError(normalizeAppError(err).userMessage);
       setStep("ext-menu-photo");
     } finally {
       setLoading(false);
