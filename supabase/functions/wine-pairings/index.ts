@@ -135,46 +135,44 @@ Analise o perfil ESPECÍFICO deste rótulo (não da uva genérica) e sugira 6-8 
       const hasCellar = userWines?.length > 0;
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
-${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE priorizar rótulos REAIS da adega. Para cada vinho da adega sugerido, use o NOME EXATO, a UVA, a REGIÃO e a SAFRA reais. NUNCA responda com categorias genéricas ("vinho branco seco") se há vinhos reais compatíveis.
+${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE priorizar rótulos REAIS. Use o NOME EXATO de cada vinho sugerido. NUNCA responda com categorias genéricas ("vinho branco seco") se há vinhos reais compatíveis.
 
 Se NENHUM vinho da adega combina adequadamente, diga isso honestamente e sugira o perfil ideal que o usuário deveria buscar.` : "Sugira tipos específicos de vinho com rótulos de referência."}
 
-ANTES DE SUGERIR, analise internamente o PERFIL DO PRATO:
-- Proteína principal (vermelha, branca, peixe, vegetal, ovo, laticínio)
-- Método de cocção (grelhado, frito, cozido, cru, assado, refogado)
-- Gordura dominante (manteiga, azeite, gordura animal, leite de coco)
-- Temperos/molhos (sal, ervas, especiarias, tomate, creme)
-- Intensidade geral (leve, média, intensa)
-- Sabores dominantes (umami, doce, ácido, amargo, salgado)
+REGRA #1 — FALE DO RÓTULO, NUNCA DA UVA GENÉRICA:
+- ERRADO: "Um Malbec argentino possui taninos aveludados..."
+- CERTO: "O Catena Zapata Malbec 2019, do terroir de altitude de Mendoza (~1000m), desenvolve taninos mais refinados e acidez mais viva que Malbecs de planície, o que o torna ideal para..."
 
-REGRA ZERO — ESPECIFICIDADE:
-Para vinhos da adega: cite características TÍPICAS daquela uva naquela região (ex: "O Carmenère chileno tem taninos sedosos e notas herbáceas que...")
-Para safras conhecidas: considere maturidade (ex: safra 2018 = ~8 anos, taninos já integrados)
+PARA CADA VINHO DA ADEGA, considere:
+1. O que se sabe sobre o PRODUTOR? (escala, filosofia)
+2. O que a REGIÃO implica sobre o estilo?
+3. A SAFRA indica maturidade? (ex: 2018 = ~8 anos, taninos integrados)
+4. O POSICIONAMENTO do vinho (linha básica vs reserva)
 
-CADA explicação DEVE:
-1. Citar propriedades REAIS do vinho (taninos, acidez, corpo, álcool, aromas da uva)
-2. Citar componentes REAIS do prato (gordura, sal, umami, textura, método de cocção)
-3. Explicar a INTERAÇÃO FÍSICA entre eles
-4. Ser IMPOSSÍVEL de copiar para outro par vinho/prato
+CADA EXPLICAÇÃO deve:
+- Citar o vinho PELO NOME (não "este Malbec")
+- Explicar por que ESTE rótulo específico funciona (ou não) com ESTE prato
+- Referenciar componentes REAIS do prato (gordura, sal, umami, textura, cocção)
+- Descrever a INTERAÇÃO FÍSICA (ex: "a acidez alta do [nome] corta a gordura da picanha")
 
-PROIBIDO: "combina bem", "harmoniza", "boa opção", "complementa os sabores" — qualquer frase genérica.
+JULGAMENTO HONESTO — use toda a escala:
+- Excelente escolha: harmonia excepcional
+- Alta compatibilidade: muito boa combinação
+- Boa opção: funciona bem
+- Funciona bem: aceitável
+- Escolha ousada: pode funcionar mas é arriscado
+- Pouco indicado: não recomendo
 
-CADA sugestão com lógica DIFERENTE: Contraste / Semelhança / Complemento / Equilíbrio / Limpeza
+NEM TODOS os vinhos devem ser positivos. Se um vinho da adega é ruim para o prato, diga.
 
-REGRAS ENOLÓGICAS INVIOLÁVEIS:
-1. Peso equivalente
-2. Tanino + peixe = metálico → NUNCA
-3. Álcool alto + picante = amplifica ardência → NUNCA
-4. NUNCA force um vinho da adega que não combina
-
-Sugira 3-5 opções. Se há vinhos da adega compatíveis, pelo menos 3 devem ser da adega.`;
+PROIBIDO: "[Uva] possui notas de...", "combina bem", "harmoniza", qualquer frase genérica.`;
 
       const cellarContext = hasCellar
-        ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} (estilo: ${w.style || "?"}, uva: ${w.grape || "?"}, região: ${w.region || "?"}, país: ${w.country || "?"}, safra: ${w.vintage || "?"}, produtor: ${w.producer || "?"})`).join("\n")}`
+        ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"}`).join("\n")}`
         : "";
       userPrompt = `Prato: "${dish}"${cellarContext}
 
-Analise o prato tecnicamente e sugira os melhores vinhos. Para cada um, explique a interação físico-química específica entre ESTE vinho e ESTE prato.`;
+Analise o prato tecnicamente e sugira os melhores vinhos. Para cada um, cite o NOME do vinho e explique por que ESTE rótulo específico (não a uva genérica) funciona com este prato. Use julgamento honesto — nem todos precisam ser positivos.`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
