@@ -149,54 +149,99 @@ function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): Win
   const rules = matchedRules.length > 0 ? matchedRules : PAIRING_RULES.slice(0, 2);
 
   const matchedStyles = new Set(rules.flatMap((r) => r.styles));
-  const explanation = rules[0]?.explanation || "Sugestão baseada em regras clássicas de harmonização";
 
-  // Try cellar wines first
+  // Build dish-specific explanations based on actual wine + dish interaction
+  const buildCellarReason = (w: WineSummary, ruleExplanation: string): string => {
+    const parts: string[] = [];
+    const style = (w.style || "").toLowerCase();
+    const grape = w.grape || "";
+    const region = w.region || "";
+    
+    if (grape) {
+      parts.push(`A uva ${grape} traz características próprias que interagem com os sabores de "${dish}".`);
+    }
+    if (region) {
+      parts.push(`Produzido na região de ${region}, este vinho carrega tipicidade que pode complementar o prato.`);
+    }
+    if (style === "tinto" && lower.match(/carne|churrasco|picanha|costela|bife/)) {
+      parts.push("Os taninos presentes ajudam a limpar o paladar entre as mordidas, equilibrando a gordura da proteína.");
+    } else if (style === "branco" && lower.match(/peixe|salmão|camarão|frutos/)) {
+      parts.push("A acidez natural deste branco realça a frescura do prato sem competir com a delicadeza dos ingredientes.");
+    } else if (style === "espumante") {
+      parts.push("A efervescência natural funciona como um limpador de paladar, renovando a percepção a cada gole.");
+    } else {
+      parts.push(ruleExplanation + ".");
+    }
+    if (w.vintage) {
+      const age = new Date().getFullYear() - w.vintage;
+      if (age > 5) parts.push(`Com ${age} anos de guarda, os taninos já estão mais integrados.`);
+    }
+    return parts.join(" ");
+  };
+
   if (cellarWines?.length) {
     const cellarMatches = cellarWines.filter(
       (w) => w.style && matchedStyles.has(w.style.toLowerCase()),
     );
 
     if (cellarMatches.length > 0) {
-      return cellarMatches.slice(0, 5).map((w, i) => ({
+      // Deduplicate by name to avoid identical cards
+      const seen = new Set<string>();
+      const unique = cellarMatches.filter(w => {
+        if (seen.has(w.name)) return false;
+        seen.add(w.name);
+        return true;
+      });
+      return unique.slice(0, 5).map((w, i) => ({
         wineName: w.name,
         style: w.style || "tinto",
-        reason: explanation,
+        grape: w.grape || undefined,
+        vintage: w.vintage || undefined,
+        region: w.region || undefined,
+        country: w.country || undefined,
+        reason: buildCellarReason(w, rules[0]?.explanation || "Sugestão baseada em regras clássicas"),
         fromCellar: true,
         match: i === 0 ? "muito bom" : "bom",
+        harmony_type: (["equilíbrio", "complemento", "contraste", "semelhança", "limpeza"] as const)[i % 5],
+        harmony_label: (["peso proporcional", "aromas complementares", "opostos que equilibram", "texturas semelhantes", "paladar renovado"])[i % 5],
       }));
     }
   }
 
-  // Generic suggestions
   const genericSuggestions: WineSuggestion[] = [];
-  const styleNames: Record<string, string> = {
-    tinto: "Vinho tinto encorpado",
-    branco: "Vinho branco seco",
-    rosé: "Vinho rosé refrescante",
-    espumante: "Espumante brut",
-    sobremesa: "Vinho de sobremesa",
+  const styleDetails: Record<string, { name: string; reason: string }> = {
+    tinto: { name: "Vinho tinto encorpado", reason: `Para "${dish}", um tinto de corpo médio a encorpado oferece estrutura de taninos que equilibra a intensidade dos sabores. Procure vinhos com boa acidez para manter o paladar fresco.` },
+    branco: { name: "Vinho branco seco", reason: `A acidez cítrica de um bom branco seco corta a gordura e realça os ingredientes mais delicados de "${dish}". Prefira exemplares com boa mineralidade.` },
+    rosé: { name: "Vinho rosé refrescante", reason: `Um rosé seco e fresco traz versatilidade para "${dish}" — corpo suficiente para não desaparecer, mas leveza que não compete com o prato.` },
+    espumante: { name: "Espumante brut", reason: `A perlage fina de um espumante brut funciona como limpador natural do paladar entre cada garfada de "${dish}", renovando a experiência a cada gole.` },
+    sobremesa: { name: "Vinho de sobremesa", reason: `A doçura residual equilibra e complementa os sabores de "${dish}", criando um final harmonioso onde nenhum elemento se sobrepõe.` },
   };
 
   for (const style of matchedStyles) {
+    const detail = styleDetails[style] || { name: `Vinho ${style}`, reason: `Sugestão clássica para acompanhar "${dish}".` };
     genericSuggestions.push({
-      wineName: styleNames[style] || `Vinho ${style}`,
+      wineName: detail.name,
       style,
-      reason: explanation,
+      reason: detail.reason,
       fromCellar: false,
       match: genericSuggestions.length === 0 ? "muito bom" : "bom",
+      harmony_type: (["equilíbrio", "complemento", "contraste"] as const)[genericSuggestions.length % 3],
     });
     if (genericSuggestions.length >= 3) break;
   }
 
-  // Ensure at least 3
   while (genericSuggestions.length < 3) {
-    const fallbacks = ["Vinho tinto de corpo médio", "Vinho branco frutado", "Espumante seco"];
-    const fb = fallbacks[genericSuggestions.length] || "Vinho versátil";
+    const idx = genericSuggestions.length;
+    const fallbacks = [
+      { name: "Vinho tinto de corpo médio", reason: `Um tinto versátil com taninos macios se adapta bem a "${dish}" sem dominar os sabores principais.` },
+      { name: "Vinho branco frutado", reason: `Notas frutadas e acidez equilibrada complementam a textura e os temperos de "${dish}".` },
+      { name: "Espumante seco", reason: `A efervescência limpa o paladar e a acidez viva mantém o frescor durante toda a refeição.` },
+    ];
+    const fb = fallbacks[idx] || { name: "Vinho versátil", reason: "Opção equilibrada para este prato." };
     genericSuggestions.push({
-      wineName: fb,
+      wineName: fb.name,
       style: "tinto",
-      reason: "Sugestão versátil que harmoniza com diversos pratos",
+      reason: fb.reason,
       fromCellar: false,
       match: "bom",
     });
