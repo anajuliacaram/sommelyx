@@ -118,6 +118,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         msg = "A imagem está muito grande. Tente uma foto mais leve.";
       } else if (code === "LABEL_NOT_IDENTIFIED") {
         msg = "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
+      } else if (code === "CONFIG_ERROR") {
+        msg = "O scanner está temporariamente indisponível. Tente novamente em instantes.";
       } else if (code === "AI_TIMEOUT") {
         msg = "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.";
       } else if (code === "AI_UNAVAILABLE" || code === "AI_RATE_LIMIT") {
