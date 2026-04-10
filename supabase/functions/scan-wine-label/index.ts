@@ -162,15 +162,31 @@ function hasPlausibleWineSignal(value: unknown) {
   return normalized.replace(/[^a-z]/g, "").length >= 3;
 }
 
+function isStrongAnchor(value: unknown) {
+  if (!hasPlausibleWineSignal(value)) return false;
+  const normalized = normalizeForMatch(value);
+  return normalized.length >= 3;
+}
+
+function isWeakAnchor(value: unknown) {
+  if (!hasPlausibleWineSignal(value)) return false;
+  return true;
+}
+
 function countWineAnchors(wine: Record<string, unknown>) {
-  let count = 0;
-  if (hasPlausibleWineSignal(wine.producer)) count++;
-  if (hasPlausibleWineSignal(wine.style)) count++;
-  if (hasPlausibleWineSignal(wine.country)) count++;
-  if (hasPlausibleWineSignal(wine.region) && !isAbsurdRegionValue(wine.region)) count++;
-  if (hasPlausibleWineSignal(wine.grape)) count++;
-  if (normalizeNumber(wine.vintage) != null) count++;
-  return count;
+  const strongAnchors = [
+    isStrongAnchor(wine.producer) && !hasArtifactToken(wine.producer),
+    isStrongAnchor(wine.country) && !hasArtifactToken(wine.country),
+    isStrongAnchor(wine.region) && !hasArtifactToken(wine.region) && !isAbsurdRegionValue(wine.region),
+  ].filter(Boolean).length;
+
+  const weakAnchors = [
+    isWeakAnchor(wine.grape),
+    isWeakAnchor(wine.vintage),
+    isWeakAnchor(wine.style),
+  ].filter(Boolean).length;
+
+  return { strongAnchors, weakAnchors };
 }
 
 async function logAudit(
@@ -461,13 +477,16 @@ serve(async (req) => {
 
     const suspiciousName = hasArtifactToken(normalizedWine.name);
     const suspiciousProducer = hasArtifactToken(normalizedWine.producer);
-    const hasEnoughWineContext = countWineAnchors(normalizedWine) >= 2;
+    const { strongAnchors, weakAnchors } = countWineAnchors(normalizedWine);
+    const hasEnoughWineContext = strongAnchors >= 1 || weakAnchors >= 2;
+    const hasAnyWineContext = strongAnchors + weakAnchors > 0;
 
     if (
       !normalizedWine.name ||
       suspiciousName ||
       suspiciousProducer ||
       !hasEnoughWineContext ||
+      !hasAnyWineContext ||
       isAbsurdRegionValue(normalizedWine.region)
     ) {
       await logAudit(userId, 422, "ai_error", durationMs, {
@@ -475,7 +494,8 @@ serve(async (req) => {
         reason: "insufficient_or_suspicious_label",
         suspicious_name: suspiciousName,
         suspicious_producer: suspiciousProducer,
-        wine_anchors: countWineAnchors(normalizedWine),
+        strong_anchors: strongAnchors,
+        weak_anchors: weakAnchors,
       });
       return fail(422, {
         ok: false,
@@ -496,6 +516,11 @@ serve(async (req) => {
     const durationMs = Date.now() - startTime;
     const errMsg = error instanceof Error ? error.message : "unknown";
     const isAbort = errMsg.toLowerCase().includes("aborted") || errMsg.toLowerCase().includes("abort");
+    const isParseOrInferenceIssue =
+      errMsg.toLowerCase().includes("json") ||
+      errMsg.toLowerCase().includes("parse") ||
+      errMsg.toLowerCase().includes("structured") ||
+      errMsg.toLowerCase().includes("confidence");
 
     console.error(`[${FUNCTION_NAME}] request_id=${requestId} user_id=${userId} error=${errMsg}`);
 
@@ -512,6 +537,16 @@ serve(async (req) => {
         error: "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.",
         requestId,
         retryable: true,
+      });
+    }
+
+    if (isParseOrInferenceIssue) {
+      return fail(422, {
+        ok: false,
+        code: "LABEL_NOT_IDENTIFIED",
+        error: "Não foi possível identificar o rótulo com confiança. Tente outra foto, com o rótulo mais centralizado e sem elementos da interface na imagem.",
+        requestId,
+        retryable: false,
       });
     }
 
