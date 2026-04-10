@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const AI_TIMEOUT_MS = 60_000;
+const AI_TIMEOUT_MS = 55_000;
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -107,6 +107,70 @@ function normalizeNumber(value: unknown) {
     if (Number.isFinite(parsed)) return parsed;
   }
   return null;
+}
+
+function normalizeForMatch(value: unknown) {
+  if (typeof value !== "string") return "";
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const ARTIFACT_TOKENS = new Set([
+  "huawei",
+  "samsung",
+  "iphone",
+  "xiaomi",
+  "redmi",
+  "galaxy",
+  "pixel",
+  "motorola",
+  "oppo",
+  "vivo",
+  "screenshot",
+  "dcim",
+  "img",
+  "camera",
+  "photo",
+  "pura",
+]);
+
+function hasArtifactToken(value: unknown) {
+  const normalized = normalizeForMatch(value);
+  if (!normalized) return false;
+  return normalized.split(" ").some((token) => ARTIFACT_TOKENS.has(token));
+}
+
+function isAbsurdRegionValue(value: unknown) {
+  const normalized = normalizeForMatch(value);
+  if (!normalized) return true;
+  if (normalized === "0") return true;
+  if (/^\d+$/.test(normalized) && Number(normalized) === 0) return true;
+  if (!/[a-z]/.test(normalized)) return true;
+  return false;
+}
+
+function hasPlausibleWineSignal(value: unknown) {
+  if (typeof value === "number") return Number.isFinite(value);
+  const normalized = normalizeForMatch(value);
+  if (!normalized) return false;
+  if (hasArtifactToken(normalized)) return false;
+  return normalized.replace(/[^a-z]/g, "").length >= 3;
+}
+
+function countWineAnchors(wine: Record<string, unknown>) {
+  let count = 0;
+  if (hasPlausibleWineSignal(wine.producer)) count++;
+  if (hasPlausibleWineSignal(wine.style)) count++;
+  if (hasPlausibleWineSignal(wine.country)) count++;
+  if (hasPlausibleWineSignal(wine.region) && !isAbsurdRegionValue(wine.region)) count++;
+  if (hasPlausibleWineSignal(wine.grape)) count++;
+  if (normalizeNumber(wine.vintage) != null) count++;
+  return count;
 }
 
 async function logAudit(
@@ -258,6 +322,10 @@ serve(async (req) => {
       `- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.\n` +
       `- tasting_notes: 1-2 frases curtas em português (perfil esperado).\n` +
       `- food_pairing: 2-3 sugestões em português.\n` +
+      `- Considere apenas texto visível do rótulo da garrafa.\n` +
+      `- Ignore totalmente texto de interface, screenshot, sistema, notificações, nome de aparelho, marcas de celular, elementos da galeria ou overlays.\n` +
+      `- Não infira vinho a partir de texto irrelevante.\n` +
+      `- Se a confiança for baixa, retorne campos nulos em vez de adivinhar.\n` +
       `- Leia todo texto visível no rótulo (frente e verso, se aparecer).\n\n` +
       `Schema JSON:\n` +
       `{\n` +
@@ -391,12 +459,28 @@ serve(async (req) => {
       drink_until: normalizeNumber(wine.drink_until),
     };
 
-    if (!normalizedWine.name) {
-      await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "missing_name" });
+    const suspiciousName = hasArtifactToken(normalizedWine.name);
+    const suspiciousProducer = hasArtifactToken(normalizedWine.producer);
+    const hasEnoughWineContext = countWineAnchors(normalizedWine) >= 2;
+
+    if (
+      !normalizedWine.name ||
+      suspiciousName ||
+      suspiciousProducer ||
+      !hasEnoughWineContext ||
+      isAbsurdRegionValue(normalizedWine.region)
+    ) {
+      await logAudit(userId, 422, "ai_error", durationMs, {
+        request_id: requestId,
+        reason: "insufficient_or_suspicious_label",
+        suspicious_name: suspiciousName,
+        suspicious_producer: suspiciousProducer,
+        wine_anchors: countWineAnchors(normalizedWine),
+      });
       return fail(422, {
         ok: false,
         code: "LABEL_NOT_IDENTIFIED",
-        error: "Não foi possível identificar o nome do vinho com segurança. Tente outra foto ou cadastre manualmente.",
+        error: "Não foi possível identificar o rótulo com confiança. Tente outra foto, com o rótulo mais centralizado e sem elementos da interface na imagem.",
         requestId,
         retryable: false,
       });
