@@ -99,6 +99,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [suggestions, setSuggestions] = useState<WineSuggestion[] | null>(null);
   const [pairings, setPairings] = useState<PairingResult[] | null>(null);
   const [wineProfile, setWineProfile] = useState<WineProfile | null>(null);
+  const [pairingLogic, setPairingLogic] = useState<string | null>(null);
   const [dishProfile, setDishProfile] = useState<DishProfile | null>(null);
   const [scanResults, setScanResults] = useState<WineListAnalysis | null>(null);
   const [menuResults, setMenuResults] = useState<MenuAnalysis | null>(null);
@@ -120,6 +121,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setSuggestions(null);
     setPairings(null);
     setWineProfile(null);
+    setPairingLogic(null);
     setDishProfile(null);
     setScanResults(null);
     setMenuResults(null);
@@ -187,6 +189,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     if (!wine) return;
     setLoading(true);
     setError(null);
+    setPairingLogic(null);
     try {
       const result = await getWinePairings({
         name: wine.name,
@@ -199,6 +202,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       });
       setPairings(result.pairings);
       setWineProfile(result.wineProfile || null);
+      setPairingLogic(result.pairingLogic || null);
       setStep("wine-results");
     } catch (err: any) {
       setError(err.message || "Não foi possível buscar sugestões");
@@ -1287,6 +1291,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                         {wineProfile.summary && (
                           <p className="text-[12px] text-foreground/60 leading-relaxed italic">{wineProfile.summary}</p>
                         )}
+                        {pairingLogic && (
+                          <div className="rounded-xl border border-primary/10 bg-primary/[0.03] p-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70 mb-1">
+                              Lógica da harmonização
+                            </p>
+                            <p className="text-[12px] text-foreground/65 leading-relaxed">
+                              {pairingLogic}
+                            </p>
+                          </div>
+                        )}
                         <div className="flex flex-wrap gap-1.5">
                           {wineProfile.body && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Corpo {wineProfile.body}</span>}
                           {wineProfile.acidity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Acidez {wineProfile.acidity}</span>}
@@ -1478,6 +1492,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           )}
                           {/* Verdict */}
                           <p className="text-[12.5px] text-foreground/65 leading-relaxed">{w.verdict}</p>
+                          {w.reasoning && (
+                            <p className="text-[12px] text-foreground/60 leading-relaxed">
+                              {w.reasoning}
+                            </p>
+                          )}
                           {/* Comparative labels */}
                           {w.comparativeLabels && w.comparativeLabels.length > 0 && (
                             <div className="flex flex-wrap gap-1">

@@ -68,6 +68,7 @@ export interface PairingResult {
 export interface PairingResponse {
   pairings: PairingResult[];
   wineProfile?: WineProfile | null;
+  pairingLogic?: string | null;
 }
 
 export interface WineSuggestionProfile {
@@ -113,6 +114,7 @@ export interface WineListItem {
   price?: number | null;
   rating: number;
   description?: string;
+  reasoning?: string | null;
   pairings?: WineListPairing[];
   verdict: string;
   compatibilityLabel: string;
@@ -218,6 +220,9 @@ const GENERIC_RESPONSE_PHRASES = [
   "equilibrado",
   "versátil",
   "clássico",
+  "vinho branco seco",
+  "espumante brut",
+  "dia a dia",
 ];
 
 function hasGenericWineLanguage(text?: string | null) {
@@ -225,6 +230,42 @@ function hasGenericWineLanguage(text?: string | null) {
   const normalized = text.toLowerCase();
   if (normalized.length < 30) return true;
   return GENERIC_RESPONSE_PHRASES.some((phrase) => normalized.includes(phrase));
+}
+
+const TECHNICAL_TERMS = [
+  /acidez/i,
+  /tanin/i,
+  /corpo/i,
+  /estrutura/i,
+  /intensidad/i,
+  /textur/i,
+  /gordur/i,
+  /prote[ií]na/i,
+  /molho/i,
+  /umami/i,
+  /frescor/i,
+  /paladar/i,
+];
+
+const COMPARATIVE_TERMS = [
+  /compar/i,
+  /\bcarta\b/i,
+  /\boutros\b/i,
+  /\bentre\b/i,
+  /\bmelhor\b/i,
+  /\bmenos\b/i,
+  /\bmais\b/i,
+  /\bdentro da carta\b/i,
+];
+
+function hasTechnicalWineLanguage(text?: string | null) {
+  if (!text) return false;
+  return TECHNICAL_TERMS.some((pattern) => pattern.test(text));
+}
+
+function hasComparativeWineLanguage(text?: string | null) {
+  if (!text) return false;
+  return COMPARATIVE_TERMS.some((pattern) => pattern.test(text));
 }
 
 function isUserFacingAnalysisError(message: string) {
@@ -239,27 +280,29 @@ function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kin
 
   if (kind === "pairings") {
     const pairings = Array.isArray(data.pairings) ? data.pairings : [];
-    if (pairings.length === 0) return false;
+    if (pairings.length < 3) return false;
     return pairings.every((item: any) =>
       typeof item?.dish === "string" &&
       typeof item?.reason === "string" &&
       typeof item?.match === "string" &&
       item.dish.trim().length > 0 &&
-      item.reason.trim().length >= 45 &&
+      item.reason.trim().length >= 55 &&
       !hasGenericWineLanguage(item.reason) &&
+      hasTechnicalWineLanguage(item.reason) &&
       !hasGenericWineLanguage(item.harmony_label),
     );
   }
 
   if (kind === "suggestions") {
     const suggestions = Array.isArray(data.suggestions) ? data.suggestions : [];
-    if (suggestions.length === 0) return false;
+    if (suggestions.length < 3) return false;
     return suggestions.every((item: any) =>
       typeof item?.wineName === "string" &&
       typeof item?.reason === "string" &&
       item.wineName.trim().length > 0 &&
-      item.reason.trim().length >= 45 &&
+      item.reason.trim().length >= 55 &&
       !hasGenericWineLanguage(item.reason) &&
+      hasTechnicalWineLanguage(item.reason) &&
       !hasGenericWineLanguage(item.harmony_label),
     );
   }
@@ -271,20 +314,38 @@ function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kin
       typeof item?.name === "string" &&
       item.name.trim().length > 0 &&
       typeof item?.verdict === "string" &&
+      typeof item?.compatibilityLabel === "string" &&
+      typeof item?.reasoning === "string" &&
+      item.reasoning.trim().length >= 80 &&
+      hasComparativeWineLanguage(item.reasoning) &&
+      hasTechnicalWineLanguage(item.reasoning) &&
       !hasGenericWineLanguage(item.verdict) &&
-      typeof item?.compatibility === "number",
+      item.verdict.trim().length >= 30 &&
+      Array.isArray(item.pairings) &&
+      item.pairings.length >= 3 &&
+      item.pairings.every((pairing: any) =>
+        typeof pairing?.dish === "string" &&
+        typeof pairing?.why === "string" &&
+        pairing.dish.trim().length > 0 &&
+        pairing.why.trim().length >= 25 &&
+        hasTechnicalWineLanguage(pairing.why) &&
+        !hasGenericWineLanguage(pairing.why)
+      ) &&
+      Array.isArray(item.comparativeLabels) &&
+      item.comparativeLabels.length >= 1,
     );
   }
 
   if (kind === "menu") {
     const dishes = Array.isArray(data.dishes) ? data.dishes : [];
-    if (dishes.length === 0) return false;
+    if (dishes.length < 5) return false;
     return dishes.every((item: any) =>
       typeof item?.name === "string" &&
       item.name.trim().length > 0 &&
       typeof item?.reason === "string" &&
-      item.reason.trim().length >= 45 &&
-      !hasGenericWineLanguage(item.reason),
+      item.reason.trim().length >= 55 &&
+      !hasGenericWineLanguage(item.reason) &&
+      hasTechnicalWineLanguage(item.reason),
     );
   }
 
@@ -555,14 +616,14 @@ function fallbackPairingsForWine(wine: { name?: string; style?: string | null; g
 function isValidPairings(data: unknown): data is PairingResponse {
   if (!data || typeof data !== "object") return false;
   const d = data as Record<string, unknown>;
-  if (!Array.isArray(d.pairings) || d.pairings.length === 0) return false;
+  if (!Array.isArray(d.pairings) || d.pairings.length < 3 || d.pairings.length > 5) return false;
   return d.pairings.every((p: any) => typeof p.dish === "string" && p.dish.length > 0);
 }
 
 function isValidSuggestions(data: unknown): data is SuggestionResponse {
   if (!data || typeof data !== "object") return false;
   const d = data as Record<string, unknown>;
-  if (!Array.isArray(d.suggestions) || d.suggestions.length === 0) return false;
+  if (!Array.isArray(d.suggestions) || d.suggestions.length < 3 || d.suggestions.length > 5) return false;
   return d.suggestions.every((s: any) => typeof s.wineName === "string" && s.wineName.length > 0);
 }
 

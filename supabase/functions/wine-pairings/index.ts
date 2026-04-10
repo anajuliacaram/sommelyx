@@ -107,6 +107,98 @@ function validateWineSpecificity(
   return { passed: failures.length === 0, failures };
 }
 
+function analyzeDish(dish: string) {
+  const lower = dish.toLowerCase();
+  const result = {
+    intensity: "média",
+    fat: "moderada",
+    protein: "",
+    cooking: "",
+    flavors: [] as string[],
+  };
+
+  if (lower.match(/grelhad|brasa|churras|assad|frit[oa]/)) {
+    result.cooking = "grelhado/assado";
+    result.intensity = "alta";
+  } else if (lower.match(/cozid|vapor|refogad/)) {
+    result.cooking = "cozido";
+  } else if (lower.match(/cru|tartare|ceviche/)) {
+    result.cooking = "cru";
+    result.intensity = "leve";
+  }
+
+  if (lower.match(/carne|picanha|costela|bife|cordeiro/)) {
+    result.protein = "vermelha";
+    result.fat = "alta";
+  } else if (lower.match(/frango|ave|peru/)) {
+    result.protein = "branca";
+    result.fat = "moderada";
+  } else if (lower.match(/peixe|salmão|atum|camarão|bacalhau/)) {
+    result.protein = "peixe";
+    result.fat = "leve";
+  } else if (lower.match(/ovo|omelete/)) {
+    result.protein = "ovo";
+    result.fat = "moderada";
+  } else if (lower.match(/queijo|fondue/)) {
+    result.protein = "laticínio";
+    result.fat = "alta";
+  }
+
+  if (lower.match(/molho|creme/)) result.flavors.push("molho cremoso");
+  if (lower.match(/tomate/)) result.flavors.push("acidez do tomate");
+  if (lower.match(/limão|cítric|vinagre/)) result.flavors.push("acidez cítrica");
+  if (lower.match(/pimenta|picante|apimentad/)) result.flavors.push("picância");
+
+  return result;
+}
+
+const TECHNICAL_PATTERNS = [
+  /acidez/i,
+  /tanin/i,
+  /corpo/i,
+  /estrutura/i,
+  /intensid/i,
+  /textur/i,
+  /gordur/i,
+  /prote[ií]na/i,
+  /molho/i,
+  /umami/i,
+  /paladar/i,
+  /frescor/i,
+];
+
+function hasTechnicalLanguage(text?: string | null) {
+  if (!text) return false;
+  return TECHNICAL_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function scoreCellarWineForDish(wine: Record<string, unknown>, dish: string) {
+  const analysis = analyzeDish(dish);
+  const lowerDish = dish.toLowerCase();
+  const style = String(wine.style || "").toLowerCase();
+  const grape = String(wine.grape || "").toLowerCase();
+  const region = String(wine.region || "").toLowerCase();
+  const country = String(wine.country || "").toLowerCase();
+  let score = 0;
+
+  if (style === "tinto" && (analysis.protein === "vermelha" || analysis.fat === "alta")) score += 18;
+  if ((style === "branco" || style === "espumante" || style === "rosé") && (analysis.protein === "peixe" || analysis.fat === "leve")) score += 18;
+  if (style === "tinto" && analysis.intensity === "alta") score += 8;
+  if ((style === "branco" || style === "rosé" || style === "espumante") && analysis.intensity === "leve") score += 8;
+  if (grape && lowerDish.includes(grape)) score += 5;
+  if (region && lowerDish.includes(region)) score += 3;
+  if (country && lowerDish.includes(country)) score += 2;
+  if (analysis.flavors.some((flavor) => lowerDish.includes(flavor.split(" ")[0]))) score += 4;
+  if (String(wine.tannin || "").toLowerCase().includes("firm")) score += analysis.protein === "vermelha" ? 4 : 0;
+  if (String(wine.acidity || "").toLowerCase().includes("alta")) score += analysis.fat === "alta" ? 4 : 2;
+
+  return score;
+}
+
+function rankCellarWinesForDish(dish: string, wines: Record<string, unknown>[]) {
+  return [...wines].sort((a, b) => scoreCellarWineForDish(b, dish) - scoreCellarWineForDish(a, dish));
+}
+
 async function callAI(
   apiKey: string,
   systemPrompt: string,
@@ -265,7 +357,8 @@ ${PROFILE_CONSTRUCTION_RULES}
 FLUXO OBRIGATÓRIO:
 1. Execute as 5 ETAPAS do perfil técnico para "${wineName}"
 2. Use o perfil para gerar o campo "summary" do wineProfile — 2-3 frases que DIFERENCIEM "${wineName}" de outros vinhos da mesma uva "${wineGrape || ""}"
-3. Para CADA prato sugerido, explique a INTERAÇÃO FÍSICA entre o perfil técnico de "${wineName}" e os componentes do prato
+3. Defina pairingLogic como a síntese objetiva do que este vinho pede na mesa
+4. Para CADA prato sugerido, explique a INTERAÇÃO FÍSICA entre o perfil técnico de "${wineName}" e os componentes do prato
 
 O summary DEVE:
 - Começar com "O ${wineName}..." ou "Este ${wineName}..."
@@ -295,10 +388,11 @@ Safra: ${wineVintage || "Não informada"}
 INSTRUÇÕES:
 1. Execute as 5 ETAPAS do perfil técnico para "${wineName}" — NÃO pule nenhuma etapa
 2. Preencha wineProfile.summary com 2-3 frases ESPECÍFICAS sobre "${wineName}" (começando com "O ${wineName}...")
-3. Sugira 6-8 pratos, SEMPRE citando "${wineName}" pelo nome em CADA explicação
-4. Varie entre entradas, pratos principais e queijos/sobremesa
-5. Em CADA reason, cite ao menos 1 característica ESPECÍFICA de "${wineName}" (não da uva genérica)
-6. Varie os harmony_type (contraste/semelhança/complemento/equilíbrio/limpeza)`;
+3. Preencha pairingLogic com 2-4 frases objetivas explicando o que o vinho pede na mesa
+4. Sugira 3-5 pratos, SEMPRE citando "${wineName}" pelo nome em CADA explicação
+5. Varie entre entradas, pratos principais e queijos/sobremesa
+6. Em CADA reason, cite ao menos 1 característica ESPECÍFICA de "${wineName}" (não da uva genérica)
+7. Varie os harmony_type (contraste/semelhança/complemento/equilíbrio/limpeza)`;
 
     } else if (mode === "food-to-wine") {
       const hasCellar = userWines?.length > 0;
@@ -311,7 +405,8 @@ ${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE:
 2. Usar o perfil técnico para determinar compatibilidade com o prato "${dish}"
 3. Priorizar rótulos REAIS. NUNCA responda com categorias genéricas ("vinho branco seco")
 4. Se NENHUM vinho da adega combina adequadamente, diga isso honestamente.
-5. Para cada vinho, a explicação DEVE citar o nome do rótulo e uma característica específica dele.` : "Sugira tipos específicos de vinho com rótulos de referência."}
+5. Para cada vinho, a explicação DEVE citar o nome do rótulo e uma característica específica dele.
+6. Os vinhos já foram pré-filtrados localmente; você deve apenas explicar e ranquear os melhores.` : "Sugira tipos específicos de vinho com rótulos de referência."}
 
 FLUXO OBRIGATÓRIO:
 1. Analise "${dish}" tecnicamente (proteína, gordura, cocção, intensidade, texturas)
@@ -333,8 +428,11 @@ JULGAMENTO HONESTO — use toda a escala:
 
 NEM TODOS os vinhos devem ser positivos. Se um vinho é ruim para o prato, diga.`;
 
+      const rankedCellarWines = hasCellar
+        ? rankCellarWinesForDish(dish, (userWines as any[]).slice(0, 40)).slice(0, 8)
+        : [];
       const cellarContext = hasCellar
-        ? `\nVinhos na adega do usuário:\n${(userWines as any[]).map((w: any) => `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"}`).join("\n")}`
+        ? `\nVinhos na adega do usuário (pré-filtrados localmente por compatibilidade):\n${rankedCellarWines.map((w: any) => `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"}`).join("\n")}`
         : "";
       userPrompt = `Prato: "${dish}"${cellarContext}
 
@@ -343,7 +441,8 @@ INSTRUÇÕES:
 2. Para cada vinho, execute as 5 ETAPAS do perfil técnico
 3. Na explicação, cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não)
 4. Em cada reason, mencione ao menos 1 aspecto que diferencia este rótulo de outro da mesma uva
-5. Use compatibilityLabel honestamente — nem tudo é "Excelente escolha"`;
+5. Use compatibilityLabel honestamente — nem tudo é "Excelente escolha"
+6. Sugira de 3 a 5 vinhos reais da adega, sem inventar categorias genéricas`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
@@ -374,6 +473,8 @@ INSTRUÇÕES:
               },
               pairings: {
                 type: "array",
+                minItems: 3,
+                maxItems: 5,
                 items: {
                   type: "object",
                   properties: {
@@ -410,8 +511,9 @@ INSTRUÇÕES:
                   additionalProperties: false,
                 },
               },
+              pairingLogic: { type: "string", description: "Síntese técnica explicando o que o vinho pede e por quê" },
             },
-            required: ["wineProfile", "pairings"],
+            required: ["wineProfile", "pairings", "pairingLogic"],
             additionalProperties: false,
           },
         },
@@ -439,6 +541,8 @@ INSTRUÇÕES:
               },
               suggestions: {
                 type: "array",
+                minItems: 3,
+                maxItems: 5,
                 items: {
                   type: "object",
                   properties: {
@@ -525,45 +629,75 @@ INSTRUÇÕES:
       const textsToValidate: string[] = [];
       if (mode === "wine-to-food") {
         if (lastParsed.wineProfile?.summary) textsToValidate.push(lastParsed.wineProfile.summary);
+        if (lastParsed.pairingLogic) textsToValidate.push(lastParsed.pairingLogic);
         for (const p of (lastParsed.pairings || [])) {
           if (p.reason) textsToValidate.push(p.reason);
+          if (p.harmony_label) textsToValidate.push(p.harmony_label);
         }
         validationResult = validateWineSpecificity(textsToValidate, wineName || "", wineGrape);
+        if (!Array.isArray(lastParsed.pairings) || lastParsed.pairings.length < 3 || lastParsed.pairings.length > 5) {
+          validationResult.failures.push(`Expected 3-5 pairings, received ${Array.isArray(lastParsed.pairings) ? lastParsed.pairings.length : 0}`);
+          validationResult.passed = false;
+        }
+        if (typeof lastParsed.pairingLogic !== "string" || lastParsed.pairingLogic.trim().length < 45 || !hasTechnicalLanguage(lastParsed.pairingLogic)) {
+          validationResult.failures.push("Pairing logic missing or too generic");
+          validationResult.passed = false;
+        }
+        for (const p of (lastParsed.pairings || [])) {
+          if (typeof p.reason !== "string" || p.reason.trim().length < 55 || !hasTechnicalLanguage(p.reason)) {
+            validationResult.failures.push(`Pairing explanation too generic for ${String(p?.dish || "prato")}`);
+            validationResult.passed = false;
+          }
+        }
       } else {
         for (const s of (lastParsed.suggestions || [])) {
           if (s.reason) textsToValidate.push(s.reason);
         }
         // For food-to-wine, validate each wine's specificity
         const allPassed: boolean[] = [];
-        for (const s of (lastParsed.suggestions || [])) {
-          if (s.reason) {
-            const v = validateWineSpecificity([s.reason], s.wineName || "", s.grape);
-            allPassed.push(v.passed);
-            if (!v.passed) validationResult.failures.push(...v.failures);
+        const suggestions = Array.isArray(lastParsed.suggestions) ? lastParsed.suggestions : [];
+        if (hasCellar && suggestions.some((s: any) => s.fromCellar !== true)) {
+          validationResult.failures.push("All cellar suggestions must come from real wines in the cellar");
+        }
+        if (suggestions.length < 3 || suggestions.length > 5) {
+          validationResult.failures.push(`Expected 3-5 suggestions, received ${suggestions.length}`);
+        }
+        for (const s of suggestions) {
+          const v = validateWineSpecificity([s.reason], s.wineName || "", s.grape);
+          const ok = v.passed &&
+            typeof s.reason === "string" &&
+            s.reason.trim().length >= 55 &&
+            hasTechnicalLanguage(s.reason) &&
+            (typeof s.compatibilityLabel === "string" && ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"].includes(s.compatibilityLabel)) &&
+            typeof s.fromCellar === "boolean";
+          allPassed.push(ok);
+          if (!ok) validationResult.failures.push(...v.failures);
+          if (typeof s.reason === "string" && (s.reason.trim().length < 55 || !hasTechnicalLanguage(s.reason))) {
+            validationResult.failures.push(`Reasoning too generic for ${s.wineName || "vinho"}`);
           }
         }
-        validationResult.passed = allPassed.length === 0 || allPassed.filter(p => p).length >= allPassed.length * 0.6;
+        validationResult.passed = allPassed.length > 0 && allPassed.every(Boolean) && validationResult.failures.length === 0;
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
 
       if (validationResult.passed) break;
 
-      // If last attempt, use what we have
       if (attempt === MAX_ATTEMPTS - 1) {
-        console.log("Max retries reached, using best result available");
+        console.log("Max retries reached, no valid pairing response produced");
       }
     }
 
     const parsed = lastParsed || (mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] });
 
-    if (mode === "wine-to-food" && (!Array.isArray(parsed.pairings) || parsed.pairings.length === 0)) {
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_empty_response", Date.now() - startTime);
-      return jsonResponse({ pairings: [], wineProfile: parsed.wineProfile || null });
-    }
-    if (mode === "food-to-wine" && (!Array.isArray(parsed.suggestions) || parsed.suggestions.length === 0)) {
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "ai_empty_response", Date.now() - startTime);
-      return jsonResponse({ suggestions: [], dishProfile: parsed.dishProfile || null });
+    if (!validationResult.passed) {
+      const specificityMessage = "A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.";
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 422, "validation_error", Date.now() - startTime, {
+        mode,
+        reason: specificityMessage,
+        validation_failures: validationResult.failures.slice(0, 12),
+      });
+      return jsonResponse({ error: specificityMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
     }
 
     await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success", Date.now() - startTime, {

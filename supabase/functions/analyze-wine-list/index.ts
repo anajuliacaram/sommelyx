@@ -61,6 +61,32 @@ const GENERIC_PATTERNS = [
   /notas? de frutas (?:vermelhas|escuras|tropicais|cítricas) e/i,
 ];
 
+const TECHNICAL_PATTERNS = [
+  /acidez/i,
+  /tanin/i,
+  /corpo/i,
+  /estrutura/i,
+  /intensid/i,
+  /textur/i,
+  /gordur/i,
+  /prote[ií]na/i,
+  /molho/i,
+  /umami/i,
+  /paladar/i,
+  /gastron/i,
+];
+
+const COMPARATIVE_PATTERNS = [
+  /compar/i,
+  /\bcarta\b/i,
+  /\boutros\b/i,
+  /\bentre\b/i,
+  /\bmelhor\b/i,
+  /\bmenos\b/i,
+  /\bmais\b/i,
+  /\bdentro da carta\b/i,
+];
+
 function validateWineSpecificity(
   texts: string[],
   wineName: string,
@@ -104,6 +130,16 @@ function validateWineSpecificity(
   return { passed: failures.length === 0, failures };
 }
 
+function hasTechnicalLanguage(text?: string | null) {
+  if (!text) return false;
+  return TECHNICAL_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function hasComparativeLanguage(text?: string | null) {
+  if (!text) return false;
+  return COMPARATIVE_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 function extractToolArguments(aiData: any) {
   const toolCallArgs = aiData?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (typeof toolCallArgs === "string" && toolCallArgs.trim()) return JSON.parse(toolCallArgs);
@@ -121,7 +157,7 @@ function extractToolArguments(aiData: any) {
 
 function normalizeWineListPayload(payload: any) {
   const rawWines = Array.isArray(payload?.wines) ? payload.wines : [];
-  const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"];
+  const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"];
 
   const wines = rawWines.map((wine: any) => ({
     name: String(wine?.name || "Vinho não identificado"),
@@ -133,6 +169,7 @@ function normalizeWineListPayload(payload: any) {
     price: typeof wine?.price === "number" ? wine.price : null,
     rating: typeof wine?.rating === "number" ? Math.max(0, Math.min(5, wine.rating)) : 0,
     description: wine?.description ? String(wine.description) : null,
+    reasoning: wine?.reasoning ? String(wine.reasoning) : null,
     pairings: (Array.isArray(wine?.pairings) ? wine.pairings : []).slice(0, 5).map((p: any) => {
       if (typeof p === "object" && p !== null) {
         return { dish: String(p.dish || ""), why: String(p.why || p.reason || "") };
@@ -417,11 +454,16 @@ REGRAS DE ANÁLISE:
 
 3. COMPATIBILIDADE SEMÂNTICA: "Excelente escolha", "Alta compatibilidade", "Boa opção" ou "Funciona bem". Nem todos podem ser "Excelente".
 
-4. HARMONIZAÇÃO: 3-5 pratos com lógica sensorial real (ex: "a acidez do [nome] corta a gordura da picanha"). Cada prato precisa ter uma justificativa específica e diferente.
+4. REASONING OBRIGATÓRIO: escreva uma justificativa comparativa curta, 2-4 frases, com lógica técnica real. O reasoning precisa:
+   - comparar este vinho com outros da carta
+   - citar acidez, tanino, corpo, estrutura ou ocasião
+   - explicar quando escolher este rótulo versus os demais
 
-5. VEREDICTO: Frase opinativa DIRETA como sommelier falaria. Ex: "O [nome] é a escolha óbvia se você vai pedir carne — estrutura para aguentar e taninos que pedem gordura" ou "Honestamente, o [nome] está caro para o que entrega — prefira o [outro] por metade do preço".
+5. HARMONIZAÇÃO: 3-5 pratos com lógica sensorial real (ex: "a acidez do [nome] corta a gordura da picanha"). Cada prato precisa ter uma justificativa específica e diferente.
 
-6. JULGAMENTO HONESTO: Nem todo vinho merece nota alta. Se um vinho é mediano, diga.
+6. VEREDICTO: Frase opinativa DIRETA como sommelier falaria. Ex: "O [nome] é a escolha óbvia se você vai pedir carne — estrutura para aguentar e taninos que pedem gordura" ou "Honestamente, o [nome] está caro para o que entrega — prefira o [outro] por metade do preço".
+
+7. JULGAMENTO HONESTO: Nem todo vinho merece nota alta. Se um vinho é mediano, diga.
 
 PROIBIDO: "bom equilíbrio entre fruta e madeira", "[Uva] possui notas de...", qualquer frase que sirva para qualquer vinho da mesma uva.
 Use apenas conteúdo legível do anexo. Não invente rótulos.`;
@@ -454,6 +496,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
                     tannin: { type: "string", description: "Suave, Médio, Firme, Robusto (tintos)" },
                     occasion: { type: "string", description: "Breve descrição da ocasião ideal. Ex: 'Aperitivo descontraído', 'Jantar especial', 'Almoço casual'" },
                     description: { type: "string", description: "Análise técnica útil para decisão — evite genéricos" },
+                    reasoning: { type: "string", description: "2-4 frases comparando este vinho com outros da carta e explicando a decisão técnica" },
                     pairings: {
                       type: "array",
                       minItems: 3,
@@ -483,7 +526,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
                       description: "Labels comparativas derivadas do conjunto analisado",
                     },
                   },
-                  required: ["name", "rating", "verdict", "compatibilityLabel", "description", "pairings"],
+                  required: ["name", "rating", "verdict", "compatibilityLabel", "description", "reasoning", "pairings"],
                   additionalProperties: false,
                 },
               },
@@ -586,22 +629,61 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           if (d.reason) textsToValidate.push(d.reason);
         }
         validationResult = validateWineSpecificity(textsToValidate, wineName || "", null);
+        if (!validationResult.passed || !Array.isArray(lastParsed.dishes) || lastParsed.dishes.length < 5) {
+          if (Array.isArray(lastParsed.dishes) && lastParsed.dishes.length < 5) {
+            validationResult.failures.push(`Expected at least 5 dishes, received ${lastParsed.dishes.length}`);
+          }
+          validationResult.passed = false;
+        }
       } else {
         for (const w of (lastParsed.wines || [])) {
           if (w.description) textsToValidate.push(w.description);
           if (w.verdict) textsToValidate.push(w.verdict);
+          if (w.reasoning) textsToValidate.push(w.reasoning);
+          for (const p of (Array.isArray(w.pairings) ? w.pairings : [])) {
+            if (p?.why) textsToValidate.push(p.why);
+          }
         }
         // For wine list, validate each wine individually
         const allPassed: boolean[] = [];
         for (const w of (lastParsed.wines || [])) {
-          const wTexts = [w.description, w.verdict].filter(Boolean);
+          const wTexts = [w.description, w.verdict, w.reasoning, ...(Array.isArray(w.pairings) ? w.pairings.map((p: any) => p?.why).filter(Boolean) : [])].filter(Boolean);
           if (wTexts.length > 0) {
             const v = validateWineSpecificity(wTexts, w.name || "", w.grape);
-            allPassed.push(v.passed);
-            if (!v.passed) validationResult.failures.push(...v.failures);
+            const wineSpecificFailures: string[] = [...v.failures];
+
+            if (typeof w.reasoning !== "string" || w.reasoning.trim().length < 80) {
+              wineSpecificFailures.push(`Reasoning too short or missing for ${w.name || "vinho"}`);
+            } else if (!hasComparativeLanguage(w.reasoning) || !hasTechnicalLanguage(w.reasoning)) {
+              wineSpecificFailures.push(`Reasoning lacks comparative or technical language for ${w.name || "vinho"}`);
+            }
+
+            if (!Array.isArray(w.pairings) || w.pairings.length < 3) {
+              wineSpecificFailures.push(`Expected at least 3 pairings for ${w.name || "vinho"}`);
+            } else {
+              for (const pairing of w.pairings) {
+                const why = typeof pairing?.why === "string" ? pairing.why : "";
+                if (why.trim().length < 25 || !hasTechnicalLanguage(why) || hasGenericWineLanguage(why)) {
+                  wineSpecificFailures.push(`Pairing explanation too generic for ${w.name || "vinho"} -> ${String(pairing?.dish || "")}`);
+                }
+              }
+            }
+
+            if (!Array.isArray(w.comparativeLabels) || w.comparativeLabels.length < 1) {
+              wineSpecificFailures.push(`Comparative labels missing for ${w.name || "vinho"}`);
+            }
+
+            const compatOk = typeof w.compatibilityLabel === "string" && ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"].includes(w.compatibilityLabel);
+            if (!compatOk) {
+              wineSpecificFailures.push(`Compatibility label invalid for ${w.name || "vinho"}`);
+            }
+
+            const passed = v.passed && wineSpecificFailures.length === 0;
+            allPassed.push(passed);
+            if (!passed) validationResult.failures.push(...wineSpecificFailures);
           }
         }
-        validationResult.passed = allPassed.length === 0 || allPassed.filter(p => p).length >= allPassed.length * 0.6;
+        validationResult.passed = allPassed.length > 0 && allPassed.every(Boolean);
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
@@ -609,12 +691,24 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       if (validationResult.passed) break;
 
       if (attempt === MAX_ATTEMPTS - 1) {
-        console.log("Max retries reached, using best result available");
+        console.log("Max retries reached, no valid analysis produced");
       }
     }
 
     if (!lastParsed) {
       throw new Error("Não foi possível interpretar a resposta da IA.");
+    }
+
+    if (!validationResult.passed) {
+      const specificityMessage = isMenuMode
+        ? "A análise do cardápio não ficou específica o suficiente. Tente novamente com uma imagem mais nítida."
+        : "A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.";
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", user.id, "analyze-wine-list", 422, "validation_error", 0, {
+        reason: specificityMessage,
+        validation_failures: validationResult.failures.slice(0, 12),
+        mode,
+      });
+      return jsonResponse({ error: specificityMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
     }
 
     return jsonResponse(isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed));

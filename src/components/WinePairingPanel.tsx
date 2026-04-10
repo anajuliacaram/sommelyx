@@ -101,6 +101,7 @@ export function WinePairingPanel({
 }: WinePairingPanelProps) {
   const [pairings, setPairings] = useState<PairingResult[] | null>(null);
   const [wineProfile, setWineProfile] = useState<WineProfile | null>(null);
+  const [pairingLogic, setPairingLogic] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
@@ -108,6 +109,7 @@ export function WinePairingPanel({
   const handleFetch = async () => {
     setLoading(true);
     setError(null);
+    setPairingLogic(null);
     try {
       const result = await getWinePairings({
         name: wineName,
@@ -119,6 +121,7 @@ export function WinePairingPanel({
       });
       setPairings(result.pairings);
       setWineProfile(result.wineProfile || null);
+      setPairingLogic(result.pairingLogic || null);
     } catch (err: any) {
       setError(err.message || "Não foi possível gerar sugestões");
     } finally {
@@ -230,6 +233,15 @@ export function WinePairingPanel({
                     </span>
                   )}
                 </div>
+              </div>
+            )}
+            {pairingLogic && (
+              <div className="rounded-xl border border-border/30 bg-background/55 p-3 space-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  <BookOpen className="h-3 w-3 text-primary/60" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Lógica da harmonização</span>
+                </div>
+                <p className="text-[12px] text-foreground/70 leading-relaxed">{pairingLogic}</p>
               </div>
             )}
 

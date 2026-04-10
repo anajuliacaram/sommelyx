@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin, FileText, Wine as WineIcon, Bookmark, ChevronDown, ChevronUp, Zap, Feather, Dumbbell, Brain, Smile, Heart } from "@/icons/lucide";
+import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin, FileText, Wine as WineIcon, ChevronDown, ChevronUp, Zap, Feather, Dumbbell, Brain, Smile, Heart } from "@/icons/lucide";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -294,6 +294,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         wine.grape,
         wine.region,
         wine.description,
+        wine.reasoning,
         wine.verdict,
         ...(wine.comparativeLabels || []),
         ...(wine.pairings || []).flatMap((p) => [p.dish, p.why]),
@@ -695,7 +696,25 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
                   {label}
                 </span>
               ))}
+              {wine.compatibilityLabel && (
+                <span
+                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold"
+                  style={{
+                    background: compatStyle.bg,
+                    color: compatStyle.color,
+                    border: `1px solid ${compatStyle.border}`,
+                  }}
+                >
+                  {wine.compatibilityLabel}
+                </span>
+              )}
             </div>
+
+            {wine.reasoning && (
+              <p className="line-clamp-3 text-[12px] leading-relaxed text-foreground/65">
+                {wine.reasoning}
+              </p>
+            )}
           </div>
 
           <div className="flex shrink-0 flex-col items-end gap-1">
@@ -704,13 +723,6 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
                 R$ {wine.price.toFixed(0)}
               </span>
             )}
-            <button
-              onClick={onToggleSave}
-              className="rounded-md p-1 transition-colors hover:bg-black/5"
-              title={isSaved ? "Remover dos favoritos" : "Salvar"}
-            >
-              <Bookmark className="h-3.5 w-3.5" style={{ color: isSaved ? config.badgeText : "#ccc", fill: isSaved ? config.badgeText : "transparent" }} />
-            </button>
           </div>
         </div>
 
@@ -801,7 +813,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
           </div>
         )}
 
-        <div className="grid grid-cols-[1fr_auto] items-center gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
             variant="primary"
@@ -810,17 +822,6 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
           >
             Escolher este vinho
           </Button>
-          <button
-            type="button"
-            onClick={onToggleSave}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/60 bg-background/70 transition-colors hover:bg-black/5"
-            title={isSaved ? "Remover dos favoritos" : "Salvar"}
-          >
-            <Bookmark className="h-3.5 w-3.5" style={{ color: isSaved ? config.badgeText : "#ccc", fill: isSaved ? config.badgeText : "transparent" }} />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
             variant="ghost"
@@ -836,6 +837,14 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
             onClick={() => setExpanded((current) => !current)}
           >
             {expanded ? "Ocultar harmonização" : "Harmonizar com prato"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-8 justify-center rounded-xl border border-border/50 bg-background/55 px-2.5 text-[10px] font-semibold"
+            onClick={onToggleSave}
+          >
+            {isSaved ? "Salvo" : "Salvar"}
           </Button>
         </div>
 
