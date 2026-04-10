@@ -120,37 +120,92 @@ function extractToolArguments(aiData: any) {
 }
 
 function normalizeWineListPayload(payload: any) {
-  const wines = Array.isArray(payload?.wines) ? payload.wines : [];
+  const rawWines = Array.isArray(payload?.wines) ? payload.wines : [];
   const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"];
-  const validCompLabels = ["mais leve", "mais encorpado", "mais complexo", "mais fácil de beber"];
+
+  const wines = rawWines.map((wine: any) => ({
+    name: String(wine?.name || "Vinho não identificado"),
+    producer: wine?.producer ? String(wine.producer) : null,
+    vintage: typeof wine?.vintage === "number" ? wine.vintage : null,
+    style: wine?.style ? String(wine.style) : null,
+    grape: wine?.grape ? String(wine.grape) : null,
+    region: wine?.region ? String(wine.region) : null,
+    price: typeof wine?.price === "number" ? wine.price : null,
+    rating: typeof wine?.rating === "number" ? Math.max(0, Math.min(5, wine.rating)) : 0,
+    description: wine?.description ? String(wine.description) : null,
+    pairings: (Array.isArray(wine?.pairings) ? wine.pairings : []).slice(0, 5).map((p: any) => {
+      if (typeof p === "object" && p !== null) {
+        return { dish: String(p.dish || ""), why: String(p.why || p.reason || "") };
+      }
+      return { dish: String(p), why: "" };
+    }),
+    verdict: wine?.verdict ? String(wine.verdict) : "Sem resumo",
+    compatibilityLabel: validCompatLabels.includes(wine?.compatibilityLabel) ? wine.compatibilityLabel : "Boa opção",
+    highlight: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"].includes(wine?.highlight) ? wine.highlight : null,
+    body: wine?.body ? String(wine.body) : null,
+    acidity: wine?.acidity ? String(wine.acidity) : null,
+    tannin: wine?.tannin ? String(wine.tannin) : null,
+    occasion: wine?.occasion ? String(wine.occasion) : null,
+    comparativeLabels: Array.isArray(wine?.comparativeLabels) ? wine.comparativeLabels.filter((l: any) => typeof l === "string").slice(0, 3) : [],
+  }));
+
+  const normalizeToken = (value?: string | null) => (value || "").toLowerCase().replace(/\s+/g, " ").trim();
+  const bodyRank = (value?: string | null) => {
+    const v = normalizeToken(value);
+    if (v.includes("leve")) return 0;
+    if (v.includes("encorp")) return 2;
+    if (v.includes("médio") || v.includes("medio") || v.includes("medium")) return 1;
+    return null;
+  };
+  const tanninRank = (value?: string | null) => {
+    const v = normalizeToken(value);
+    if (v.includes("suave") || v.includes("sedos") || v.includes("baixo")) return 0;
+    if (v.includes("firme") || v.includes("estrutur") || v.includes("robust") || v.includes("alto")) return 2;
+    if (v.includes("médio") || v.includes("medio") || v.includes("moderad")) return 1;
+    return null;
+  };
+  const scoreForTopPick = (wine: any) => (wine.rating || 0) * 10 + (wine.highlight === "top-pick" ? 8 : 0) + (wine.highlight === "best-value" ? 4 : 0);
+  const scoreForValue = (wine: any) => {
+    if (typeof wine.price !== "number" || wine.price <= 0) return wine.rating || 0;
+    return (wine.rating || 0) * 10 + Math.max(0, 600 / wine.price);
+  };
+
+  const wineNames = new Set(wines.map((wine: any) => wine.name));
+  const derivedTopPick = wines.slice().sort((a: any, b: any) => scoreForTopPick(b) - scoreForTopPick(a))[0]?.name || null;
+  const derivedBestValue = wines.slice().sort((a: any, b: any) => scoreForValue(b) - scoreForValue(a))[0]?.name || null;
+  const finalTopPick = payload?.topPick && wineNames.has(String(payload.topPick)) ? String(payload.topPick) : derivedTopPick;
+  const finalBestValue = payload?.bestValue && wineNames.has(String(payload.bestValue)) ? String(payload.bestValue) : derivedBestValue;
+
+  const bodyRanks = wines
+    .map((wine: any, index: number) => ({ index, rank: bodyRank(wine.body) }))
+    .filter((entry: any) => entry.rank !== null);
+  const tanninRanks = wines
+    .map((wine: any, index: number) => ({ index, rank: tanninRank(wine.tannin) }))
+    .filter((entry: any) => entry.rank !== null);
+
+  const lightestIndex = bodyRanks.length > 0 ? bodyRanks.slice().sort((a: any, b: any) => a.rank - b.rank)[0].index : -1;
+  const boldestIndex = bodyRanks.length > 0 ? bodyRanks.slice().sort((a: any, b: any) => b.rank - a.rank)[0].index : -1;
+  const easiestIndex = tanninRanks.length > 0 ? tanninRanks.slice().sort((a: any, b: any) => a.rank - b.rank)[0].index : -1;
+  const complexIndex = wines
+    .map((wine: any, index: number) => ({ index, score: (wine.highlight === "most-complex" ? 3 : 0) + (wine.rating || 0) }))
+    .sort((a: any, b: any) => b.score - a.score)[0]?.index ?? -1;
+
   return {
-    wines: wines.map((wine: any) => ({
-      name: String(wine?.name || "Vinho não identificado"),
-      producer: wine?.producer ? String(wine.producer) : null,
-      vintage: typeof wine?.vintage === "number" ? wine.vintage : null,
-      style: wine?.style ? String(wine.style) : null,
-      grape: wine?.grape ? String(wine.grape) : null,
-      region: wine?.region ? String(wine.region) : null,
-      price: typeof wine?.price === "number" ? wine.price : null,
-      rating: typeof wine?.rating === "number" ? Math.max(0, Math.min(5, wine.rating)) : 0,
-      description: wine?.description ? String(wine.description) : null,
-      pairings: Array.isArray(wine?.pairings) ? wine.pairings.map((p: any) => {
-        if (typeof p === "object" && p !== null) {
-          return { dish: String(p.dish || ""), why: String(p.why || p.reason || "") };
-        }
-        return { dish: String(p), why: "" };
-      }) : [],
-      verdict: wine?.verdict ? String(wine.verdict) : "Sem resumo",
-      compatibilityLabel: validCompatLabels.includes(wine?.compatibilityLabel) ? wine.compatibilityLabel : "Boa opção",
-      highlight: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"].includes(wine?.highlight) ? wine.highlight : null,
-      body: wine?.body ? String(wine.body) : null,
-      acidity: wine?.acidity ? String(wine.acidity) : null,
-      tannin: wine?.tannin ? String(wine.tannin) : null,
-      occasion: wine?.occasion ? String(wine.occasion) : null,
-      comparativeLabels: Array.isArray(wine?.comparativeLabels) ? wine.comparativeLabels.filter((l: any) => typeof l === "string").slice(0, 3) : [],
-    })),
-    topPick: payload?.topPick ? String(payload.topPick) : null,
-    bestValue: payload?.bestValue ? String(payload.bestValue) : null,
+    wines: wines.map((wine: any, index: number) => {
+      const derivedLabels = new Set<string>(Array.isArray(wine.comparativeLabels) ? wine.comparativeLabels : []);
+      if (wine.name === finalTopPick) derivedLabels.add("melhor escolha da carta");
+      if (wine.name === finalBestValue) derivedLabels.add("melhor custo-benefício");
+      if (index === lightestIndex) derivedLabels.add("mais leve");
+      if (index === boldestIndex) derivedLabels.add("mais encorpado");
+      if (index === easiestIndex) derivedLabels.add("mais fácil de beber");
+      if (index === complexIndex) derivedLabels.add("mais complexo");
+      return {
+        ...wine,
+        comparativeLabels: Array.from(derivedLabels).slice(0, 3),
+      };
+    }),
+    topPick: finalTopPick,
+    bestValue: finalBestValue,
   };
 }
 
@@ -358,11 +413,11 @@ PARA CADA VINHO da carta, construa um PERFIL MENTAL:
 REGRAS DE ANÁLISE:
 1. DESCRIÇÃO ESPECÍFICA: Corpo, acidez, taninos, estilo gastronômico e ocasião ideal. Cite o NOME do vinho, não "este vinho". Referencie o que diferencia ESTE rótulo de outros da mesma uva.
 
-2. COMPARAÇÃO RELATIVA: Compare dentro da carta. Atribua labels como "mais leve da carta", "mais encorpado", "mais complexo", "mais fácil de beber".
+2. COMPARAÇÃO RELATIVA: Compare dentro da carta. Atribua labels comparativas derivadas do conjunto analisado e use no máximo 3 por vinho. Priorize: "melhor escolha da carta", "melhor custo-benefício", "mais leve", "mais encorpado", "mais complexo", "mais fácil de beber".
 
 3. COMPATIBILIDADE SEMÂNTICA: "Excelente escolha", "Alta compatibilidade", "Boa opção" ou "Funciona bem". Nem todos podem ser "Excelente".
 
-4. HARMONIZAÇÃO: 3-5 pratos com lógica sensorial real (ex: "a acidez do [nome] corta a gordura da picanha").
+4. HARMONIZAÇÃO: 3-5 pratos com lógica sensorial real (ex: "a acidez do [nome] corta a gordura da picanha"). Cada prato precisa ter uma justificativa específica e diferente.
 
 5. VEREDICTO: Frase opinativa DIRETA como sommelier falaria. Ex: "O [nome] é a escolha óbvia se você vai pedir carne — estrutura para aguentar e taninos que pedem gordura" ou "Honestamente, o [nome] está caro para o que entrega — prefira o [outro] por metade do preço".
 
@@ -401,6 +456,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
                     description: { type: "string", description: "Análise técnica útil para decisão — evite genéricos" },
                     pairings: {
                       type: "array",
+                      minItems: 3,
+                      maxItems: 5,
                       items: {
                         type: "object",
                         properties: {
@@ -415,7 +472,16 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
                     verdict: { type: "string", description: "Frase direta opinativa como sommelier falaria ao cliente" },
                     compatibilityLabel: { type: "string", enum: ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"] },
                     highlight: { type: "string", enum: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"] },
-                    comparativeLabels: { type: "array", items: { type: "string" }, description: "Labels comparativas: mais leve, mais encorpado, mais complexo, mais fácil de beber, melhor para carne, melhor para peixe, etc." },
+                    comparativeLabels: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                        enum: ["melhor escolha da carta", "melhor custo-benefício", "mais leve", "mais encorpado", "mais complexo", "mais fácil de beber"],
+                      },
+                      minItems: 1,
+                      maxItems: 3,
+                      description: "Labels comparativas derivadas do conjunto analisado",
+                    },
                   },
                   required: ["name", "rating", "verdict", "compatibilityLabel", "description", "pairings"],
                   additionalProperties: false,
