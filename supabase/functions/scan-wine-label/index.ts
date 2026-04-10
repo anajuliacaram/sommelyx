@@ -147,7 +147,7 @@ function hasArtifactToken(value: unknown) {
 
 function isAbsurdRegionValue(value: unknown) {
   const normalized = normalizeForMatch(value);
-  if (!normalized) return true;
+  if (!normalized) return false;
   if (normalized === "0") return true;
   if (/^\d+$/.test(normalized) && Number(normalized) === 0) return true;
   if (!/[a-z]/.test(normalized)) return true;
@@ -481,6 +481,8 @@ serve(async (req) => {
     const { strongAnchors, weakAnchors } = countWineAnchors(normalizedWine);
     const hasEnoughWineContext = strongAnchors >= 1 || weakAnchors >= 2;
     const hasAnyWineContext = strongAnchors + weakAnchors > 0;
+    const regionExplicitlyInvalid = isAbsurdRegionValue(normalizedWine.region);
+    const regionMissingButAllowed = !normalizedWine.region || normalizeForMatch(normalizedWine.region) === "";
 
     if (
       !normalizedWine.name ||
@@ -488,7 +490,7 @@ serve(async (req) => {
       suspiciousProducer ||
       !hasEnoughWineContext ||
       !hasAnyWineContext ||
-      isAbsurdRegionValue(normalizedWine.region)
+      regionExplicitlyInvalid
     ) {
       await logAudit(userId, 422, "ai_error", durationMs, {
         request_id: requestId,
@@ -497,6 +499,8 @@ serve(async (req) => {
         suspicious_producer: suspiciousProducer,
         strong_anchors: strongAnchors,
         weak_anchors: weakAnchors,
+        region_missing_but_allowed: regionMissingButAllowed,
+        region_explicitly_invalid: regionExplicitlyInvalid,
       });
       return fail(422, {
         ok: false,
@@ -507,9 +511,24 @@ serve(async (req) => {
       });
     }
 
+    if (regionMissingButAllowed) {
+      await logAudit(userId, 200, "success", durationMs, {
+        request_id: requestId,
+        wine_name: normalizedWine.name || "unknown",
+        region_missing_but_allowed: true,
+        strong_anchors: strongAnchors,
+        weak_anchors: weakAnchors,
+      });
+      return jsonResponse(200, { ok: true, wine: normalizedWine, requestId });
+    }
+
     await logAudit(userId, 200, "success", durationMs, {
       request_id: requestId,
       wine_name: normalizedWine.name || "unknown",
+      strong_anchors: strongAnchors,
+      weak_anchors: weakAnchors,
+      region_missing_but_allowed: false,
+      region_explicitly_invalid: regionExplicitlyInvalid,
     });
 
     return jsonResponse(200, { ok: true, wine: normalizedWine, requestId });
