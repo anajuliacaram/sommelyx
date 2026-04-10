@@ -59,6 +59,14 @@ const GENERIC_PATTERNS = [
   /complementa os sabores/i,
   /é? um vinho (?:versátil|equilibrado|elegante) que/i,
   /notas? de frutas (?:vermelhas|escuras|tropicais|cítricas) e/i,
+  /bom para acompanhar/i,
+  /bom vinho para o dia a dia/i,
+  /ideal para/i,
+  /ideal com/i,
+  /carne vermelha/i,
+  /para pratos leves/i,
+  /frutas vermelhas/i,
+  /frutas escuras/i,
 ];
 
 const TECHNICAL_PATTERNS = [
@@ -87,10 +95,66 @@ const COMPARATIVE_PATTERNS = [
   /\bdentro da carta\b/i,
 ];
 
+interface SpecificityContext {
+  wineName?: string;
+  producer?: string | null;
+  region?: string | null;
+  country?: string | null;
+  style?: string | null;
+  vintage?: number | null;
+  grape?: string | null;
+}
+
+function normalizeForMatch(value?: string | number | null) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function collectSpecificAnchors(context?: SpecificityContext) {
+  const strong = [
+    context?.producer,
+    context?.region,
+    context?.country,
+    context?.style,
+    context?.vintage != null ? String(context.vintage) : null,
+  ]
+    .map(normalizeForMatch)
+    .filter((anchor) => anchor.length > 2);
+
+  const weak = [context?.wineName, context?.grape]
+    .map(normalizeForMatch)
+    .filter((anchor) => anchor.length > 2);
+
+  return { strong, weak };
+}
+
+function countAnchorHits(text: string, anchors: string[]) {
+  const normalized = normalizeForMatch(text);
+  return anchors.filter((anchor) => normalized.includes(anchor)).length;
+}
+
+function hasSpecificLabelContext(texts: string[], context?: SpecificityContext) {
+  const combined = texts.filter(Boolean).join(" ");
+  if (!combined.trim()) return false;
+
+  const { strong, weak } = collectSpecificAnchors(context);
+  if (strong.length > 0) {
+    return countAnchorHits(combined, strong) >= 1;
+  }
+
+  return countAnchorHits(combined, weak) >= 1;
+}
+
 function validateWineSpecificity(
   texts: string[],
   wineName: string,
   grape?: string | null,
+  context?: SpecificityContext,
 ): { passed: boolean; failures: string[] } {
   const failures: string[] = [];
   const wineNameLower = wineName.toLowerCase();
@@ -125,6 +189,10 @@ function validateWineSpecificity(
         failures.push(`Grape-only description without label context`);
       }
     }
+  }
+
+  if (!hasSpecificLabelContext(texts, context ?? { wineName, grape })) {
+    failures.push("Missing label-specific anchor");
   }
 
   return { passed: failures.length === 0, failures };
@@ -449,6 +517,7 @@ PARA CADA VINHO da carta, construa um PERFIL MENTAL:
 
 REGRAS DE ANÁLISE:
 1. DESCRIÇÃO ESPECÍFICA: Corpo, acidez, taninos, estilo gastronômico e ocasião ideal. Cite o NOME do vinho, não "este vinho". Referencie o que diferencia ESTE rótulo de outros da mesma uva.
+   Em cada explicação, mencione pelo menos um anchor do rótulo (produtor, região, país, safra ou linha/posicionamento). Se faltar dado, faça inferência cautelosa e diga que está estimando pelo contexto do rótulo.
 
 2. COMPARAÇÃO RELATIVA: Compare dentro da carta. Atribua labels comparativas derivadas do conjunto analisado e use no máximo 3 por vinho. Priorize: "melhor escolha da carta", "melhor custo-benefício", "mais leve", "mais encorpado", "mais complexo", "mais fácil de beber".
 
@@ -457,6 +526,7 @@ REGRAS DE ANÁLISE:
 4. REASONING OBRIGATÓRIO: escreva uma justificativa comparativa curta, 2-4 frases, com lógica técnica real. O reasoning precisa:
    - comparar este vinho com outros da carta
    - citar acidez, tanino, corpo, estrutura ou ocasião
+   - citar pelo menos um anchor específico do rótulo (produtor, região, país, safra ou linha/posicionamento)
    - explicar quando escolher este rótulo versus os demais
 
 5. HARMONIZAÇÃO: 3-5 pratos com lógica sensorial real (ex: "a acidez do [nome] corta a gordura da picanha"). Cada prato precisa ter uma justificativa específica e diferente.
@@ -628,7 +698,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         for (const d of (lastParsed.dishes || [])) {
           if (d.reason) textsToValidate.push(d.reason);
         }
-        validationResult = validateWineSpecificity(textsToValidate, wineName || "", null);
+        validationResult = validateWineSpecificity(textsToValidate, wineName || "", null, { wineName });
         if (!validationResult.passed || !Array.isArray(lastParsed.dishes) || lastParsed.dishes.length < 5) {
           if (Array.isArray(lastParsed.dishes) && lastParsed.dishes.length < 5) {
             validationResult.failures.push(`Expected at least 5 dishes, received ${lastParsed.dishes.length}`);
@@ -649,7 +719,15 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         for (const w of (lastParsed.wines || [])) {
           const wTexts = [w.description, w.verdict, w.reasoning, ...(Array.isArray(w.pairings) ? w.pairings.map((p: any) => p?.why).filter(Boolean) : [])].filter(Boolean);
           if (wTexts.length > 0) {
-            const v = validateWineSpecificity(wTexts, w.name || "", w.grape);
+            const v = validateWineSpecificity(wTexts, w.name || "", w.grape, {
+              wineName: w.name,
+              producer: w.producer ?? null,
+              region: w.region ?? null,
+              country: (w as any).country ?? null,
+              style: w.style ?? null,
+              vintage: w.vintage ?? null,
+              grape: w.grape ?? null,
+            });
             const wineSpecificFailures: string[] = [...v.failures];
 
             if (typeof w.reasoning !== "string" || w.reasoning.trim().length < 80) {

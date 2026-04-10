@@ -213,9 +213,18 @@ const GENERIC_RESPONSE_PHRASES = [
   "combina bem",
   "harmoniza bem",
   "boa opção",
+  "bom para acompanhar",
+  "bom vinho para o dia a dia",
   "complementa os sabores",
   "acidez do vinho combina",
+  "ideal para",
+  "ideal com",
+  "para carnes vermelhas",
+  "para pratos leves",
+  "carne vermelha",
   "frutas frescas",
+  "frutas vermelhas",
+  "frutas escuras",
   "paladar",
   "equilibrado",
   "versátil",
@@ -268,6 +277,61 @@ function hasComparativeWineLanguage(text?: string | null) {
   return COMPARATIVE_TERMS.some((pattern) => pattern.test(text));
 }
 
+interface WineSpecificityContext {
+  wineName?: string;
+  producer?: string | null;
+  region?: string | null;
+  country?: string | null;
+  style?: string | null;
+  vintage?: number | null;
+  grape?: string | null;
+}
+
+function normalizeForMatch(value?: string | number | null) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function collectSpecificAnchors(context?: WineSpecificityContext) {
+  const strong = [
+    context?.producer,
+    context?.region,
+    context?.country,
+    context?.style,
+    context?.vintage != null ? String(context.vintage) : null,
+  ]
+    .map(normalizeForMatch)
+    .filter((anchor) => anchor.length > 2);
+
+  const weak = [context?.wineName, context?.grape]
+    .map(normalizeForMatch)
+    .filter((anchor) => anchor.length > 2);
+
+  return { strong, weak };
+}
+
+function countAnchorHits(text: string, anchors: string[]) {
+  const normalized = normalizeForMatch(text);
+  return anchors.filter((anchor) => normalized.includes(anchor)).length;
+}
+
+function hasSpecificLabelContext(texts: string[], context?: WineSpecificityContext) {
+  const combined = texts.filter(Boolean).join(" ");
+  if (!combined.trim()) return false;
+
+  const { strong, weak } = collectSpecificAnchors(context);
+  if (strong.length > 0) {
+    return countAnchorHits(combined, strong) >= 1;
+  }
+
+  return countAnchorHits(combined, weak) >= 1;
+}
+
 function isUserFacingAnalysisError(message: string) {
   return (
     message.startsWith("A análise não ficou específica o suficiente.") ||
@@ -275,7 +339,11 @@ function isUserFacingAnalysisError(message: string) {
   );
 }
 
-function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kind: "pairings" | "suggestions" | "wineList" | "menu" | "insight"): boolean {
+function validateWineSpecificity<T extends Record<string, unknown>>(
+  data: T,
+  kind: "pairings" | "suggestions" | "wineList" | "menu" | "insight",
+  context?: WineSpecificityContext,
+): boolean {
   if (!data || typeof data !== "object") return false;
 
   if (kind === "pairings") {
@@ -289,7 +357,8 @@ function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kin
       item.reason.trim().length >= 55 &&
       !hasGenericWineLanguage(item.reason) &&
       hasTechnicalWineLanguage(item.reason) &&
-      !hasGenericWineLanguage(item.harmony_label),
+      !hasGenericWineLanguage(item.harmony_label) &&
+      hasSpecificLabelContext([item.reason, item.harmony_label, item?.dish], context),
     );
   }
 
@@ -303,37 +372,66 @@ function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kin
       item.reason.trim().length >= 55 &&
       !hasGenericWineLanguage(item.reason) &&
       hasTechnicalWineLanguage(item.reason) &&
-      !hasGenericWineLanguage(item.harmony_label),
+      !hasGenericWineLanguage(item.harmony_label) &&
+      hasSpecificLabelContext(
+        [item.reason, item.harmony_label, item?.wineName],
+        {
+          wineName: item?.wineName,
+          producer: null,
+          region: item?.region ?? null,
+          country: item?.country ?? null,
+          style: item?.style ?? null,
+          vintage: item?.vintage ?? null,
+          grape: item?.grape ?? null,
+        },
+      ),
     );
   }
 
   if (kind === "wineList") {
     const wines = Array.isArray(data.wines) ? data.wines : [];
     if (wines.length === 0) return false;
-    return wines.every((item: any) =>
-      typeof item?.name === "string" &&
-      item.name.trim().length > 0 &&
-      typeof item?.verdict === "string" &&
-      typeof item?.compatibilityLabel === "string" &&
-      typeof item?.reasoning === "string" &&
-      item.reasoning.trim().length >= 80 &&
-      hasComparativeWineLanguage(item.reasoning) &&
-      hasTechnicalWineLanguage(item.reasoning) &&
-      !hasGenericWineLanguage(item.verdict) &&
-      item.verdict.trim().length >= 30 &&
-      Array.isArray(item.pairings) &&
-      item.pairings.length >= 3 &&
-      item.pairings.every((pairing: any) =>
-        typeof pairing?.dish === "string" &&
-        typeof pairing?.why === "string" &&
-        pairing.dish.trim().length > 0 &&
-        pairing.why.trim().length >= 25 &&
-        hasTechnicalWineLanguage(pairing.why) &&
-        !hasGenericWineLanguage(pairing.why)
-      ) &&
-      Array.isArray(item.comparativeLabels) &&
-      item.comparativeLabels.length >= 1,
-    );
+    return wines.every((item: any) => {
+      const itemContext = {
+        wineName: item.name,
+        producer: item.producer ?? null,
+        region: item.region ?? null,
+        country: item.country ?? null,
+        style: item.style ?? null,
+        vintage: item.vintage ?? null,
+        grape: item.grape ?? null,
+      };
+
+      return (
+        typeof item?.name === "string" &&
+        item.name.trim().length > 0 &&
+        typeof item?.verdict === "string" &&
+        typeof item?.compatibilityLabel === "string" &&
+        typeof item?.reasoning === "string" &&
+        item.reasoning.trim().length >= 80 &&
+        hasComparativeWineLanguage(item.reasoning) &&
+        hasTechnicalWineLanguage(item.reasoning) &&
+        hasSpecificLabelContext(
+          [item.reasoning, item.verdict, item.description],
+          itemContext,
+        ) &&
+        !hasGenericWineLanguage(item.verdict) &&
+        item.verdict.trim().length >= 30 &&
+        Array.isArray(item.pairings) &&
+        item.pairings.length >= 3 &&
+        item.pairings.every((pairing: any) =>
+          typeof pairing?.dish === "string" &&
+          typeof pairing?.why === "string" &&
+          pairing.dish.trim().length > 0 &&
+          pairing.why.trim().length >= 25 &&
+          hasTechnicalWineLanguage(pairing.why) &&
+          hasSpecificLabelContext([pairing.why, pairing.dish], itemContext) &&
+          !hasGenericWineLanguage(pairing.why)
+        ) &&
+        Array.isArray(item.comparativeLabels) &&
+        item.comparativeLabels.length >= 1
+      );
+    });
   }
 
   if (kind === "menu") {
@@ -345,7 +443,8 @@ function validateWineSpecificity<T extends Record<string, unknown>>(data: T, kin
       typeof item?.reason === "string" &&
       item.reason.trim().length >= 55 &&
       !hasGenericWineLanguage(item.reason) &&
-      hasTechnicalWineLanguage(item.reason),
+      hasTechnicalWineLanguage(item.reason) &&
+      hasSpecificLabelContext([item.reason, data.summary], context),
     );
   }
 
@@ -654,12 +753,21 @@ export async function getWinePairings(wine: {
       { timeoutMs: 55_000, retries: 1 },
     );
     const data = await request();
-    if (isValidPairings(data) && validateWineSpecificity(data, "pairings")) {
+    const pairingContext = {
+      wineName: wine.name,
+      producer: wine.producer ?? null,
+      region: wine.region ?? null,
+      country: wine.country ?? null,
+      style: wine.style ?? null,
+      vintage: wine.vintage ?? null,
+      grape: wine.grape ?? null,
+    };
+    if (isValidPairings(data) && validateWineSpecificity(data, "pairings", pairingContext.wineName, pairingContext)) {
       return data;
     }
 
     const retryData = await request().catch(() => null);
-    if (retryData && isValidPairings(retryData) && validateWineSpecificity(retryData, "pairings")) {
+    if (retryData && isValidPairings(retryData) && validateWineSpecificity(retryData, "pairings", pairingContext.wineName, pairingContext)) {
       return retryData;
     }
 
@@ -762,11 +870,11 @@ export async function analyzeMenuForWine(
       { timeoutMs: 45_000, retries: 1 },
     );
     const data = await request();
-    if (data && Array.isArray(data.dishes) && data.dishes.length > 0 && validateWineSpecificity(data, "menu")) {
+    if (data && Array.isArray(data.dishes) && data.dishes.length > 0 && validateWineSpecificity(data, "menu", { wineName })) {
       return data;
     }
     const retryData = await request().catch(() => null);
-    if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0 && validateWineSpecificity(retryData, "menu")) {
+    if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0 && validateWineSpecificity(retryData, "menu", { wineName })) {
       return retryData;
     }
     throw new Error("A análise do cardápio não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");

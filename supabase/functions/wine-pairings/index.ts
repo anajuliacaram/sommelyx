@@ -58,12 +58,76 @@ const GENERIC_PATTERNS = [
   /complementa os sabores/i,
   /é? um vinho (?:versátil|equilibrado|elegante) que/i,
   /notas? de frutas (?:vermelhas|escuras|tropicais|cítricas) e/i,
+  /bom para acompanhar/i,
+  /bom vinho para o dia a dia/i,
+  /ideal para/i,
+  /ideal com/i,
+  /carne vermelha/i,
+  /para pratos leves/i,
+  /frutas vermelhas/i,
+  /frutas escuras/i,
 ];
+
+interface SpecificityContext {
+  wineName?: string;
+  producer?: string | null;
+  region?: string | null;
+  country?: string | null;
+  style?: string | null;
+  vintage?: number | null;
+  grape?: string | null;
+}
+
+function normalizeForMatch(value?: string | number | null) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function collectSpecificAnchors(context?: SpecificityContext) {
+  const strong = [
+    context?.producer,
+    context?.region,
+    context?.country,
+    context?.style,
+    context?.vintage != null ? String(context.vintage) : null,
+  ]
+    .map(normalizeForMatch)
+    .filter((anchor) => anchor.length > 2);
+
+  const weak = [context?.wineName, context?.grape]
+    .map(normalizeForMatch)
+    .filter((anchor) => anchor.length > 2);
+
+  return { strong, weak };
+}
+
+function countAnchorHits(text: string, anchors: string[]) {
+  const normalized = normalizeForMatch(text);
+  return anchors.filter((anchor) => normalized.includes(anchor)).length;
+}
+
+function hasSpecificLabelContext(texts: string[], context?: SpecificityContext) {
+  const combined = texts.filter(Boolean).join(" ");
+  if (!combined.trim()) return false;
+
+  const { strong, weak } = collectSpecificAnchors(context);
+  if (strong.length > 0) {
+    return countAnchorHits(combined, strong) >= 1;
+  }
+
+  return countAnchorHits(combined, weak) >= 1;
+}
 
 function validateWineSpecificity(
   texts: string[],
   wineName: string,
   grape?: string | null,
+  context?: SpecificityContext,
 ): { passed: boolean; failures: string[] } {
   const failures: string[] = [];
   const wineNameLower = wineName.toLowerCase();
@@ -102,6 +166,10 @@ function validateWineSpecificity(
         failures.push(`Grape-only description without label context`);
       }
     }
+  }
+
+  if (!hasSpecificLabelContext(texts, context ?? { wineName, grape })) {
+    failures.push("Missing label-specific anchor");
   }
 
   return { passed: failures.length === 0, failures };
@@ -343,7 +411,8 @@ PROIBIDO (causa rejeição automática):
 
 OBRIGATÓRIO em CADA explicação:
 - Citar "${wineName}" pelo nome (não "este vinho" ou "o ${wineGrape || "vinho"}")
-- Referenciar pelo menos UM aspecto único deste rótulo (produtor, região, posicionamento, safra)
+- Referenciar pelo menos UM aspecto único deste rótulo (produtor, região, país, posicionamento, safra ou estilo)
+- Se houver poucos dados, faça inferência cautelosa e escreva como tendência deste rótulo, não como regra genérica da uva
 - Explicar a INTERAÇÃO FÍSICA entre vinho e prato (acidez × gordura, tanino × proteína, etc.)`;
 
     let systemPrompt: string;
@@ -634,7 +703,15 @@ INSTRUÇÕES:
           if (p.reason) textsToValidate.push(p.reason);
           if (p.harmony_label) textsToValidate.push(p.harmony_label);
         }
-        validationResult = validateWineSpecificity(textsToValidate, wineName || "", wineGrape);
+        validationResult = validateWineSpecificity(textsToValidate, wineName || "", wineGrape, {
+          wineName,
+          producer: wineProducer,
+          region: wineRegion,
+          country: wineCountry,
+          style: wineStyle,
+          vintage: wineVintage,
+          grape: wineGrape,
+        });
         if (!Array.isArray(lastParsed.pairings) || lastParsed.pairings.length < 3 || lastParsed.pairings.length > 5) {
           validationResult.failures.push(`Expected 3-5 pairings, received ${Array.isArray(lastParsed.pairings) ? lastParsed.pairings.length : 0}`);
           validationResult.passed = false;
@@ -646,6 +723,17 @@ INSTRUÇÕES:
         for (const p of (lastParsed.pairings || [])) {
           if (typeof p.reason !== "string" || p.reason.trim().length < 55 || !hasTechnicalLanguage(p.reason)) {
             validationResult.failures.push(`Pairing explanation too generic for ${String(p?.dish || "prato")}`);
+            validationResult.passed = false;
+          } else if (!hasSpecificLabelContext([p.reason, p.harmony_label, p.dish], {
+            wineName,
+            producer: wineProducer,
+            region: wineRegion,
+            country: wineCountry,
+            style: wineStyle,
+            vintage: wineVintage,
+            grape: wineGrape,
+          })) {
+            validationResult.failures.push(`Pairing explanation missing label anchor for ${String(p?.dish || "prato")}`);
             validationResult.passed = false;
           }
         }
@@ -663,11 +751,28 @@ INSTRUÇÕES:
           validationResult.failures.push(`Expected 3-5 suggestions, received ${suggestions.length}`);
         }
         for (const s of suggestions) {
-          const v = validateWineSpecificity([s.reason], s.wineName || "", s.grape);
+          const v = validateWineSpecificity([s.reason], s.wineName || "", s.grape, {
+            wineName: s.wineName,
+            producer: null,
+            region: s.region ?? null,
+            country: s.country ?? null,
+            style: s.style ?? null,
+            vintage: s.vintage ?? null,
+            grape: s.grape ?? null,
+          });
           const ok = v.passed &&
             typeof s.reason === "string" &&
             s.reason.trim().length >= 55 &&
             hasTechnicalLanguage(s.reason) &&
+            hasSpecificLabelContext([s.reason, s.harmony_label, s.wineName], {
+              wineName: s.wineName,
+              producer: null,
+              region: s.region ?? null,
+              country: s.country ?? null,
+              style: s.style ?? null,
+              vintage: s.vintage ?? null,
+              grape: s.grape ?? null,
+            }) &&
             (typeof s.compatibilityLabel === "string" && ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"].includes(s.compatibilityLabel)) &&
             typeof s.fromCellar === "boolean";
           allPassed.push(ok);
