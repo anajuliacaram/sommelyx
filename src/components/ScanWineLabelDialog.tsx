@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
@@ -21,6 +21,7 @@ interface ScannedWineData {
   drink_until: number | null;
   purchase_price: number | null;
   cellar_location: string | null;
+  labelImagePreview?: string | null;
 }
 
 interface ScanWineLabelDialogProps {
@@ -40,9 +41,16 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const [lastBase64, setLastBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
+  const selectedFileRef = useRef<File | null>(null);
   const { toast } = useToast();
 
   const reset = () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    selectedFileRef.current = null;
     setStep("capture");
     setImagePreview(null);
     setScannedData(null);
@@ -50,6 +58,15 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setSupportCode(null);
     setLastBase64(null);
   };
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+    };
+  }, []);
 
   const handleClose = (v: boolean) => {
     if (!v) reset();
@@ -137,7 +154,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       return;
     }
 
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
     const previewUrl = URL.createObjectURL(file);
+    previewUrlRef.current = previewUrl;
+    selectedFileRef.current = file;
     setImagePreview(previewUrl);
     setStep("scanning");
 
@@ -153,9 +175,29 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     }
   }, [compressImage, runScan, toast]);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!scannedData) return;
-    onScanComplete(scannedData);
+
+    let labelImagePreview: string | null = imagePreview;
+    const selectedFile = selectedFileRef.current;
+
+    if (selectedFile) {
+      try {
+        labelImagePreview = await new Promise<string | null>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(selectedFile);
+        });
+      } catch (err) {
+        console.warn("Failed to convert label image preview to data URL:", err);
+      }
+    }
+
+    onScanComplete({
+      ...scannedData,
+      labelImagePreview,
+    });
     reset();
     onOpenChange(false);
   };

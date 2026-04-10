@@ -32,6 +32,102 @@ const styles = [
   { value: "fortificado", label: "Fortificado" },
 ];
 
+type ScanSuggestionInput = {
+  name?: string | null;
+  producer?: string | null;
+  vintage?: number | null;
+  style?: string | null;
+  country?: string | null;
+  region?: string | null;
+  grape?: string | null;
+  drink_from?: number | null;
+  drink_until?: number | null;
+  purchase_price?: number | null;
+  labelImagePreview?: string | null;
+};
+
+function normalizeSuggestionText(value?: string | null) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function suggestPurchasePrice(input: ScanSuggestionInput) {
+  const style = normalizeSuggestionText(input.style);
+  const grape = normalizeSuggestionText(input.grape);
+  const country = normalizeSuggestionText(input.country);
+  const region = normalizeSuggestionText(input.region);
+  const producer = normalizeSuggestionText(input.producer);
+  const name = normalizeSuggestionText(input.name);
+
+  let price = 78;
+
+  if (style.includes("espum")) price = 120;
+  else if (style.includes("fort")) price = 150;
+  else if (style.includes("sobrem")) price = 110;
+  else if (style.includes("branc")) price = 85;
+  else if (style.includes("rose")) price = 82;
+  else if (style.includes("tint")) price = 95;
+
+  if (country.includes("fran")) price += 18;
+  else if (country.includes("ital")) price += 14;
+  else if (country.includes("port")) price += 10;
+  else if (country.includes("argentin") || country.includes("chil")) price += 6;
+
+  if (region.includes("barolo") || region.includes("bordeaux") || region.includes("burg")) price += 20;
+  else if (region.includes("mendoza") || region.includes("douro") || region.includes("tosc")) price += 8;
+
+  if (producer && /catena|antinori|ruffino|gaja|chateau|château|vega|almaviva|quintarelli/i.test(producer)) price += 15;
+  if (grape && /nebbiolo|tannat|cabernet|syrah|sangiovese|riesling|chardonnay/i.test(grape)) price += 6;
+  if (name && /reserve|reserva|gran|grand|cru|riserva|selection|seleção/i.test(name)) price += 10;
+
+  if (typeof input.vintage === "number") {
+    const currentYear = new Date().getFullYear();
+    const age = Math.max(0, currentYear - input.vintage);
+    if (age > 10) price += 12;
+    else if (age > 5) price += 8;
+    else if (age <= 2) price -= 4;
+  }
+
+  return Math.max(30, Math.round(price / 5) * 5);
+}
+
+function suggestDrinkWindow(input: ScanSuggestionInput) {
+  const style = normalizeSuggestionText(input.style);
+  const grape = normalizeSuggestionText(input.grape);
+  const currentYear = new Date().getFullYear();
+
+  let startOffset = 0;
+  let span = 5;
+
+  if (style.includes("espum")) {
+    startOffset = 0;
+    span = 3;
+  } else if (style.includes("branc") || style.includes("rose")) {
+    startOffset = 0;
+    span = 4;
+  } else if (style.includes("sobrem") || style.includes("fort")) {
+    startOffset = 0;
+    span = 10;
+  } else if (style.includes("tint")) {
+    startOffset = 1;
+    span = 6;
+  }
+
+  if (/nebbiolo|tannat|cabernet|sangiovese|syrah|tempranillo/i.test(grape)) {
+    span += 2;
+  } else if (/riesling|chardonnay|sauvignon|pinot grigio|alvarinho/i.test(grape)) {
+    span = Math.max(3, span - 1);
+  }
+
+  const baseYear = typeof input.vintage === "number" ? input.vintage : currentYear;
+  const from = baseYear + startOffset;
+  const until = from + span;
+
+  return {
+    from,
+    until,
+  };
+}
+
 export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
@@ -52,6 +148,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [drinkUntil, setDrinkUntil] = useState("");
   const [foodPairing, setFoodPairing] = useState("");
   const [notes, setNotes] = useState("");
+  const [labelImagePreview, setLabelImagePreview] = useState<string | null>(null);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
@@ -75,6 +173,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
+    setLabelImagePreview(null);
+    setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
 
@@ -93,8 +193,28 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (data.purchase_price) setLastPaid(String(data.purchase_price));
     if (data.current_value) setCurrentValue(String(data.current_value));
     if (data.cellar_location) setLocation({ manualLabel: String(data.cellar_location) });
-    // Open advanced fields if we have data for them
-    if (data.country || data.region || data.grape || data.food_pairing || data.tasting_notes || data.drink_from) {
+    if (data.labelImagePreview) setLabelImagePreview(String(data.labelImagePreview));
+
+    const inferredDrinkWindow = (!data.drink_from || !data.drink_until)
+      ? suggestDrinkWindow(data)
+      : null;
+
+    if (!data.purchase_price && !isCommercial && !lastPaid) {
+      setLastPaid(String(suggestPurchasePrice(data)));
+    }
+
+    if (!data.drink_from && inferredDrinkWindow && !drinkFrom) {
+      setDrinkFrom(String(inferredDrinkWindow.from));
+    }
+
+    if (!data.drink_until && inferredDrinkWindow && !drinkUntil) {
+      setDrinkUntil(String(inferredDrinkWindow.until));
+    }
+
+    if (
+      data.country || data.region || data.grape || data.food_pairing || data.tasting_notes ||
+      data.drink_from || data.drink_until || inferredDrinkWindow || (!isCommercial && !data.purchase_price)
+    ) {
       setMoreOpen(true);
     }
     toast({ title: isCommercial ? "Dados do produto preenchidos!" : "🍷 Dados do rótulo preenchidos!" });
@@ -152,15 +272,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       if (!lastPaid) missing.push("último valor pago");
       if (!drinkFrom && !drinkUntil) missing.push("prazo para beber");
       if (!currentValue) missing.push("valor atual");
-
-      if (missing.length > 0) {
-        toast({
-          title: "⚠️ Atenção",
-          description: `Campos como ${missing.join(", ")} não foram preenchidos. Alguns relatórios e alertas podem ficar incompletos.`,
-          variant: "destructive",
-          duration: 7000,
-        });
-      }
+      setMissingFields(missing);
 
       setSuccess(true);
       setTimeout(() => {
@@ -199,6 +311,19 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   <p className="text-[15px] font-medium" style={{ color: '#1F1F1F' }}>
                     {isCommercial ? "Produto cadastrado!" : `${parseInt(quantity) || 1} garrafa(s) adicionada(s)!`}
                   </p>
+                  {missingFields.length > 0 && (
+                    <div
+                      className="w-full rounded-2xl border px-4 py-3 text-left"
+                      style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
+                    >
+                      <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>
+                        Campos sugeridos para completar depois
+                      </p>
+                      <p className="text-[11px] leading-relaxed" style={{ color: '#8B6B2B' }}>
+                        Faltaram {missingFields.join(", ")}. O cadastro já foi salvo e você pode editar essas informações quando quiser.
+                      </p>
+                    </div>
+                  )}
                 </motion.div>
               ) : (
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-5">
@@ -216,6 +341,24 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       <p className="text-[12px] mt-0.5" style={{ color: '#6B6B6B' }}>Extração instantânea dos dados do rótulo</p>
                     </div>
                   </div>
+
+                  {labelImagePreview && (
+                    <div className="rounded-2xl border bg-white p-3 flex items-center gap-3" style={{ borderColor: '#E5E2DC' }}>
+                      <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border" style={{ borderColor: '#EFEAE3', backgroundColor: '#F8F6F2' }}>
+                        <img
+                          src={labelImagePreview}
+                          alt="Foto do rótulo analisado"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold truncate" style={{ color: '#1F1F1F' }}>Foto do rótulo analisada</p>
+                        <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: '#6B6B6B' }}>
+                          A imagem fica como referência visual durante o cadastro.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Import File Card */}
                   <div
@@ -384,6 +527,20 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     <Plus className="h-4 w-4" />
                     {addWine.isPending ? "Salvando..." : isCommercial ? "Cadastrar produto" : "Salvar vinho"}
                   </button>
+
+                  {missingFields.length > 0 && (
+                    <div
+                      className="rounded-2xl border px-4 py-3"
+                      style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
+                    >
+                      <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>
+                        Campos sugeridos para completar depois
+                      </p>
+                      <p className="text-[11px] leading-relaxed" style={{ color: '#8B6B2B' }}>
+                        Faltaram {missingFields.join(", ")}. O cadastro já foi salvo e você pode editar essas informações quando quiser.
+                      </p>
+                    </div>
+                  )}
                 </motion.form>
               )}
             </AnimatePresence>
