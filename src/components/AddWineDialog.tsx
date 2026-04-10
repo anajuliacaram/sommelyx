@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Check, Camera, Upload, Sparkles } from "@/icons/lucide";
+import { ChevronDown, Plus, Check, Camera, FileSpreadsheet, Sparkles } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -337,8 +337,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       <Camera className="h-5 w-5" style={{ color: '#6F7F5B' }} />
                     </div>
                     <div className="flex flex-col">
-                      <p className="text-[14px] font-semibold" style={{ color: '#1F1F1F' }}>Escanear rótulo</p>
-                      <p className="text-[12px] mt-0.5" style={{ color: '#6B6B6B' }}>Extração instantânea dos dados do rótulo</p>
+                      <p className="text-[14px] font-semibold" style={{ color: '#1F1F1F' }}>Escanear foto do rótulo</p>
+                      <p className="text-[12px] mt-0.5" style={{ color: '#6B6B6B' }}>
+                        Use câmera ou fototeca para ler a garrafa
+                      </p>
                     </div>
                   </div>
 
@@ -367,11 +369,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     onClick={() => setImportCsvOpen(true)}
                   >
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
-                      <Upload className="h-4 w-4" style={{ color: '#C8A96A' }} />
+                      <FileSpreadsheet className="h-4 w-4" style={{ color: '#C8A96A' }} />
                     </div>
                     <div className="flex flex-col">
-                      <p className="text-[13px] font-semibold" style={{ color: '#1F1F1F' }}>Importar arquivo</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6B6B' }}>Leitura inteligente do Sommelyx</p>
+                      <p className="text-[13px] font-semibold" style={{ color: '#1F1F1F' }}>Importar documento / planilha</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6B6B' }}>
+                        CSV, PDF, Excel e outros arquivos para cadastro em lote
+                      </p>
                     </div>
                   </div>
 

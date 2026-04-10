@@ -167,10 +167,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const readWordAsText = async (file: File) => {
     const buffer = await file.arrayBuffer();
-    const mammothModule = await import("mammoth");
-    const mammoth = mammothModule.default || mammothModule;
-    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
-    return result.value || "";
+    try {
+      const mammothModule = await (0, eval)("import('mammoth')");
+      const mammoth = mammothModule.default || mammothModule;
+      const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+      return result.value || "";
+    } catch {
+      throw new Error("Arquivos Word precisam ser convertidos em PDF, XLSX ou CSV para importação.");
+    }
   };
 
   const fileToCsvLikeText = async (file: File) => {
@@ -342,7 +346,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
             <Sparkles className="h-4 w-4" style={{ color: "#8F2D56" }} />
-            Importação inteligente
+            Importar documento / planilha
           </SheetTitle>
         </SheetHeader>
 
@@ -358,10 +362,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               >
                 <Upload className="h-8 w-8 mx-auto mb-3" style={{ color: "#8F2D56" }} />
                 <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
-                  Arraste o arquivo ou clique para selecionar
+                  Arraste um documento ou clique para selecionar
                 </p>
                  <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
-                   CSV, Excel, PDF, Word, TXT — qualquer formato
+                   CSV, Excel, PDF, Word e TXT para cadastro em lote
                  </p>
               </div>
               <input

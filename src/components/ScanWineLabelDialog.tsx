@@ -248,9 +248,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Escolher da Galeria
+                  Escolher da Fototeca
                 </Button>
               </div>
+
+              <p className="text-[10px] leading-relaxed text-muted-foreground text-center max-w-[260px]">
+                Use câmera ou fototeca para ler apenas a foto do rótulo.
+              </p>
 
               <input
                 ref={cameraInputRef}
