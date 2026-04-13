@@ -339,10 +339,11 @@ function isUserFacingAnalysisError(message: string) {
   );
 }
 
-function validateWineSpecificity<T extends Record<string, unknown>>(
-  data: T,
+function validateWineSpecificity(
+  data: any,
   kind: "pairings" | "suggestions" | "wineList" | "menu" | "insight",
-  context?: WineSpecificityContext,
+  context?: WineSpecificityContext | string,
+  extraContext?: WineSpecificityContext,
 ): boolean {
   if (!data || typeof data !== "object") return false;
 
