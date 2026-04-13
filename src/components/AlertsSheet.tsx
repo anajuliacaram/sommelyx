@@ -43,6 +43,7 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
   const [insights, setInsights] = useState<Record<string, WineInsight>>({});
   const [loadingInsight, setLoadingInsight] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
   const alerts = useMemo(() => {
     if (!wines) return [];
