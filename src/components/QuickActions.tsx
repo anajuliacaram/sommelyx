@@ -85,7 +85,7 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onRegisterConsumption}
-              className="h-11 w-full rounded-2xl border border-primary/15 bg-primary/[0.06] text-[14px] font-semibold text-foreground/80 gap-1.5 px-4 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:border-primary/25 hover:text-foreground/95 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
+              className="h-11 w-full rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[14px] font-semibold text-[#2B2B2B] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-primary"
             >
               <Wine className="h-[15px] w-[15px] shrink-0" />
               {isCommercial ? "Registrar venda" : "Registrar consumo"}
@@ -99,7 +99,7 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onHarmonize}
-              className="h-10 w-full rounded-2xl border border-accent/20 bg-accent/[0.08] text-[13.5px] font-semibold text-foreground/75 gap-1.5 px-4 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-accent/[0.14] hover:text-foreground/90 hover:border-accent/30 hover:shadow-[0_6px_16px_-6px_hsl(var(--accent)/0.18)] active:translate-y-[0.5px]"
+              className="h-10 w-full rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[13.5px] font-semibold text-[#2B2B2B] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-accent"
             >
               <UtensilsCrossed className="h-[15px] w-[15px] shrink-0" />
               Harmonizar
@@ -111,7 +111,7 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onAnalyzeList}
-              className="h-10 w-full rounded-2xl border border-primary/15 bg-primary/[0.05] text-[13.5px] font-semibold text-foreground/75 gap-1.5 px-4 tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:bg-primary/[0.11] hover:text-foreground/90 hover:border-primary/25 hover:shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.15)] active:translate-y-[0.5px]"
+              className="h-10 w-full rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[13.5px] font-semibold text-[#2B2B2B] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-primary"
             >
               <Sparkles className="h-[15px] w-[15px] shrink-0" />
               Analisar carta
