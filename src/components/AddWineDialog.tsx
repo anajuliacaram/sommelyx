@@ -280,9 +280,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
       // Lembrete sobre campos opcionais não preenchidos
       const missing: string[] = [];
-      if (!lastPaid) missing.push("último valor pago");
+      if (!lastPaid && !noPriceInfo) missing.push("último valor pago");
       if (!drinkFrom && !drinkUntil) missing.push("prazo para beber");
-      if (!currentValue) missing.push("valor atual");
+      if (!currentValue) missing.push("valor atual estimado");
       setMissingFields(missing);
 
       setSuccess(true);
