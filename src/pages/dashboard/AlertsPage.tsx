@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2 } from "@/icons/lucide";
+import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2, X } from "@/icons/lucide";
 import { useWines } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -80,10 +80,13 @@ export default function AlertsPage() {
     return items;
   }, [wines]);
 
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+  const visibleAlerts = alerts.filter(a => !dismissedIds.has(a.id));
+
   const grouped = {
-    drink_now: alerts.filter(a => a.type === "drink_now"),
-    past_peak: alerts.filter(a => a.type === "past_peak"),
-    low_stock: alerts.filter(a => a.type === "low_stock"),
+    drink_now: visibleAlerts.filter(a => a.type === "drink_now"),
+    past_peak: visibleAlerts.filter(a => a.type === "past_peak"),
+    low_stock: visibleAlerts.filter(a => a.type === "low_stock"),
   };
 
   const handleInsight = useCallback(async (alert: AlertItem) => {
@@ -128,14 +131,27 @@ export default function AlertsPage() {
   return (
     <div className="space-y-5 max-w-4xl">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="flex items-center gap-2">
-          <Bell className="h-4.5 w-4.5 text-primary" />
-          <h1 className="text-lg font-serif font-bold text-foreground tracking-tight">Alertas</h1>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Bell className="h-4.5 w-4.5 text-primary" />
+              <h1 className="text-lg font-serif font-bold text-foreground tracking-tight">Alertas</h1>
+            </div>
+            <p className="text-[12px] text-muted-foreground mt-0.5">{visibleAlerts.length} alerta{visibleAlerts.length !== 1 ? "s" : ""} ativo{visibleAlerts.length !== 1 ? "s" : ""}</p>
+          </div>
+          {visibleAlerts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setDismissedIds(new Set(alerts.map(a => a.id)))}
+              className="text-[12px] font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted/20"
+            >
+              Limpar tudo
+            </button>
+          )}
         </div>
-        <p className="text-[12px] text-muted-foreground mt-0.5">{alerts.length} alerta{alerts.length !== 1 ? "s" : ""} ativo{alerts.length !== 1 ? "s" : ""}</p>
       </motion.div>
 
-      {alerts.length === 0 ? (
+      {visibleAlerts.length === 0 ? (
         <motion.div className="glass-card p-8 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 bg-success/8">
             <Wine className="h-5 w-5 text-success" />
