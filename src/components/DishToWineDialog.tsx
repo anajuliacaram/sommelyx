@@ -830,39 +830,15 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
             {/* ── Ext: Menu scanning ── */}
             {step === "ext-menu-scanning" && (
-              <motion.div
-                key="ext-menu-scanning"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-4 py-8"
-              >
-                {preview && (
-                  preview.url ? (
-                    <img src={preview.url} alt={preview.fileName} className="w-20 h-20 object-cover rounded-xl border border-border/30" />
-                  ) : (
-                    <div className="w-full rounded-xl border border-border/40 bg-background/60 px-4 py-3 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <FileText className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[12px] font-semibold text-foreground truncate">{preview.fileName}</p>
-                        <p className="text-[10px] text-muted-foreground">PDF anexado para leitura inteligente</p>
-                      </div>
-                    </div>
-                  )
-                )}
-                <AiProgressiveLoader
-                  steps={[
-                    "Processando imagem…",
-                    "Lendo cardápio com inteligência Sommelyx…",
-                    "Identificando pratos…",
-                    "Avaliando harmonizações…",
-                  ]}
-                  interval={3000}
-                  subtitle={`Vinho: ${extWineName}`}
-                />
-              </motion.div>
+              <PairingLoadingState
+                steps={[
+                  "Processando imagem…",
+                  "Lendo cardápio com inteligência Sommelyx…",
+                  "Identificando pratos…",
+                  "Avaliando harmonizações…",
+                ]}
+                subtitle={`Vinho: ${extWineName}`}
+              />
             )}
 
             {/* ── Ext: Menu results ── */}
