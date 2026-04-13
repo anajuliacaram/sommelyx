@@ -220,6 +220,19 @@ export default function CommercialDashboard() {
     () => (isFiltered ? allWines.filter((w) => wineMatchesFilters(w, filters)) : allWines),
     [allWines, filters, isFiltered]
   );
+  const filteredWineIds = useMemo(() => new Set(wines.map((w) => w.id)), [wines]);
+  const filteredWineNames = useMemo(
+    () => new Set(wines.map((w) => w.name.toLowerCase())),
+    [wines],
+  );
+  const salesInScope = useMemo(
+    () =>
+      sales.filter((sale) => {
+        if (sale.wine_id && filteredWineIds.has(sale.wine_id)) return true;
+        return filteredWineNames.has(sale.name.toLowerCase());
+      }),
+    [sales, filteredWineIds, filteredWineNames],
+  );
 
   /* ── Filtered KPIs ── */
   const totalBottles = useMemo(() => wines.reduce((sum, w) => sum + w.quantity, 0), [wines]);
@@ -247,7 +260,7 @@ export default function CommercialDashboard() {
       since.setMonth(since.getMonth() - 6);
       const { data, error } = await supabase
         .from("wine_events")
-        .select("event_type,quantity,created_at")
+        .select("event_type,quantity,created_at,wine_id")
         .eq("user_id", user!.id)
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: true });
@@ -255,21 +268,25 @@ export default function CommercialDashboard() {
       return data ?? [];
     },
   });
+  const wineEventsInScope = useMemo(
+    () => (wineEvents as any[]).filter((event) => event.wine_id && filteredWineIds.has(event.wine_id)),
+    [wineEvents, filteredWineIds],
+  );
 
   const salesMonthly = useMemo(() => {
     const map: Record<string, number> = {};
-    sales.forEach((s) => {
+    salesInScope.forEach((s) => {
       const d = new Date(s.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       map[key] = (map[key] || 0) + (s.price ?? 0) * (s.quantity ?? 0);
     });
     return months.map((m) => ({ name: m.label, value: Math.round(map[m.key] || 0) }));
-  }, [sales, months]);
+  }, [salesInScope, months]);
 
   const stockMovesMonthly = useMemo(() => {
     const inMap: Record<string, number> = {};
     const outMap: Record<string, number> = {};
-    (wineEvents as any[]).forEach((e) => {
+    wineEventsInScope.forEach((e) => {
       const d = new Date(e.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       const qty = Number(e.quantity ?? 0);
@@ -282,7 +299,7 @@ export default function CommercialDashboard() {
       out: outMap[m.key] || 0,
       net: (inMap[m.key] || 0) - (outMap[m.key] || 0),
     }));
-  }, [wineEvents, months]);
+  }, [wineEventsInScope, months]);
 
   /* ── Breakdown data ── */
   const breakdownByStyle = useMemo(() => {
@@ -359,8 +376,6 @@ export default function CommercialDashboard() {
     return labels;
   }, [filters]);
 
-  const allBottles = useMemo(() => allWines.reduce((sum, w) => sum + w.quantity, 0), [allWines]);
-
   return (
     <>
       <AnimatePresence>
@@ -375,15 +390,15 @@ export default function CommercialDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1280px] space-y-5">
+      <div className="max-w-[1280px] space-y-4">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[26px] font-bold tracking-[-0.025em] text-foreground sm:text-[30px] font-serif">
+              <h1 className="text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[30px] font-serif">
                 Resumo da operação
               </h1>
-              <p className="mt-1.5 text-[14px] text-muted-foreground leading-relaxed">
+              <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed">
                 {isFiltered
                   ? `${uniqueLabels} rótulos · ${totalBottles} garrafas · ${formatBRL(totalValue)}`
                   : `${totalBottles} un. em estoque`}
@@ -492,7 +507,7 @@ export default function CommercialDashboard() {
               </span>
               <button
                 onClick={clearFilters}
-                className="ml-auto text-[10px] font-semibold text-muted-foreground/50 hover:text-foreground transition-colors"
+                className="ml-auto text-[10px] font-semibold text-muted-foreground/60 hover:text-foreground transition-colors"
               >
                 Limpar
               </button>
@@ -520,7 +535,7 @@ export default function CommercialDashboard() {
                     <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground/60 whitespace-nowrap">{kpi.label}</p>
                   </div>
                   <p className="text-[26px] font-bold tracking-[-0.02em] text-foreground leading-none">{kpi.value}</p>
-                  <p className="text-[12px] text-muted-foreground/50 mt-2 font-medium">{kpi.detail}</p>
+                  <p className="text-[12px] text-muted-foreground/60 mt-2 font-medium">{kpi.detail}</p>
                 </div>
               ))
             )}
@@ -559,7 +574,7 @@ export default function CommercialDashboard() {
                 <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50">Estoque</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60">Estoque</p>
                       <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em] text-foreground">
                         Itens de maior impacto
                       </h2>
@@ -570,7 +585,7 @@ export default function CommercialDashboard() {
                   </div>
 
                   <div className="overflow-hidden rounded-2xl border border-border/25">
-                    <div className="grid grid-cols-12 gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50 bg-muted/12">
+                    <div className="grid grid-cols-12 gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 bg-muted/12">
                       <div className="col-span-6">Produto</div>
                       <div className="col-span-2 text-center">Tipo</div>
                       <div className="col-span-2 text-right">Qtd.</div>
@@ -620,7 +635,7 @@ export default function CommercialDashboard() {
                   <div className="glass-card p-6">
                     <div className="flex items-center justify-between gap-3 mb-4">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50">Alertas</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60">Alertas</p>
                         <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em] text-foreground">Reposição</h2>
                       </div>
                       <Button variant="ghost" size="sm" className="text-[12px] font-semibold text-muted-foreground hover:text-foreground" onClick={() => navigate("/dashboard/inventory")}>
@@ -658,7 +673,7 @@ export default function CommercialDashboard() {
                 {/* Quick Links */}
                 <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
                   <div className="glass-card p-6">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50 mb-3.5">Atalhos</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 mb-3.5">Atalhos</p>
                     <div className="grid grid-cols-2 gap-2.5">
                       {[
                         { icon: Package, label: "Estoque", route: "/dashboard/inventory" },
@@ -779,7 +794,7 @@ export default function CommercialDashboard() {
                 <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <h3 className="text-[16px] font-bold tracking-[-0.01em] text-foreground">Vendas</h3>
-                    <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-wider">6 meses</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-wider">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
                   </div>
                   <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -799,7 +814,7 @@ export default function CommercialDashboard() {
                 <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <h3 className="text-[16px] font-bold tracking-[-0.01em] text-foreground">Movimentação</h3>
-                    <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-wider">6 meses</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-wider">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
                   </div>
                   <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -820,7 +835,7 @@ export default function CommercialDashboard() {
                 <div className="glass-card p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <h3 className="text-[16px] font-bold tracking-[-0.01em] text-foreground">Saldo mensal</h3>
-                    <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-wider">net</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-wider">{isFiltered ? "recorte atual" : "net"}</span>
                   </div>
                   <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
