@@ -250,7 +250,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
     if (
       data.country || data.region || data.grape || data.food_pairing || data.tasting_notes ||
-      data.drink_from || data.drink_until || inferredDrinkWindow || (!isCommercial && !data.purchase_price)
+      data.drink_from || data.drink_until
     ) {
       setMoreOpen(true);
     }
