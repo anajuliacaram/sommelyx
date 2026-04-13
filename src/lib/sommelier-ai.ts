@@ -285,6 +285,7 @@ interface WineSpecificityContext {
   style?: string | null;
   vintage?: number | null;
   grape?: string | null;
+  dish?: string | null;
 }
 
 function normalizeForMatch(value?: string | number | null) {
@@ -332,6 +333,16 @@ function hasSpecificLabelContext(texts: string[], context?: WineSpecificityConte
   return countAnchorHits(combined, weak) >= 1;
 }
 
+function hasDishContext(text: string, dish?: string | null) {
+  if (!dish) return true;
+  const dishTokens = normalizeForMatch(dish).split(" ").filter((t) => t.length > 3);
+  const normalizedText = normalizeForMatch(text);
+  if (dishTokens.length === 0) {
+    return normalizedText.includes("prato") || normalizedText.includes("receita");
+  }
+  return dishTokens.some((token) => normalizedText.includes(token));
+}
+
 function isUserFacingAnalysisError(message: string) {
   return (
     message.startsWith("A análise não ficou específica o suficiente.") ||
@@ -376,6 +387,7 @@ function validateWineSpecificity(
       !hasGenericWineLanguage(item.reason) &&
       hasTechnicalWineLanguage(item.reason) &&
       !hasGenericWineLanguage(item.harmony_label) &&
+      hasDishContext(item.reason, resolvedContext?.dish ?? null) &&
       hasSpecificLabelContext(
         [item.reason, item.harmony_label, item?.wineName],
         {
@@ -574,143 +586,13 @@ function buildCellarReason(w: WineSummary, dish: string, harmonyType: string): s
   return parts.join(" ");
 }
 
-function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): WineSuggestion[] {
-  const lower = dish.toLowerCase();
-  const matchedRules = PAIRING_RULES.filter((r) => r.keywords.some((k) => lower.includes(k)));
-  const rules = matchedRules.length > 0 ? matchedRules : [
-    { keywords: [], styles: ["branco", "rosé", "tinto"], explanation: "Para pratos do dia a dia, vinhos versáteis de corpo leve a médio são seguros" },
-  ];
-
-  const matchedStyles = new Set(rules.flatMap((r) => r.styles));
-  const harmonyTypes = ["equilíbrio", "complemento", "contraste", "semelhança", "limpeza"] as const;
-  const harmonyLabels = ["peso proporcional", "aromas complementares", "opostos que equilibram", "texturas semelhantes", "paladar renovado"];
-  const compatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Funciona bem"];
-
-  if (cellarWines?.length) {
-    const cellarMatches = cellarWines.filter(
-      (w) => w.style && matchedStyles.has(w.style.toLowerCase()),
-    );
-
-    if (cellarMatches.length > 0) {
-      const seen = new Set<string>();
-      const unique = cellarMatches.filter(w => {
-        if (seen.has(w.name)) return false;
-        seen.add(w.name);
-        return true;
-      });
-      return unique.slice(0, 5).map((w, i) => ({
-        wineName: w.name,
-        style: w.style || "tinto",
-        grape: w.grape || undefined,
-        vintage: w.vintage || undefined,
-        region: w.region || undefined,
-        country: w.country || undefined,
-        reason: buildCellarReason(w, dish, harmonyTypes[i % 5]),
-        fromCellar: true,
-        match: i === 0 ? "muito bom" : "bom",
-        harmony_type: harmonyTypes[i % 5],
-        harmony_label: harmonyLabels[i % 5],
-        compatibilityLabel: compatLabels[i],
-      }));
-    }
-  }
-
-  const analysis = analyzeDish(dish);
-  const genericSuggestions: WineSuggestion[] = [];
-  const styleDetails: Record<string, { name: string; reason: string }> = {
-    tinto: { name: "Vinho tinto de corpo médio", reason: `Para "${dish}" (intensidade ${analysis.intensity}), um tinto de corpo médio oferece taninos suaves que ${analysis.protein === "ovo" ? "contrastam com a cremosidade do ovo" : analysis.fat === "alta" ? "equilibram a gordura da proteína" : "complementam os sabores sem dominar"}.` },
-    branco: { name: "Vinho branco seco", reason: `A acidez cítrica de um branco seco ${analysis.protein === "peixe" ? "realça a frescura do peixe sem competir" : `traz frescor e contraste para "${dish}"`}.` },
-    rosé: { name: "Vinho rosé seco", reason: `Um rosé seco oferece o equilíbrio ideal para "${dish}" — ${analysis.intensity === "leve" ? "sua delicadeza espelha a leveza do prato" : "corpo suficiente para acompanhar sem dominar"}.` },
-    espumante: { name: "Espumante brut", reason: `A perlage fina funciona como limpador natural do paladar entre cada garfada de "${dish}".` },
-    sobremesa: { name: "Vinho de sobremesa", reason: `A doçura residual equilibra e complementa os sabores de "${dish}".` },
-  };
-
-  for (const style of matchedStyles) {
-    const detail = styleDetails[style] || { name: `Vinho ${style}`, reason: `Sugestão clássica para "${dish}".` };
-    genericSuggestions.push({
-      wineName: detail.name,
-      style,
-      reason: detail.reason,
-      fromCellar: false,
-      match: genericSuggestions.length === 0 ? "muito bom" : "bom",
-      harmony_type: harmonyTypes[genericSuggestions.length % 5],
-      harmony_label: harmonyLabels[genericSuggestions.length % 5],
-      compatibilityLabel: compatLabels[genericSuggestions.length],
-    });
-    if (genericSuggestions.length >= 3) break;
-  }
-
-  while (genericSuggestions.length < 3) {
-    const idx = genericSuggestions.length;
-    const fallbacks = [
-      { name: "Vinho branco aromático", style: "branco", reason: `Para "${dish}", um branco aromático traz frescor e notas frutadas que complementam sem competir.` },
-      { name: "Rosé seco e fresco", style: "rosé", reason: `A versatilidade de um rosé seco se adapta naturalmente a "${dish}".` },
-      { name: "Espumante brut", style: "espumante", reason: `As bolhas finas limpam o paladar e adicionam frescor a qualquer refeição.` },
-    ];
-    const fb = fallbacks[idx] || fallbacks[0];
-    genericSuggestions.push({
-      wineName: fb.name,
-      style: fb.style,
-      reason: fb.reason,
-      fromCellar: false,
-      match: "bom",
-      harmony_type: harmonyTypes[idx % 5],
-      harmony_label: harmonyLabels[idx % 5],
-      compatibilityLabel: compatLabels[Math.min(idx, 3)],
-    });
-  }
-
-  return genericSuggestions;
+// Legacy fallback stubs retained for reference only. Never used as final output.
+function fallbackPairingsForDish(_dish: string, _cellarWines?: WineSummary[]): WineSuggestion[] {
+  return [];
 }
 
-function fallbackPairingsForWine(wine: { name?: string; style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }): PairingResult[] {
-  const style = (wine.style || "tinto").toLowerCase();
-  const name = wine.name || "Este vinho";
-  const grape = wine.grape || "";
-  const region = wine.region || "";
-  const producer = wine.producer || "";
-
-  const contextParts: string[] = [];
-  if (producer) contextParts.push(`produzido por ${producer}`);
-  if (grape) contextParts.push(`de ${grape}`);
-  if (region) contextParts.push(`da região de ${region}`);
-  const context = contextParts.length > 0 ? `${name}, ${contextParts.join(", ")},` : `${name}`;
-
-  const pairingMap: Record<string, PairingResult[]> = {
-    tinto: [
-      { dish: "Picanha na brasa com sal grosso", reason: `${context} tende a ter taninos que encontram na gordura intramuscular da picanha um parceiro natural — a proteína suaviza a adstringência enquanto o sal amplifica a percepção aromática.`, match: "perfeito", category: "classico", harmony_type: "equilíbrio", harmony_label: "gordura que suaviza taninos" },
-      { dish: "Risoto de cogumelos porcini", reason: `As notas terrosas dos cogumelos porcini dialogam com o perfil de ${context} — a manteiga do risoto envolve o vinho e a umami dos funghi amplifica a complexidade.`, match: "perfeito", category: "afinidade", harmony_type: "semelhança", harmony_label: "notas terrosas em sintonia" },
-      { dish: "Cordeiro assado com ervas e alho", reason: `A intensidade aromática do cordeiro pede a estrutura que ${context} oferece. Os taninos cortam a gordura natural da carne, renovando o paladar.`, match: "muito bom", category: "classico", harmony_type: "limpeza", harmony_label: "taninos que cortam gordura" },
-      { dish: "Ragu de carne com pappardelle", reason: `O cozimento longo do ragu concentra umami e gordura — ${context} funciona como contraponto com sua acidez, renovando o paladar entre garfadas.`, match: "muito bom", category: "classico", harmony_type: "contraste", harmony_label: "acidez vs untuosidade do molho" },
-      { dish: "Tábua de queijos maturados", reason: `A gordura e o sal dos queijos maturados neutralizam a adstringência dos taninos de ${context}, revelando camadas aromáticas mais sutis.`, match: "bom", category: "contraste", harmony_type: "complemento", harmony_label: "sal que revela fruta" },
-      { dish: "Berinjela à parmegiana gratinada", reason: `A textura macia da berinjela e a acidez do tomate criam uma base que acolhe ${context} sem competir — equilíbrio de peso e intensidade.`, match: "bom", category: "afinidade", harmony_type: "equilíbrio", harmony_label: "peso proporcional" },
-    ],
-    branco: [
-      { dish: "Salmão grelhado com molho de limão siciliano", reason: `A acidez mineral de ${context} espelha o limão do molho, enquanto sua textura realça a delicadeza do salmão sem mascará-la.`, match: "perfeito", category: "afinidade", harmony_type: "semelhança", harmony_label: "citricidade em sintonia" },
-      { dish: "Camarão ao alho e óleo com ervas frescas", reason: `O alho dourado e o azeite criam uma gordura sutil que a acidez de ${context} corta com precisão, renovando o paladar.`, match: "perfeito", category: "classico", harmony_type: "limpeza", harmony_label: "acidez que limpa o azeite" },
-      { dish: "Ceviche de peixe branco com coentro", reason: `A frescura ácida do ceviche encontra em ${context} um espelho de leveza e vivacidade — ambos trabalham na mesma frequência.`, match: "muito bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "frescor que se espelha" },
-      { dish: "Risoto de limão e ervas finas", reason: `A manteiga do risoto pede a acidez de ${context} para equilibrar, enquanto as ervas encontram complemento nos aromas do vinho.`, match: "muito bom", category: "contraste", harmony_type: "complemento", harmony_label: "ervas que se completam" },
-      { dish: "Frango ao molho de mostarda e estragão", reason: `A cremosidade do molho de mostarda encontra na acidez de ${context} um contraponto que equilibra sem dominar.`, match: "bom", category: "contraste", harmony_type: "contraste", harmony_label: "acidez vs cremosidade" },
-      { dish: "Salada de folhas com queijo de cabra e nozes", reason: `A acidez de ${context} liga os elementos: amargura das folhas, tanginess do queijo de cabra e oleosidade das nozes.`, match: "bom", category: "classico", harmony_type: "equilíbrio", harmony_label: "peso equilibrado" },
-    ],
-    rosé: [
-      { dish: "Salada mediterrânea com azeite e orégano", reason: `A leveza frutada de ${context} espelha a frescura dos vegetais, enquanto sua acidez corta o azeite sem competir.`, match: "perfeito", category: "classico", harmony_type: "semelhança", harmony_label: "frescor mediterrâneo" },
-      { dish: "Sushi variado com sashimi", reason: `A versatilidade de ${context} acompanha a variedade textural do sushi sem dominar nenhum elemento individual.`, match: "muito bom", category: "afinidade", harmony_type: "equilíbrio", harmony_label: "versatilidade textural" },
-      { dish: "Bruschetta de tomate fresco com manjericão", reason: `A acidez natural do tomate encontra em ${context} um parceiro de mesma intensidade — harmonia despretensiosa e precisa.`, match: "muito bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "acidez em sintonia" },
-      { dish: "Frango grelhado com limão e alcaparras", reason: `A proteína branca e o toque ácido das alcaparras pedem ${context} — corpo suficiente para acompanhar sem peso excessivo.`, match: "bom", category: "classico", harmony_type: "complemento", harmony_label: "leveza que complementa" },
-      { dish: "Pizza margherita com mozzarella fresca", reason: `A gordura da mozzarella e a acidez do tomate encontram em ${context} o equilíbrio entre frescor e substância.`, match: "bom", category: "contraste", harmony_type: "limpeza", harmony_label: "frescor que limpa gordura" },
-    ],
-    espumante: [
-      { dish: "Ostras frescas com limão", reason: `A salinidade mineral das ostras amplifica a perlage de ${context}, criando uma explosão de frescor — a acidez corta a cremosidade do molusco.`, match: "perfeito", category: "classico", harmony_type: "contraste", harmony_label: "bolhas que amplificam salinidade" },
-      { dish: "Salmão defumado com cream cheese e alcaparras", reason: `As bolhas de ${context} agem como micro-limpadores entre a gordura do salmão e a untuosidade do cream cheese.`, match: "perfeito", category: "classico", harmony_type: "limpeza", harmony_label: "perlage que renova o paladar" },
-      { dish: "Canapés de patê de foie gras", reason: `A riqueza concentrada do foie gras precisa da acidez vibrante e das bolhas de ${context} para não saturar o paladar.`, match: "muito bom", category: "classico", harmony_type: "contraste", harmony_label: "acidez vs riqueza" },
-      { dish: "Tempura de legumes com molho ponzu", reason: `A crocância da tempura e a leveza do ponzu encontram nas bolhas finas de ${context} um parceiro que adiciona textura sem peso.`, match: "muito bom", category: "afinidade", harmony_type: "complemento", harmony_label: "texturas que se complementam" },
-      { dish: "Frutas frescas com calda de maracujá", reason: `A acidez tropical do maracujá espelha a vivacidade de ${context}, criando uma sobremesa leve onde ambos se elevam.`, match: "bom", category: "afinidade", harmony_type: "semelhança", harmony_label: "acidez tropical em sintonia" },
-      { dish: "Risoto de açafrão com parmesão", reason: `O umami do parmesão e a elegância do açafrão pedem ${context} com corpo para acompanhar sem ser ofuscado.`, match: "bom", category: "contraste", harmony_type: "equilíbrio", harmony_label: "peso proporcional ao umami" },
-    ],
-  };
-
-  return pairingMap[style] || pairingMap["tinto"]!;
+function fallbackPairingsForWine(_wine: { name?: string; style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }): PairingResult[] {
+  return [];
 }
 
 // ── Validation helpers ──
@@ -808,12 +690,12 @@ export async function getDishWineSuggestions(
       { timeoutMs: 55_000, retries: 1 },
     );
     const data = await request();
-    if (isValidSuggestions(data) && validateWineSpecificity(data, "suggestions")) {
+    if (isValidSuggestions(data) && validateWineSpecificity(data, "suggestions", undefined, { dish })) {
       return data;
     }
 
     const retryData = await request().catch(() => null);
-    if (retryData && isValidSuggestions(retryData) && validateWineSpecificity(retryData, "suggestions")) {
+    if (retryData && isValidSuggestions(retryData) && validateWineSpecificity(retryData, "suggestions", undefined, { dish })) {
       return retryData;
     }
 

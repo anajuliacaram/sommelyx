@@ -123,6 +123,38 @@ function hasSpecificLabelContext(texts: string[], context?: SpecificityContext) 
   return countAnchorHits(combined, weak) >= 1;
 }
 
+const GENERIC_WINE_NAME_TOKENS = new Set([
+  "vinho",
+  "tinto",
+  "branco",
+  "rose",
+  "rosé",
+  "espumante",
+  "seco",
+  "seca",
+  "leve",
+  "medio",
+  "médio",
+  "encorpado",
+  "corpo",
+  "aromatico",
+  "aromático",
+  "fresco",
+  "brut",
+  "doce",
+  "suave",
+  "jovem",
+]);
+
+function isGenericWineName(name?: string | null) {
+  const normalized = normalizeForMatch(name);
+  if (!normalized) return true;
+  const tokens = normalized.split(" ").filter(Boolean);
+  if (tokens.length === 0) return true;
+  const nonGeneric = tokens.filter((token) => !GENERIC_WINE_NAME_TOKENS.has(token));
+  return nonGeneric.length === 0;
+}
+
 function validateWineSpecificity(
   texts: string[],
   wineName: string,
@@ -751,6 +783,10 @@ INSTRUÇÕES:
           validationResult.failures.push(`Expected 3-5 suggestions, received ${suggestions.length}`);
         }
         for (const s of suggestions) {
+          const hasConcreteRef = Boolean(s.region || s.country || s.grape || s.vintage);
+          if (!hasCellar && isGenericWineName(s.wineName) && !hasConcreteRef) {
+            validationResult.failures.push(`Generic wine type without concrete reference: ${s.wineName || "vinho"}`);
+          }
           const v = validateWineSpecificity([s.reason], s.wineName || "", s.grape, {
             wineName: s.wineName,
             producer: null,
@@ -774,7 +810,8 @@ INSTRUÇÕES:
               grape: s.grape ?? null,
             }) &&
             (typeof s.compatibilityLabel === "string" && ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"].includes(s.compatibilityLabel)) &&
-            typeof s.fromCellar === "boolean";
+            typeof s.fromCellar === "boolean" &&
+            (hasCellar || !isGenericWineName(s.wineName) || hasConcreteRef);
           allPassed.push(ok);
           if (!ok) validationResult.failures.push(...v.failures);
           if (typeof s.reason === "string" && (s.reason.trim().length < 55 || !hasTechnicalLanguage(s.reason))) {
