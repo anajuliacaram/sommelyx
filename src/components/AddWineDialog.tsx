@@ -170,6 +170,16 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (open && isCommercial) setMoreOpen(true);
   }, [open, isCommercial]);
 
+  // Auto-estimate current market value when wine details change
+  useEffect(() => {
+    if (!name.trim()) return;
+    const estimated = suggestPurchasePrice({
+      name, producer, vintage: vintage ? parseInt(vintage) : null,
+      style, country, region, grape,
+    });
+    setCurrentValue(String(estimated));
+  }, [name, producer, vintage, style, country, region, grape]);
+
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
