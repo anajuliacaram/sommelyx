@@ -43,6 +43,7 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
   const [insights, setInsights] = useState<Record<string, WineInsight>>({});
   const [loadingInsight, setLoadingInsight] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
   const alerts = useMemo(() => {
     if (!wines) return [];
@@ -105,10 +106,12 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
 
   const hasAiSupport = (type: string) => type === "drink_now" || type === "past_peak";
 
+  const visibleAlerts = alerts.filter(a => !dismissedIds.has(a.id));
+
   const grouped = {
-    drink_now: alerts.filter(a => a.type === "drink_now"),
-    past_peak: alerts.filter(a => a.type === "past_peak"),
-    low_stock: alerts.filter(a => a.type === "low_stock"),
+    drink_now: visibleAlerts.filter(a => a.type === "drink_now"),
+    past_peak: visibleAlerts.filter(a => a.type === "past_peak"),
+    low_stock: visibleAlerts.filter(a => a.type === "low_stock"),
   };
 
   const labels: Record<string, string> = { drink_now: "Beber agora", past_peak: "Passando do pico", low_stock: "Estoque baixo" };
@@ -124,13 +127,22 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
             </div>
             <div>
               <SheetTitle className="text-base font-serif font-bold">Alertas</SheetTitle>
-              <p className="text-[11px] text-muted-foreground">{alerts.length} ativo{alerts.length !== 1 ? "s" : ""}</p>
+              <p className="text-[11px] text-muted-foreground">{visibleAlerts.length} ativo{visibleAlerts.length !== 1 ? "s" : ""}</p>
             </div>
           </div>
+          {visibleAlerts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setDismissedIds(new Set(alerts.map(a => a.id)))}
+              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted/20"
+            >
+              Limpar tudo
+            </button>
+          )}
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-          {alerts.length === 0 ? (
+          {visibleAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <div className="w-12 h-12 rounded-2xl bg-success/8 flex items-center justify-center mb-3">
                 <Wine className="h-5 w-5 text-success" />
@@ -181,6 +193,14 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
                         <Badge variant="outline" className={cn("text-[9px] h-5 shrink-0 border-0", a.bg, a.tone)}>
                           {a.title}
                         </Badge>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setDismissedIds(prev => new Set(prev).add(a.id)); }}
+                          className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 text-muted-foreground/40 hover:text-foreground hover:bg-muted/30 transition-colors"
+                          title="Dispensar"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
                       </div>
 
                       <AnimatePresence>
