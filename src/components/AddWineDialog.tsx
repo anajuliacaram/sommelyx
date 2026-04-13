@@ -142,6 +142,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [grape, setGrape] = useState("");
   const [lastPaid, setLastPaid] = useState("");
   const [lastPaidDate, setLastPaidDate] = useState(new Date().toISOString().split("T")[0]);
+  const [noPriceInfo, setNoPriceInfo] = useState(false);
   const [currentValue, setCurrentValue] = useState("");
   const [location, setLocation] = useState<StructuredLocation>({});
   const [drinkFrom, setDrinkFrom] = useState("");
