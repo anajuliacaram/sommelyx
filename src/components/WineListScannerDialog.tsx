@@ -428,12 +428,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-3 pt-5"
+              className="space-y-3 pt-3"
             >
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#888" }}>
-                  {filteredWines.length} vinho{filteredWines.length !== 1 ? "s" : ""}{filterMode !== "all" ? ` (${filterMode})` : ""}
-                </p>
+                <SectionHeader icon="wine" label={`${filteredWines.length} vinho${filteredWines.length !== 1 ? "s" : ""}${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
                 <Button variant="ghost" size="sm" onClick={reset} className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground">
                   <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
                 </Button>
