@@ -350,6 +350,68 @@ function isUserFacingAnalysisError(message: string) {
   );
 }
 
+function isValidLenientMenu(data: any, wineName: string): boolean {
+  const dishes = Array.isArray(data?.dishes) ? data.dishes : [];
+  if (dishes.length < 3) return false;
+  return dishes.every((item: any) =>
+    typeof item?.name === "string" &&
+    item.name.trim().length > 0 &&
+    typeof item?.reason === "string" &&
+    item.reason.trim().length >= 35 &&
+    !hasGenericWineLanguage(item.reason) &&
+    hasTechnicalWineLanguage(item.reason) &&
+    hasSpecificLabelContext([item.reason, data?.summary], { wineName }),
+  );
+}
+
+function isValidLenientWineList(data: any): boolean {
+  const wines = Array.isArray(data?.wines) ? data.wines : [];
+  if (wines.length < 3) return false;
+  return wines.every((item: any) => {
+    const itemContext = {
+      wineName: item.name,
+      producer: item.producer ?? null,
+      region: item.region ?? null,
+      country: item.country ?? null,
+      style: item.style ?? null,
+      vintage: item.vintage ?? null,
+      grape: item.grape ?? null,
+    };
+
+    const reasoning = typeof item?.reasoning === "string" ? item.reasoning.trim() : "";
+    const description = typeof item?.description === "string" ? item.description.trim() : "";
+    const hasCoreText = (reasoning.length >= 60 || description.length >= 60) &&
+      hasTechnicalWineLanguage(reasoning || description) &&
+      !hasGenericWineLanguage(reasoning || description) &&
+      hasSpecificLabelContext([reasoning, description, item?.verdict], itemContext);
+
+    const pairings = Array.isArray(item?.pairings) ? item.pairings : [];
+    const pairingsOk = pairings.length >= 2 && pairings.every((pairing: any) =>
+      typeof pairing?.dish === "string" &&
+      typeof pairing?.why === "string" &&
+      pairing.dish.trim().length > 0 &&
+      pairing.why.trim().length >= 20 &&
+      hasTechnicalWineLanguage(pairing.why) &&
+      !hasGenericWineLanguage(pairing.why) &&
+      hasSpecificLabelContext([pairing.why, pairing.dish], itemContext)
+    );
+
+    const compatOk = typeof item?.compatibilityLabel === "string" &&
+      ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"].includes(item.compatibilityLabel);
+
+    const labelsOk = Array.isArray(item?.comparativeLabels) && item.comparativeLabels.length >= 1;
+
+    return (
+      typeof item?.name === "string" &&
+      item.name.trim().length > 0 &&
+      hasCoreText &&
+      pairingsOk &&
+      compatOk &&
+      labelsOk
+    );
+  });
+}
+
 function validateWineSpecificity(
   data: any,
   kind: "pairings" | "suggestions" | "wineList" | "menu" | "insight",
@@ -733,6 +795,8 @@ export async function analyzeWineList(
     if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0 && validateWineSpecificity(retryData, "wineList")) {
       return retryData;
     }
+    if (data && isValidLenientWineList(data)) return data;
+    if (retryData && isValidLenientWineList(retryData)) return retryData;
     throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
@@ -762,6 +826,8 @@ export async function analyzeMenuForWine(
     if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0 && validateWineSpecificity(retryData, "menu", { wineName })) {
       return retryData;
     }
+    if (data && isValidLenientMenu(data, wineName)) return data;
+    if (retryData && isValidLenientMenu(retryData, wineName)) return retryData;
     throw new Error("A análise do cardápio não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {

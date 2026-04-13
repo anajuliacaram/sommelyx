@@ -208,6 +208,70 @@ function hasComparativeLanguage(text?: string | null) {
   return COMPARATIVE_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+function isLenientMenuAnalysis(data: any, wineName?: string | null): boolean {
+  const dishes = Array.isArray(data?.dishes) ? data.dishes : [];
+  if (dishes.length < 3) return false;
+  return dishes.every((item: any) =>
+    typeof item?.name === "string" &&
+    item.name.trim().length > 0 &&
+    typeof item?.reason === "string" &&
+    item.reason.trim().length >= 35 &&
+    !hasGenericWineLanguage(item.reason) &&
+    hasTechnicalLanguage(item.reason) &&
+    hasSpecificLabelContext([item.reason, data?.summary], { wineName: wineName || "" }),
+  );
+}
+
+function isLenientWineListAnalysis(data: any): boolean {
+  const wines = Array.isArray(data?.wines) ? data.wines : [];
+  if (wines.length < 3) return false;
+  return wines.every((w: any) => {
+    const reasoning = typeof w?.reasoning === "string" ? w.reasoning.trim() : "";
+    const description = typeof w?.description === "string" ? w.description.trim() : "";
+    const coreText = reasoning || description;
+    const itemContext = {
+      wineName: w.name,
+      producer: w.producer ?? null,
+      region: w.region ?? null,
+      country: (w as any).country ?? null,
+      style: w.style ?? null,
+      vintage: w.vintage ?? null,
+      grape: w.grape ?? null,
+    };
+    const hasCoreText = coreText.length >= 60 &&
+      hasTechnicalLanguage(coreText) &&
+      !hasGenericWineLanguage(coreText) &&
+      hasSpecificLabelContext([coreText, w?.verdict], itemContext);
+
+    const pairings = Array.isArray(w?.pairings) ? w.pairings : [];
+    const pairingsOk = pairings.length >= 2 && pairings.every((pairing: any) => {
+      const why = typeof pairing?.why === "string" ? pairing.why : "";
+      return (
+        typeof pairing?.dish === "string" &&
+        pairing.dish.trim().length > 0 &&
+        why.trim().length >= 20 &&
+        hasTechnicalLanguage(why) &&
+        !hasGenericWineLanguage(why) &&
+        hasSpecificLabelContext([why, pairing.dish], itemContext)
+      );
+    });
+
+    const compatOk = typeof w?.compatibilityLabel === "string" &&
+      ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"].includes(w.compatibilityLabel);
+
+    const labelsOk = Array.isArray(w?.comparativeLabels) && w.comparativeLabels.length >= 1;
+
+    return (
+      typeof w?.name === "string" &&
+      w.name.trim().length > 0 &&
+      hasCoreText &&
+      pairingsOk &&
+      compatOk &&
+      labelsOk
+    );
+  });
+}
+
 function extractToolArguments(aiData: any) {
   const toolCallArgs = aiData?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (typeof toolCallArgs === "string" && toolCallArgs.trim()) return JSON.parse(toolCallArgs);
@@ -641,7 +705,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       const timeout = setTimeout(() => controller.abort(), 90_000);
 
       const retryHint = attempt > 0
-        ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre cada rótulo. Cite nomes dos vinhos, mencione produtores/regiões/posicionamento.`
+        ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre cada rótulo. Cite nomes dos vinhos, mencione produtores/regiões/posicionamento. Mesmo com leitura parcial, devolva a melhor análise possível mantendo a estrutura.`
         : "";
 
       const messagesForAI = [
@@ -705,6 +769,9 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           }
           validationResult.passed = false;
         }
+        if (!validationResult.passed && isLenientMenuAnalysis(lastParsed, wineName || "")) {
+          validationResult.passed = true;
+        }
       } else {
         for (const w of (lastParsed.wines || [])) {
           if (w.description) textsToValidate.push(w.description);
@@ -762,6 +829,9 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           }
         }
         validationResult.passed = allPassed.length > 0 && allPassed.every(Boolean);
+        if (!validationResult.passed && isLenientWineListAnalysis(lastParsed)) {
+          validationResult.passed = true;
+        }
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
