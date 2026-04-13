@@ -601,19 +601,19 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-4"
               >
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
-                    Qual vinho da sua adega?
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+                    {isCommercial ? "Qual vinho do estoque?" : "Qual vinho da sua adega?"}
                   </p>
 
                   {/* Search input */}
                   <div className="relative">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
                     <input
                       type="text"
                       value={wineSearch}
                       onChange={(e) => setWineSearch(e.target.value)}
-                      placeholder="Buscar vinho na sua adega..."
-                      className="flex h-12 w-full rounded-2xl border border-border/50 bg-background/60 pl-10 pr-4 py-2.5 text-[14px] font-medium text-foreground backdrop-blur-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-3 focus:ring-primary/[0.10] focus:border-primary/30 transition-all duration-200"
+                      placeholder={isCommercial ? "Buscar vinho no estoque..." : "Buscar vinho na sua adega..."}
+                      className="flex h-12 w-full rounded-2xl border border-white/15 bg-white/8 pl-10 pr-4 py-2.5 text-[14px] font-medium text-white backdrop-blur-sm placeholder:text-white/30 focus:outline-none focus:ring-3 focus:ring-white/10 focus:border-white/25 transition-all duration-200"
                       autoFocus
                     />
                   </div>
