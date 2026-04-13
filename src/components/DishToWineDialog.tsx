@@ -630,8 +630,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           className={cn(
                             "flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
                             active
-                              ? "bg-primary/10 text-primary border border-primary/20"
-                              : "bg-background/40 text-muted-foreground/60 border border-border/30 hover:bg-muted/30 hover:text-muted-foreground"
+                              ? "bg-white/15 text-white border border-white/25"
+                              : "bg-white/5 text-white/40 border border-white/8 hover:bg-white/10 hover:text-white/60"
                           )}
                         >
                           <Icon className="h-3 w-3" />
@@ -655,19 +655,22 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           className={cn(
                             "w-full text-left rounded-2xl p-3.5 transition-all duration-[160ms] ease-[cubic-bezier(0.22,1,0.36,1)] group",
                             isSelected
-                              ? "bg-primary/[0.08] border border-primary/20 shadow-[0_2px_12px_-4px_hsl(var(--primary)/0.12)]"
-                              : "bg-background/40 border border-border/25 hover:bg-muted/30 hover:border-border/40 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.08)] active:scale-[0.99]"
+                              ? "border border-white/25 shadow-[0_2px_12px_-4px_rgba(255,255,255,0.08)]"
+                              : "border border-white/8 hover:border-white/15 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.15)] active:scale-[0.99]"
                           )}
+                          style={{
+                            background: isSelected ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)",
+                          }}
                         >
                           <div className="flex items-center gap-3">
                             <div className={cn(
                               "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-150",
-                              isSelected ? "bg-primary/15" : "bg-muted/30"
+                              isSelected ? "bg-white/15" : "bg-white/8"
                             )}>
                               {isSelected ? (
-                                <Check className="h-4 w-4 text-primary" />
+                                <Check className="h-4 w-4 text-white" />
                               ) : (
-                                <Wine className="h-4 w-4 text-muted-foreground/50" />
+                                <Wine className="h-4 w-4 text-white/40" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
