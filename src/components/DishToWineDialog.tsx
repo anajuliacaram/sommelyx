@@ -1185,43 +1185,15 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-3"
               >
                 {selectedWine && (
-                  <div className="glass-card p-4 space-y-2">
-                    <p className="text-[15px] font-bold text-foreground tracking-tight">{selectedWine.name}</p>
-                    <p className="text-[12px] text-foreground/55">
-                      {[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
-                    </p>
-                    {wineProfile && (wineProfile.body || wineProfile.summary) && (
-                      <div className="space-y-1.5 pt-1">
-                        {wineProfile.summary && (
-                          <p className="text-[12px] text-foreground/60 leading-relaxed italic">{wineProfile.summary}</p>
-                        )}
-                        {pairingLogic && (
-                          <div className="rounded-xl border border-primary/10 bg-primary/[0.03] p-3">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70 mb-1">
-                              Lógica da harmonização
-                            </p>
-                            <p className="text-[12px] text-foreground/65 leading-relaxed">
-                              {pairingLogic}
-                            </p>
-                          </div>
-                        )}
-                        <div className="flex flex-wrap gap-1.5">
-                          {wineProfile.body && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Corpo {wineProfile.body}</span>}
-                          {wineProfile.acidity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Acidez {wineProfile.acidity}</span>}
-                          {wineProfile.tannin && wineProfile.tannin !== "n/a" && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Taninos {wineProfile.tannin}</span>}
-                          {wineProfile.complexity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{wineProfile.complexity}</span>}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <WineProfileCard
+                    title={selectedWine.name}
+                    subtitle={[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
+                    profile={wineProfile}
+                    pairingLogic={pairingLogic}
+                  />
                 )}
 
-                <div className="flex items-center gap-2 pb-2">
-                  <ChefHat className="h-4 w-4 text-primary/70" />
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Pratos sugeridos
-                  </span>
-                </div>
+                <SectionHeader icon="chef" label="Pratos sugeridos" />
 
                 {pairings.length === 0 ? (
                   <div className="glass-card p-6 text-center space-y-2">
