@@ -88,9 +88,9 @@ const styleOptions = [
 ];
 
 const drinkWindowOptions = [
-  { value: "now", label: "Beber agora" },
-  { value: "young", label: "Jovem" },
-  { value: "past", label: "Passou" },
+  { value: "now", label: "Pronto para beber" },
+  { value: "young", label: "Pode estar muito jovem" },
+  { value: "past", label: "Pode ter passado do pico" },
 ];
 
 type CellarWineGroup = WineType & {
@@ -172,10 +172,20 @@ export default function CellarPage() {
     wines.forEach(w => { const s = drinkStatus(w); if (s) dwMap[s] = (dwMap[s] || 0) + w.quantity; });
     const drinkWindows = drinkWindowOptions.map(d => ({ ...d, count: dwMap[d.value] || 0 }));
 
-    // Count wines per vintage
+    // Count wines per vintage (include "Sem safra")
     const vintageMap: Record<string, number> = {};
-    wines.forEach(w => { if (w.vintage) vintageMap[String(w.vintage)] = (vintageMap[String(w.vintage)] || 0) + w.quantity; });
-    const vintageOptions = Object.entries(vintageMap).sort(([a], [b]) => Number(b) - Number(a)).map(([v, c]) => ({ value: v, label: v, count: c }));
+    let noVintageCount = 0;
+    wines.forEach(w => {
+      if (w.vintage) {
+        vintageMap[String(w.vintage)] = (vintageMap[String(w.vintage)] || 0) + w.quantity;
+      } else {
+        noVintageCount += w.quantity;
+      }
+    });
+    const vintageOptions = [
+      ...(noVintageCount > 0 ? [{ value: "sem-safra", label: "Sem safra", count: noVintageCount }] : []),
+      ...Object.entries(vintageMap).sort(([a], [b]) => Number(b) - Number(a)).map(([v, c]) => ({ value: v, label: v, count: c })),
+    ];
     
     const prices = wines.map(w => w.purchase_price ?? 0).filter(p => p > 0);
     const maxPrice = prices.length > 0 ? Math.ceil(Math.max(...prices) / 100) * 100 : 5000;
@@ -267,7 +277,10 @@ export default function CellarPage() {
     if (selectedStyles.length > 0) list = list.filter(w => w.style && selectedStyles.includes(w.style));
     if (selectedCountries.length > 0) list = list.filter(w => w.country && selectedCountries.includes(w.country));
     if (selectedGrapes.length > 0) list = list.filter(w => w.grape && selectedGrapes.includes(w.grape));
-    if (selectedVintages.length > 0) list = list.filter(w => w.vintage && selectedVintages.includes(String(w.vintage)));
+    if (selectedVintages.length > 0) list = list.filter(w => {
+      if (selectedVintages.includes("sem-safra") && !w.vintage) return true;
+      return w.vintage && selectedVintages.includes(String(w.vintage));
+    });
     if (vintageActive) list = list.filter(w => w.vintage && w.vintage >= vintageRange[0] && w.vintage <= vintageRange[1]);
     if (priceActive) list = list.filter(w => {
       const price = w.purchase_price ?? 0;
