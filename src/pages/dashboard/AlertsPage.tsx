@@ -220,6 +220,14 @@ export default function AlertsPage() {
                           <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0", a.bg, a.tone)}>
                             {a.title}
                           </span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setDismissedIds(prev => new Set(prev).add(a.id)); }}
+                            className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 text-muted-foreground/40 hover:text-foreground hover:bg-muted/30 transition-colors"
+                            title="Dispensar"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                           <ArrowRight className="h-3 w-3 text-muted-foreground/30 shrink-0 group-hover:text-muted-foreground transition-colors" />
                         </div>
 
