@@ -345,6 +345,8 @@ function validateWineSpecificity(
   context?: WineSpecificityContext | string,
   extraContext?: WineSpecificityContext,
 ): boolean {
+  const resolvedContext: WineSpecificityContext | undefined =
+    extraContext ?? (typeof context === "object" ? context : context ? { wineName: context } : undefined);
   if (!data || typeof data !== "object") return false;
 
   if (kind === "pairings") {
