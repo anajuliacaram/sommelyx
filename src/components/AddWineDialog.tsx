@@ -156,6 +156,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [success, setSuccess] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [importCsvOpen, setImportCsvOpen] = useState(false);
+  const [estimating, setEstimating] = useState(false);
+  const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
+  const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const addWine = useAddWine();
   const createLocation = useCreateWineLocation();
@@ -171,15 +174,49 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (open && isCommercial) setMoreOpen(true);
   }, [open, isCommercial]);
 
-  // Auto-estimate current market value when wine details change
+  // Debounced AI price estimation
+  const fetchEstimate = useCallback(async (n: string, p: string, v: string, s: string, c: string, r: string, g: string) => {
+    if (!n.trim()) return;
+    setEstimating(true);
+    setEstimateConfidence(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("estimate-wine-price", {
+        body: {
+          name: n.trim(),
+          producer: p || null,
+          vintage: v ? parseInt(v) : null,
+          style: s || null,
+          country: c || null,
+          region: r || null,
+          grape: g || null,
+        },
+      });
+      if (!error && data?.estimated_price) {
+        setCurrentValue(String(data.estimated_price));
+        setEstimateConfidence(data.confidence || "media");
+      } else {
+        // Fallback to heuristic
+        const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
+        setCurrentValue(String(fallback));
+        setEstimateConfidence(null);
+      }
+    } catch {
+      const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
+      setCurrentValue(String(fallback));
+      setEstimateConfidence(null);
+    } finally {
+      setEstimating(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!name.trim()) return;
-    const estimated = suggestPurchasePrice({
-      name, producer, vintage: vintage ? parseInt(vintage) : null,
-      style, country, region, grape,
-    });
-    setCurrentValue(String(estimated));
-  }, [name, producer, vintage, style, country, region, grape]);
+    if (estimateTimer.current) clearTimeout(estimateTimer.current);
+    estimateTimer.current = setTimeout(() => {
+      fetchEstimate(name, producer, vintage, style, country, region, grape);
+    }, 1200);
+    return () => { if (estimateTimer.current) clearTimeout(estimateTimer.current); };
+  }, [name, producer, vintage, style, country, region, grape, fetchEstimate]);
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
