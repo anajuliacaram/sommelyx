@@ -213,7 +213,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card border-border/50">
         <SheetHeader>
           <SheetTitle className="font-serif text-lg">Escanear Rótulo</SheetTitle>
         </SheetHeader>
