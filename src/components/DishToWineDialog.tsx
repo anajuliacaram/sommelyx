@@ -1395,11 +1395,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 </div>
 
                 {scanResults.wines.length === 0 ? (
-                  <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }} space-y-2">
-                    <p className="text-sm text-foreground/70 font-medium">
+                  <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    <p className="text-sm text-white/60 font-medium">
                       Não foi possível identificar vinhos na imagem.
                     </p>
-                    <p className="text-xs text-muted-foreground">Tente outra foto com melhor iluminação.</p>
+                    <p className="text-xs text-white/35">Tente outra foto com melhor iluminação.</p>
                   </div>
                 ) : (
                   <ul className="space-y-3">
