@@ -106,10 +106,12 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
 
   const hasAiSupport = (type: string) => type === "drink_now" || type === "past_peak";
 
+  const visibleAlerts = alerts.filter(a => !dismissedIds.has(a.id));
+
   const grouped = {
-    drink_now: alerts.filter(a => a.type === "drink_now"),
-    past_peak: alerts.filter(a => a.type === "past_peak"),
-    low_stock: alerts.filter(a => a.type === "low_stock"),
+    drink_now: visibleAlerts.filter(a => a.type === "drink_now"),
+    past_peak: visibleAlerts.filter(a => a.type === "past_peak"),
+    low_stock: visibleAlerts.filter(a => a.type === "low_stock"),
   };
 
   const labels: Record<string, string> = { drink_now: "Beber agora", past_peak: "Passando do pico", low_stock: "Estoque baixo" };
