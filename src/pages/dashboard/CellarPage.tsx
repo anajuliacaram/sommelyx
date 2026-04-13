@@ -157,10 +157,17 @@ export default function CellarPage() {
     wines.forEach(w => { if (w.country) countryMap[w.country] = (countryMap[w.country] || 0) + w.quantity; });
     const countries = Object.entries(countryMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c }));
     
-    // Count wines per grape
+    // Count wines per grape (add "Blend" for wines without a grape)
     const grapeMap: Record<string, number> = {};
-    wines.forEach(w => { if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity; });
-    const grapes = Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c }));
+    let noGrapeCount = 0;
+    wines.forEach(w => {
+      if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity;
+      else noGrapeCount += w.quantity;
+    });
+    const grapes = [
+      ...(noGrapeCount > 0 ? [{ value: "blend", label: "Blend", count: noGrapeCount }] : []),
+      ...Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c })),
+    ];
     
     // Count wines per style
     const styleMap: Record<string, number> = {};
@@ -276,7 +283,10 @@ export default function CellarPage() {
     }
     if (selectedStyles.length > 0) list = list.filter(w => w.style && selectedStyles.includes(w.style));
     if (selectedCountries.length > 0) list = list.filter(w => w.country && selectedCountries.includes(w.country));
-    if (selectedGrapes.length > 0) list = list.filter(w => w.grape && selectedGrapes.includes(w.grape));
+    if (selectedGrapes.length > 0) list = list.filter(w => {
+      if (selectedGrapes.includes("blend") && !w.grape) return true;
+      return w.grape && selectedGrapes.includes(w.grape);
+    });
     if (selectedVintages.length > 0) list = list.filter(w => {
       if (selectedVintages.includes("sem-safra") && !w.vintage) return true;
       return w.vintage && selectedVintages.includes(String(w.vintage));
@@ -406,24 +416,24 @@ export default function CellarPage() {
                 size="sm"
                 onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
                  className={cn(
-                   "h-[30px] px-3.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 border transition-all duration-200 hover:-translate-y-[1px]",
+                   "h-[30px] px-3.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 border transition-all duration-200",
                    lowStock
-                     ? "bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.22)] shadow-[0_2px_10px_-3px_hsl(var(--wine)/0.18),inset_0_1px_0_rgba(255,255,255,0.15)] backdrop-blur-lg"
-                     : "bg-white/70 backdrop-blur-lg hover:bg-white/90 border-white/40 text-[hsl(var(--wine)/0.50)] hover:text-[hsl(var(--wine)/0.85)] shadow-[0_1px_4px_-1px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.5)] hover:shadow-[0_3px_10px_-3px_hsl(var(--wine)/0.10),inset_0_1px_0_rgba(255,255,255,0.6)]"
+                     ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
+                     : "bg-white text-foreground/80 border-border/60 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
                  )}
               >
                 Baixo estoque
               </Button>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="hidden sm:flex rounded-full p-[2px] bg-white/65 backdrop-blur-lg border border-white/40 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.5)]">
+              <div className="hidden sm:flex rounded-full p-[2px] bg-white border border-border/50 shadow-sm">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   aria-pressed={viewMode === "grid"}
                   onClick={() => setViewMode("grid")}
-                  className={cn("h-7 w-7 rounded-full transition-all duration-150", viewMode === "grid" ? "bg-white shadow-sm text-[hsl(var(--wine))] hover:bg-white" : "text-[hsl(var(--wine)/0.35)] hover:text-[hsl(var(--wine)/0.65)]")}
+                  className={cn("h-7 w-7 rounded-full transition-all duration-150", viewMode === "grid" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-foreground/50 hover:text-foreground/80")}
                 >
                   <LayoutGrid className="h-3.5 w-3.5" />
                 </Button>
@@ -433,7 +443,7 @@ export default function CellarPage() {
                   size="icon"
                   aria-pressed={viewMode === "list"}
                   onClick={() => setViewMode("list")}
-                  className={cn("h-7 w-7 rounded-full transition-all duration-150", viewMode === "list" ? "bg-white shadow-sm text-[hsl(var(--wine))] hover:bg-white" : "text-[hsl(var(--wine)/0.35)] hover:text-[hsl(var(--wine)/0.65)]")}
+                  className={cn("h-7 w-7 rounded-full transition-all duration-150", viewMode === "list" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-foreground/50 hover:text-foreground/80")}
                 >
                   <List className="h-3.5 w-3.5" />
                 </Button>
@@ -441,7 +451,7 @@ export default function CellarPage() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                className="h-[30px] px-3 pr-7 text-[11px] font-bold rounded-full bg-white/70 backdrop-blur-lg cursor-pointer border border-white/40 text-[hsl(var(--wine)/0.50)] shadow-[0_1px_4px_-1px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.5)] hover:bg-white/90 transition-all duration-200"
+                className="h-[30px] px-3 pr-7 text-[11px] font-bold rounded-full bg-white cursor-pointer border border-border/60 text-foreground/80 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border transition-all duration-200"
               >
                 <option value="drink">Prioridade</option>
                 <option value="drinkNow">Beber agora</option>
@@ -457,10 +467,10 @@ export default function CellarPage() {
 
           {/* Compact Range Sliders — inline on desktop, stacked on mobile */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-             <div className="rounded-2xl bg-white/55 backdrop-blur-lg border border-white/40 px-3.5 py-2.5 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.5)]">
+             <div className="rounded-2xl bg-white border border-border/40 px-3.5 py-2.5 shadow-sm">
                <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
              </div>
-             <div className="rounded-2xl bg-white/55 backdrop-blur-lg border border-white/40 px-3.5 py-2.5 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.5)]">
+             <div className="rounded-2xl bg-white border border-border/40 px-3.5 py-2.5 shadow-sm">
                <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
             </div>
           </div>
@@ -477,10 +487,10 @@ export default function CellarPage() {
             size="sm"
             onClick={() => applySavedFilter(f)}
             className={cn(
-              "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200 hover:-translate-y-[1px]",
+              "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
               activeSavedFilter === f.name
-                ? "bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.20)] shadow-[0_2px_8px_-3px_hsl(var(--wine)/0.15),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-lg"
-                : "bg-white/60 backdrop-blur-lg text-[hsl(var(--wine)/0.45)] border-white/35 hover:bg-white/85 hover:text-[hsl(var(--wine)/0.75)] shadow-[0_1px_3px_-1px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.4)]",
+                ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md"
+                : "bg-white text-foreground/70 border-border/50 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground",
             )}
           >
             {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3 opacity-40" />}
@@ -494,7 +504,7 @@ export default function CellarPage() {
         <div className="flex flex-wrap gap-2 items-center pt-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[28px] text-[11px] rounded-full group border-[hsl(var(--wine)/0.15)] bg-[hsl(var(--wine)/0.07)] text-[hsl(var(--wine))] font-bold shadow-[0_1px_4px_-2px_hsl(var(--wine)/0.10),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-md">
+            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[28px] text-[11px] rounded-full group border-[hsl(var(--wine)/0.30)] bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] font-bold shadow-sm">
               {chip.label}
               <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 hover:opacity-100 transition-opacity duration-150" onClick={chip.onRemove} />
             </Badge>

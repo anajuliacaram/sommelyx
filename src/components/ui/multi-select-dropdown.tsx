@@ -78,46 +78,49 @@ export function MultiSelectDropdown({
                     variant={hasSelection ? "secondary" : "outline"}
                     size="sm"
                     className={cn(
-                        "h-[30px] px-3.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 border transition-all duration-200 hover:-translate-y-[1px]",
+                        "h-[30px] px-3.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 border transition-all duration-200",
                         hasSelection
-                            ? "bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.22)] shadow-[0_2px_10px_-3px_hsl(var(--wine)/0.18),inset_0_1px_0_rgba(255,255,255,0.15)] backdrop-blur-lg"
-                            : "bg-white/70 backdrop-blur-lg hover:bg-white/90 border-white/40 text-[hsl(var(--wine)/0.50)] hover:text-[hsl(var(--wine)/0.85)] shadow-[0_1px_4px_-1px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.5)] hover:shadow-[0_3px_10px_-3px_hsl(var(--wine)/0.10),inset_0_1px_0_rgba(255,255,255,0.6)]"
+                            ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
+                            : "bg-white text-foreground/80 border-border/60 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
                     )}
                 >
                     <span className="truncate max-w-[80px]">{triggerLabel}</span>
-                    <ChevronDown className={cn("h-3 w-3 opacity-40 shrink-0 transition-transform duration-200", open && "rotate-180")} />
+                    <ChevronDown className={cn(
+                        "h-3 w-3 shrink-0 transition-transform duration-200",
+                        hasSelection ? "opacity-70" : "opacity-50",
+                        open && "rotate-180"
+                    )} />
                 </Button>
             </PopoverTrigger>
             <PopoverContent
                 side="bottom"
                 align="start"
                 sideOffset={6}
-                className="w-[250px] p-2.5 rounded-2xl shadow-[0_20px_60px_-15px_rgba(30,20,20,0.16),0_4px_12px_rgba(30,20,20,0.04)] bg-white/95 backdrop-blur-2xl border border-white/50"
+                className="w-[250px] p-2.5 rounded-2xl shadow-xl bg-white border border-border/40"
             >
                 <div className="flex flex-col gap-1.5">
-                    {/* Sort toggle + search */}
                     <div className="flex items-center gap-1.5 px-0.5 pt-0.5">
                         {showSearch && (
                             <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[hsl(var(--wine)/0.35)]" />
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
                                 <Input
                                     placeholder={searchPlaceholder}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="h-8 pl-8 rounded-xl bg-[hsl(var(--cream)/0.5)] border-[hsl(var(--border)/0.20)] text-[12px] text-foreground placeholder:text-[hsl(var(--wine)/0.25)] focus:border-[hsl(var(--wine)/0.25)] focus:ring-[hsl(var(--wine)/0.06)]"
+                                    className="h-8 pl-8 rounded-xl bg-[hsl(var(--cream))] border-border/30 text-[12px] text-foreground placeholder:text-muted-foreground/40 focus:border-[hsl(var(--wine)/0.40)] focus:ring-[hsl(var(--wine)/0.10)]"
                                 />
                             </div>
                         )}
                         {!showSearch ? <div className="flex-1" /> : null}
-                        <div className="flex rounded-xl bg-[hsl(var(--cream)/0.6)] p-0.5 shrink-0 border border-white/30">
+                        <div className="flex rounded-lg bg-[hsl(var(--cream))] p-0.5 shrink-0 border border-border/25">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setSortMode("alpha")}
                                 className={cn(
-                                    "h-7 w-7 rounded-lg transition-all duration-150",
-                                    sortMode === "alpha" ? "bg-white shadow-sm text-[hsl(var(--wine))]" : "text-[hsl(var(--wine)/0.35)] hover:text-[hsl(var(--wine)/0.65)]"
+                                    "h-7 w-7 rounded-md transition-all duration-150",
+                                    sortMode === "alpha" ? "bg-white shadow-sm text-[hsl(var(--wine))]" : "text-muted-foreground/50 hover:text-foreground/70"
                                 )}
                                 title="Ordem alfabética"
                             >
@@ -130,8 +133,8 @@ export function MultiSelectDropdown({
                                     size="icon"
                                     onClick={() => setSortMode("count")}
                                     className={cn(
-                                        "h-7 w-7 rounded-lg transition-all duration-150",
-                                        sortMode === "count" ? "bg-white shadow-sm text-[hsl(var(--wine))]" : "text-[hsl(var(--wine)/0.35)] hover:text-[hsl(var(--wine)/0.65)]"
+                                        "h-7 w-7 rounded-md transition-all duration-150",
+                                        sortMode === "count" ? "bg-white shadow-sm text-[hsl(var(--wine))]" : "text-muted-foreground/50 hover:text-foreground/70"
                                     )}
                                     title="Ordenar por quantidade"
                                 >
@@ -144,7 +147,7 @@ export function MultiSelectDropdown({
                     <ScrollArea className="max-h-[220px] px-0.5">
                         <div className="space-y-0.5">
                             {filteredOptions.length === 0 ? (
-                                <div className="p-3 text-center text-[12px] text-[hsl(var(--wine)/0.35)] font-medium">
+                                <div className="p-3 text-center text-[12px] text-muted-foreground/50 font-medium">
                                     Nenhum resultado
                                 </div>
                             ) : (
@@ -156,30 +159,32 @@ export function MultiSelectDropdown({
                                             className={cn(
                                                 "flex items-center gap-2.5 px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-150",
                                                 isChecked
-                                                    ? "bg-[hsl(var(--wine)/0.07)] text-[hsl(var(--wine))]"
-                                                    : "hover:bg-[hsl(var(--cream)/0.5)] text-foreground/75"
+                                                    ? "bg-[hsl(var(--wine)/0.08)] text-[hsl(var(--wine))]"
+                                                    : "hover:bg-[hsl(var(--cream))] text-foreground/80"
                                             )}
                                             onClick={() => onChange(opt.value)}
                                         >
                                             <Checkbox
                                                 checked={isChecked}
                                                 className={cn(
-                                                    "pointer-events-none rounded-md h-4 w-4 border-[hsl(var(--wine)/0.20)] transition-colors duration-150",
-                                                    isChecked && "border-[hsl(var(--wine))] bg-[hsl(var(--wine))] text-white"
+                                                    "pointer-events-none rounded-md h-4 w-4 transition-colors duration-150",
+                                                    isChecked
+                                                        ? "border-[hsl(var(--wine))] bg-[hsl(var(--wine))] text-white"
+                                                        : "border-border/60"
                                                 )}
                                             />
                                             <span className={cn(
-                                                "text-[12px] leading-none flex-1 mt-px truncate transition-all duration-150",
+                                                "text-[12px] leading-none flex-1 mt-px truncate",
                                                 isChecked ? "font-bold" : "font-medium"
                                             )}>
                                                 {opt.label}
                                             </span>
                                             {opt.count !== undefined && (
                                                 <span className={cn(
-                                                    "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[24px] text-center transition-colors duration-150",
+                                                    "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[24px] text-center",
                                                     isChecked
-                                                        ? "bg-[hsl(var(--wine)/0.12)] text-[hsl(var(--wine))]"
-                                                        : "bg-[hsl(var(--cream-dark)/0.35)] text-[hsl(var(--wine)/0.40)]"
+                                                        ? "bg-[hsl(var(--wine)/0.15)] text-[hsl(var(--wine))]"
+                                                        : "bg-muted/50 text-muted-foreground/60"
                                                 )}>
                                                     {opt.count}
                                                 </span>
@@ -192,10 +197,10 @@ export function MultiSelectDropdown({
                     </ScrollArea>
 
                     {hasSelection && (
-                        <div className="pt-1.5 mt-0.5 border-t border-[hsl(var(--wine)/0.08)] px-1 pb-0.5">
+                        <div className="pt-1.5 mt-0.5 border-t border-border/20 px-1 pb-0.5">
                             <Button
                                 variant="ghost"
-                                className="w-full h-7 text-[11px] font-bold text-[hsl(var(--wine)/0.60)] hover:text-[hsl(var(--wine))] hover:bg-[hsl(var(--wine)/0.05)] justify-center rounded-xl transition-all duration-150"
+                                className="w-full h-7 text-[11px] font-bold text-[hsl(var(--wine)/0.70)] hover:text-[hsl(var(--wine))] hover:bg-[hsl(var(--wine)/0.05)] justify-center rounded-xl transition-all duration-150"
                                 onClick={() => {
                                     onClear()
                                     setOpen(false)
