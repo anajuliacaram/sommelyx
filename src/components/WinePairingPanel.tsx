@@ -1,11 +1,20 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Loader2, Sparkles, ChevronDown, X, BookOpen } from "@/icons/lucide";
+import { UtensilsCrossed, Loader2, Sparkles, BookOpen } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { getWinePairings, type PairingResult, type WineProfile, type Recipe } from "@/lib/sommelier-ai";
-import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  MatchDot,
+  MatchLevelBadge,
+  HarmonyTag,
+  WineProfileChips,
+  DishProfilePills,
+  RecipeButton,
+  PremiumResultCard,
+  SectionHeader,
+} from "@/components/pairing/shared";
 
 interface WinePairingPanelProps {
   wineName: string;
@@ -16,26 +25,6 @@ interface WinePairingPanelProps {
   wineVintage?: number | null;
   existingPairing?: string | null;
 }
-
-const matchDot: Record<string, string> = {
-  perfeito: "bg-[hsl(152,42%,42%)]",
-  "muito bom": "bg-[hsl(152,32%,52%)]",
-  bom: "bg-[hsl(38,52%,50%)]",
-};
-
-const matchBadge: Record<string, { label: string; className: string }> = {
-  perfeito: { label: "Combinação perfeita", className: "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" },
-  "muito bom": { label: "Alta compatibilidade", className: "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" },
-  bom: { label: "Boa opção", className: "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" },
-};
-
-const harmonyLabel: Record<string, string> = {
-  contraste: "harmonia por contraste",
-  semelhança: "harmonia por semelhança",
-  complemento: "aromas complementares",
-  equilíbrio: "equilíbrio de intensidade",
-  limpeza: "limpeza de paladar",
-};
 
 function RecipeModal({ recipe, dishName, wineName, open, onOpenChange }: { recipe: Recipe; dishName: string; wineName: string; open: boolean; onOpenChange: (v: boolean) => void }) {
   return (
@@ -49,7 +38,6 @@ function RecipeModal({ recipe, dishName, wineName, open, onOpenChange }: { recip
             {recipe.description && (
               <p className="text-[13px] text-foreground/70 leading-relaxed italic">{recipe.description}</p>
             )}
-
             <div>
               <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Ingredientes</h4>
               <ul className="space-y-1">
@@ -61,7 +49,6 @@ function RecipeModal({ recipe, dishName, wineName, open, onOpenChange }: { recip
                 ))}
               </ul>
             </div>
-
             <div>
               <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Modo de preparo</h4>
               <ol className="space-y-2">
@@ -75,7 +62,6 @@ function RecipeModal({ recipe, dishName, wineName, open, onOpenChange }: { recip
                 ))}
               </ol>
             </div>
-
             <div className="rounded-xl bg-primary/5 border border-primary/10 p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Sparkles className="h-3 w-3 text-primary" />
@@ -153,13 +139,8 @@ export function WinePairingPanel({
   }
 
   return (
-    <div className="space-y-2.5">
-      <div className="flex items-center gap-1.5">
-        <UtensilsCrossed className="h-3.5 w-3.5 text-primary/70" />
-        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-          Harmoniza com
-        </span>
-      </div>
+    <div className="space-y-3">
+      <SectionHeader icon="chef" label="Harmoniza com" />
 
       <AnimatePresence mode="wait">
         {loading ? (
@@ -171,7 +152,7 @@ export function WinePairingPanel({
             className="flex items-center gap-2.5 py-4"
           >
             <Loader2 className="h-4 w-4 animate-spin text-primary/60" />
-            <span className="text-[12px] text-foreground/60">Analisando harmonizações…</span>
+            <span className="text-[12px] text-[#888]">Analisando harmonizações…</span>
           </motion.div>
         ) : error ? (
           <motion.div
@@ -200,124 +181,73 @@ export function WinePairingPanel({
           >
             {/* Wine Structure Section */}
             {wineProfile?.summary && (
-              <div className="rounded-xl border border-primary/10 bg-primary/[0.03] p-3 space-y-2">
+              <div
+                className="rounded-xl p-3.5 space-y-2"
+                style={{
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.48) 100%)",
+                  border: "1px solid rgba(255,255,255,0.50)",
+                  boxShadow: "0 2px 12px -6px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)",
+                }}
+              >
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="h-3 w-3 text-primary/60" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70">Estrutura do vinho</span>
                 </div>
-                <p className="text-[12px] text-foreground/70 leading-relaxed">{wineProfile.summary}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {wineProfile.body && (
-                    <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                      Corpo {wineProfile.body}
-                    </span>
-                  )}
-                  {wineProfile.acidity && (
-                    <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                      Acidez {wineProfile.acidity}
-                    </span>
-                  )}
-                  {wineProfile.tannin && wineProfile.tannin !== "n/a" && (
-                    <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                      Taninos {wineProfile.tannin}
-                    </span>
-                  )}
-                  {wineProfile.complexity && (
-                    <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                      {wineProfile.complexity}
-                    </span>
-                  )}
-                  {wineProfile.style && (
-                    <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-0.5 text-[9px] font-semibold text-primary/60">
-                      {wineProfile.style}
-                    </span>
-                  )}
-                </div>
+                <p className="text-[12px] text-[#555] leading-relaxed">{wineProfile.summary}</p>
+                <WineProfileChips profile={wineProfile} />
               </div>
             )}
+
             {pairingLogic && (
-              <div className="rounded-xl border border-border/30 bg-background/55 p-3 space-y-1.5">
+              <div
+                className="rounded-xl p-3.5 space-y-1.5"
+                style={{
+                  background: "rgba(255,255,255,0.45)",
+                  border: "1px solid rgba(255,255,255,0.40)",
+                }}
+              >
                 <div className="flex items-center gap-1.5">
                   <BookOpen className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Lógica da harmonização</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#888]">Lógica da harmonização</span>
                 </div>
-                <p className="text-[12px] text-foreground/70 leading-relaxed">{pairingLogic}</p>
+                <p className="text-[12px] text-[#666] leading-relaxed">{pairingLogic}</p>
               </div>
             )}
 
             {/* Pairing Cards */}
             <ul className="space-y-2.5">
-              {pairings.map((p, i) => {
-                const badge = matchBadge[p.match];
-                const hLabel = p.harmony_label || (p.harmony_type && harmonyLabel[p.harmony_type]);
-                return (
-                  <motion.li
-                    key={i}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.07, duration: 0.25 }}
-                    className="rounded-2xl border border-border/30 bg-card/60 p-3.5 space-y-1.5 transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
-                  >
-                    {/* Header: dish name + match badge */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("w-2 h-2 rounded-full shrink-0 ring-2 ring-white/50", matchDot[p.match] || "bg-primary/40")} />
-                        <span className="text-[13px] font-bold text-foreground">{p.dish}</span>
-                      </div>
-                      {badge && (
-                        <span className={cn("shrink-0 inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide", badge.className)}>
-                          {badge.label}
-                        </span>
-                      )}
+              {pairings.map((p, i) => (
+                <PremiumResultCard key={i} index={i}>
+                  {/* Header: dish name + match badge */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <MatchDot match={p.match} />
+                      <span className="text-[14px] font-bold text-[#1A1A1A] tracking-tight">{p.dish}</span>
                     </div>
+                    <MatchLevelBadge match={p.match} size="sm" />
+                  </div>
 
-                    {/* Harmony label */}
-                    {hLabel && (
-                      <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-[1px] text-[9px] font-semibold uppercase tracking-wider text-primary/70 ml-[16px]">
-                        {hLabel}
-                      </span>
-                    )}
+                  {/* Harmony label */}
+                  <div className="pl-[22px] flex items-center gap-2 flex-wrap">
+                    <HarmonyTag type={p.harmony_type} label={p.harmony_label} />
+                  </div>
 
-                    {/* Dish profile pills */}
-                    {p.dish_profile && (
-                      <div className="flex flex-wrap gap-1 pl-[16px]">
-                        {p.dish_profile.intensity && (
-                          <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">
-                            {p.dish_profile.intensity}
-                          </span>
-                        )}
-                        {p.dish_profile.texture && (
-                          <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">
-                            {p.dish_profile.texture}
-                          </span>
-                        )}
-                        {p.dish_profile.highlight && (
-                          <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">
-                            {p.dish_profile.highlight}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                  {/* Dish profile pills */}
+                  <div className="pl-[22px]">
+                    <DishProfilePills profile={p.dish_profile} />
+                  </div>
 
-                    {/* Explanation */}
-                    <p className="text-[11px] text-foreground/55 leading-snug pl-[16px]">{p.reason}</p>
+                  {/* Explanation */}
+                  <p className="text-[12.5px] text-[#555] leading-relaxed pl-[22px]">{p.reason}</p>
 
-                    {/* Recipe button */}
-                    {p.recipe && (
-                      <div className="pl-[16px]">
-                        <button
-                          type="button"
-                          onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })}
-                          className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
-                        >
-                          <BookOpen className="h-3 w-3" />
-                          Ver receita
-                        </button>
-                      </div>
-                    )}
-                  </motion.li>
-                );
-              })}
+                  {/* Recipe button */}
+                  {p.recipe && (
+                    <div className="pl-[22px]">
+                      <RecipeButton onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })} />
+                    </div>
+                  )}
+                </PremiumResultCard>
+              ))}
             </ul>
           </motion.div>
         ) : null}
