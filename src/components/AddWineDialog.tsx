@@ -16,6 +16,7 @@ import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { LocationFields } from "@/components/LocationFields";
 import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddWineDialogProps {
   open: boolean;
