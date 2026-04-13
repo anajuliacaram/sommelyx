@@ -124,29 +124,29 @@ export function AppSidebar() {
           {/* CTAs */}
           <div className="px-0 pb-1">
             {isCommercial ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
                 <Button
                   variant="primary"
-                  className="col-span-2 h-9 text-[11px] font-medium rounded-lg"
+                  className="w-full h-11 text-[14px] font-semibold rounded-2xl gap-1.5 px-4 shadow-[0_8px_20px_-12px_hsl(var(--wine)/0.35)] hover:shadow-[0_12px_24px_-12px_hsl(var(--wine)/0.4)]"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  <Plus className="h-[15px] w-[15px] shrink-0" />
                   Cadastrar produto
                 </Button>
                 <Button
-                  variant="outline"
-                  className="h-9 text-[11px] font-medium rounded-lg"
+                  variant="ghost"
+                  className="w-full h-11 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[14px] font-semibold text-[#2B2B2B] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-primary"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <ShoppingCart className="h-3.5 w-3.5 mr-1" />
-                  Venda
+                  <ShoppingCart className="h-[15px] w-[15px] shrink-0" />
+                  Registrar venda
                 </Button>
                 <Button
-                  variant="danger"
-                  className="h-9 text-[11px] font-medium rounded-lg"
+                  variant="ghost"
+                  className="w-full h-10 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[13.5px] font-semibold text-[#2B2B2B] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-destructive"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
-                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                  <AlertTriangle className="h-[15px] w-[15px] shrink-0" />
                   Ruptura
                 </Button>
               </div>
