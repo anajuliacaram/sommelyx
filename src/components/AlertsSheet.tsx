@@ -127,10 +127,10 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
             </div>
             <div>
               <SheetTitle className="text-base font-serif font-bold">Alertas</SheetTitle>
-              <p className="text-[11px] text-muted-foreground">{alerts.length} ativo{alerts.length !== 1 ? "s" : ""}</p>
+              <p className="text-[11px] text-muted-foreground">{visibleAlerts.length} ativo{visibleAlerts.length !== 1 ? "s" : ""}</p>
             </div>
           </div>
-          {alerts.length > 0 && (
+          {visibleAlerts.length > 0 && (
             <button
               type="button"
               onClick={() => setDismissedIds(new Set(alerts.map(a => a.id)))}
