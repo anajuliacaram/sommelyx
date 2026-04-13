@@ -99,10 +99,12 @@ export default {
         cream: {
           DEFAULT: "hsl(var(--cream))",
           dark: "hsl(var(--cream-dark))",
+          warm: "hsl(var(--cream-warm))",
         },
         forest: {
           DEFAULT: "hsl(var(--forest))",
           light: "hsl(var(--forest-light))",
+          muted: "hsl(var(--forest-muted))",
         },
         copper: {
           DEFAULT: "hsl(var(--copper))",
