@@ -405,18 +405,18 @@ export default function CellarPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
-                className={cn(
-                  "h-8 px-3 rounded-xl text-[11px] font-semibold flex items-center gap-1 border transition-all duration-200",
-                  lowStock
-                    ? "bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.20)] shadow-[0_2px_8px_-2px_hsl(var(--wine)/0.15)] backdrop-blur-md"
-                    : "bg-[hsl(var(--cream-dark)/0.55)] backdrop-blur-md hover:bg-[hsl(var(--cream-dark)/0.75)] border-[hsl(var(--border)/0.35)] text-[hsl(var(--wine)/0.70)] hover:text-[hsl(var(--wine))] shadow-[0_1px_4px_-1px_rgba(0,0,0,0.05)]"
-                )}
+                 className={cn(
+                   "h-8 px-3 rounded-xl text-[11px] font-semibold flex items-center gap-1 border transition-all duration-200",
+                   lowStock
+                     ? "bg-[hsl(var(--wine)/0.08)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.18)] shadow-[0_2px_8px_-2px_hsl(var(--wine)/0.12)] backdrop-blur-md"
+                     : "bg-white/60 backdrop-blur-md hover:bg-white/80 border-[hsl(var(--border)/0.25)] text-[hsl(var(--wine)/0.55)] hover:text-[hsl(var(--wine)/0.80)] shadow-[0_1px_3px_-1px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_6px_-2px_hsl(var(--wine)/0.08)]"
+                 )}
               >
                 Baixo estoque
               </Button>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="hidden sm:flex rounded-xl p-[2px] bg-[hsl(var(--cream-dark)/0.50)] backdrop-blur-md border border-[hsl(var(--border)/0.25)]">
+              <div className="hidden sm:flex rounded-xl p-[2px] bg-white/50 backdrop-blur-md border border-[hsl(var(--border)/0.20)]">
                 <Button
                   type="button"
                   variant="ghost"
@@ -441,7 +441,7 @@ export default function CellarPage() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                className="h-8 px-3 pr-7 text-[11px] font-semibold rounded-xl bg-[hsl(var(--cream-dark)/0.55)] backdrop-blur-md cursor-pointer border border-[hsl(var(--border)/0.35)] text-[hsl(var(--wine)/0.70)] shadow-[0_1px_4px_-1px_rgba(0,0,0,0.05)]"
+                className="h-8 px-3 pr-7 text-[11px] font-semibold rounded-xl bg-white/60 backdrop-blur-md cursor-pointer border border-[hsl(var(--border)/0.25)] text-[hsl(var(--wine)/0.55)] shadow-[0_1px_3px_-1px_rgba(0,0,0,0.04)]"
               >
                 <option value="drink">Prioridade</option>
                 <option value="drinkNow">Beber agora</option>
@@ -457,11 +457,11 @@ export default function CellarPage() {
 
           {/* Compact Range Sliders — inline on desktop, stacked on mobile */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div className="rounded-xl bg-[hsl(var(--cream-dark)/0.45)] backdrop-blur-md border border-[hsl(var(--border)/0.25)] px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.03)]">
-              <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
-            </div>
-            <div className="rounded-xl bg-[hsl(var(--cream-dark)/0.45)] backdrop-blur-md border border-[hsl(var(--border)/0.25)] px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.03)]">
-              <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
+             <div className="rounded-xl bg-white/50 backdrop-blur-md border border-[hsl(var(--border)/0.20)] px-3 py-2 shadow-[0_1px_3px_-1px_rgba(0,0,0,0.03)]">
+               <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
+             </div>
+             <div className="rounded-xl bg-white/50 backdrop-blur-md border border-[hsl(var(--border)/0.20)] px-3 py-2 shadow-[0_1px_3px_-1px_rgba(0,0,0,0.03)]">
+               <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
             </div>
           </div>
         </div>
