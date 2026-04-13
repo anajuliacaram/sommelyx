@@ -342,7 +342,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-card border-border/50">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
             <Sparkles className="h-4 w-4" style={{ color: "#8F2D56" }} />

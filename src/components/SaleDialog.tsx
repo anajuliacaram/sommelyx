@@ -156,7 +156,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
   return (
     <Sheet open={open} onOpenChange={v => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card border-border/50">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 text-primary" />
