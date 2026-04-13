@@ -457,10 +457,10 @@ export default function CellarPage() {
 
           {/* Compact Range Sliders — inline on desktop, stacked on mobile */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div className="rounded-xl bg-white/50 backdrop-blur-md border border-border/30 px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04)]">
+            <div className="rounded-xl bg-[hsl(var(--cream-dark)/0.45)] backdrop-blur-md border border-[hsl(var(--border)/0.25)] px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.03)]">
               <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
             </div>
-            <div className="rounded-xl bg-white/50 backdrop-blur-md border border-border/30 px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04)]">
+            <div className="rounded-xl bg-[hsl(var(--cream-dark)/0.45)] backdrop-blur-md border border-[hsl(var(--border)/0.25)] px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.03)]">
               <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
             </div>
           </div>
