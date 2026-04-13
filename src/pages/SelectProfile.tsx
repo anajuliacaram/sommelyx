@@ -48,8 +48,8 @@ export default function SelectProfile() {
   if (existingProfile) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-background">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,hsl(var(--primary)/0.04),transparent_70%)]" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(165deg, #F4F1EC 0%, #EDE7DF 40%, #E6E2D8 65%, #E8E4DB 100%)" }}>
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,hsl(var(--primary)/0.05),transparent_70%)]" />
 
       <div className="w-full max-w-3xl relative z-10">
         {/* Progress dots */}
