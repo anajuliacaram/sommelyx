@@ -42,11 +42,11 @@ export default function DashboardLayout() {
           <header
             className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30"
             style={{
-              background: "rgba(11, 31, 23, 0.7)",
-              backdropFilter: "blur(18px) saturate(1.3)",
-              WebkitBackdropFilter: "blur(18px) saturate(1.3)",
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+              background: "rgba(255, 255, 255, 0.75)",
+              backdropFilter: "blur(24px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(24px) saturate(1.4)",
+              borderBottom: "1px solid rgba(255,255,255,0.40)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
             {/* Desktop: icon-only trigger */}
