@@ -378,82 +378,84 @@ export default function CellarPage() {
           />
         </div>
 
-        {/* Bottom Row: Filters & Sort */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
-            <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
-            <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
-            <MultiSelectDropdown title="Safra" options={dynamicOptions.vintageOptions || []} selected={selectedVintages} onChange={(v) => { setSelectedVintages(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedVintages([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar safra..." />
-            <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
-              className={cn(
-                "h-9 px-3 rounded-xl text-[12px] font-semibold flex items-center gap-1.5 border",
-                lowStock
-                  ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/12"
-                  : "bg-card/80 hover:bg-card border-border/50 text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Baixo estoque
-            </Button>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="hidden sm:flex rounded-lg p-[2px] bg-muted/30 border border-border/40">
+        {/* Filters Row */}
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
+              <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
+              <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
+              <MultiSelectDropdown title="Safra" options={dynamicOptions.vintageOptions || []} selected={selectedVintages} onChange={(v) => { setSelectedVintages(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedVintages([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar safra..." />
+              <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
               <Button
                 type="button"
                 variant="ghost"
-                size="icon"
-                aria-pressed={viewMode === "grid"}
-                onClick={() => setViewMode("grid")}
-                className={cn("h-8 w-8 rounded-md", viewMode === "grid" ? "bg-background shadow-sm text-primary hover:bg-background" : "text-muted-foreground")}
+                size="sm"
+                onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
+                className={cn(
+                  "h-8 px-2.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 border transition-all duration-200",
+                  lowStock
+                    ? "bg-primary/10 text-primary border-primary/20 shadow-[0_2px_8px_-2px_rgba(111,127,91,0.2)] backdrop-blur-md"
+                    : "bg-white/60 backdrop-blur-md hover:bg-white/80 border-border/40 text-muted-foreground hover:text-foreground shadow-[0_1px_4px_-1px_rgba(0,0,0,0.06)]"
+                )}
               >
-                <LayoutGrid className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-pressed={viewMode === "list"}
-                onClick={() => setViewMode("list")}
-                className={cn("h-8 w-8 rounded-md", viewMode === "list" ? "bg-background shadow-sm text-primary hover:bg-background" : "text-muted-foreground")}
-              >
-                <List className="h-3.5 w-3.5" />
+                Baixo estoque
               </Button>
             </div>
+            <div className="flex items-center gap-1.5">
+              <div className="hidden sm:flex rounded-lg p-[2px] bg-white/40 backdrop-blur-md border border-border/30">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-pressed={viewMode === "grid"}
+                  onClick={() => setViewMode("grid")}
+                  className={cn("h-7 w-7 rounded-md", viewMode === "grid" ? "bg-background shadow-sm text-primary hover:bg-background" : "text-muted-foreground")}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-pressed={viewMode === "list"}
+                  onClick={() => setViewMode("list")}
+                  className={cn("h-7 w-7 rounded-md", viewMode === "list" ? "bg-background shadow-sm text-primary hover:bg-background" : "text-muted-foreground")}
+                >
+                  <List className="h-3.5 w-3.5" />
+                </Button>
+              </div>
               <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="h-9 px-3 pr-8 text-xs font-semibold rounded-lg bg-card cursor-pointer border border-border/40 text-foreground"
-            >
-              <option value="drink">Prioridade</option>
-              <option value="drinkNow">Beber agora</option>
-              <option value="expensive">Mais caros</option>
-              <option value="lowStock">Menos estoque</option>
-              <option value="date">Recentes</option>
-              <option value="name">Nome A-Z</option>
-              <option value="value">Valor</option>
-              <option value="qty">Quantidade</option>
-            </select>
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className="h-8 px-2.5 pr-7 text-[11px] font-semibold rounded-xl bg-white/60 backdrop-blur-md cursor-pointer border border-border/40 text-foreground shadow-[0_1px_4px_-1px_rgba(0,0,0,0.06)]"
+              >
+                <option value="drink">Prioridade</option>
+                <option value="drinkNow">Beber agora</option>
+                <option value="expensive">Mais caros</option>
+                <option value="lowStock">Menos estoque</option>
+                <option value="date">Recentes</option>
+                <option value="name">Nome A-Z</option>
+                <option value="value">Valor</option>
+                <option value="qty">Quantidade</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Compact Range Sliders — inline on desktop, stacked on mobile */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="rounded-xl bg-white/50 backdrop-blur-md border border-border/30 px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04)]">
+              <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
+            </div>
+            <div className="rounded-xl bg-white/50 backdrop-blur-md border border-border/30 px-3 py-2 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04)]">
+              <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Range Sliders & Saved Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="glass-card p-3">
-          <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
-        </div>
-        <div className="glass-card p-3">
-          <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
+      <div className="flex flex-wrap gap-1.5 items-center">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-0.5">Filtros salvos:</span>
         {defaultSavedFilters.map(f => (
           <Button
             key={f.name}
@@ -462,13 +464,13 @@ export default function CellarPage() {
             size="sm"
             onClick={() => applySavedFilter(f)}
             className={cn(
-              "h-8 px-3.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border",
+              "h-7 px-2.5 rounded-full text-[11px] font-semibold flex items-center gap-1 border transition-all duration-200",
               activeSavedFilter === f.name
-                ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/12"
-                : "bg-black/[0.02] text-foreground/80 border-black/[0.06] hover:bg-muted/40",
+                ? "bg-primary/10 text-primary border-primary/20 shadow-[0_2px_8px_-2px_rgba(111,127,91,0.2)] backdrop-blur-md"
+                : "bg-white/50 backdrop-blur-md text-foreground/70 border-border/30 hover:bg-white/80 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04)]",
             )}
           >
-            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
+            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3 opacity-50" />}
             {f.name}
           </Button>
         ))}
