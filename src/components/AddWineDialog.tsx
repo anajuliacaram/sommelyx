@@ -488,19 +488,42 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       </div>
                       <div>
                         <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Último valor pago (R$)</label>
-                        <div className="grid grid-cols-2 gap-2 mt-1">
-                          <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
-                          <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
-                        </div>
-                        <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
-                          Quanto e quando você pagou por último.
-                        </p>
+                        <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={noPriceInfo}
+                            onChange={e => {
+                              setNoPriceInfo(e.target.checked);
+                              if (e.target.checked) { setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); }
+                            }}
+                            className="w-4 h-4 rounded border accent-[#6F7F5B]"
+                            style={{ borderColor: '#D0CDC6' }}
+                          />
+                          <span className="text-[12px]" style={{ color: '#6B6B6B' }}>Não sei / foi presente / sem informação de valor</span>
+                        </label>
+                        {!noPriceInfo && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                            <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                          </div>
+                        )}
+                        {!noPriceInfo && (
+                          <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
+                            Quanto e quando você pagou por último.
+                          </p>
+                        )}
                       </div>
                       <div>
-                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Valor atual (R$)</label>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>Valor atual estimado (R$)</label>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
+                            <Sparkles className="h-3 w-3" />
+                            Estimativa
+                          </span>
+                        </div>
                         <input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                         <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
-                          Referência de valor de mercado atual.
+                          Média estimada de valor de mercado atual deste vinho, calculada pela inteligência Sommelyx com base no rótulo, safra, uva e região.
                         </p>
                       </div>
                       <div>
