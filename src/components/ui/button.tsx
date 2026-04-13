@@ -12,11 +12,11 @@ const buttonVariants = cva(
         primary:
           "rounded-2xl text-white bg-[#7B1E2B] shadow-[0_4px_14px_rgba(123,30,43,0.25)] hover:-translate-y-0.5 hover:bg-[#6A1924] hover:shadow-[0_6px_20px_rgba(123,30,43,0.32)] tracking-[-0.01em]",
         secondary:
-          "rounded-2xl text-[#111] tracking-[-0.01em]",
+          "rounded-2xl text-white/85 tracking-[-0.01em]",
         outline:
-          "rounded-2xl bg-transparent text-[#111] hover:-translate-y-0.5",
+          "rounded-2xl bg-transparent text-white/85 hover:-translate-y-0.5",
         ghost:
-          "rounded-2xl bg-transparent text-[#111] hover:bg-black/5",
+          "rounded-2xl bg-transparent text-white/75 hover:bg-white/8 hover:text-white",
         danger:
           "rounded-2xl bg-destructive text-destructive-foreground shadow-[0_2px_8px_rgba(220,38,38,0.15)] hover:-translate-y-0.5 hover:bg-destructive/90",
         success:
@@ -26,7 +26,7 @@ const buttonVariants = cva(
         destructive: "rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:-translate-y-0.5",
         link: "text-primary underline-offset-4 hover:underline",
         premium: "btn-premium text-white rounded-2xl border-0 font-semibold tracking-[-0.01em] shadow-float",
-        glass: "btn-glass rounded-2xl px-6 font-semibold text-[#111]",
+        glass: "btn-glass rounded-2xl px-6 font-semibold text-white/85",
       },
       size: {
         default: "h-11 px-6 text-[14px]",
@@ -53,11 +53,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
 
     const glassStyle = (variant === "secondary" || variant === "outline") ? {
-      background: "rgba(255, 255, 255, 0.70)",
+      background: "rgba(255, 255, 255, 0.06)",
       backdropFilter: "blur(12px)",
       WebkitBackdropFilter: "blur(12px)",
-      border: "1px solid rgba(255, 255, 255, 0.40)",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)",
+      border: "1px solid rgba(255, 255, 255, 0.10)",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.10)",
       ...style,
     } : style;
 
