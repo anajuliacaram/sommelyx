@@ -53,7 +53,7 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
   return null;
 }
 
-const statusLabel = { now: "Beber agora", past: "Passou do ponto", young: "Em guarda" };
+const statusLabel = { now: "Beber agora", past: "Beber em breve", young: "Em guarda" };
 const statusColor = {
   now: "bg-emerald-500/8 text-emerald-600 border-emerald-500/15",
   past: "bg-amber-500/8 text-amber-600 border-amber-500/15",

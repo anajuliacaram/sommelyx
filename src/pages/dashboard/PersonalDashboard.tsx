@@ -133,7 +133,7 @@ export default function PersonalDashboard() {
     const items: { label: string; detail: string; tone: "success" | "warning" | "wine"; action?: () => void }[] = [];
     if (drinkNow > 0) items.push({ label: `${drinkNow} vinho${drinkNow > 1 ? "s" : ""} em janela ideal`, detail: "Hora de abrir", tone: "success", action: () => navigate("/dashboard/cellar") });
     
-    if (pastPeak > 0) items.push({ label: `${pastPeak} vinho${pastPeak > 1 ? "s" : ""} passaram do pico`, detail: "Atenção ao prazo", tone: "wine", action: () => navigate("/dashboard/alerts") });
+    if (pastPeak > 0) items.push({ label: `${pastPeak} vinho${pastPeak > 1 ? "s" : ""} — beber em breve`, detail: "Pode ter passado da janela ideal", tone: "wine", action: () => navigate("/dashboard/alerts") });
     const lastConsumed = consumption.length > 0 ? consumption[0] : null;
     if (lastConsumed) {
       const days = Math.floor((Date.now() - new Date(lastConsumed.consumed_at).getTime()) / (1000 * 60 * 60 * 24));
@@ -299,7 +299,7 @@ export default function PersonalDashboard() {
                   {[
                     { label: "Beber agora", value: drinkNow, tone: "text-success" },
                     { label: "Em guarda", value: inGuard, tone: "text-info" },
-                    { label: "Passaram do pico", value: pastPeak, tone: "text-warning" },
+                    { label: "Beber em breve", value: pastPeak, tone: "text-warning" },
                   ].map((a) => (
                     <button
                       key={a.label}
