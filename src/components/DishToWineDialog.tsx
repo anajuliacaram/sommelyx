@@ -498,11 +498,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-4"
               >
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
-                    Qual o prato que você quer harmonizar?
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+                    {isCommercial ? "Qual prato o cliente pediu?" : "Qual o prato que você quer harmonizar?"}
                   </p>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
                     <Input
                       value={dish}
                       onChange={(e) => setDish(e.target.value)}
