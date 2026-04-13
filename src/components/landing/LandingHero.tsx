@@ -45,10 +45,10 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             variants={fadeUp}
             custom={0}
             className="max-w-[34rem] lg:max-w-[38rem] font-serif text-[32px] font-bold leading-[1.15] tracking-[-0.025em] sm:text-[44px]"
-            style={{ color: "#1A1A1A" }}
+            style={{ color: "#FFFFFF" }}
           >
             Um painel executivo para sua adega, com clareza de estoque,{" "}
-            <span className="whitespace-nowrap text-primary">valor e giro.</span>
+            <span className="whitespace-nowrap" style={{ color: "#C6A16E" }}>valor e giro.</span>
           </motion.h1>
 
           <motion.p
@@ -57,7 +57,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             variants={fadeUp}
             custom={1}
             className="mt-5 max-w-xl text-[16px] font-normal leading-[1.7] sm:text-[18px]"
-            style={{ color: "#555" }}
+            style={{ color: "rgba(255,255,255,0.7)" }}
           >
             Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
