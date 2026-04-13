@@ -1259,12 +1259,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 <SectionHeader icon="chef" label="Pratos sugeridos" />
 
                 {pairings.length === 0 ? (
-                  <div className="glass-card p-6 text-center space-y-2">
-                    <p className="text-sm text-foreground/70 font-medium">
+                  <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    <p className="text-sm text-white/60 font-medium">
                       Nenhuma sugestão encontrada.
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Experimente outro vinho da sua adega.
+                    <p className="text-xs text-white/35">
+                      Experimente outro vinho.
                     </p>
                   </div>
                 ) : (
@@ -1278,12 +1278,18 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
+                          className="rounded-2xl p-4 space-y-2.5 cursor-default transition-all duration-200 hover:-translate-y-[1px] list-none"
+                          style={{
+                            background: "rgba(255,255,255,0.78)",
+                            backdropFilter: "blur(20px) saturate(1.3)",
+                            border: "1px solid rgba(255,255,255,0.45)",
+                            boxShadow: "0 4px 20px -6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)",
+                          }}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2.5">
                               <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
-                              <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
+                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{p.dish}</span>
                             </div>
                             {badge && (
                               <span className={cn("shrink-0 inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide", badge.className)}>
