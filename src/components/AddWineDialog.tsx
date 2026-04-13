@@ -275,10 +275,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       setMissingFields(missing);
 
       setSuccess(true);
-      setTimeout(() => {
-        reset();
-        onOpenChange(false);
-      }, 1200);
     } catch (err: any) {
       console.error("Wine save error:", err);
       toast({ title: isCommercial ? "Erro ao cadastrar produto" : "Erro ao adicionar vinho", description: err?.message || "Tente novamente", variant: "destructive" });
