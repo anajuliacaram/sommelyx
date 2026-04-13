@@ -5,9 +5,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
 const AlertDialog = AlertDialogPrimitive.Root;
-
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
-
 const AlertDialogPortal = AlertDialogPrimitive.Portal;
 
 const AlertDialogOverlay = React.forwardRef<
@@ -19,7 +17,7 @@ const AlertDialogOverlay = React.forwardRef<
       "fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
-    style={{ background: "rgba(0, 0, 0, 0.6)" }}
+    style={{ background: "rgba(8, 20, 17, 0.55)" }}
     {...props}
     ref={ref}
   />
@@ -39,11 +37,11 @@ const AlertDialogContent = React.forwardRef<
         className,
       )}
       style={{
-        background: "rgba(11, 31, 23, 0.95)",
-        backdropFilter: "blur(18px) saturate(1.3)",
-        WebkitBackdropFilter: "blur(18px) saturate(1.3)",
-        border: "1px solid rgba(255, 255, 255, 0.08)",
-        boxShadow: "0 32px 100px -30px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.15)",
+        background: "rgba(255, 255, 255, 0.88)",
+        backdropFilter: "blur(28px) saturate(1.4)",
+        WebkitBackdropFilter: "blur(28px) saturate(1.4)",
+        border: "1px solid rgba(255, 255, 255, 0.55)",
+        boxShadow: "0 32px 100px -30px rgba(8,20,17,0.40), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
       {...props}
     />
@@ -65,7 +63,7 @@ const AlertDialogTitle = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Title ref={ref} className={cn("text-2xl font-bold leading-none tracking-tight font-serif text-white", className)} {...props} />
+  <AlertDialogPrimitive.Title ref={ref} className={cn("text-2xl font-bold leading-none tracking-tight font-serif", className)} style={{ color: "#1C1C1C" }} {...props} />
 ));
 AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName;
 
@@ -73,7 +71,7 @@ const AlertDialogDescription = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Description ref={ref} className={cn("text-sm", className)} style={{ color: "rgba(255, 255, 255, 0.65)" }} {...props} />
+  <AlertDialogPrimitive.Description ref={ref} className={cn("text-sm", className)} style={{ color: "#6B6B6B" }} {...props} />
 ));
 AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName;
 
