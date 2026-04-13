@@ -361,7 +361,7 @@ function validateWineSpecificity(
       !hasGenericWineLanguage(item.reason) &&
       hasTechnicalWineLanguage(item.reason) &&
       !hasGenericWineLanguage(item.harmony_label) &&
-      hasSpecificLabelContext([item.reason, item.harmony_label, item?.dish], context),
+      hasSpecificLabelContext([item.reason, item.harmony_label, item?.dish], resolvedContext),
     );
   }
 
@@ -447,7 +447,7 @@ function validateWineSpecificity(
       item.reason.trim().length >= 55 &&
       !hasGenericWineLanguage(item.reason) &&
       hasTechnicalWineLanguage(item.reason) &&
-      hasSpecificLabelContext([item.reason, data.summary], context),
+      hasSpecificLabelContext([item.reason, data.summary], resolvedContext),
     );
   }
 
