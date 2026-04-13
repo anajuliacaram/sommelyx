@@ -850,29 +850,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                {/* Wine profile card (same as wine-results) */}
-                <div className="glass-card p-4 space-y-2">
-                  <p className="text-[15px] font-bold text-foreground tracking-tight">{extWineName}</p>
-                  {wineProfile && (wineProfile.body || wineProfile.summary) && (
-                    <div className="space-y-1.5 pt-1">
-                      {wineProfile.summary && (
-                        <p className="text-[12px] text-foreground/60 leading-relaxed italic">{wineProfile.summary}</p>
-                      )}
-                      <div className="flex flex-wrap gap-1.5">
-                        {wineProfile.body && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Corpo {wineProfile.body}</span>}
-                        {wineProfile.acidity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Acidez {wineProfile.acidity}</span>}
-                        {wineProfile.tannin && wineProfile.tannin !== "n/a" && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Taninos {wineProfile.tannin}</span>}
-                        {wineProfile.complexity && <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{wineProfile.complexity}</span>}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Wine profile card */}
+                <WineProfileCard title={extWineName} profile={wineProfile} />
 
-                <div className="flex items-center gap-2 pb-1">
-                  <ChefHat className="h-4 w-4 text-primary/70" />
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Pratos do cardápio
-                  </span>
+                <SectionHeader icon="chef" label="Pratos do cardápio" />
                 </div>
 
                 {menuResults.summary && (
