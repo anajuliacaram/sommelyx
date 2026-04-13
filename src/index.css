@@ -4,34 +4,34 @@
 
 @layer base {
   :root {
-    /* ── Sommelyx Light — Premium Glass Editorial ── */
-    --background: 33 18% 96%;
-    --foreground: 0 0% 11%;
+    /* ── Sommelyx Unified Design System ── */
+    --background: 30 18% 94%;       /* #F4F1EC */
+    --foreground: 0 0% 11%;         /* #1C1C1C */
     --foreground-strong: 0 0% 11%;
-    --foreground-secondary: 0 0% 29%;
+    --foreground-secondary: 0 0% 44%; /* #6F6F6F */
 
-    --card: 0 0% 100%;
+    --card: 0 0% 100%;              /* #FFFFFF */
     --card-foreground: 0 0% 11%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
 
-    /* Primary — Deep Wine */
-    --primary: 348 55% 28%;
-    --primary-foreground: 0 0% 98%;
+    /* Primary — Deep Wine #7B1E2B */
+    --primary: 352 61% 30%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 8% 91%;
+    --secondary: 30 12% 93%;
     --secondary-foreground: 20 6% 25%;
 
-    --muted: 28 8% 90%;
-    --muted-foreground: 0 0% 42%;
+    --muted: 28 10% 91%;
+    --muted-foreground: 0 0% 44%;   /* #6F6F6F */
 
-    /* Accent — Warm Gold */
-    --accent: 38 36% 52%;
+    /* Accent — Warm Cream #E8D8C3 */
+    --accent: 30 42% 84%;
     --accent-foreground: 20 8% 15%;
 
     /* Semantic States */
-    --success: 152 32% 38%;
+    --success: 121 15% 49%;         /* #6A8F6B */
     --success-foreground: 0 0% 100%;
     --warning: 38 52% 50%;
     --warning-foreground: 0 0% 100%;
@@ -41,13 +41,13 @@
     --info-foreground: 0 0% 100%;
 
     /* Borders */
-    --border: 28 10% 86%;
-    --input: 28 10% 84%;
-    --ring: 348 55% 28%;
+    --border: 28 10% 88%;
+    --input: 28 10% 86%;
+    --ring: 352 61% 30%;
 
     --radius: 0.75rem;
 
-    /* Sidebar — Translucent Forest */
+    /* Sidebar — Deep Forest */
     --sidebar-background: 140 22% 14%;
     --sidebar-foreground: 33 10% 96%;
     --sidebar-primary: 35 30% 68%;
@@ -58,7 +58,7 @@
     --sidebar-ring: 35 30% 68%;
 
     /* Wine palette */
-    --wine: 348 55% 28%;
+    --wine: 352 61% 30%;
     --wine-foreground: 0 0% 100%;
     --wine-light: 348 18% 94%;
     --wine-vivid: 345 42% 38%;
@@ -67,7 +67,7 @@
     --gold-foreground: 0 0% 100%;
     --gold-light: 38 28% 84%;
 
-    --cream: 33 18% 96%;
+    --cream: 30 18% 94%;
     --cream-dark: 28 10% 88%;
 
     /* Editorial — Forest & Copper */
@@ -78,8 +78,7 @@
     --copper-light: 28 35% 78%;
     --copper-muted: 28 25% 72%;
 
-    /* Cream warm for content areas */
-    --cream-warm: 33 18% 96%;
+    --cream-warm: 30 18% 94%;
   }
 
   .dark {
@@ -157,7 +156,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background: linear-gradient(165deg, #F4F1EC 0%, #EDE7DF 40%, #E6E2D8 65%, #E4E1D6 80%, #E8E4DB 100%);
+    background: #F4F1EC;
     background-attachment: fixed;
     min-height: 100vh;
     color: #1C1C1C;
@@ -168,13 +167,12 @@
   .dashboard-shell h2,
   .dashboard-shell h3,
   .dashboard-shell h4 {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Libre Baskerville', Georgia, serif;
     letter-spacing: -0.025em;
     line-height: 1.15;
     font-weight: 700;
   }
 
-  /* Larger headings for premium feel */
   .dashboard-shell h1 { font-size: 2.2rem; }
   .dashboard-shell h2 { font-size: 1.65rem; }
   .dashboard-shell h3 { font-size: 1.3rem; }
@@ -200,16 +198,14 @@
 
 @layer utilities {
 
-  /* ── Glass Card — Premium ── */
+  /* ── Unified Card — Solid White ── */
   .glass-card {
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.62);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: #FFFFFF;
+    border: 1px solid hsl(var(--border));
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.03),
-      0 8px 32px -8px rgba(0, 0, 0, 0.10);
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 4px 16px -4px rgba(0, 0, 0, 0.06);
     transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
                 border-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -220,36 +216,23 @@
   .glass-card:hover {
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.04),
-      0 14px 40px -10px rgba(0, 0, 0, 0.13);
-    border-color: rgba(255, 255, 255, 0.55);
+      0 8px 24px -6px rgba(0, 0, 0, 0.10);
     transform: translateY(-1px);
   }
 
   .dark .glass-card {
-    background: rgba(13, 13, 15, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15),
                 0 8px 32px -16px rgba(0, 0, 0, 0.25);
   }
 
   .glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
-    z-index: 10;
+    content: none;
   }
 
   .glass-card::after {
     content: none;
-  }
-
-  .glass-card > * {
-    position: relative;
-    z-index: 1;
   }
 
   .premium-noise {
@@ -261,7 +244,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.035;
+    opacity: 0.025;
     background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     mix-blend-mode: overlay;
     z-index: 50;
@@ -310,23 +293,19 @@
 
   .glass-card-sm {
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.60);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(255, 255, 255, 0.42);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 6px 24px -6px rgba(0, 0, 0, 0.08);
+    background: #FFFFFF;
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.06);
   }
 
-  /* ── Wine Card — Glass ── */
+  /* ── Wine Card ── */
   .wine-card-glass {
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.60);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(255, 255, 255, 0.40);
+    background: #FFFFFF;
+    border: 1px solid hsl(var(--border));
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.03),
-      0 6px 24px -8px rgba(0, 0, 0, 0.09);
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 4px 16px -4px rgba(0, 0, 0, 0.06);
     transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     overflow: hidden;
@@ -336,19 +315,11 @@
     transform: translateY(-3px);
     box-shadow:
       0 2px 4px rgba(0, 0, 0, 0.04),
-      0 16px 40px -12px rgba(0, 0, 0, 0.14);
-    border-color: rgba(255, 255, 255, 0.55);
+      0 12px 32px -8px rgba(0, 0, 0, 0.12);
   }
 
   .wine-card-glass::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
-    z-index: 10;
+    content: none;
   }
 
   /* ── Premium Forms ── */
@@ -357,17 +328,15 @@
     padding-left: 1.25rem;
     padding-right: 1.25rem;
     border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.7);
+    background: #FFFFFF;
     color: hsl(var(--foreground));
     border: 1px solid hsl(var(--border));
-    backdrop-filter: blur(12px);
     transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .input-premium:focus {
     border-color: hsl(var(--primary) / 0.3);
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.06), 0 2px 8px -4px hsl(var(--wine) / 0.08);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.06);
     outline: none;
   }
 
@@ -386,7 +355,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     border-bottom: 1px solid hsl(var(--border));
-    background: rgba(255, 255, 255, 0.3);
+    background: hsl(var(--muted) / 0.3);
   }
 
   .table-premium th:first-child { border-top-left-radius: 0.75rem; }
@@ -404,7 +373,7 @@
   }
 
   .table-premium tr:hover td {
-    background: rgba(255, 255, 255, 0.3);
+    background: hsl(var(--muted) / 0.2);
   }
 
   .table-premium tr.selected td {
@@ -439,37 +408,12 @@
     position: relative;
   }
 
-  /* Warm ambient glow with olive hint */
   .dashboard-shell::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 0;
-    background:
-      radial-gradient(ellipse at 10% 5%, hsl(var(--wine) / 0.05), transparent 50%),
-      radial-gradient(ellipse at 90% 90%, hsl(var(--gold) / 0.04), transparent 45%),
-      radial-gradient(ellipse at 50% 50%, hsl(80 20% 50% / 0.02), transparent 60%);
+    content: none;
   }
 
-  /* Subtle noise grain on dashboard */
   .dashboard-shell::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.03;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
-  }
-
-  .dashboard-shell > * {
-    position: relative;
-    z-index: 1;
+    content: none;
   }
 
   /* ── Premium Button System ── */
@@ -477,12 +421,8 @@
     position: relative;
     overflow: hidden;
     color: white;
-    background: linear-gradient(145deg,
-      #7B2330 0%,
-      #A13A45 100%);
-    box-shadow:
-      0 6px 20px rgba(123, 35, 48, 0.25),
-      inset 0 1px 1px rgba(255, 255, 255, 0.12);
+    background: #7B1E2B;
+    box-shadow: 0 4px 14px rgba(123, 30, 43, 0.20);
   }
 
   .btn-premium:disabled {
@@ -491,33 +431,23 @@
   }
 
   .btn-premium:hover {
-    box-shadow:
-      0 8px 28px rgba(123, 35, 48, 0.30),
-      inset 0 1px 1px rgba(255, 255, 255, 0.14);
-    filter: brightness(1.05);
+    background: #6A1924;
+    box-shadow: 0 6px 20px rgba(123, 30, 43, 0.28);
     transform: translateY(-1px);
   }
 
   .btn-premium::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
-    pointer-events: none;
-    border-radius: inherit;
+    content: none;
   }
 
   .btn-glass {
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid hsl(var(--border));
+    background: #FFFFFF;
     transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .btn-glass:hover {
-    background: rgba(255, 255, 255, 0.55);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: hsl(var(--muted) / 0.3);
     transform: translateY(-0.5px);
   }
 
@@ -530,15 +460,13 @@
   .mobile-bottom-sheet {
     border-top-left-radius: 28px;
     border-top-right-radius: 28px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid hsl(var(--border));
+    background: #FFFFFF;
     box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.08);
   }
 
   .dark .mobile-bottom-sheet {
-    background: rgba(0, 0, 0, 0.7);
+    background: hsl(var(--card));
   }
 
   .mobile-bottom-sheet-handle {
@@ -579,12 +507,12 @@
     perspective: 1000px;
   }
 
-  /* ── Sidebar Premium (Glass Forest) ── */
+  /* ── Sidebar Premium (Forest) ── */
   .sidebar-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    height: 38px;
+    height: 40px;
     padding: 0 0.875rem;
     border-radius: 0.75rem;
     position: relative;
@@ -592,8 +520,8 @@
     outline: none;
     background: transparent;
     border: 1px solid transparent;
-    color: rgba(245, 245, 243, 0.75);
-    font-size: 13.5px;
+    color: rgba(245, 245, 243, 0.70);
+    font-size: 14px;
     font-weight: 500;
     letter-spacing: -0.005em;
     transition: all 170ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -601,9 +529,9 @@
 
   .sidebar-item:hover,
   .sidebar-item:focus-visible {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.10);
     color: #F5F5F3;
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   .sidebar-item:hover svg,
@@ -621,7 +549,7 @@
   }
 
   .sidebar-item--active {
-    background: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.12);
     color: #F5F5F3;
     font-weight: 600;
     border-color: transparent;
@@ -655,7 +583,6 @@
     margin-left: auto;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
   }
 
   .sidebar-badge--novo {
@@ -706,17 +633,14 @@
 
   .card-depth {
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.62);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 8px 30px -8px rgba(0, 0, 0, 0.10);
+    background: #FFFFFF;
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px -4px rgba(0, 0, 0, 0.06);
     transition: all 280ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-depth:hover {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 14px 40px -10px rgba(0, 0, 0, 0.13);
-    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px -6px rgba(0, 0, 0, 0.10);
     transform: translateY(-1px);
   }
 
@@ -725,7 +649,7 @@
   }
 
   .shadow-float {
-    box-shadow: 0 6px 20px -6px hsl(var(--wine) / 0.14), 0 2px 6px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 14px -4px hsl(var(--wine) / 0.14), 0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
   .text-gradient-wine {

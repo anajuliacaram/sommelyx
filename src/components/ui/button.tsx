@@ -10,11 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "rounded-2xl text-primary-foreground bg-gradient-to-br from-primary to-wine-vivid shadow-[0_2px_8px_hsl(var(--wine)/0.18),inset_0_1px_1px_rgba(255,255,255,0.10)] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_hsl(var(--wine)/0.24),inset_0_1px_1px_rgba(255,255,255,0.12)] hover:brightness-105 tracking-[-0.01em]",
+          "rounded-2xl text-white bg-[#7B1E2B] shadow-[0_4px_14px_rgba(123,30,43,0.20)] hover:-translate-y-0.5 hover:bg-[#6A1924] hover:shadow-[0_6px_20px_rgba(123,30,43,0.28)] tracking-[-0.01em]",
         secondary:
-          "rounded-2xl bg-[rgba(255,255,255,0.85)] text-[#2B2B2B] border border-[rgba(0,0,0,0.06)] shadow-[0_1px_3px_rgba(0,0,0,0.04)] backdrop-blur-md hover:bg-white hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] tracking-[-0.01em]",
+          "rounded-2xl bg-white text-[#1C1C1C] border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:bg-muted/20 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] tracking-[-0.01em]",
         outline:
-          "rounded-2xl bg-transparent border border-border/60 text-foreground hover:bg-muted/20 hover:-translate-y-0.5 hover:border-primary/15",
+          "rounded-2xl bg-transparent border border-border text-foreground hover:bg-muted/20 hover:-translate-y-0.5",
         ghost:
           "rounded-2xl bg-transparent text-foreground hover:bg-muted/20",
         danger:
@@ -24,11 +24,11 @@ const buttonVariants = cva(
 
         // Back-compat
         default:
-          "rounded-2xl text-primary-foreground bg-gradient-to-br from-primary to-wine-vivid shadow-[0_2px_8px_hsl(var(--wine)/0.18)] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_hsl(var(--wine)/0.24)] tracking-[-0.01em]",
+          "rounded-2xl text-white bg-[#7B1E2B] shadow-[0_4px_14px_rgba(123,30,43,0.20)] hover:-translate-y-0.5 hover:bg-[#6A1924] hover:shadow-[0_6px_20px_rgba(123,30,43,0.28)] tracking-[-0.01em]",
         destructive: "rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:-translate-y-0.5",
         link: "text-primary underline-offset-4 hover:underline",
         premium: "btn-premium text-white rounded-2xl border-0 font-semibold tracking-[-0.01em] shadow-float",
-        glass: "btn-glass rounded-2xl px-6 font-semibold backdrop-blur-xl",
+        glass: "btn-glass rounded-2xl px-6 font-semibold",
       },
       size: {
         default: "h-11 px-6 text-[14px]",

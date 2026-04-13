@@ -40,14 +40,7 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
           <header
-            className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 border-b"
-            style={{
-              background: "rgba(255, 255, 255, 0.65)",
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-              borderColor: "rgba(255, 255, 255, 0.40)",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
-            }}
+            className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 border-b border-border bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
           >
             {/* Desktop: icon-only trigger */}
             {!isMobile && (
