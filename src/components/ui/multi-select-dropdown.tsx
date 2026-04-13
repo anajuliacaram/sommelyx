@@ -83,12 +83,14 @@ export function MultiSelectDropdown({
                     variant={hasSelection ? "secondary" : "outline"}
                     size="sm"
                     className={cn(
-                        "h-9 px-3 rounded-xl text-[12px] font-semibold flex items-center gap-1.5 border-border/50 transition-all",
-                        hasSelection ? "bg-primary/10 text-primary border-primary/20 shadow-sm" : "bg-card/80 hover:bg-card hover:border-border"
+                        "h-8 px-2.5 rounded-xl text-[11px] font-semibold flex items-center gap-1 border transition-all duration-200",
+                        hasSelection
+                            ? "bg-primary/10 text-primary border-primary/20 shadow-[0_2px_8px_-2px_rgba(111,127,91,0.2)] backdrop-blur-md"
+                            : "bg-white/60 backdrop-blur-md hover:bg-white/80 border-border/40 text-muted-foreground hover:text-foreground shadow-[0_1px_4px_-1px_rgba(0,0,0,0.06)]"
                     )}
                 >
-                    <span className="truncate max-w-[100px]">{triggerLabel}</span>
-                    <ChevronDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
+                    <span className="truncate max-w-[80px]">{triggerLabel}</span>
+                    <ChevronDown className={cn("h-3 w-3 opacity-40 shrink-0 transition-transform duration-200", open && "rotate-180")} />
                 </Button>
             </PopoverTrigger>
             <PopoverContent
