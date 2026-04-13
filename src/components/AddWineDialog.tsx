@@ -303,7 +303,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   key="success"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-16 gap-4"
+                  className="flex flex-col items-center justify-center py-12 gap-4"
                 >
                   <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6F7F5B' }}>
                     <Check className="h-7 w-7 text-white" />
@@ -324,6 +324,25 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       </p>
                     </div>
                   )}
+                  <div className="flex gap-3 w-full pt-2">
+                    <button
+                      type="button"
+                      onClick={() => { reset(); onOpenChange(false); }}
+                      className="flex-1 h-12 rounded-[14px] border text-[14px] font-semibold transition-all hover:bg-white/60"
+                      style={{ color: '#4A4A4A', borderColor: '#E5E2DC' }}
+                    >
+                      Concluir
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => reset()}
+                      className="flex-1 h-12 rounded-[14px] text-[14px] font-semibold text-white transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                      style={{ backgroundColor: '#6F7F5B' }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Adicionar outro
+                    </button>
+                  </div>
                 </motion.div>
               ) : (
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-5">
