@@ -142,7 +142,7 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-          {alerts.length === 0 ? (
+          {visibleAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <div className="w-12 h-12 rounded-2xl bg-success/8 flex items-center justify-center mb-3">
                 <Wine className="h-5 w-5 text-success" />
