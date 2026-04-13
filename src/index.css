@@ -73,46 +73,7 @@
     --copper-muted: 28 25% 72%;
   }
 
-  .dark {
-    --background: 164 20% 5%;
-    --foreground: 150 6% 90%;
-    --card: 164 15% 8%;
-    --card-foreground: 150 6% 90%;
-    --popover: 164 15% 9%;
-    --popover-foreground: 150 6% 90%;
-    --primary: 348 42% 48%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 164 8% 11%;
-    --secondary-foreground: 150 6% 78%;
-    --muted: 164 6% 12%;
-    --muted-foreground: 150 5% 52%;
-    --accent: 38 32% 54%;
-    --accent-foreground: 164 8% 7%;
-    --success: 152 32% 42%;
-    --warning: 38 48% 52%;
-    --destructive: 0 38% 48%;
-    --info: 199 38% 48%;
-    --border: 164 8% 14%;
-    --input: 164 8% 14%;
-    --ring: 348 42% 48%;
-    --sidebar-background: 164 30% 4%;
-    --sidebar-foreground: 150 5% 68%;
-    --sidebar-primary: 348 42% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 164 8% 8%;
-    --sidebar-accent-foreground: 150 8% 88%;
-    --sidebar-border: 164 8% 12%;
-    --sidebar-ring: 348 42% 48%;
-    --wine: 348 42% 48%;
-    --wine-foreground: 0 0% 100%;
-    --wine-light: 348 22% 80%;
-    --wine-vivid: 345 42% 52%;
-    --gold: 38 36% 54%;
-    --gold-foreground: 0 0% 100%;
-    --gold-light: 38 28% 72%;
-    --cream: 164 8% 10%;
-    --cream-dark: 164 6% 7%;
-  }
+  /* Dark mode inherits root — already dark by default */
 }
 
 @layer base {
