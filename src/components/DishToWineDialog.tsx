@@ -884,7 +884,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 {/* Wine profile card */}
                 <WineProfileCard title={extWineName} profile={wineProfile} />
 
-                <SectionHeader icon="chef" label="Pratos do cardápio" />
+                <SectionHeader icon="chef" label="Pratos do cardápio" variant="dark" />
 
                 {menuResults.summary && (
                   <p className="text-[11px] text-foreground/80 leading-relaxed italic">
@@ -1081,7 +1081,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 {/* Dish profile section */}
                 <DishProfileCard dish={dish} profile={dishProfile} />
 
-                <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} />
+                <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} variant="dark" />
 
                 {suggestions.length === 0 ? (
                   <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
@@ -1256,7 +1256,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   />
                 )}
 
-                <SectionHeader icon="chef" label="Pratos sugeridos" />
+                <SectionHeader icon="chef" label="Pratos sugeridos" variant="dark" />
 
                 {pairings.length === 0 ? (
                   <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
