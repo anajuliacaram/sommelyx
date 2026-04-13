@@ -854,7 +854,6 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 <WineProfileCard title={extWineName} profile={wineProfile} />
 
                 <SectionHeader icon="chef" label="Pratos do cardápio" />
-                </div>
 
                 {menuResults.summary && (
                   <p className="text-[11px] text-foreground/80 leading-relaxed italic">
