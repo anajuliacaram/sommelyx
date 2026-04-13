@@ -454,8 +454,8 @@ export default function CellarPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
+      <div className="flex flex-wrap gap-1.5 items-center">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-0.5">Filtros salvos:</span>
         {defaultSavedFilters.map(f => (
           <Button
             key={f.name}
@@ -464,13 +464,13 @@ export default function CellarPage() {
             size="sm"
             onClick={() => applySavedFilter(f)}
             className={cn(
-              "h-8 px-3.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border",
+              "h-7 px-2.5 rounded-full text-[11px] font-semibold flex items-center gap-1 border transition-all duration-200",
               activeSavedFilter === f.name
-                ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/12"
-                : "bg-black/[0.02] text-foreground/80 border-black/[0.06] hover:bg-muted/40",
+                ? "bg-primary/10 text-primary border-primary/20 shadow-[0_2px_8px_-2px_rgba(111,127,91,0.2)] backdrop-blur-md"
+                : "bg-white/50 backdrop-blur-md text-foreground/70 border-border/30 hover:bg-white/80 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.04)]",
             )}
           >
-            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
+            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3 opacity-50" />}
             {f.name}
           </Button>
         ))}
