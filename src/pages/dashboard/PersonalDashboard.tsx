@@ -116,9 +116,8 @@ export default function PersonalDashboard() {
       { label: "Garrafas", value: `${totalBottles}`, icon: Layers, urgent: false },
       { label: "Valor estimado", value: totalValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }), icon: Star, urgent: false },
       { label: "Beber agora", value: `${drinkNow}`, icon: GlassWater, urgent: drinkNow > 0 },
-      { label: "Estoque baixo", value: `${lowStock}`, icon: AlertTriangle, urgent: lowStock > 0 },
     ],
-    [drinkNow, lowStock, totalBottles, totalValue],
+    [drinkNow, totalBottles, totalValue],
   );
 
   const handleOpenBottle = async (wineId: string, wineName: string) => {
@@ -133,7 +132,7 @@ export default function PersonalDashboard() {
   const priorityItems = useMemo(() => {
     const items: { label: string; detail: string; tone: "success" | "warning" | "wine"; action?: () => void }[] = [];
     if (drinkNow > 0) items.push({ label: `${drinkNow} vinho${drinkNow > 1 ? "s" : ""} em janela ideal`, detail: "Hora de abrir", tone: "success", action: () => navigate("/dashboard/cellar") });
-    if (lowStock > 0) items.push({ label: `${lowStock} rótulo${lowStock > 1 ? "s" : ""} com estoque baixo`, detail: "Considere repor", tone: "warning", action: () => navigate("/dashboard/alerts") });
+    
     if (pastPeak > 0) items.push({ label: `${pastPeak} vinho${pastPeak > 1 ? "s" : ""} passaram do pico`, detail: "Atenção ao prazo", tone: "wine", action: () => navigate("/dashboard/alerts") });
     const lastConsumed = consumption.length > 0 ? consumption[0] : null;
     if (lastConsumed) {
@@ -141,7 +140,7 @@ export default function PersonalDashboard() {
       items.push({ label: `Último consumo há ${days} dia${days !== 1 ? "s" : ""}`, detail: lastConsumed.wine_name, tone: "wine" });
     }
     return items;
-  }, [drinkNow, lowStock, pastPeak, consumption, navigate]);
+  }, [drinkNow, pastPeak, consumption, navigate]);
 
   return (
     <>
@@ -301,7 +300,6 @@ export default function PersonalDashboard() {
                     { label: "Beber agora", value: drinkNow, tone: "text-success" },
                     { label: "Em guarda", value: inGuard, tone: "text-info" },
                     { label: "Passaram do pico", value: pastPeak, tone: "text-warning" },
-                    { label: "Baixo estoque", value: lowStock, tone: "text-primary" },
                   ].map((a) => (
                     <button
                       key={a.label}
