@@ -1166,10 +1166,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             </div>
                           )}
 
-                          {/* Explanation */}
-                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
-                            {s.reason}
-                          </p>
+                          {/* Explanation moved to "Por que funciona" block below */}
 
                           {/* Badges: classification + harmony */}
                           <div className="flex items-center gap-2 pl-[18px] flex-wrap">
