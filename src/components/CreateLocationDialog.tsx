@@ -54,7 +54,7 @@ export function CreateLocationDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!createLocation.isPending) onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-[600px] bg-card border-border/50">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="font-serif text-[18px] tracking-tight">Adicionar localização</DialogTitle>
           <DialogDescription className="text-[12px] leading-relaxed">

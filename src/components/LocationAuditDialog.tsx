@@ -63,7 +63,7 @@ export function LocationAuditDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!busy) onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-[560px] bg-card border-border/50">
+      <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle className="font-serif text-[18px] tracking-tight">{title}</DialogTitle>
           <DialogDescription className="text-[12px] leading-relaxed">{subtitle}</DialogDescription>

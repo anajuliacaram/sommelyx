@@ -22,7 +22,7 @@ const COLORS = ["#8F2D56", "#C44569", "#E07A5F", "#C9A86A", "#6B7280", "#22c55e"
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg">
+    <div className="glass-card-sm px-3 py-2">
       <p className="text-[13px] font-semibold text-foreground">{label || payload[0]?.name}</p>
       <p className="text-[12px] text-muted-foreground">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
     </div>
@@ -32,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const CustomPieTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg">
+    <div className="glass-card-sm px-3 py-2">
       <p className="text-[13px] font-semibold text-foreground">{payload[0]?.name}</p>
       <p className="text-[12px] text-muted-foreground">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
     </div>
