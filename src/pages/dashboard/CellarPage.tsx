@@ -452,6 +452,7 @@ export default function CellarPage() {
             </div>
           </div>
         </div>
+      </div>
 
       <div className="flex flex-wrap gap-2 items-center">
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Filtros salvos:</span>
