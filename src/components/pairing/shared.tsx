@@ -474,32 +474,37 @@ export function RecipeButton({ onClick }: { onClick: () => void }) {
 export function PairingSheetHero({
   title,
   subtitle,
+  mode = "personal",
 }: {
   title: string;
   subtitle: string;
+  mode?: "personal" | "commercial";
 }) {
   return (
     <div className="relative -mx-6 -mt-2 px-6 pt-6 pb-5 mb-2 overflow-hidden">
-      {/* Subtle gradient background */}
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, rgba(123,35,48,0.04) 0%, transparent 100%)",
+          background: "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)",
         }}
       />
       <div className="relative flex items-center gap-3.5">
         <div
           className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
           style={{
-            background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-light)) 100%)",
-            boxShadow: "0 8px 24px -8px rgba(123,35,48,0.30)",
+            background: mode === "commercial"
+              ? "linear-gradient(135deg, #2D5A27 0%, #4A7C43 100%)"
+              : "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-light)) 100%)",
+            boxShadow: mode === "commercial"
+              ? "0 8px 24px -8px rgba(45,90,39,0.40)"
+              : "0 8px 24px -8px rgba(123,35,48,0.30)",
           }}
         >
           <UtensilsCrossed className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-serif font-bold text-[#1A1A1A] tracking-tight">{title}</h2>
-          <p className="text-[12.5px] text-[#888] mt-0.5 leading-relaxed">{subtitle}</p>
+          <h2 className="text-xl font-serif font-bold text-white tracking-tight">{title}</h2>
+          <p className="text-[12.5px] text-white/50 mt-0.5 leading-relaxed">{subtitle}</p>
         </div>
       </div>
     </div>
