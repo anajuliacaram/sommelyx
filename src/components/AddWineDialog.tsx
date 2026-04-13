@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { LocationFields } from "@/components/LocationFields";
 import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -155,6 +156,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [success, setSuccess] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [importCsvOpen, setImportCsvOpen] = useState(false);
+  const [estimating, setEstimating] = useState(false);
+  const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
+  const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const addWine = useAddWine();
   const createLocation = useCreateWineLocation();
@@ -170,21 +174,56 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (open && isCommercial) setMoreOpen(true);
   }, [open, isCommercial]);
 
-  // Auto-estimate current market value when wine details change
+  // Debounced AI price estimation
+  const fetchEstimate = useCallback(async (n: string, p: string, v: string, s: string, c: string, r: string, g: string) => {
+    if (!n.trim()) return;
+    setEstimating(true);
+    setEstimateConfidence(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("estimate-wine-price", {
+        body: {
+          name: n.trim(),
+          producer: p || null,
+          vintage: v ? parseInt(v) : null,
+          style: s || null,
+          country: c || null,
+          region: r || null,
+          grape: g || null,
+        },
+      });
+      if (!error && data?.estimated_price) {
+        setCurrentValue(String(data.estimated_price));
+        setEstimateConfidence(data.confidence || "media");
+      } else {
+        // Fallback to heuristic
+        const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
+        setCurrentValue(String(fallback));
+        setEstimateConfidence(null);
+      }
+    } catch {
+      const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
+      setCurrentValue(String(fallback));
+      setEstimateConfidence(null);
+    } finally {
+      setEstimating(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!name.trim()) return;
-    const estimated = suggestPurchasePrice({
-      name, producer, vintage: vintage ? parseInt(vintage) : null,
-      style, country, region, grape,
-    });
-    setCurrentValue(String(estimated));
-  }, [name, producer, vintage, style, country, region, grape]);
+    if (estimateTimer.current) clearTimeout(estimateTimer.current);
+    estimateTimer.current = setTimeout(() => {
+      fetchEstimate(name, producer, vintage, style, country, region, grape);
+    }, 1200);
+    return () => { if (estimateTimer.current) clearTimeout(estimateTimer.current); };
+  }, [name, producer, vintage, style, country, region, grape, fetchEstimate]);
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setLabelImagePreview(null); setNoPriceInfo(false);
+    setEstimating(false); setEstimateConfidence(null);
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
@@ -524,16 +563,31 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         )}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-1.5">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                           <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>Valor atual estimado (R$)</label>
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
                             <Sparkles className="h-3 w-3" />
-                            Estimativa
+                            {estimating ? "Estimando..." : "Estimativa Sommelyx"}
                           </span>
+                          {estimateConfidence && !estimating && (
+                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{
+                              backgroundColor: estimateConfidence === 'alta' ? 'rgba(111,127,91,0.1)' : estimateConfidence === 'media' ? 'rgba(200,169,106,0.12)' : 'rgba(180,80,80,0.1)',
+                              color: estimateConfidence === 'alta' ? '#6F7F5B' : estimateConfidence === 'media' ? '#8B6B2B' : '#9B4444',
+                            }}>
+                              Confiança {estimateConfidence}
+                            </span>
+                          )}
                         </div>
-                        <input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                        <div className="relative">
+                          <input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder={estimating ? "Calculando..." : "0.00"} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC', opacity: estimating ? 0.6 : 1 }} />
+                          {estimating && (
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                              <div className="w-4 h-4 border-2 border-[#6F7F5B] border-t-transparent rounded-full animate-spin" />
+                            </div>
+                          )}
+                        </div>
                         <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
-                          Média estimada de valor de mercado atual deste vinho, calculada pela inteligência Sommelyx com base no rótulo, safra, uva e região.
+                          Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região.
                         </p>
                       </div>
                       <div>
