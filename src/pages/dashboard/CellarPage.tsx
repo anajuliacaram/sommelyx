@@ -487,10 +487,10 @@ export default function CellarPage() {
             size="sm"
             onClick={() => applySavedFilter(f)}
             className={cn(
-              "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200 hover:-translate-y-[1px]",
+              "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
               activeSavedFilter === f.name
-                ? "bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.20)] shadow-[0_2px_8px_-3px_hsl(var(--wine)/0.15),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-lg"
-                : "bg-white/60 backdrop-blur-lg text-[hsl(var(--wine)/0.45)] border-white/35 hover:bg-white/85 hover:text-[hsl(var(--wine)/0.75)] shadow-[0_1px_3px_-1px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.4)]",
+                ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md"
+                : "bg-white text-foreground/70 border-border/50 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground",
             )}
           >
             {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3 opacity-40" />}
@@ -504,7 +504,7 @@ export default function CellarPage() {
         <div className="flex flex-wrap gap-2 items-center pt-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[28px] text-[11px] rounded-full group border-[hsl(var(--wine)/0.15)] bg-[hsl(var(--wine)/0.07)] text-[hsl(var(--wine))] font-bold shadow-[0_1px_4px_-2px_hsl(var(--wine)/0.10),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-md">
+            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[28px] text-[11px] rounded-full group border-[hsl(var(--wine)/0.30)] bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] font-bold shadow-sm">
               {chip.label}
               <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 hover:opacity-100 transition-opacity duration-150" onClick={chip.onRemove} />
             </Badge>
