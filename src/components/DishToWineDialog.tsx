@@ -1051,7 +1051,6 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 <DishProfileCard dish={dish} profile={dishProfile} />
 
                 <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} />
-                </div>
 
                 {suggestions.length === 0 ? (
                   <div className="glass-card p-6 text-center space-y-2">
