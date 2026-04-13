@@ -45,17 +45,17 @@ export function RangeSliderFilter({
   );
 
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full space-y-1.5">
       <div className="flex items-center justify-between">
         <span
           className={cn(
-            "text-[11px] font-semibold uppercase tracking-wider transition-colors",
+            "text-[10px] font-semibold uppercase tracking-wider transition-colors",
             isActive ? "text-primary" : "text-muted-foreground"
           )}
         >
           {label}
         </span>
-        <span className="text-[12px] font-bold text-foreground tabular-nums">
+        <span className="text-[11px] font-bold text-foreground tabular-nums">
           {formatValue(displayed[0])} — {formatValue(displayed[1])}
         </span>
       </div>
@@ -67,13 +67,13 @@ export function RangeSliderFilter({
         onValueChange={handleChange}
         onValueCommit={handleCommit}
         onPointerDown={() => setDragging(true)}
-        className="relative flex w-full touch-none select-none items-center group h-5"
+        className="relative flex w-full touch-none select-none items-center group h-4"
       >
-        <SliderPrimitive.Track className="relative h-[6px] w-full grow overflow-hidden rounded-full bg-muted/60">
+        <SliderPrimitive.Track className="relative h-[4px] w-full grow overflow-hidden rounded-full bg-muted/50">
           <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-wine to-[hsl(var(--wine-vivid))]" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block h-[18px] w-[18px] rounded-full border-2 border-wine bg-background shadow-md ring-offset-background transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-grab active:cursor-grabbing active:scale-105" />
-        <SliderPrimitive.Thumb className="block h-[18px] w-[18px] rounded-full border-2 border-wine bg-background shadow-md ring-offset-background transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-grab active:cursor-grabbing active:scale-105" />
+        <SliderPrimitive.Thumb className="block h-[14px] w-[14px] rounded-full border-2 border-wine bg-background shadow-md ring-offset-background transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 cursor-grab active:cursor-grabbing active:scale-105" />
+        <SliderPrimitive.Thumb className="block h-[14px] w-[14px] rounded-full border-2 border-wine bg-background shadow-md ring-offset-background transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 cursor-grab active:cursor-grabbing active:scale-105" />
       </SliderPrimitive.Root>
     </div>
   );
