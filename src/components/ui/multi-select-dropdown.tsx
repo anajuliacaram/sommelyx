@@ -80,8 +80,8 @@ export function MultiSelectDropdown({
                     className={cn(
                         "h-8 px-3 rounded-xl text-[11px] font-semibold flex items-center gap-1 border transition-all duration-200",
                         hasSelection
-                            ? "bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.20)] shadow-[0_2px_8px_-2px_hsl(var(--wine)/0.15)] backdrop-blur-md"
-                            : "bg-[hsl(var(--cream-dark)/0.55)] backdrop-blur-md hover:bg-[hsl(var(--cream-dark)/0.75)] border-[hsl(var(--border)/0.35)] text-[hsl(var(--wine)/0.70)] hover:text-[hsl(var(--wine))] shadow-[0_1px_4px_-1px_rgba(0,0,0,0.05)]"
+                            ? "bg-[hsl(var(--wine)/0.08)] text-[hsl(var(--wine))] border-[hsl(var(--wine)/0.18)] shadow-[0_2px_8px_-2px_hsl(var(--wine)/0.12)] backdrop-blur-md"
+                            : "bg-white/60 backdrop-blur-md hover:bg-white/80 border-[hsl(var(--border)/0.25)] text-[hsl(var(--wine)/0.55)] hover:text-[hsl(var(--wine)/0.80)] shadow-[0_1px_3px_-1px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_6px_-2px_hsl(var(--wine)/0.08)]"
                     )}
                 >
                     <span className="truncate max-w-[80px]">{triggerLabel}</span>
@@ -92,7 +92,7 @@ export function MultiSelectDropdown({
                 side="bottom"
                 align="start"
                 sideOffset={6}
-                className="w-[250px] p-2.5 rounded-2xl shadow-[0_16px_48px_-12px_rgba(30,20,20,0.18),0_2px_6px_rgba(30,20,20,0.06)] bg-[hsl(var(--cream-dark)/0.92)] backdrop-blur-2xl border border-[hsl(var(--border)/0.40)]"
+                className="w-[250px] p-2.5 rounded-2xl shadow-[0_16px_48px_-12px_rgba(30,20,20,0.12),0_2px_6px_rgba(30,20,20,0.04)] bg-white/90 backdrop-blur-2xl border border-[hsl(var(--border)/0.30)]"
             >
                 <div className="flex flex-col gap-1.5">
                     {/* Sort toggle + search */}
@@ -109,7 +109,7 @@ export function MultiSelectDropdown({
                             </div>
                         )}
                         {!showSearch ? <div className="flex-1" /> : null}
-                        <div className="flex rounded-xl bg-white/40 p-0.5 shrink-0 border border-[hsl(var(--border)/0.20)]">
+                        <div className="flex rounded-xl bg-white/60 p-0.5 shrink-0 border border-[hsl(var(--border)/0.15)]">
                             <Button
                                 type="button"
                                 variant="ghost"
