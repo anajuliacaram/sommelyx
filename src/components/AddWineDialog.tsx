@@ -584,14 +584,20 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           label="Localização na adega"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Beber a partir de</label>
-                          <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
-                        </div>
-                        <div>
-                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Beber até</label>
-                          <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                      <div>
+                        <p className="text-[14px] font-medium mb-1" style={{ color: '#4A4A4A' }}>Janela de consumo sugerida</p>
+                        <p className="text-[11px] leading-relaxed mb-3" style={{ color: '#6B6B6B' }}>
+                          Referência de melhor expressão do vinho em condições ideais de guarda. Vinhos fora dessa janela não estão necessariamente ruins — o potencial real depende do armazenamento, da safra específica e das características da uva.
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>A partir de</label>
+                            <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                          </div>
+                          <div>
+                            <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Até</label>
+                            <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
+                          </div>
                         </div>
                       </div>
                       <div>
