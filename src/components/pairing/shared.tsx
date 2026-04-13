@@ -358,18 +358,18 @@ export function PremiumResultCard({
    SECTION HEADER — Premium section divider
    ═══════════════════════════════════════════════ */
 
-export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
+export function SectionHeader({ icon, label, count, variant = "light" }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number; variant?: "light" | "dark" }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
     <div className="flex items-center gap-2.5 py-1">
-      <div className="w-7 h-7 rounded-lg bg-primary/[0.08] flex items-center justify-center">
-        <Icon className="h-3.5 w-3.5 text-primary/70" />
+      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", variant === "dark" ? "bg-white/10" : "bg-primary/[0.08]")}>
+        <Icon className={cn("h-3.5 w-3.5", variant === "dark" ? "text-white/60" : "text-primary/70")} />
       </div>
-      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#888]">
+      <span className={cn("text-[11px] font-bold uppercase tracking-[0.14em]", variant === "dark" ? "text-white/40" : "text-[#888]")}>
         {label}
       </span>
       {count != null && (
-        <span className="text-[10px] font-bold text-[#aaa] ml-auto">{count}</span>
+        <span className={cn("text-[10px] font-bold ml-auto", variant === "dark" ? "text-white/25" : "text-[#aaa]")}>{count}</span>
       )}
     </div>
   );
