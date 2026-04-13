@@ -1084,12 +1084,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} />
 
                 {suggestions.length === 0 ? (
-                  <div className="glass-card p-6 text-center space-y-2">
-                    <p className="text-sm text-foreground/70 font-medium">
-                      Nenhum vinho na sua adega combina com esse prato.
+                  <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    <p className="text-sm text-white/60 font-medium">
+                      {isCommercial ? "Nenhum vinho do estoque combina com esse prato." : "Nenhum vinho na sua adega combina com esse prato."}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Experimente outro prato ou adicione mais vinhos à adega.
+                    <p className="text-xs text-white/35">
+                      Experimente outro prato ou adicione mais vinhos.
                     </p>
                   </div>
                 ) : (
@@ -1111,18 +1111,20 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className={cn(
-                            "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
-                            tint || "bg-card/60 border-border/30",
-                            s.fromCellar && !tint && "border-primary/20 bg-primary/[0.04]",
-                          )}
+                          className="rounded-2xl p-4 space-y-2.5 cursor-default transition-all duration-200 hover:-translate-y-[1px] list-none"
+                          style={{
+                            background: "rgba(255,255,255,0.78)",
+                            backdropFilter: "blur(20px) saturate(1.3)",
+                            border: "1px solid rgba(255,255,255,0.45)",
+                            boxShadow: "0 4px 20px -6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)",
+                          }}
                         >
                           {/* Top: wine identity + classification */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 space-y-0.5">
                               <div className="flex items-center gap-2">
                                 <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[s.match] || "bg-primary/40")} />
-                                <span className="text-[15px] font-bold text-foreground tracking-tight">
+                                <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">
                                   {s.wineName}
                                 </span>
                               </div>
