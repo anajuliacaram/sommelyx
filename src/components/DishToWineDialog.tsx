@@ -27,7 +27,36 @@ import {
   PairingErrorState,
   RecipeButton,
   harmonyLabelMap,
+  matchDotColor,
 } from "@/components/pairing/shared";
+import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
+
+// Compat helpers kept locally for result rendering
+const matchDot: Record<string, string> = matchDotColor;
+const harmonyLabel = harmonyLabelMap;
+const matchBadge: Record<string, { label: string; className: string }> = {
+  perfeito: { label: "combinação perfeita", className: "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" },
+  "muito bom": { label: "harmonia elegante", className: "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" },
+  bom: { label: "boa combinação", className: "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]" },
+};
+
+const styleTint: Record<string, string> = {
+  tinto: "bg-[hsl(348,40%,50%/0.06)] border-[hsl(348,40%,50%/0.12)]",
+  branco: "bg-[hsl(45,50%,55%/0.06)] border-[hsl(45,50%,55%/0.12)]",
+  rosé: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
+  rose: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
+  espumante: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
+  champagne: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
+};
+
+function getStyleTint(style?: string | null): string {
+  if (!style) return "";
+  const lower = style.toLowerCase();
+  for (const [key, val] of Object.entries(styleTint)) {
+    if (lower.includes(key)) return val;
+  }
+  return "";
+}
 
 interface DishToWineDialogProps {
   open: boolean;
