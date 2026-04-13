@@ -65,7 +65,7 @@ export function AlertsSheet({ open, onOpenChange, profileType }: AlertsSheetProp
       if (w.drink_until && currentYear > w.drink_until) {
         items.push({
           id: `past-${w.id}`, wineId: w.id, type: "past_peak", icon: AlertTriangle, tone: "text-warning", bg: "bg-warning/8",
-          title: "Passou do pico", desc: `Janela encerrou em ${w.drink_until}`, wineName: w.name,
+          title: "Beber em breve", desc: `Janela ideal encerrou em ${w.drink_until} — recomendamos consumir logo`, wineName: w.name,
           style: w.style, grape: w.grape, region: w.region, country: w.country, vintage: w.vintage,
           drinkFrom: w.drink_from, drinkUntil: w.drink_until,
         });
@@ -115,7 +115,7 @@ export function AlertsSheet({ open, onOpenChange, profileType }: AlertsSheetProp
     low_stock: visibleAlerts.filter(a => a.type === "low_stock"),
   };
 
-  const labels: Record<string, string> = { drink_now: "Beber agora", past_peak: "Passando do pico", low_stock: "Estoque baixo" };
+  const labels: Record<string, string> = { drink_now: "Beber agora", past_peak: "Beber em breve", low_stock: "Estoque baixo" };
   const icons: Record<string, typeof Bell> = { drink_now: GlassWater, past_peak: AlertTriangle, low_stock: ArrowDownRight };
 
   return (
