@@ -917,7 +917,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2.5">
                               <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[d.match] || "bg-primary/40")} />
-                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{d.name</span>
+                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{d.name}</span>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               {d.highlight && (
@@ -1425,7 +1425,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           {/* Header: wine name + price */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 space-y-0.5">
-                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{w.name</span>
+                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{w.name}</span>
                               {meta && <p className="text-[11px] text-muted-foreground/70">{meta}</p>}
                             </div>
                             {w.price != null && (
