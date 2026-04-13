@@ -1187,6 +1187,39 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               </span>
                             )}
                           </div>
+
+                          {/* "Por que funciona" highlight */}
+                          <div className="pl-[18px] rounded-xl bg-[#0F2A24]/[0.06] border border-[#0F2A24]/[0.08] p-2.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F2A24]/60 mb-1 flex items-center gap-1.5">
+                              <Sparkles className="h-3 w-3" />
+                              Por que funciona
+                            </p>
+                            <p className="text-[12px] text-[#555] leading-relaxed">{s.reason}</p>
+                          </div>
+
+                          {/* Action CTA */}
+                          <div className="pl-[18px]">
+                            {isCommercial ? (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-3 text-[11px] font-semibold border border-[#0F2A24]/20 bg-[#0F2A24]/[0.06] text-[#0F2A24] hover:bg-[#0F2A24]/10 rounded-xl"
+                                onClick={() => toast({ title: `${s.wineName}`, description: "Pronto para sugerir ao cliente" })}
+                              >
+                                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                                Sugerir ao cliente
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                className="h-8 px-3 text-[11px] font-semibold rounded-xl"
+                                onClick={() => toast({ title: `${s.wineName}`, description: "Registrado para consumo" })}
+                              >
+                                <GlassWater className="h-3.5 w-3.5 mr-1.5" />
+                                Consumir agora
+                              </Button>
+                            )}
+                          </div>
                         </motion.li>
                       );
                     })}
@@ -1201,7 +1234,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setDish("");
                     setStep("dish");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
                 >
                   Buscar outro prato
                 </Button>
