@@ -193,6 +193,14 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
                         <Badge variant="outline" className={cn("text-[9px] h-5 shrink-0 border-0", a.bg, a.tone)}>
                           {a.title}
                         </Badge>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setDismissedIds(prev => new Set(prev).add(a.id)); }}
+                          className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 text-muted-foreground/40 hover:text-foreground hover:bg-muted/30 transition-colors"
+                          title="Dispensar"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
                       </div>
 
                       <AnimatePresence>
