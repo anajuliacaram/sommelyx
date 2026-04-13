@@ -337,7 +337,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30" style={{ background: "linear-gradient(165deg, #0F2A24 0%, #152F2A 40%, #1C3A33 100%)" }}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30" style={{ background: "radial-gradient(circle at 20% 30%, rgba(80,120,90,0.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(120,160,120,0.15), transparent 50%), linear-gradient(135deg, #0B1F17, #0F2A20, #132F24)" }}>
         <SheetHeader className="sr-only">
           <SheetTitle>Harmonizar</SheetTitle>
         </SheetHeader>

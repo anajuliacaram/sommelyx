@@ -1,11 +1,11 @@
 export function LandingBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Deep green base */}
+      {/* Deep green base with radial glow */}
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(165deg, #0F2A24 0%, #152F2A 40%, #1C3A33 70%, #1A3630 100%)",
+          background: "radial-gradient(circle at 20% 30%, rgba(80,120,90,0.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(120,160,120,0.15), transparent 50%), linear-gradient(135deg, #0B1F17, #0F2A20, #132F24)",
         }}
       />
 
