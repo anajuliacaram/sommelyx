@@ -88,7 +88,7 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground selection:bg-primary/15 selection:text-primary">
+    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary" style={{ background: "linear-gradient(165deg, #F4F1EC 0%, #EDE7DF 40%, #E6E2D8 65%, #E8E4DB 100%)" }}>
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
@@ -98,7 +98,7 @@ export default function Login() {
 
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">
         {/* Left panel */}
-        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] border border-border/40 bg-card/70 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_-16px_rgba(44,20,31,0.06)] backdrop-blur-xl sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12">
+        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] p-6 sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12" style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.45)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 8px 32px -8px rgba(0,0,0,0.10)" }}>
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
               <Logo variant="navbar" className="h-10 sm:h-11 w-auto drop-shadow-[0_4px_12px_rgba(44,20,31,0.10)]" />
@@ -141,7 +141,8 @@ export default function Login() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full max-w-[520px] bg-card/65 backdrop-blur-2xl p-7 md:p-9 rounded-[24px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_12px_40px_-20px_rgba(15,15,20,0.10)] border border-border/40 ring-1 ring-white/[0.04]"
+            className="w-full max-w-[520px] p-7 md:p-9 rounded-[24px]"
+            style={{ background: "rgba(255,255,255,0.65)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)", border: "1px solid rgba(255,255,255,0.48)", boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 12px 40px -20px rgba(15,15,20,0.12)" }}
           >
             <div className="mb-7">
               <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Acesse sua conta</h2>

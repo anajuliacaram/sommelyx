@@ -10,11 +10,11 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
       className,
     )}
     style={{
-      background: "rgba(255, 255, 255, 0.55)",
-      backdropFilter: "blur(16px)",
-      WebkitBackdropFilter: "blur(16px)",
-      border: "1px solid rgba(255, 255, 255, 0.35)",
-      boxShadow: "0 8px 30px rgba(0, 0, 0, 0.08)",
+      background: "rgba(255, 255, 255, 0.62)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      border: "1px solid rgba(255, 255, 255, 0.45)",
+      boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 8px 32px -8px rgba(0,0,0,0.10)",
     }}
     {...props}
   />
