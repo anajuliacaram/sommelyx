@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin, FileText, Wine as WineIcon, ChevronDown, ChevronUp, Zap, Feather, Dumbbell, Brain, Smile, Heart } from "@/icons/lucide";
-import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -11,6 +10,14 @@ import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import {
+  CompatibilityBadge,
+  PairingSheetHero,
+  PairingLoadingState,
+  PairingErrorState,
+  PremiumResultCard,
+  SectionHeader,
+} from "@/components/pairing/shared";
 
 interface WineListScannerDialogProps {
   open: boolean;
@@ -355,12 +362,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-border/50" style={{ background: "#F4F1EC" }}>
-        <SheetHeader>
-          <SheetTitle className="font-serif text-lg flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary/70" />
-            Analisar Carta de Vinhos
-          </SheetTitle>
+        <SheetHeader className="sr-only">
+          <SheetTitle>Analisar Carta de Vinhos</SheetTitle>
         </SheetHeader>
+
+        <PairingSheetHero
+          title="Analisar Carta"
+          subtitle="Envie a carta de vinhos e descubra as melhores escolhas para você"
+        />
 
         <AnimatePresence mode="wait">
           {step === "capture" && (
@@ -402,41 +411,15 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           )}
 
           {step === "scanning" && (
-            <motion.div
-              key="scanning"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-8"
-            >
-              {attachmentPreview && (
-                attachmentPreview.url ? (
-                  <div className="w-full aspect-[4/3] max-h-[200px] rounded-xl overflow-hidden border border-border/30">
-                    <img src={attachmentPreview.url} alt={attachmentPreview.fileName} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-full rounded-xl border border-border/40 bg-background/60 px-4 py-3 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <FileText className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[12px] font-semibold text-foreground truncate">{attachmentPreview.fileName}</p>
-                      <p className="text-[10px] text-muted-foreground">PDF anexado para leitura inteligente</p>
-                    </div>
-                  </div>
-                )
-              )}
-              <AiProgressiveLoader
-                steps={[
-                  "Processando imagem…",
-                  "Identificando vinhos na carta…",
-                  "Analisando estrutura de cada vinho…",
-                  "Comparando opções da carta…",
-                  "Montando recomendações…",
-                ]}
-                interval={3000}
-              />
-            </motion.div>
+            <PairingLoadingState
+              steps={[
+                "Processando imagem…",
+                "Identificando vinhos na carta…",
+                "Analisando estrutura de cada vinho…",
+                "Comparando opções da carta…",
+                "Montando recomendações…",
+              ]}
+            />
           )}
 
           {step === "results" && results && (
@@ -445,12 +428,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-3 pt-5"
+              className="space-y-3 pt-3"
             >
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#888" }}>
-                  {filteredWines.length} vinho{filteredWines.length !== 1 ? "s" : ""}{filterMode !== "all" ? ` (${filterMode})` : ""}
-                </p>
+                <SectionHeader icon="wine" label={`${filteredWines.length} vinho${filteredWines.length !== 1 ? "s" : ""}${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
                 <Button variant="ghost" size="sm" onClick={reset} className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground">
                   <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
                 </Button>
@@ -568,29 +549,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           )}
 
           {step === "error" && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-14"
-            >
-              <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
-                <X className="h-7 w-7 text-destructive" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-medium text-foreground mb-1">Não foi possível analisar</p>
-                <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
-              </div>
-              <div className="flex flex-col gap-2.5 w-full">
-                <Button onClick={() => (lastAttachment ? runScan(lastAttachment) : reset())} variant="secondary" className="h-11 text-[13px] font-semibold">
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
-                </Button>
-                <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-border/60">
-                  Fechar
-                </Button>
-              </div>
-            </motion.div>
+            <PairingErrorState
+              message={errorMsg}
+              onRetry={() => (lastAttachment ? runScan(lastAttachment) : reset())}
+              onClose={() => handleClose(false)}
+            />
           )}
         </AnimatePresence>
       </SheetContent>
