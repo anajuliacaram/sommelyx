@@ -283,7 +283,10 @@ export default function CellarPage() {
     }
     if (selectedStyles.length > 0) list = list.filter(w => w.style && selectedStyles.includes(w.style));
     if (selectedCountries.length > 0) list = list.filter(w => w.country && selectedCountries.includes(w.country));
-    if (selectedGrapes.length > 0) list = list.filter(w => w.grape && selectedGrapes.includes(w.grape));
+    if (selectedGrapes.length > 0) list = list.filter(w => {
+      if (selectedGrapes.includes("blend") && !w.grape) return true;
+      return w.grape && selectedGrapes.includes(w.grape);
+    });
     if (selectedVintages.length > 0) list = list.filter(w => {
       if (selectedVintages.includes("sem-safra") && !w.vintage) return true;
       return w.vintage && selectedVintages.includes(String(w.vintage));
