@@ -11,7 +11,7 @@ import {
   Layers,
   Package,
   Plus,
-  RefreshCw,
+  RefreshCcw,
   ShoppingCart,
   TrendingUp,
   Upload,
