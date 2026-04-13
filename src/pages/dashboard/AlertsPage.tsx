@@ -37,6 +37,7 @@ export default function AlertsPage() {
   const { data: wines } = useWines();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profileType } = useAuth();
 
   const [insights, setInsights] = useState<Record<string, WineInsight>>({});
   const [loadingInsight, setLoadingInsight] = useState<string | null>(null);
@@ -67,7 +68,7 @@ export default function AlertsPage() {
         });
       }
 
-      if (w.quantity > 0 && w.quantity <= 2) {
+      if (w.quantity > 0 && w.quantity <= 2 && profileType === "commercial") {
         items.push({
           id: `low-${w.id}`, wineId: w.id, type: "low_stock", icon: ArrowDownRight, tone: "text-wine", bg: "bg-wine/8",
           title: "Estoque baixo", desc: `Apenas ${w.quantity} garrafa(s) restante(s)`, wineName: w.name,
