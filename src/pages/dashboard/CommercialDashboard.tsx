@@ -380,7 +380,7 @@ export default function CommercialDashboard() {
     () => [
       { label: "Estoque total", value: `${totalBottles}`, icon: Layers, tone: "default" as const },
       { label: "Valor em estoque", value: formatBRL(totalValue), icon: DollarSign, tone: "default" as const },
-      { label: "Giro", value: `${turnover}%`, icon: RefreshCw, tone: "default" as const },
+      { label: "Giro", value: `${turnover}%`, icon: RefreshCcw, tone: "default" as const },
       { label: "Ticket médio", value: formatBRL(avgTicket), icon: TrendingUp, tone: "default" as const },
       { label: "Ruptura", value: `${lowStock}`, icon: AlertTriangle, tone: lowStock > 0 ? ("alert" as const) : ("default" as const) },
     ],
