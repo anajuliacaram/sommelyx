@@ -10,7 +10,7 @@ const corsHeaders = {
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 const AI_TIMEOUT_MS = 55_000;
-const AI_URL = "https://api.openai.com/v1/chat/completions";
+const AI_URL = "https://ai.lovable.dev/v1/chat/completions";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 10;
@@ -316,11 +316,11 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
-    if (!OPENAI_API_KEY) {
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing OPENAI_API_KEY`);
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_openai_key" });
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const AI_MODEL = "google/gemini-2.5-flash";
+    if (!LOVABLE_API_KEY) {
+      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing LOVABLE_API_KEY`);
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_lovable_api_key" });
       return fail(500, {
         ok: false,
         code: "CONFIG_ERROR",
@@ -373,11 +373,11 @@ serve(async (req) => {
       method: "POST",
       signal: controller.signal,
       headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: OPENAI_MODEL,
+        model: AI_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           {
