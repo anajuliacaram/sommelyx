@@ -91,7 +91,7 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
                 willChange: "transform, box-shadow",
             } : {}}
             className={cn(
-                "relative rounded-2xl bg-card/80 backdrop-blur-sm p-5 cursor-default transition-colors border border-border/40",
+                "relative rounded-2xl bg-[hsl(var(--cream-warm))] p-5 cursor-default transition-colors border border-border/50",
                 onClick && "cursor-pointer",
                 className
             )}

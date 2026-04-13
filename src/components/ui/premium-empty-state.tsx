@@ -36,27 +36,27 @@ export function PremiumEmptyState({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "flex flex-col items-center justify-center py-16 lg:py-20 px-8 text-center rounded-xl bg-card/60 border border-border/25 relative overflow-hidden",
+                "editorial-hero flex flex-col items-center justify-center py-16 lg:py-20 px-8 text-center relative",
                 className
             )}
         >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[280px] max-h-[280px] bg-gradient-to-br from-primary/[0.04] to-transparent blur-[60px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[280px] max-h-[280px] bg-gradient-to-br from-copper/[0.06] to-transparent blur-[60px] rounded-full pointer-events-none" />
 
             <motion.div
                 animate={reducedMotion ? {} : { y: [-2, 2, -2] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="relative flex items-center justify-center w-16 h-16 mb-8"
             >
-                <div className="absolute inset-0 bg-primary/[0.04] rounded-full blur-lg pointer-events-none" />
-                <div className="relative z-10 w-12 h-12 rounded-lg bg-card border border-border/30 flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-primary/70" strokeWidth={1.5} />
+                <div className="absolute inset-0 bg-copper/[0.08] rounded-full blur-lg pointer-events-none" />
+                <div className="relative z-10 w-12 h-12 rounded-lg bg-[hsl(0_0%_100%/0.08)] border border-[hsl(0_0%_100%/0.10)] flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-copper" strokeWidth={1.5} />
                 </div>
             </motion.div>
 
-            <h3 className="font-serif text-[22px] font-semibold text-foreground tracking-[-0.01em] mb-2">
+            <h3 className="font-serif text-[22px] font-semibold text-[hsl(var(--cream-warm))] tracking-[-0.01em] mb-2 relative z-10">
                 {title}
             </h3>
-            <p className="text-[14px] text-muted-foreground max-w-[340px] leading-relaxed mb-8">
+            <p className="text-[14px] text-[hsl(var(--cream-warm)/0.6)] max-w-[340px] leading-relaxed mb-8 relative z-10">
                 {description}
             </p>
 

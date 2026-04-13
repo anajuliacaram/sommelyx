@@ -71,8 +71,13 @@
     /* Editorial — Forest & Copper */
     --forest: 140 18% 12%;
     --forest-light: 140 12% 18%;
+    --forest-muted: 140 8% 22%;
     --copper: 28 42% 62%;
     --copper-light: 28 35% 78%;
+    --copper-muted: 28 25% 72%;
+
+    /* Cream warm for content areas */
+    --cream-warm: 33 18% 96%;
   }
 
   .dark {
@@ -186,15 +191,14 @@
 
 @layer utilities {
 
-  /* ── Glass Card — Refined editorial glass ── */
+  /* ── Glass Card — Editorial Premium ── */
   .glass-card {
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(24px) saturate(1.15);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: hsl(var(--cream-warm));
+    border: 1px solid hsl(var(--border) / 0.5);
     box-shadow:
-      0 1px 3px rgba(15, 15, 20, 0.03),
-      0 8px 32px -16px rgba(44, 20, 31, 0.08);
+      0 1px 2px rgba(26, 36, 24, 0.04),
+      0 6px 24px -12px rgba(26, 36, 24, 0.06);
     transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
                 border-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -204,8 +208,9 @@
 
   .glass-card:hover {
     box-shadow:
-      0 2px 8px rgba(15, 15, 20, 0.05),
-      0 12px 40px -18px rgba(44, 20, 31, 0.12);
+      0 2px 6px rgba(26, 36, 24, 0.06),
+      0 10px 32px -14px rgba(26, 36, 24, 0.10);
+    border-color: hsl(var(--copper) / 0.15);
     transform: translateY(-1px);
   }
 
@@ -214,7 +219,6 @@
     border: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15),
                 0 8px 32px -16px rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(32px) saturate(1.2);
   }
 
   .glass-card::before {
@@ -224,9 +228,8 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+    background: linear-gradient(to right, transparent, hsl(var(--copper) / 0.12), transparent);
     z-index: 10;
-    opacity: 0.4;
   }
 
   .glass-card::after {
@@ -235,9 +238,8 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(120% 80% at 20% 0%, hsl(var(--wine) / 0.025), transparent 55%),
-      radial-gradient(100% 60% at 85% 90%, hsl(var(--gold) / 0.015), transparent 50%);
-    opacity: 0.6;
+      radial-gradient(120% 80% at 20% 0%, hsl(var(--forest) / 0.025), transparent 55%),
+      radial-gradient(100% 60% at 85% 90%, hsl(var(--copper) / 0.02), transparent 50%);
     z-index: 0;
   }
 
@@ -597,18 +599,19 @@
 
   .card-depth {
     border-radius: 20px;
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border) / 0.4);
+    background: hsl(var(--cream-warm));
+    border: 1px solid hsl(var(--border) / 0.5);
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.03),
-      0 6px 24px -12px rgba(44, 20, 31, 0.06);
+      0 1px 2px rgba(26, 36, 24, 0.04),
+      0 6px 24px -12px rgba(26, 36, 24, 0.06);
     transition: all 280ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-depth:hover {
     box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.04),
-      0 10px 32px -14px rgba(44, 20, 31, 0.10);
+      0 2px 6px rgba(26, 36, 24, 0.06),
+      0 10px 32px -14px rgba(26, 36, 24, 0.10);
+    border-color: hsl(var(--copper) / 0.15);
     transform: translateY(-1px);
   }
 
@@ -625,6 +628,43 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .text-gradient-editorial {
+    background: linear-gradient(145deg, hsl(var(--forest)), hsl(var(--forest-light)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Editorial Hero Block — Forest deep ── */
+  .editorial-hero {
+    border-radius: 20px;
+    background: linear-gradient(145deg, hsl(var(--forest)), hsl(var(--forest-muted)));
+    color: hsl(var(--cream-warm));
+    border: 1px solid hsl(0 0% 100% / 0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .editorial-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, hsl(var(--copper) / 0.2), transparent);
+  }
+
+  .editorial-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 15% 0%, hsl(var(--copper) / 0.08), transparent 50%),
+      radial-gradient(ellipse at 85% 100%, hsl(0 0% 100% / 0.03), transparent 40%);
   }
 
   .gradient-gold {
