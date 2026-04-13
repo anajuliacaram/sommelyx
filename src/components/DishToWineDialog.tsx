@@ -804,7 +804,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
-                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
+                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}">
                   <p className="text-[12px] font-medium text-foreground">
                     Vinho: <span className="font-semibold">{extWineName}</span>
                   </p>
@@ -1001,7 +1001,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
-                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
+                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}">
                   <p className="text-[12px] font-medium text-foreground">
                     Prato: <span className="font-semibold">{dish}</span>
                   </p>
