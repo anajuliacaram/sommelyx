@@ -230,41 +230,36 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
 
         {/* FAQ */}
         <motion.div
-          className="mx-auto mt-10 sm:mt-12 max-w-3xl"
+          className="mx-auto mt-14 sm:mt-20 max-w-3xl"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
           variants={fadeUp}
           custom={4}
         >
-          <div className="text-center">
-            <h3 className="font-serif text-[24px] sm:text-[30px] font-black tracking-tight" style={{ color: "#1A1A1A" }}>
+          <div className="text-center mb-10">
+            <h3 className="font-serif text-[28px] sm:text-[34px] font-black tracking-tight text-foreground">
               Perguntas frequentes
             </h3>
-            <p className="mt-2 font-sans text-[13px] sm:text-[14px] font-medium" style={{ color: "#666" }}>
+            <p className="mt-3 font-sans text-[14px] sm:text-[15px] font-medium text-muted-foreground">
               Respostas rápidas para decidir com confiança.
             </p>
           </div>
 
-          <div className="mt-6">
-            <Accordion type="single" collapsible className="w-full space-y-3">
+          <div className="space-y-4">
+            <Accordion type="single" collapsible className="w-full space-y-4">
               {faqs.map((item, idx) => (
                 <AccordionItem
                   key={item.q}
                   value={`faq-${idx}`}
-                  className="group relative overflow-hidden rounded-[18px] transition-all duration-300 ease-premium hover:-translate-y-0.5 data-[state=open]:before:opacity-100 before:absolute before:left-0 before:top-4 before:bottom-4 before:w-[3px] before:rounded-r-full before:bg-[#6E1E2A] before:opacity-0"
-                  style={{
-                    ...glassCard,
-                    background: "rgba(30,20,20,0.025)",
-                  }}
+                  className="group relative overflow-hidden rounded-[20px] border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_-4px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_-6px_rgba(0,0,0,0.10)] data-[state=open]:shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_32px_-8px_rgba(0,0,0,0.12)] before:absolute before:left-0 before:top-5 before:bottom-5 before:w-[3px] before:rounded-r-full before:bg-primary before:opacity-0 before:transition-opacity before:duration-300 data-[state=open]:before:opacity-100"
                 >
                   <AccordionTrigger
-                    className="px-5 py-4 text-left font-serif text-[15px] sm:text-[16px] font-semibold tracking-[-0.01em] leading-snug hover:no-underline [&>svg]:text-foreground/35 [&[data-state=open]>svg]:text-wine data-[state=open]:text-wine"
-                    style={{ color: "#2B2B2B" }}
+                    className="px-6 py-5 text-left font-serif text-[16px] sm:text-[18px] font-bold tracking-[-0.015em] leading-snug text-foreground hover:no-underline [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground/50 [&>svg]:transition-colors [&[data-state=open]>svg]:text-primary"
                   >
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="px-5 pb-5 pt-0 font-sans text-[13px] sm:text-[14px] font-normal tracking-[-0.005em] leading-relaxed" style={{ color: "#666" }}>
+                  <AccordionContent className="px-6 pb-6 pt-0 font-sans text-[14px] sm:text-[15px] font-normal tracking-[-0.005em] leading-[1.75] text-foreground/70">
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
