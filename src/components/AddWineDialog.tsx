@@ -245,25 +245,12 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (data.cellar_location) setLocation({ manualLabel: String(data.cellar_location) });
     if (data.labelImagePreview) setLabelImagePreview(String(data.labelImagePreview));
 
-    const inferredDrinkWindow = (!data.drink_from || !data.drink_until)
-      ? suggestDrinkWindow(data)
-      : null;
-
-    if (!data.purchase_price && !isCommercial && !lastPaid) {
-      setLastPaid(String(suggestPurchasePrice(data)));
-    }
-
-    if (!data.drink_from && inferredDrinkWindow && !drinkFrom) {
-      setDrinkFrom(String(inferredDrinkWindow.from));
-    }
-
-    if (!data.drink_until && inferredDrinkWindow && !drinkUntil) {
-      setDrinkUntil(String(inferredDrinkWindow.until));
-    }
+    // Only set drink window if AI returned them from the label
+    // Do NOT use heuristic fallbacks — better to leave blank than fill wrong data
 
     if (
       data.country || data.region || data.grape || data.food_pairing || data.tasting_notes ||
-      data.drink_from || data.drink_until || inferredDrinkWindow || (!isCommercial && !data.purchase_price)
+      data.drink_from || data.drink_until
     ) {
       setMoreOpen(true);
     }
