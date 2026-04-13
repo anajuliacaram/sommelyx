@@ -157,10 +157,17 @@ export default function CellarPage() {
     wines.forEach(w => { if (w.country) countryMap[w.country] = (countryMap[w.country] || 0) + w.quantity; });
     const countries = Object.entries(countryMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c }));
     
-    // Count wines per grape
+    // Count wines per grape (add "Blend" for wines without a grape)
     const grapeMap: Record<string, number> = {};
-    wines.forEach(w => { if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity; });
-    const grapes = Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c }));
+    let noGrapeCount = 0;
+    wines.forEach(w => {
+      if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity;
+      else noGrapeCount += w.quantity;
+    });
+    const grapes = [
+      ...(noGrapeCount > 0 ? [{ value: "blend", label: "Blend", count: noGrapeCount }] : []),
+      ...Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c })),
+    ];
     
     // Count wines per style
     const styleMap: Record<string, number> = {};
