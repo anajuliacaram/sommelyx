@@ -804,7 +804,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
-                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}">
+                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
                   <p className="text-[12px] font-medium text-foreground">
                     Vinho: <span className="font-semibold">{extWineName}</span>
                   </p>
@@ -1001,7 +1001,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
-                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}">
+                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
                   <p className="text-[12px] font-medium text-foreground">
                     Prato: <span className="font-semibold">{dish}</span>
                   </p>
@@ -1381,7 +1381,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}">
+                <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
                   <p className="text-sm font-medium text-foreground">
                     Prato: <span className="font-bold">{dish}</span>
                   </p>
