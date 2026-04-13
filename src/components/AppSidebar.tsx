@@ -78,7 +78,16 @@ export function AppSidebar() {
 
   return (
     <>
-      <Sidebar collapsible="offcanvas" className="border-r border-[hsl(var(--sidebar-border))] w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
+      <Sidebar
+        collapsible="offcanvas"
+        className="border-r w-[240px]"
+        style={{
+          background: "rgba(30, 46, 28, 0.65)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderColor: "rgba(255, 255, 255, 0.15)",
+        }}
+      >
         <SidebarHeader className="pt-2 md:pt-2 px-3">
           <Link
             to="/dashboard"
@@ -95,7 +104,7 @@ export function AppSidebar() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[25px] font-bold tracking-[-0.01em] text-[hsl(var(--cream))] leading-none font-serif">
+              <span className="text-[25px] font-bold tracking-[-0.01em] leading-none font-serif" style={{ color: "#F5F5F3" }}>
                 Sommelyx
               </span>
               <span
@@ -156,7 +165,7 @@ export function AppSidebar() {
 
         <SidebarContent className="px-3 pt-1">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--sidebar-foreground)/0.35)] mb-1 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold mb-1 px-3" style={{ color: "rgba(245, 245, 243, 0.35)" }}>
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -182,7 +191,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-1">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--sidebar-foreground)/0.35)] mb-1 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold mb-1 px-3" style={{ color: "rgba(245, 245, 243, 0.35)" }}>
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -212,14 +221,17 @@ export function AppSidebar() {
           <div className="px-3 pt-3 pb-[calc(14px+env(safe-area-inset-bottom))]">
             <div className="flex items-center gap-2.5 px-2 mb-3">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-forest shrink-0"
-                style={{ background: "linear-gradient(135deg, hsl(var(--copper)), hsl(var(--copper-light)))" }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0"
+                style={{
+                  background: "linear-gradient(135deg, hsl(var(--copper)), hsl(var(--copper-light)))",
+                  color: "#1A2418",
+                }}
               >
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold truncate text-[hsl(var(--sidebar-foreground))]">{user?.user_metadata?.full_name || "Usuário"}</p>
-                <p className="text-[11px] truncate text-[hsl(var(--sidebar-foreground)/0.45)]">{user?.email}</p>
+                <p className="text-[13px] font-semibold truncate" style={{ color: "#F5F5F3" }}>{user?.user_metadata?.full_name || "Usuário"}</p>
+                <p className="text-[11px] truncate" style={{ color: "rgba(245, 245, 243, 0.45)" }}>{user?.email}</p>
               </div>
             </div>
             <SidebarMenu>

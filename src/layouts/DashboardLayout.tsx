@@ -36,10 +36,18 @@ export default function DashboardLayout() {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="dashboard-shell min-h-screen flex w-full bg-background">
+      <div className="dashboard-shell min-h-screen flex w-full">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/30">
+          <header
+            className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 border-b"
+            style={{
+              background: "rgba(255, 255, 255, 0.6)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              borderColor: "rgba(255, 255, 255, 0.3)",
+            }}
+          >
             {/* Desktop: icon-only trigger */}
             {!isMobile && (
               <SidebarTrigger
