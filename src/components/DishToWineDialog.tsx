@@ -507,7 +507,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       value={dish}
                       onChange={(e) => setDish(e.target.value)}
                       placeholder="Digite o prato ou ingrediente…"
-                      className="pl-9 h-11 text-sm"
+                      className="pl-9 h-11 text-sm bg-white/10 border-white/15 text-white placeholder:text-white/30 focus:border-white/30 focus:ring-white/10"
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                       autoFocus
                     />
@@ -534,7 +534,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 {!loading && (
                   <div className="space-y-2.5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/35">
                       Sugestões populares
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -544,7 +544,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSearch(d)}
-                          className="h-8 px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary rounded-xl"
+                          className="h-8 px-3 text-[11px] font-medium border border-white/12 bg-white/6 hover:bg-white/12 hover:border-white/20 text-white/60 hover:text-white/90 rounded-xl"
                         >
                           {d}
                         </Button>
