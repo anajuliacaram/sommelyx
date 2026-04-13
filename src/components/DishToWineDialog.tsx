@@ -768,11 +768,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-4"
               >
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
                     Qual vinho você quer harmonizar?
                   </p>
                   <div className="relative">
-                    <Wine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+                    <Wine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
                     <Input
                       value={extWineName}
                       onChange={(e) => setExtWineName(e.target.value)}
@@ -811,7 +811,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-3">
                     Envie a foto do cardápio do restaurante
                   </p>
 
@@ -845,7 +845,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       type="button"
                       variant="ghost"
                       onClick={() => menuGalleryRef.current?.click()}
-                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                      className="h-12 text-[13px] font-medium border border-white/12 bg-white/8 hover:bg-white/12 text-white/70"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
@@ -985,7 +985,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setWineProfile(null);
                     setStep("ext-menu-photo");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
                 >
                   Enviar outra foto
                 </Button>
@@ -1008,7 +1008,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-3">
                     Envie a foto da carta de vinhos
                   </p>
 
@@ -1042,7 +1042,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       type="button"
                       variant="ghost"
                       onClick={() => fileGalleryRef.current?.click()}
-                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                      className="h-12 text-[13px] font-medium border border-white/12 bg-white/8 hover:bg-white/12 text-white/70"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
@@ -1493,7 +1493,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setPreview(null);
                     setStep("photo");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
                 >
                   Enviar outra foto
                 </Button>
@@ -1516,7 +1516,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <p className="text-[13px] text-foreground/70 leading-relaxed italic">{recipeModal.recipe.description}</p>
                 )}
                 <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Ingredientes</h4>
+                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Ingredientes</h4>
                   <ul className="space-y-1">
                     {recipeModal.recipe.ingredients.map((ing, i) => (
                       <li key={i} className="text-[13px] text-foreground/80 flex items-start gap-2">
@@ -1527,7 +1527,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Modo de preparo</h4>
+                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Modo de preparo</h4>
                   <ol className="space-y-2">
                     {recipeModal.recipe.steps.map((step, i) => (
                       <li key={i} className="text-[13px] text-foreground/80 flex items-start gap-2.5">
