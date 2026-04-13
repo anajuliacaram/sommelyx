@@ -223,6 +223,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setLabelImagePreview(null); setNoPriceInfo(false);
+    setEstimating(false); setEstimateConfidence(null);
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
