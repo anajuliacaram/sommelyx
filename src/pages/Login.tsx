@@ -88,7 +88,7 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary" style={{ background: "linear-gradient(135deg, #0B1F17 0%, #0F2A20 40%, #132F24 100%)" }}>
+    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary" style={{ background: "linear-gradient(165deg, #F4F1EC 0%, #EDE7DF 40%, #E6E2D8 65%, #E8E4DB 100%)" }}>
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
@@ -98,15 +98,15 @@ export default function Login() {
 
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">
         {/* Left panel */}
-        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] p-6 sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12" style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 8px 32px -8px rgba(0,0,0,0.25)" }}>
+        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] p-6 sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12" style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.45)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 8px 32px -8px rgba(0,0,0,0.10)" }}>
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
               <Logo variant="navbar" className="h-10 sm:h-11 w-auto drop-shadow-[0_4px_12px_rgba(44,20,31,0.10)]" />
-              <span className="font-serif text-[26px] font-black tracking-tight text-white">Sommelyx</span>
+              <span className="font-serif text-[26px] font-black tracking-tight text-wine">Sommelyx</span>
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">
-              <span className="inline-flex items-center gap-2 rounded-full border border-wine/20 bg-wine/[0.08] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine-foreground" style={{ color: "#C6A16E" }}>
+              <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
               </span>
               <h1 className="mt-5 max-w-[560px] text-[36px] font-black leading-[0.97] tracking-[-0.03em] text-foreground sm:text-[44px] lg:text-[54px]">
@@ -124,7 +124,7 @@ export default function Login() {
               { icon: ShieldCheck, label: "Confiável", desc: "Dados protegidos e operação estável", bg: "bg-gold/10", color: "text-gold" },
               { icon: Sparkles, label: "Editorial", desc: "Experiência elegante de ponta a ponta", bg: "bg-wine/[0.06]", color: "text-wine" },
             ].map((item) => (
-              <article key={item.label} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <article key={item.label} className="rounded-xl border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                 <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
                   <item.icon className="h-4 w-4" />
                 </div>
@@ -142,7 +142,7 @@ export default function Login() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[520px] p-7 md:p-9 rounded-[24px]"
-            style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 1px 3px rgba(0,0,0,0.15), 0 12px 40px -20px rgba(0,0,0,0.30)" }}
+            style={{ background: "rgba(255,255,255,0.65)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)", border: "1px solid rgba(255,255,255,0.48)", boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 12px 40px -20px rgba(15,15,20,0.12)" }}
           >
             <div className="mb-7">
               <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Acesse sua conta</h2>
@@ -255,8 +255,7 @@ export default function Login() {
                   toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                 }
               }}
-              className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-xl text-[13px] font-semibold text-white hover:shadow-sm"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.10)" }}
+              className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border/50 bg-background/60 text-[13px] font-semibold text-foreground hover:bg-background/90 hover:shadow-sm"
             >
               <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>

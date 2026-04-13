@@ -42,11 +42,11 @@ export default function DashboardLayout() {
           <header
             className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30"
             style={{
-              background: "rgba(20, 30, 25, 0.6)",
-              backdropFilter: "blur(16px) saturate(1.3)",
-              WebkitBackdropFilter: "blur(16px) saturate(1.3)",
-              borderBottom: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+              background: "rgba(11, 31, 23, 0.7)",
+              backdropFilter: "blur(18px) saturate(1.3)",
+              WebkitBackdropFilter: "blur(18px) saturate(1.3)",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
             }}
           >
             {/* Desktop: icon-only trigger */}
@@ -97,9 +97,10 @@ export default function DashboardLayout() {
                 className={[
                   "hidden sm:inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-extrabold uppercase tracking-[0.08em] shrink-0 whitespace-nowrap",
                   profileType === "commercial"
-                    ? "bg-accent/12 text-accent ring-1 ring-accent/20"
-                    : "bg-primary/10 text-primary ring-1 ring-primary/18",
+                    ? "text-accent ring-1 ring-accent/20"
+                    : "text-primary-foreground ring-1 ring-primary/30",
                 ].join(" ")}
+                style={{ background: "rgba(255, 255, 255, 0.06)" }}
               >
                 {profileType === "commercial" ? "COMERCIAL" : "PESSOAL"}
               </span>
@@ -109,7 +110,7 @@ export default function DashboardLayout() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setAlertsOpen(true)}
-                className="h-10 w-10 rounded-xl relative text-muted-foreground hover:bg-muted/20"
+                className="h-10 w-10 rounded-xl relative text-white/60 hover:bg-white/10 hover:text-white"
                 title="Alertas"
               >
                 <Bell className="h-4.5 w-4.5" />

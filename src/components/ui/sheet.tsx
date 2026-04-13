@@ -22,7 +22,7 @@ const SheetOverlay = React.forwardRef<
       "fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
-    style={{ background: "rgba(0, 0, 0, 0.6)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+    style={{ background: "rgba(0, 0, 0, 0.6)" }}
     {...props}
     ref={ref}
   />
@@ -60,16 +60,18 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         ref={ref}
         className={cn(sheetVariants({ side }), className)}
         style={{
-          background: "rgba(20, 30, 25, 0.92)",
-          backdropFilter: "blur(28px) saturate(1.4)",
-          WebkitBackdropFilter: "blur(28px) saturate(1.4)",
+          background: "rgba(11, 31, 23, 0.95)",
+          backdropFilter: "blur(18px) saturate(1.3)",
+          WebkitBackdropFilter: "blur(18px) saturate(1.3)",
           border: "1px solid rgba(255, 255, 255, 0.08)",
-          boxShadow: "0 24px 80px -20px rgba(0,0,0,0.50)",
+          boxShadow: "0 24px 80px -20px rgba(0,0,0,0.40)",
         }}
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute right-3 top-3 z-50 h-9 w-9 rounded-xl flex items-center justify-center opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-white/10 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <SheetPrimitive.Close className="absolute right-3 top-3 z-50 h-9 w-9 rounded-xl flex items-center justify-center opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-white/10 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:ring-offset-2 active:scale-95 disabled:pointer-events-none text-white"
+          style={{ background: "rgba(255, 255, 255, 0.06)", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+        >
           <X className="h-4.5 w-4.5" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
@@ -93,7 +95,7 @@ const SheetTitle = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <SheetPrimitive.Title ref={ref} className={cn("text-2xl font-bold tracking-tight font-serif", className)} style={{ color: "#FFFFFF" }} {...props} />
+  <SheetPrimitive.Title ref={ref} className={cn("text-2xl font-bold tracking-tight font-serif text-white", className)} {...props} />
 ));
 SheetTitle.displayName = SheetPrimitive.Title.displayName;
 
@@ -101,7 +103,7 @@ const SheetDescription = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <SheetPrimitive.Description ref={ref} className={cn("text-sm leading-relaxed", className)} style={{ color: "rgba(255,255,255,0.65)" }} {...props} />
+  <SheetPrimitive.Description ref={ref} className={cn("text-sm", className)} style={{ color: "rgba(255, 255, 255, 0.6)" }} {...props} />
 ));
 SheetDescription.displayName = SheetPrimitive.Description.displayName;
 

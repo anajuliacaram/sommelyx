@@ -82,10 +82,10 @@ export function AppSidebar() {
         collapsible="offcanvas"
         className="border-r w-[240px]"
         style={{
-          background: "rgba(10, 22, 16, 0.85)",
+          background: "rgba(30, 46, 28, 0.65)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          borderColor: "rgba(255, 255, 255, 0.08)",
+          borderColor: "rgba(255, 255, 255, 0.15)",
         }}
       >
         <SidebarHeader className="pt-2 md:pt-2 px-3">
@@ -135,7 +135,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-11 rounded-2xl border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.07)] text-[14px] font-semibold text-white gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.12)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] active:translate-y-[0.5px] [&_svg]:text-primary"
+                  className="w-full h-11 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[14px] font-semibold text-[#2B2B2B] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-primary"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-[15px] w-[15px] shrink-0" />
@@ -143,7 +143,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-10 rounded-2xl border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.07)] text-[13.5px] font-semibold text-white gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.12)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] active:translate-y-[0.5px] [&_svg]:text-destructive"
+                  className="w-full h-10 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[13.5px] font-semibold text-[#2B2B2B] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-destructive"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-[15px] w-[15px] shrink-0" />

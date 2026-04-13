@@ -12,11 +12,12 @@ const fadeUp = {
 } as const;
 
 const glassStyle = {
-  background: "rgba(255,255,255,0.06)",
-  backdropFilter: "blur(12px) saturate(1.2)",
-  WebkitBackdropFilter: "blur(12px) saturate(1.2)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 8px 32px -8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)",
+  background: "rgba(30,20,20,0.04)",
+  backdropFilter: "blur(16px) saturate(1.3)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.3)",
+  border: "1px solid rgba(255,255,255,0.45)",
+  boxShadow:
+    "0 10px 36px -10px rgba(30,20,20,0.1), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)",
 } as const;
 
 const blocks = [
@@ -80,7 +81,7 @@ function FeatureCard({ block, i, onSignup, mobile = false }: { block: typeof blo
     >
       <div
         className="absolute top-0 left-4 right-4 h-[1px] rounded-full pointer-events-none"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent)" }}
       />
 
       <div
@@ -90,13 +91,13 @@ function FeatureCard({ block, i, onSignup, mobile = false }: { block: typeof blo
         <block.icon className="h-4.5 w-4.5" style={{ color: block.accent }} strokeWidth={1.8} />
       </div>
 
-      <h3 className="text-[17px] sm:text-[18px] font-serif font-bold mb-2 tracking-[-0.02em]" style={{ color: "#FFFFFF" }}>
+      <h3 className="text-[17px] sm:text-[18px] font-serif font-bold mb-2 tracking-[-0.02em]" style={{ color: "#1A1A1A" }}>
         {block.title}
       </h3>
 
       <ul className="space-y-1.5 flex-1 mb-3">
         {block.bullets.map(b => (
-          <li key={b} className="flex items-start gap-2 text-[13px] sm:text-[14px] font-medium leading-snug" style={{ color: "rgba(255,255,255,0.7)" }}>
+          <li key={b} className="flex items-start gap-2 text-[13px] sm:text-[14px] font-medium leading-snug" style={{ color: "#555" }}>
             <Check className="h-3.5 w-3.5 mt-0.5 shrink-0 text-gold" strokeWidth={2.5} />
             {b}
           </li>
@@ -124,10 +125,10 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
           className="text-center mb-8 sm:mb-10"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-serif font-bold tracking-[-0.02em]" style={{ color: "#FFFFFF" }}>
+          <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-serif font-bold tracking-[-0.02em]" style={{ color: "#1A1A1A" }}>
             Tudo que você precisa para gerenciar sua adega
           </h2>
-          <p className="mt-2 text-[14px] sm:text-[16px] max-w-md mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+          <p className="mt-2 text-[14px] sm:text-[16px] max-w-md mx-auto leading-relaxed" style={{ color: "#666" }}>
             Simples, inteligente e feito para quem ama vinho.
           </p>
         </motion.div>

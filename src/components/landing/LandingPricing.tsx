@@ -56,11 +56,12 @@ const faqs = [
 ] as const;
 
 const glassCard = {
-  background: "rgba(255,255,255,0.06)",
-  backdropFilter: "blur(12px) saturate(1.2)",
-  WebkitBackdropFilter: "blur(12px) saturate(1.2)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 12px 40px -12px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)",
+  background: "rgba(30,20,20,0.04)",
+  backdropFilter: "blur(16px) saturate(1.3)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.3)",
+  border: "1px solid rgba(255,255,255,0.45)",
+  boxShadow:
+    "0 12px 40px -12px rgba(30,20,20,0.12), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)",
 } as const;
 
 interface LandingPricingProps {
@@ -81,13 +82,13 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
         isLight
           ? {
               ...glassCard,
-              background: "rgba(255,255,255,0.06)",
-              boxShadow: "0 16px 56px -18px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)",
+              background: "rgba(255,255,255,0.5)",
+              boxShadow: "0 16px 56px -18px rgba(30,20,20,0.14), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)",
             }
           : {
               background: "linear-gradient(180deg, #2B2B2B 0%, #1F1C20 55%, #171518 100%)",
               border: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 20px 60px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
+              boxShadow: "0 20px 60px -20px rgba(15,15,20,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
             }
       }
       initial="hidden"
@@ -99,9 +100,10 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
     >
       {isLight ? (
         <>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.12),transparent_55%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_35%,rgba(198,167,104,0.10),transparent_55%)]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)" }} />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.08),transparent_55%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_35%,rgba(198,167,104,0.08),transparent_55%)]" />
+          {/* Top highlight */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)" }} />
         </>
       ) : (
         <>
@@ -112,18 +114,18 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
       )}
 
       <div className={`relative ${mobile ? "p-5" : "p-6 sm:p-8"} flex flex-col flex-1`}>
-        <h3 className={`${mobile ? "text-[22px]" : "text-[24px]"} font-serif font-bold tracking-tight`} style={{ color: "#FFFFFF" }}>
+        <h3 className={`${mobile ? "text-[22px]" : "text-[24px]"} font-serif font-bold tracking-tight`} style={{ color: txt }}>
           {plan.name}
         </h3>
-        <p className={`${mobile ? "text-[13px] mt-2 mb-4" : "text-[14px] mt-2 mb-6"} font-medium leading-relaxed`} style={{ color: "rgba(255,255,255,0.65)" }}>
+        <p className={`${mobile ? "text-[13px] mt-2 mb-4" : "text-[14px] mt-2 mb-6"} font-medium leading-relaxed`} style={{ color: isLight ? "rgba(43,43,43,0.7)" : "rgba(248,246,243,0.7)" }}>
           {plan.desc}
         </p>
 
         <div className="mb-4 flex items-end gap-2">
-          <span className={`${mobile ? "text-[40px]" : "text-[46px] sm:text-[52px]"} font-semibold font-sans tracking-[-0.03em] leading-none`} style={{ color: "#FFFFFF" }}>
+          <span className={`${mobile ? "text-[40px]" : "text-[46px] sm:text-[52px]"} font-semibold font-sans tracking-[-0.03em] leading-none`} style={{ color: txt }}>
             {plan.price}
           </span>
-          <span className={`${mobile ? "pb-[3px] text-[13px]" : "pb-[6px] text-[14px]"} font-medium`} style={{ color: "rgba(255,255,255,0.45)" }}>
+          <span className={`${mobile ? "pb-[3px] text-[13px]" : "pb-[6px] text-[14px]"} font-medium`} style={{ color: isLight ? "rgba(43,43,43,0.55)" : "rgba(248,246,243,0.55)" }}>
             {plan.period}
           </span>
         </div>
@@ -131,14 +133,23 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
         <div className={`${mobile ? "mb-5" : "mb-7"} flex items-center gap-2.5`}>
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em]"
-            style={{
-              color: "#C6A16E",
-              background: "rgba(198,161,110,0.10)",
-              border: "1px solid rgba(198,161,110,0.20)",
-              boxShadow: "0 4px 16px -6px rgba(198,161,110,0.15)",
-            }}
+            style={
+              isLight
+                ? {
+                    color: "#6E1E2A",
+                    background: "rgba(110,30,42,0.06)",
+                    border: "1px solid rgba(110,30,42,0.12)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5)",
+                  }
+                : {
+                    color: "#F8F6F3",
+                    background: "linear-gradient(135deg, rgba(198,167,104,0.18), rgba(110,30,42,0.15))",
+                    border: "1px solid rgba(198,167,104,0.3)",
+                    boxShadow: "0 8px 24px -8px rgba(198,167,104,0.2)",
+                  }
+            }
           >
-            <Check className="h-4 w-4 text-[#C6A16E]" strokeWidth={2.5} />
+            <Check className={isLight ? "h-4 w-4 text-[#6E1E2A]/80" : "h-4 w-4 text-[#C6A768]"} strokeWidth={2.5} />
             14 dias grátis
           </span>
         </div>
@@ -154,20 +165,27 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
           {plan.cta}
         </Button>
 
-        <div className={`${mobile ? "mt-5 mb-4" : "mt-6 mb-5"} h-px w-full`} style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className={`${mobile ? "mt-5 mb-4" : "mt-6 mb-5"} h-px w-full`} style={{ background: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)" }} />
 
         <ul className="space-y-3 flex-1">
           {plan.features.map(f => (
             <li
               key={f}
               className={`flex items-start gap-2.5 ${mobile ? "text-[13px]" : "text-[13px] sm:text-[14px]"} leading-relaxed font-medium`}
-              style={{ color: "rgba(255,255,255,0.75)" }}
+              style={{ color: isLight ? "rgba(43,43,43,0.8)" : "rgba(248,246,243,0.8)" }}
             >
               <div
                 className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px]"
-                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={
+                  isLight
+                    ? { background: "rgba(110,30,42,0.06)", border: "1px solid rgba(110,30,42,0.1)" }
+                    : { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)" }
+                }
               >
-                <Check className="h-3 w-3 text-[#C6A16E]/80" strokeWidth={2.5} />
+                <Check
+                  className={isLight ? "h-3 w-3 text-[#6E1E2A]/70" : "h-3 w-3 text-[#C6A768]/80"}
+                  strokeWidth={2.5}
+                />
               </div>
               {f}
             </li>
@@ -186,10 +204,10 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           className="mx-auto mb-7 sm:mb-10 max-w-xl text-center"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight leading-[1.1]" style={{ color: "#FFFFFF" }}>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight leading-[1.1]" style={{ color: "#1A1A1A" }}>
             Escolha o plano ideal para sua adega
           </h2>
-          <p className="mt-4 text-[14px] sm:text-[15px] font-medium max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.6)" }}>
+          <p className="mt-4 text-[14px] sm:text-[15px] font-medium max-w-md mx-auto" style={{ color: "#666" }}>
             Comece sem compromisso. Cancele quando quiser.
           </p>
         </motion.div>

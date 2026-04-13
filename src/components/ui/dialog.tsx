@@ -19,7 +19,7 @@ const DialogOverlay = React.forwardRef<
       "fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
-    style={{ background: "rgba(5, 12, 8, 0.7)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
+    style={{ background: "rgba(0, 0, 0, 0.6)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
     {...props}
   />
 ));
@@ -38,11 +38,11 @@ const DialogContent = React.forwardRef<
         className,
       )}
       style={{
-        background: "rgba(20, 35, 28, 0.88)",
-        backdropFilter: "blur(28px) saturate(1.4)",
-        WebkitBackdropFilter: "blur(28px) saturate(1.4)",
-        border: "1px solid rgba(255, 255, 255, 0.10)",
-        boxShadow: "0 32px 100px -30px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.20)",
+        background: "rgba(11, 31, 23, 0.95)",
+        backdropFilter: "blur(18px) saturate(1.3)",
+        WebkitBackdropFilter: "blur(18px) saturate(1.3)",
+        border: "1px solid rgba(255, 255, 255, 0.08)",
+        boxShadow: "0 32px 100px -30px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.15)",
       }}
       {...props}
     >
@@ -72,8 +72,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn("text-2xl font-bold leading-none tracking-tight font-serif", className)}
-    style={{ color: "#FFFFFF" }}
+    className={cn("text-2xl font-bold leading-none tracking-tight font-serif text-white", className)}
     {...props}
   />
 ));
@@ -83,7 +82,7 @@ const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description ref={ref} className={cn("text-sm leading-relaxed", className)} style={{ color: "rgba(255,255,255,0.65)" }} {...props} />
+  <DialogPrimitive.Description ref={ref} className={cn("text-sm leading-relaxed", className)} style={{ color: "rgba(255, 255, 255, 0.65)" }} {...props} />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 

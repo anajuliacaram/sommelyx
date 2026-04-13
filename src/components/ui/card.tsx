@@ -11,10 +11,10 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     )}
     style={{
       background: "rgba(255, 255, 255, 0.06)",
-      backdropFilter: "blur(12px) saturate(1.2)",
-      WebkitBackdropFilter: "blur(12px) saturate(1.2)",
+      backdropFilter: "blur(16px) saturate(1.2)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.2)",
       border: "1px solid rgba(255, 255, 255, 0.08)",
-      boxShadow: "0 1px 2px rgba(0,0,0,0.15), 0 8px 32px -8px rgba(0,0,0,0.25)",
+      boxShadow: "0 1px 2px rgba(0,0,0,0.10), 0 8px 32px -8px rgba(0,0,0,0.20)",
       ...style,
     }}
     {...props}
@@ -31,14 +31,14 @@ CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("text-lg font-semibold leading-none tracking-tight", className)} style={{ color: "#FFFFFF" }} {...props} />
+    <h3 ref={ref} className={cn("text-lg font-semibold leading-none tracking-tight text-white", className)} {...props} />
   ),
 );
 CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn("text-sm leading-relaxed", className)} style={{ color: "rgba(255,255,255,0.7)" }} {...props} />
+    <p ref={ref} className={cn("text-sm leading-relaxed", className)} style={{ color: "rgba(255, 255, 255, 0.6)" }} {...props} />
   ),
 );
 CardDescription.displayName = "CardDescription";
