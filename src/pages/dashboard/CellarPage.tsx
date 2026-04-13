@@ -547,7 +547,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/30 bg-card/70 px-4 py-3 backdrop-blur-md shadow-[0_2px_12px_-4px_rgba(25,18,22,0.06)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[3px] hover:shadow-[0_14px_36px_-12px_rgba(25,18,22,0.12)] hover:border-border/50"
+                className="group relative flex flex-col overflow-hidden wine-card-glass px-4 py-3 transition-all duration-300"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
