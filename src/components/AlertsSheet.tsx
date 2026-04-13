@@ -33,9 +33,10 @@ interface AlertItem {
 interface AlertsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  profileType?: "personal" | "commercial" | null;
 }
 
-export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
+export function AlertsSheet({ open, onOpenChange, profileType }: AlertsSheetProps) {
   const { data: wines } = useWines();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -70,7 +71,7 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
         });
       }
 
-      if (w.quantity > 0 && w.quantity <= 2) {
+      if (w.quantity > 0 && w.quantity <= 2 && profileType === "commercial") {
         items.push({
           id: `low-${w.id}`, wineId: w.id, type: "low_stock", icon: ArrowDownRight, tone: "text-wine", bg: "bg-wine/8",
           title: "Estoque baixo", desc: `Apenas ${w.quantity} garrafa(s)`, wineName: w.name,

@@ -23,7 +23,7 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const { drinkNow, lowStock } = useWineMetrics();
   const { data: wines } = useWines();
-  const alertCount = drinkNow + lowStock;
+  const alertCount = drinkNow + (profileType === "commercial" ? lowStock : 0);
   const isMobile = useIsMobile();
 
   const initials =
@@ -131,7 +131,7 @@ export default function DashboardLayout() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
-      <AlertsSheet open={alertsOpen} onOpenChange={setAlertsOpen} />
+      <AlertsSheet open={alertsOpen} onOpenChange={setAlertsOpen} profileType={profileType} />
     </SidebarProvider>
   );
 }
