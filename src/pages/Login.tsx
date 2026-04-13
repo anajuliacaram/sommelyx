@@ -88,12 +88,11 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary" style={{ background: "linear-gradient(165deg, #F4F1EC 0%, #EDE7DF 40%, #E6E2D8 65%, #E8E4DB 100%)" }}>
+    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary" style={{ background: "radial-gradient(circle at 20% 30%, rgba(80,120,90,0.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(120,160,120,0.15), transparent 50%), linear-gradient(135deg, #0B1F17, #0F2A20, #132F24)" }}>
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
         <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-gold/12 via-wine/6 to-transparent blur-[120px]" />
-        <div className="absolute inset-0 opacity-[0.25]" style={{ backgroundImage: "linear-gradient(rgba(23,20,29,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.025) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
       </div>
 
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">

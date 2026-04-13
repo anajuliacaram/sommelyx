@@ -48,7 +48,7 @@ export default function SelectProfile() {
   if (existingProfile) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(165deg, #F4F1EC 0%, #EDE7DF 40%, #E6E2D8 65%, #E8E4DB 100%)" }}>
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "radial-gradient(circle at 20% 30%, rgba(80,120,90,0.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(120,160,120,0.15), transparent 50%), linear-gradient(135deg, #0B1F17, #0F2A20, #132F24)" }}>
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,hsl(var(--primary)/0.05),transparent_70%)]" />
 
       <div className="w-full max-w-3xl relative z-10">
