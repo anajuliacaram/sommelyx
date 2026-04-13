@@ -36,9 +36,9 @@ export default function DashboardLayout() {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="dashboard-shell min-h-screen flex w-full">
+      <div className="dashboard-shell h-screen flex w-full overflow-hidden">
         <AppSidebar />
-        <main className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           <header
             className="h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 border-b border-border bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
           >
@@ -125,7 +125,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 px-5 pt-5 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-7 lg:px-10">
+          <div className="flex-1 overflow-y-auto px-5 pt-5 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-7 lg:px-10">
             <AnimatedOutlet />
           </div>
         </main>
