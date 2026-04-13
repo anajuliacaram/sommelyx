@@ -78,7 +78,7 @@ export function AppSidebar() {
 
   return (
     <>
-      <Sidebar collapsible="offcanvas" className="border-r border-border w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
+      <Sidebar collapsible="offcanvas" className="border-r border-[hsl(var(--sidebar-border))] w-[240px]" style={{ background: "hsl(var(--sidebar-background))" }}>
         <SidebarHeader className="pt-2 md:pt-2 px-3">
           <Link
             to="/dashboard"
@@ -95,7 +95,7 @@ export function AppSidebar() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[25px] font-bold tracking-[-0.01em] text-primary leading-none font-serif">
+              <span className="text-[25px] font-bold tracking-[-0.01em] text-[hsl(var(--cream))] leading-none font-serif">
                 Sommelyx
               </span>
               <span
@@ -103,8 +103,8 @@ export function AppSidebar() {
                   "mt-1.5 w-fit inline-flex items-center rounded-md h-5 px-2",
                   "text-[9px] font-extrabold uppercase tracking-[0.1em] leading-none",
                   isCommercial
-                    ? "bg-accent/12 text-accent ring-1 ring-accent/20"
-                    : "bg-primary/10 text-primary ring-1 ring-primary/18",
+                    ? "bg-[hsl(var(--copper)/0.15)] text-[hsl(var(--copper))] ring-1 ring-[hsl(var(--copper)/0.25)]"
+                    : "bg-[hsl(var(--copper)/0.12)] text-[hsl(var(--copper-light))] ring-1 ring-[hsl(var(--copper)/0.20)]",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}
@@ -156,7 +156,7 @@ export function AppSidebar() {
 
         <SidebarContent className="px-3 pt-1">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--sidebar-foreground)/0.35)] mb-1 px-3">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -182,7 +182,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-1">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-muted-foreground/50 mb-1 px-3">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold text-[hsl(var(--sidebar-foreground)/0.35)] mb-1 px-3">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -212,21 +212,21 @@ export function AppSidebar() {
           <div className="px-3 pt-3 pb-[calc(14px+env(safe-area-inset-bottom))]">
             <div className="flex items-center gap-2.5 px-2 mb-3">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--wine-vivid)))" }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-forest shrink-0"
+                style={{ background: "linear-gradient(135deg, hsl(var(--copper)), hsl(var(--copper-light)))" }}
               >
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold truncate text-foreground">{user?.user_metadata?.full_name || "Usuário"}</p>
-                <p className="text-[11px] truncate text-muted-foreground/60">{user?.email}</p>
+                <p className="text-[13px] font-semibold truncate text-[hsl(var(--sidebar-foreground))]">{user?.user_metadata?.full_name || "Usuário"}</p>
+                <p className="text-[11px] truncate text-[hsl(var(--sidebar-foreground)/0.45)]">{user?.email}</p>
               </div>
             </div>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={signOut}
-                  className="sidebar-item !h-[36px] !text-[12px] hover:!bg-destructive/[0.04] hover:!text-destructive hover:!border-destructive/15"
+                  className="sidebar-item !h-[36px] !text-[12px] hover:!bg-red-500/10 hover:!text-red-400 hover:!border-red-500/15"
                 >
                   <LogOut className="h-4 w-4 shrink-0" />
                   <span className="font-medium">Sair</span>
