@@ -1027,39 +1027,15 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
             {/* ── Scanning ── */}
             {step === "scanning" && (
-              <motion.div
-                key="scanning"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-4 py-8"
-              >
-                {preview && (
-                  preview.url ? (
-                    <img src={preview.url} alt={preview.fileName} className="w-20 h-20 object-cover rounded-xl border border-border/30" />
-                  ) : (
-                    <div className="w-full rounded-xl border border-border/40 bg-background/60 px-4 py-3 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <FileText className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[12px] font-semibold text-foreground truncate">{preview.fileName}</p>
-                        <p className="text-[10px] text-muted-foreground">PDF anexado para leitura inteligente</p>
-                      </div>
-                    </div>
-                  )
-                )}
-                <AiProgressiveLoader
-                  steps={[
-                    "Processando imagem…",
-                    "Identificando vinhos na carta…",
-                    "Consultando sommelier…",
-                    "Selecionando os melhores para o prato…",
-                  ]}
-                  interval={3000}
-                  subtitle={`Prato: ${dish}`}
-                />
-              </motion.div>
+              <PairingLoadingState
+                steps={[
+                  "Processando imagem…",
+                  "Identificando vinhos na carta…",
+                  "Consultando sommelier…",
+                  "Selecionando os melhores para o prato…",
+                ]}
+                subtitle={`Prato: ${dish}`}
+              />
             )}
 
             {/* ── Cellar Results (dish → wine suggestions) ── */}
@@ -1072,42 +1048,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-3"
               >
                 {/* Dish profile section */}
-                {dishProfile && (dishProfile.protein || dishProfile.intensity) && (
-                  <div className="rounded-xl border border-primary/10 bg-primary/[0.03] p-3 space-y-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <ChefHat className="h-3 w-3 text-primary/60" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70">Perfil do prato</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {dishProfile.protein && (
-                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                          {dishProfile.protein}
-                        </span>
-                      )}
-                      {dishProfile.cooking && (
-                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                          {dishProfile.cooking}
-                        </span>
-                      )}
-                      {dishProfile.fat && (
-                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                          gordura {dishProfile.fat}
-                        </span>
-                      )}
-                      {dishProfile.intensity && (
-                        <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                          intensidade {dishProfile.intensity}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <DishProfileCard dish={dish} profile={dishProfile} />
 
-                <div className="flex items-center gap-2 pb-1">
-                  <Sparkles className="h-4 w-4 text-primary/70" />
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Vinhos para "{dish}"
-                  </span>
+                <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} />
                 </div>
 
                 {suggestions.length === 0 ? (
