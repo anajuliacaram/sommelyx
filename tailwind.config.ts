@@ -100,6 +100,14 @@ export default {
           DEFAULT: "hsl(var(--cream))",
           dark: "hsl(var(--cream-dark))",
         },
+        forest: {
+          DEFAULT: "hsl(var(--forest))",
+          light: "hsl(var(--forest-light))",
+        },
+        copper: {
+          DEFAULT: "hsl(var(--copper))",
+          light: "hsl(var(--copper-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
