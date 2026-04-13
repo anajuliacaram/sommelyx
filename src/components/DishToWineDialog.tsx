@@ -1309,21 +1309,48 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               {p.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.highlight}</span>}
                             </div>
                           )}
-                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
-                            {p.reason}
-                          </p>
+                          {/* "Por que funciona" highlight */}
+                          <div className="pl-[18px] rounded-xl bg-[#0F2A24]/[0.06] border border-[#0F2A24]/[0.08] p-2.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F2A24]/60 mb-1 flex items-center gap-1.5">
+                              <Sparkles className="h-3 w-3" />
+                              Por que funciona
+                            </p>
+                            <p className="text-[12px] text-[#555] leading-relaxed">{p.reason}</p>
+                          </div>
+
+                          {/* Recipe + Action */}
+                          <div className="pl-[18px] flex items-center gap-2 flex-wrap">
                           {p.recipe && (
-                            <div className="pl-[18px]">
                               <button
                                 type="button"
                                 onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })}
-                                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary/80 hover:text-primary bg-primary/[0.04] hover:bg-primary/[0.08] px-3 py-1.5 rounded-lg border border-primary/[0.06] transition-all duration-200"
                               >
-                                <BookOpen className="h-3 w-3" />
+                                <BookOpen className="h-3.5 w-3.5" />
                                 Ver receita
                               </button>
-                            </div>
                           )}
+                          {isCommercial ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 px-3 text-[11px] font-semibold border border-[#0F2A24]/20 bg-[#0F2A24]/[0.06] text-[#0F2A24] hover:bg-[#0F2A24]/10 rounded-xl"
+                              onClick={() => toast({ title: p.dish, description: "Pronto para sugerir ao cliente" })}
+                            >
+                              <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                              Sugerir ao cliente
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              className="h-8 px-3 text-[11px] font-semibold rounded-xl"
+                              onClick={() => toast({ title: p.dish, description: "Excelente escolha!" })}
+                            >
+                              <GlassWater className="h-3.5 w-3.5 mr-1.5" />
+                              Consumir agora
+                            </Button>
+                          )}
+                          </div>
                         </motion.li>
                       );
                     })}
@@ -1338,7 +1365,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setSelectedWineId("");
                     setStep("select-wine");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
                 >
                   Escolher outro vinho
                 </Button>
