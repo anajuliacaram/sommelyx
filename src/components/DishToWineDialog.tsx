@@ -676,18 +676,18 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             <div className="flex-1 min-w-0">
                               <p className={cn(
                                 "text-[13.5px] font-semibold truncate",
-                                isSelected ? "text-foreground" : "text-foreground/90"
+                                isSelected ? "text-white" : "text-white/80"
                               )}>
                                 {w.name}
-                                {w.vintage ? <span className="text-muted-foreground/60 font-normal ml-1.5">({w.vintage})</span> : null}
+                                {w.vintage ? <span className="text-white/40 font-normal ml-1.5">({w.vintage})</span> : null}
                               </p>
                               {meta && (
-                                <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5">{meta}</p>
+                                <p className="text-[11px] text-white/35 truncate mt-0.5">{meta}</p>
                               )}
                             </div>
                             <span className={cn(
                               "text-[11px] font-semibold tabular-nums shrink-0 px-2 py-0.5 rounded-lg",
-                              isSelected ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50"
+                              isSelected ? "bg-white/15 text-white" : "bg-white/8 text-white/40"
                             )}>
                               {w.quantity}×
                             </span>
@@ -699,11 +699,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     {/* Empty state */}
                     {filtered.length === 0 && availableWines.length > 0 && (
                       <div className="text-center py-10 space-y-2">
-                        <Search className="h-7 w-7 text-muted-foreground/30 mx-auto" />
-                        <p className="text-[13px] font-medium text-muted-foreground/70">
-                          Nenhum vinho encontrado na sua adega
+                        <Search className="h-7 w-7 text-white/20 mx-auto" />
+                        <p className="text-[13px] font-medium text-white/50">
+                          Nenhum vinho encontrado
                         </p>
-                        <p className="text-[11px] text-muted-foreground/45">
+                        <p className="text-[11px] text-white/30">
                           Tente outro nome, produtor ou uva
                         </p>
                       </div>
@@ -711,11 +711,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                     {availableWines.length === 0 && (
                       <div className="text-center py-10 space-y-2">
-                        <Wine className="h-7 w-7 text-muted-foreground/30 mx-auto" />
-                        <p className="text-[13px] font-medium text-muted-foreground/70">
-                          Sua adega está vazia no momento
+                        <Wine className="h-7 w-7 text-white/20 mx-auto" />
+                        <p className="text-[13px] font-medium text-white/50">
+                          {isCommercial ? "Estoque vazio" : "Sua adega está vazia no momento"}
                         </p>
-                        <p className="text-[11px] text-muted-foreground/45">
+                        <p className="text-[11px] text-white/30">
                           Adicione vinhos para usar a harmonização
                         </p>
                       </div>
@@ -725,9 +725,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 {/* Selected wine preview */}
                 {selectedWine && (
-                  <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 space-y-0.5">
-                    <p className="text-[13px] font-semibold text-foreground">{selectedWine.name}</p>
-                    <p className="text-[11px] text-muted-foreground">
+                  <div className="rounded-xl p-3 space-y-0.5" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    <p className="text-[13px] font-semibold text-white">{selectedWine.name}</p>
+                    <p className="text-[11px] text-white/45">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
                     </p>
                   </div>
