@@ -12,7 +12,7 @@ const buttonVariants = cva(
         primary:
           "rounded-2xl text-primary-foreground bg-gradient-to-br from-primary to-wine-vivid shadow-[0_2px_8px_hsl(var(--wine)/0.18),inset_0_1px_1px_rgba(255,255,255,0.10)] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_hsl(var(--wine)/0.24),inset_0_1px_1px_rgba(255,255,255,0.12)] hover:brightness-105 tracking-[-0.01em]",
         secondary:
-          "rounded-2xl bg-card/80 text-foreground border border-border/50 shadow-editorial backdrop-blur-md hover:bg-card hover:-translate-y-0.5 hover:shadow-editorial-hover tracking-[-0.01em]",
+          "rounded-2xl bg-[rgba(255,255,255,0.85)] text-[#2B2B2B] border border-[rgba(0,0,0,0.06)] shadow-[0_1px_3px_rgba(0,0,0,0.04)] backdrop-blur-md hover:bg-white hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] tracking-[-0.01em]",
         outline:
           "rounded-2xl bg-transparent border border-border/60 text-foreground hover:bg-muted/20 hover:-translate-y-0.5 hover:border-primary/15",
         ghost:
