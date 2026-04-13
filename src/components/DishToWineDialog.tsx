@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, ShoppingBag, GlassWater } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, ShoppingCart, GlassWater } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
