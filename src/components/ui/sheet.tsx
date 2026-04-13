@@ -57,14 +57,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
       <SheetOverlay />
       <SheetPrimitive.Content
         ref={ref}
-        className={cn(sheetVariants({ side }), className)}
-        style={{
-          background: "rgba(255, 255, 255, 0.78)",
-          backdropFilter: "blur(32px)",
-          WebkitBackdropFilter: "blur(32px)",
-          border: "1px solid rgba(255, 255, 255, 0.50)",
-          boxShadow: "0 32px 100px -40px rgba(44,20,31,0.45), 0 8px 24px rgba(15,15,20,0.08)",
-        }}
+        className={cn(sheetVariants({ side }), "bg-[#F4F1EC] border-border shadow-[0_24px_80px_-20px_rgba(0,0,0,0.20)]", className)}
         {...props}
       >
         {children}
