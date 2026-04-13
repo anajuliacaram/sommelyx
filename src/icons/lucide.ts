@@ -47,6 +47,7 @@ export { default as Eye } from "lucide-react/dist/esm/icons/eye.js";
 export { default as Feather } from "lucide-react/dist/esm/icons/feather.js";
 export { default as EyeOff } from "lucide-react/dist/esm/icons/eye-off.js";
 export { default as FileText } from "lucide-react/dist/esm/icons/file-text.js";
+export { default as FileSpreadsheet } from "lucide-react/dist/esm/icons/file-spreadsheet.js";
 export { default as Filter } from "lucide-react/dist/esm/icons/filter.js";
 export { default as GlassWater } from "lucide-react/dist/esm/icons/glass-water.js";
 export { default as Globe } from "lucide-react/dist/esm/icons/globe.js";
