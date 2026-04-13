@@ -331,19 +331,22 @@ serve(async (req) => {
     }
 
     const systemPrompt =
-      `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia o máximo de informações com precisão.\n\n` +
-      `Regras:\n` +
+      `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia SOMENTE informações que estejam EXPLICITAMENTE VISÍVEIS no rótulo.\n\n` +
+      `Regras CRÍTICAS:\n` +
+      `- Extraia APENAS texto que esteja impresso/escrito no rótulo da garrafa.\n` +
+      `- NÃO INFIRA, NÃO ADIVINHE, NÃO DEDUZA informações que não estejam escritas no rótulo.\n` +
+      `- Se o país NÃO está escrito no rótulo, retorne country como null. NÃO tente adivinhar baseado no nome do vinho ou produtor.\n` +
+      `- Se a região NÃO está escrita no rótulo, retorne region como null. NÃO tente adivinhar.\n` +
+      `- Se a uva NÃO está escrita no rótulo, retorne grape como null. NÃO associe "Malbec" automaticamente a "Mendoza" por exemplo.\n` +
+      `- Se a safra NÃO está escrita no rótulo, retorne vintage como null.\n` +
+      `- Cada campo deve conter SOMENTE o que está literalmente visível na imagem.\n` +
+      `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado. Deduza APENAS pela cor visível da garrafa/líquido ou se estiver escrito.\n` +
+      `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc) — mas SOMENTE se estiver indicado no rótulo.\n` +
+      `- tasting_notes: 1-2 frases curtas em português (perfil esperado baseado no que está escrito no rótulo). Se não houver informação suficiente, retorne null.\n` +
+      `- food_pairing: 2-3 sugestões em português. Se não houver informação suficiente, retorne null.\n` +
+      `- Ignore totalmente texto de interface, screenshot, sistema, notificações, nome de aparelho, marcas de celular.\n` +
       `- Retorne APENAS JSON válido seguindo o schema abaixo (sem texto extra, sem markdown).\n` +
-      `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado.\n` +
-      `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc).\n` +
-      `- Se safra for desconhecida, deixe vintage/drink_from/drink_until como null.\n` +
-      `- tasting_notes: 1-2 frases curtas em português (perfil esperado).\n` +
-      `- food_pairing: 2-3 sugestões em português.\n` +
-      `- Considere apenas texto visível do rótulo da garrafa.\n` +
-      `- Ignore totalmente texto de interface, screenshot, sistema, notificações, nome de aparelho, marcas de celular, elementos da galeria ou overlays.\n` +
-      `- Não infira vinho a partir de texto irrelevante.\n` +
-      `- Se a confiança for baixa, retorne campos nulos em vez de adivinhar.\n` +
-      `- Leia todo texto visível no rótulo (frente e verso, se aparecer).\n\n` +
+      `- É MELHOR retornar null do que retornar informação errada.\n\n` +
       `Schema JSON:\n` +
       `{\n` +
       `  "wine": {\n` +
