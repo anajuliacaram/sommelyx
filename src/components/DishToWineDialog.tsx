@@ -334,18 +334,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card/85 border-border/30">
-        <SheetHeader>
-          <SheetTitle className="font-serif text-2xl flex items-center gap-2.5">
-            <UtensilsCrossed className="h-5 w-5 text-primary/80" />
-            Harmonizar
-          </SheetTitle>
-          <p className="text-sm text-muted-foreground">
-            Encontre o vinho ideal para o seu prato
-          </p>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30" style={{ background: "#F4F1EC" }}>
+        <SheetHeader className="sr-only">
+          <SheetTitle>Harmonizar</SheetTitle>
         </SheetHeader>
 
-        <div className="space-y-5 pt-5">
+        <PairingSheetHero
+          title="Harmonizar"
+          subtitle="Encontre a combinação perfeita entre vinho e gastronomia"
+        />
+
+        <div className="space-y-5">
           {step !== "source" && (
             <Button
               variant="ghost"
