@@ -145,6 +145,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [lastPaidDate, setLastPaidDate] = useState(new Date().toISOString().split("T")[0]);
   const [noPriceInfo, setNoPriceInfo] = useState(false);
   const [currentValue, setCurrentValue] = useState("");
+  const [currentValueTouched, setCurrentValueTouched] = useState(false);
   const [location, setLocation] = useState<StructuredLocation>({});
   const [drinkFrom, setDrinkFrom] = useState("");
   const [drinkUntil, setDrinkUntil] = useState("");
@@ -192,38 +193,56 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         },
       });
       if (!error && data?.estimated_price) {
-        setCurrentValue(String(data.estimated_price));
+        if (isCommercial || !currentValueTouched) {
+          setCurrentValue(String(data.estimated_price));
+        }
         setEstimateConfidence(data.confidence || "media");
       } else {
         // Fallback to heuristic
         const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
-        setCurrentValue(String(fallback));
+        if (isCommercial || !currentValueTouched) {
+          setCurrentValue(String(fallback));
+        }
         setEstimateConfidence(null);
       }
     } catch {
       const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
-      setCurrentValue(String(fallback));
+      if (isCommercial || !currentValueTouched) {
+        setCurrentValue(String(fallback));
+      }
       setEstimateConfidence(null);
     } finally {
       setEstimating(false);
     }
-  }, []);
+  }, [currentValueTouched, isCommercial]);
 
   useEffect(() => {
     if (!name.trim()) return;
+    if (!isCommercial && !currentValueTouched) {
+      const fallback = suggestPurchasePrice({
+        name,
+        producer,
+        vintage: vintage ? parseInt(vintage) : null,
+        style,
+        country,
+        region,
+        grape,
+      });
+      setCurrentValue(String(fallback));
+    }
     if (estimateTimer.current) clearTimeout(estimateTimer.current);
     estimateTimer.current = setTimeout(() => {
       fetchEstimate(name, producer, vintage, style, country, region, grape);
     }, 1200);
     return () => { if (estimateTimer.current) clearTimeout(estimateTimer.current); };
-  }, [name, producer, vintage, style, country, region, grape, fetchEstimate]);
+  }, [name, producer, vintage, style, country, region, grape, fetchEstimate, currentValueTouched, isCommercial]);
 
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setLabelImagePreview(null); setNoPriceInfo(false);
-    setEstimating(false); setEstimateConfidence(null);
+    setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
@@ -241,9 +260,16 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (data.drink_from) setDrinkFrom(String(data.drink_from));
     if (data.drink_until) setDrinkUntil(String(data.drink_until));
     if (data.purchase_price) setLastPaid(String(data.purchase_price));
-    if (data.current_value) setCurrentValue(String(data.current_value));
+    if (data.current_value) {
+      setCurrentValue(String(data.current_value));
+      setCurrentValueTouched(false);
+    } else if (!isCommercial) {
+      setCurrentValue(String(suggestPurchasePrice(data)));
+      setCurrentValueTouched(false);
+    }
     if (data.cellar_location) setLocation({ manualLabel: String(data.cellar_location) });
     if (data.labelImagePreview) setLabelImagePreview(String(data.labelImagePreview));
+    if (!data.purchase_price && !isCommercial) setNoPriceInfo(true);
 
     // Only set drink window if AI returned them from the label
     // Do NOT use heuristic fallbacks — better to leave blank than fill wrong data
@@ -522,22 +548,44 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Uva</label>
                         <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                       </div>
-                      <div>
-                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Último valor pago (R$)</label>
-                        <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={noPriceInfo}
-                            onChange={e => {
-                              setNoPriceInfo(e.target.checked);
-                              if (e.target.checked) { setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); }
-                            }}
-                            className="w-4 h-4 rounded border accent-[#6F7F5B]"
-                            style={{ borderColor: '#D0CDC6' }}
-                          />
-                          <span className="text-[12px]" style={{ color: '#6B6B6B' }}>Não sei / foi presente / sem informação de valor</span>
-                        </label>
-                        {!noPriceInfo && (
+                        <div>
+                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>
+                            {isCommercial ? "Último valor pago (R$)" : "Último valor pago (opcional)"}
+                          </label>
+                          {!isCommercial && (
+                            <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={noPriceInfo}
+                                onChange={e => {
+                                  setNoPriceInfo(e.target.checked);
+                                  if (e.target.checked) {
+                                    setLastPaid("");
+                                    setLastPaidDate(new Date().toISOString().split("T")[0]);
+                                  }
+                                }}
+                                className="w-4 h-4 rounded border accent-[#6F7F5B]"
+                                style={{ borderColor: '#D0CDC6' }}
+                              />
+                              <span className="text-[12px]" style={{ color: '#6B6B6B' }}>Não fui eu que comprei / não sei o valor</span>
+                            </label>
+                          )}
+                          {isCommercial && (
+                            <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={noPriceInfo}
+                                onChange={e => {
+                                  setNoPriceInfo(e.target.checked);
+                                  if (e.target.checked) { setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); }
+                                }}
+                                className="w-4 h-4 rounded border accent-[#6F7F5B]"
+                                style={{ borderColor: '#D0CDC6' }}
+                              />
+                              <span className="text-[12px]" style={{ color: '#6B6B6B' }}>Não sei / foi presente / sem informação de valor</span>
+                            </label>
+                          )}
+                          {!noPriceInfo && (
                           <div className="grid grid-cols-2 gap-2">
                             <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
                             <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }} />
@@ -551,7 +599,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                          <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>Valor atual estimado (R$)</label>
+                        <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>
+                          {isCommercial ? "Valor atual estimado (R$)" : "Valor médio estimado (R$)"}
+                        </label>
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
                             <Sparkles className="h-3 w-3" />
                             {estimating ? "Estimando..." : "Estimativa Sommelyx"}
@@ -566,7 +616,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           )}
                         </div>
                         <div className="relative">
-                          <input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder={estimating ? "Calculando..." : "0.00"} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC', opacity: estimating ? 0.6 : 1 }} />
+                          <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0.00"} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC', opacity: estimating ? 0.6 : 1 }} />
                           {estimating && (
                             <div className="absolute right-4 top-1/2 -translate-y-1/2">
                               <div className="w-4 h-4 border-2 border-[#6F7F5B] border-t-transparent rounded-full animate-spin" />
@@ -574,7 +624,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           )}
                         </div>
                         <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
-                          Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região.
+                          {isCommercial
+                            ? "Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região."
+                            : "Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região."}
                         </p>
                       </div>
                       <div>

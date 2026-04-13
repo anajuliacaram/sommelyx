@@ -32,6 +32,58 @@ const styles = [
   { value: "sobremesa", label: "Sobremesa" },
 ];
 
+function normalizeSuggestionText(value?: string | null) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function suggestMarketValue(input: {
+  name?: string | null;
+  producer?: string | null;
+  vintage?: number | null;
+  style?: string | null;
+  country?: string | null;
+  region?: string | null;
+  grape?: string | null;
+}) {
+  const style = normalizeSuggestionText(input.style);
+  const grape = normalizeSuggestionText(input.grape);
+  const country = normalizeSuggestionText(input.country);
+  const region = normalizeSuggestionText(input.region);
+  const producer = normalizeSuggestionText(input.producer);
+  const name = normalizeSuggestionText(input.name);
+
+  let price = 78;
+
+  if (style.includes("espum")) price = 120;
+  else if (style.includes("fort")) price = 150;
+  else if (style.includes("sobrem")) price = 110;
+  else if (style.includes("branc")) price = 85;
+  else if (style.includes("rose")) price = 82;
+  else if (style.includes("tint")) price = 95;
+
+  if (country.includes("fran")) price += 18;
+  else if (country.includes("ital")) price += 14;
+  else if (country.includes("port")) price += 10;
+  else if (country.includes("argentin") || country.includes("chil")) price += 6;
+
+  if (region.includes("barolo") || region.includes("bordeaux") || region.includes("burg")) price += 20;
+  else if (region.includes("mendoza") || region.includes("douro") || region.includes("tosc")) price += 8;
+
+  if (producer && /catena|antinori|ruffino|gaja|chateau|château|vega|almaviva|quintarelli/i.test(producer)) price += 15;
+  if (grape && /nebbiolo|tannat|cabernet|syrah|sangiovese|riesling|chardonnay/i.test(grape)) price += 6;
+  if (name && /reserve|reserva|gran|grand|cru|riserva|selection|seleção/i.test(name)) price += 10;
+
+  if (typeof input.vintage === "number") {
+    const currentYear = new Date().getFullYear();
+    const age = Math.max(0, currentYear - input.vintage);
+    if (age > 10) price += 12;
+    else if (age > 5) price += 8;
+    else if (age <= 2) price -= 4;
+  }
+
+  return Math.max(30, Math.round(price / 5) * 5);
+}
+
 export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
@@ -51,6 +103,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
   const [lastPaidDateSnapshot, setLastPaidDateSnapshot] = useState("");
   const [lastPaid, setLastPaid] = useState("");
   const [lastPaidDate, setLastPaidDate] = useState("");
+  const [purchasePriceUnknown, setPurchasePriceUnknown] = useState(false);
   const [currentValue, setCurrentValue] = useState("");
   const [location, setLocation] = useState<StructuredLocation>({});
   const [drinkFrom, setDrinkFrom] = useState("");
@@ -106,8 +159,13 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setLastPaidSnapshot(wine.purchase_price != null ? String(wine.purchase_price) : "");
       setLastPaidDateSnapshot("");
       setLastPaid(wine.purchase_price ? String(wine.purchase_price) : "");
+      setPurchasePriceUnknown(!isCommercial && !wine.purchase_price);
       setLastPaidDate(new Date().toISOString().split("T")[0]);
-      setCurrentValue(wine.current_value ? String(wine.current_value) : "");
+      setCurrentValue(
+        wine.current_value
+          ? String(wine.current_value)
+          : (!isCommercial ? String(suggestMarketValue(wine)) : "")
+      );
       setLocation(
         primaryLoc
           ? {
@@ -156,7 +214,9 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       country: country || null,
       region: region || null,
       grape: grape || null,
-      purchase_price: lastPaid ? parseFloat(lastPaid) : null,
+      purchase_price: isCommercial || !purchasePriceUnknown
+        ? (lastPaid ? parseFloat(lastPaid) : null)
+        : null,
       current_value: currentValue ? parseFloat(currentValue) : null,
       cellar_location: formattedLocation,
       drink_from: drinkFrom ? parseInt(drinkFrom) : null,
@@ -440,8 +500,27 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
               </div>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Último valor pago (R$)</Label>
-                  {lastPaidSnapshot && (
+                  <Label className="text-xs text-muted-foreground">
+                    {isCommercial ? "Último valor pago (R$)" : "Último valor pago (opcional)"}
+                  </Label>
+                  {!isCommercial && (
+                    <label className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={purchasePriceUnknown}
+                        onChange={(e) => {
+                          setPurchasePriceUnknown(e.target.checked);
+                          if (e.target.checked) {
+                            setLastPaid("");
+                            setLastPaidDate("");
+                          }
+                        }}
+                        className="h-4 w-4 rounded border"
+                      />
+                      <span>Não fui eu que comprei / não sei o valor</span>
+                    </label>
+                  )}
+                  {lastPaidSnapshot && !purchasePriceUnknown && (
                     <p className="mt-1 mb-2 text-[11px] text-muted-foreground rounded-lg bg-muted/40 px-3 py-2">
                       Último registro:{" "}
                       <span className="font-semibold text-foreground">
@@ -452,16 +531,24 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                       )}
                     </p>
                   )}
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
-                    <Input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} />
-                  </div>
-                  <p className="mt-1 text-[10px] text-muted-foreground/80">Atualize o valor e a data da última compra.</p>
+                  {!purchasePriceUnknown && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
+                        <Input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} />
+                      </div>
+                      <p className="mt-1 text-[10px] text-muted-foreground/80">
+                        {isCommercial ? "Atualize o valor e a data da última compra." : "Se não souber o valor, marque a opção acima e seguimos com a estimativa de mercado."}
+                      </p>
+                    </>
+                  )}
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Valor atual (R$)</Label>
+                  <Label className="text-xs text-muted-foreground">{isCommercial ? "Valor atual (R$)" : "Valor médio estimado (R$)"}</Label>
                   <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
-                  <p className="mt-1 text-[10px] text-muted-foreground/80">Referência de valor de mercado atual.</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground/80">
+                    {isCommercial ? "Referência de valor de mercado atual." : "Estimativa automática de mercado, editável a qualquer momento."}
+                  </p>
                 </div>
               </div>
               <div>
