@@ -127,6 +127,15 @@ export function AlertsSheet({ open, onOpenChange }: AlertsSheetProps) {
               <p className="text-[11px] text-muted-foreground">{alerts.length} ativo{alerts.length !== 1 ? "s" : ""}</p>
             </div>
           </div>
+          {alerts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setDismissedIds(new Set(alerts.map(a => a.id)))}
+              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted/20"
+            >
+              Limpar tudo
+            </button>
+          )}
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">

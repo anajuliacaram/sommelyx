@@ -99,7 +99,7 @@ export default function DashboardLayout() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => isMobile ? setAlertsOpen(true) : navigate("/dashboard/alerts")}
+                onClick={() => setAlertsOpen(true)}
                 className="h-10 w-10 rounded-xl relative text-muted-foreground hover:bg-muted/20"
                 title="Alertas"
               >
