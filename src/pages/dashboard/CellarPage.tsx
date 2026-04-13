@@ -397,7 +397,8 @@ export default function CellarPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquise vinho, produtor, uva, safra…"
-            className="pl-9 h-10 text-[13px] font-medium rounded-xl bg-background/60 backdrop-blur-md border-border/40 shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all w-full"
+            className="pl-9 h-10 text-[13px] font-medium rounded-xl border-border/40 shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all w-full"
+            style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
           />
         </div>
 
@@ -467,10 +468,10 @@ export default function CellarPage() {
 
           {/* Compact Range Sliders — inline on desktop, stacked on mobile */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-             <div className="rounded-2xl bg-white border border-border/40 px-3.5 py-2.5 shadow-sm">
+             <div className="rounded-2xl px-3.5 py-2.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 4px 16px -4px rgba(0,0,0,0.06)" }}>
                <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
              </div>
-             <div className="rounded-2xl bg-white border border-border/40 px-3.5 py-2.5 shadow-sm">
+             <div className="rounded-2xl px-3.5 py-2.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 4px 16px -4px rgba(0,0,0,0.06)" }}>
                <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
             </div>
           </div>
