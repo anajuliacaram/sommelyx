@@ -174,7 +174,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
-    setLabelImagePreview(null);
+    setLabelImagePreview(null); setNoPriceInfo(false);
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
