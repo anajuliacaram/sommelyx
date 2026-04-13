@@ -371,22 +371,28 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3"
               >
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                  De onde vem o vinho?
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">
+                  {isCommercial ? "Origem do vinho para venda" : "De onde vem o vinho?"}
                 </p>
 
                 <button
                   onClick={() => handleSelectSource("cellar")}
-                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
+                  className="w-full text-left rounded-2xl p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    backdropFilter: "blur(16px)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    boxShadow: "0 4px 20px -6px rgba(0,0,0,0.20)",
+                  }}
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
-                      <Wine className="h-5 w-5 text-primary" />
+                    <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center group-hover:bg-white/15 group-hover:scale-105 transition-all duration-200">
+                      <Wine className="h-5 w-5 text-white/80" />
                     </div>
                     <div>
-                      <p className="text-[14px] font-semibold text-foreground">Da minha adega</p>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">
-                        Harmonize com vinhos que você já tem
+                      <p className="text-[14px] font-semibold text-white">{isCommercial ? "Do meu estoque" : "Da minha adega"}</p>
+                      <p className="text-[12px] text-white/45 mt-0.5">
+                        {isCommercial ? "Harmonize vinhos disponíveis para venda" : "Harmonize com vinhos que você já tem"}
                       </p>
                     </div>
                   </div>
@@ -394,15 +400,21 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 <button
                   onClick={() => handleSelectSource("external")}
-                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
+                  className="w-full text-left rounded-2xl p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    backdropFilter: "blur(16px)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    boxShadow: "0 4px 20px -6px rgba(0,0,0,0.15)",
+                  }}
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-accent/12 flex items-center justify-center group-hover:bg-accent/18 group-hover:scale-105 transition-all duration-200">
-                      <Camera className="h-5 w-5 text-accent-foreground" />
+                    <div className="w-11 h-11 rounded-2xl bg-white/8 flex items-center justify-center group-hover:bg-white/12 group-hover:scale-105 transition-all duration-200">
+                      <Camera className="h-5 w-5 text-white/70" />
                     </div>
                     <div>
-                      <p className="text-[14px] font-semibold text-foreground">Adega externa</p>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">
+                      <p className="text-[14px] font-semibold text-white">Adega externa</p>
+                      <p className="text-[12px] text-white/40 mt-0.5">
                         Envie a foto da carta de vinhos ou do cardápio
                       </p>
                     </div>
