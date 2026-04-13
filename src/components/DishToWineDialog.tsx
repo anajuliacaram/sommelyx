@@ -337,14 +337,15 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30" style={{ background: "#F4F1EC" }}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30" style={{ background: "linear-gradient(165deg, #0F2A24 0%, #152F2A 40%, #1C3A33 100%)" }}>
         <SheetHeader className="sr-only">
           <SheetTitle>Harmonizar</SheetTitle>
         </SheetHeader>
 
         <PairingSheetHero
-          title="Harmonizar"
-          subtitle="Encontre a combinação perfeita entre vinho e gastronomia"
+          title={isCommercial ? "Harmonizar para Venda" : "Harmonizar"}
+          subtitle={isCommercial ? "Encontre a harmonização que conquista o cliente" : "Encontre a combinação perfeita entre vinho e gastronomia"}
+          mode={isCommercial ? "commercial" : "personal"}
         />
 
         <div className="space-y-5">
@@ -353,7 +354,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               variant="ghost"
               size="sm"
               onClick={goBack}
-              className="h-8 px-2 text-[11px] text-muted-foreground hover:text-foreground -mt-2"
+              className="h-8 px-2 text-[11px] text-white/50 hover:text-white/80 hover:bg-white/5 -mt-2"
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Voltar
