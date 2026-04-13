@@ -5,7 +5,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/Logo";
+import { cn } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 export default function SelectProfile() {
