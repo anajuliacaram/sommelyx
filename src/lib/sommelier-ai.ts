@@ -339,11 +339,14 @@ function isUserFacingAnalysisError(message: string) {
   );
 }
 
-function validateWineSpecificity<T extends Record<string, unknown>>(
-  data: T,
+function validateWineSpecificity(
+  data: any,
   kind: "pairings" | "suggestions" | "wineList" | "menu" | "insight",
-  context?: WineSpecificityContext,
+  context?: WineSpecificityContext | string,
+  extraContext?: WineSpecificityContext,
 ): boolean {
+  const resolvedContext: WineSpecificityContext | undefined =
+    extraContext ?? (typeof context === "object" ? context : context ? { wineName: context } : undefined);
   if (!data || typeof data !== "object") return false;
 
   if (kind === "pairings") {
