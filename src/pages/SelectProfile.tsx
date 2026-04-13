@@ -5,7 +5,6 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 
 export default function SelectProfile() {
@@ -76,9 +75,16 @@ export default function SelectProfile() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-2 mb-5">
-                  <Logo variant="compact" className="h-10 w-auto" />
-                  <span className="text-[14px] font-bold font-sans tracking-tight text-foreground">Sommelyx</span>
+              <div className="flex items-center justify-center gap-2 mb-5">
+                  <img
+                    src="/logo-sommelyx-mark.png"
+                    alt="Sommelyx"
+                    draggable={false}
+                    className="h-12 w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)]"
+                  />
+                  <span className="text-[22px] font-bold tracking-[-0.01em] text-primary leading-none font-serif">
+                    Sommelyx
+                  </span>
                 </div>
                 <h1 className="text-2xl md:text-3xl font-serif font-bold mb-2 text-foreground tracking-tight">
                   Como você vai usar
