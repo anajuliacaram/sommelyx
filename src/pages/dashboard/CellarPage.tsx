@@ -536,8 +536,8 @@ export default function CellarPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 items-center">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mr-0.5">Filtros salvos:</span>
+      <div className="glass-card p-3 flex flex-wrap gap-1.5 items-center">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mr-0.5">Filtros salvos:</span>
         {defaultSavedFilters.map(f => (
           <Button
             key={f.name}
@@ -549,7 +549,7 @@ export default function CellarPage() {
               "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
               activeSavedFilter === f.name
                 ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md"
-                : "bg-white text-foreground/70 border-border/50 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground",
+                : "bg-white/90 text-foreground/70 border-border/50 shadow-sm hover:bg-white hover:border-border hover:text-foreground",
             )}
           >
             {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3 opacity-40" />}
@@ -560,15 +560,15 @@ export default function CellarPage() {
 
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center pt-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mr-1">Filtros ativos:</span>
+        <div className="glass-card p-3 flex flex-wrap gap-2 items-center">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[28px] text-[11px] rounded-full group border-[hsl(var(--wine)/0.30)] bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] font-bold shadow-sm">
+            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[28px] text-[11px] rounded-full group border-[hsl(var(--wine)/0.25)] bg-[hsl(var(--wine)/0.12)] text-[hsl(var(--wine))] font-bold shadow-sm">
               {chip.label}
               <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 hover:opacity-100 transition-opacity duration-150" onClick={chip.onRemove} />
             </Badge>
           ))}
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs font-bold text-destructive hover:bg-destructive/10 ml-1">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-xs font-bold text-destructive hover:bg-destructive/10 ml-1">
             Limpar tudo
           </Button>
         </div>
