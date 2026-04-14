@@ -157,13 +157,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-color: #161814;
+    background-color: #1a2420;
     background-image:
-      radial-gradient(ellipse 80% 55% at 12% 20%, rgba(94, 16, 40, 0.28) 0%, transparent 65%),
-      radial-gradient(ellipse 70% 50% at 88% 75%, rgba(36, 52, 38, 0.35) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 45% at 72% 18%, rgba(138, 75, 42, 0.18) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 255, 255, 0.025) 0%, transparent 60%),
-      linear-gradient(170deg, #161814 0%, #1a1c17 40%, #161814 100%);
+      radial-gradient(ellipse 80% 55% at 12% 20%, rgba(94, 16, 40, 0.25) 0%, transparent 65%),
+      radial-gradient(ellipse 75% 55% at 88% 75%, rgba(36, 52, 38, 0.45) 0%, transparent 60%),
+      radial-gradient(ellipse 65% 50% at 30% 80%, rgba(36, 52, 38, 0.30) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 45% at 72% 18%, rgba(138, 75, 42, 0.15) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 60%),
+      linear-gradient(170deg, #1a2420 0%, #1e2b22 40%, #1a2420 100%);
     background-attachment: fixed;
     min-height: 100vh;
     color: #1C1C1C;
