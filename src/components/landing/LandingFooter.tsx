@@ -18,10 +18,10 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
       }}
     >
       <div className="mx-auto max-w-6xl flex flex-col items-center gap-2 sm:gap-3 md:flex-row md:justify-between">
-        <div className="flex items-center gap-3 rounded-2xl px-4 py-2.5 bg-white/60 border border-white/60 shadow-[0_12px_28px_-18px_rgba(0,0,0,0.16)] min-w-[220px] sm:min-w-[250px]">
-          <Logo variant="compact" className="h-8 sm:h-10 w-auto grayscale-0 shrink-0 opacity-100 font-semibold text-xl" />
+        <div className="flex items-center gap-3 min-w-[220px] sm:min-w-[250px]">
+          <Logo variant="compact" className="h-12 sm:h-14 w-auto shrink-0 opacity-100 drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]" />
           <div className="flex flex-col leading-none min-w-0">
-            <span className="font-bold text-[14px] sm:text-[15px] font-sans tracking-tight text-foreground">Sommelyx</span>
+            <span className="font-serif font-extrabold text-[20px] sm:text-[24px] tracking-[-0.01em]" style={{ color: "#3d0a16" }}>Sommelyx</span>
             <span className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55 whitespace-nowrap">
               Gestão inteligente de adegas
             </span>
