@@ -148,7 +148,7 @@ export default function ConsumptionPage() {
 
       {/* Period + Source Filters — tighter */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-wrap gap-1.5">
-        <div className="flex items-center gap-px rounded-xl border border-white/50 bg-white/55 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-2xl">
+        <div className="flex items-center gap-px rounded-xl border border-white/16 bg-white/40 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-xl">
           {([
             { value: "week", label: "Sem" },
             { value: "month", label: "Mês" },
@@ -165,7 +165,7 @@ export default function ConsumptionPage() {
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
                     ? "text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/60",
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/40",
                 )}
                 onClick={() => setPeriod(p.value)}
               >
@@ -181,7 +181,7 @@ export default function ConsumptionPage() {
             );
           })}
         </div>
-        <div className="flex items-center gap-px rounded-xl border border-white/50 bg-white/55 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-2xl">
+        <div className="flex items-center gap-px rounded-xl border border-white/16 bg-white/40 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-xl">
           {([
             { value: "all", label: "Todos", icon: null },
             { value: "cellar", label: "Adega", icon: GlassWater },
@@ -197,7 +197,7 @@ export default function ConsumptionPage() {
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
                     ? "text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/60",
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/40",
                 )}
                 onClick={() => setSource(s.value)}
               >
