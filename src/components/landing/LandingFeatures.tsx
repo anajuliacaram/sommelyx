@@ -11,15 +11,6 @@ const fadeUp = {
   }),
 } as const;
 
-const glassStyle = {
-  background: "rgba(30,20,20,0.04)",
-  backdropFilter: "blur(16px) saturate(1.3)",
-  WebkitBackdropFilter: "blur(16px) saturate(1.3)",
-  border: "1px solid rgba(255,255,255,0.45)",
-  boxShadow:
-    "0 10px 36px -10px rgba(30,20,20,0.1), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)",
-} as const;
-
 const blocks = [
   {
     icon: Wine,
@@ -69,10 +60,9 @@ function FeatureCard({ block, i, onSignup, mobile = false }: { block: typeof blo
       key={block.title}
       className={`
         ${mobile ? "snap-start shrink-0 w-[86%] max-w-[340px]" : ""}
-        group relative flex flex-col items-start p-4 sm:p-5 rounded-2xl transition-all duration-250
+        surface-clarity group relative flex flex-col items-start p-4 sm:p-5 rounded-2xl transition-all duration-250
         hover:-translate-y-1 hover:shadow-[0_16px_48px_-12px_rgba(30,20,20,0.15)]
       `}
-      style={glassStyle}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-40px" }}
@@ -122,13 +112,13 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
       <div className="mx-auto max-w-5xl">
         {/* Section header */}
         <motion.div
-          className="text-center mb-8 sm:mb-10"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
-        >
-          <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-serif font-bold tracking-[-0.02em]" style={{ color: "#1A1A1A" }}>
+          className="section-surface section-surface--full mx-auto mb-8 sm:mb-10 max-w-3xl rounded-[28px] px-5 py-4 text-center items-center"
+        initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
+      >
+          <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-serif font-bold tracking-[-0.02em] text-foreground">
             Tudo que você precisa para gerenciar sua adega
           </h2>
-          <p className="mt-2 text-[14px] sm:text-[16px] max-w-md mx-auto leading-relaxed" style={{ color: "#666" }}>
+          <p className="mt-2 text-[14px] sm:text-[16px] max-w-md mx-auto leading-relaxed text-foreground/68">
             Simples, inteligente e feito para quem ama vinho.
           </p>
         </motion.div>

@@ -3,21 +3,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowDownRight,
-  ArrowRight,
-  BarChart3,
   DollarSign,
-  FileText,
   Filter,
   Layers,
   Package,
   Plus,
-  RefreshCcw,
   ShoppingCart,
   TrendingUp,
   Upload,
   Users,
-  Wine,
+  FileText,
   X,
+  Wine,
+  BarChart3,
 } from "@/icons/lucide";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -50,11 +48,11 @@ import { cn } from "@/lib/utils";
 
 /* ── Animation ── */
 const fadeUp = {
-  hidden: { opacity: 0, y: 12 } as const,
+  hidden: { opacity: 0, y: 10 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.05, duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.05, duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -77,55 +75,25 @@ function buildMonthWindow(size: number) {
   return months;
 }
 
-const glassTooltipStyle = {
-  background: "rgba(255,255,255,0.90)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  border: "1px solid rgba(255,255,255,0.50)",
+const chartTooltipStyle = {
+  background: "rgba(255,255,255,0.94)",
+  border: "1px solid rgba(255,255,255,0.28)",
   borderRadius: 14,
-  fontSize: 13,
-  boxShadow: "0 8px 32px -8px rgba(0,0,0,0.15)",
+  fontSize: 12,
+  boxShadow: "0 12px 28px -12px rgba(44,20,31,0.16)",
+  backdropFilter: "blur(14px)",
 };
 
 const PIE_COLORS = [
-  "#7B1E2B",
-  "#C6A768",
-  "#388E3C",
-  "#3B6EA5",
-  "#7E57C2",
-  "#5C8A8A",
-  "#C75B39",
-  "#8D8D3B",
+  "hsl(348, 55%, 35%)",
+  "hsl(38, 52%, 50%)",
+  "hsl(152, 32%, 42%)",
+  "hsl(220, 40%, 50%)",
+  "hsl(270, 40%, 50%)",
+  "hsl(180, 30%, 45%)",
+  "hsl(15, 50%, 50%)",
+  "hsl(60, 35%, 48%)",
 ];
-
-/* ── Glass Panel ── */
-function GP({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("rounded-[20px]", className)}
-      style={{
-        background: "rgba(255, 255, 255, 0.78)",
-        backdropFilter: "blur(20px) saturate(1.3)",
-        WebkitBackdropFilter: "blur(20px) saturate(1.3)",
-        border: "1px solid rgba(255, 255, 255, 0.45)",
-        boxShadow:
-          "0 1px 2px rgba(0,0,0,0.04), 0 8px 32px -8px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.6)",
-      }}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ── Section Label ── */
-function SL({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[10px] font-bold uppercase tracking-[0.10em]" style={{ color: "#999" }}>
-      {children}
-    </p>
-  );
-}
 
 /* ── Filter types ── */
 interface ActiveFilters {
@@ -149,7 +117,7 @@ function wineMatchesFilters(w: WineType, f: ActiveFilters) {
   return true;
 }
 
-/* ── Filter Chip Group ── */
+/* ── Filter Chip Component ── */
 function FilterChipGroup({
   label,
   options,
@@ -164,9 +132,7 @@ function FilterChipGroup({
   if (options.length === 0) return null;
   return (
     <div className="space-y-1.5">
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: "#aaa" }}>
-        {label}
-      </p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60">{label}</p>
       <div className="flex flex-wrap gap-1.5">
         {options.slice(0, 12).map((opt) => {
           const active = selected.includes(opt.value);
@@ -178,16 +144,15 @@ function FilterChipGroup({
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-semibold transition-all duration-150 border",
                 active
-                  ? "bg-[rgba(123,30,43,0.10)] text-primary border-[rgba(123,30,43,0.20)]"
-                  : "border-[rgba(0,0,0,0.06)] hover:bg-[rgba(0,0,0,0.03)]",
+                  ? "bg-primary/10 text-primary border-primary/20"
+                  : "bg-background/50 text-muted-foreground/70 border-border/30 hover:bg-muted/20 hover:text-foreground"
               )}
-              style={active ? {} : { color: "#666", background: "rgba(255,255,255,0.50)" }}
             >
               {opt.value}
-              <span
-                className="text-[9px] font-bold tabular-nums"
-                style={{ color: active ? "rgba(123,30,43,0.5)" : "#bbb" }}
-              >
+              <span className={cn(
+                "text-[9px] font-bold tabular-nums",
+                active ? "text-primary/60" : "text-muted-foreground/40"
+              )}>
                 {opt.count}
               </span>
             </button>
@@ -206,27 +171,23 @@ export default function CommercialDashboard() {
 
   const [addOpen, setAddOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(
-    () => !localStorage.getItem("sommelyx_onboarding_done_commercial"),
-  );
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("sommelyx_onboarding_done_commercial"));
   const [filters, setFilters] = useState<ActiveFilters>(emptyFilters);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  /* ── Filter options from ALL wines ── */
+  /* ── Build filter options from ALL wines (unfiltered) ── */
   const filterOptions = useMemo(() => {
     const styleMap: Record<string, number> = {};
     const countryMap: Record<string, number> = {};
     const regionMap: Record<string, number> = {};
     const grapeMap: Record<string, number> = {};
 
-    allWines
-      .filter((w) => w.quantity > 0)
-      .forEach((w) => {
-        if (w.style) styleMap[w.style] = (styleMap[w.style] || 0) + w.quantity;
-        if (w.country) countryMap[w.country] = (countryMap[w.country] || 0) + w.quantity;
-        if (w.region) regionMap[w.region] = (regionMap[w.region] || 0) + w.quantity;
-        if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity;
-      });
+    allWines.filter(w => w.quantity > 0).forEach((w) => {
+      if (w.style) styleMap[w.style] = (styleMap[w.style] || 0) + w.quantity;
+      if (w.country) countryMap[w.country] = (countryMap[w.country] || 0) + w.quantity;
+      if (w.region) regionMap[w.region] = (regionMap[w.region] || 0) + w.quantity;
+      if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity;
+    });
 
     const toOpts = (map: Record<string, number>) =>
       Object.entries(map)
@@ -254,13 +215,16 @@ export default function CommercialDashboard() {
   const clearFilters = useCallback(() => setFilters(emptyFilters), []);
   const isFiltered = hasActiveFilters(filters);
 
-  /* ── Apply filters ── */
+  /* ── Apply filters to wines ── */
   const wines = useMemo(
     () => (isFiltered ? allWines.filter((w) => wineMatchesFilters(w, filters)) : allWines),
-    [allWines, filters, isFiltered],
+    [allWines, filters, isFiltered]
   );
   const filteredWineIds = useMemo(() => new Set(wines.map((w) => w.id)), [wines]);
-  const filteredWineNames = useMemo(() => new Set(wines.map((w) => w.name.toLowerCase())), [wines]);
+  const filteredWineNames = useMemo(
+    () => new Set(wines.map((w) => w.name.toLowerCase())),
+    [wines],
+  );
   const salesInScope = useMemo(
     () =>
       sales.filter((sale) => {
@@ -270,27 +234,21 @@ export default function CommercialDashboard() {
     [sales, filteredWineIds, filteredWineNames],
   );
 
-  /* ── KPIs ── */
+  /* ── Filtered KPIs ── */
   const totalBottles = useMemo(() => wines.reduce((sum, w) => sum + w.quantity, 0), [wines]);
   const totalValue = useMemo(
     () => wines.reduce((sum, w) => sum + (w.current_value ?? w.purchase_price ?? 0) * w.quantity, 0),
-    [wines],
+    [wines]
   );
   const uniqueLabels = useMemo(() => wines.filter((w) => w.quantity > 0).length, [wines]);
   const lowStock = useMemo(() => wines.filter((w) => w.quantity > 0 && w.quantity <= 2).length, [wines]);
 
   const turnover = useMemo(() => {
     const recently = wines.filter(
-      (w) => Date.now() - new Date(w.updated_at).getTime() < 30 * 24 * 60 * 60 * 1000,
+      (w) => Date.now() - new Date(w.updated_at).getTime() < 30 * 24 * 60 * 60 * 1000
     ).length;
     return wines.length > 0 ? Math.round((recently / wines.length) * 100) : 0;
   }, [wines]);
-
-  const avgTicket = useMemo(() => {
-    if (salesInScope.length === 0) return 0;
-    const total = salesInScope.reduce((s, sale) => s + (sale.price ?? 0) * (sale.quantity ?? 1), 0);
-    return total / salesInScope.length;
-  }, [salesInScope]);
 
   const months = useMemo(() => buildMonthWindow(6), []);
 
@@ -310,7 +268,6 @@ export default function CommercialDashboard() {
       return data ?? [];
     },
   });
-
   const wineEventsInScope = useMemo(
     () => (wineEvents as any[]).filter((event) => event.wine_id && filteredWineIds.has(event.wine_id)),
     [wineEvents, filteredWineIds],
@@ -347,14 +304,12 @@ export default function CommercialDashboard() {
   /* ── Breakdown data ── */
   const breakdownByStyle = useMemo(() => {
     const map: Record<string, { bottles: number; value: number }> = {};
-    wines
-      .filter((w) => w.quantity > 0)
-      .forEach((w) => {
-        const key = w.style || "Outros";
-        if (!map[key]) map[key] = { bottles: 0, value: 0 };
-        map[key].bottles += w.quantity;
-        map[key].value += (w.current_value ?? w.purchase_price ?? 0) * w.quantity;
-      });
+    wines.filter(w => w.quantity > 0).forEach((w) => {
+      const key = w.style || "Outros";
+      if (!map[key]) map[key] = { bottles: 0, value: 0 };
+      map[key].bottles += w.quantity;
+      map[key].value += (w.current_value ?? w.purchase_price ?? 0) * w.quantity;
+    });
     return Object.entries(map)
       .sort(([, a], [, b]) => b.bottles - a.bottles)
       .map(([name, d]) => ({ name, ...d }));
@@ -362,14 +317,12 @@ export default function CommercialDashboard() {
 
   const breakdownByRegion = useMemo(() => {
     const map: Record<string, { bottles: number; value: number }> = {};
-    wines
-      .filter((w) => w.quantity > 0)
-      .forEach((w) => {
-        const key = w.region || w.country || "Outros";
-        if (!map[key]) map[key] = { bottles: 0, value: 0 };
-        map[key].bottles += w.quantity;
-        map[key].value += (w.current_value ?? w.purchase_price ?? 0) * w.quantity;
-      });
+    wines.filter(w => w.quantity > 0).forEach((w) => {
+      const key = w.region || w.country || "Outros";
+      if (!map[key]) map[key] = { bottles: 0, value: 0 };
+      map[key].bottles += w.quantity;
+      map[key].value += (w.current_value ?? w.purchase_price ?? 0) * w.quantity;
+    });
     return Object.entries(map)
       .sort(([, a], [, b]) => b.bottles - a.bottles)
       .slice(0, 8)
@@ -378,13 +331,12 @@ export default function CommercialDashboard() {
 
   const kpis = useMemo(
     () => [
-      { label: "Estoque total", value: `${totalBottles}`, icon: Layers, tone: "default" as const },
-      { label: "Valor em estoque", value: formatBRL(totalValue), icon: DollarSign, tone: "default" as const },
-      { label: "Giro", value: `${turnover}%`, icon: RefreshCcw, tone: "default" as const },
-      { label: "Ticket médio", value: formatBRL(avgTicket), icon: TrendingUp, tone: "default" as const },
-      { label: "Ruptura", value: `${lowStock}`, icon: AlertTriangle, tone: lowStock > 0 ? ("alert" as const) : ("default" as const) },
+      { label: "Rótulos", value: `${uniqueLabels}`, detail: "Em estoque", icon: Wine },
+      { label: "Garrafas", value: `${totalBottles}`, detail: "Total disponível", icon: Layers },
+      { label: "Valor em estoque", value: formatBRL(totalValue), detail: "Investimento", icon: DollarSign },
+      { label: "Reposição", value: `${lowStock}`, detail: lowStock > 0 ? "Atenção" : "Estoque saudável", icon: AlertTriangle },
     ],
-    [lowStock, totalBottles, totalValue, turnover, avgTicket],
+    [lowStock, totalBottles, totalValue, uniqueLabels],
   );
 
   const lowStockRows = useMemo(
@@ -441,43 +393,34 @@ export default function CommercialDashboard() {
       <div className="max-w-[1280px] space-y-4">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="surface-clarity rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1
-                className="text-[26px] sm:text-[30px] font-bold tracking-[-0.02em] leading-[1.1] font-serif"
-                style={{ color: "rgba(255,255,255,0.92)" }}
-              >
+              <h1 className="text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[30px] font-serif">
                 Resumo da operação
               </h1>
-              <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <p className="mt-1.5 text-[13px] text-foreground/68 leading-relaxed">
                 {isFiltered
                   ? `${uniqueLabels} rótulos · ${totalBottles} garrafas · ${formatBRL(totalValue)}`
                   : `${totalBottles} un. em estoque`}
                 {lowStock > 0 && !isFiltered && (
-                  <>
-                    {" "}
-                    · <span style={{ color: "#C97A82" }}>{lowStock} para repor</span>
-                  </>
+                  <> · <span className="text-primary font-medium">{lowStock} para repor</span></>
                 )}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2.5">
               <Button
-                variant={filtersOpen ? "primary" : "glass"}
+                variant={filtersOpen ? "default" : "outline"}
                 size="default"
                 onClick={() => setFiltersOpen(!filtersOpen)}
-                className="gap-2"
+                className={cn(
+                  "gap-2",
+                  isFiltered && !filtersOpen && "border-primary/30 text-primary"
+                )}
               >
                 <Filter className="h-4 w-4" />
                 Filtros
                 {isFiltered && (
-                  <span
-                    className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold"
-                    style={{
-                      background: filtersOpen ? "rgba(255,255,255,0.20)" : "rgba(123,30,43,0.12)",
-                      color: filtersOpen ? "#fff" : "#7B1E2B",
-                    }}
-                  >
+                  <span className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
                     {activeFilterLabels.length}
                   </span>
                 )}
@@ -488,7 +431,7 @@ export default function CommercialDashboard() {
               <Button variant="secondary" size="default" onClick={() => navigate("/dashboard/sales")}>
                 <ShoppingCart className="mr-1.5 h-4 w-4" /> Venda
               </Button>
-              <Button variant="ghost" size="default" onClick={() => setCsvOpen(true)} style={{ color: "rgba(255,255,255,0.60)" }}>
+              <Button variant="ghost" size="default" onClick={() => setCsvOpen(true)}>
                 <Upload className="mr-1.5 h-4 w-4" /> Importar
               </Button>
             </div>
@@ -504,24 +447,42 @@ export default function CommercialDashboard() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <GP className="p-5 space-y-4">
+              <div className="chart-surface p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-[13px] font-semibold" style={{ color: "#111" }}>
-                    Filtrar estoque
-                  </p>
+                  <p className="text-[13px] font-semibold text-foreground">Filtrar estoque</p>
                   {isFiltered && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] gap-1" style={{ color: "#888" }}>
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] text-muted-foreground gap-1">
                       <X className="h-3 w-3" /> Limpar tudo
                     </Button>
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <FilterChipGroup label="Tipo" options={filterOptions.style} selected={filters.style} onToggle={(v) => toggleFilter("style", v)} />
-                  <FilterChipGroup label="País" options={filterOptions.country} selected={filters.country} onToggle={(v) => toggleFilter("country", v)} />
-                  <FilterChipGroup label="Região" options={filterOptions.region} selected={filters.region} onToggle={(v) => toggleFilter("region", v)} />
-                  <FilterChipGroup label="Uva" options={filterOptions.grape} selected={filters.grape} onToggle={(v) => toggleFilter("grape", v)} />
+                  <FilterChipGroup
+                    label="Tipo"
+                    options={filterOptions.style}
+                    selected={filters.style}
+                    onToggle={(v) => toggleFilter("style", v)}
+                  />
+                  <FilterChipGroup
+                    label="País"
+                    options={filterOptions.country}
+                    selected={filters.country}
+                    onToggle={(v) => toggleFilter("country", v)}
+                  />
+                  <FilterChipGroup
+                    label="Região"
+                    options={filterOptions.region}
+                    selected={filters.region}
+                    onToggle={(v) => toggleFilter("region", v)}
+                  />
+                  <FilterChipGroup
+                    label="Uva"
+                    options={filterOptions.grape}
+                    selected={filters.grape}
+                    onToggle={(v) => toggleFilter("grape", v)}
+                  />
                 </div>
-              </GP>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -529,78 +490,55 @@ export default function CommercialDashboard() {
         {/* ─── Active Filter Context Bar ─── */}
         {isFiltered && !filtersOpen && (
           <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
-            <div
-              className="flex items-center gap-2 flex-wrap rounded-2xl px-4 py-2.5"
-              style={{
-                background: "rgba(255,255,255,0.65)",
-                border: "1px solid rgba(123,30,43,0.10)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-              }}
-            >
-              <span className="text-[11px] font-semibold shrink-0" style={{ color: "#888" }}>
-                Visualizando:
-              </span>
+            <div className="surface-clarity flex items-center gap-2 flex-wrap rounded-xl px-4 py-2.5">
+              <span className="text-[11px] font-semibold text-foreground/68 shrink-0">Visualizando:</span>
               {activeFilterLabels.map(({ key, value }) => (
                 <button
                   key={`${key}-${value}`}
                   onClick={() => toggleFilter(key, value)}
-                  className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-primary transition-colors"
-                  style={{ background: "rgba(123,30,43,0.08)" }}
+                  className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/15 transition-colors"
                 >
                   {value}
                   <X className="h-2.5 w-2.5" />
                 </button>
               ))}
-              <span className="text-[11px]" style={{ color: "#aaa" }}>
+              <span className="text-[11px] text-foreground/54">
                 · {uniqueLabels} rótulos · {totalBottles} garrafas · {formatBRL(totalValue)}
               </span>
-              <button onClick={clearFilters} className="ml-auto text-[10px] font-semibold transition-colors" style={{ color: "#aaa" }}>
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-[10px] font-semibold text-foreground/54 hover:text-foreground transition-colors"
+              >
                 Limpar
               </button>
             </div>
           </motion.div>
         )}
 
-        {/* ─── KPI Strip (5 items, denser) ─── */}
+        {/* ─── KPI Strip ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {isLoading
-              ? [1, 2, 3, 4, 5].map((i) => (
-                  <GP key={i} className="p-4">
-                    <Skeleton className="h-3 w-16 mb-2 rounded-lg" />
-                    <Skeleton className="h-7 w-14 rounded-lg" />
-                  </GP>
-                ))
-              : kpis.map((kpi) => (
-                  <GP key={kpi.label} className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div
-                        className="flex items-center justify-center h-7 w-7 rounded-lg"
-                        style={{
-                          background:
-                            kpi.tone === "alert" ? "rgba(123,30,43,0.10)" : "rgba(0,0,0,0.04)",
-                        }}
-                      >
-                        <kpi.icon
-                          className="h-3.5 w-3.5"
-                          style={{
-                            color: kpi.tone === "alert" ? "#7B1E2B" : "#888",
-                          }}
-                        />
-                      </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {isLoading ? (
+              [1, 2, 3, 4].map((i) => (
+                <div key={i} className="glass-card p-5">
+                  <Skeleton className="h-3.5 w-20 mb-3 rounded-lg" />
+                  <Skeleton className="h-8 w-16 rounded-lg" />
+                </div>
+              ))
+            ) : (
+              kpis.map((kpi) => (
+                <div key={kpi.label} className="glass-card p-5">
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/[0.06]">
+                      <kpi.icon className="h-4 w-4 text-primary/60" />
                     </div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.08em] mb-0.5" style={{ color: "#999" }}>
-                      {kpi.label}
-                    </p>
-                    <p
-                      className="text-[22px] font-bold tracking-[-0.02em] leading-none tabular-nums"
-                      style={{ color: kpi.tone === "alert" && lowStock > 0 ? "#7B1E2B" : "#111" }}
-                    >
-                      {kpi.value}
-                    </p>
-                  </GP>
-                ))}
+                    <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground/60 whitespace-nowrap">{kpi.label}</p>
+                  </div>
+                  <p className="text-[26px] font-bold tracking-[-0.02em] text-foreground leading-none">{kpi.value}</p>
+                  <p className="text-[12px] text-muted-foreground/60 mt-2 font-medium">{kpi.detail}</p>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
 
@@ -620,208 +558,142 @@ export default function CommercialDashboard() {
             }}
           />
         ) : totalBottles === 0 && isFiltered ? (
-          <GP className="p-10 text-center space-y-3">
-            <Filter className="h-8 w-8 mx-auto" style={{ color: "rgba(0,0,0,0.15)" }} />
-            <p className="text-[15px] font-semibold" style={{ color: "#555" }}>
-              Nenhum item encontrado com esses filtros
-            </p>
-            <p className="text-[13px]" style={{ color: "#999" }}>
-              Tente remover um filtro ou ajuste a seleção
-            </p>
+          <div className="glass-card p-10 text-center space-y-3">
+            <Filter className="h-8 w-8 text-muted-foreground/30 mx-auto" />
+            <p className="text-[15px] font-semibold text-foreground/70">Nenhum item encontrado com esses filtros</p>
+            <p className="text-[13px] text-muted-foreground/50">Tente remover um filtro ou ajuste a seleção</p>
             <Button variant="ghost" size="sm" onClick={clearFilters} className="mt-2">
               Limpar filtros
             </Button>
-          </GP>
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-12 gap-4">
+          <div className="grid grid-cols-12 gap-4">
               {/* ─── Stock Table ─── */}
               <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-                <GP className="p-6">
+                <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <div className="min-w-0">
-                      <SL>Estoque</SL>
-                      <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em]" style={{ color: "#111" }}>
+                      <p className="chart-surface-kicker">Estoque</p>
+                      <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em] text-foreground">
                         Itens de maior impacto
                       </h2>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-[12px] font-semibold"
-                      style={{ color: "#888" }}
-                      onClick={() => navigate("/dashboard/inventory")}
-                    >
-                      Ver tudo <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                    <Button variant="ghost" size="sm" className="text-[12px] font-semibold text-muted-foreground hover:text-foreground" onClick={() => navigate("/dashboard/inventory")}>
+                      Ver tudo →
                     </Button>
                   </div>
 
-                  <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(0,0,0,0.05)" }}>
-                    <div
-                      className="grid grid-cols-12 gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.1em]"
-                      style={{ color: "#999", background: "rgba(0,0,0,0.02)" }}
-                    >
+                  <div className="overflow-hidden rounded-2xl border border-border/25">
+                    <div className="grid grid-cols-12 gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 bg-muted/12">
                       <div className="col-span-6">Produto</div>
                       <div className="col-span-2 text-center">Tipo</div>
                       <div className="col-span-2 text-right">Qtd.</div>
                       <div className="col-span-2 text-right">Valor</div>
                     </div>
-                    <div>
+                    <div className="divide-y divide-border/12">
                       {stockRows.map((row) => (
                         <button
                           key={row.id}
                           type="button"
                           onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(row.name)}`)}
-                          className="grid w-full grid-cols-12 items-center gap-2 px-5 py-3 text-left transition-all duration-200 hover:bg-[rgba(0,0,0,0.02)]"
-                          style={{ borderBottom: "1px solid rgba(0,0,0,0.03)" }}
+                          className="grid w-full grid-cols-12 items-center gap-2 px-5 py-3.5 text-left transition-all duration-200 hover:bg-muted/10"
                         >
                           <div className="col-span-6 min-w-0">
                             <div className="flex items-center gap-2.5">
-                              <div
-                                className="h-2 w-2 rounded-full shrink-0"
-                                style={{ background: row.low ? "#7B1E2B" : "#C6A768" }}
-                              />
-                              <p className="truncate text-[13px] font-semibold" style={{ color: "#111" }}>
-                                {row.name}
-                              </p>
+                              <div className={cn("h-2 w-2 rounded-full shrink-0", row.low ? "bg-primary" : "bg-accent")} />
+                              <p className="truncate text-[13px] font-semibold text-foreground">{row.name}</p>
                             </div>
                             {row.producer && (
-                              <p className="mt-0.5 truncate text-[11px] pl-[18px]" style={{ color: "#aaa" }}>
-                                {row.producer}
-                              </p>
+                              <p className="mt-0.5 truncate text-[11px] text-muted-foreground/50 pl-[18px]">{row.producer}</p>
                             )}
                           </div>
                           <div className="col-span-2 text-center">
                             {row.style && (
-                              <span
-                                className="inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-semibold"
-                                style={{ background: "rgba(0,0,0,0.04)", color: "#777" }}
-                              >
+                              <span className="inline-flex items-center rounded-lg bg-muted/25 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground/70">
                                 {row.style}
                               </span>
                             )}
                           </div>
                           <div className="col-span-2 text-right">
-                            <span
-                              className="text-[13px] font-bold tabular-nums"
-                              style={{ color: row.low ? "#7B1E2B" : "#111" }}
-                            >
-                              {row.qty}
-                            </span>
+                            <span className={cn("text-[13px] font-bold tabular-nums", row.low ? "text-primary" : "text-foreground")}>{row.qty}</span>
                           </div>
                           <div className="col-span-2 text-right">
-                            <span className="text-[13px] font-semibold tabular-nums" style={{ color: "#333" }}>
-                              {formatBRL(row.value)}
-                            </span>
+                            <span className="text-[13px] font-semibold text-foreground tabular-nums">{formatBRL(row.value)}</span>
                           </div>
                         </button>
                       ))}
                     </div>
                   </div>
-                </GP>
+                </div>
               </motion.div>
 
               {/* ─── Right Column ─── */}
               <div className="col-span-12 grid gap-4 lg:col-span-5">
-                {/* Alerts / Low Stock */}
+                {/* Alerts */}
                 <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-                  <GP className="p-6">
-                    <div className="flex items-center justify-between gap-3 mb-4">
-                      <div>
-                        <SL>Alertas</SL>
-                        <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em]" style={{ color: "#111" }}>
-                          Reposição
-                        </h2>
+                <div className="chart-surface p-6">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <div>
+                        <p className="chart-surface-kicker">Alertas</p>
+                        <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em] text-foreground">Reposição</h2>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[12px] font-semibold"
-                        style={{ color: "#888" }}
-                        onClick={() => navigate("/dashboard/inventory")}
-                      >
+                      <Button variant="ghost" size="sm" className="text-[12px] font-semibold text-muted-foreground hover:text-foreground" onClick={() => navigate("/dashboard/inventory")}>
                         Ajustar
                       </Button>
                     </div>
 
                     <div className="grid gap-2">
                       {lowStockRows.length === 0 ? (
-                        <div
-                          className="rounded-2xl py-8 text-center"
-                          style={{ background: "rgba(0,0,0,0.02)", border: "1px dashed rgba(0,0,0,0.06)" }}
-                        >
-                          <p className="text-[13px] font-medium" style={{ color: "#bbb" }}>
-                            Nenhum item com estoque baixo
-                          </p>
+                        <div className="rounded-2xl border border-border/20 bg-muted/8 py-8 text-center">
+                          <p className="text-[13px] text-muted-foreground/40 font-medium">Nenhum item com estoque baixo</p>
                         </div>
                       ) : (
                         lowStockRows.map((w) => (
-                          <div
-                            key={w.id}
-                            className="flex items-center gap-3.5 rounded-2xl px-4 py-3 transition-all duration-200 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06)]"
-                            style={{
-                              background: "rgba(255,255,255,0.55)",
-                              border: "1px solid rgba(255,255,255,0.45)",
-                            }}
-                          >
-                            <div
-                              className="flex h-8 w-8 items-center justify-center rounded-xl shrink-0"
-                              style={{ background: "rgba(123,30,43,0.08)" }}
-                            >
-                              <ArrowDownRight className="h-3.5 w-3.5 text-primary" />
+                          <div key={w.id} className="flex items-center gap-3.5 rounded-2xl border border-border/20 bg-background/40 px-4 py-3 transition-all duration-200 hover:bg-background/60 hover:shadow-sm">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/8 text-primary shrink-0">
+                              <ArrowDownRight className="h-3.5 w-3.5" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[13px] font-semibold" style={{ color: "#111" }}>
-                                {w.name}
-                              </p>
+                              <p className="truncate text-[13px] font-semibold text-foreground">{w.name}</p>
                               {w.producer && (
-                                <p className="mt-0.5 truncate text-[11px]" style={{ color: "#aaa" }}>
-                                  {w.producer}
-                                </p>
+                                <p className="mt-0.5 truncate text-[11px] text-muted-foreground/50">{w.producer}</p>
                               )}
                             </div>
-                            <span
-                              className="rounded-xl px-2.5 py-0.5 text-[11px] font-bold tabular-nums text-primary"
-                              style={{ background: "rgba(123,30,43,0.08)" }}
-                            >
+                            <span className="rounded-xl bg-primary/8 px-2.5 py-0.5 text-[11px] font-bold text-primary tabular-nums">
                               {w.quantity} un.
                             </span>
                           </div>
                         ))
                       )}
                     </div>
-                  </GP>
+                  </div>
                 </motion.div>
 
                 {/* Quick Links */}
                 <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-                  <GP className="p-5">
-                    <SL>Atalhos</SL>
-                    <div className="grid grid-cols-2 gap-2 mt-3">
+                <div className="chart-surface p-6">
+                    <p className="chart-surface-kicker mb-3.5">Atalhos</p>
+                    <div className="grid grid-cols-2 gap-2.5">
                       {[
                         { icon: Package, label: "Estoque", route: "/dashboard/inventory" },
                         { icon: ShoppingCart, label: "Vendas", route: "/dashboard/sales" },
                         { icon: Users, label: "Cadastros", route: "/dashboard/registers" },
                         { icon: FileText, label: "Relatórios", route: "/dashboard/reports" },
                       ].map((item) => (
-                        <button
+                        <Button
                           key={item.label}
                           type="button"
+                          variant="ghost"
                           onClick={() => navigate(item.route)}
-                          className="flex h-11 items-center gap-3 rounded-2xl px-4 text-left transition-all duration-200 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06)]"
-                          style={{
-                            background: "rgba(255,255,255,0.50)",
-                            border: "1px solid rgba(255,255,255,0.40)",
-                          }}
+                          className="flex h-11 items-center gap-3 rounded-2xl border border-border/20 bg-background/30 px-4 text-left hover:bg-muted/12 transition-all duration-200"
                         >
-                          <item.icon className="h-4 w-4 shrink-0" style={{ color: "#999" }} />
-                          <span className="text-[12px] font-semibold" style={{ color: "#333" }}>
-                            {item.label}
-                          </span>
-                        </button>
+                          <item.icon className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                          <span className="text-[12px] font-semibold text-foreground">{item.label}</span>
+                        </Button>
                       ))}
                     </div>
-                  </GP>
+                  </div>
                 </motion.div>
               </div>
             </div>
@@ -830,17 +702,13 @@ export default function CommercialDashboard() {
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {/* By Style */}
-                <GP className="p-6">
+                <div className="chart-surface p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="h-4 w-4" style={{ color: "#999" }} />
-                    <h3 className="text-[16px] font-bold tracking-[-0.01em]" style={{ color: "#111" }}>
-                      Por tipo
-                    </h3>
+                    <BarChart3 className="h-4 w-4 text-foreground/50" />
+                    <h3 className="chart-surface-title">Por tipo</h3>
                   </div>
                   {breakdownByStyle.length === 0 ? (
-                    <p className="text-[13px] py-4 text-center" style={{ color: "#bbb" }}>
-                      Sem dados
-                    </p>
+                    <p className="text-[13px] text-muted-foreground/40 py-4 text-center">Sem dados</p>
                   ) : (
                     <div className="flex items-start gap-6">
                       <div className="w-[120px] h-[120px] shrink-0">
@@ -855,7 +723,7 @@ export default function CommercialDashboard() {
                               outerRadius={55}
                               innerRadius={30}
                               strokeWidth={2}
-                              stroke="rgba(255,255,255,0.80)"
+                              stroke="rgba(255,255,255,0.92)"
                             >
                               {breakdownByStyle.map((_, i) => (
                                 <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -869,39 +737,26 @@ export default function CommercialDashboard() {
                           const pct = totalBottles > 0 ? Math.round((d.bottles / totalBottles) * 100) : 0;
                           return (
                             <div key={d.name} className="flex items-center gap-2.5">
-                              <div
-                                className="h-2.5 w-2.5 rounded-full shrink-0"
-                                style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
-                              />
-                              <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: "#333" }}>
-                                {d.name}
-                              </span>
-                              <span className="text-[11px] font-bold tabular-nums" style={{ color: "#777" }}>
-                                {d.bottles} un.
-                              </span>
-                              <span className="text-[10px] font-semibold tabular-nums w-[32px] text-right" style={{ color: "#bbb" }}>
-                                {pct}%
-                              </span>
+                              <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                              <span className="text-[12px] font-semibold text-foreground flex-1 truncate">{d.name}</span>
+                              <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{d.bottles} un.</span>
+                              <span className="text-[10px] font-semibold text-muted-foreground/40 tabular-nums w-[32px] text-right">{pct}%</span>
                             </div>
                           );
                         })}
                       </div>
                     </div>
                   )}
-                </GP>
+                </div>
 
                 {/* By Region */}
-                <GP className="p-6">
+                <div className="chart-surface p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="h-4 w-4" style={{ color: "#999" }} />
-                    <h3 className="text-[16px] font-bold tracking-[-0.01em]" style={{ color: "#111" }}>
-                      Por região
-                    </h3>
+                    <BarChart3 className="h-4 w-4 text-foreground/50" />
+                    <h3 className="chart-surface-title">Por região</h3>
                   </div>
                   {breakdownByRegion.length === 0 ? (
-                    <p className="text-[13px] py-4 text-center" style={{ color: "#bbb" }}>
-                      Sem dados
-                    </p>
+                    <p className="text-[13px] text-muted-foreground/40 py-4 text-center">Sem dados</p>
                   ) : (
                     <div className="space-y-2.5">
                       {breakdownByRegion.map((d, i) => {
@@ -909,22 +764,19 @@ export default function CommercialDashboard() {
                         return (
                           <div key={d.name}>
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-[12px] font-semibold truncate" style={{ color: "#333" }}>
-                                {d.name}
-                              </span>
+                              <span className="text-[12px] font-semibold text-foreground truncate">{d.name}</span>
                               <div className="flex items-center gap-3">
-                                <span className="text-[11px] font-bold tabular-nums" style={{ color: "#777" }}>
-                                  {d.bottles} un.
-                                </span>
-                                <span className="text-[11px] font-semibold tabular-nums" style={{ color: "#bbb" }}>
-                                  {formatBRL(d.value)}
-                                </span>
+                                <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{d.bottles} un.</span>
+                                <span className="text-[11px] font-semibold text-muted-foreground/50 tabular-nums">{formatBRL(d.value)}</span>
                               </div>
                             </div>
-                            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
+                            <div className="h-1.5 rounded-full bg-muted/20 overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all duration-500"
-                                style={{ width: `${pct}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
+                                style={{
+                                  width: `${pct}%`,
+                                  backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
+                                }}
                               />
                             </div>
                           </div>
@@ -932,113 +784,73 @@ export default function CommercialDashboard() {
                       })}
                     </div>
                   )}
-                </GP>
+                </div>
               </div>
             </motion.div>
 
             {/* ─── Charts ─── */}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-                <GP className="p-6">
+                <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="text-[16px] font-bold tracking-[-0.01em]" style={{ color: "#111" }}>
-                      Vendas
-                    </h3>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#bbb" }}>
-                      {isFiltered ? "6m · filtro" : "6 meses"}
-                    </span>
+                    <h3 className="chart-surface-title">Vendas</h3>
+                    <span className="chart-surface-kicker">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
                   </div>
                   <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={salesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "rgba(0,0,0,0.25)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip contentStyle={glassTooltipStyle} formatter={(v: any) => formatBRL(Number(v))} />
-                        <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="#7B1E2B" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
+                        <Tooltip contentStyle={chartTooltipStyle} formatter={(v: any) => formatBRL(Number(v))} />
+                        <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                </GP>
+                </div>
               </motion.div>
 
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
-                <GP className="p-6">
+                <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="text-[16px] font-bold tracking-[-0.01em]" style={{ color: "#111" }}>
-                      Movimentação
-                    </h3>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#bbb" }}>
-                      {isFiltered ? "6m · filtro" : "6 meses"}
-                    </span>
+                    <h3 className="chart-surface-title">Movimentação</h3>
+                    <span className="chart-surface-kicker">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
                   </div>
                   <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={stockMovesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "rgba(0,0,0,0.25)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip contentStyle={glassTooltipStyle} />
-                        <Bar dataKey="in" stackId="a" radius={[8, 8, 0, 0]} fill="#C6A768" name="Entrada" />
-                        <Bar dataKey="out" stackId="a" radius={[8, 8, 0, 0]} fill="#7B1E2B" name="Saída" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
+                        <Tooltip contentStyle={chartTooltipStyle} />
+                        <Bar dataKey="in" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--gold))" name="Entrada" />
+                        <Bar dataKey="out" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" name="Saída" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                </GP>
+                </div>
               </motion.div>
 
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={8}>
-                <GP className="p-6">
+                <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="text-[16px] font-bold tracking-[-0.01em]" style={{ color: "#111" }}>
-                      Saldo mensal
-                    </h3>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#bbb" }}>
-                      {isFiltered ? "recorte" : "net"}
-                    </span>
+                    <h3 className="chart-surface-title">Saldo mensal</h3>
+                    <span className="chart-surface-kicker">{isFiltered ? "recorte atual" : "net"}</span>
                   </div>
                   <div className="h-[170px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stockMovesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "rgba(0,0,0,0.25)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip contentStyle={glassTooltipStyle} />
-                        <Area type="monotone" dataKey="net" stroke="#7B1E2B" fill="rgba(123,30,43,0.06)" strokeWidth={2} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
+                        <Tooltip contentStyle={chartTooltipStyle} />
+                        <Area type="monotone" dataKey="net" stroke="hsl(var(--wine))" fill="hsl(var(--wine) / 0.08)" strokeWidth={2.5} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                </GP>
+                </div>
               </motion.div>
             </div>
-
-            {/* ─── Insight Card ─── */}
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={9}>
-              <div
-                className="rounded-[20px] p-6 relative overflow-hidden"
-                style={{
-                  background: "linear-gradient(145deg, hsl(var(--forest)), hsl(var(--forest-muted)))",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-px"
-                  style={{ background: "linear-gradient(to right, transparent, rgba(198,167,104,0.2), transparent)" }}
-                />
-                <div className="relative z-10">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] mb-2" style={{ color: "rgba(198,167,104,0.70)" }}>
-                    Insight operacional
-                  </p>
-                  <p className="text-[15px] font-medium leading-relaxed max-w-xl" style={{ color: "rgba(232,228,219,0.80)" }}>
-                    {lowStock > 0
-                      ? `${lowStock} produto${lowStock > 1 ? "s" : ""} com estoque crítico. Revise sua reposição para evitar ruptura.`
-                      : turnover > 50
-                        ? `Giro de ${turnover}% nos últimos 30 dias — boa rotatividade. Mantenha o ciclo de reposição ativo.`
-                        : `Sua operação tem ${uniqueLabels} rótulos ativos. Continue monitorando para otimizar o mix de produtos.`}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
           </>
         )}
       </div>

@@ -82,38 +82,43 @@ export function AppSidebar() {
         collapsible="offcanvas"
         className="border-r w-[240px]"
         style={{
-          background: "rgba(30, 46, 28, 0.65)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderColor: "rgba(255, 255, 255, 0.15)",
+          background: "rgba(10, 20, 15, 0.78)",
+          backdropFilter: "blur(14px) saturate(1.02)",
+          WebkitBackdropFilter: "blur(14px) saturate(1.02)",
+          borderColor: "rgba(255, 255, 255, 0.08)",
         }}
       >
         <SidebarHeader className="pt-2 md:pt-2 px-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-0 px-1 py-1 mb-1 rounded-lg transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex w-full items-center gap-2.5 px-3 py-3 mb-2 rounded-2xl transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15 overflow-hidden"
             aria-label="Ir para o início do dashboard"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.05)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
           >
-            <div className="flex h-[100px] w-[70px] shrink-0 items-center justify-center">
+            <div className="flex h-[66px] w-[42px] shrink-0 items-center justify-center">
               <img
                 src="/logo-sommelyx-mark.png"
                 alt="Sommelyx"
                 draggable={false}
-                className="h-[100px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
+                className="h-[66px] w-auto max-w-none select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[25px] font-bold tracking-[-0.01em] leading-none font-serif" style={{ color: "#F5F5F3" }}>
+            <div className="flex min-w-0 flex-1 flex-col items-start justify-center py-0.5">
+              <span className="block text-[24px] font-bold tracking-[-0.01em] leading-[0.95] font-serif whitespace-nowrap" style={{ color: "#F5F5F3" }}>
                 Sommelyx
               </span>
               <span
                 className={[
-                  "mt-1.5 w-fit inline-flex items-center rounded-md h-5 px-2",
-                  "text-[9px] font-extrabold uppercase tracking-[0.1em] leading-none",
+                  "chip-surface mt-[5px] h-5 px-2.5",
                   isCommercial
-                    ? "bg-[hsl(var(--copper)/0.15)] text-[hsl(var(--copper))] ring-1 ring-[hsl(var(--copper)/0.25)]"
-                    : "bg-[hsl(var(--copper)/0.12)] text-[hsl(var(--copper-light))] ring-1 ring-[hsl(var(--copper)/0.20)]",
+                    ? "chip-surface--active text-[#1E1811]"
+                    : "bg-[rgba(110,30,42,0.20)] text-[#FAF7F2] border-[rgba(110,30,42,0.28)]",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}
@@ -135,7 +140,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-11 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[14px] font-semibold text-[#2B2B2B] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-primary"
+                  className="w-full h-11 rounded-2xl border border-white/10 bg-[rgba(248,245,240,0.16)] text-[14px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(248,245,240,0.22)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] active:translate-y-[0.5px] [&_svg]:text-[hsl(var(--copper-light))]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-[15px] w-[15px] shrink-0" />
@@ -143,7 +148,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-10 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.85)] text-[13.5px] font-semibold text-[#2B2B2B] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] active:translate-y-[0.5px] [&_svg]:text-destructive"
+                  className="w-full h-10 rounded-2xl border border-white/10 bg-[rgba(248,245,240,0.16)] text-[13.5px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(248,245,240,0.22)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] active:translate-y-[0.5px] [&_svg]:text-destructive"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-[15px] w-[15px] shrink-0" />

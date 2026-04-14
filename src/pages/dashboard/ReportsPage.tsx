@@ -109,8 +109,10 @@ export default function ReportsPage() {
   return (
     <div className="space-y-4 max-w-[1200px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Relatórios</h1>
-        <p className="text-[11px] text-muted-foreground">Análise de estoque e vendas com dados reais</p>
+        <div className="section-surface">
+          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Relatórios</h1>
+          <p className="text-[11px] text-muted-foreground">Análise de estoque e vendas com dados reais</p>
+        </div>
       </motion.div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as ReportTab)}>
@@ -128,7 +130,7 @@ export default function ReportsPage() {
               { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign },
               { label: "Rótulos", value: wines.filter((w) => w.quantity > 0).length, icon: Tag },
             ].map((m, i) => (
-              <motion.div key={m.label} className="glass-card p-3" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+              <motion.div key={m.label} className="chart-surface p-3" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center mb-1.5 bg-primary/10">
                   <m.icon className="h-3 w-3 text-primary" />
                 </div>
@@ -140,37 +142,37 @@ export default function ReportsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {byCountry.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-                <h3 className="text-[12px] font-semibold text-foreground mb-1">Estoque por País</h3>
+              <motion.div className="chart-surface p-4" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+                <h3 className="chart-surface-title mb-1">Estoque por País</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
-                    <Pie data={byCountry} cx="50%" cy="50%" innerRadius={40} outerRadius={65} paddingAngle={2} dataKey="value" nameKey="name">
+                    <Pie data={byCountry} cx="50%" cy="50%" innerRadius={36} outerRadius={68} paddingAngle={3} dataKey="value" nameKey="name">
                       {byCountry.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ background: "rgba(255,255,255,0.94)", border: "1px solid rgba(255,255,255,0.28)", borderRadius: 14, fontSize: 12, boxShadow: "0 12px 28px -12px rgba(44,20,31,0.16)", backdropFilter: "blur(14px)" }} />
                   </PieChart>
                 </ResponsiveContainer>
               </motion.div>
             )}
 
             {byStyle.length > 0 && (
-              <motion.div className="glass-card p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-                <h3 className="text-[12px] font-semibold text-foreground mb-1">Estoque por Estilo</h3>
+              <motion.div className="chart-surface p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+                <h3 className="chart-surface-title mb-1">Estoque por Estilo</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={byStyle}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={20} />
-                    <Tooltip />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.68)" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={20} />
+                    <Tooltip contentStyle={{ background: "rgba(255,255,255,0.94)", border: "1px solid rgba(255,255,255,0.28)", borderRadius: 14, fontSize: 12, boxShadow: "0 12px 28px -12px rgba(44,20,31,0.16)", backdropFilter: "blur(14px)" }} />
+                    <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" />
                   </BarChart>
                 </ResponsiveContainer>
               </motion.div>
             )}
 
             {byLabel.length > 0 && (
-              <motion.div className="glass-card p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-                <h3 className="text-[12px] font-semibold text-foreground mb-1">Top Rótulos em Estoque</h3>
+              <motion.div className="chart-surface p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+                <h3 className="chart-surface-title mb-1">Top Rótulos em Estoque</h3>
                 <div className="space-y-1.5">
                   {byLabel.map((w, i) => (
                     <div key={`${w.name}-${i}`} className="flex items-center gap-2.5">
@@ -195,7 +197,7 @@ export default function ReportsPage() {
               { label: "Unidades", value: salesUnits, icon: Package },
               { label: "Vendas", value: sales.length, icon: ShoppingCart },
             ].map((m, i) => (
-              <motion.div key={m.label} className="glass-card p-3" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+              <motion.div key={m.label} className="chart-surface p-3" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center mb-1.5 bg-primary/10">
                   <m.icon className="h-3 w-3 text-primary" />
                 </div>
@@ -206,36 +208,36 @@ export default function ReportsPage() {
           </div>
 
           {sales.length === 0 ? (
-            <div className="glass-card p-8 text-center">
-              <p className="text-[12px] text-muted-foreground">Nenhuma venda registrada ainda.</p>
+            <div className="chart-surface p-8 text-center">
+              <p className="text-[12px] text-foreground/60">Nenhuma venda registrada ainda.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {salesByDay.length > 0 && (
-                <motion.div className="glass-card p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-                  <h3 className="text-[12px] font-semibold text-foreground mb-1">Faturamento por Dia</h3>
+                <motion.div className="chart-surface p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+                  <h3 className="chart-surface-title mb-1">Faturamento por Dia</h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <LineChart data={salesByDay}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={40} />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--primary))" }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.68)" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={40} />
+                      <Tooltip contentStyle={{ background: "rgba(255,255,255,0.94)", border: "1px solid rgba(255,255,255,0.28)", borderRadius: 14, fontSize: 12, boxShadow: "0 12px 28px -12px rgba(44,20,31,0.16)", backdropFilter: "blur(14px)" }} />
+                      <Line type="monotone" dataKey="value" stroke="hsl(var(--wine))" strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--wine))" }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </motion.div>
               )}
 
               {salesByLabel.length > 0 && (
-                <motion.div className="glass-card p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-                  <h3 className="text-[12px] font-semibold text-foreground mb-1">Top Rótulos Vendidos</h3>
+                <motion.div className="chart-surface p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+                  <h3 className="chart-surface-title mb-1">Top Rótulos Vendidos</h3>
                   <div className="space-y-1.5">
                     {salesByLabel.map((w, i) => (
                       <div key={`${w.name}-${i}`} className="flex items-center gap-2.5">
                         <span className="text-[10px] font-bold w-5 text-muted-foreground shrink-0">#{i + 1}</span>
                         <div className="flex-1 min-w-0"><p className="text-[11px] font-semibold truncate text-foreground">{w.name}</p></div>
-                        <span className="text-[10px] text-muted-foreground shrink-0">{w.qty} un.</span>
-                        <span className="text-[10px] font-bold text-primary shrink-0">R$ {w.revenue.toLocaleString("pt-BR")}</span>
+                        <span className="text-[10px] text-foreground/60 shrink-0">{w.qty} un.</span>
+                        <span className="text-[10px] font-bold text-wine shrink-0">R$ {w.revenue.toLocaleString("pt-BR")}</span>
                       </div>
                     ))}
                   </div>

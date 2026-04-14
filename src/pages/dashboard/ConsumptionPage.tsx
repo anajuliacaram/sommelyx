@@ -22,9 +22,9 @@ const COLORS = ["#8F2D56", "#C44569", "#E07A5F", "#C9A86A", "#6B7280", "#22c55e"
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-card-sm px-3 py-2">
+    <div className="chart-tooltip-premium px-3 py-2">
       <p className="text-[13px] font-semibold text-foreground">{label || payload[0]?.name}</p>
-      <p className="text-[12px] text-muted-foreground">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
+      <p className="text-[12px] text-foreground/62">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
     </div>
   );
 };
@@ -32,9 +32,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const CustomPieTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-card-sm px-3 py-2">
+    <div className="chart-tooltip-premium px-3 py-2">
       <p className="text-[13px] font-semibold text-foreground">{payload[0]?.name}</p>
-      <p className="text-[12px] text-muted-foreground">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
+      <p className="text-[12px] text-foreground/62">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
     </div>
   );
 };
@@ -152,8 +152,10 @@ export default function ConsumptionPage() {
     <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Meu Consumo</h1>
-        <p className="text-[11px] text-muted-foreground">Histórico, análises e insights sobre seus vinhos</p>
+        <div className="section-surface">
+          <h1 className="section-surface__title text-lg md:text-xl font-serif font-bold tracking-tight">Meu Consumo</h1>
+          <p className="section-surface__subtitle text-[11px]">Histórico, análises e insights sobre seus vinhos</p>
+        </div>
       </motion.div>
 
       {/* Period + Source Filters — compact on mobile */}
@@ -250,9 +252,9 @@ export default function ConsumptionPage() {
 
       {/* ── HISTORY FIRST on mobile ── */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-        <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-[13px] font-serif font-bold text-foreground">Histórico</h2>
-          <Badge variant="outline" className="text-[9px] font-bold">{filtered.length}</Badge>
+        <div className="section-surface flex items-center gap-2 mb-2">
+          <h2 className="section-surface__title text-[13px] font-serif font-bold">Histórico</h2>
+          <Badge variant="outline" className="chip-surface chip-surface--soft h-6 px-2 text-[9px] font-bold">{filtered.length}</Badge>
         </div>
       </motion.div>
 
@@ -342,14 +344,14 @@ export default function ConsumptionPage() {
       {totalCount > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
           {topCountries.length > 0 && (
-            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={10}>
-              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={10}>
+              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-foreground/50" />
                 Por país
               </h3>
               <ResponsiveContainer width="100%" height={chartH}>
                 <PieChart>
-                  <Pie data={topCountries} cx="50%" cy="50%" innerRadius={isMobile ? 28 : 40} outerRadius={isMobile ? 50 : 70} paddingAngle={3} dataKey="value" label={isMobile ? false : ({ name, value }) => `${name} (${value})`} labelLine={isMobile ? false : { stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}>
+                  <Pie data={topCountries} cx="50%" cy="50%" innerRadius={isMobile ? 26 : 38} outerRadius={isMobile ? 52 : 72} paddingAngle={3} dataKey="value" label={isMobile ? false : ({ name, value }) => `${name} (${value})`} labelLine={isMobile ? false : { stroke: "hsl(var(--foreground) / 0.42)", strokeWidth: 1 }}>
                     {topCountries.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
                   <Tooltip content={<CustomPieTooltip />} />
@@ -357,9 +359,9 @@ export default function ConsumptionPage() {
               </ResponsiveContainer>
               <div className="flex flex-wrap justify-center gap-2 mt-1">
                 {topCountries.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-1">
+                  <div key={d.name} className="chart-legend-chip">
                     <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
-                    <span className="text-[10px] text-foreground font-medium">{d.name} ({d.value})</span>
+                    <span>{d.name} ({d.value})</span>
                   </div>
                 ))}
               </div>
@@ -367,18 +369,18 @@ export default function ConsumptionPage() {
           )}
 
           {ratingDistribution.length > 0 && (
-            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={11}>
-              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Star className="h-3.5 w-3.5 text-muted-foreground" />
+            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={11}>
+              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
+                <Star className="h-3.5 w-3.5 text-foreground/50" />
                 Avaliações
               </h3>
               <ResponsiveContainer width="100%" height={chartH}>
                 <BarChart data={ratingDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: isMobile ? 10 : 12, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.16)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: isMobile ? 10 : 12, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))">
                     {ratingDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Bar>
                 </BarChart>
@@ -387,33 +389,33 @@ export default function ConsumptionPage() {
           )}
 
           {topGrapes.length > 0 && (
-            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={12}>
-              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Grape className="h-3.5 w-3.5 text-muted-foreground" />
+            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={12}>
+              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
+                <Grape className="h-3.5 w-3.5 text-foreground/50" />
                 Uvas
               </h3>
               <ResponsiveContainer width="100%" height={chartH}>
                 <BarChart data={topGrapes} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.16)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: isMobile ? 11 : 13, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} width={isMobile ? 80 : 110} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" fill="#8F2D56" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="value" fill="hsl(var(--wine))" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
           )}
 
           {topWines.length > 0 && (
-            <motion.div className="glass-card p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={13}>
-              <h3 className="text-[12px] sm:text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={13}>
+              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-foreground/50" />
                 Mais consumidos
               </h3>
               <div className="space-y-2">
                 {topWines.map(([name, data], i) => (
                   <div key={name} className="flex items-center gap-2">
-                    <span className="text-[12px] font-black w-5 text-muted-foreground/40">#{i + 1}</span>
+                    <span className="text-[12px] font-black w-5 text-foreground/42">#{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-semibold truncate text-foreground">{name}</p>
                     </div>

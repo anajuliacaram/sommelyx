@@ -45,6 +45,8 @@ type ScanSuggestionInput = {
   drink_until?: number | null;
   purchase_price?: number | null;
   labelImagePreview?: string | null;
+  labelImageFile?: File | null;
+  labelImageBase64?: string | null;
 };
 
 function normalizeSuggestionText(value?: string | null) {
@@ -152,6 +154,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [foodPairing, setFoodPairing] = useState("");
   const [notes, setNotes] = useState("");
   const [labelImagePreview, setLabelImagePreview] = useState<string | null>(null);
+  const [labelImageFile, setLabelImageFile] = useState<File | null>(null);
+  const [labelImageBase64, setLabelImageBase64] = useState<string | null>(null);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -241,7 +245,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
-    setLabelImagePreview(null); setNoPriceInfo(false);
+    setLabelImagePreview(null); setLabelImageFile(null); setLabelImageBase64(null); setNoPriceInfo(false);
     setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
@@ -269,6 +273,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     }
     if (data.cellar_location) setLocation({ manualLabel: String(data.cellar_location) });
     if (data.labelImagePreview) setLabelImagePreview(String(data.labelImagePreview));
+    if (data.labelImageFile) setLabelImageFile(data.labelImageFile);
+    if (data.labelImageBase64) setLabelImageBase64(String(data.labelImageBase64));
     if (!data.purchase_price && !isCommercial) setNoPriceInfo(true);
 
     // Only set drink window if AI returned them from the label
@@ -288,6 +294,42 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (!name.trim()) return;
 
     try {
+      let imageUrl: string | null = null;
+      if (labelImageBase64 && user) {
+        try {
+          const path = `${user.id}/${Date.now()}-${crypto.randomUUID()}.jpg`;
+          const response = await fetch(`data:image/jpeg;base64,${labelImageBase64}`);
+          const blob = await response.blob();
+          const { error } = await supabase.storage.from("wine-label-images").upload(path, blob, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: "image/jpeg",
+          });
+          if (!error) {
+            const { data } = supabase.storage.from("wine-label-images").getPublicUrl(path);
+            imageUrl = data.publicUrl;
+          }
+        } catch (uploadError) {
+          console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);
+        }
+      } else if (labelImageFile && user) {
+        try {
+          const ext = labelImageFile.name.split(".").pop()?.toLowerCase() || "jpg";
+          const path = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+          const { error } = await supabase.storage.from("wine-label-images").upload(path, labelImageFile, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: labelImageFile.type,
+          });
+          if (!error) {
+            const { data } = supabase.storage.from("wine-label-images").getPublicUrl(path);
+            imageUrl = data.publicUrl;
+          }
+        } catch (uploadError) {
+          console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);
+        }
+      }
+
       const formattedLocation = formatLocationLabel(location) || null;
       const inserted = await addWine.mutateAsync({
         name: name.trim(),
@@ -306,7 +348,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         food_pairing: foodPairing || null,
         tasting_notes: notes || null,
         rating: null,
-        image_url: null,
+        image_url: imageUrl,
       });
 
       // Persist structured location — non-blocking so wine save succeeds even if location RPC fails

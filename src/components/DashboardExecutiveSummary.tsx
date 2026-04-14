@@ -45,7 +45,7 @@ export function DashboardExecutiveSummary({
   commandHint,
 }: DashboardExecutiveSummaryProps) {
   return (
-    <section className="editorial-hero relative p-6 sm:p-8">
+    <section className="surface-clarity relative p-6 sm:p-8 rounded-[28px]">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-10 top-[-60px] h-32 w-32 rounded-full bg-copper/[0.08] blur-[60px]" />
         <div className="absolute right-[-30px] top-10 h-28 w-28 rounded-full bg-[hsl(0_0%_100%/0.04)] blur-[60px]" />
@@ -59,10 +59,10 @@ export function DashboardExecutiveSummary({
           </div>
 
           <div className="space-y-2">
-            <h1 className="max-w-2xl font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.02em] text-[hsl(var(--cream-warm))] sm:text-[34px] relative z-10">
+            <h1 className="max-w-2xl font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.02em] text-foreground sm:text-[34px] relative z-10">
               {title}
             </h1>
-            <p className="max-w-2xl text-[14px] leading-relaxed text-[hsl(var(--cream-warm)/0.6)] sm:text-[15px] relative z-10">
+            <p className="max-w-2xl text-[14px] leading-relaxed text-foreground/66 sm:text-[15px] relative z-10">
               {description}
             </p>
           </div>
@@ -71,7 +71,7 @@ export function DashboardExecutiveSummary({
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="inline-flex items-center rounded-md border border-[hsl(0_0%_100%/0.10)] bg-[hsl(0_0%_100%/0.06)] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--cream-warm)/0.5)] relative z-10"
+                className="inline-flex items-center rounded-md border border-border/30 bg-background/60 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-foreground/58 relative z-10"
               >
                 {badge}
               </span>
@@ -97,13 +97,13 @@ export function DashboardExecutiveSummary({
         </div>
 
         <div className="grid gap-3">
-          <div className="rounded-xl border border-copper/20 bg-[hsl(0_0%_100%/0.06)] p-5 text-[hsl(var(--cream-warm))] relative z-10">
+          <div className="rounded-xl border border-white/40 bg-background/62 p-5 text-foreground relative z-10 backdrop-blur-[14px]">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/70">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/80">
                   Experiência guiada
                 </p>
-                <h2 className="mt-2 font-serif text-[20px] font-semibold tracking-[-0.02em] text-[hsl(var(--cream-warm))]">
+                <h2 className="mt-2 font-serif text-[20px] font-semibold tracking-[-0.02em] text-foreground">
                   Um painel claro para decidir rápido.
                 </h2>
               </div>
@@ -112,7 +112,7 @@ export function DashboardExecutiveSummary({
                 <p className="text-[11px] font-medium text-copper">{commandHint ?? "Ctrl/Cmd + K"}</p>
               </div>
             </div>
-            <p className="mt-3 text-[13px] leading-relaxed text-[hsl(var(--cream-warm)/0.5)]">
+            <p className="mt-3 text-[13px] leading-relaxed text-foreground/60">
               Abra o menu rápido para navegar, localizar rótulos e disparar ações sem quebrar o foco.
             </p>
           </div>
@@ -123,18 +123,18 @@ export function DashboardExecutiveSummary({
               return (
                 <article
                   key={metric.label}
-                  className="rounded-xl border border-[hsl(0_0%_100%/0.08)] bg-[hsl(0_0%_100%/0.05)] p-4"
+                  className="rounded-xl border border-border/30 bg-background/58 p-4 backdrop-blur-[12px]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[hsl(var(--cream-warm)/0.5)]">{metric.label}</p>
-                      <p className="mt-2 font-serif text-[24px] font-semibold tracking-[-0.02em] text-[hsl(var(--cream-warm))]">{metric.value}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-foreground/55">{metric.label}</p>
+                      <p className="mt-2 font-serif text-[24px] font-semibold tracking-[-0.02em] text-foreground">{metric.value}</p>
                     </div>
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">
                       <Icon className="h-4 w-4 text-copper" />
                     </div>
                   </div>
-                  <p className="mt-2 text-[12px] leading-relaxed text-[hsl(var(--cream-warm)/0.45)]">{metric.detail}</p>
+                  <p className="mt-2 text-[12px] leading-relaxed text-foreground/58">{metric.detail}</p>
                 </article>
               );
             })}

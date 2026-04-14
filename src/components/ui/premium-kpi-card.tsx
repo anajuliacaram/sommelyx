@@ -91,14 +91,14 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
                 willChange: "transform, box-shadow",
             } : {}}
             className={cn(
-                "relative rounded-2xl bg-[hsl(var(--cream-warm))] p-5 cursor-default transition-colors border border-border/50",
+                "glass-card relative rounded-2xl p-5 cursor-default transition-colors",
                 onClick && "cursor-pointer",
                 className
             )}
         >
             {interactive && isHovering && (
                 <motion.div
-                    className="pointer-events-none absolute inset-0 z-10 rounded-2xl opacity-20 mix-blend-overlay"
+                    className="pointer-events-none absolute inset-0 z-10 rounded-2xl opacity-18 mix-blend-overlay"
                     style={{ background: gradientBg }}
                 />
             )}

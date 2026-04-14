@@ -5,8 +5,11 @@ import { X } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
+
 const DialogTrigger = DialogPrimitive.Trigger;
+
 const DialogPortal = DialogPrimitive.Portal;
+
 const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
@@ -16,10 +19,9 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-[rgba(10,20,15,0.42)] backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
-    style={{ background: "rgba(8, 20, 17, 0.55)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
     {...props}
   />
 ));
@@ -39,15 +41,15 @@ const DialogContent = React.forwardRef<
       )}
       style={{
         background: "rgba(255, 255, 255, 0.88)",
-        backdropFilter: "blur(28px) saturate(1.4)",
-        WebkitBackdropFilter: "blur(28px) saturate(1.4)",
-        border: "1px solid rgba(255, 255, 255, 0.55)",
-        boxShadow: "0 32px 100px -30px rgba(8,20,17,0.40), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        border: "1px solid rgba(255, 255, 255, 0.25)",
+        boxShadow: "0 24px 72px -28px rgba(15,15,20,0.26), 0 4px 14px rgba(15,15,20,0.06)",
       }}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-xl p-2 opacity-60 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-black/5 hover:scale-105 active:scale-95 focus:outline-none focus:ring-3 focus:ring-primary/10 focus:ring-offset-2 disabled:pointer-events-none text-[#333]">
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-xl p-2 opacity-60 ring-offset-background transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:opacity-100 hover:bg-muted/30 hover:scale-105 active:scale-95 focus:outline-none focus:ring-3 focus:ring-primary/10 focus:ring-offset-2 disabled:pointer-events-none">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -72,8 +74,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn("text-2xl font-bold leading-none tracking-tight font-serif", className)}
-    style={{ color: "#1C1C1C" }}
+    className={cn("text-2xl font-bold leading-none tracking-tight text-foreground font-serif", className)}
     {...props}
   />
 ));
@@ -83,7 +84,7 @@ const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description ref={ref} className={cn("text-sm leading-relaxed", className)} style={{ color: "#6B6B6B" }} {...props} />
+  <DialogPrimitive.Description ref={ref} className={cn("text-sm text-muted-foreground leading-relaxed", className)} {...props} />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 

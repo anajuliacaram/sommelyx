@@ -361,7 +361,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-border/50" style={{ background: "#F4F1EC" }}>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-border/50">
         <SheetHeader className="sr-only">
           <SheetTitle>Analisar Carta de Vinhos</SheetTitle>
         </SheetHeader>

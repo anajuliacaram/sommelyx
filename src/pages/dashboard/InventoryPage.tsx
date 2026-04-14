@@ -460,12 +460,12 @@ export default function InventoryPage() {
             />
 
             {/* --- HEADER --- */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-serif font-black italic tracking-tight text-foreground" style={{ letterSpacing: "-0.04em" }}>
+                    <h1 className="section-surface__title text-2xl md:text-3xl font-serif font-black italic tracking-tight" style={{ letterSpacing: "-0.04em" }}>
                         Estoque
                     </h1>
-                    <p className="text-sm mt-1 text-muted-foreground font-medium">Operação comercial com leitura rápida de disponibilidade, valor e giro.</p>
+                    <p className="section-surface__subtitle text-sm mt-1 font-medium">Operação comercial com leitura rápida de disponibilidade, valor e giro.</p>
                     <div className="flex flex-wrap items-center gap-2 mt-2">
                         <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.labels} rótulos</Badge>
                         <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.bottles} em estoque</Badge>
@@ -691,12 +691,12 @@ export default function InventoryPage() {
                         </DropdownMenu>
                     </div>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground px-0.5">
-                <p>
+                <div className="section-surface flex items-center justify-between gap-3 text-[11px] px-0.5 py-0.5">
+                <p className="text-foreground/72">
                     {formatListCount(filteredWines.length, "item exibido", "itens exibidos")} •{" "}
                     {formatListCount(selectedIds.length, "selecionado", "selecionados")}
                 </p>
-                    <p className="hidden md:block">Filtros rápidos para operação comercial</p>
+                    <p className="hidden md:block text-foreground/60">Filtros rápidos para operação comercial</p>
                 </div>
                 </div>
             </div>
@@ -710,34 +710,34 @@ export default function InventoryPage() {
                         exit={{ opacity: 0, y: -10 }}
                         className="flex flex-nowrap md:flex-wrap gap-2 items-center px-1 overflow-x-auto md:overflow-visible scrollbar-hide"
                     >
-                        <span className="shrink-0 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-1">Filtros ativos:</span>
+                        <span className="chip-surface chip-surface--soft shrink-0 mr-1">Filtros ativos:</span>
                         {styleFilters.map(s => (
-                            <Badge key={s} variant="secondary" className="shrink-0 pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10 whitespace-nowrap">
+                            <Badge key={s} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
                                 {s} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("style", s, true)} />
                             </Badge>
                         ))}
                         {countryFilters.map(c => (
-                            <Badge key={c} variant="secondary" className="shrink-0 pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10 whitespace-nowrap">
+                            <Badge key={c} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
                                 {c} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("country", c, true)} />
                             </Badge>
                         ))}
                         {regionFilters.map(r => (
-                            <Badge key={r} variant="secondary" className="shrink-0 pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10 whitespace-nowrap">
+                            <Badge key={r} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
                                 {r} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("region", r, true)} />
                             </Badge>
                         ))}
                         {grapeFilters.map(g => (
-                            <Badge key={g} variant="secondary" className="shrink-0 pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10 whitespace-nowrap">
+                            <Badge key={g} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
                                 {g} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("grape", g, true)} />
                             </Badge>
                         ))}
                         {vintageFilters.map(v => (
-                            <Badge key={v} variant="secondary" className="shrink-0 pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10 whitespace-nowrap">
+                            <Badge key={v} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
                                 Safra {v} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("vintage", v, true)} />
                             </Badge>
                         ))}
                         {statusFilter !== "all" && (
-                            <Badge variant="secondary" className="shrink-0 pl-2 pr-1 h-6 text-[10px] rounded-md bg-primary/5 text-primary border-primary/10 transition-colors hover:bg-primary/10 whitespace-nowrap">
+                            <Badge variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
                                 {statusFilter === "low" ? "Baixo estoque" : statusFilter === "out" ? "Sem estoque" : "Em estoque"} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("status", null)} />
                             </Badge>
                         )}
@@ -745,7 +745,7 @@ export default function InventoryPage() {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="h-6 px-2 text-[10px] font-bold text-destructive hover:bg-destructive/10 hover:text-destructive border-l border-destructive/20 rounded-none ml-1"
+                            className="chip-surface chip-surface--danger h-6 px-2 ml-1 rounded-full"
                             onClick={clearAllFilters}
                         >
                             Limpar tudo

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, ShoppingCart, GlassWater } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -11,7 +11,6 @@ import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   CompatibilityBadge,
   MatchDot,
@@ -93,8 +92,6 @@ const popularDishes = [
 export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) {
   const { data: wines } = useWines();
   const { toast } = useToast();
-  const { profileType } = useAuth();
-  const isCommercial = profileType === "commercial";
   const fileRef = useRef<HTMLInputElement>(null);
   const fileGalleryRef = useRef<HTMLInputElement>(null);
   const menuFileRef = useRef<HTMLInputElement>(null);
@@ -337,15 +334,14 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30" style={{ background: "radial-gradient(circle at 20% 30%, rgba(80,120,90,0.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(120,160,120,0.15), transparent 50%), linear-gradient(135deg, #0B1F17, #0F2A20, #132F24)" }}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30">
         <SheetHeader className="sr-only">
           <SheetTitle>Harmonizar</SheetTitle>
         </SheetHeader>
 
         <PairingSheetHero
-          title={isCommercial ? "Harmonizar para Venda" : "Harmonizar"}
-          subtitle={isCommercial ? "Encontre a harmonização que conquista o cliente" : "Encontre a combinação perfeita entre vinho e gastronomia"}
-          mode={isCommercial ? "commercial" : "personal"}
+          title="Harmonizar"
+          subtitle="Encontre a combinação perfeita entre vinho e gastronomia"
         />
 
         <div className="space-y-5">
@@ -354,7 +350,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               variant="ghost"
               size="sm"
               onClick={goBack}
-              className="h-8 px-2 text-[11px] text-white/50 hover:text-white/80 hover:bg-white/5 -mt-2"
+              className="h-8 px-2 text-[11px] text-muted-foreground hover:text-foreground -mt-2"
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Voltar
@@ -371,28 +367,22 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3"
               >
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">
-                  {isCommercial ? "Origem do vinho para venda" : "De onde vem o vinho?"}
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  De onde vem o vinho?
                 </p>
 
                 <button
                   onClick={() => handleSelectSource("cellar")}
-                  className="w-full text-left rounded-2xl p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    backdropFilter: "blur(16px)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    boxShadow: "0 4px 20px -6px rgba(0,0,0,0.20)",
-                  }}
+                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center group-hover:bg-white/15 group-hover:scale-105 transition-all duration-200">
-                      <Wine className="h-5 w-5 text-white/80" />
+                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
+                      <Wine className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-[14px] font-semibold text-white">{isCommercial ? "Do meu estoque" : "Da minha adega"}</p>
-                      <p className="text-[12px] text-white/45 mt-0.5">
-                        {isCommercial ? "Harmonize vinhos disponíveis para venda" : "Harmonize com vinhos que você já tem"}
+                      <p className="text-[14px] font-semibold text-foreground">Da minha adega</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">
+                        Harmonize com vinhos que você já tem
                       </p>
                     </div>
                   </div>
@@ -400,21 +390,15 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 <button
                   onClick={() => handleSelectSource("external")}
-                  className="w-full text-left rounded-2xl p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    backdropFilter: "blur(16px)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    boxShadow: "0 4px 20px -6px rgba(0,0,0,0.15)",
-                  }}
+                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-white/8 flex items-center justify-center group-hover:bg-white/12 group-hover:scale-105 transition-all duration-200">
-                      <Camera className="h-5 w-5 text-white/70" />
+                    <div className="w-11 h-11 rounded-2xl bg-accent/12 flex items-center justify-center group-hover:bg-accent/18 group-hover:scale-105 transition-all duration-200">
+                      <Camera className="h-5 w-5 text-accent-foreground" />
                     </div>
                     <div>
-                      <p className="text-[14px] font-semibold text-white">Adega externa</p>
-                      <p className="text-[12px] text-white/40 mt-0.5">
+                      <p className="text-[14px] font-semibold text-foreground">Adega externa</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">
                         Envie a foto da carta de vinhos ou do cardápio
                       </p>
                     </div>
@@ -432,29 +416,23 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3"
               >
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                   {subModeTitle} — Como quer harmonizar?
                 </p>
 
                 <button
                   onClick={() => handleSelectSubMode("by-dish")}
-                  className="w-full text-left rounded-2xl p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    backdropFilter: "blur(16px)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    boxShadow: "0 4px 20px -6px rgba(0,0,0,0.20)",
-                  }}
+                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center group-hover:bg-white/15 group-hover:scale-105 transition-all duration-200">
-                      <ChefHat className="h-5 w-5 text-white/80" />
+                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
+                      <ChefHat className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-[14px] font-semibold text-white">Tenho um prato em mente</p>
-                      <p className="text-[12px] text-white/45 mt-0.5">
+                      <p className="text-[14px] font-semibold text-foreground">Tenho um prato em mente</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">
                         {source === "cellar"
-                          ? (isCommercial ? "Sugere vinhos do estoque para o prato do cliente" : "O Sommelyx sugere vinhos da sua adega para o prato")
+                          ? "O Sommelyx sugere vinhos da sua adega para o prato"
                           : "Digite o prato e envie a foto da carta de vinhos"}
                       </p>
                     </div>
@@ -463,23 +441,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 <button
                   onClick={() => handleSelectSubMode("by-wine")}
-                  className="w-full text-left rounded-2xl p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    backdropFilter: "blur(16px)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    boxShadow: "0 4px 20px -6px rgba(0,0,0,0.15)",
-                  }}
+                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-white/8 flex items-center justify-center group-hover:bg-white/12 group-hover:scale-105 transition-all duration-200">
-                      <Wine className="h-5 w-5 text-white/70" />
+                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
+                      <Wine className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-[14px] font-semibold text-white">Tenho um vinho em mente</p>
-                      <p className="text-[12px] text-white/40 mt-0.5">
+                      <p className="text-[14px] font-semibold text-foreground">Tenho um vinho em mente</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">
                         {source === "cellar"
-                          ? (isCommercial ? "Sugere pratos que combinam para vender mais" : "O Sommelyx sugere pratos ideais para o vinho escolhido")
+                          ? "O Sommelyx sugere pratos ideais para o vinho escolhido"
                           : "Digite o vinho e envie a foto do cardápio"}
                       </p>
                     </div>
@@ -498,16 +470,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-4"
               >
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
-                    {isCommercial ? "Qual prato o cliente pediu?" : "Qual o prato que você quer harmonizar?"}
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                    Qual o prato que você quer harmonizar?
                   </p>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
                     <Input
                       value={dish}
                       onChange={(e) => setDish(e.target.value)}
                       placeholder="Digite o prato ou ingrediente…"
-                      className="pl-9 h-11 text-sm bg-white/10 border-white/15 text-white placeholder:text-white/30 focus:border-white/30 focus:ring-white/10"
+                      className="pl-9 h-11 text-sm"
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                       autoFocus
                     />
@@ -534,7 +506,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 {!loading && (
                   <div className="space-y-2.5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/35">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                       Sugestões populares
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -544,7 +516,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSearch(d)}
-                          className="h-8 px-3 text-[11px] font-medium border border-white/12 bg-white/6 hover:bg-white/12 hover:border-white/20 text-white/60 hover:text-white/90 rounded-xl"
+                          className="h-8 px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary rounded-xl"
                         >
                           {d}
                         </Button>
@@ -601,19 +573,19 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-4"
               >
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
-                    {isCommercial ? "Qual vinho do estoque?" : "Qual vinho da sua adega?"}
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                    Qual vinho da sua adega?
                   </p>
 
                   {/* Search input */}
                   <div className="relative">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
                     <input
                       type="text"
                       value={wineSearch}
                       onChange={(e) => setWineSearch(e.target.value)}
-                      placeholder={isCommercial ? "Buscar vinho no estoque..." : "Buscar vinho na sua adega..."}
-                      className="flex h-12 w-full rounded-2xl border border-white/15 bg-white/8 pl-10 pr-4 py-2.5 text-[14px] font-medium text-white backdrop-blur-sm placeholder:text-white/30 focus:outline-none focus:ring-3 focus:ring-white/10 focus:border-white/25 transition-all duration-200"
+                      placeholder="Buscar vinho na sua adega..."
+                      className="flex h-12 w-full rounded-2xl border border-border/50 bg-background/60 pl-10 pr-4 py-2.5 text-[14px] font-medium text-foreground backdrop-blur-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-3 focus:ring-primary/[0.10] focus:border-primary/30 transition-all duration-200"
                       autoFocus
                     />
                   </div>
@@ -630,8 +602,8 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           className={cn(
                             "flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
                             active
-                              ? "bg-white/15 text-white border border-white/25"
-                              : "bg-white/5 text-white/40 border border-white/8 hover:bg-white/10 hover:text-white/60"
+                              ? "bg-primary/10 text-primary border border-primary/20"
+                              : "bg-background/40 text-muted-foreground/60 border border-border/30 hover:bg-muted/30 hover:text-muted-foreground"
                           )}
                         >
                           <Icon className="h-3 w-3" />
@@ -655,39 +627,36 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           className={cn(
                             "w-full text-left rounded-2xl p-3.5 transition-all duration-[160ms] ease-[cubic-bezier(0.22,1,0.36,1)] group",
                             isSelected
-                              ? "border border-white/25 shadow-[0_2px_12px_-4px_rgba(255,255,255,0.08)]"
-                              : "border border-white/8 hover:border-white/15 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.15)] active:scale-[0.99]"
+                              ? "bg-primary/[0.08] border border-primary/20 shadow-[0_2px_12px_-4px_hsl(var(--primary)/0.12)]"
+                              : "bg-background/40 border border-border/25 hover:bg-muted/30 hover:border-border/40 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.08)] active:scale-[0.99]"
                           )}
-                          style={{
-                            background: isSelected ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)",
-                          }}
                         >
                           <div className="flex items-center gap-3">
                             <div className={cn(
                               "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-150",
-                              isSelected ? "bg-white/15" : "bg-white/8"
+                              isSelected ? "bg-primary/15" : "bg-muted/30"
                             )}>
                               {isSelected ? (
-                                <Check className="h-4 w-4 text-white" />
+                                <Check className="h-4 w-4 text-primary" />
                               ) : (
-                                <Wine className="h-4 w-4 text-white/40" />
+                                <Wine className="h-4 w-4 text-muted-foreground/50" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(
                                 "text-[13.5px] font-semibold truncate",
-                                isSelected ? "text-white" : "text-white/80"
+                                isSelected ? "text-foreground" : "text-foreground/90"
                               )}>
                                 {w.name}
-                                {w.vintage ? <span className="text-white/40 font-normal ml-1.5">({w.vintage})</span> : null}
+                                {w.vintage ? <span className="text-muted-foreground/60 font-normal ml-1.5">({w.vintage})</span> : null}
                               </p>
                               {meta && (
-                                <p className="text-[11px] text-white/35 truncate mt-0.5">{meta}</p>
+                                <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5">{meta}</p>
                               )}
                             </div>
                             <span className={cn(
                               "text-[11px] font-semibold tabular-nums shrink-0 px-2 py-0.5 rounded-lg",
-                              isSelected ? "bg-white/15 text-white" : "bg-white/8 text-white/40"
+                              isSelected ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50"
                             )}>
                               {w.quantity}×
                             </span>
@@ -699,11 +668,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     {/* Empty state */}
                     {filtered.length === 0 && availableWines.length > 0 && (
                       <div className="text-center py-10 space-y-2">
-                        <Search className="h-7 w-7 text-white/20 mx-auto" />
-                        <p className="text-[13px] font-medium text-white/50">
-                          Nenhum vinho encontrado
+                        <Search className="h-7 w-7 text-muted-foreground/30 mx-auto" />
+                        <p className="text-[13px] font-medium text-muted-foreground/70">
+                          Nenhum vinho encontrado na sua adega
                         </p>
-                        <p className="text-[11px] text-white/30">
+                        <p className="text-[11px] text-muted-foreground/45">
                           Tente outro nome, produtor ou uva
                         </p>
                       </div>
@@ -711,11 +680,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                     {availableWines.length === 0 && (
                       <div className="text-center py-10 space-y-2">
-                        <Wine className="h-7 w-7 text-white/20 mx-auto" />
-                        <p className="text-[13px] font-medium text-white/50">
-                          {isCommercial ? "Estoque vazio" : "Sua adega está vazia no momento"}
+                        <Wine className="h-7 w-7 text-muted-foreground/30 mx-auto" />
+                        <p className="text-[13px] font-medium text-muted-foreground/70">
+                          Sua adega está vazia no momento
                         </p>
-                        <p className="text-[11px] text-white/30">
+                        <p className="text-[11px] text-muted-foreground/45">
                           Adicione vinhos para usar a harmonização
                         </p>
                       </div>
@@ -725,9 +694,9 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
                 {/* Selected wine preview */}
                 {selectedWine && (
-                  <div className="rounded-xl p-3 space-y-0.5" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                    <p className="text-[13px] font-semibold text-white">{selectedWine.name}</p>
-                    <p className="text-[11px] text-white/45">
+                  <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 space-y-0.5">
+                    <p className="text-[13px] font-semibold text-foreground">{selectedWine.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
                     </p>
                   </div>
@@ -768,11 +737,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 className="space-y-4"
               >
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
                     Qual vinho você quer harmonizar?
                   </p>
                   <div className="relative">
-                    <Wine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+                    <Wine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
                     <Input
                       value={extWineName}
                       onChange={(e) => setExtWineName(e.target.value)}
@@ -804,14 +773,14 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
-                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
                   <p className="text-[12px] font-medium text-foreground">
                     Vinho: <span className="font-semibold">{extWineName}</span>
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-3">
                     Envie a foto do cardápio do restaurante
                   </p>
 
@@ -845,7 +814,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       type="button"
                       variant="ghost"
                       onClick={() => menuGalleryRef.current?.click()}
-                      className="h-12 text-[13px] font-medium border border-white/12 bg-white/8 hover:bg-white/12 text-white/70"
+                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
@@ -884,7 +853,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 {/* Wine profile card */}
                 <WineProfileCard title={extWineName} profile={wineProfile} />
 
-                <SectionHeader icon="chef" label="Pratos do cardápio" variant="dark" />
+                <SectionHeader icon="chef" label="Pratos do cardápio" />
 
                 {menuResults.summary && (
                   <p className="text-[11px] text-foreground/80 leading-relaxed italic">
@@ -912,12 +881,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
+                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2.5">
                               <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[d.match] || "bg-primary/40")} />
-                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{d.name}</span>
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">{d.name}</span>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               {d.highlight && (
@@ -954,7 +923,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             </div>
                           )}
                           {/* Explanation */}
-                          <p className="text-[12.5px] text-[#555] leading-relaxed pl-[18px]">
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
                             {d.reason}
                           </p>
                           {/* Recipe button */}
@@ -985,7 +954,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setWineProfile(null);
                     setStep("ext-menu-photo");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Enviar outra foto
                 </Button>
@@ -1001,14 +970,14 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
-                <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
                   <p className="text-[12px] font-medium text-foreground">
                     Prato: <span className="font-semibold">{dish}</span>
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/40 mb-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-3">
                     Envie a foto da carta de vinhos
                   </p>
 
@@ -1042,7 +1011,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       type="button"
                       variant="ghost"
                       onClick={() => fileGalleryRef.current?.click()}
-                      className="h-12 text-[13px] font-medium border border-white/12 bg-white/8 hover:bg-white/12 text-white/70"
+                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
@@ -1081,15 +1050,15 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 {/* Dish profile section */}
                 <DishProfileCard dish={dish} profile={dishProfile} />
 
-                <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} variant="dark" />
+                <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} />
 
                 {suggestions.length === 0 ? (
-                  <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                    <p className="text-sm text-white/60 font-medium">
-                      {isCommercial ? "Nenhum vinho do estoque combina com esse prato." : "Nenhum vinho na sua adega combina com esse prato."}
+                  <div className="glass-card p-6 text-center space-y-2">
+                    <p className="text-sm text-foreground/70 font-medium">
+                      Nenhum vinho na sua adega combina com esse prato.
                     </p>
-                    <p className="text-xs text-white/35">
-                      Experimente outro prato ou adicione mais vinhos.
+                    <p className="text-xs text-muted-foreground">
+                      Experimente outro prato ou adicione mais vinhos à adega.
                     </p>
                   </div>
                 ) : (
@@ -1111,20 +1080,18 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl p-4 space-y-2.5 cursor-default transition-all duration-200 hover:-translate-y-[1px] list-none"
-                          style={{
-                            background: "rgba(255,255,255,0.78)",
-                            backdropFilter: "blur(20px) saturate(1.3)",
-                            border: "1px solid rgba(255,255,255,0.45)",
-                            boxShadow: "0 4px 20px -6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)",
-                          }}
+                          className={cn(
+                            "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
+                            tint || "bg-card/60 border-border/30",
+                            s.fromCellar && !tint && "border-primary/20 bg-primary/[0.04]",
+                          )}
                         >
                           {/* Top: wine identity + classification */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 space-y-0.5">
                               <div className="flex items-center gap-2">
                                 <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[s.match] || "bg-primary/40")} />
-                                <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">
+                                <span className="text-[15px] font-bold text-foreground tracking-tight">
                                   {s.wineName}
                                 </span>
                               </div>
@@ -1166,7 +1133,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             </div>
                           )}
 
-                          {/* Explanation moved to "Por que funciona" block below */}
+                          {/* Explanation */}
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
+                            {s.reason}
+                          </p>
 
                           {/* Badges: classification + harmony */}
                           <div className="flex items-center gap-2 pl-[18px] flex-wrap">
@@ -1184,39 +1154,6 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               </span>
                             )}
                           </div>
-
-                          {/* "Por que funciona" highlight */}
-                          <div className="pl-[18px] rounded-xl bg-[#0F2A24]/[0.06] border border-[#0F2A24]/[0.08] p-2.5">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F2A24]/60 mb-1 flex items-center gap-1.5">
-                              <Sparkles className="h-3 w-3" />
-                              Por que funciona
-                            </p>
-                            <p className="text-[12px] text-[#555] leading-relaxed">{s.reason}</p>
-                          </div>
-
-                          {/* Action CTA */}
-                          <div className="pl-[18px]">
-                            {isCommercial ? (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 px-3 text-[11px] font-semibold border border-[#0F2A24]/20 bg-[#0F2A24]/[0.06] text-[#0F2A24] hover:bg-[#0F2A24]/10 rounded-xl"
-                                onClick={() => toast({ title: `${s.wineName}`, description: "Pronto para sugerir ao cliente" })}
-                              >
-                                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                                Sugerir ao cliente
-                              </Button>
-                            ) : (
-                              <Button
-                                size="sm"
-                                className="h-8 px-3 text-[11px] font-semibold rounded-xl"
-                                onClick={() => toast({ title: `${s.wineName}`, description: "Registrado para consumo" })}
-                              >
-                                <GlassWater className="h-3.5 w-3.5 mr-1.5" />
-                                Consumir agora
-                              </Button>
-                            )}
-                          </div>
                         </motion.li>
                       );
                     })}
@@ -1231,7 +1168,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setDish("");
                     setStep("dish");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Buscar outro prato
                 </Button>
@@ -1256,15 +1193,15 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   />
                 )}
 
-                <SectionHeader icon="chef" label="Pratos sugeridos" variant="dark" />
+                <SectionHeader icon="chef" label="Pratos sugeridos" />
 
                 {pairings.length === 0 ? (
-                  <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                    <p className="text-sm text-white/60 font-medium">
+                  <div className="glass-card p-6 text-center space-y-2">
+                    <p className="text-sm text-foreground/70 font-medium">
                       Nenhuma sugestão encontrada.
                     </p>
-                    <p className="text-xs text-white/35">
-                      Experimente outro vinho.
+                    <p className="text-xs text-muted-foreground">
+                      Experimente outro vinho da sua adega.
                     </p>
                   </div>
                 ) : (
@@ -1278,18 +1215,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl p-4 space-y-2.5 cursor-default transition-all duration-200 hover:-translate-y-[1px] list-none"
-                          style={{
-                            background: "rgba(255,255,255,0.78)",
-                            backdropFilter: "blur(20px) saturate(1.3)",
-                            border: "1px solid rgba(255,255,255,0.45)",
-                            boxShadow: "0 4px 20px -6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)",
-                          }}
+                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2.5">
                               <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
-                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{p.dish}</span>
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
                             </div>
                             {badge && (
                               <span className={cn("shrink-0 inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide", badge.className)}>
@@ -1309,48 +1240,21 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               {p.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.highlight}</span>}
                             </div>
                           )}
-                          {/* "Por que funciona" highlight */}
-                          <div className="pl-[18px] rounded-xl bg-[#0F2A24]/[0.06] border border-[#0F2A24]/[0.08] p-2.5">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F2A24]/60 mb-1 flex items-center gap-1.5">
-                              <Sparkles className="h-3 w-3" />
-                              Por que funciona
-                            </p>
-                            <p className="text-[12px] text-[#555] leading-relaxed">{p.reason}</p>
-                          </div>
-
-                          {/* Recipe + Action */}
-                          <div className="pl-[18px] flex items-center gap-2 flex-wrap">
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
+                            {p.reason}
+                          </p>
                           {p.recipe && (
+                            <div className="pl-[18px]">
                               <button
                                 type="button"
                                 onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })}
-                                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary/80 hover:text-primary bg-primary/[0.04] hover:bg-primary/[0.08] px-3 py-1.5 rounded-lg border border-primary/[0.06] transition-all duration-200"
+                                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
                               >
-                                <BookOpen className="h-3.5 w-3.5" />
+                                <BookOpen className="h-3 w-3" />
                                 Ver receita
                               </button>
+                            </div>
                           )}
-                          {isCommercial ? (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 px-3 text-[11px] font-semibold border border-[#0F2A24]/20 bg-[#0F2A24]/[0.06] text-[#0F2A24] hover:bg-[#0F2A24]/10 rounded-xl"
-                              onClick={() => toast({ title: p.dish, description: "Pronto para sugerir ao cliente" })}
-                            >
-                              <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                              Sugerir ao cliente
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              className="h-8 px-3 text-[11px] font-semibold rounded-xl"
-                              onClick={() => toast({ title: p.dish, description: "Excelente escolha!" })}
-                            >
-                              <GlassWater className="h-3.5 w-3.5 mr-1.5" />
-                              Consumir agora
-                            </Button>
-                          )}
-                          </div>
                         </motion.li>
                       );
                     })}
@@ -1365,7 +1269,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setSelectedWineId("");
                     setStep("select-wine");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Escolher outro vinho
                 </Button>
@@ -1381,7 +1285,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <div className="glass-card p-4">
                   <p className="text-sm font-medium text-foreground">
                     Prato: <span className="font-bold">{dish}</span>
                   </p>
@@ -1395,11 +1299,11 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 </div>
 
                 {scanResults.wines.length === 0 ? (
-                  <div className="rounded-2xl p-6 text-center space-y-2" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                    <p className="text-sm text-white/60 font-medium">
+                  <div className="glass-card p-6 text-center space-y-2">
+                    <p className="text-sm text-foreground/70 font-medium">
                       Não foi possível identificar vinhos na imagem.
                     </p>
-                    <p className="text-xs text-white/35">Tente outra foto com melhor iluminação.</p>
+                    <p className="text-xs text-muted-foreground">Tente outra foto com melhor iluminação.</p>
                   </div>
                 ) : (
                   <ul className="space-y-3">
@@ -1425,7 +1329,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           {/* Header: wine name + price */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 space-y-0.5">
-                              <span className="text-[15px] font-bold text-[#1A1A1A] tracking-tight font-serif">{w.name}</span>
+                              <span className="text-[15px] font-bold text-foreground tracking-tight">{w.name}</span>
                               {meta && <p className="text-[11px] text-muted-foreground/70">{meta}</p>}
                             </div>
                             {w.price != null && (
@@ -1463,7 +1367,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                             </div>
                           )}
                           {/* Verdict */}
-                          <p className="text-[12.5px] text-[#555] leading-relaxed">{w.verdict}</p>
+                          <p className="text-[12.5px] text-foreground/65 leading-relaxed">{w.verdict}</p>
                           {w.reasoning && (
                             <p className="text-[12px] text-foreground/60 leading-relaxed">
                               {w.reasoning}
@@ -1493,7 +1397,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     setPreview(null);
                     setStep("photo");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-white/50 hover:text-white/80 border border-white/12 bg-white/5 hover:bg-white/10 transition-all duration-200 rounded-xl"
+                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
                   Enviar outra foto
                 </Button>
@@ -1516,7 +1420,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   <p className="text-[13px] text-foreground/70 leading-relaxed italic">{recipeModal.recipe.description}</p>
                 )}
                 <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Ingredientes</h4>
+                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Ingredientes</h4>
                   <ul className="space-y-1">
                     {recipeModal.recipe.ingredients.map((ing, i) => (
                       <li key={i} className="text-[13px] text-foreground/80 flex items-start gap-2">
@@ -1527,7 +1431,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Modo de preparo</h4>
+                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Modo de preparo</h4>
                   <ol className="space-y-2">
                     {recipeModal.recipe.steps.map((step, i) => (
                       <li key={i} className="text-[13px] text-foreground/80 flex items-start gap-2.5">

@@ -12,12 +12,11 @@ interface LandingHeaderProps {
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-3 sm:px-8 py-2.5 sm:py-3 lg:py-3.5"
+      className="fixed top-0 w-full z-50 px-3 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 border-b border-white/22"
       style={{
-        background: "rgba(15, 42, 36, 0.60)",
-        backdropFilter: "blur(24px) saturate(1.4)",
-        WebkitBackdropFilter: "blur(24px) saturate(1.4)",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(244, 240, 235, 0.72)",
+        backdropFilter: "blur(24px) saturate(1.35)",
+        WebkitBackdropFilter: "blur(14px) saturate(1.12)",
       }}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -32,7 +31,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             variant="navbar"
             className="h-9 sm:h-10 md:h-11 lg:h-14 drop-shadow-[0_4px_12px_rgba(15,15,20,0.10)]"
           />
-          <span className="font-serif text-[17px] sm:text-[19px] md:text-[22px] lg:text-[28px] font-bold tracking-[-0.01em] text-white/90">
+          <span className="font-serif text-[17px] sm:text-[19px] md:text-[22px] lg:text-[28px] font-bold tracking-[-0.01em] text-wine">
             Sommelyx
           </span>
         </a>
@@ -41,10 +40,11 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://instagram.com/sommelyx"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-white/50 hover:text-white/80 transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground/60 hover:text-foreground transition-colors duration-200"
             style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.5)",
+              border: "1px solid rgba(255,255,255,0.6)",
+              backdropFilter: "blur(8px)",
             }}
           >
             <Instagram size={14} />
@@ -53,10 +53,11 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://www.linkedin.com/company/sommelyx/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-white/50 hover:text-white/80 transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground/60 hover:text-foreground transition-colors duration-200"
             style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.5)",
+              border: "1px solid rgba(255,255,255,0.6)",
+              backdropFilter: "blur(8px)",
             }}
           >
             <Linkedin size={14} />
@@ -64,10 +65,14 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-[13px] sm:text-[14px] font-semibold px-4 sm:px-5 rounded-xl transition-all duration-250 hover:-translate-y-0.5 text-white/80 hover:text-white hover:bg-white/10"
+            className="text-[13px] sm:text-[14px] font-semibold px-4 sm:px-5 rounded-xl transition-all duration-250 hover:-translate-y-0.5"
             style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(110,30,42,0.07)",
+              border: "1px solid rgba(110,30,42,0.14)",
+              backdropFilter: "blur(16px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+              boxShadow: "0 2px 8px rgba(110,30,42,0.06), inset 0 1px 0 rgba(255,255,255,0.45)",
+              color: "#5a1528",
             }}
             onClick={onLogin}
           >

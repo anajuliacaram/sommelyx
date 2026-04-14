@@ -78,6 +78,64 @@ function getStyleBadgeClass(style?: string | null) {
   return "bg-primary/5 text-primary/70 border-primary/12";
 }
 
+function WineImageThumb({
+  src,
+  alt,
+  toneClassName,
+  compact = false,
+}: {
+  src: string | null | undefined;
+  alt: string;
+  toneClassName: string;
+  compact?: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+  }, [src]);
+
+  const wrapperClassName = compact
+    ? "relative aspect-square overflow-hidden rounded-xl border border-border/20 bg-muted/20"
+    : "relative aspect-[5/6] overflow-hidden rounded-2xl border border-border/20 bg-muted/20";
+
+  return (
+    <div className={wrapperClassName}>
+      {src && !failed ? (
+        <>
+          {!loaded && <Skeleton className="absolute inset-0 rounded-none" />}
+          <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            onLoad={() => setLoaded(true)}
+            onError={() => setFailed(true)}
+            className={cn(
+              "h-full w-full object-cover transition-opacity duration-300",
+              loaded ? "opacity-100" : "opacity-0",
+            )}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/8 to-transparent" />
+        </>
+      ) : (
+        <div className={cn("relative flex h-full w-full items-center justify-center overflow-hidden", toneClassName)}>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10" />
+          <div className="relative flex flex-col items-center gap-1.5 px-3 text-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/16 text-white/90 backdrop-blur-sm">
+              <Wine className="h-4 w-4" />
+            </div>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/80">
+              Sem imagem
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const styleOptions = [
   { value: "tinto", label: "Tinto" },
   { value: "branco", label: "Branco" },
@@ -377,10 +435,10 @@ export default function CellarPage() {
   return (
     <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
+      <div className="section-surface section-surface--full rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
-          <p className="text-sm text-muted-foreground font-medium">
+          <p className="text-sm text-foreground/68 font-medium">
             {filtered.length} rótulo{filtered.length !== 1 ? "s" : ""} · {visibleBottleCount} garrafa{visibleBottleCount !== 1 ? "s" : ""} em estoque
           </p>
         </div>
@@ -545,21 +603,21 @@ export default function CellarPage() {
             const isExpanded = !!expandedGroups[wine.groupKey];
             const hasGroupDetails = wine.entries.length > 1;
             const hasPriceVariance = wine.distinctPriceCount > 1;
+            const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden wine-card-glass px-4 py-3 transition-all duration-300"
+                className="group relative flex flex-col overflow-hidden wine-card-glass px-3.5 py-2.5 transition-all duration-300"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
+                <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} />
+
                 {/* ── Top: Name + Vintage + Region ── */}
-                <div className="flex items-start gap-2.5 mb-2">
-                  <div className="mt-0.5 h-7 w-7 shrink-0 rounded-lg bg-background/60 p-1.5">
-                    <div className={cn("h-full w-full rounded-[5px]", getWineTone(wine.style))} />
-                  </div>
+                <div className="mt-2.5 flex items-start gap-2.5 mb-2">
                   <div className="min-w-0 flex-1">
-                    <h3 className="line-clamp-1 text-[14px] font-serif font-bold leading-snug text-foreground tracking-[-0.01em]">
+                    <h3 className="line-clamp-1 text-[13.5px] font-serif font-bold leading-snug text-foreground tracking-[-0.01em]">
                       {wine.name}
                     </h3>
                     <p className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
@@ -572,19 +630,19 @@ export default function CellarPage() {
 
                 {/* ── Middle: Status badges ── */}
                 {(status || wine.style) && (
-                  <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                <div className="mb-2 flex flex-wrap items-center gap-1.5">
                     {status && (
-                      <span className={cn("inline-flex items-center h-[22px] rounded-full border px-2.5 text-[10.5px] font-semibold tracking-[-0.01em]", statusColor[status])}>
+                      <span className={cn("inline-flex items-center h-[21px] rounded-full border px-2.5 text-[10px] font-semibold tracking-[-0.01em]", statusColor[status])}>
                         {statusLabel[status]}
                       </span>
                     )}
                     {wine.style && (
-                      <span className={cn("inline-flex items-center h-[22px] rounded-full border px-2.5 text-[10.5px] font-semibold capitalize tracking-[-0.01em]", getStyleBadgeClass(wine.style))}>
+                      <span className={cn("inline-flex items-center h-[21px] rounded-full border px-2.5 text-[10px] font-semibold capitalize tracking-[-0.01em]", getStyleBadgeClass(wine.style))}>
                         {wine.style}
                       </span>
                     )}
                     {wine.country && (
-                      <span className="inline-flex items-center h-[22px] rounded-full border border-border/25 bg-muted/8 px-2.5 text-[10.5px] font-medium text-muted-foreground/70">
+                      <span className="inline-flex items-center h-[21px] rounded-full border border-border/25 bg-muted/8 px-2.5 text-[10px] font-medium text-muted-foreground/70">
                         {wine.country}
                       </span>
                     )}
@@ -594,19 +652,19 @@ export default function CellarPage() {
                 {/* ── Bottom: Price + Quantity ── */}
                 <div className="mb-2 flex items-baseline justify-between px-0.5">
                   <div>
-                    <p className="text-[9px] uppercase tracking-[0.08em] text-muted-foreground/60 mb-0.5 font-semibold">Preço</p>
-                    <p className="text-[16px] font-bold leading-none text-foreground tracking-[-0.02em]">
+                    <p className="text-[9px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Preço</p>
+                    <p className="text-[15px] font-bold leading-none text-foreground tracking-[-0.02em]">
                       {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] uppercase tracking-[0.08em] text-muted-foreground/60 mb-0.5 font-semibold">Qtd</p>
-                    <p className="text-[16px] font-bold leading-none text-foreground/80 tracking-[-0.02em]">{wine.quantity}</p>
+                    <p className="text-[9px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Qtd</p>
+                    <p className="text-[15px] font-bold leading-none text-foreground/80 tracking-[-0.02em]">{wine.quantity}</p>
                   </div>
                 </div>
 
                 {/* ── Actions ── */}
-                <div className="flex items-center gap-1.5 pt-2 border-t border-border/20 mt-auto">
+                <div className="flex items-center gap-1.5 pt-1.5 border-t border-border/20 mt-auto">
                   <Button
                     size="sm"
                     variant="ghost"
@@ -647,7 +705,7 @@ export default function CellarPage() {
                     {isExpanded && (
                       <div className="mt-2 space-y-1 rounded-xl border border-border/20 bg-background/40 p-2">
                         {wine.entries.map((entry) => (
-                          <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-background/60 px-2.5 py-1.5">
+                      <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-background/60 px-2.5 py-1.5">
                             <div className="min-w-0">
                               <p className="truncate text-[11px] font-semibold text-foreground/85">
                                 {entry.cellar_location || "Sem localização"}
@@ -685,11 +743,23 @@ export default function CellarPage() {
             <tbody>
               {filtered.map((wine) => {
                 const status = drinkStatus(wine);
+                const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
                 return (
                   <tr key={wine.id} className="transition-colors hover:bg-muted/20 border-b border-border/15 last:border-0">
                     <td className="px-3 py-2">
-                      <p className="text-[11px] font-bold text-foreground truncate max-w-[200px]">{wine.name}</p>
-                      <p className="text-[9px] text-muted-foreground">{[wine.producer, formatVintageLabel(wine.vintage), wine.country].filter(Boolean).join(" · ")}</p>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="h-9 w-7 shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted/20">
+                          {coverImageUrl ? (
+                            <img src={coverImageUrl} alt={wine.name} className="h-full w-full object-cover" loading="lazy" />
+                          ) : (
+                            <div className={cn("h-full w-full", getWineTone(wine.style))} />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-bold text-foreground truncate max-w-[200px]">{wine.name}</p>
+                          <p className="text-[9px] text-muted-foreground">{[wine.producer, formatVintageLabel(wine.vintage), wine.country].filter(Boolean).join(" · ")}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-3 py-2 hidden sm:table-cell">
                       <span className="text-[9px] font-medium px-1.5 py-0.5 rounded capitalize bg-primary/5 text-primary">{wine.style || "—"}</span>

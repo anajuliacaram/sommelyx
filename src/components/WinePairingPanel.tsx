@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Loader2, Sparkles, BookOpen, GlassWater } from "@/icons/lucide";
+import { UtensilsCrossed, Loader2, Sparkles, BookOpen } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { getWinePairings, type PairingResult, type WineProfile, type Recipe } from "@/lib/sommelier-ai";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MatchDot,
@@ -92,7 +91,7 @@ export function WinePairingPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
-  const { toast } = useToast();
+
   const handleFetch = async () => {
     setLoading(true);
     setError(null);

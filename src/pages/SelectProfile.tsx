@@ -48,7 +48,7 @@ export default function SelectProfile() {
   if (existingProfile) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "radial-gradient(circle at 20% 30%, rgba(80,120,90,0.25), transparent 40%), radial-gradient(circle at 80% 70%, rgba(120,160,120,0.15), transparent 50%), linear-gradient(135deg, #0B1F17, #0F2A20, #132F24)" }}>
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "linear-gradient(165deg, #F4F1EC 0%, #EDE7DF 40%, #E6E2D8 65%, #E8E4DB 100%)" }}>
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,hsl(var(--primary)/0.05),transparent_70%)]" />
 
       <div className="w-full max-w-3xl relative z-10">
@@ -75,7 +75,7 @@ export default function SelectProfile() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-2 mb-5">
+              <div className="surface-clarity inline-flex items-center justify-center gap-2 px-4 py-2 rounded-2xl mb-5">
                   <img
                     src="/logo-sommelyx-mark.png"
                     alt="Sommelyx"
@@ -116,8 +116,13 @@ export default function SelectProfile() {
                     onClick={() => handleSelect(option.type)}
                     disabled={saving}
                     className={cn(
-                      "glass-card p-7 text-left group cursor-pointer relative w-full transition-all",
-                      selectedType === option.type && "border-primary/40 shadow-[0_10px_30px_hsl(var(--primary)/0.12)]",
+                      "card-depth p-6 md:p-7 text-left group cursor-pointer relative w-full transition-all overflow-hidden",
+                      option.type === "personal" ? "border-[hsl(var(--wine)/0.10)]" : "border-[hsl(var(--copper)/0.12)]",
+                      selectedType === option.type
+                        ? option.type === "personal"
+                          ? "border-[hsl(var(--wine)/0.28)] shadow-[0_14px_34px_-16px_hsl(var(--wine)/0.18)]"
+                          : "border-[hsl(var(--copper)/0.26)] shadow-[0_14px_34px_-16px_hsl(var(--copper)/0.18)]"
+                        : "hover:border-border/60",
                       saving && selectedType !== option.type && "opacity-50",
                     )}
                     initial={{ opacity: 0, y: 20 }}
@@ -130,14 +135,19 @@ export default function SelectProfile() {
                         <div className="w-5 h-5 border-2 rounded-full animate-spin border-primary border-t-transparent" />
                       </div>
                     )}
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5 bg-gradient-to-br from-primary to-wine shadow-[0_4px_12px_hsl(var(--primary)/0.15)]">
+                    <div className={cn(
+                      "w-11 h-11 rounded-xl flex items-center justify-center mb-5 shadow-[0_4px_12px_hsl(var(--primary)/0.15)]",
+                      option.type === "personal"
+                        ? "bg-gradient-to-br from-primary to-wine"
+                        : "bg-gradient-to-br from-[#8B6A2D] to-[#B88F4A]",
+                    )}>
                       <option.icon className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-base font-semibold mb-2 font-sans tracking-tight text-foreground">{option.title}</h3>
-                    <p className="text-[12px] mb-5 leading-relaxed text-muted-foreground">{option.desc}</p>
+                    <h3 className="text-[1.02rem] font-semibold mb-2 font-sans tracking-tight text-foreground">{option.title}</h3>
+                    <p className="text-[12px] mb-5 leading-relaxed text-foreground/72">{option.desc}</p>
                     <ul className="space-y-2 mb-5">
                       {option.features.map(f => (
-                        <li key={f} className="text-[12px] flex items-center gap-2 text-muted-foreground">
+                        <li key={f} className="text-[12px] flex items-center gap-2 text-foreground/68">
                           <div className="w-1 h-1 rounded-full bg-primary shrink-0" />
                           {f}
                         </li>

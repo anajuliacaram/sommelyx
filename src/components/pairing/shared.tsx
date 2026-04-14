@@ -234,11 +234,11 @@ export function WineProfileCard({
     <div
       className="rounded-2xl p-4 sm:p-5 space-y-3"
       style={{
-        background: "linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.55) 100%)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        border: "1px solid rgba(255,255,255,0.55)",
-        boxShadow: "0 4px 20px -8px rgba(44,20,31,0.10), inset 0 1px 0 rgba(255,255,255,0.8)",
+        background: "rgba(255,255,255,0.88)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        border: "1px solid rgba(255,255,255,0.25)",
+        boxShadow: "0 8px 24px -12px rgba(44,20,31,0.12), inset 0 1px 0 rgba(255,255,255,0.65)",
       }}
     >
       <div className="flex items-center gap-2.5">
@@ -287,11 +287,11 @@ export function DishProfileCard({ dish, profile }: { dish: string; profile?: Dis
     <div
       className="rounded-2xl p-4 space-y-2.5"
       style={{
-        background: "linear-gradient(135deg, rgba(255,255,255,0.68) 0%, rgba(255,255,255,0.50) 100%)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        border: "1px solid rgba(255,255,255,0.50)",
-        boxShadow: "0 2px 12px -6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)",
+        background: "rgba(255,255,255,0.86)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        border: "1px solid rgba(255,255,255,0.25)",
+        boxShadow: "0 6px 18px -10px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.65)",
       }}
     >
       <div className="flex items-center gap-2">
@@ -334,16 +334,16 @@ export function PremiumResultCard({
       className={cn("list-none rounded-2xl overflow-hidden transition-all duration-250 hover:-translate-y-0.5", extraClass)}
       style={{
         background: isHighlighted
-          ? "linear-gradient(135deg, rgba(255,255,255,0.80) 0%, rgba(255,255,255,0.65) 100%)"
-          : "linear-gradient(135deg, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0.55) 100%)",
-        backdropFilter: "blur(14px) saturate(1.3)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.3)",
+          ? "rgba(255,255,255,0.92)"
+          : "rgba(255,255,255,0.88)",
+        backdropFilter: "blur(10px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(10px) saturate(1.08)",
         border: isHighlighted
-          ? "1px solid rgba(255,255,255,0.65)"
-          : "1px solid rgba(255,255,255,0.50)",
+          ? "1px solid rgba(255,255,255,0.28)"
+          : "1px solid rgba(255,255,255,0.25)",
         boxShadow: isHighlighted
-          ? "0 8px 32px -8px rgba(44,20,31,0.12), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.8)"
-          : "0 4px 20px -6px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.7)",
+          ? "0 10px 34px -12px rgba(44,20,31,0.14), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)"
+          : "0 6px 22px -10px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.62)",
       }}
     >
       {accentColor && <div className="h-[2px] w-full" style={{ background: accentColor }} />}
@@ -358,18 +358,18 @@ export function PremiumResultCard({
    SECTION HEADER — Premium section divider
    ═══════════════════════════════════════════════ */
 
-export function SectionHeader({ icon, label, count, variant = "light" }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number; variant?: "light" | "dark" }) {
+export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
     <div className="flex items-center gap-2.5 py-1">
-      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", variant === "dark" ? "bg-white/10" : "bg-primary/[0.08]")}>
-        <Icon className={cn("h-3.5 w-3.5", variant === "dark" ? "text-white/60" : "text-primary/70")} />
+      <div className="w-7 h-7 rounded-lg bg-primary/[0.08] flex items-center justify-center">
+        <Icon className="h-3.5 w-3.5 text-primary/70" />
       </div>
-      <span className={cn("text-[11px] font-bold uppercase tracking-[0.14em]", variant === "dark" ? "text-white/40" : "text-[#888]")}>
+      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#888]">
         {label}
       </span>
       {count != null && (
-        <span className={cn("text-[10px] font-bold ml-auto", variant === "dark" ? "text-white/25" : "text-[#aaa]")}>{count}</span>
+        <span className="text-[10px] font-bold text-[#aaa] ml-auto">{count}</span>
       )}
     </div>
   );
@@ -474,37 +474,32 @@ export function RecipeButton({ onClick }: { onClick: () => void }) {
 export function PairingSheetHero({
   title,
   subtitle,
-  mode = "personal",
 }: {
   title: string;
   subtitle: string;
-  mode?: "personal" | "commercial";
 }) {
   return (
     <div className="relative -mx-6 -mt-2 px-6 pt-6 pb-5 mb-2 overflow-hidden">
+      {/* Subtle gradient background */}
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)",
+          background: "linear-gradient(180deg, rgba(123,35,48,0.04) 0%, transparent 100%)",
         }}
       />
       <div className="relative flex items-center gap-3.5">
         <div
           className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
           style={{
-            background: mode === "commercial"
-              ? "linear-gradient(135deg, #2D5A27 0%, #4A7C43 100%)"
-              : "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-light)) 100%)",
-            boxShadow: mode === "commercial"
-              ? "0 8px 24px -8px rgba(45,90,39,0.40)"
-              : "0 8px 24px -8px rgba(123,35,48,0.30)",
+            background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-light)) 100%)",
+            boxShadow: "0 8px 24px -8px rgba(123,35,48,0.30)",
           }}
         >
           <UtensilsCrossed className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-serif font-bold text-white tracking-tight">{title}</h2>
-          <p className="text-[12.5px] text-white/50 mt-0.5 leading-relaxed">{subtitle}</p>
+          <h2 className="text-xl font-serif font-bold text-[#1A1A1A] tracking-tight">{title}</h2>
+          <p className="text-[12.5px] text-[#888] mt-0.5 leading-relaxed">{subtitle}</p>
         </div>
       </div>
     </div>

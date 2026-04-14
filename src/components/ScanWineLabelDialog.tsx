@@ -22,6 +22,8 @@ interface ScannedWineData {
   purchase_price: number | null;
   cellar_location: string | null;
   labelImagePreview?: string | null;
+  labelImageFile?: File | null;
+  labelImageBase64?: string | null;
 }
 
 interface ScanWineLabelDialogProps {
@@ -197,6 +199,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     onScanComplete({
       ...scannedData,
       labelImagePreview,
+      labelImageFile: selectedFile,
+      labelImageBase64: lastBase64,
     });
     reset();
     onOpenChange(false);

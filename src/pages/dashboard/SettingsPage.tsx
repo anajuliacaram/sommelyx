@@ -100,11 +100,13 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+        <div className="section-surface section-surface--full">
         <div className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-serif font-bold text-foreground" style={{ letterSpacing: "-0.03em" }}>Configurações</h1>
+          <h1 className="section-surface__title text-xl font-serif font-bold" style={{ letterSpacing: "-0.03em" }}>Configurações</h1>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">Gerencie seu perfil e preferências</p>
+        <p className="section-surface__subtitle text-sm">Gerencie seu perfil e preferências</p>
+        </div>
       </motion.div>
 
       {/* Profile */}
