@@ -112,7 +112,7 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
       <div className="mx-auto max-w-5xl">
         {/* Section header */}
         <motion.div
-          className="section-surface section-surface--full mx-auto sm:mb-10 max-w-3xl rounded-[28px] px-5 py-4 text-center items-center pt-[5px] pb-[5px] mb-[20px] mt-0 mr-0 ml-[70px]"
+          className="section-surface section-surface--full mx-auto sm:mb-8 max-w-3xl rounded-[28px] px-5 py-3 text-center items-center mb-5 mt-0"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
       >
           <h2 className="text-[22px] sm:text-[26px] font-serif font-bold tracking-[-0.02em] text-foreground md:text-2xl">
