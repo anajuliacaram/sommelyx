@@ -37,29 +37,28 @@ export default function DashboardLayout() {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="dashboard-shell h-dvh overflow-hidden flex w-full relative">
-        {/* Full-width top bar behind everything */}
+        {/* Full-width top bar */}
         <div
-          className="absolute top-0 left-0 right-0 h-14 z-20 pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-12 z-20 pointer-events-none"
           style={{
-            background: "rgba(10, 20, 15, 0.55)",
-            backdropFilter: "blur(18px) saturate(1.1)",
-            WebkitBackdropFilter: "blur(18px) saturate(1.1)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08), 0 8px 24px -16px rgba(0, 0, 0, 0.15)",
+            background: "rgba(11, 31, 23, 0.45)",
+            backdropFilter: "blur(24px) saturate(1.15)",
+            WebkitBackdropFilter: "blur(24px) saturate(1.15)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
           }}
         />
 
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="relative isolate h-14 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 overflow-hidden"
+            className="relative isolate h-12 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 overflow-hidden"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "rounded-xl h-10 w-10 border border-white/8 bg-white/5 text-white/70 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 [&>svg]:h-4 [&>svg]:w-4",
+                    "rounded-xl h-8 w-8 border border-white/8 bg-white/5 text-white/70 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 [&>svg]:h-3.5 [&>svg]:w-3.5",
                   )}
                 />
               )}
@@ -68,7 +67,7 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "rounded-xl h-11 min-w-[80px] px-3 gap-2 border border-white/8 bg-white/5 text-white/80 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 active:scale-95 transition-transform duration-150 [&>svg]:h-5 [&>svg]:w-5",
+                    "rounded-xl h-9 min-w-[72px] px-2.5 gap-1.5 border border-white/8 bg-white/5 text-white/80 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 active:scale-95 transition-transform duration-150 [&>svg]:h-4 [&>svg]:w-4",
                   )}
                 >
                   <span className="text-[13px] font-semibold leading-none">Menu</span>
@@ -113,7 +112,7 @@ export default function DashboardLayout() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setAlertsOpen(true)}
-                  className="h-10 w-10 rounded-xl relative text-white/60 hover:text-white hover:bg-white/8"
+                  className="h-8 w-8 rounded-xl relative text-white/60 hover:text-white hover:bg-white/8"
                   title="Alertas"
                 >
                   <Bell className="h-4.5 w-4.5" />
@@ -128,7 +127,7 @@ export default function DashboardLayout() {
                   type="button"
                   variant="primary"
                   size="icon"
-                  className="h-10 w-10 rounded-xl p-0 text-[12px] font-semibold"
+                  className="h-8 w-8 rounded-xl p-0 text-[11px] font-semibold"
                   onClick={() => navigate("/dashboard/settings")}
                 >
                   {initials}
