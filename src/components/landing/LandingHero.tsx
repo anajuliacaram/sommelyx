@@ -14,21 +14,21 @@ const fadeUp = {
 
 /* ── Glass card style (reused) ── */
 const glassCard = {
-  background: "rgba(255,255,255,0.45)",
-  backdropFilter: "blur(16px) saturate(1.4)",
-  WebkitBackdropFilter: "blur(16px) saturate(1.4)",
-  border: "1px solid rgba(255,255,255,0.55)",
+  background: "rgba(255,255,255,0.66)",
+  backdropFilter: "blur(12px) saturate(1.2)",
+  WebkitBackdropFilter: "blur(12px) saturate(1.2)",
+  border: "1px solid rgba(255,255,255,0.72)",
   boxShadow:
-    "0 8px 32px -8px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)",
+    "0 10px 34px -10px rgba(30,20,20,0.10), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.82)",
 } as const;
 
 const glassCardDark = {
-  background: "rgba(30,20,20,0.05)",
-  backdropFilter: "blur(16px) saturate(1.4)",
-  WebkitBackdropFilter: "blur(16px) saturate(1.4)",
-  border: "1px solid rgba(255,255,255,0.45)",
+  background: "rgba(255,255,255,0.74)",
+  backdropFilter: "blur(12px) saturate(1.18)",
+  WebkitBackdropFilter: "blur(12px) saturate(1.18)",
+  border: "1px solid rgba(255,255,255,0.68)",
   boxShadow:
-    "0 12px 40px -12px rgba(30,20,20,0.12), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)",
+    "0 12px 40px -12px rgba(30,20,20,0.14), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.82)",
 } as const;
 
 interface LandingHeroProps {
@@ -47,10 +47,10 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             variants={fadeUp}
             custom={0}
             className="max-w-[34rem] lg:max-w-[38rem] font-serif text-[32px] font-bold leading-[1.15] tracking-[-0.025em] sm:text-[44px]"
-            style={{ color: "#F4F1EC" }}
+            style={{ color: "#FAF7F2" }}
           >
             Um painel executivo para sua adega, com clareza de estoque,{" "}
-            <span className="whitespace-nowrap text-primary">valor e giro.</span>
+            <span className="whitespace-nowrap text-primary drop-shadow-[0_2px_8px_rgba(110,30,42,0.18)]">valor e giro.</span>
           </motion.h1>
 
           <motion.p
@@ -59,7 +59,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             variants={fadeUp}
             custom={1}
             className="mt-5 max-w-xl text-[16px] font-normal leading-[1.7] sm:text-[18px]"
-            style={{ color: "rgba(244,241,236,0.75)" }}
+            style={{ color: "rgba(250,247,242,0.86)" }}
           >
             Menos scroll, mais decisão. A Sommelyx consolida sinais críticos e ações rápidas em uma experiência premium de verdade.
           </motion.p>
@@ -70,7 +70,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 variant="primary"
                 className="group h-12 rounded-xl px-8 text-[14px] font-semibold uppercase tracking-[0.06em]"
                 style={{
-                  boxShadow: "0 4px 20px -4px rgba(110,30,42,0.4), 0 0 0 1px rgba(110,30,42,0.1), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  boxShadow: "0 10px 28px -10px rgba(110,30,42,0.48), 0 0 0 1px rgba(110,30,42,0.16), inset 0 1px 0 rgba(255,255,255,0.22)",
                 }}
                 onClick={onSignup}
               >
@@ -83,8 +83,8 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               style={{
                 ...glassCard,
                 color: "#2d6a4f",
-                background: "rgba(16,185,129,0.08)",
-                border: "1px solid rgba(16,185,129,0.18)",
+                background: "rgba(16,185,129,0.10)",
+                border: "1px solid rgba(16,185,129,0.20)",
               }}
             >
               <Check className="h-3.5 w-3.5" style={{ color: "#10b981" }} /> 14 dias grátis
@@ -130,13 +130,13 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                   <Wine className="h-4 w-4 text-wine" />
                 </div>
                 <div className="leading-none">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>Dashboard</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#666" }}>Dashboard</p>
                   <p className="text-[14px] font-semibold tracking-tight" style={{ color: "#1A1A1A" }}>Painel executivo</p>
                 </div>
               </div>
               <div
                 className="rounded-full px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine"
-                style={{ background: "rgba(110,30,42,0.06)", border: "1px solid rgba(110,30,42,0.12)" }}
+                style={{ background: "rgba(110,30,42,0.09)", border: "1px solid rgba(110,30,42,0.14)" }}
               >
                 Premium
               </div>
@@ -150,7 +150,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 { label: "Reposição", value: "6 itens" },
               ].map((kpi) => (
                 <div key={kpi.label} className="rounded-xl p-3" style={glassCard}>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>{kpi.label}</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#666" }}>{kpi.label}</p>
                   <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight" style={{ color: "#1A1A1A" }}>{kpi.value}</p>
                 </div>
               ))}
@@ -171,13 +171,13 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                   <Wine className="h-4 w-4 text-wine" />
                 </div>
                 <div className="leading-none">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>Dashboard</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#666" }}>Dashboard</p>
                   <p className="text-[15px] font-semibold tracking-tight" style={{ color: "#1A1A1A" }}>Painel executivo</p>
                 </div>
               </div>
               <div
                 className="rounded-full px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-wine"
-                style={{ background: "rgba(110,30,42,0.06)", border: "1px solid rgba(110,30,42,0.12)" }}
+                style={{ background: "rgba(110,30,42,0.09)", border: "1px solid rgba(110,30,42,0.14)" }}
               >
                 Premium
               </div>
@@ -191,7 +191,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 { label: "Reposição", value: "6 itens" },
               ].map((kpi) => (
                 <div key={kpi.label} className="rounded-xl p-3.5" style={glassCard}>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>{kpi.label}</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#666" }}>{kpi.label}</p>
                   <p className="mt-1.5 font-serif text-[18px] font-bold tracking-tight" style={{ color: "#1A1A1A" }}>{kpi.value}</p>
                 </div>
               ))}
@@ -199,7 +199,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
 
             <div className="mt-3 grid grid-cols-12 gap-2.5">
               <div className="col-span-7 rounded-xl p-3.5" style={glassCard}>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#888" }}>Estoque atual</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: "#666" }}>Estoque atual</p>
                 <div className="mt-2.5 space-y-2">
                   {[
                     { name: "Brunello di Montalcino", qty: "2", tone: "low" },
@@ -209,7 +209,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                     <div key={row.name} className="flex items-center gap-2">
                       <div className={`h-1.5 w-1.5 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-gold"}`} />
                       <p className="flex-1 truncate text-[12px] font-medium" style={{ color: "#2B2B2B" }}>{row.name}</p>
-                      <span className="rounded-md px-2 py-1 text-[10px] font-medium" style={{ background: "rgba(0,0,0,0.04)", color: "#888" }}>{row.qty}</span>
+                      <span className="rounded-md px-2 py-1 text-[10px] font-medium" style={{ background: "rgba(110,30,42,0.06)", color: "#666" }}>{row.qty}</span>
                     </div>
                   ))}
                 </div>
@@ -223,7 +223,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                     </div>
                   ))}
                 </div>
-                <p className="mt-2 text-[10px] font-medium" style={{ color: "#888" }}>Últimos 6 meses</p>
+                <p className="mt-2 text-[10px] font-medium" style={{ color: "#666" }}>Últimos 6 meses</p>
               </div>
             </div>
           </div>
