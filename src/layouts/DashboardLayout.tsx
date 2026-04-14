@@ -25,7 +25,6 @@ export default function DashboardLayout() {
   const { data: wines } = useWines();
   const alertCount = drinkNow + (profileType === "commercial" ? lowStock : 0);
   const isMobile = useIsMobile();
-  const topbarSurface = "rgba(255, 255, 255, 0.68)";
 
   const initials =
     user?.user_metadata?.full_name
@@ -41,33 +40,30 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="relative isolate h-14 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 border-b overflow-hidden"
+            className="relative isolate h-14 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 overflow-hidden"
             style={{
-              background: topbarSurface,
-              backdropFilter: "blur(14px) saturate(1.05)",
-              WebkitBackdropFilter: "blur(24px) saturate(1.1)",
-              borderColor: "rgba(255, 255, 255, 0.18)",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04), 0 12px 28px -18px rgba(0, 0, 0, 0.12)",
+              background: "rgba(10, 20, 15, 0.55)",
+              backdropFilter: "blur(18px) saturate(1.1)",
+              WebkitBackdropFilter: "blur(18px) saturate(1.1)",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08), 0 8px 24px -16px rgba(0, 0, 0, 0.15)",
             }}
           >
-            {/* Desktop: icon-only trigger */}
             <div className="relative z-10 flex items-center gap-3 w-full">
-              {/* Desktop: icon-only trigger */}
               {!isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "rounded-xl h-10 w-10 border border-white/20 bg-[rgba(248,245,240,0.82)] text-[hsl(var(--wine))] shadow-[0_6px_18px_-12px_rgba(0,0,0,0.25)] hover:bg-[rgba(248,245,240,0.92)] hover:text-[hsl(var(--wine))] hover:border-white/30 [&>svg]:h-4 [&>svg]:w-4",
+                    "rounded-xl h-10 w-10 border border-white/8 bg-white/5 text-white/70 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 [&>svg]:h-4 [&>svg]:w-4",
                   )}
                 />
               )}
 
-              {/* Mobile: larger, labeled trigger */}
               {isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "rounded-xl h-11 min-w-[80px] px-3 gap-2 border border-white/20 bg-[rgba(248,245,240,0.86)] text-[hsl(var(--wine))] shadow-[0_6px_18px_-12px_rgba(0,0,0,0.25)] hover:bg-[rgba(248,245,240,0.94)] hover:text-[hsl(var(--wine))] hover:border-white/30 active:scale-95 transition-transform duration-150 [&>svg]:h-5 [&>svg]:w-5",
+                    "rounded-xl h-11 min-w-[80px] px-3 gap-2 border border-white/8 bg-white/5 text-white/80 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 active:scale-95 transition-transform duration-150 [&>svg]:h-5 [&>svg]:w-5",
                   )}
                 >
                   <span className="text-[13px] font-semibold leading-none">Menu</span>
@@ -97,12 +93,12 @@ export default function DashboardLayout() {
 
               <div className="flex items-center gap-2.5">
                 <span
-                  className={[
-                    "hidden sm:inline-flex items-center chip-surface h-7 px-3 shrink-0 whitespace-nowrap",
+                  className={cn(
+                    "hidden sm:inline-flex items-center h-7 px-3 shrink-0 whitespace-nowrap rounded-full text-[10px] font-bold uppercase tracking-[0.08em]",
                     profileType === "commercial"
-                      ? "chip-surface--active text-[#1E1811]"
-                      : "bg-[rgba(110,30,42,0.22)] text-[#FAF7F2] border-[rgba(110,30,42,0.30)]",
-                  ].join(" ")}
+                      ? "bg-[rgba(198,161,110,0.15)] text-[rgba(220,190,150,0.9)] border border-[rgba(198,161,110,0.20)]"
+                      : "bg-[rgba(123,30,43,0.18)] text-[rgba(230,180,185,0.9)] border border-[rgba(123,30,43,0.25)]",
+                  )}
                 >
                   {profileType === "commercial" ? "COMERCIAL" : "PESSOAL"}
                 </span>
@@ -112,7 +108,7 @@ export default function DashboardLayout() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setAlertsOpen(true)}
-                  className="h-10 w-10 rounded-xl relative text-muted-foreground hover:bg-muted/20"
+                  className="h-10 w-10 rounded-xl relative text-white/60 hover:text-white hover:bg-white/8"
                   title="Alertas"
                 >
                   <Bell className="h-4.5 w-4.5" />
