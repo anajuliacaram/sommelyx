@@ -19,7 +19,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-[rgba(10,20,15,0.42)] backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-[rgba(8,16,12,0.52)] backdrop-blur-[6px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
     {...props}
@@ -59,11 +59,11 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         ref={ref}
         className={cn(sheetVariants({ side }), className)}
         style={{
-          background: "rgba(255, 255, 255, 0.88)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.25)",
-          boxShadow: "0 24px 72px -28px rgba(15,15,20,0.26), 0 4px 14px rgba(15,15,20,0.06)",
+          background: "rgba(255, 255, 255, 0.82)",
+          backdropFilter: "blur(20px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.1)",
+          border: "1px solid rgba(255, 255, 255, 0.22)",
+          boxShadow: "0 20px 60px -20px rgba(12,12,18,0.22), 0 2px 8px rgba(12,12,18,0.04)",
         }}
         {...props}
       >
