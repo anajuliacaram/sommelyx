@@ -461,9 +461,9 @@ export default function CellarPage() {
         </div>
 
         {/* Filters Row */}
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+            <div className="flex flex-wrap items-center gap-1">
               <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
               <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
               <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
@@ -475,7 +475,7 @@ export default function CellarPage() {
                 size="sm"
                 onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
                  className={cn(
-                   "h-[30px] px-3.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 border transition-all duration-200",
+                   "h-[28px] px-3 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
                    lowStock
                      ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
                      : "bg-white text-foreground/80 border-border/60 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
