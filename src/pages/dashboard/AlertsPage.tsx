@@ -34,6 +34,12 @@ interface AlertItem {
   drinkUntil?: number | null;
 }
 
+const sectionConfig: Record<string, { label: string; icon: typeof Bell; accent: string; accentBg: string }> = {
+  drink_now: { label: "Beber agora", icon: GlassWater, accent: "text-emerald-700", accentBg: "bg-emerald-600/8" },
+  past_peak: { label: "Beber em breve", icon: AlertTriangle, accent: "text-amber-700", accentBg: "bg-amber-500/8" },
+  low_stock: { label: "Estoque baixo", icon: ArrowDownRight, accent: "text-wine", accentBg: "bg-wine/8" },
+};
+
 export default function AlertsPage() {
   const { data: wines } = useWines();
   const navigate = useNavigate();
@@ -51,7 +57,7 @@ export default function AlertsPage() {
       if (w.quantity <= 0) return;
       if (w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until) {
         items.push({
-          id: `now-${w.id}`, wineId: w.id, type: "drink_now", icon: GlassWater, tone: "text-success", bg: "bg-success/8",
+          id: `now-${w.id}`, wineId: w.id, type: "drink_now", icon: GlassWater, tone: "text-emerald-700", bg: "bg-emerald-600/8",
           title: "Beber agora", desc: `Janela ideal: ${w.drink_from}–${w.drink_until}`, wineName: w.name,
           style: w.style, grape: w.grape, region: w.region, country: w.country, vintage: w.vintage,
           drinkFrom: w.drink_from, drinkUntil: w.drink_until,
@@ -59,7 +65,7 @@ export default function AlertsPage() {
       }
       if (w.drink_until && currentYear > w.drink_until) {
         items.push({
-          id: `past-${w.id}`, wineId: w.id, type: "past_peak", icon: AlertTriangle, tone: "text-warning", bg: "bg-warning/8",
+          id: `past-${w.id}`, wineId: w.id, type: "past_peak", icon: AlertTriangle, tone: "text-amber-700", bg: "bg-amber-500/8",
           title: "Beber em breve", desc: `Janela encerrou em ${w.drink_until}`, wineName: w.name,
           style: w.style, grape: w.grape, region: w.region, country: w.country, vintage: w.vintage,
           drinkFrom: w.drink_from, drinkUntil: w.drink_until,
@@ -105,22 +111,27 @@ export default function AlertsPage() {
   const hasAiSupport = (type: string) => type === "drink_now" || type === "past_peak";
 
   return (
-    <div className="space-y-2.5 max-w-4xl">
+    <div className="space-y-3 max-w-3xl">
+      {/* ── Header ── */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="section-surface">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-primary" />
-                <h1 className="text-base font-serif font-bold text-foreground tracking-tight">Alertas</h1>
+        <div className="glass-card px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-[10px] bg-primary/8 flex items-center justify-center">
+                <Bell className="h-3.5 w-3.5 text-primary" />
               </div>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{visibleAlerts.length} alerta{visibleAlerts.length !== 1 ? "s" : ""} ativo{visibleAlerts.length !== 1 ? "s" : ""}</p>
+              <div>
+                <h1 className="text-[15px] font-serif font-bold text-foreground leading-tight">Alertas</h1>
+                <p className="text-[10px] text-muted-foreground leading-none mt-0.5">
+                  {visibleAlerts.length} alerta{visibleAlerts.length !== 1 ? "s" : ""} ativo{visibleAlerts.length !== 1 ? "s" : ""}
+                </p>
+              </div>
             </div>
             {visibleAlerts.length > 0 && (
               <button
                 type="button"
                 onClick={() => setDismissedIds(new Set(alerts.map(a => a.id)))}
-                className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-lg hover:bg-muted/15"
+                className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-lg hover:bg-black/[0.04]"
               >
                 Limpar tudo
               </button>
@@ -129,99 +140,123 @@ export default function AlertsPage() {
         </div>
       </motion.div>
 
+      {/* ── Empty state ── */}
       {visibleAlerts.length === 0 ? (
-        <motion.div className="glass-card p-6 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2 bg-success/8">
-            <Wine className="h-4 w-4 text-success" />
+        <motion.div className="glass-card px-5 py-10 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+          <div className="w-9 h-9 rounded-xl bg-emerald-600/8 flex items-center justify-center mx-auto mb-2.5">
+            <Wine className="h-4 w-4 text-emerald-700" />
           </div>
           <h3 className="text-[13px] font-semibold text-foreground mb-0.5">Tudo em ordem!</h3>
-          <p className="text-[11px] text-muted-foreground max-w-xs mx-auto">Nenhum alerta no momento.</p>
+          <p className="text-[11px] text-muted-foreground max-w-[220px] mx-auto">Nenhum alerta no momento. Seus vinhos estão bem cuidados.</p>
         </motion.div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {Object.entries(grouped).map(([key, items]) => {
             if (items.length === 0) return null;
-            const labels: Record<string, string> = { drink_now: "Beber agora", past_peak: "Beber em breve", low_stock: "Estoque baixo" };
-            const icons: Record<string, typeof Bell> = { drink_now: GlassWater, past_peak: AlertTriangle, low_stock: ArrowDownRight };
-            const SectionIcon = icons[key] || Bell;
+            const cfg = sectionConfig[key] || sectionConfig.drink_now;
+            const SectionIcon = cfg.icon;
+
             return (
-              <motion.div key={key} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1">
-                <div className="flex items-center gap-1.5 px-0.5">
-                  <SectionIcon className="h-3 w-3 text-muted-foreground/50" />
-                  <h2 className="text-[9px] font-bold uppercase tracking-[0.10em] text-muted-foreground">{labels[key]} · {items.length}</h2>
+              <motion.div key={key} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1.5">
+                {/* ── Section header ── */}
+                <div className="flex items-center gap-2 px-1">
+                  <div className={cn("w-5 h-5 rounded-md flex items-center justify-center", cfg.accentBg)}>
+                    <SectionIcon className={cn("h-2.5 w-2.5", cfg.accent)} />
+                  </div>
+                  <h2 className={cn("text-[11px] font-bold tracking-wide", cfg.accent)}>
+                    {cfg.label}
+                  </h2>
+                  <span className="text-[10px] text-muted-foreground/60 font-medium">{items.length}</span>
                 </div>
-                <div className="grid gap-1">
+
+                {/* ── Alert cards ── */}
+                <div className="space-y-1">
                   {items.map((a, i) => (
                     <motion.div key={a.id} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
                       <div className="glass-card overflow-hidden">
+                        {/* Card row */}
                         <div
-                          className="p-2.5 flex items-center gap-2.5 cursor-pointer group w-full text-left transition-all hover:shadow-sm"
+                          className="px-3 py-2 flex items-center gap-2 cursor-pointer group transition-colors hover:bg-black/[0.015]"
                           onClick={() => navigate("/dashboard/cellar")}
                           role="button"
                           tabIndex={0}
                         >
-                          <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", a.bg)}>
-                            <a.icon className={cn("h-3 w-3", a.tone)} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-semibold truncate text-foreground">{a.wineName}</p>
-                            <p className="text-[10px] text-muted-foreground">{a.desc}</p>
+                          {/* Icon */}
+                          <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center shrink-0", a.bg)}>
+                            <a.icon className={cn("h-2.5 w-2.5", a.tone)} />
                           </div>
 
-                          {hasAiSupport(a.type) && (
+                          {/* Text */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[12px] font-semibold truncate text-foreground leading-tight">{a.wineName}</p>
+                            <p className="text-[9px] text-muted-foreground leading-tight mt-px">{a.desc}</p>
+                          </div>
+
+                          {/* Actions cluster */}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {hasAiSupport(a.type) && (
+                              <button
+                                type="button"
+                                className={cn(
+                                  "flex items-center gap-1 text-[9px] font-semibold pl-1.5 pr-2 py-0.5 rounded-md shrink-0 transition-all border",
+                                  expandedId === a.id
+                                    ? "bg-primary/8 text-primary border-primary/15"
+                                    : "bg-transparent text-muted-foreground border-border/30 hover:bg-primary/5 hover:text-primary hover:border-primary/15",
+                                )}
+                                onClick={(e) => { e.stopPropagation(); handleInsight(a); }}
+                                disabled={loadingInsight === a.id}
+                              >
+                                {loadingInsight === a.id ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Sparkles className="h-2.5 w-2.5" />}
+                                IA
+                              </button>
+                            )}
+
+                            <span className={cn(
+                              "text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md shrink-0",
+                              a.bg, a.tone
+                            )}>
+                              {a.title}
+                            </span>
+
                             <button
                               type="button"
-                              className={cn(
-                                "flex items-center gap-1 text-[9px] font-medium px-2 py-1 rounded-lg shrink-0 transition-all",
-                                expandedId === a.id
-                                  ? "bg-primary/10 text-primary"
-                                  : "bg-muted/15 text-muted-foreground hover:bg-primary/8 hover:text-primary",
-                              )}
-                              onClick={(e) => { e.stopPropagation(); handleInsight(a); }}
-                              disabled={loadingInsight === a.id}
+                              onClick={(e) => { e.stopPropagation(); setDismissedIds(prev => new Set(prev).add(a.id)); }}
+                              className="h-5 w-5 rounded-md flex items-center justify-center shrink-0 text-muted-foreground/30 hover:text-foreground hover:bg-black/[0.04] transition-colors"
+                              title="Dispensar"
                             >
-                              {loadingInsight === a.id ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Sparkles className="h-2.5 w-2.5" />}
-                              Análise
+                              <X className="h-2.5 w-2.5" />
                             </button>
-                          )}
 
-                          <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0", a.bg, a.tone)}>{a.title}</span>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setDismissedIds(prev => new Set(prev).add(a.id)); }}
-                            className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-muted-foreground/30 hover:text-foreground hover:bg-muted/20 transition-colors"
-                            title="Dispensar"
-                          >
-                            <X className="h-2.5 w-2.5" />
-                          </button>
-                          <ArrowRight className="h-2.5 w-2.5 text-muted-foreground/20 shrink-0 group-hover:text-muted-foreground transition-colors" />
+                            <ArrowRight className="h-2.5 w-2.5 text-muted-foreground/20 shrink-0 group-hover:text-muted-foreground/50 transition-colors" />
+                          </div>
                         </div>
 
+                        {/* ── Expanded AI insight ── */}
                         <AnimatePresence>
                           {expandedId === a.id && (
                             <motion.div
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: "auto", opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                               className="overflow-hidden"
                             >
-                              <div className="px-3 pb-3 pt-0.5 border-t border-border/15">
+                              <div className="mx-3 mb-2.5 rounded-lg bg-black/[0.02] border border-border/15 px-3 py-2">
                                 {loadingInsight === a.id ? (
-                                  <div className="flex items-center gap-2 py-2">
+                                  <div className="flex items-center gap-2 py-1">
                                     <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                                    <span className="text-[11px] text-muted-foreground italic">Analisando…</span>
+                                    <span className="text-[10px] text-muted-foreground italic">Analisando…</span>
                                   </div>
                                 ) : insights[a.id] ? (
-                                  <div className="space-y-1.5 py-1.5">
+                                  <div className="space-y-1.5">
                                     <div className="flex items-start gap-1.5">
                                       <Sparkles className="h-3 w-3 text-primary shrink-0 mt-0.5" />
-                                      <p className="text-[11px] leading-relaxed text-foreground/85">{insights[a.id].insight}</p>
+                                      <p className="text-[10px] leading-[1.6] text-foreground/80">{insights[a.id].insight}</p>
                                     </div>
                                     {insights[a.id].recommendation && (
-                                      <div className="flex items-start gap-1.5 rounded-lg bg-primary/5 px-2.5 py-1.5">
-                                        <Wine className="h-3 w-3 text-primary shrink-0 mt-0.5" />
-                                        <p className="text-[11px] font-medium text-primary">{insights[a.id].recommendation}</p>
+                                      <div className="flex items-start gap-1.5 rounded-md bg-primary/[0.04] px-2 py-1.5">
+                                        <Wine className="h-3 w-3 text-primary shrink-0 mt-px" />
+                                        <p className="text-[10px] font-medium text-primary leading-snug">{insights[a.id].recommendation}</p>
                                       </div>
                                     )}
                                   </div>
