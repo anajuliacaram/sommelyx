@@ -36,7 +36,7 @@ interface AlertItem {
 
 const sectionConfig: Record<string, { label: string; icon: typeof Bell; accent: string; accentBg: string }> = {
   drink_now: { label: "Beber agora", icon: GlassWater, accent: "text-emerald-700", accentBg: "bg-emerald-600/8" },
-  past_peak: { label: "Beber em breve", icon: AlertTriangle, accent: "text-amber-700", accentBg: "bg-amber-500/8" },
+  past_peak: { label: "Beber em breve", icon: AlertTriangle, accent: "text-[#a5723b]", accentBg: "bg-amber-500/8" },
   low_stock: { label: "Estoque baixo", icon: ArrowDownRight, accent: "text-wine", accentBg: "bg-wine/8" },
 };
 
@@ -65,7 +65,7 @@ export default function AlertsPage() {
       }
       if (w.drink_until && currentYear > w.drink_until) {
         items.push({
-          id: `past-${w.id}`, wineId: w.id, type: "past_peak", icon: AlertTriangle, tone: "text-amber-700", bg: "bg-amber-500/8",
+          id: `past-${w.id}`, wineId: w.id, type: "past_peak", icon: AlertTriangle, tone: "text-[#824917]", bg: "bg-amber-500/8",
           title: "Beber em breve", desc: `Janela encerrou em ${w.drink_until}`, wineName: w.name,
           style: w.style, grape: w.grape, region: w.region, country: w.country, vintage: w.vintage,
           drinkFrom: w.drink_from, drinkUntil: w.drink_until,
@@ -160,10 +160,10 @@ export default function AlertsPage() {
               <motion.div key={key} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1.5">
                 {/* ── Section header ── */}
                 <div className="flex items-center gap-2 px-1">
-                  <div className={cn("w-5 h-5 rounded-md flex items-center justify-center", cfg.accentBg)}>
-                    <SectionIcon className={cn("h-2.5 w-2.5", cfg.accent)} />
+                  <div className={cn("w-5 h-5 rounded-md flex items-center justify-center px-[4px]", cfg.accentBg)}>
+                    <SectionIcon className={cn("h-2.5 w-2.5", key === "past_peak" ? "text-[#956437] text-4xl" : cfg.accent)} />
                   </div>
-                  <h2 className={cn("text-[11px] font-bold tracking-wide", cfg.accent)}>
+                  <h2 className={cn("font-bold tracking-wide", key === "past_peak" ? "text-[#a5723b] text-lg" : cn("text-[11px]", cfg.accent))}>
                     {cfg.label}
                   </h2>
                   <span className="text-[10px] text-muted-foreground/60 font-medium">{items.length}</span>
@@ -176,7 +176,7 @@ export default function AlertsPage() {
                       <div className="glass-card overflow-hidden">
                         {/* Card row */}
                         <div
-                          className="px-3 py-2 flex items-center gap-2 cursor-pointer group transition-colors hover:bg-black/[0.015]"
+                          className="py-2 gap-2 cursor-pointer group transition-colors hover:bg-black/[0.015] flex items-center justify-start px-[30px]"
                           onClick={() => navigate("/dashboard/cellar")}
                           role="button"
                           tabIndex={0}
@@ -188,8 +188,8 @@ export default function AlertsPage() {
 
                           {/* Text */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-semibold truncate text-foreground leading-tight">{a.wineName}</p>
-                            <p className="text-[9px] text-muted-foreground leading-tight mt-px">{a.desc}</p>
+                            <p className="font-semibold truncate text-foreground leading-tight text-base font-sans">{a.wineName}</p>
+                            <p className="text-muted-foreground leading-tight mt-px font-medium text-xs">{a.desc}</p>
                           </div>
 
                           {/* Actions cluster */}
@@ -198,10 +198,10 @@ export default function AlertsPage() {
                               <button
                                 type="button"
                                 className={cn(
-                                  "flex items-center gap-1 text-[9px] font-semibold pl-1.5 pr-2 py-0.5 rounded-md shrink-0 transition-all border",
+                                  "flex items-center gap-1 font-semibold pl-1.5 pr-2 rounded-md shrink-0 transition-all text-sm",
                                   expandedId === a.id
-                                    ? "bg-primary/8 text-primary border-primary/15"
-                                    : "bg-transparent text-muted-foreground border-border/30 hover:bg-primary/5 hover:text-primary hover:border-primary/15",
+                                    ? "bg-primary/8 text-primary border-primary/15 py-0.5 border"
+                                    : "bg-transparent text-muted-foreground border-border/30 hover:bg-primary/5 hover:text-primary hover:border-primary/15 border-2 px-[2px] py-[2px]",
                                 )}
                                 onClick={(e) => { e.stopPropagation(); handleInsight(a); }}
                                 disabled={loadingInsight === a.id}
