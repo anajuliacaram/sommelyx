@@ -55,9 +55,9 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 
 const statusLabel = { now: "Beber agora", past: "Beber em breve", young: "Em guarda" };
 const statusColor = {
-  now: "bg-emerald-500/14 text-emerald-800 border-emerald-500/20",
-  past: "bg-amber-500/14 text-amber-800 border-amber-500/20",
-  young: "bg-sky-500/14 text-sky-800 border-sky-500/20",
+  now: "bg-emerald-500/22 text-emerald-900 border-emerald-500/28 shadow-[0_1px_2px_rgba(16,185,129,0.12)]",
+  past: "bg-amber-500/22 text-amber-900 border-amber-500/28 shadow-[0_1px_2px_rgba(245,158,11,0.12)]",
+  young: "bg-sky-500/22 text-sky-900 border-sky-500/28 shadow-[0_1px_2px_rgba(14,165,233,0.12)]",
 };
 
 function getWineTone(style?: string | null) {
@@ -71,11 +71,11 @@ function getWineTone(style?: string | null) {
 
 function getStyleBadgeClass(style?: string | null) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#7B1E3A]/18 text-[#4E1022] border-[#7B1E3A]/24 shadow-[0_1px_2px_rgba(123,30,58,0.08)]";
-  if (s.includes("branco")) return "bg-[#E6D29C]/34 text-[#6B4F16] border-[#D8BD72]/30 shadow-[0_1px_2px_rgba(180,150,60,0.10)]";
-  if (s.includes("rose")) return "bg-[#D98BA0]/18 text-[#7B3950] border-[#C97A93]/22 shadow-[0_1px_2px_rgba(201,122,147,0.08)]";
-  if (s.includes("espum")) return "bg-[#D4BC76]/20 text-[#71551E] border-[#C6A768]/24 shadow-[0_1px_2px_rgba(198,167,104,0.08)]";
-  return "bg-primary/10 text-primary/80 border-primary/16";
+  if (s.includes("tinto")) return "bg-[#7B1E3A]/28 text-[#4A0E20] border-[#7B1E3A]/32 shadow-[0_1px_2px_rgba(123,30,58,0.12)]";
+  if (s.includes("branco")) return "bg-[#F0DEAA]/48 text-[#6D4E15] border-[#D8BD72]/38 shadow-[0_1px_2px_rgba(180,150,60,0.12)]";
+  if (s.includes("rose")) return "bg-[#E89CB0]/28 text-[#7B3950] border-[#C97A93]/28 shadow-[0_1px_2px_rgba(201,122,147,0.10)]";
+  if (s.includes("espum")) return "bg-[#E0CC8A]/30 text-[#6C5119] border-[#C6A768]/28 shadow-[0_1px_2px_rgba(198,167,104,0.10)]";
+  return "bg-primary/12 text-primary/80 border-primary/18";
 }
 
 /** Returns inline style for wine-type accent on cards */
@@ -618,19 +618,19 @@ export default function CellarPage() {
 
                   {/* ── Middle: Status badges ── */}
                   {(status || wine.style) && (
-                  <div className="mb-[3px] flex flex-wrap items-center gap-1">
+                    <div className="mb-[3px] flex flex-wrap items-center gap-1">
                       {status && (
-                        <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2 text-[9px] font-semibold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", statusColor[status])}>
+                        <span className={cn("inline-flex items-center h-[21px] rounded-full border px-3 text-[10px] font-bold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.05)]", statusColor[status])}>
                           {statusLabel[status]}
                         </span>
                       )}
                       {wine.style && (
-                        <span className={cn("inline-flex items-center h-[19px] rounded-full border px-2.5 text-[9px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", getStyleBadgeClass(wine.style))}>
+                        <span className={cn("inline-flex items-center h-[21px] rounded-full border px-3 text-[10px] font-bold capitalize tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.05)]", getStyleBadgeClass(wine.style))}>
                           {wine.style}
                         </span>
                       )}
                       {wine.country && (
-                        <span className="inline-flex items-center h-[18px] rounded-full border border-white/60 bg-white/68 px-2 text-[9px] font-medium text-[#5b4f57] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                        <span className="inline-flex items-center h-[21px] rounded-full border border-white/60 bg-white/72 px-3 text-[10px] font-medium text-[#5b4f57] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
                           {wine.country}
                         </span>
                       )}
