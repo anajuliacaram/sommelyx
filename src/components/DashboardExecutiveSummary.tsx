@@ -97,7 +97,7 @@ export function DashboardExecutiveSummary({
         </div>
 
         <div className="grid gap-3">
-          <div className="rounded-[16px] border border-white/18 bg-white/55 p-5 text-foreground relative z-10 backdrop-blur-[16px]">
+          <div className="rounded-[16px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.65)] p-5 text-foreground relative z-10 backdrop-blur-[10px]" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/80">
@@ -123,7 +123,8 @@ export function DashboardExecutiveSummary({
               return (
                 <article
                   key={metric.label}
-                  className="rounded-[16px] border border-white/18 bg-white/55 p-4 backdrop-blur-[16px]"
+                  className="rounded-[16px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.65)] p-4 backdrop-blur-[10px]"
+                  style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
