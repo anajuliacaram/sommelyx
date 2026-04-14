@@ -78,16 +78,8 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </MagneticButton>
-            <span
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.10em]"
-              style={{
-                ...glassCard,
-                color: "#2d6a4f",
-                background: "rgba(16,185,129,0.10)",
-                border: "1px solid rgba(16,185,129,0.20)",
-              }}
-            >
-              <Check className="h-3.5 w-3.5" style={{ color: "#10b981" }} /> 14 dias grátis
+            <span className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.10em] bg-[#205b2f] text-slate-50">
+              <Check className="h-3.5 w-3.5" /> 14 dias grátis
             </span>
           </motion.div>
 
