@@ -370,16 +370,16 @@
     padding-left: 1.25rem;
     padding-right: 1.25rem;
     border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.55);
     color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--border));
-    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(16px);
     transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .input-premium:focus {
     border-color: hsl(var(--primary) / 0.3);
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.72);
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.06), 0 2px 8px -4px hsl(var(--wine) / 0.08);
     outline: none;
   }
@@ -793,13 +793,13 @@
     height: 1.85rem;
     padding: 0 0.8rem;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.64);
-    backdrop-filter: blur(10px) saturate(1.04);
-    -webkit-backdrop-filter: blur(10px) saturate(1.04);
-    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: rgba(255, 255, 255, 0.50);
+    backdrop-filter: blur(12px) saturate(1.06);
+    -webkit-backdrop-filter: blur(12px) saturate(1.06);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.03),
-      0 10px 22px -14px rgba(0, 0, 0, 0.12);
+      0 1px 2px rgba(0, 0, 0, 0.02),
+      0 6px 16px -10px rgba(0, 0, 0, 0.08);
     color: hsl(var(--foreground));
     font-size: 10px;
     font-weight: 700;
@@ -815,7 +815,7 @@
   }
 
   .chip-surface--soft {
-    background: rgba(255, 255, 255, 0.52);
+    background: rgba(255, 255, 255, 0.40);
     color: rgba(26, 23, 21, 0.82);
   }
 
