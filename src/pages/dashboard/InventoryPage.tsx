@@ -382,17 +382,18 @@ export default function InventoryPage() {
 
     // --- Render Helpers ---
     const renderStockVisual = (qty: number) => {
-        let color = "bg-wine shadow-[hsl(var(--wine)/0.35)]";
-        if (qty === 0) color = "bg-gray-400 shadow-gray-400/50";
-        else if (qty <= 2) color = "bg-wine shadow-[hsl(var(--wine)/0.4)]";
-        else if (qty <= 6) color = "bg-gold shadow-[hsl(var(--gold)/0.4)]";
+        let color = "bg-success/70";
+        if (qty === 0) color = "bg-muted-foreground/40";
+        else if (qty <= 2) color = "bg-destructive/60";
+        else if (qty <= 6) color = "bg-warning/60";
 
         return (
-            <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.35)] ${color}`} />
-                <span className="text-sm font-black text-foreground">
-                    {qty} <span className="text-[11px] text-muted-foreground font-bold lowercase">un.</span>
+            <div className="flex items-center gap-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${color}`} />
+                <span className="text-[13px] font-bold tabular-nums text-foreground">
+                    {qty}
                 </span>
+                <span className="text-[10px] text-muted-foreground font-medium">un.</span>
             </div>
         );
     };
@@ -400,7 +401,7 @@ export default function InventoryPage() {
     // MultiSelectDropdown handles its own UI now, so we remove QuickFilterDropdown
 
     return (
-        <div className="space-y-4 md:space-y-5 max-w-[1440px] pb-[calc(72px+env(safe-area-inset-bottom))] relative">
+        <div className="space-y-3 md:space-y-4 max-w-[1440px] pb-[calc(72px+env(safe-area-inset-bottom))] relative">
             <StockAuditDialog
                 open={auditOpen}
                 onOpenChange={(v) => { setAuditOpen(v); if (!v) setAuditPayload(null); }}
@@ -460,16 +461,18 @@ export default function InventoryPage() {
             />
 
             {/* --- HEADER --- */}
-            <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-3">
                 <div>
-                    <h1 className="section-surface__title text-2xl md:text-3xl font-serif font-black italic tracking-tight" style={{ letterSpacing: "-0.04em" }}>
+                    <h1 className="section-surface__title text-xl md:text-2xl font-serif font-black italic tracking-tight" style={{ letterSpacing: "-0.04em" }}>
                         Estoque
                     </h1>
-                    <p className="section-surface__subtitle text-sm mt-1 font-medium">Operação comercial com leitura rápida de disponibilidade, valor e giro.</p>
-                    <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.labels} rótulos</Badge>
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.bottles} em estoque</Badge>
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">R$ {summary.totalValue.toLocaleString("pt-BR")} estimado</Badge>
+                    <p className="section-surface__subtitle text-[12px] mt-0.5 font-medium text-muted-foreground">Operação comercial · leitura rápida de disponibilidade e valor</p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">{summary.labels} rótulos</span>
+                        <span className="text-muted-foreground/30">·</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">{summary.bottles} garrafas</span>
+                        <span className="text-muted-foreground/30">·</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">R$ {summary.totalValue.toLocaleString("pt-BR")}</span>
                     </div>
                 </div>
 
@@ -519,7 +522,7 @@ export default function InventoryPage() {
             </div>
 
             {/* --- QUICK ACTIONS & FILTERS --- */}
-            <div className="glass-card p-3 md:p-4 border-white/50 space-y-3">
+            <div className="glass-card p-2.5 md:p-3 border-white/40 space-y-2">
                 <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1 min-w-0">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
@@ -755,7 +758,7 @@ export default function InventoryPage() {
             </AnimatePresence>
 
             {/* --- DATA VIEW --- */}
-            <div className="glass-card overflow-hidden border-white/40 ring-1 ring-black/[0.03]">
+            <div className="glass-card overflow-hidden border-white/30 ring-1 ring-black/[0.02]">
                 {isLoading ? (
                     <div className="p-8 space-y-4">
                         {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 w-full" />)}
@@ -840,9 +843,7 @@ export default function InventoryPage() {
                                                 <div className="flex items-center gap-2">
                                                     {renderStockVisual(wine.quantity)}
                                                     {wine.quantity > 0 && wine.quantity <= 2 ? (
-                                                        <Badge className="h-6 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-semibold">
-                                                            Baixo
-                                                        </Badge>
+                                                        <span className="text-[9px] font-semibold text-destructive/80 uppercase tracking-wider">Baixo</span>
                                                     ) : null}
                                                 </div>
                                                 <div className="text-right">
@@ -967,22 +968,22 @@ export default function InventoryPage() {
                             </thead>
                             <tbody>
                                 {filteredWines.map(wine => (
-                                    <tr key={wine.id} className={cn(selectedIds.includes(wine.id) && "selected", "group hover:bg-muted/10 transition-colors cursor-default h-[74px]")} onClick={() => toggleSelect(wine.id)}>
+                                    <tr key={wine.id} className={cn(selectedIds.includes(wine.id) && "selected", "group hover:bg-muted/5 transition-colors cursor-default")} onClick={() => toggleSelect(wine.id)}>
                                         <td onClick={e => e.stopPropagation()}><Checkbox checked={selectedIds.includes(wine.id)} onCheckedChange={() => toggleSelect(wine.id)} /></td>
                                         <td>
-                                            <div className="flex items-center gap-3 py-1">
-                                                <div className="w-11 h-14 rounded-lg bg-muted/30 flex items-center justify-center shrink-0 border border-black/5 overflow-hidden">
-                                                    {wine.image_url ? <img src={wine.image_url} className="w-full h-full object-cover" /> : <Package className="h-5 w-5 text-muted-foreground/50" />}
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-9 h-12 rounded-lg bg-muted/20 flex items-center justify-center shrink-0 border border-black/[0.04] overflow-hidden">
+                                                    {wine.image_url ? <img src={wine.image_url} className="w-full h-full object-cover" /> : <Package className="h-4 w-4 text-muted-foreground/40" />}
                                                 </div>
-                                                <div className="min-w-[140px]">
-                                                    <p className="font-extrabold text-[14px] text-foreground hover:text-primary transition-colors cursor-pointer leading-tight">{wine.name}</p>
-                                                    <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.producer || "Produtor não informado"}</p>
+                                                <div className="min-w-[120px]">
+                                                    <p className="font-bold text-[13px] text-foreground leading-tight truncate">{wine.name}</p>
+                                                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{wine.producer || "—"}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="hidden lg:table-cell">
-                                            <div className="text-[13px] font-medium">{wine.region || "Região não informada"}</div>
-                                            <div className="text-[11px] font-medium text-muted-foreground mt-0.5">{wine.country || "País não informado"} • Safra {wine.vintage || "NV"}</div>
+                                            <div className="text-[12px] text-foreground">{wine.region || "—"}</div>
+                                            <div className="text-[11px] text-muted-foreground/70 mt-0.5">{wine.country || "—"} · {wine.vintage || "NV"}</div>
                                             {(() => {
                                               const loc = (allLocations ?? [])
                                                 .filter((l) => l.wine_id === wine.id)
@@ -992,13 +993,10 @@ export default function InventoryPage() {
                                                 })
                                                 .find(Boolean);
                                               return loc ? (
-                                                <div className="mt-1">
-                                                  <Badge
-                                                    variant="secondary"
-                                                    className="h-5 rounded-full px-2 text-[9px] font-bold tracking-wide bg-[#6E1E2A]/[0.06] text-[#6E1E2A] border border-[#6E1E2A]/[0.12]"
-                                                  >
+                                                <div className="mt-0.5">
+                                                  <span className="text-[9px] font-medium text-muted-foreground/70 tracking-wide">
                                                     {loc}
-                                                  </Badge>
+                                                  </span>
                                                 </div>
                                               ) : null;
                                             })()}
@@ -1007,14 +1005,14 @@ export default function InventoryPage() {
                                             <div className="flex items-center gap-2.5">
                                                 {renderStockVisual(wine.quantity)}
                                                 {wine.quantity > 0 && wine.quantity <= 2 && (
-                                                    <Badge className="h-6 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-semibold">Baixo estoque</Badge>
+                                                    <span className="text-[9px] font-semibold text-destructive/80 uppercase tracking-wider">Baixo</span>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="text-right hidden sm:table-cell">
-                                            <p className="text-sm font-bold text-foreground">R$ {(wine.current_value || wine.purchase_price || 0).toLocaleString("pt-BR")}</p>
+                                            <p className="text-[13px] font-semibold tabular-nums text-foreground">R$ {(wine.current_value || wine.purchase_price || 0).toLocaleString("pt-BR")}</p>
                                         </td>
-                                        <td className="text-right hidden xl:table-cell"><p className="text-sm font-extrabold text-foreground">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
+                                        <td className="text-right hidden xl:table-cell"><p className="text-[13px] font-bold tabular-nums text-foreground">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
                                         <td className="text-right pr-4" onClick={e => e.stopPropagation()}>
                                             <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                                 <Button

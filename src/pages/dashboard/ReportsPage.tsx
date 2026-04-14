@@ -107,11 +107,11 @@ export default function ReportsPage() {
   if (isLoading) return <div className="text-muted-foreground text-sm p-8">Carregando…</div>;
 
   return (
-    <div className="space-y-4 max-w-[1200px]">
+    <div className="space-y-3 max-w-[1200px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface">
           <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Relatórios</h1>
-          <p className="text-[11px] text-muted-foreground">Análise de estoque e vendas com dados reais</p>
+          <p className="text-[10px] text-muted-foreground/70">Análise de estoque e vendas com dados reais</p>
         </div>
       </motion.div>
 
@@ -123,24 +123,24 @@ export default function ReportsPage() {
       </Tabs>
 
       {tab === "estoque" && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: "Garrafas", value: totalBottles, icon: Wine },
               { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign },
               { label: "Rótulos", value: wines.filter((w) => w.quantity > 0).length, icon: Tag },
             ].map((m, i) => (
-              <motion.div key={m.label} className="chart-surface p-3" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center mb-1.5 bg-primary/10">
-                  <m.icon className="h-3 w-3 text-primary" />
+              <motion.div key={m.label} className="chart-surface p-2.5" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+                <div className="w-5 h-5 rounded-md flex items-center justify-center mb-1 bg-primary/8">
+                  <m.icon className="h-2.5 w-2.5 text-primary" />
                 </div>
-                <p className="text-lg font-black font-sans tracking-tight text-foreground">{m.value}</p>
-                <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
+                <p className="text-base font-bold font-sans tabular-nums text-foreground">{m.value}</p>
+                <p className="text-[9px] font-semibold text-muted-foreground/70 uppercase tracking-[0.06em]">{m.label}</p>
               </motion.div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
             {byCountry.length > 0 && (
               <motion.div className="chart-surface p-4" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
                 <h3 className="chart-surface-title mb-1">Estoque por País</h3>
@@ -190,19 +190,19 @@ export default function ReportsPage() {
       )}
 
       {tab === "vendas" && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: "Faturamento", value: `R$ ${salesRevenue.toLocaleString("pt-BR")}`, icon: DollarSign },
               { label: "Unidades", value: salesUnits, icon: Package },
               { label: "Vendas", value: sales.length, icon: ShoppingCart },
             ].map((m, i) => (
-              <motion.div key={m.label} className="chart-surface p-3" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center mb-1.5 bg-primary/10">
-                  <m.icon className="h-3 w-3 text-primary" />
+              <motion.div key={m.label} className="chart-surface p-2.5" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+                <div className="w-5 h-5 rounded-md flex items-center justify-center mb-1 bg-primary/8">
+                  <m.icon className="h-2.5 w-2.5 text-primary" />
                 </div>
-                <p className="text-lg font-black font-sans tracking-tight text-foreground">{m.value}</p>
-                <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">{m.label}</p>
+                <p className="text-base font-bold font-sans tabular-nums text-foreground">{m.value}</p>
+                <p className="text-[9px] font-semibold text-muted-foreground/70 uppercase tracking-[0.06em]">{m.label}</p>
               </motion.div>
             ))}
           </div>
@@ -212,7 +212,7 @@ export default function ReportsPage() {
               <p className="text-[12px] text-foreground/60">Nenhuma venda registrada ainda.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               {salesByDay.length > 0 && (
                 <motion.div className="chart-surface p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
                   <h3 className="chart-surface-title mb-1">Faturamento por Dia</h3>
