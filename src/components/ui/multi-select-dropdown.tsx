@@ -78,7 +78,7 @@ export function MultiSelectDropdown({
                     variant={hasSelection ? "secondary" : "outline"}
                     size="sm"
                     className={cn(
-                        "h-[30px] px-3.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 border transition-all duration-200",
+                        "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
                         hasSelection
                             ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
                             : "bg-white text-foreground/80 border-border/60 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
