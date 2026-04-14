@@ -59,10 +59,10 @@ export function DashboardExecutiveSummary({
           </div>
 
           <div className="space-y-2">
-            <h1 className="max-w-2xl font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.02em] text-foreground sm:text-[34px] relative z-10">
+            <h1 className="max-w-2xl font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#1C1C1C] sm:text-[34px] relative z-10">
               {title}
             </h1>
-            <p className="max-w-2xl text-[14px] leading-relaxed text-foreground/66 sm:text-[15px] relative z-10">
+            <p className="max-w-2xl text-[14px] leading-relaxed text-[#6B6B6B] sm:text-[15px] relative z-10">
               {description}
             </p>
           </div>
@@ -71,7 +71,7 @@ export function DashboardExecutiveSummary({
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="inline-flex items-center rounded-md border border-border/30 bg-background/60 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-foreground/58 relative z-10"
+                className="inline-flex items-center rounded-md border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.65)] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#6B6B6B] relative z-10"
               >
                 {badge}
               </span>
@@ -103,7 +103,7 @@ export function DashboardExecutiveSummary({
                 <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/80">
                   Experiência guiada
                 </p>
-                <h2 className="mt-2 font-serif text-[20px] font-semibold tracking-[-0.02em] text-foreground">
+                <h2 className="mt-2 font-serif text-[20px] font-semibold tracking-[-0.02em] text-[#1C1C1C]">
                   Um painel claro para decidir rápido.
                 </h2>
               </div>
@@ -112,7 +112,7 @@ export function DashboardExecutiveSummary({
                 <p className="text-[11px] font-medium text-copper">{commandHint ?? "Ctrl/Cmd + K"}</p>
               </div>
             </div>
-            <p className="mt-3 text-[13px] leading-relaxed text-foreground/60">
+            <p className="mt-3 text-[13px] leading-relaxed text-[#6B6B6B]">
               Abra o menu rápido para navegar, localizar rótulos e disparar ações sem quebrar o foco.
             </p>
           </div>
@@ -128,14 +128,14 @@ export function DashboardExecutiveSummary({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-foreground/55">{metric.label}</p>
-                      <p className="mt-2 font-serif text-[24px] font-semibold tracking-[-0.02em] text-foreground">{metric.value}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[#6B6B6B]">{metric.label}</p>
+                      <p className="mt-2 font-serif text-[24px] font-semibold tracking-[-0.02em] text-[#1C1C1C]">{metric.value}</p>
                     </div>
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">
                       <Icon className="h-4 w-4 text-copper" />
                     </div>
                   </div>
-                  <p className="mt-2 text-[12px] leading-relaxed text-foreground/58">{metric.detail}</p>
+                  <p className="mt-2 text-[12px] leading-relaxed text-[#6B6B6B]">{metric.detail}</p>
                 </article>
               );
             })}
