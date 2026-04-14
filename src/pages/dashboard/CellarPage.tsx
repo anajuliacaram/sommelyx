@@ -461,9 +461,9 @@ export default function CellarPage() {
         </div>
 
         {/* Filters Row */}
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+            <div className="flex flex-wrap items-center gap-1">
               <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
               <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
               <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
@@ -475,7 +475,7 @@ export default function CellarPage() {
                 size="sm"
                 onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
                  className={cn(
-                   "h-[30px] px-3.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 border transition-all duration-200",
+                   "h-[28px] px-3 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
                    lowStock
                      ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
                      : "bg-white text-foreground/80 border-border/60 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
@@ -524,12 +524,12 @@ export default function CellarPage() {
             </div>
           </div>
 
-          {/* Compact Range Sliders — inline on desktop, stacked on mobile */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-             <div className="rounded-2xl px-3.5 py-2.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 4px 16px -4px rgba(0,0,0,0.06)" }}>
+          {/* Compact Range Sliders — single row */}
+          <div className="grid grid-cols-2 gap-2">
+             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
                <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
              </div>
-             <div className="rounded-2xl px-3.5 py-2.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 4px 16px -4px rgba(0,0,0,0.06)" }}>
+             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
                <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
             </div>
           </div>
