@@ -216,13 +216,13 @@
   /* ── Glass Card — Premium Unified ── */
   .glass-card {
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px) saturate(1.06);
-    -webkit-backdrop-filter: blur(14px) saturate(1.06);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.02),
-      0 8px 24px -12px rgba(0, 0, 0, 0.10);
+      0 6px 20px -10px rgba(0, 0, 0, 0.08);
     transition: box-shadow 250ms cubic-bezier(0.22, 1, 0.36, 1),
                 border-color 250ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -233,8 +233,8 @@
   .glass-card:hover {
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.03),
-      0 10px 28px -12px rgba(0, 0, 0, 0.13);
-    border-color: rgba(255, 255, 255, 0.28);
+      0 8px 24px -10px rgba(0, 0, 0, 0.11);
+    border-color: rgba(255, 255, 255, 0.22);
     transform: translateY(-1px);
   }
 
@@ -252,7 +252,7 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.45), transparent);
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.35), transparent);
     z-index: 10;
   }
 
@@ -323,23 +323,23 @@
 
   .glass-card-sm {
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 6px 18px -8px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 6px 16px -8px rgba(0, 0, 0, 0.07);
   }
 
   /* ── Wine Card — Glass ── */
   .wine-card-glass {
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.02),
-      0 6px 18px -8px rgba(0, 0, 0, 0.09);
+      0 6px 16px -8px rgba(0, 0, 0, 0.08);
     transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     overflow: hidden;
@@ -360,7 +360,7 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
     z-index: 10;
   }
 
@@ -370,16 +370,16 @@
     padding-left: 1.25rem;
     padding-right: 1.25rem;
     border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.55);
     color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--border));
-    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(16px);
     transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .input-premium:focus {
     border-color: hsl(var(--primary) / 0.3);
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.72);
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.06), 0 2px 8px -4px hsl(var(--wine) / 0.08);
     outline: none;
   }
@@ -721,29 +721,29 @@
 
   .card-depth {
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px) saturate(1.06);
-    -webkit-backdrop-filter: blur(14px) saturate(1.06);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 8px 20px -10px rgba(0, 0, 0, 0.10);
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 6px 18px -10px rgba(0, 0, 0, 0.08);
     transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-depth:hover {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 10px 24px -10px rgba(0, 0, 0, 0.13);
-    border-color: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 8px 22px -10px rgba(0, 0, 0, 0.11);
+    border-color: rgba(255, 255, 255, 0.22);
     transform: translateY(-1px);
   }
 
   .surface-clarity {
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px) saturate(1.06);
-    -webkit-backdrop-filter: blur(14px) saturate(1.06);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.02),
-      0 8px 24px -12px rgba(0, 0, 0, 0.10);
+      0 6px 20px -10px rgba(0, 0, 0, 0.08);
   }
 
   .reading-surface,
@@ -755,11 +755,11 @@
     max-width: 100%;
     padding: 0.75rem 1rem;
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px) saturate(1.06);
-    -webkit-backdrop-filter: blur(14px) saturate(1.06);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 8px 20px -10px rgba(0, 0, 0, 0.10);
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 6px 18px -10px rgba(0, 0, 0, 0.08);
   }
 
   .section-surface {
@@ -793,13 +793,13 @@
     height: 1.85rem;
     padding: 0 0.8rem;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.64);
-    backdrop-filter: blur(10px) saturate(1.04);
-    -webkit-backdrop-filter: blur(10px) saturate(1.04);
-    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: rgba(255, 255, 255, 0.50);
+    backdrop-filter: blur(12px) saturate(1.06);
+    -webkit-backdrop-filter: blur(12px) saturate(1.06);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.03),
-      0 10px 22px -14px rgba(0, 0, 0, 0.12);
+      0 1px 2px rgba(0, 0, 0, 0.02),
+      0 6px 16px -10px rgba(0, 0, 0, 0.08);
     color: hsl(var(--foreground));
     font-size: 10px;
     font-weight: 700;
@@ -815,7 +815,7 @@
   }
 
   .chip-surface--soft {
-    background: rgba(255, 255, 255, 0.52);
+    background: rgba(255, 255, 255, 0.40);
     color: rgba(26, 23, 21, 0.82);
   }
 
@@ -827,11 +827,11 @@
 
   .chart-surface {
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px) saturate(1.06);
-    -webkit-backdrop-filter: blur(14px) saturate(1.06);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 8px 20px -10px rgba(0, 0, 0, 0.10);
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 6px 18px -10px rgba(0, 0, 0, 0.08);
     padding: 0.875rem;
   }
 

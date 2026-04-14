@@ -97,7 +97,7 @@ export function DashboardExecutiveSummary({
         </div>
 
         <div className="grid gap-3">
-          <div className="rounded-[16px] border border-white/30 bg-white/50 p-5 text-foreground relative z-10 backdrop-blur-[14px]">
+          <div className="rounded-[16px] border border-white/18 bg-white/55 p-5 text-foreground relative z-10 backdrop-blur-[16px]">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/80">
@@ -123,7 +123,7 @@ export function DashboardExecutiveSummary({
               return (
                 <article
                   key={metric.label}
-                  className="rounded-[16px] border border-white/30 bg-white/50 p-4 backdrop-blur-[12px]"
+                  className="rounded-[16px] border border-white/18 bg-white/55 p-4 backdrop-blur-[16px]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>

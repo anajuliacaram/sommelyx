@@ -40,11 +40,11 @@ const DialogContent = React.forwardRef<
         className,
       )}
       style={{
-        background: "rgba(255, 255, 255, 0.82)",
-        backdropFilter: "blur(20px) saturate(1.1)",
-        WebkitBackdropFilter: "blur(20px) saturate(1.1)",
-        border: "1px solid rgba(255, 255, 255, 0.22)",
-        boxShadow: "0 20px 60px -20px rgba(12,12,18,0.22), 0 2px 8px rgba(12,12,18,0.04)",
+        background: "rgba(255, 255, 255, 0.72)",
+        backdropFilter: "blur(24px) saturate(1.12)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.12)",
+        border: "1px solid rgba(255, 255, 255, 0.18)",
+        boxShadow: "0 20px 60px -20px rgba(12,12,18,0.20), 0 2px 8px rgba(12,12,18,0.04)",
       }}
       {...props}
     >

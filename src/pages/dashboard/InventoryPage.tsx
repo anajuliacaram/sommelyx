@@ -537,7 +537,7 @@ export default function InventoryPage() {
                     {/* Mobile-first: reduzir altura do topo e evitar wrap infinito */}
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 sm:mx-0 sm:px-0 sm:overflow-visible">
                         {/* Quick Toggles for Stock */}
-                        <div className="shrink-0 flex border border-black/5 rounded-[12px] bg-white/40 backdrop-blur-sm p-[3px]">
+                        <div className="shrink-0 flex border border-white/14 rounded-[12px] bg-white/35 backdrop-blur-sm p-[3px]">
                             {[
                                 { id: "all", label: "Todos" },
                                 { id: "low", label: "Baixo estoque" },
@@ -782,7 +782,7 @@ export default function InventoryPage() {
                                 <div
                                     key={wine.id}
                                     className={cn(
-                                        "rounded-2xl border border-black/[0.06] bg-white/70 p-3 shadow-sm",
+                                         "rounded-2xl border border-white/14 bg-white/55 backdrop-blur-md p-3 shadow-sm",
                                         selected && "ring-2 ring-primary/20",
                                     )}
                                 >
@@ -1114,7 +1114,7 @@ export default function InventoryPage() {
                                     <div
                                         key={wine.id}
                                         className={cn(
-                                            "rounded-2xl border border-black/[0.06] bg-white/70 p-4 shadow-sm hover:bg-white/80 transition-colors",
+                                            "rounded-2xl border border-white/14 bg-white/55 backdrop-blur-md p-4 shadow-sm hover:bg-white/65 transition-colors",
                                             selected && "ring-2 ring-primary/20",
                                         )}
                                         onClick={() => {

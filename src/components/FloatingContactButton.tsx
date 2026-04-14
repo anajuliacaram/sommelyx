@@ -58,7 +58,7 @@ export function FloatingContactButton({ className }: Props) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full border border-border/40 bg-white shadow-sm hover:bg-white/90"
+              className="h-10 w-10 rounded-full border border-white/18 bg-white/55 backdrop-blur-md shadow-sm hover:bg-white/65"
               aria-label="Minimizar botão de contato"
               onClick={(e) => {
                 e.preventDefault();
@@ -92,7 +92,7 @@ export function FloatingContactButton({ className }: Props) {
           align="end"
           side="top"
           sideOffset={10}
-          className="w-[280px] rounded-2xl border border-black/[0.08] bg-white/85 p-3 shadow-[0_26px_70px_-48px_rgba(15,15,20,0.75)] backdrop-blur-2xl"
+          className="w-[280px] rounded-2xl border border-white/16 bg-white/65 p-3 shadow-[0_26px_70px_-48px_rgba(15,15,20,0.75)] backdrop-blur-2xl"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -132,7 +132,7 @@ export function FloatingContactButton({ className }: Props) {
 
             <Button
               variant="outline"
-              className="w-full h-11 rounded-xl justify-start px-4 text-[13px] font-semibold bg-white/70"
+              className="w-full h-11 rounded-xl justify-start px-4 text-[13px] font-semibold bg-white/50 backdrop-blur-sm"
               onClick={handleCopy}
             >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
