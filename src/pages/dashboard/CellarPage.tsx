@@ -463,14 +463,14 @@ export default function CellarPage() {
                    "h-[28px] px-3 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
                    lowStock
                      ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
-                     : "bg-white text-foreground/80 border-border/60 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
+                     : "bg-white/50 backdrop-blur-sm text-foreground/80 border-white/20 shadow-sm hover:bg-white/60 hover:text-foreground"
                  )}
               >
                 Baixo estoque
               </Button>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="hidden sm:flex rounded-full p-[2px] bg-white border border-border/50 shadow-sm">
+              <div className="hidden sm:flex rounded-full p-[2px] bg-white/45 backdrop-blur-sm border border-white/18 shadow-sm">
                 <Button
                   type="button"
                   variant="ghost"
@@ -495,7 +495,7 @@ export default function CellarPage() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                className="h-[30px] px-3 pr-7 text-[11px] font-bold rounded-full bg-white cursor-pointer border border-border/60 text-foreground/80 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border transition-all duration-200"
+                className="h-[30px] px-3 pr-7 text-[11px] font-bold rounded-full bg-white/50 backdrop-blur-sm cursor-pointer border border-white/18 text-foreground/80 shadow-sm hover:bg-white/60 transition-all duration-200"
               >
                 <option value="drink">Prioridade</option>
                 <option value="drinkNow">Beber agora</option>
