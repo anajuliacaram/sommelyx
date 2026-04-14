@@ -38,9 +38,9 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
         >
           <Logo
             variant="navbar"
-            className="h-14 sm:h-16 md:h-[120px] drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]"
+            className="h-10 sm:h-12 md:h-14 drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]"
           />
-          <span className="font-serif text-[26px] sm:text-[32px] md:text-[42px] tracking-[-0.01em] font-extrabold" style={{ color: "#3d0a16" }}>
+          <span className="font-serif text-[22px] sm:text-[26px] md:text-[32px] tracking-[-0.01em] font-extrabold" style={{ color: "#3d0a16" }}>
             Sommelyx
           </span>
         </a>
