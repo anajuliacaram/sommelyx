@@ -61,7 +61,7 @@ export function QuickActions({
   /* ── Stacked layout (sidebar — dark context) ── */
   return (
     <motion.div
-      className="rounded-2xl border border-white/8 bg-white/5 p-3 backdrop-blur-sm"
+      className="rounded-2xl border border-white/[0.04] bg-white/5 p-3 backdrop-blur-sm"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
