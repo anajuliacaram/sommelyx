@@ -215,24 +215,16 @@ export default function CellarPage() {
     wines.forEach(w => { if (w.country) countryMap[w.country] = (countryMap[w.country] || 0) + w.quantity; });
     const countries = Object.entries(countryMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c }));
     
-    // Count wines per grape (deduplicate case-insensitive, normalize to Title Case)
-    const grapeMap: Record<string, { canonical: string; count: number }> = {};
+    // Count wines per grape (add "Blend" for wines without a grape)
+    const grapeMap: Record<string, number> = {};
     let noGrapeCount = 0;
     wines.forEach(w => {
-      if (w.grape) {
-        const key = w.grape.trim().toLowerCase();
-        if (!grapeMap[key]) {
-          const canonical = w.grape.trim().replace(/\b\w/g, c => c.toUpperCase());
-          grapeMap[key] = { canonical, count: 0 };
-        }
-        grapeMap[key].count += w.quantity;
-      } else {
-        noGrapeCount += w.quantity;
-      }
+      if (w.grape) grapeMap[w.grape] = (grapeMap[w.grape] || 0) + w.quantity;
+      else noGrapeCount += w.quantity;
     });
     const grapes = [
       ...(noGrapeCount > 0 ? [{ value: "blend", label: "Blend", count: noGrapeCount }] : []),
-      ...Object.values(grapeMap).sort((a, b) => a.canonical.localeCompare(b.canonical)).map(({ canonical, count }) => ({ value: canonical, label: canonical, count })),
+      ...Object.entries(grapeMap).sort(([a], [b]) => a.localeCompare(b)).map(([v, c]) => ({ value: v, label: v, count: c })),
     ];
     
     // Count wines per style
@@ -351,7 +343,7 @@ export default function CellarPage() {
     if (selectedCountries.length > 0) list = list.filter(w => w.country && selectedCountries.includes(w.country));
     if (selectedGrapes.length > 0) list = list.filter(w => {
       if (selectedGrapes.includes("blend") && !w.grape) return true;
-      return w.grape && selectedGrapes.some(g => g.toLowerCase() === w.grape!.trim().toLowerCase());
+      return w.grape && selectedGrapes.includes(w.grape);
     });
     if (selectedVintages.length > 0) list = list.filter(w => {
       if (selectedVintages.includes("sem-safra") && !w.vintage) return true;

@@ -9,7 +9,6 @@ import { ptBR } from "date-fns/locale/pt-BR";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
-import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -29,12 +28,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-
 const fadeUp = {
-  hidden: { opacity: 0, y: 8 } as const,
+  hidden: { opacity: 0, y: 6 } as const,
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.03, duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -122,36 +120,35 @@ export default function ConsumptionPage() {
     }
   };
 
-  // Chart height: compact on mobile
-  const chartH = isMobile ? 140 : 200;
+  const chartH = isMobile ? 120 : 160;
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <Skeleton className="h-8 w-48 rounded-xl" />
-        <div className="grid grid-cols-4 gap-2">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-40 rounded-lg" />
+        <div className="grid grid-cols-4 gap-1.5">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-12 rounded-lg" />)}
         </div>
-        <div className="grid gap-2">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
+        <div className="grid gap-1.5">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 rounded-lg" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 max-w-[1200px]">
-      {/* Header */}
+    <div className="space-y-2.5 max-w-[1200px]">
+      {/* Header — compact */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="section-surface">
-          <h1 className="section-surface__title text-lg md:text-xl font-serif font-bold tracking-tight">Meu Consumo</h1>
-          <p className="section-surface__subtitle text-[11px]">Histórico, análises e insights sobre seus vinhos</p>
+        <div className="section-surface !py-2 !px-3">
+          <h1 className="section-surface__title text-base font-serif font-bold tracking-tight">Meu Consumo</h1>
+          <p className="section-surface__subtitle text-[10px] mt-0">Histórico e insights sobre seus vinhos</p>
         </div>
       </motion.div>
 
-      {/* Period + Source Filters — compact on mobile */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-col sm:flex-row gap-2">
-        <div className="flex flex-wrap items-center gap-0.5 rounded-2xl border border-white/55 bg-white/60 p-0.5 sm:p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
+      {/* Period + Source Filters — tighter */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-wrap gap-1.5">
+        <div className="flex items-center gap-px rounded-xl border border-white/50 bg-white/55 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-2xl">
           {([
             { value: "week", label: "Sem" },
             { value: "month", label: "Mês" },
@@ -164,10 +161,10 @@ export default function ConsumptionPage() {
                 key={p.value}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative h-8 sm:h-10 rounded-xl px-3 sm:px-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.14em] transition-all duration-200 ease-out",
+                  "relative h-7 rounded-lg px-2.5 text-[9px] font-black uppercase tracking-[0.12em] transition-all duration-200",
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
-                    ? "text-primary-foreground shadow-md"
+                    ? "text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-white/60",
                 )}
                 onClick={() => setPeriod(p.value)}
@@ -175,7 +172,7 @@ export default function ConsumptionPage() {
                 {isActive && (
                   <motion.span
                     layoutId="period-pill"
-                    className="absolute inset-0 rounded-xl bg-primary shadow-md"
+                    className="absolute inset-0 rounded-lg bg-primary shadow-sm"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -184,7 +181,7 @@ export default function ConsumptionPage() {
             );
           })}
         </div>
-        <div className="flex flex-wrap items-center gap-0.5 rounded-2xl border border-white/55 bg-white/60 p-0.5 sm:p-1 shadow-[0_18px_48px_-28px_rgba(15,15,20,0.28)] ring-1 ring-black/[0.03] backdrop-blur-2xl">
+        <div className="flex items-center gap-px rounded-xl border border-white/50 bg-white/55 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-2xl">
           {([
             { value: "all", label: "Todos", icon: null },
             { value: "cellar", label: "Adega", icon: GlassWater },
@@ -196,10 +193,10 @@ export default function ConsumptionPage() {
                 key={s.value}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative h-8 sm:h-10 rounded-xl px-3 sm:px-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.14em] flex items-center gap-1.5 transition-all duration-200 ease-out",
+                  "relative h-7 rounded-lg px-2.5 text-[9px] font-black uppercase tracking-[0.12em] flex items-center gap-1 transition-all duration-200",
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
-                    ? "text-primary-foreground shadow-md"
+                    ? "text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-white/60",
                 )}
                 onClick={() => setSource(s.value)}
@@ -207,12 +204,12 @@ export default function ConsumptionPage() {
                 {isActive && (
                   <motion.span
                     layoutId="source-pill"
-                    className="absolute inset-0 rounded-xl bg-primary shadow-md"
+                    className="absolute inset-0 rounded-lg bg-primary shadow-sm"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <span className="relative z-10 flex items-center gap-1.5">
-                  {s.icon && <s.icon className="h-3.5 w-3.5 opacity-85" />}
+                <span className="relative z-10 flex items-center gap-1">
+                  {s.icon && <s.icon className="h-3 w-3 opacity-85" />}
                   {s.label}
                 </span>
               </button>
@@ -221,32 +218,34 @@ export default function ConsumptionPage() {
         </div>
       </motion.div>
 
-      {/* KPI Cards — ultra-compact on mobile: single row of 4 */}
-      <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+      {/* KPI Strip — ultra compact, uniform grid */}
+      <div className="grid grid-cols-4 gap-1.5">
         {[
           { label: "Total", value: totalCount, icon: Wine, color: "#8F2D56" },
           { label: "Adega", value: cellarCount, icon: GlassWater, color: "#C9A86A" },
           { label: "Ext.", value: externalCount, icon: MapPin, color: "#C44569" },
           { label: "Média", value: avgRating, icon: Star, color: "#22c55e" },
         ].map((m, i) => (
-          <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
-            <PremiumKpiCard className="!p-2 sm:!p-3">
-              <div className="hidden sm:flex w-7 h-7 rounded-lg items-center justify-center mb-1.5" style={{ background: `${m.color}12` }}>
-                <m.icon className="h-3.5 w-3.5" style={{ color: m.color }} />
-              </div>
-              <p className="text-base sm:text-lg font-black font-sans tracking-tight text-foreground text-center sm:text-left">{m.value}</p>
-              <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.06em] text-center sm:text-left">{m.label}</p>
-            </PremiumKpiCard>
+          <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
+            className="glass-card !rounded-xl !p-2 flex items-center gap-2"
+          >
+            <div className="flex w-6 h-6 rounded-md items-center justify-center shrink-0" style={{ background: `${m.color}10` }}>
+              <m.icon className="h-3 w-3" style={{ color: m.color }} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold tracking-tight text-foreground leading-none">{m.value}</p>
+              <p className="text-[8px] font-semibold text-muted-foreground uppercase tracking-[0.04em] mt-0.5">{m.label}</p>
+            </div>
           </motion.div>
         ))}
       </div>
 
-      {/* ── HISTORY FIRST on mobile ── */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-        <div className="section-surface flex items-center gap-2 mb-2">
-          <h2 className="section-surface__title text-[13px] font-serif font-bold">Histórico</h2>
-          <Badge variant="outline" className="chip-surface chip-surface--soft h-6 px-2 text-[9px] font-bold">{filtered.length}</Badge>
-        </div>
+      {/* Histórico header — inline, tight */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}
+        className="flex items-center gap-1.5 pt-1"
+      >
+        <h2 className="text-[12px] font-serif font-bold text-foreground tracking-tight">Histórico</h2>
+        <span className="text-[9px] font-bold text-muted-foreground bg-muted/20 rounded-md px-1.5 py-0.5 tabular-nums">{filtered.length}</span>
       </motion.div>
 
       {filtered.length === 0 ? (
@@ -260,68 +259,56 @@ export default function ConsumptionPage() {
         />
       ) : (
         <AnimatePresence mode="popLayout">
-          <div className="grid gap-1.5 sm:gap-2.5">
+          <div className="grid gap-1">
             {filtered.map((entry, i) => (
               <motion.div
                 key={entry.id}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ delay: Math.min(i * 0.015, 0.25) }}
               >
-                <div className="glass-card p-3 sm:p-3.5 hover:shadow-md transition-all group">
-                  <div className="flex items-start justify-between gap-2">
+                <div className="glass-card !rounded-xl !p-2.5 hover:shadow-sm transition-all group">
+                  <div className="flex items-center gap-2.5">
                     <div className="flex-1 min-w-0">
-                      {/* Row 1: name + source badge */}
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <h3 className="font-bold text-[14px] sm:text-[13px] text-foreground truncate">
-                          {entry.wine_name}
-                        </h3>
+                      {/* Single dense row: name + vintage + badges + date */}
+                      <div className="flex items-center gap-1.5 mb-px">
+                        <h3 className="font-bold text-[12px] text-foreground truncate">{entry.wine_name}</h3>
                         {entry.vintage && (
-                          <span className="text-[11px] text-muted-foreground/50 shrink-0">{entry.vintage}</span>
+                          <span className="text-[10px] text-muted-foreground/45 shrink-0">{entry.vintage}</span>
                         )}
                       </div>
-
-                      {/* Row 2: source + rating + date — more prominent */}
-                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         <span className={cn(
-                          "inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md",
+                          "inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-px rounded",
                           entry.source === "cellar"
                             ? "bg-success/10 text-success"
                             : "bg-amber-500/10 text-amber-600"
                         )}>
-                          {entry.source === "cellar" ? <GlassWater className="h-2.5 w-2.5" /> : <MapPin className="h-2.5 w-2.5" />}
-                          {entry.source === "cellar" ? "Adega" : "Externo"}
+                          {entry.source === "cellar" ? <GlassWater className="h-2 w-2" /> : <MapPin className="h-2 w-2" />}
+                          {entry.source === "cellar" ? "Adega" : "Ext."}
                         </span>
                         {entry.rating && (
-                          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted/15", ratingColor(entry.rating))}>
+                          <span className={cn("text-[9px] font-bold px-1 py-px rounded bg-muted/10", ratingColor(entry.rating))}>
                             {ratingLabel(entry.rating)}
                           </span>
                         )}
-                        <span className="text-[11px] font-medium text-muted-foreground ml-auto shrink-0">
+                        {entry.country && (
+                          <span className="text-[9px] text-muted-foreground/55">{entry.country}{entry.grape ? ` · ${entry.grape}` : ""}</span>
+                        )}
+                        <span className="text-[10px] font-medium text-muted-foreground/50 ml-auto shrink-0">
                           {format(new Date(entry.consumed_at), "dd MMM", { locale: ptBR })}
                         </span>
-                      </div>
-
-                      {/* Row 3: origin info — compact */}
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 flex-wrap">
-                        {entry.country && <span>{entry.country}{entry.region ? ` · ${entry.region}` : ""}</span>}
-                        {entry.grape && (
-                          <>
-                            {entry.country && <span className="opacity-40">|</span>}
-                            <span>{entry.grape}</span>
-                          </>
-                        )}
                       </div>
                     </div>
 
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 shrink-0 text-muted-foreground/40 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                      className="h-6 w-6 shrink-0 text-muted-foreground/30 hover:text-destructive opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       onClick={() => handleDelete(entry.id)}
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-2.5 w-2.5" />
                     </Button>
                   </div>
                 </div>
@@ -331,27 +318,25 @@ export default function ConsumptionPage() {
         </AnimatePresence>
       )}
 
-      {/* Charts — compact visualizations */}
+      {/* Analytics — compact cards */}
       {totalCount > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
           {topWines.length > 0 && (
-            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={10}>
-              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5 text-foreground/50" />
+            <motion.div className="chart-surface !p-3" initial="hidden" animate="visible" variants={fadeUp} custom={10}>
+              <h3 className="chart-surface-title !text-[11px] mb-1.5 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-foreground/40" />
                 Mais consumidos
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {topWines.map(([name, data], i) => (
-                  <div key={name} className="flex items-center gap-2">
-                    <span className="text-[12px] font-black w-5 text-foreground/42">#{i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold truncate text-foreground">{name}</p>
-                    </div>
-                    <div className="text-right shrink-0 flex items-center gap-2">
+                  <div key={name} className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black w-4 text-foreground/30">#{i + 1}</span>
+                    <p className="text-[11px] font-semibold truncate flex-1 text-foreground">{name}</p>
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {data.rating && (
-                        <span className={cn("text-[10px] font-semibold", ratingColor(data.rating))}>{ratingLabel(data.rating)}</span>
+                        <span className={cn("text-[9px] font-semibold", ratingColor(data.rating))}>{ratingLabel(data.rating)}</span>
                       )}
-                      <span className="text-[12px] font-black text-foreground">{data.count}×</span>
+                      <span className="text-[11px] font-black text-foreground">{data.count}×</span>
                     </div>
                   </div>
                 ))}
@@ -360,18 +345,18 @@ export default function ConsumptionPage() {
           )}
 
           {ratingDistribution.length > 0 && (
-            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={11}>
-              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
-                <Star className="h-3.5 w-3.5 text-foreground/50" />
+            <motion.div className="chart-surface !p-3" initial="hidden" animate="visible" variants={fadeUp} custom={11}>
+              <h3 className="chart-surface-title !text-[11px] mb-1.5 flex items-center gap-1">
+                <Star className="h-3 w-3 text-foreground/40" />
                 Avaliações
               </h3>
               <ResponsiveContainer width="100%" height={chartH}>
                 <BarChart data={ratingDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.16)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: isMobile ? 10 : 12, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.12)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--foreground) / 0.65)", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.45)" }} axisLine={false} tickLine={false} width={18} allowDecimals={false} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))">
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="hsl(var(--wine))">
                     {ratingDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Bar>
                 </BarChart>
@@ -380,22 +365,22 @@ export default function ConsumptionPage() {
           )}
 
           {topCountries.length > 0 && (
-            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={12}>
-              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 text-foreground/50" />
+            <motion.div className="chart-surface !p-3" initial="hidden" animate="visible" variants={fadeUp} custom={12}>
+              <h3 className="chart-surface-title !text-[11px] mb-1.5 flex items-center gap-1">
+                <Globe className="h-3 w-3 text-foreground/40" />
                 Por país
               </h3>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {topCountries.map((d, i) => {
                   const maxVal = topCountries[0]?.value || 1;
                   const pct = Math.round((d.value / maxVal) * 100);
                   return (
-                    <div key={d.name} className="flex items-center gap-2">
-                      <span className="text-[12px] font-semibold text-foreground w-[90px] truncate">{d.name}</span>
-                      <div className="flex-1 h-[6px] rounded-full bg-muted/20 overflow-hidden">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
+                    <div key={d.name} className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-semibold text-foreground w-[72px] truncate">{d.name}</span>
+                      <div className="flex-1 h-[4px] rounded-full bg-muted/15 overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
                       </div>
-                      <span className="text-[11px] font-bold text-foreground/70 w-6 text-right tabular-nums">{d.value}</span>
+                      <span className="text-[10px] font-bold text-foreground/60 w-5 text-right tabular-nums">{d.value}</span>
                     </div>
                   );
                 })}
@@ -404,22 +389,22 @@ export default function ConsumptionPage() {
           )}
 
           {topGrapes.length > 0 && (
-            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={13}>
-              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
-                <Grape className="h-3.5 w-3.5 text-foreground/50" />
+            <motion.div className="chart-surface !p-3" initial="hidden" animate="visible" variants={fadeUp} custom={13}>
+              <h3 className="chart-surface-title !text-[11px] mb-1.5 flex items-center gap-1">
+                <Grape className="h-3 w-3 text-foreground/40" />
                 Uvas
               </h3>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {topGrapes.map((d, i) => {
                   const maxVal = topGrapes[0]?.value || 1;
                   const pct = Math.round((d.value / maxVal) * 100);
                   return (
-                    <div key={d.name} className="flex items-center gap-2">
-                      <span className="text-[12px] font-semibold text-foreground w-[90px] truncate">{d.name}</span>
-                      <div className="flex-1 h-[6px] rounded-full bg-muted/20 overflow-hidden">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
+                    <div key={d.name} className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-semibold text-foreground w-[72px] truncate">{d.name}</span>
+                      <div className="flex-1 h-[4px] rounded-full bg-muted/15 overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
                       </div>
-                      <span className="text-[11px] font-bold text-foreground/70 w-6 text-right tabular-nums">{d.value}</span>
+                      <span className="text-[10px] font-bold text-foreground/60 w-5 text-right tabular-nums">{d.value}</span>
                     </div>
                   );
                 })}
