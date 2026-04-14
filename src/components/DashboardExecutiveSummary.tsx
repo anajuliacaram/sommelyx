@@ -45,7 +45,7 @@ export function DashboardExecutiveSummary({
   commandHint,
 }: DashboardExecutiveSummaryProps) {
   return (
-    <section className="surface-clarity relative p-6 sm:p-8 rounded-[28px]">
+    <section className="glass-card relative p-6 sm:p-8">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-10 top-[-60px] h-32 w-32 rounded-full bg-copper/[0.08] blur-[60px]" />
         <div className="absolute right-[-30px] top-10 h-28 w-28 rounded-full bg-[hsl(0_0%_100%/0.04)] blur-[60px]" />
@@ -97,7 +97,7 @@ export function DashboardExecutiveSummary({
         </div>
 
         <div className="grid gap-3">
-          <div className="rounded-xl border border-white/40 bg-background/62 p-5 text-foreground relative z-10 backdrop-blur-[14px]">
+          <div className="rounded-[16px] border border-white/30 bg-white/50 p-5 text-foreground relative z-10 backdrop-blur-[14px]">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/80">
@@ -123,7 +123,7 @@ export function DashboardExecutiveSummary({
               return (
                 <article
                   key={metric.label}
-                  className="rounded-xl border border-border/30 bg-background/58 p-4 backdrop-blur-[12px]"
+                  className="rounded-[16px] border border-white/30 bg-white/50 p-4 backdrop-blur-[12px]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
