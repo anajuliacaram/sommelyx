@@ -78,6 +78,26 @@ function getStyleBadgeClass(style?: string | null) {
   return "bg-primary/5 text-primary/70 border-primary/12";
 }
 
+/** Returns inline style for wine-type accent on cards */
+function getWineTypeAccent(style?: string | null): React.CSSProperties {
+  const s = (style || "").toLowerCase();
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.25)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.08) 0%, transparent 40%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.25)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.08) 0%, transparent 40%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.25)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.08) 0%, transparent 40%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.25)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.08) 0%, transparent 40%)" };
+  return {};
+}
+
+/** Returns hover accent for wine type */
+function getWineTypeAccentHover(style?: string | null): React.CSSProperties {
+  const s = (style || "").toLowerCase();
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.35)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.12) 0%, transparent 40%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.35)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.12) 0%, transparent 40%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.35)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.12) 0%, transparent 40%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.35)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.12) 0%, transparent 40%)" };
+  return {};
+}
+
 function WineImageThumb({
   src,
   alt,
