@@ -9,7 +9,7 @@ interface LandingFooterProps {
 export function LandingFooter({ onLogin }: LandingFooterProps) {
   return (
     <footer
-      className="surface-clarity py-8 sm:py-10 px-5 sm:px-8 relative z-10 rounded-t-[28px] mt-6 sm:mt-8"
+      className="surface-clarity py-3 sm:py-4 px-5 sm:px-8 relative z-10 rounded-t-[28px] mt-6 sm:mt-8"
       style={{
         borderTop: "1px solid rgba(255,255,255,0.28)",
         background: "linear-gradient(180deg, rgba(250,247,242,0.72) 0%, rgba(248,244,237,0.84) 100%)",
@@ -17,8 +17,8 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
         WebkitBackdropFilter: "blur(14px) saturate(1.02)",
       }}
     >
-      <div className="mx-auto max-w-6xl flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between">
-        <div className="flex items-center gap-4 rounded-3xl px-5 py-4 bg-white/60 border border-white/60 shadow-[0_12px_28px_-18px_rgba(0,0,0,0.16)] min-w-[250px] sm:min-w-[280px]">
+      <div className="mx-auto max-w-6xl flex flex-col items-center gap-2 sm:gap-3 md:flex-row md:justify-between">
+        <div className="flex items-center gap-3 rounded-2xl px-4 py-2.5 bg-white/60 border border-white/60 shadow-[0_12px_28px_-18px_rgba(0,0,0,0.16)] min-w-[220px] sm:min-w-[250px]">
           <Logo variant="compact" className="h-8 sm:h-10 w-auto grayscale-0 shrink-0 opacity-100 font-semibold text-xl" />
           <div className="flex flex-col leading-none min-w-0">
             <span className="font-bold text-[14px] sm:text-[15px] font-sans tracking-tight text-foreground">Sommelyx</span>
