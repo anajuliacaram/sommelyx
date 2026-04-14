@@ -201,10 +201,10 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
     <section id="pricing" className="relative px-5 sm:px-8 pt-6 pb-14 overflow-hidden z-10 sm:pt-0 sm:pb-0">
       <div className="mx-auto max-w-5xl relative z-10">
         <motion.div
-          className="section-surface section-surface--full mx-auto sm:mb-8 max-w-[800px] sm:px-6 sm:py-5 items-center text-center ml-[70px] mt-0 mb-[20px] py-[5px] px-[5px] pl-[5px] pr-[5px] pt-[5px]"
+          className="section-surface section-surface--full mx-auto sm:mb-8 max-w-[800px] sm:px-6 sm:py-5 items-center text-center mt-0 py-[5px] ml-[70px] px-[10px] pb-[5px] mr-0 mb-[40px] pt-[5px] pl-[50px] pr-px"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="section-surface__title sm:text-[2rem] md:text-[2.25rem] max-w-[640px] text-3xl font-bold">
+          <h2 className="section-surface__title sm:text-[2rem] md:text-[2.25rem] max-w-[640px] font-bold text-2xl">
             Escolha o plano ideal para sua adega
           </h2>
           <p className="section-surface__subtitle mt-2.5 sm:text-[14px] max-w-xl mx-auto leading-relaxed font-semibold text-sm">
@@ -237,8 +237,8 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           variants={fadeUp}
           custom={4}
         >
-          <div className="section-surface mx-auto text-center items-center">
-            <h3 className="section-surface__title font-serif text-[24px] sm:text-[30px]">
+          <div className="section-surface text-center items-center px-[200px] py-0 pr-[30px] pl-[30px] mx-[190px] my-0 mb-0">
+            <h3 className="section-surface__title font-serif sm:text-[30px] text-3xl font-bold">
               Perguntas frequentes
             </h3>
             <p className="section-surface__subtitle mt-2 font-sans text-[13px] sm:text-[14px]">
