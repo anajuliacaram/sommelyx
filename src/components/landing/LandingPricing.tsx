@@ -201,13 +201,13 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
     <section id="pricing" className="relative px-5 sm:px-8 pt-6 sm:pt-10 pb-14 sm:pb-20 overflow-hidden z-10">
       <div className="mx-auto max-w-5xl relative z-10">
         <motion.div
-          className="section-surface section-surface--full mx-auto mb-6 sm:mb-8 max-w-[800px] px-5 py-4 sm:px-6 sm:py-5 text-center items-center"
+          className="section-surface section-surface--full mx-auto sm:mb-8 max-w-[800px] sm:px-6 sm:py-5 items-center text-center ml-[70px] mt-0 mb-[20px] py-[5px] px-[5px] pl-[5px] pr-[5px] pt-[5px]"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="section-surface__title text-2xl sm:text-[2rem] md:text-[2.25rem] max-w-[640px]">
+          <h2 className="section-surface__title sm:text-[2rem] md:text-[2.25rem] max-w-[640px] text-3xl font-bold">
             Escolha o plano ideal para sua adega
           </h2>
-          <p className="section-surface__subtitle mt-2.5 text-[13px] sm:text-[14px] max-w-xl mx-auto leading-relaxed">
+          <p className="section-surface__subtitle mt-2.5 sm:text-[14px] max-w-xl mx-auto leading-relaxed font-semibold text-sm">
             Comece sem compromisso. Cancele quando quiser.
           </p>
         </motion.div>
