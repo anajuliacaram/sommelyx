@@ -48,14 +48,11 @@ export function RangeSliderFilter({
     <div className="w-full space-y-1">
       <div className="flex items-center justify-between">
         <span
-          className={cn(
-            "text-[9px] font-bold uppercase tracking-wider transition-colors",
-            isActive ? "text-primary" : "text-muted-foreground"
-          )}
+          className="font-bold uppercase tracking-wider transition-colors text-muted-foreground text-xs text-[#832a45]"
         >
           {label}
         </span>
-        <span className="text-[10px] font-extrabold text-foreground tabular-nums">
+        <span className="font-extrabold text-foreground tabular-nums text-sm text-[#7b1e3b]">
           {formatValue(displayed[0])} — {formatValue(displayed[1])}
         </span>
       </div>
