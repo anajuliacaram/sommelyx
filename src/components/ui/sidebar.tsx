@@ -141,11 +141,7 @@ const Sidebar = React.forwardRef<
   if (collapsible === "none") {
     return (
       <div
-        className={cn(
-          "flex h-full w-[--sidebar-width] flex-col text-sidebar-foreground",
-          "bg-[rgba(10,20,15,0.68)] backdrop-blur-xl border-r border-white/8 shadow-[0_20px_40px_-28px_rgba(0,0,0,0.42)]",
-          className,
-        )}
+        className={cn("flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground", className)}
         ref={ref}
         {...props}
       >
@@ -157,15 +153,15 @@ const Sidebar = React.forwardRef<
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-      <SheetContent
-        data-sidebar="sidebar"
-        data-mobile="true"
-        className="w-[--sidebar-width] p-0 text-sidebar-foreground [&>button]:hidden bg-[rgba(10,20,15,0.78)] backdrop-blur-xl border-r border-white/8"
-        style={
-          {
-            "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-          } as React.CSSProperties
-        }
+        <SheetContent
+          data-sidebar="sidebar"
+          data-mobile="true"
+          className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          style={
+            {
+              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+            } as React.CSSProperties
+          }
           side={side}
         >
           <div className="flex h-full w-full flex-col">{children}</div>
@@ -203,14 +199,14 @@ const Sidebar = React.forwardRef<
           // Adjust the padding for floating and inset variants.
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-            : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]",
+            : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className,
         )}
         {...props}
       >
         <div
           data-sidebar="sidebar"
-          className="flex h-full w-full flex-col overflow-hidden text-sidebar-foreground bg-[rgba(10,20,15,0.68)] backdrop-blur-xl shadow-[0_20px_40px_-28px_rgba(0,0,0,0.42)] group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-white/10 group-data-[variant=floating]:shadow"
+          className="flex h-full w-full flex-col overflow-hidden bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
         >
           {children}
         </div>

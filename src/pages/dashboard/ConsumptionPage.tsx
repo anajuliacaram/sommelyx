@@ -152,9 +152,9 @@ export default function ConsumptionPage() {
     <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="section-surface">
-          <h1 className="section-surface__title text-lg md:text-xl font-serif font-bold tracking-tight">Meu Consumo</h1>
-          <p className="section-surface__subtitle text-[11px]">Histórico, análises e insights sobre seus vinhos</p>
+        <div className="reading-surface">
+          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Meu Consumo</h1>
+          <p className="text-[11px] text-muted-foreground">Histórico, análises e insights sobre seus vinhos</p>
         </div>
       </motion.div>
 
@@ -252,9 +252,9 @@ export default function ConsumptionPage() {
 
       {/* ── HISTORY FIRST on mobile ── */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
-        <div className="section-surface flex items-center gap-2 mb-2">
-          <h2 className="section-surface__title text-[13px] font-serif font-bold">Histórico</h2>
-          <Badge variant="outline" className="chip-surface chip-surface--soft h-6 px-2 text-[9px] font-bold">{filtered.length}</Badge>
+        <div className="flex items-center gap-2 mb-2">
+          <h2 className="text-[13px] font-serif font-bold text-foreground">Histórico</h2>
+          <Badge variant="outline" className="text-[9px] font-bold">{filtered.length}</Badge>
         </div>
       </motion.div>
 

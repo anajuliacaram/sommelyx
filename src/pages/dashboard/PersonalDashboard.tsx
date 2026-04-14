@@ -159,18 +159,13 @@ export default function PersonalDashboard() {
       <div className="max-w-[1280px] space-y-5">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
-            <div className="section-surface section-surface--full w-full md:flex-1 md:min-w-0 px-5 py-4">
+          <div className="reading-surface flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <h1 className="text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
                 Olá, <span className="text-gradient-wine">{firstName}</span>
               </h1>
-              <p className="mt-1.5 text-[13px] font-medium text-muted-foreground/80">
-                Tudo pronto para revisar sua adega com clareza rápida.
-              </p>
             </div>
-
-            <div className="section-surface section-surface--full w-full md:w-auto md:min-w-[320px] px-4 py-4">
-              <QuickActions
+             <QuickActions
                 variant="personal"
                 layout="inline"
                 onAddWine={() => setAddOpen(true)}
@@ -178,7 +173,6 @@ export default function PersonalDashboard() {
                 onHarmonize={() => setDishToWineOpen(true)}
                 onAnalyzeList={() => setWineListScanOpen(true)}
               />
-            </div>
           </div>
         </motion.div>
 

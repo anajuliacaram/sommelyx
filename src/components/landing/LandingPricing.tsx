@@ -201,7 +201,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
     <section id="pricing" className="relative px-5 sm:px-8 pt-6 sm:pt-10 pb-14 sm:pb-20 overflow-hidden z-10">
       <div className="mx-auto max-w-5xl relative z-10">
         <motion.div
-          className="mx-auto mb-7 sm:mb-10 max-w-xl text-center"
+          className="reading-surface mx-auto mb-7 sm:mb-10 max-w-xl text-center items-center"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight leading-[1.1]" style={{ color: "#F4F1EC" }}>
@@ -237,7 +237,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           variants={fadeUp}
           custom={4}
         >
-          <div className="text-center">
+          <div className="reading-surface mx-auto text-center items-center">
             <h3 className="font-serif text-[24px] sm:text-[30px] font-black tracking-tight" style={{ color: "#1A1A1A" }}>
               Perguntas frequentes
             </h3>
