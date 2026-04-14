@@ -6,14 +6,14 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl text-card-foreground transition-all duration-280 ease-premium hover:-translate-y-[1px]",
+      "rounded-[20px] text-card-foreground transition-all duration-280 ease-premium hover:-translate-y-[1px]",
       className,
     )}
     style={{
       background: "rgba(255, 255, 255, 0.88)",
-      backdropFilter: "blur(10px)",
-      WebkitBackdropFilter: "blur(10px)",
-      border: "1px solid rgba(255, 255, 255, 0.25)",
+      backdropFilter: "blur(12px) saturate(1.06)",
+      WebkitBackdropFilter: "blur(12px) saturate(1.06)",
+      border: "1px solid rgba(255, 255, 255, 0.30)",
       boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 10px 24px -12px rgba(0,0,0,0.14)",
     }}
     {...props}
