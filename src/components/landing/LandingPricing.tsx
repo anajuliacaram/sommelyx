@@ -198,7 +198,7 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
 
 export function LandingPricing({ onSignup }: LandingPricingProps) {
   return (
-    <section id="pricing" className="relative px-5 sm:px-8 pt-6 sm:pt-10 pb-14 sm:pb-20 overflow-hidden z-10">
+    <section id="pricing" className="relative px-5 sm:px-8 pt-6 pb-14 overflow-hidden z-10 sm:pt-0 sm:pb-0">
       <div className="mx-auto max-w-5xl relative z-10">
         <motion.div
           className="section-surface section-surface--full mx-auto sm:mb-8 max-w-[800px] sm:px-6 sm:py-5 items-center text-center ml-[70px] mt-0 mb-[20px] py-[5px] px-[5px] pl-[5px] pr-[5px] pt-[5px]"
