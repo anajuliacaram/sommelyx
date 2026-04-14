@@ -82,10 +82,10 @@ export function AppSidebar() {
         collapsible="offcanvas"
         className="w-[240px]"
         style={{
-          background: "rgba(10, 20, 15, 0.78)",
-          backdropFilter: "blur(14px) saturate(1.02)",
-          WebkitBackdropFilter: "blur(14px) saturate(1.02)",
-          borderColor: "rgba(255, 255, 255, 0.08)",
+          background: "linear-gradient(180deg, rgba(7, 16, 12, 0.72) 0%, rgba(7, 16, 12, 0.78) 100%)",
+          backdropFilter: "blur(20px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.1)",
+          borderColor: "rgba(255, 255, 255, 0.06)",
         }}
       >
         <SidebarHeader className="pt-2 md:pt-2 px-3">
