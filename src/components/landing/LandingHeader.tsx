@@ -85,10 +85,10 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <MagneticButton>
             <Button
               variant="primary"
-              className="px-3.5 sm:px-5 h-8 sm:h-9 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.05em] rounded-xl shadow-float whitespace-nowrap"
+              className="px-3.5 sm:px-5 h-8 sm:h-9 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.05em] rounded-xl shadow-float whitespace-nowrap active:scale-100 shadow-md opacity-100"
               onClick={onSignup}
             >
-              Começar grátis
+              Criar conta grátis
             </Button>
           </MagneticButton>
         </div>
