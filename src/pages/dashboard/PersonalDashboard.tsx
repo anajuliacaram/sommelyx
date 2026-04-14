@@ -156,10 +156,10 @@ export default function PersonalDashboard() {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="flex flex-col gap-2.5 md:flex-row md:items-stretch md:justify-between">
             <div className="section-surface section-surface--full w-full md:flex-1 md:min-w-0">
-              <h1 className="text-lg font-bold tracking-[-0.03em] text-foreground">
+              <h1 className="text-[17px] md:text-[20px] font-semibold tracking-[-0.03em] text-foreground">
                 Olá, <span className="text-gradient-wine">{firstName}</span>
               </h1>
-              <p className="text-[11px] font-medium text-muted-foreground/70">
+              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/68">
                 Tudo pronto para revisar sua adega.
               </p>
             </div>
@@ -182,14 +182,14 @@ export default function PersonalDashboard() {
           <div className="grid grid-cols-3 gap-1.5">
             {isLoading ? (
               [1, 2, 3].map((i) => (
-                <div key={i} className="glass-card p-2.5">
+                <div key={i} className="card-depth p-2.5">
                   <Skeleton className="h-3 w-14 mb-1.5 rounded" />
                   <Skeleton className="h-5 w-10 rounded" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="glass-card p-2.5 flex items-center gap-2">
+                <div key={kpi.label} className="card-depth p-2.5 flex items-center gap-2">
                   <div className={cn(
                     "flex h-7 w-7 items-center justify-center rounded-lg shrink-0",
                     kpi.urgent ? "bg-primary/8" : "bg-muted/15"
@@ -198,7 +198,7 @@ export default function PersonalDashboard() {
                   </div>
                   <div className="min-w-0">
                     <p className={cn(
-                      "text-sm font-bold tracking-[-0.02em] leading-none tabular-nums",
+                      "text-[13px] font-bold tracking-[-0.02em] leading-none tabular-nums",
                       kpi.urgent ? "text-primary" : "text-foreground",
                     )}>
                       {kpi.value}
@@ -214,7 +214,7 @@ export default function PersonalDashboard() {
         {/* ─── Priority Block ─── */}
         {priorityItems.length > 0 && (
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-            <div className="glass-card p-3">
+            <div className="card-depth p-3">
               <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-muted-foreground mb-1.5">Hoje para decidir</p>
               <div className="grid gap-px">
                 {priorityItems.map((item, i) => (
@@ -248,9 +248,9 @@ export default function PersonalDashboard() {
         <div className="grid grid-cols-12 gap-2.5">
           {/* ─── Ready to Drink ─── */}
           <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-            <div className="glass-card p-3.5">
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <h2 className="text-[14px] font-bold tracking-[-0.01em] text-foreground">Prontos para abrir</h2>
+            <div className="card-depth p-3.5">
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-foreground">Prontos para abrir</h2>
                 <Button variant="ghost" size="sm" className="text-[11px] text-muted-foreground h-7" onClick={() => navigate("/dashboard/cellar")}>
                   Ver adega <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
@@ -294,9 +294,9 @@ export default function PersonalDashboard() {
           {/* ─── Right Column ─── */}
           <div className="col-span-12 grid gap-2.5 lg:col-span-5">
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-              <div className="glass-card p-3.5">
+              <div className="card-depth p-3.5">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-[14px] font-bold tracking-[-0.01em] text-foreground">Alertas</h2>
+                  <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-foreground">Alertas</h2>
                   <Button variant="ghost" size="sm" className="text-[11px] text-muted-foreground h-7" onClick={() => navigate("/dashboard/alerts")}>
                     Ver todos <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
@@ -311,7 +311,7 @@ export default function PersonalDashboard() {
                       key={a.label}
                       type="button"
                       onClick={() => navigate("/dashboard/alerts")}
-                      className="flex items-center justify-between rounded-lg px-2.5 py-2 transition-all duration-200 hover:bg-muted/12"
+                      className="flex items-center justify-between rounded-lg px-2.5 py-2 transition-all duration-200 hover:bg-muted/10"
                     >
                       <span className="text-[12px] font-medium text-muted-foreground">{a.label}</span>
                       <span className={cn("text-lg font-bold tabular-nums tracking-[-0.02em]", a.value > 0 ? a.tone : "text-muted-foreground/15")}>{a.value}</span>
@@ -324,7 +324,7 @@ export default function PersonalDashboard() {
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
               <div className="chart-surface p-3.5">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-[12px] font-bold text-foreground">Consumo</h2>
+                  <h2 className="text-[12px] font-semibold text-foreground">Consumo</h2>
                   <span className="text-[10px] font-semibold text-foreground/50">
                     {consumption.length} total
                   </span>

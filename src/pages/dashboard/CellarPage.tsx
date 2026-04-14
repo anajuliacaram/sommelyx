@@ -119,7 +119,7 @@ function WineImageThumb({
 
   const wrapperClassName = compact
     ? "relative aspect-square overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
-    : "relative aspect-[16/10] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
+    : "relative aspect-[4/3] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
 
   return (
     <div className={wrapperClassName}>
@@ -438,16 +438,16 @@ export default function CellarPage() {
   const visibleBottleCount = filtered.reduce((sum, wine) => sum + wine.quantity, 0);
 
   return (
-    <div className="space-y-4 max-w-[1200px]">
+      <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
       <div className="section-surface section-surface--full rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
-          <p className="text-sm text-foreground/68 font-medium">
+          <h1 className="text-xl md:text-[1.95rem] font-serif font-semibold text-foreground tracking-[-0.03em]">Minha Adega</h1>
+          <p className="text-[13px] md:text-[14px] text-foreground/62 font-medium mt-0.5">
             {filtered.length} rótulo{filtered.length !== 1 ? "s" : ""} · {visibleBottleCount} garrafa{visibleBottleCount !== 1 ? "s" : ""} em estoque
           </p>
         </div>
-        <Button variant="primary" size="sm" onClick={() => setAddOpen(true)} className="h-9 px-5 text-xs font-bold">
+        <Button variant="primary" size="sm" onClick={() => setAddOpen(true)} className="h-9 px-5 text-xs font-semibold">
           <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
         </Button>
       </div>
@@ -545,14 +545,14 @@ export default function CellarPage() {
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
         <div className="glass-card p-3 flex flex-wrap gap-2 items-center">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mr-1">Filtros ativos:</span>
+          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-foreground/55 mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[28px] text-[11px] rounded-full group border-[hsl(var(--wine)/0.25)] bg-[hsl(var(--wine)/0.12)] text-[hsl(var(--wine))] font-bold shadow-sm">
+            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[26px] text-[10px] rounded-full group border-[hsl(var(--wine)/0.24)] bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] font-semibold shadow-sm">
               {chip.label}
               <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 hover:opacity-100 transition-opacity duration-150" onClick={chip.onRemove} />
             </Badge>
           ))}
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-xs font-bold text-destructive hover:bg-destructive/10 ml-1">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] font-semibold text-destructive hover:bg-destructive/10 ml-1">
             Limpar tudo
           </Button>
         </div>

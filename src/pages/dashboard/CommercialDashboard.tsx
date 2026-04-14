@@ -142,10 +142,10 @@ function FilterChipGroup({
               type="button"
               onClick={() => onToggle(opt.value)}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-semibold transition-all duration-150 border",
+                "inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-semibold transition-all duration-150 border backdrop-blur-sm",
                 active
-                  ? "bg-primary/10 text-primary border-primary/20"
-                  : "bg-background/50 text-muted-foreground/70 border-border/30 hover:bg-muted/20 hover:text-foreground"
+                  ? "bg-primary/12 text-primary border-primary/20 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                  : "bg-white/48 text-muted-foreground/72 border-white/24 hover:bg-white/58 hover:text-foreground"
               )}
             >
               {opt.value}
@@ -395,10 +395,10 @@ export default function CommercialDashboard() {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="surface-clarity rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[26px] font-bold tracking-[-0.02em] text-foreground sm:text-[30px] font-serif">
+              <h1 className="text-[25px] font-semibold tracking-[-0.03em] text-foreground sm:text-[28px] font-serif">
                 Resumo da operação
               </h1>
-              <p className="mt-1.5 text-[13px] text-foreground/68 leading-relaxed">
+              <p className="mt-1 text-[13px] text-foreground/62 leading-relaxed">
                 {isFiltered
                   ? `${uniqueLabels} rótulos · ${totalBottles} garrafas · ${formatBRL(totalValue)}`
                   : `${totalBottles} un. em estoque`}
@@ -520,21 +520,21 @@ export default function CommercialDashboard() {
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="glass-card p-5">
+                <div key={i} className="card-depth p-5">
                   <Skeleton className="h-3.5 w-20 mb-3 rounded-lg" />
                   <Skeleton className="h-8 w-16 rounded-lg" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="glass-card p-5">
+                <div key={kpi.label} className="card-depth p-5">
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/[0.06]">
                       <kpi.icon className="h-4 w-4 text-primary/60" />
                     </div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground/60 whitespace-nowrap">{kpi.label}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 whitespace-nowrap">{kpi.label}</p>
                   </div>
-                  <p className="text-[26px] font-bold tracking-[-0.02em] text-foreground leading-none">{kpi.value}</p>
+                  <p className="text-[26px] font-bold tracking-[-0.02em] text-foreground leading-none tabular-nums">{kpi.value}</p>
                   <p className="text-[12px] text-muted-foreground/60 mt-2 font-medium">{kpi.detail}</p>
                 </div>
               ))
@@ -575,7 +575,7 @@ export default function CommercialDashboard() {
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <div className="min-w-0">
                       <p className="chart-surface-kicker">Estoque</p>
-                      <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em] text-foreground">
+                      <h2 className="mt-1 text-[18px] font-semibold tracking-[-0.01em] text-foreground">
                         Itens de maior impacto
                       </h2>
                     </div>
@@ -584,7 +584,7 @@ export default function CommercialDashboard() {
                     </Button>
                   </div>
 
-                  <div className="overflow-hidden rounded-2xl border border-border/25">
+                  <div className="overflow-hidden rounded-2xl border border-border/22 bg-white/44 shadow-[0_10px_26px_-22px_rgba(44,20,31,0.18)]">
                     <div className="grid grid-cols-12 gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 bg-muted/12">
                       <div className="col-span-6">Produto</div>
                       <div className="col-span-2 text-center">Tipo</div>
@@ -597,7 +597,7 @@ export default function CommercialDashboard() {
                           key={row.id}
                           type="button"
                           onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(row.name)}`)}
-                          className="grid w-full grid-cols-12 items-center gap-2 px-5 py-3.5 text-left transition-all duration-200 hover:bg-muted/10"
+                          className="grid w-full grid-cols-12 items-center gap-2 px-5 py-3.25 text-left transition-all duration-200 hover:bg-muted/8"
                         >
                           <div className="col-span-6 min-w-0">
                             <div className="flex items-center gap-2.5">
@@ -610,7 +610,7 @@ export default function CommercialDashboard() {
                           </div>
                           <div className="col-span-2 text-center">
                             {row.style && (
-                              <span className="inline-flex items-center rounded-lg bg-muted/25 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground/70">
+                              <span className="inline-flex items-center rounded-lg bg-muted/20 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground/72">
                                 {row.style}
                               </span>
                             )}

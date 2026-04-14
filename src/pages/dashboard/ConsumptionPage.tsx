@@ -141,14 +141,14 @@ export default function ConsumptionPage() {
       {/* Header — compact */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface !py-2 !px-3">
-          <h1 className="section-surface__title text-base font-serif font-bold tracking-tight">Meu Consumo</h1>
-          <p className="section-surface__subtitle text-[10px] mt-0">Histórico e insights sobre seus vinhos</p>
+          <h1 className="section-surface__title text-[15px] md:text-[18px] font-serif font-semibold tracking-[-0.025em]">Meu Consumo</h1>
+          <p className="section-surface__subtitle text-[10px] mt-0.5">Histórico e insights sobre seus vinhos</p>
         </div>
       </motion.div>
 
       {/* Period + Source Filters — tighter */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-wrap gap-1.5">
-        <div className="flex items-center gap-px rounded-xl border border-white/16 bg-white/40 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-xl">
+        <div className="flex items-center gap-px rounded-xl border border-white/14 bg-white/42 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-xl">
           {([
             { value: "week", label: "Sem" },
             { value: "month", label: "Mês" },
@@ -165,7 +165,7 @@ export default function ConsumptionPage() {
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
                     ? "text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/40",
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/42",
                 )}
                 onClick={() => setPeriod(p.value)}
               >
@@ -181,7 +181,7 @@ export default function ConsumptionPage() {
             );
           })}
         </div>
-        <div className="flex items-center gap-px rounded-xl border border-white/16 bg-white/40 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-xl">
+        <div className="flex items-center gap-px rounded-xl border border-white/14 bg-white/42 p-[3px] shadow-sm ring-1 ring-black/[0.02] backdrop-blur-xl">
           {([
             { value: "all", label: "Todos", icon: null },
             { value: "cellar", label: "Adega", icon: GlassWater },
@@ -197,7 +197,7 @@ export default function ConsumptionPage() {
                   "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                   isActive
                     ? "text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/40",
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/42",
                 )}
                 onClick={() => setSource(s.value)}
               >
@@ -220,21 +220,21 @@ export default function ConsumptionPage() {
 
       {/* KPI Strip — ultra compact, uniform grid */}
       <div className="grid grid-cols-4 gap-1.5">
-        {[
+          {[
           { label: "Total", value: totalCount, icon: Wine, color: "#8F2D56" },
           { label: "Adega", value: cellarCount, icon: GlassWater, color: "#C9A86A" },
           { label: "Ext.", value: externalCount, icon: MapPin, color: "#C44569" },
           { label: "Média", value: avgRating, icon: Star, color: "#22c55e" },
-        ].map((m, i) => (
-          <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
-            className="glass-card !rounded-xl !p-2 flex items-center gap-2"
-          >
-            <div className="flex w-6 h-6 rounded-md items-center justify-center shrink-0" style={{ background: `${m.color}10` }}>
+          ].map((m, i) => (
+            <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
+            className="card-depth !rounded-xl !p-2.5 flex items-center gap-2"
+            >
+            <div className="flex w-6 h-6 rounded-md items-center justify-center shrink-0" style={{ background: `${m.color}12` }}>
               <m.icon className="h-3 w-3" style={{ color: m.color }} />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold tracking-tight text-foreground leading-none">{m.value}</p>
-              <p className="text-[8px] font-semibold text-muted-foreground uppercase tracking-[0.04em] mt-0.5">{m.label}</p>
+              <p className="text-[13px] font-bold tracking-[-0.02em] text-foreground leading-none tabular-nums">{m.value}</p>
+              <p className="text-[8px] font-semibold text-muted-foreground uppercase tracking-[0.06em] mt-0.5">{m.label}</p>
             </div>
           </motion.div>
         ))}
@@ -268,7 +268,7 @@ export default function ConsumptionPage() {
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ delay: Math.min(i * 0.015, 0.25) }}
               >
-                <div className="glass-card !rounded-xl !p-2.5 hover:shadow-sm transition-all group">
+                <div className="card-depth !rounded-xl !p-2.25 hover:shadow-sm transition-all group">
                   <div className="flex items-center gap-2.5">
                     <div className="flex-1 min-w-0">
                       {/* Single dense row: name + vintage + badges + date */}
@@ -282,21 +282,21 @@ export default function ConsumptionPage() {
                         <span className={cn(
                           "inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-px rounded",
                           entry.source === "cellar"
-                            ? "bg-success/10 text-success"
-                            : "bg-amber-500/10 text-amber-600"
+                            ? "bg-success/12 text-success"
+                            : "bg-amber-500/12 text-amber-700"
                         )}>
                           {entry.source === "cellar" ? <GlassWater className="h-2 w-2" /> : <MapPin className="h-2 w-2" />}
                           {entry.source === "cellar" ? "Adega" : "Ext."}
                         </span>
                         {entry.rating && (
-                          <span className={cn("text-[9px] font-bold px-1 py-px rounded bg-muted/10", ratingColor(entry.rating))}>
+                          <span className={cn("text-[9px] font-bold px-1 py-px rounded bg-muted/12", ratingColor(entry.rating))}>
                             {ratingLabel(entry.rating)}
                           </span>
                         )}
                         {entry.country && (
-                          <span className="text-[9px] text-muted-foreground/55">{entry.country}{entry.grape ? ` · ${entry.grape}` : ""}</span>
+                          <span className="text-[9px] text-muted-foreground/58">{entry.country}{entry.grape ? ` · ${entry.grape}` : ""}</span>
                         )}
-                        <span className="text-[10px] font-medium text-muted-foreground/50 ml-auto shrink-0">
+                        <span className="text-[10px] font-medium text-muted-foreground/48 ml-auto shrink-0">
                           {format(new Date(entry.consumed_at), "dd MMM", { locale: ptBR })}
                         </span>
                       </div>
