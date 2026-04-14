@@ -80,7 +80,7 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="offcanvas"
-        className="border-r w-[240px]"
+        className="w-[240px]"
         style={{
           background: "rgba(10, 20, 15, 0.78)",
           backdropFilter: "blur(14px) saturate(1.02)",
