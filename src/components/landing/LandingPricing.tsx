@@ -201,7 +201,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
     <section id="pricing" className="relative px-5 sm:px-8 pt-6 pb-14 overflow-hidden z-10 sm:pt-0 sm:pb-0">
       <div className="mx-auto max-w-5xl relative z-10">
         <motion.div
-          className="section-surface section-surface--full mx-auto sm:mb-8 max-w-[800px] sm:px-6 sm:py-5 items-center text-center mt-0 py-[5px] ml-[70px] px-[10px] pb-[5px] mr-0 mb-[40px] pt-[5px] pl-[50px] pr-px"
+          className="section-surface section-surface--full mx-auto sm:mb-8 max-w-3xl sm:px-6 sm:py-4 items-center text-center mt-0 py-3 px-5 mb-5"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
           <h2 className="section-surface__title sm:text-[2rem] md:text-[2.25rem] max-w-[640px] font-bold text-2xl">
