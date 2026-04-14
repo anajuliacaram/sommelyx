@@ -79,8 +79,8 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
                 scale: isPressing ? 0.99 : 1,
                 y: isHovering && interactive ? -2 : 0,
                 boxShadow: isHovering && interactive
-                    ? "0 12px 32px -14px rgba(44,20,31,0.12), 0 0 0 1px rgba(255,255,255,0.35)"
-                    : "0 8px 32px -16px rgba(44,20,31,0.08), 0 0 0 1px rgba(255,255,255,0.35)"
+                    ? "0 16px 34px -18px rgba(44,20,31,0.14), 0 0 0 1px rgba(255,255,255,0.42), inset 0 1px 0 rgba(255,255,255,0.32)"
+                    : "0 10px 28px -18px rgba(44,20,31,0.08), 0 0 0 1px rgba(255,255,255,0.38), inset 0 1px 0 rgba(255,255,255,0.24)"
             }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             style={interactive ? {
@@ -91,14 +91,14 @@ export function PremiumKpiCard({ children, className, onClick }: PremiumKpiCardP
                 willChange: "transform, box-shadow",
             } : {}}
             className={cn(
-                "glass-card relative rounded-2xl p-3.5 cursor-default transition-colors",
+                "glass-card relative rounded-[18px] p-3.5 cursor-default transition-colors",
                 onClick && "cursor-pointer",
                 className
             )}
         >
             {interactive && isHovering && (
                 <motion.div
-                    className="pointer-events-none absolute inset-0 z-10 rounded-2xl opacity-18 mix-blend-overlay"
+                    className="pointer-events-none absolute inset-0 z-10 rounded-[18px] opacity-16 mix-blend-overlay"
                     style={{ background: gradientBg }}
                 />
             )}
