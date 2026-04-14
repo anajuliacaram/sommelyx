@@ -55,9 +55,9 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 
 const statusLabel = { now: "Beber agora", past: "Beber em breve", young: "Em guarda" };
 const statusColor = {
-  now: "bg-emerald-500/8 text-emerald-600 border-emerald-500/15",
-  past: "bg-amber-500/8 text-amber-600 border-amber-500/15",
-  young: "bg-sky-500/8 text-sky-600 border-sky-500/15",
+  now: "bg-emerald-500/14 text-emerald-800 border-emerald-500/20",
+  past: "bg-amber-500/14 text-amber-800 border-amber-500/20",
+  young: "bg-sky-500/14 text-sky-800 border-sky-500/20",
 };
 
 function getWineTone(style?: string | null) {
@@ -71,30 +71,30 @@ function getWineTone(style?: string | null) {
 
 function getStyleBadgeClass(style?: string | null) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#7B1E3A]/6 text-[#7B1E3A]/80 border-[#7B1E3A]/12";
-  if (s.includes("branco")) return "bg-[#DDBD74]/10 text-[#836329]/80 border-[#DDBD74]/20";
-  if (s.includes("rose")) return "bg-[#C97A93]/8 text-[#93435F]/80 border-[#C97A93]/15";
-  if (s.includes("espum")) return "bg-[#C6A768]/10 text-[#8B6A2D]/80 border-[#C6A768]/18";
-  return "bg-primary/5 text-primary/70 border-primary/12";
+  if (s.includes("tinto")) return "bg-[#7B1E3A]/18 text-[#4E1022] border-[#7B1E3A]/24 shadow-[0_1px_2px_rgba(123,30,58,0.08)]";
+  if (s.includes("branco")) return "bg-[#E6D29C]/34 text-[#6B4F16] border-[#D8BD72]/30 shadow-[0_1px_2px_rgba(180,150,60,0.10)]";
+  if (s.includes("rose")) return "bg-[#D98BA0]/18 text-[#7B3950] border-[#C97A93]/22 shadow-[0_1px_2px_rgba(201,122,147,0.08)]";
+  if (s.includes("espum")) return "bg-[#D4BC76]/20 text-[#71551E] border-[#C6A768]/24 shadow-[0_1px_2px_rgba(198,167,104,0.08)]";
+  return "bg-primary/10 text-primary/80 border-primary/16";
 }
 
 /** Returns inline style for wine-type accent on cards */
 function getWineTypeAccent(style?: string | null): React.CSSProperties {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.25)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.08) 0%, transparent 40%)" };
-  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.25)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.08) 0%, transparent 40%)" };
-  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.25)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.08) 0%, transparent 40%)" };
-  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.25)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.08) 0%, transparent 40%)" };
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.18)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.045) 0%, transparent 42%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.18)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.045) 0%, transparent 42%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.18)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.045) 0%, transparent 42%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.18)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.045) 0%, transparent 42%)" };
   return {};
 }
 
 /** Returns hover accent for wine type */
 function getWineTypeAccentHover(style?: string | null): React.CSSProperties {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.35)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.12) 0%, transparent 40%)" };
-  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.35)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.12) 0%, transparent 40%)" };
-  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.35)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.12) 0%, transparent 40%)" };
-  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.35)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.12) 0%, transparent 40%)" };
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.24)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.075) 0%, transparent 42%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.24)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.075) 0%, transparent 42%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.24)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.075) 0%, transparent 42%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.24)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.075) 0%, transparent 42%)" };
   return {};
 }
 
@@ -118,8 +118,8 @@ function WineImageThumb({
   }, [src]);
 
   const wrapperClassName = compact
-    ? "relative aspect-square overflow-hidden rounded-lg border border-border/20 bg-muted/20"
-    : "relative aspect-[3/2] overflow-hidden rounded-lg border border-border/20 bg-muted/20";
+    ? "relative aspect-square overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
+    : "relative aspect-[3/2] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
 
   return (
     <div className={wrapperClassName}>
@@ -137,7 +137,7 @@ function WineImageThumb({
               loaded ? "opacity-100" : "opacity-0",
             )}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/8 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/16 to-transparent" />
         </>
       ) : (
         <div className={cn("relative flex h-full w-full items-center justify-center overflow-hidden", toneClassName)}>
@@ -591,7 +591,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden wine-card-glass px-2 py-1.5 transition-all duration-300 border-l-[3px]"
+                className="group relative flex flex-col overflow-hidden wine-card-glass px-1.5 py-1 transition-all duration-300 border-l-[3px]"
                 style={getWineTypeAccent(wine.style)}
                 onMouseEnter={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccentHover(wine.style)); }}
                 onMouseLeave={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccent(wine.style)); }}
@@ -601,115 +601,117 @@ export default function CellarPage() {
               >
                 <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} />
 
-                {/* ── Top: Name + Vintage + Region ── */}
-                <div className="mt-1.5 flex items-start gap-1.5 mb-1">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="line-clamp-1 text-[11.5px] font-serif font-bold leading-snug text-foreground tracking-[-0.01em]">
-                      {wine.name}
-                    </h3>
-                    <p className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <span className="font-semibold">{formatVintageLabel(wine.vintage)}</span>
-                      <span className="text-muted-foreground/30">·</span>
-                      <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
-                    </p>
+                <div className="mt-1 rounded-[16px] border border-white/55 bg-[rgba(255,255,255,0.84)] px-[7px] py-[7px] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.32)] backdrop-blur-[14px]">
+                  {/* ── Top: Name + Vintage + Region ── */}
+                  <div className="flex items-start gap-[5px] mb-[3px]">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="line-clamp-1 text-[11px] font-serif font-bold leading-snug text-[#1f1720] tracking-[-0.01em]">
+                        {wine.name}
+                      </h3>
+                      <p className="mt-0.5 flex items-center gap-1 text-[9.5px] text-[#5a4f57]">
+                        <span className="font-semibold">{formatVintageLabel(wine.vintage)}</span>
+                        <span className="text-[#7e7380]">·</span>
+                        <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {/* ── Middle: Status badges ── */}
-                {(status || wine.style) && (
-                <div className="mb-1 flex flex-wrap items-center gap-1">
-                    {status && (
-                      <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2 text-[9px] font-semibold tracking-[-0.01em]", statusColor[status])}>
-                        {statusLabel[status]}
-                      </span>
-                    )}
-                    {wine.style && (
-                      <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2 text-[9px] font-semibold capitalize tracking-[-0.01em]", getStyleBadgeClass(wine.style))}>
-                        {wine.style}
-                      </span>
-                    )}
-                    {wine.country && (
-                      <span className="inline-flex items-center h-[18px] rounded-full border border-border/25 bg-muted/8 px-2 text-[9px] font-medium text-muted-foreground/70">
-                        {wine.country}
-                      </span>
-                    )}
+                  {/* ── Middle: Status badges ── */}
+                  {(status || wine.style) && (
+                  <div className="mb-[3px] flex flex-wrap items-center gap-1">
+                      {status && (
+                        <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2 text-[9px] font-semibold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", statusColor[status])}>
+                          {statusLabel[status]}
+                        </span>
+                      )}
+                      {wine.style && (
+                        <span className={cn("inline-flex items-center h-[19px] rounded-full border px-2.5 text-[9px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", getStyleBadgeClass(wine.style))}>
+                          {wine.style}
+                        </span>
+                      )}
+                      {wine.country && (
+                        <span className="inline-flex items-center h-[18px] rounded-full border border-white/60 bg-white/68 px-2 text-[9px] font-medium text-[#5b4f57] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                          {wine.country}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── Bottom: Price + Quantity ── */}
+                  <div className="mb-[3px] flex items-baseline justify-between px-0.5">
+                    <div>
+                      <p className="text-[7px] uppercase tracking-[0.08em] text-[#7b7079] mb-0.5 font-semibold">Preço</p>
+                      <p className="text-[11.5px] font-bold leading-none text-[#1f1720] tracking-[-0.02em]">
+                        {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[7px] uppercase tracking-[0.08em] text-[#7b7079] mb-0.5 font-semibold">Qtd</p>
+                      <p className="text-[11.5px] font-bold leading-none text-[#1f1720]/88 tracking-[-0.02em]">{wine.quantity}</p>
+                    </div>
                   </div>
-                )}
 
-                {/* ── Bottom: Price + Quantity ── */}
-                <div className="mb-1 flex items-baseline justify-between px-0.5">
-                  <div>
-                    <p className="text-[7px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Preço</p>
-                    <p className="text-[12px] font-bold leading-none text-foreground tracking-[-0.02em]">
-                      {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[7px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Qtd</p>
-                    <p className="text-[12px] font-bold leading-none text-foreground/80 tracking-[-0.02em]">{wine.quantity}</p>
-                  </div>
-                </div>
-
-                {/* ── Actions ── */}
-                <div className="flex items-center gap-0.5 pt-1 border-t border-border/20 mt-auto">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 flex-1 rounded-md text-[9px] font-semibold text-foreground/60 hover:text-primary hover:bg-primary/[0.06] transition-all duration-200"
-                    onClick={() => setConsumptionWine(wine)}
-                  >
-                    <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 rounded-md p-0 text-foreground/40 hover:text-foreground/80 hover:bg-muted/15 transition-all duration-200"
-                    onClick={() => setEditWine(wine)}
-                    title="Editar"
-                  >
-                    <Pencil className="h-2.5 w-2.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 rounded-md p-0 text-foreground/35 hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
-                    onClick={() => setDeleteTarget(wine)}
-                    title="Remover"
-                  >
-                    <Trash2 className="h-2.5 w-2.5" />
-                  </Button>
-                </div>
-
-                {hasGroupDetails && (
-                  <div className="mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setExpandedGroups((prev) => ({ ...prev, [wine.groupKey]: !prev[wine.groupKey] }))}
-                      className="inline-flex items-center gap-1 rounded-full border border-border/20 bg-background/50 px-2.5 py-1 text-[10px] font-semibold text-muted-foreground/70 transition-all duration-200 hover:border-primary/20 hover:text-primary/80"
+                  {/* ── Actions ── */}
+                  <div className="flex items-center gap-0.5 pt-[3px] border-t border-black/5 mt-auto">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-[22px] flex-1 rounded-md text-[9px] font-semibold text-[#584c56] hover:text-primary hover:bg-primary/[0.08] transition-all duration-200"
+                      onClick={() => setConsumptionWine(wine)}
                     >
-                      {isExpanded ? "Ocultar" : `${wine.entries.length} registros`}
-                    </button>
-                    {isExpanded && (
-                      <div className="mt-2 space-y-1 rounded-xl border border-border/20 bg-background/40 p-2">
-                        {wine.entries.map((entry) => (
-                      <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-background/60 px-2.5 py-1.5">
-                            <div className="min-w-0">
-                              <p className="truncate text-[11px] font-semibold text-foreground/85">
-                                {entry.cellar_location || "Sem localização"}
-                              </p>
-                              <p className="text-[9.5px] text-muted-foreground/60 font-medium">
-                                {formatVintageLabel(entry.vintage)} · {entry.quantity} gf
-                              </p>
-                            </div>
-                            <span className="text-[10.5px] font-semibold text-primary/80">
-                              {entry.purchase_price != null ? `R$ ${entry.purchase_price.toFixed(0)}` : "—"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                      <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-[22px] w-[22px] rounded-md p-0 text-[#7a6f78] hover:text-[#2f2730] hover:bg-black/[0.04] transition-all duration-200"
+                      onClick={() => setEditWine(wine)}
+                      title="Editar"
+                    >
+                      <Pencil className="h-2.5 w-2.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-[22px] w-[22px] rounded-md p-0 text-[#7a6f78] hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
+                      onClick={() => setDeleteTarget(wine)}
+                      title="Remover"
+                    >
+                      <Trash2 className="h-2.5 w-2.5" />
+                    </Button>
                   </div>
-                )}
+
+                  {hasGroupDetails && (
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedGroups((prev) => ({ ...prev, [wine.groupKey]: !prev[wine.groupKey] }))}
+                        className="inline-flex items-center gap-1 rounded-full border border-white/55 bg-white/70 px-2.5 py-1 text-[10px] font-semibold text-[#615763] backdrop-blur-sm transition-all duration-200 hover:border-primary/20 hover:text-primary/80"
+                      >
+                        {isExpanded ? "Ocultar" : `${wine.entries.length} registros`}
+                      </button>
+                      {isExpanded && (
+                        <div className="mt-2 space-y-1 rounded-xl border border-white/55 bg-white/58 p-2 backdrop-blur-[12px]">
+                          {wine.entries.map((entry) => (
+                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/72 px-2.5 py-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                              <div className="min-w-0">
+                                <p className="truncate text-[11px] font-semibold text-[#201920]">
+                                  {entry.cellar_location || "Sem localização"}
+                                </p>
+                                <p className="text-[9.5px] text-[#6b6068] font-medium">
+                                  {formatVintageLabel(entry.vintage)} · {entry.quantity} gf
+                                </p>
+                              </div>
+                              <span className="text-[10.5px] font-semibold text-primary/80">
+                                {entry.purchase_price != null ? `R$ ${entry.purchase_price.toFixed(0)}` : "—"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </motion.div>
             );
           })}
