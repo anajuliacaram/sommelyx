@@ -80,8 +80,8 @@ export function MultiSelectDropdown({
                     className={cn(
                         "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
                         hasSelection
-                            ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
-                            : "bg-white text-foreground/80 border-border/60 shadow-sm hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
+                            ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-sm hover:shadow-md hover:brightness-110"
+                            : "bg-white text-foreground/80 border-border/60 shadow-none hover:bg-[hsl(var(--cream))] hover:border-border hover:text-foreground"
                     )}
                 >
                     <span className="truncate max-w-[80px]">{triggerLabel}</span>
