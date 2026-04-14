@@ -77,12 +77,8 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             <Linkedin size={16} />
           </a>
           <Button
-            variant="ghost"
             size="sm"
-            className="text-[13px] font-semibold px-4 h-8 rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(110,30,42,0.06)]"
-            style={{
-              color: "#5a1528",
-            }}
+            className="text-[13px] font-semibold px-4 h-8 rounded-xl transition-all duration-200 hover:-translate-y-0.5 bg-[#772839] text-[#dbdcdb] shadow-md hover:bg-[#772839]/90"
             onClick={onLogin}
           >
             Entrar
