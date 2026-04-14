@@ -597,7 +597,7 @@ export default function CellarPage() {
           } : undefined}
         />
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {filtered.map((wine, i) => {
             const status = drinkStatus(wine);
             const isExpanded = !!expandedGroups[wine.groupKey];
@@ -607,7 +607,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden wine-card-glass px-3.5 py-2.5 transition-all duration-300"
+                className="group relative flex flex-col overflow-hidden wine-card-glass px-2.5 py-2 transition-all duration-300"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -615,12 +615,12 @@ export default function CellarPage() {
                 <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} />
 
                 {/* ── Top: Name + Vintage + Region ── */}
-                <div className="mt-2.5 flex items-start gap-2.5 mb-2">
+                <div className="mt-2 flex items-start gap-2 mb-1.5">
                   <div className="min-w-0 flex-1">
-                    <h3 className="line-clamp-1 text-[13.5px] font-serif font-bold leading-snug text-foreground tracking-[-0.01em]">
+                    <h3 className="line-clamp-1 text-[12.5px] font-serif font-bold leading-snug text-foreground tracking-[-0.01em]">
                       {wine.name}
                     </h3>
-                    <p className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+                    <p className="mt-0.5 flex items-center gap-1 text-[10.5px] text-muted-foreground">
                       <span className="font-semibold">{formatVintageLabel(wine.vintage)}</span>
                       <span className="text-muted-foreground/30">·</span>
                       <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
@@ -650,46 +650,46 @@ export default function CellarPage() {
                 )}
 
                 {/* ── Bottom: Price + Quantity ── */}
-                <div className="mb-2 flex items-baseline justify-between px-0.5">
+                <div className="mb-1.5 flex items-baseline justify-between px-0.5">
                   <div>
-                    <p className="text-[9px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Preço</p>
-                    <p className="text-[15px] font-bold leading-none text-foreground tracking-[-0.02em]">
+                    <p className="text-[8px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Preço</p>
+                    <p className="text-[13px] font-bold leading-none text-foreground tracking-[-0.02em]">
                       {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Qtd</p>
-                    <p className="text-[15px] font-bold leading-none text-foreground/80 tracking-[-0.02em]">{wine.quantity}</p>
+                    <p className="text-[8px] uppercase tracking-[0.08em] text-foreground/50 mb-0.5 font-semibold">Qtd</p>
+                    <p className="text-[13px] font-bold leading-none text-foreground/80 tracking-[-0.02em]">{wine.quantity}</p>
                   </div>
                 </div>
 
                 {/* ── Actions ── */}
-                <div className="flex items-center gap-1.5 pt-1.5 border-t border-border/20 mt-auto">
+                <div className="flex items-center gap-1 pt-1.5 border-t border-border/20 mt-auto">
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-8 flex-1 rounded-lg text-[11px] font-semibold text-foreground/60 hover:text-primary hover:bg-primary/[0.06] transition-all duration-200 hover:-translate-y-[1px]"
+                    className="h-7 flex-1 rounded-lg text-[10px] font-semibold text-foreground/60 hover:text-primary hover:bg-primary/[0.06] transition-all duration-200"
                     onClick={() => setConsumptionWine(wine)}
                   >
-                    <UtensilsCrossed className="mr-1.5 h-3.5 w-3.5" /> Consumo
+                    <UtensilsCrossed className="mr-1 h-3 w-3" /> Consumo
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 rounded-lg p-0 text-foreground/40 hover:text-foreground/80 hover:bg-muted/15 transition-all duration-200"
+                    className="h-7 w-7 rounded-lg p-0 text-foreground/40 hover:text-foreground/80 hover:bg-muted/15 transition-all duration-200"
                     onClick={() => setEditWine(wine)}
                     title="Editar"
                   >
-                    <Pencil className="h-3.5 w-3.5" />
+                    <Pencil className="h-3 w-3" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 rounded-lg p-0 text-foreground/35 hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
+                    className="h-7 w-7 rounded-lg p-0 text-foreground/35 hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
                     onClick={() => setDeleteTarget(wine)}
                     title="Remover"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
 
