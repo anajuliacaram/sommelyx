@@ -48,7 +48,7 @@ export const Logo = React.forwardRef<HTMLImageElement, Props>(function Logo(
         draggable={false}
         loading={resolvedLoading}
         {...fetchPriorityProps}
-        className={cn("select-none object-scale-down", variantClasses[variant], className)}
+        className={cn("select-none object-contain", variantClasses[variant], className)}
         {...props}
       />
     </picture>
