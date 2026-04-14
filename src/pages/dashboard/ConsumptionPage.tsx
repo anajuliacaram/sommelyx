@@ -29,15 +29,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const CustomPieTooltip = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="chart-tooltip-premium px-3 py-2">
-      <p className="text-[13px] font-semibold text-foreground">{payload[0]?.name}</p>
-      <p className="text-[12px] text-foreground/62">{payload[0]?.value} {payload[0]?.value === 1 ? "vinho" : "vinhos"}</p>
-    </div>
-  );
-};
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
