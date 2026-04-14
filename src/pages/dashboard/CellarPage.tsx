@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, Bookmark, BookmarkCheck, UtensilsCrossed, MapPin } from "@/icons/lucide";
+import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, UtensilsCrossed, MapPin } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -159,20 +159,7 @@ type CellarWineGroup = WineType & {
   distinctPriceCount: number;
 };
 
-interface SavedFilter {
-  name: string;
-  styles: string[];
-  countries: string[];
-  grapes: string[];
-  drinkWindows: string[];
-  lowStock: boolean;
-}
-
-const defaultSavedFilters: SavedFilter[] = [
-  { name: "Tintos para beber agora", styles: ["tinto"], countries: [], grapes: [], drinkWindows: ["now"], lowStock: false },
-  { name: "Espumantes", styles: ["espumante"], countries: [], grapes: [], drinkWindows: [], lowStock: false },
-  { name: "Baixo estoque", styles: [], countries: [], grapes: [], drinkWindows: [], lowStock: true },
-];
+// Filter components are now using MultiSelectDropdown
 
 // Filter components are now using MultiSelectDropdown
 
@@ -200,7 +187,7 @@ export default function CellarPage() {
   const [manageOpen, setManageOpen] = useState(false);
   const [editWine, setEditWine] = useState<WineType | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<WineType | null>(null);
-  const [activeSavedFilter, setActiveSavedFilter] = useState<string | null>(null);
+  const [activeSavedFilter, setActiveSavedFilter] = useState<string | null>(null); // kept for filter reset logic
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [consumptionWine, setConsumptionWine] = useState<WineType | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -260,6 +247,12 @@ export default function CellarPage() {
     return { countries, grapes, styles, drinkWindows, vintageOptions, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
   }, [wines]);
 
+  // Sync range filters with dynamic options so they don't appear as "active" on load
+  useEffect(() => {
+    setPriceRange([0, dynamicOptions.maxPrice]);
+    setVintageRange([dynamicOptions.minVintage, dynamicOptions.maxVintage]);
+  }, [dynamicOptions.maxPrice, dynamicOptions.minVintage, dynamicOptions.maxVintage]);
+
   const groupedWines = useMemo<CellarWineGroup[]>(() => {
     if (!wines) return [];
 
@@ -296,14 +289,6 @@ export default function CellarPage() {
     });
   }, [wines]);
 
-  const applySavedFilter = (f: SavedFilter) => {
-    setSelectedStyles(f.styles);
-    setSelectedCountries(f.countries);
-    setSelectedGrapes(f.grapes);
-    setSelectedDrinkWindows(f.drinkWindows);
-    setLowStock(f.lowStock);
-    setActiveSavedFilter(f.name);
-  };
 
   const clearFilters = () => {
     setSelectedStyles([]);
@@ -536,27 +521,6 @@ export default function CellarPage() {
         </div>
       </div>
 
-      <div className="glass-card p-3 flex flex-wrap gap-1.5 items-center">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mr-0.5">Filtros salvos:</span>
-        {defaultSavedFilters.map(f => (
-          <Button
-            key={f.name}
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => applySavedFilter(f)}
-            className={cn(
-              "h-[28px] px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
-              activeSavedFilter === f.name
-                ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md"
-                : "bg-white/90 text-foreground/70 border-border/50 shadow-sm hover:bg-white hover:border-border hover:text-foreground",
-            )}
-          >
-            {activeSavedFilter === f.name ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3 opacity-40" />}
-            {f.name}
-          </Button>
-        ))}
-      </div>
 
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
