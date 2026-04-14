@@ -25,7 +25,7 @@ export default function DashboardLayout() {
   const { data: wines } = useWines();
   const alertCount = drinkNow + (profileType === "commercial" ? lowStock : 0);
   const isMobile = useIsMobile();
-  const topbarSurface = "rgba(255, 255, 255, 0.72)";
+  const topbarSurface = "rgba(255, 255, 255, 0.68)";
 
   const initials =
     user?.user_metadata?.full_name
@@ -41,7 +41,7 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="relative isolate h-14 flex items-center px-5 md:px-7 gap-3 sticky top-0 z-30 border-b overflow-hidden"
+            className="relative isolate h-14 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 border-b overflow-hidden"
             style={{
               background: topbarSurface,
               backdropFilter: "blur(14px) saturate(1.05)",
@@ -57,7 +57,7 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "rounded-xl h-10 w-10 border border-white/20 bg-[rgba(248,245,240,0.8)] text-[hsl(var(--wine))] shadow-[0_6px_18px_-12px_rgba(0,0,0,0.25)] hover:bg-[rgba(248,245,240,0.9)] hover:text-[hsl(var(--wine))] hover:border-white/30 [&>svg]:h-4 [&>svg]:w-4",
+                    "rounded-xl h-10 w-10 border border-white/20 bg-[rgba(248,245,240,0.82)] text-[hsl(var(--wine))] shadow-[0_6px_18px_-12px_rgba(0,0,0,0.25)] hover:bg-[rgba(248,245,240,0.92)] hover:text-[hsl(var(--wine))] hover:border-white/30 [&>svg]:h-4 [&>svg]:w-4",
                   )}
                 />
               )}
@@ -67,7 +67,7 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "rounded-xl h-11 min-w-[80px] px-3 gap-2 border border-white/20 bg-[rgba(248,245,240,0.82)] text-[hsl(var(--wine))] shadow-[0_6px_18px_-12px_rgba(0,0,0,0.25)] hover:bg-[rgba(248,245,240,0.92)] hover:text-[hsl(var(--wine))] hover:border-white/30 active:scale-95 transition-transform duration-150 [&>svg]:h-5 [&>svg]:w-5",
+                    "rounded-xl h-11 min-w-[80px] px-3 gap-2 border border-white/20 bg-[rgba(248,245,240,0.86)] text-[hsl(var(--wine))] shadow-[0_6px_18px_-12px_rgba(0,0,0,0.25)] hover:bg-[rgba(248,245,240,0.94)] hover:text-[hsl(var(--wine))] hover:border-white/30 active:scale-95 transition-transform duration-150 [&>svg]:h-5 [&>svg]:w-5",
                   )}
                 >
                   <span className="text-[13px] font-semibold leading-none">Menu</span>
@@ -98,10 +98,10 @@ export default function DashboardLayout() {
               <div className="flex items-center gap-2.5">
                 <span
                   className={[
-                    "hidden sm:inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-extrabold uppercase tracking-[0.08em] shrink-0 whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
+                    "hidden sm:inline-flex items-center chip-surface h-7 px-3 shrink-0 whitespace-nowrap",
                     profileType === "commercial"
-                      ? "bg-[rgba(198,167,104,0.24)] text-[#1E1811] ring-1 ring-[rgba(198,167,104,0.30)]"
-                      : "bg-[rgba(110,30,42,0.22)] text-[#FAF7F2] ring-1 ring-[rgba(110,30,42,0.30)]",
+                      ? "chip-surface--active text-[#1E1811]"
+                      : "bg-[rgba(110,30,42,0.22)] text-[#FAF7F2] border-[rgba(110,30,42,0.30)]",
                   ].join(" ")}
                 >
                   {profileType === "commercial" ? "COMERCIAL" : "PESSOAL"}

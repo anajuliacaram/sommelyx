@@ -435,7 +435,7 @@ export default function CellarPage() {
   return (
     <div className="space-y-4 max-w-[1200px]">
       {/* Header */}
-      <div className="surface-clarity reading-surface rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="section-surface section-surface--full rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Minha Adega</h1>
           <p className="text-sm text-foreground/68 font-medium">

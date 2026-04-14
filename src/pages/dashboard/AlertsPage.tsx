@@ -131,7 +131,7 @@ export default function AlertsPage() {
   return (
     <div className="space-y-5 max-w-4xl">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="reading-surface">
+        <div className="section-surface">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">

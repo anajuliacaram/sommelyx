@@ -115,11 +115,10 @@ export function AppSidebar() {
               </span>
               <span
                 className={[
-                  "mt-[5px] w-fit inline-flex items-center rounded-md h-5 px-2.5",
-                  "text-[9px] font-extrabold uppercase tracking-[0.1em] leading-none shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
+                  "chip-surface mt-[5px] h-5 px-2.5",
                   isCommercial
-                    ? "bg-[rgba(198,167,104,0.20)] text-[#1E1811] ring-1 ring-[rgba(198,167,104,0.28)]"
-                    : "bg-[rgba(110,30,42,0.20)] text-[#FAF7F2] ring-1 ring-[rgba(110,30,42,0.28)]",
+                    ? "chip-surface--active text-[#1E1811]"
+                    : "bg-[rgba(110,30,42,0.20)] text-[#FAF7F2] border-[rgba(110,30,42,0.28)]",
                 ].join(" ")}
               >
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}

@@ -109,7 +109,7 @@ export default function ReportsPage() {
   return (
     <div className="space-y-4 max-w-[1200px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="reading-surface">
+        <div className="section-surface">
           <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Relatórios</h1>
           <p className="text-[11px] text-muted-foreground">Análise de estoque e vendas com dados reais</p>
         </div>

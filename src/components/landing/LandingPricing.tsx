@@ -132,7 +132,7 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
 
         <div className={`${mobile ? "mb-5" : "mb-7"} flex items-center gap-2.5`}>
           <span
-            className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em]"
+            className="chip-surface px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em]"
             style={
               isLight
                 ? {
@@ -201,13 +201,13 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
     <section id="pricing" className="relative px-5 sm:px-8 pt-6 sm:pt-10 pb-14 sm:pb-20 overflow-hidden z-10">
       <div className="mx-auto max-w-5xl relative z-10">
         <motion.div
-          className="reading-surface mx-auto mb-7 sm:mb-10 max-w-xl text-center items-center"
+          className="section-surface section-surface--full mx-auto mb-7 sm:mb-10 max-w-2xl px-6 py-5 sm:px-8 sm:py-6 text-center items-center"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight leading-[1.1]" style={{ color: "#F4F1EC" }}>
+          <h2 className="section-surface__title text-2xl sm:text-3xl md:text-4xl max-w-2xl">
             Escolha o plano ideal para sua adega
           </h2>
-          <p className="mt-4 text-[14px] sm:text-[15px] font-medium max-w-md mx-auto" style={{ color: "rgba(244,241,236,0.72)" }}>
+          <p className="section-surface__subtitle mt-3 text-[14px] sm:text-[15px] max-w-xl mx-auto leading-relaxed">
             Comece sem compromisso. Cancele quando quiser.
           </p>
         </motion.div>
@@ -237,11 +237,11 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           variants={fadeUp}
           custom={4}
         >
-          <div className="reading-surface mx-auto text-center items-center">
-            <h3 className="font-serif text-[24px] sm:text-[30px] font-black tracking-tight" style={{ color: "#1A1A1A" }}>
+          <div className="section-surface mx-auto text-center items-center">
+            <h3 className="section-surface__title font-serif text-[24px] sm:text-[30px]">
               Perguntas frequentes
             </h3>
-            <p className="mt-2 font-sans text-[13px] sm:text-[14px] font-medium" style={{ color: "#666" }}>
+            <p className="section-surface__subtitle mt-2 font-sans text-[13px] sm:text-[14px]">
               Respostas rápidas para decidir com confiança.
             </p>
           </div>

@@ -18,11 +18,13 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
       }}
     >
       <div className="mx-auto max-w-6xl flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between">
-        <div className="flex items-center gap-3 rounded-2xl px-4 py-2.5 bg-white/52 border border-white/55 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.14)]">
-          <Logo variant="compact" className="h-7 sm:h-8 w-auto grayscale-0 opacity-95 shrink-0" />
-          <div className="flex flex-col leading-none">
-            <span className="font-bold text-[13px] sm:text-[14px] font-sans tracking-tight text-foreground">Sommelyx</span>
-            <span className="mt-1 text-[9px] font-bold uppercase tracking-[0.16em] text-foreground/45">Premium wine intelligence</span>
+        <div className="flex items-center gap-4 rounded-3xl px-5 py-4 bg-white/60 border border-white/60 shadow-[0_12px_28px_-18px_rgba(0,0,0,0.16)] min-w-[250px] sm:min-w-[280px]">
+          <Logo variant="compact" className="h-8 sm:h-10 w-auto grayscale-0 opacity-95 shrink-0" />
+          <div className="flex flex-col leading-none min-w-0">
+            <span className="font-bold text-[14px] sm:text-[15px] font-sans tracking-tight text-foreground">Sommelyx</span>
+            <span className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55 whitespace-nowrap">
+              Gestão inteligente de adegas
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-5 sm:gap-7 text-[11px] sm:text-[12px] font-semibold uppercase tracking-widest text-foreground/72">
