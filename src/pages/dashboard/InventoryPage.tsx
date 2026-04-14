@@ -401,7 +401,7 @@ export default function InventoryPage() {
     // MultiSelectDropdown handles its own UI now, so we remove QuickFilterDropdown
 
     return (
-        <div className="space-y-4 md:space-y-5 max-w-[1440px] pb-[calc(72px+env(safe-area-inset-bottom))] relative">
+        <div className="space-y-3 md:space-y-4 max-w-[1440px] pb-[calc(72px+env(safe-area-inset-bottom))] relative">
             <StockAuditDialog
                 open={auditOpen}
                 onOpenChange={(v) => { setAuditOpen(v); if (!v) setAuditPayload(null); }}
@@ -522,7 +522,7 @@ export default function InventoryPage() {
             </div>
 
             {/* --- QUICK ACTIONS & FILTERS --- */}
-            <div className="glass-card p-3 md:p-4 border-white/50 space-y-3">
+            <div className="glass-card p-2.5 md:p-3 border-white/40 space-y-2">
                 <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1 min-w-0">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
