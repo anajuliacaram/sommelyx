@@ -9,6 +9,7 @@ import { useAddConsumption } from "@/hooks/useConsumption";
 import { useWines, Wine } from "@/hooks/useWines";
 import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star } from "@/icons/lucide";
+import { cn } from "@/lib/utils";
 
 interface AddConsumptionDialogProps {
   open: boolean;
@@ -34,7 +35,6 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [rating, setRating] = useState<number>(0);
   const [consumedAt, setConsumedAt] = useState(new Date().toISOString().split("T")[0]);
 
-  // Auto-fill when opening with a pre-selected wine
   useEffect(() => {
     if (open && preSelectedWine) {
       setSource("cellar");
@@ -48,7 +48,6 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
       setVintage(preSelectedWine.vintage?.toString() || "");
     }
   }, [open, preSelectedWine]);
-
 
   const resetForm = () => {
     setSource("external");
@@ -112,25 +111,27 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-8">
-        <DialogHeader className="pb-2">
-          <DialogTitle className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-foreground font-serif">
-            <WineIcon className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
+              <WineIcon className="h-3.5 w-3.5 text-primary" />
+            </div>
             Registrar Consumo
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">Registre uma degustação da sua adega ou externa</p>
+          <p className="text-[11px] text-muted-foreground">Registre uma degustação da sua adega ou externa</p>
         </DialogHeader>
 
-        <div className="space-y-6 pt-4">
+        <div className="space-y-4">
           {/* Source toggle */}
-          <div className="space-y-2.5">
-            <Label className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Origem</Label>
-            <div className="flex gap-2.5">
+          <div className="space-y-1.5">
+            <Label className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Origem</Label>
+            <div className="flex gap-1.5">
               <Button
                 type="button"
                 variant={source === "cellar" ? "default" : "outline"}
                 size="sm"
-                className="flex-1 text-[13px] h-10 rounded-xl"
+                className="flex-1 text-[11px] h-8 rounded-lg"
                 onClick={() => { setSource("cellar"); setSelectedWineId(""); }}
               >
                 Da minha adega
@@ -139,7 +140,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 type="button"
                 variant={source === "external" ? "default" : "outline"}
                 size="sm"
-                className="flex-1 text-[13px] h-10 rounded-xl"
+                className="flex-1 text-[11px] h-8 rounded-lg"
                 onClick={() => { setSource("external"); setSelectedWineId(""); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}
               >
                 Consumo externo
@@ -149,13 +150,13 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
           {/* Select from cellar */}
           {source === "cellar" && wines && wines.length > 0 && (
-            <div className="space-y-2.5">
-              <Label className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Selecionar vinho</Label>
+            <div className="space-y-1.5">
+              <Label className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Selecionar vinho</Label>
               <Select value={selectedWineId} onValueChange={handleSelectWine}>
-                <SelectTrigger className="h-12 text-sm rounded-xl"><SelectValue placeholder="Escolha um vinho da adega" /></SelectTrigger>
+                <SelectTrigger className="h-10 text-[12px] rounded-xl"><SelectValue placeholder="Escolha um vinho da adega" /></SelectTrigger>
                 <SelectContent>
                   {wines.filter(w => w.quantity > 0).map((w) => (
-                    <SelectItem key={w.id} value={w.id}>
+                    <SelectItem key={w.id} value={w.id} className="text-[12px]">
                       {w.name} {w.vintage ? `(${w.vintage})` : ""} — {w.quantity} garrafa{w.quantity !== 1 ? "s" : ""}
                     </SelectItem>
                   ))}
@@ -165,47 +166,47 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           )}
 
           {/* Wine info */}
-          <div className="space-y-3.5">
-            <div className="space-y-2">
-              <Label className="text-[13px] font-semibold text-foreground/80">Nome do vinho <span className="text-primary">*</span></Label>
-              <Input value={wineName} onChange={(e) => setWineName(e.target.value)} placeholder="Ex: Château Margaux" disabled={source === "cellar" && !!selectedWineId} className="h-12 rounded-xl" />
+          <div className="space-y-2.5">
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-semibold text-foreground/80">Nome do vinho <span className="text-primary">*</span></Label>
+              <Input value={wineName} onChange={(e) => setWineName(e.target.value)} placeholder="Ex: Château Margaux" disabled={source === "cellar" && !!selectedWineId} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-foreground/80">Produtor</Label>
-                <Input value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} className="h-12 rounded-xl" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-semibold text-foreground/80">Produtor</Label>
+                <Input value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
               </div>
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-foreground/80">Safra</Label>
-                <Input value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} className="h-12 rounded-xl" />
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-semibold text-foreground/80">Safra</Label>
+                <Input value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
               </div>
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-foreground/80">País</Label>
-                <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} className="h-12 rounded-xl" />
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-semibold text-foreground/80">País</Label>
+                <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
               </div>
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-foreground/80">Região</Label>
-                <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} className="h-12 rounded-xl" />
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-semibold text-foreground/80">Região</Label>
+                <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
               </div>
             </div>
           </div>
 
           {/* Location & Date */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-[13px] font-semibold text-foreground/80 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-muted-foreground" />Local</Label>
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." className="h-12 rounded-xl" />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-semibold text-foreground/80 flex items-center gap-1"><MapPin className="h-3 w-3 text-muted-foreground" />Local</Label>
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
             </div>
-            <div className="space-y-2">
-              <Label className="text-[13px] font-semibold text-foreground/80">Data</Label>
-              <Input type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} className="h-12 rounded-xl" />
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-semibold text-foreground/80">Data</Label>
+              <Input type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
             </div>
           </div>
 
           {/* Rating */}
-          <div className="space-y-2.5">
-            <Label className="text-[13px] font-semibold text-foreground/80 flex items-center gap-1.5"><Star className="h-3.5 w-3.5 text-muted-foreground" />Avaliação</Label>
-            <div className="flex gap-2 flex-wrap">
+          <div className="space-y-1.5">
+            <Label className="text-[11px] font-semibold text-foreground/80 flex items-center gap-1"><Star className="h-3 w-3 text-muted-foreground" />Avaliação</Label>
+            <div className="flex gap-1.5 flex-wrap">
               {([
                 { value: 1, label: "Ruim" },
                 { value: 2, label: "Regular" },
@@ -213,27 +214,30 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 { value: 4, label: "Muito bom" },
                 { value: 5, label: "Excelente" },
               ] as const).map((opt) => (
-                <Button
+                <button
                   key={opt.value}
                   type="button"
-                  variant={rating === opt.value ? "default" : "outline"}
-                  size="sm"
-                  className="text-[12px] px-3.5 h-9 rounded-xl"
+                  className={cn(
+                    "text-[10px] font-semibold px-2.5 py-1.5 rounded-lg border transition-all duration-200",
+                    rating === opt.value
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-[rgba(255,255,255,0.5)] text-foreground/70 border-white/20 hover:bg-white/70 hover:text-foreground",
+                  )}
                   onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
                 >
                   {opt.label}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
 
           {/* Notes */}
-          <div className="space-y-2">
-            <Label className="text-[13px] font-semibold text-foreground/80">Notas de degustação</Label>
-            <Textarea value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} placeholder="Aromas, sabor, impressões..." rows={3} className="rounded-xl" />
+          <div className="space-y-1.5">
+            <Label className="text-[11px] font-semibold text-foreground/80">Notas de degustação</Label>
+            <Textarea value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} placeholder="Aromas, sabor, impressões..." rows={2} />
           </div>
 
-          <Button onClick={handleSubmit} disabled={addConsumption.isPending} className="w-full h-12 text-[15px] font-bold rounded-xl">
+          <Button onClick={handleSubmit} disabled={addConsumption.isPending} className="w-full h-10 text-[13px] font-bold rounded-xl">
             {addConsumption.isPending ? "Salvando..." : "Registrar Consumo"}
           </Button>
         </div>
