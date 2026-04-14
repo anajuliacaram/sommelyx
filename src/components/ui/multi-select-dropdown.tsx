@@ -34,7 +34,7 @@ export function MultiSelectDropdown({
 }: MultiSelectDropdownProps) {
     const [open, setOpen] = React.useState(false)
     const [search, setSearch] = React.useState("")
-    const [sortMode, setSortMode] = React.useState<"alpha" | "count">("alpha")
+    const [sortMode, setSortMode] = React.useState<"alpha" | "count">(title === "Safra" ? "count" : "alpha")
 
     const filteredOptions = React.useMemo(() => {
         let filtered = options.filter((opt) =>
