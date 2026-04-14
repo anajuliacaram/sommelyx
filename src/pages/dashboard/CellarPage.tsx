@@ -71,10 +71,10 @@ function getWineTone(style?: string | null) {
 
 function getStyleBadgeClass(style?: string | null) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#7B1E3A]/28 text-[#4A0E20] border-[#7B1E3A]/32 shadow-[0_1px_2px_rgba(123,30,58,0.12)]";
-  if (s.includes("branco")) return "bg-[#F0DEAA]/48 text-[#6D4E15] border-[#D8BD72]/38 shadow-[0_1px_2px_rgba(180,150,60,0.12)]";
-  if (s.includes("rose")) return "bg-[#E89CB0]/28 text-[#7B3950] border-[#C97A93]/28 shadow-[0_1px_2px_rgba(201,122,147,0.10)]";
-  if (s.includes("espum")) return "bg-[#E0CC8A]/30 text-[#6C5119] border-[#C6A768]/28 shadow-[0_1px_2px_rgba(198,167,104,0.10)]";
+  if (s.includes("tinto")) return "bg-[#8C1F43]/42 text-white border-[#8C1F43]/44 shadow-[0_2px_6px_rgba(140,31,67,0.18)]";
+  if (s.includes("branco")) return "bg-[#F3E2A8]/64 text-[#6A4B10] border-[#D8B85E]/46 shadow-[0_2px_6px_rgba(180,150,60,0.16)]";
+  if (s.includes("rose")) return "bg-[#E89CB0]/34 text-[#6F3348] border-[#C97A93]/32 shadow-[0_2px_6px_rgba(201,122,147,0.12)]";
+  if (s.includes("espum")) return "bg-[#E0CC8A]/42 text-[#5F4716] border-[#C6A768]/34 shadow-[0_2px_6px_rgba(198,167,104,0.14)]";
   return "bg-primary/12 text-primary/80 border-primary/18";
 }
 
@@ -119,7 +119,7 @@ function WineImageThumb({
 
   const wrapperClassName = compact
     ? "relative aspect-square overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
-    : "relative aspect-[3/2] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
+    : "relative aspect-[16/10] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
 
   return (
     <div className={wrapperClassName}>
