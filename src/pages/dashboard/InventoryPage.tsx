@@ -461,16 +461,18 @@ export default function InventoryPage() {
             />
 
             {/* --- HEADER --- */}
-            <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-3">
                 <div>
-                    <h1 className="section-surface__title text-2xl md:text-3xl font-serif font-black italic tracking-tight" style={{ letterSpacing: "-0.04em" }}>
+                    <h1 className="section-surface__title text-xl md:text-2xl font-serif font-black italic tracking-tight" style={{ letterSpacing: "-0.04em" }}>
                         Estoque
                     </h1>
-                    <p className="section-surface__subtitle text-sm mt-1 font-medium">Operação comercial com leitura rápida de disponibilidade, valor e giro.</p>
-                    <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.labels} rótulos</Badge>
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">{summary.bottles} em estoque</Badge>
-                        <Badge variant="outline" className="h-7 rounded-xl px-2.5 text-[11px] bg-background/60 border-border/70 text-muted-foreground">R$ {summary.totalValue.toLocaleString("pt-BR")} estimado</Badge>
+                    <p className="section-surface__subtitle text-[12px] mt-0.5 font-medium text-muted-foreground">Operação comercial · leitura rápida de disponibilidade e valor</p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">{summary.labels} rótulos</span>
+                        <span className="text-muted-foreground/30">·</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">{summary.bottles} garrafas</span>
+                        <span className="text-muted-foreground/30">·</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">R$ {summary.totalValue.toLocaleString("pt-BR")}</span>
                     </div>
                 </div>
 
