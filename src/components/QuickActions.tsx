@@ -85,9 +85,9 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onRegisterConsumption}
-              className="h-11 w-full rounded-2xl border border-white/10 bg-white/8 text-[14px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white/14 hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:translate-y-[0.5px] [&_svg]:text-primary/70"
+              className="group h-11 w-full rounded-2xl border border-[rgba(110,30,42,0.10)] bg-[rgba(255,255,255,0.055)] text-[14px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(110,30,42,0.16)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:translate-y-[0.5px]"
             >
-              <Wine className="h-[15px] w-[15px] shrink-0" />
+              <Wine className="h-[15px] w-[15px] shrink-0 text-[hsl(var(--wine))]/80 opacity-85 transition-colors group-hover:text-[hsl(var(--wine))]" />
               {isCommercial ? "Registrar venda" : "Registrar consumo"}
             </Button>
           </motion.div>
@@ -99,9 +99,9 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onHarmonize}
-              className="h-10 w-full rounded-2xl border border-white/10 bg-white/8 text-[13.5px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white/14 hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:translate-y-[0.5px] [&_svg]:text-accent/70"
+              className="group h-10 w-full rounded-2xl border border-[rgba(196,169,106,0.10)] bg-[rgba(255,255,255,0.055)] text-[13.5px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(196,169,106,0.16)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:translate-y-[0.5px]"
             >
-              <UtensilsCrossed className="h-[15px] w-[15px] shrink-0" />
+              <UtensilsCrossed className="h-[15px] w-[15px] shrink-0 text-[hsl(var(--gold))]/80 opacity-85 transition-colors group-hover:text-[hsl(var(--gold))]" />
               Harmonizar
             </Button>
           </motion.div>
@@ -111,9 +111,9 @@ export function QuickActions({
             <Button
               variant="ghost"
               onClick={onAnalyzeList}
-              className="h-10 w-full rounded-2xl border border-white/10 bg-white/8 text-[13.5px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-white/14 hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:translate-y-[0.5px] [&_svg]:text-primary/70"
+              className="group h-10 w-full rounded-2xl border border-[rgba(181,107,144,0.10)] bg-[rgba(255,255,255,0.055)] text-[13.5px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(181,107,144,0.16)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:translate-y-[0.5px]"
             >
-              <Sparkles className="h-[15px] w-[15px] shrink-0" />
+              <Sparkles className="h-[15px] w-[15px] shrink-0 text-[#B56B90]/85 opacity-85 transition-colors group-hover:text-[#C47BAC]" />
               Analisar carta
             </Button>
           </motion.div>

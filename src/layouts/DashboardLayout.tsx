@@ -37,17 +37,6 @@ export default function DashboardLayout() {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="dashboard-shell h-dvh overflow-hidden flex w-full relative">
-        {/* Full-width top bar */}
-        <div
-          className="absolute top-0 left-0 right-0 h-12 z-20 pointer-events-none"
-          style={{
-            background: "rgba(22, 24, 20, 0.50)",
-            backdropFilter: "blur(24px) saturate(1.15)",
-            WebkitBackdropFilter: "blur(24px) saturate(1.15)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-          }}
-        />
-
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header

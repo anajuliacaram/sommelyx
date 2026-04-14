@@ -140,18 +140,18 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-11 rounded-2xl border border-white/10 bg-[rgba(248,245,240,0.16)] text-[14px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(248,245,240,0.22)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] active:translate-y-[0.5px] [&_svg]:text-[hsl(var(--copper-light))]"
+                  className="group w-full h-11 rounded-2xl border border-[rgba(110,30,42,0.10)] bg-[rgba(255,255,255,0.055)] text-[14px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.085)] hover:border-[rgba(110,30,42,0.16)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] active:translate-y-[0.5px]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <ShoppingCart className="h-[15px] w-[15px] shrink-0" />
+                  <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-[hsl(var(--wine))]/80 opacity-80 transition-colors group-hover:text-[hsl(var(--wine))]" />
                   Registrar venda
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-10 rounded-2xl border border-white/10 bg-[rgba(248,245,240,0.16)] text-[13.5px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(248,245,240,0.22)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] active:translate-y-[0.5px] [&_svg]:text-destructive"
+                  className="group w-full h-10 rounded-2xl border border-[rgba(196,169,106,0.10)] bg-[rgba(255,255,255,0.055)] text-[13.5px] font-semibold text-[rgba(245,245,243,0.92)] gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.085)] hover:border-[rgba(196,169,106,0.16)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)] active:translate-y-[0.5px]"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
-                  <AlertTriangle className="h-[15px] w-[15px] shrink-0" />
+                  <AlertTriangle className="h-[15px] w-[15px] shrink-0 text-[hsl(var(--gold))]/80 opacity-80 transition-colors group-hover:text-[hsl(var(--gold))]" />
                   Ruptura
                 </Button>
               </div>
