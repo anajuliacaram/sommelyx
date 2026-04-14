@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { Logo } from "@/components/Logo";
@@ -10,68 +10,71 @@ interface LandingHeaderProps {
 }
 
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
+  const { scrollY } = useScroll();
+  const blur = useTransform(scrollY, [0, 120], [18, 32]);
+  const opacity = useTransform(scrollY, [0, 120], [0.38, 0.58]);
+
   return (
     <motion.header
-      className="fixed top-0 w-full z-50 px-3 sm:px-8 py-2.5 sm:py-3 lg:py-3.5 border-b border-white/22"
+      className="fixed top-0 w-full z-50 px-3 sm:px-8"
       style={{
-        background: "rgba(244, 240, 235, 0.72)",
-        backdropFilter: "blur(24px) saturate(1.35)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.12)",
+        backdropFilter: useTransform(blur, (v) => `blur(${v}px) saturate(1.3)`),
+        WebkitBackdropFilter: useTransform(blur, (v) => `blur(${v}px) saturate(1.3)`),
+        background: useTransform(
+          opacity,
+          (o) =>
+            `linear-gradient(to bottom, rgba(255,255,255,${Math.min(o + 0.15, 0.62)}), rgba(255,255,255,${o}))`
+        ),
+        borderBottom: "1px solid rgba(255,255,255,0.12)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 3px rgba(0,0,0,0.04)",
       }}
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="mx-auto flex items-center justify-between max-w-6xl">
+      <div className="mx-auto flex items-center justify-between max-w-6xl h-[52px] sm:h-[58px]">
         <a
           href="/"
-          className="flex items-center gap-2 sm:gap-3 lg:gap-3.5 transition-opacity duration-200 hover:opacity-80 rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          className="flex items-center gap-2 sm:gap-2.5 transition-opacity duration-200 hover:opacity-80 rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
         >
           <Logo
             variant="navbar"
-            className="h-9 sm:h-10 md:h-11 lg:h-14 drop-shadow-[0_4px_12px_rgba(15,15,20,0.10)]"
+            className="h-8 sm:h-9 md:h-10 drop-shadow-[0_2px_8px_rgba(15,15,20,0.08)]"
           />
-          <span className="font-serif text-[17px] sm:text-[19px] md:text-[22px] lg:text-[28px] font-bold tracking-[-0.01em] text-wine">
+          <span className="font-serif text-[16px] sm:text-[18px] md:text-[20px] font-bold tracking-[-0.01em] text-wine">
             Sommelyx
           </span>
         </a>
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <a
             href="https://instagram.com/sommelyx"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground/60 hover:text-foreground transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground/50 hover:text-foreground/70 transition-colors duration-200"
             style={{
-              background: "rgba(255,255,255,0.5)",
-              border: "1px solid rgba(255,255,255,0.6)",
-              backdropFilter: "blur(8px)",
+              background: "rgba(255,255,255,0.35)",
+              border: "1px solid rgba(255,255,255,0.4)",
             }}
           >
-            <Instagram size={14} />
+            <Instagram size={13} />
           </a>
           <a
             href="https://www.linkedin.com/company/sommelyx/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground/60 hover:text-foreground transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground/50 hover:text-foreground/70 transition-colors duration-200"
             style={{
-              background: "rgba(255,255,255,0.5)",
-              border: "1px solid rgba(255,255,255,0.6)",
-              backdropFilter: "blur(8px)",
+              background: "rgba(255,255,255,0.35)",
+              border: "1px solid rgba(255,255,255,0.4)",
             }}
           >
-            <Linkedin size={14} />
+            <Linkedin size={13} />
           </a>
           <Button
             variant="ghost"
             size="sm"
-            className="text-[13px] sm:text-[14px] font-semibold px-4 sm:px-5 rounded-xl transition-all duration-250 hover:-translate-y-0.5"
+            className="text-[13px] font-semibold px-4 h-8 rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-[rgba(110,30,42,0.06)]"
             style={{
-              background: "rgba(110,30,42,0.07)",
-              border: "1px solid rgba(110,30,42,0.14)",
-              backdropFilter: "blur(16px) saturate(1.4)",
-              WebkitBackdropFilter: "blur(16px) saturate(1.4)",
-              boxShadow: "0 2px 8px rgba(110,30,42,0.06), inset 0 1px 0 rgba(255,255,255,0.45)",
               color: "#5a1528",
             }}
             onClick={onLogin}
@@ -81,7 +84,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           <MagneticButton>
             <Button
               variant="primary"
-              className="px-3 sm:px-6 h-9 sm:h-10 text-[11px] sm:text-[13px] font-semibold uppercase tracking-[0.04em] sm:tracking-[0.06em] rounded-xl shadow-float whitespace-nowrap"
+              className="px-3.5 sm:px-5 h-8 sm:h-9 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.05em] rounded-xl shadow-float whitespace-nowrap"
               onClick={onSignup}
             >
               Começar grátis
