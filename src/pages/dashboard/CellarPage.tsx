@@ -247,6 +247,12 @@ export default function CellarPage() {
     return { countries, grapes, styles, drinkWindows, vintageOptions, maxPrice: Math.max(maxPrice, 100), minVintage: Math.min(minVintage, 1980), maxVintage: Math.max(maxVintage, currentYear) };
   }, [wines]);
 
+  // Sync range filters with dynamic options so they don't appear as "active" on load
+  useEffect(() => {
+    setPriceRange([0, dynamicOptions.maxPrice]);
+    setVintageRange([dynamicOptions.minVintage, dynamicOptions.maxVintage]);
+  }, [dynamicOptions.maxPrice, dynamicOptions.minVintage, dynamicOptions.maxVintage]);
+
   const groupedWines = useMemo<CellarWineGroup[]>(() => {
     if (!wines) return [];
 
