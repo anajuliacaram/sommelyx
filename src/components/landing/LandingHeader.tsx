@@ -50,25 +50,31 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://instagram.com/sommelyx"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground/50 hover:text-foreground/70 transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
             style={{
-              background: "rgba(255,255,255,0.35)",
-              border: "1px solid rgba(255,255,255,0.4)",
+              background: "rgba(255,255,255,0.72)",
+              border: "1px solid rgba(255,255,255,0.5)",
+              color: "hsl(var(--wine))",
+              boxShadow: "0 8px 18px -14px rgba(0,0,0,0.18)",
             }}
+            aria-label="Instagram"
           >
-            <Instagram size={13} />
+            <Instagram size={16} />
           </a>
           <a
             href="https://www.linkedin.com/company/sommelyx/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground/50 hover:text-foreground/70 transition-colors duration-200"
+            className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
             style={{
-              background: "rgba(255,255,255,0.35)",
-              border: "1px solid rgba(255,255,255,0.4)",
+              background: "rgba(255,255,255,0.72)",
+              border: "1px solid rgba(255,255,255,0.5)",
+              color: "hsl(var(--wine))",
+              boxShadow: "0 8px 18px -14px rgba(0,0,0,0.18)",
             }}
+            aria-label="LinkedIn"
           >
-            <Linkedin size={13} />
+            <Linkedin size={16} />
           </a>
           <Button
             variant="ghost"
