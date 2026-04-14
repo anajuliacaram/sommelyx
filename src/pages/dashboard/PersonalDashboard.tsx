@@ -156,7 +156,7 @@ export default function PersonalDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1280px] space-y-5">
+      <div className="max-w-[1280px] space-y-4">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
@@ -184,7 +184,7 @@ export default function PersonalDashboard() {
 
         {/* ─── KPI Strip ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
                 <div key={i} className="glass-card p-5">
@@ -245,7 +245,7 @@ export default function PersonalDashboard() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-12 gap-3">
+        <div className="grid grid-cols-12 gap-4">
           {/* ─── Ready to Drink ─── */}
           <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
             <div className="glass-card p-5">
@@ -292,7 +292,7 @@ export default function PersonalDashboard() {
           </motion.div>
 
           {/* ─── Right Column ─── */}
-          <div className="col-span-12 grid gap-3 lg:col-span-5">
+          <div className="col-span-12 grid gap-4 lg:col-span-5">
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
               <div className="glass-card p-5">
                 <div className="flex items-center justify-between mb-3">
