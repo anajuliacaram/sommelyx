@@ -340,28 +340,28 @@ export default function ConsumptionPage() {
         </AnimatePresence>
       )}
 
-      {/* Charts — AFTER history, reduced height on mobile */}
+      {/* Charts — compact visualizations */}
       {totalCount > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
-          {topCountries.length > 0 && (
+          {topWines.length > 0 && (
             <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={10}>
               <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 text-foreground/50" />
-                Por país
+                <TrendingUp className="h-3.5 w-3.5 text-foreground/50" />
+                Mais consumidos
               </h3>
-              <ResponsiveContainer width="100%" height={chartH}>
-                <PieChart>
-                  <Pie data={topCountries} cx="50%" cy="50%" innerRadius={isMobile ? 26 : 38} outerRadius={isMobile ? 52 : 72} paddingAngle={3} dataKey="value" label={isMobile ? false : ({ name, value }) => `${name} (${value})`} labelLine={isMobile ? false : { stroke: "hsl(var(--foreground) / 0.42)", strokeWidth: 1 }}>
-                    {topCountries.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip content={<CustomPieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-2 mt-1">
-                {topCountries.map((d, i) => (
-                  <div key={d.name} className="chart-legend-chip">
-                    <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
-                    <span>{d.name} ({d.value})</span>
+              <div className="space-y-2">
+                {topWines.map(([name, data], i) => (
+                  <div key={name} className="flex items-center gap-2">
+                    <span className="text-[12px] font-black w-5 text-foreground/42">#{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold truncate text-foreground">{name}</p>
+                    </div>
+                    <div className="text-right shrink-0 flex items-center gap-2">
+                      {data.rating && (
+                        <span className={cn("text-[10px] font-semibold", ratingColor(data.rating))}>{ratingLabel(data.rating)}</span>
+                      )}
+                      <span className="text-[12px] font-black text-foreground">{data.count}×</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -388,45 +388,50 @@ export default function ConsumptionPage() {
             </motion.div>
           )}
 
-          {topGrapes.length > 0 && (
+          {topCountries.length > 0 && (
             <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={12}>
+              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-foreground/50" />
+                Por país
+              </h3>
+              <div className="space-y-1.5">
+                {topCountries.map((d, i) => {
+                  const maxVal = topCountries[0]?.value || 1;
+                  const pct = Math.round((d.value / maxVal) * 100);
+                  return (
+                    <div key={d.name} className="flex items-center gap-2">
+                      <span className="text-[12px] font-semibold text-foreground w-[90px] truncate">{d.name}</span>
+                      <div className="flex-1 h-[6px] rounded-full bg-muted/20 overflow-hidden">
+                        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
+                      </div>
+                      <span className="text-[11px] font-bold text-foreground/70 w-6 text-right tabular-nums">{d.value}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {topGrapes.length > 0 && (
+            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={13}>
               <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
                 <Grape className="h-3.5 w-3.5 text-foreground/50" />
                 Uvas
               </h3>
-              <ResponsiveContainer width="100%" height={chartH}>
-                <BarChart data={topGrapes} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.16)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: isMobile ? 11 : 13, fill: "hsl(var(--foreground))", fontWeight: 500 }} axisLine={false} tickLine={false} width={isMobile ? 80 : 110} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" fill="hsl(var(--wine))" radius={[0, 8, 8, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
-          )}
-
-          {topWines.length > 0 && (
-            <motion.div className="chart-surface p-3 sm:p-4" initial="hidden" animate="visible" variants={fadeUp} custom={13}>
-              <h3 className="chart-surface-title mb-2 flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5 text-foreground/50" />
-                Mais consumidos
-              </h3>
-              <div className="space-y-2">
-                {topWines.map(([name, data], i) => (
-                  <div key={name} className="flex items-center gap-2">
-                    <span className="text-[12px] font-black w-5 text-foreground/42">#{i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold truncate text-foreground">{name}</p>
+              <div className="space-y-1.5">
+                {topGrapes.map((d, i) => {
+                  const maxVal = topGrapes[0]?.value || 1;
+                  const pct = Math.round((d.value / maxVal) * 100);
+                  return (
+                    <div key={d.name} className="flex items-center gap-2">
+                      <span className="text-[12px] font-semibold text-foreground w-[90px] truncate">{d.name}</span>
+                      <div className="flex-1 h-[6px] rounded-full bg-muted/20 overflow-hidden">
+                        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
+                      </div>
+                      <span className="text-[11px] font-bold text-foreground/70 w-6 text-right tabular-nums">{d.value}</span>
                     </div>
-                    <div className="text-right shrink-0 flex items-center gap-2">
-                      {data.rating && (
-                        <span className={cn("text-[10px] font-semibold", ratingColor(data.rating))}>{ratingLabel(data.rating)}</span>
-                      )}
-                      <span className="text-[12px] font-black text-foreground">{data.count}×</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           )}
