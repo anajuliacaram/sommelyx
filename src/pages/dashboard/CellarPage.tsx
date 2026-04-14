@@ -591,7 +591,10 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden wine-card-glass px-2 py-1.5 transition-all duration-300"
+                className="group relative flex flex-col overflow-hidden wine-card-glass px-2 py-1.5 transition-all duration-300 border-l-[3px]"
+                style={getWineTypeAccent(wine.style)}
+                onMouseEnter={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccentHover(wine.style)); }}
+                onMouseLeave={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccent(wine.style)); }}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -729,7 +732,7 @@ export default function CellarPage() {
                 const status = drinkStatus(wine);
                 const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
                 return (
-                  <tr key={wine.id} className="transition-colors hover:bg-muted/20 border-b border-border/15 last:border-0">
+                  <tr key={wine.id} className="transition-colors border-b border-[rgba(0,0,0,0.05)] last:border-0 border-l-[3px] hover:bg-[rgba(255,255,255,0.75)]" style={{ borderLeftColor: getWineTypeAccent(wine.style).borderLeftColor || 'transparent' }}>
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="h-9 w-7 shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted/20">
