@@ -99,7 +99,7 @@ function WineImageThumb({
 
   const wrapperClassName = compact
     ? "relative aspect-square overflow-hidden rounded-xl border border-border/20 bg-muted/20"
-    : "relative aspect-[5/6] overflow-hidden rounded-2xl border border-border/20 bg-muted/20";
+    : "relative aspect-[4/3] overflow-hidden rounded-xl border border-border/20 bg-muted/20";
 
   return (
     <div className={wrapperClassName}>
