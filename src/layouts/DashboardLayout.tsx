@@ -41,7 +41,7 @@ export default function DashboardLayout() {
         <div
           className="absolute top-0 left-0 right-0 h-12 z-20 pointer-events-none"
           style={{
-            background: "rgba(11, 31, 23, 0.45)",
+            background: "rgba(22, 24, 20, 0.50)",
             backdropFilter: "blur(24px) saturate(1.15)",
             WebkitBackdropFilter: "blur(24px) saturate(1.15)",
             borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
