@@ -69,8 +69,8 @@ export function RangeSliderFilter({
         <SliderPrimitive.Track className="relative h-[3px] w-full grow overflow-hidden rounded-full bg-muted/50">
           <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-wine to-[hsl(var(--wine-vivid))]" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block h-[12px] w-[12px] rounded-full border-2 border-wine bg-background shadow-md ring-offset-background transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 cursor-grab active:cursor-grabbing active:scale-105" />
-        <SliderPrimitive.Thumb className="block h-[12px] w-[12px] rounded-full border-2 border-wine bg-background shadow-md ring-offset-background transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 cursor-grab active:cursor-grabbing active:scale-105" />
+        <SliderPrimitive.Thumb className="block h-[12px] w-[12px] rounded-full border-2 border-wine bg-background shadow-sm transition-transform duration-150 hover:scale-110 focus-visible:outline-none focus-visible:border-wine/80 cursor-grab active:cursor-grabbing active:scale-105" />
+        <SliderPrimitive.Thumb className="block h-[12px] w-[12px] rounded-full border-2 border-wine bg-background shadow-sm transition-transform duration-150 hover:scale-110 focus-visible:outline-none focus-visible:border-wine/80 cursor-grab active:cursor-grabbing active:scale-105" />
       </SliderPrimitive.Root>
     </div>
   );
