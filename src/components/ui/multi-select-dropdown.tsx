@@ -95,6 +95,7 @@ export function MultiSelectDropdown({
             <PopoverContent
                 side="bottom"
                 align="start"
+                avoidCollisions={false}
                 sideOffset={4}
                 className="w-[220px] p-2 rounded-xl shadow-xl bg-white border border-border/40"
             >
