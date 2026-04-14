@@ -6,15 +6,15 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div
     ref={ref}
     className={cn(
-      "rounded-[20px] text-card-foreground transition-all duration-280 ease-premium hover:-translate-y-[1px]",
+      "rounded-[16px] text-card-foreground transition-all duration-280 ease-premium hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.72)]",
       className,
     )}
     style={{
       background: "rgba(255, 255, 255, 0.65)",
-      backdropFilter: "blur(16px) saturate(1.08)",
-      WebkitBackdropFilter: "blur(16px) saturate(1.08)",
+      backdropFilter: "blur(10px)",
+      WebkitBackdropFilter: "blur(10px)",
       border: "1px solid rgba(255, 255, 255, 0.18)",
-      boxShadow: "0 1px 2px rgba(0,0,0,0.02), 0 8px 20px -10px rgba(0,0,0,0.10)",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
     }}
     {...props}
   />

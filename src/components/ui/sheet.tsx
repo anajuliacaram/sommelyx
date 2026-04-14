@@ -59,11 +59,11 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         ref={ref}
         className={cn(sheetVariants({ side }), className)}
         style={{
-          background: "rgba(255, 255, 255, 0.72)",
-          backdropFilter: "blur(24px) saturate(1.12)",
-          WebkitBackdropFilter: "blur(24px) saturate(1.12)",
+          background: "rgba(255, 255, 255, 0.65)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
           border: "1px solid rgba(255, 255, 255, 0.18)",
-          boxShadow: "0 20px 60px -20px rgba(12,12,18,0.20), 0 2px 8px rgba(12,12,18,0.04)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
         }}
         {...props}
       >
