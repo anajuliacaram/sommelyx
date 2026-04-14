@@ -56,12 +56,12 @@ const faqs = [
 ] as const;
 
 const glassCard = {
-  background: "rgba(255,255,255,0.82)",
-  backdropFilter: "blur(12px) saturate(1.12)",
-  WebkitBackdropFilter: "blur(12px) saturate(1.12)",
-  border: "1px solid rgba(255,255,255,0.58)",
+  background: "rgba(30,20,20,0.04)",
+  backdropFilter: "blur(16px) saturate(1.3)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.3)",
+  border: "1px solid rgba(255,255,255,0.45)",
   boxShadow:
-    "0 14px 42px -14px rgba(30,20,20,0.14), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.76)",
+    "0 12px 40px -12px rgba(30,20,20,0.12), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)",
 } as const;
 
 interface LandingPricingProps {
@@ -79,16 +79,16 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
         relative rounded-3xl overflow-hidden flex flex-col h-full transition-all duration-300
       `}
       style={
-          isLight
+        isLight
           ? {
               ...glassCard,
-              background: "rgba(255,255,255,0.9)",
-              boxShadow: "0 18px 56px -18px rgba(30,20,20,0.14), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.84)",
+              background: "rgba(255,255,255,0.5)",
+              boxShadow: "0 16px 56px -18px rgba(30,20,20,0.14), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)",
             }
           : {
-              background: "linear-gradient(180deg, rgba(55,30,36,0.96) 0%, rgba(41,22,28,0.98) 52%, rgba(28,15,20,1) 100%)",
-              border: "1px solid rgba(198,167,104,0.16)",
-              boxShadow: "0 20px 60px -20px rgba(15,15,20,0.52), inset 0 1px 0 rgba(255,255,255,0.08)",
+              background: "linear-gradient(180deg, #2B2B2B 0%, #1F1C20 55%, #171518 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 20px 60px -20px rgba(15,15,20,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
             }
       }
       initial="hidden"
@@ -132,20 +132,20 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
 
         <div className={`${mobile ? "mb-5" : "mb-7"} flex items-center gap-2.5`}>
           <span
-            className="chip-surface px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em]"
+            className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em]"
             style={
               isLight
                 ? {
                     color: "#6E1E2A",
-                    background: "rgba(110,30,42,0.08)",
-                    border: "1px solid rgba(110,30,42,0.14)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.62)",
+                    background: "rgba(110,30,42,0.06)",
+                    border: "1px solid rgba(110,30,42,0.12)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5)",
                   }
                 : {
                     color: "#F8F6F3",
-                    background: "linear-gradient(135deg, rgba(198,167,104,0.22), rgba(110,30,42,0.18))",
-                    border: "1px solid rgba(198,167,104,0.34)",
-                    boxShadow: "0 10px 28px -8px rgba(198,167,104,0.24)",
+                    background: "linear-gradient(135deg, rgba(198,167,104,0.18), rgba(110,30,42,0.15))",
+                    border: "1px solid rgba(198,167,104,0.3)",
+                    boxShadow: "0 8px 24px -8px rgba(198,167,104,0.2)",
                   }
             }
           >
@@ -158,7 +158,7 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
           variant="primary"
           className={`w-full ${mobile ? "h-11" : "h-11 sm:h-12"} rounded-2xl px-6 text-[13px] sm:text-[14px] font-semibold tracking-tight hover:-translate-y-0.5`}
           style={{
-            boxShadow: "0 12px 32px -10px rgba(110,30,42,0.48), inset 0 1px 0 rgba(255,255,255,0.18)",
+            boxShadow: "0 8px 28px -8px rgba(110,30,42,0.4), inset 0 1px 0 rgba(255,255,255,0.12)",
           }}
           onClick={onSignup}
         >
@@ -178,8 +178,8 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
                 className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px]"
                 style={
                   isLight
-                    ? { background: "rgba(110,30,42,0.08)", border: "1px solid rgba(110,30,42,0.12)" }
-                    : { background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.14)" }
+                    ? { background: "rgba(110,30,42,0.06)", border: "1px solid rgba(110,30,42,0.1)" }
+                    : { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)" }
                 }
               >
                 <Check
@@ -201,13 +201,13 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
     <section id="pricing" className="relative px-5 sm:px-8 pt-6 sm:pt-10 pb-14 sm:pb-20 overflow-hidden z-10">
       <div className="mx-auto max-w-5xl relative z-10">
         <motion.div
-          className="section-surface section-surface--full mx-auto mb-6 sm:mb-8 max-w-[800px] px-5 py-4 sm:px-6 sm:py-5 text-center items-center"
+          className="mx-auto mb-7 sm:mb-10 max-w-xl text-center"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="section-surface__title text-2xl sm:text-[2rem] md:text-[2.25rem] max-w-[640px]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight leading-[1.1]" style={{ color: "#F4F1EC" }}>
             Escolha o plano ideal para sua adega
           </h2>
-          <p className="section-surface__subtitle mt-2.5 text-[13px] sm:text-[14px] max-w-xl mx-auto leading-relaxed">
+          <p className="mt-4 text-[14px] sm:text-[15px] font-medium max-w-md mx-auto" style={{ color: "rgba(244,241,236,0.72)" }}>
             Comece sem compromisso. Cancele quando quiser.
           </p>
         </motion.div>
@@ -237,11 +237,11 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           variants={fadeUp}
           custom={4}
         >
-          <div className="section-surface mx-auto text-center items-center">
-            <h3 className="section-surface__title font-serif text-[24px] sm:text-[30px]">
+          <div className="text-center">
+            <h3 className="font-serif text-[24px] sm:text-[30px] font-black tracking-tight" style={{ color: "#1A1A1A" }}>
               Perguntas frequentes
             </h3>
-            <p className="section-surface__subtitle mt-2 font-sans text-[13px] sm:text-[14px]">
+            <p className="mt-2 font-sans text-[13px] sm:text-[14px] font-medium" style={{ color: "#666" }}>
               Respostas rápidas para decidir com confiança.
             </p>
           </div>
@@ -255,20 +255,16 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                   className="group relative overflow-hidden rounded-[18px] transition-all duration-300 ease-premium hover:-translate-y-0.5 data-[state=open]:before:opacity-100 before:absolute before:left-0 before:top-4 before:bottom-4 before:w-[3px] before:rounded-r-full before:bg-[#6E1E2A] before:opacity-0"
                   style={{
                     ...glassCard,
-                    background: "rgba(255,255,255,0.10)",
-                    backdropFilter: "blur(10px) saturate(1.15)",
-                    WebkitBackdropFilter: "blur(10px) saturate(1.15)",
-                    border: "1px solid rgba(255,255,255,0.22)",
-                    boxShadow: "0 12px 30px -14px rgba(20,14,16,0.18), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.40)",
+                    background: "rgba(30,20,20,0.025)",
                   }}
                 >
                   <AccordionTrigger
-                    className="px-5 py-4 text-left font-serif text-[15px] sm:text-[16px] font-semibold tracking-[-0.01em] leading-snug hover:no-underline [&>svg]:text-[#F4F1EC]/75 [&[data-state=open]>svg]:text-[#F4F1EC] data-[state=open]:text-[#F4F1EC]"
-                    style={{ color: "#F4F1EC" }}
+                    className="px-5 py-4 text-left font-serif text-[15px] sm:text-[16px] font-semibold tracking-[-0.01em] leading-snug hover:no-underline [&>svg]:text-foreground/35 [&[data-state=open]>svg]:text-wine data-[state=open]:text-wine"
+                    style={{ color: "#2B2B2B" }}
                   >
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="px-5 pb-5 pt-0 font-sans text-[13px] sm:text-[14px] font-normal tracking-[-0.005em] leading-relaxed" style={{ color: "rgba(244,241,236,0.82)" }}>
+                  <AccordionContent className="px-5 pb-5 pt-0 font-sans text-[13px] sm:text-[14px] font-normal tracking-[-0.005em] leading-relaxed" style={{ color: "#666" }}>
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
