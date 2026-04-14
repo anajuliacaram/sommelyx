@@ -382,17 +382,18 @@ export default function InventoryPage() {
 
     // --- Render Helpers ---
     const renderStockVisual = (qty: number) => {
-        let color = "bg-wine shadow-[hsl(var(--wine)/0.35)]";
-        if (qty === 0) color = "bg-gray-400 shadow-gray-400/50";
-        else if (qty <= 2) color = "bg-wine shadow-[hsl(var(--wine)/0.4)]";
-        else if (qty <= 6) color = "bg-gold shadow-[hsl(var(--gold)/0.4)]";
+        let color = "bg-success/70";
+        if (qty === 0) color = "bg-muted-foreground/40";
+        else if (qty <= 2) color = "bg-destructive/60";
+        else if (qty <= 6) color = "bg-warning/60";
 
         return (
-            <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.35)] ${color}`} />
-                <span className="text-sm font-black text-foreground">
-                    {qty} <span className="text-[11px] text-muted-foreground font-bold lowercase">un.</span>
+            <div className="flex items-center gap-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${color}`} />
+                <span className="text-[13px] font-bold tabular-nums text-foreground">
+                    {qty}
                 </span>
+                <span className="text-[10px] text-muted-foreground font-medium">un.</span>
             </div>
         );
     };
