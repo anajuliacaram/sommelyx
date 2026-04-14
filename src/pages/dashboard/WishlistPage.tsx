@@ -274,17 +274,19 @@ export default function WishlistPage() {
 
   return (
     <div className="space-y-5 max-w-[980px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Wishlist inteligente</h1>
-          <p className="text-[12px] text-muted-foreground">
-            Digite um rótulo, produtor ou safra e o Sommelyx completa os detalhes. Se preferir, anexe uma foto do vinho.
-          </p>
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+        <div className="glass-card p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Wishlist inteligente</h1>
+            <p className="text-[12px] text-muted-foreground mt-1">
+              Digite um rótulo, produtor ou safra e o Sommelyx completa os detalhes. Se preferir, anexe uma foto do vinho.
+            </p>
+          </div>
+          <Button variant="primary" size="sm" className="h-9 px-4 text-[11px] font-bold shrink-0" onClick={() => setShowForm((value) => !value)}>
+            <Plus className="h-3.5 w-3.5 mr-1.5" />
+            {showForm ? "Fechar" : "Novo item"}
+          </Button>
         </div>
-        <Button variant="primary" size="sm" className="h-9 px-4 text-[11px] font-bold" onClick={() => setShowForm((value) => !value)}>
-          <Plus className="h-3.5 w-3.5 mr-1.5" />
-          {showForm ? "Fechar" : "Novo item"}
-        </Button>
       </motion.div>
 
       {showForm && (
