@@ -231,7 +231,7 @@ export default function ConsumptionPage() {
       </motion.div>
 
       {/* KPI Cards — ultra-compact on mobile: single row of 4 */}
-      <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
+      <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
         {[
           { label: "Total", value: totalCount, icon: Wine, color: "#8F2D56" },
           { label: "Adega", value: cellarCount, icon: GlassWater, color: "#C9A86A" },
@@ -239,12 +239,12 @@ export default function ConsumptionPage() {
           { label: "Média", value: avgRating, icon: Star, color: "#22c55e" },
         ].map((m, i) => (
           <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
-            <PremiumKpiCard className="!p-2 sm:!p-4">
-              <div className="hidden sm:flex w-8 h-8 rounded-xl items-center justify-center mb-2" style={{ background: `${m.color}12` }}>
-                <m.icon className="h-4 w-4" style={{ color: m.color }} />
+            <PremiumKpiCard className="!p-2 sm:!p-3">
+              <div className="hidden sm:flex w-7 h-7 rounded-lg items-center justify-center mb-1.5" style={{ background: `${m.color}12` }}>
+                <m.icon className="h-3.5 w-3.5" style={{ color: m.color }} />
               </div>
-              <p className="text-lg sm:text-2xl font-black font-sans tracking-tight text-foreground text-center sm:text-left">{m.value}</p>
-              <p className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em] text-center sm:text-left">{m.label}</p>
+              <p className="text-base sm:text-lg font-black font-sans tracking-tight text-foreground text-center sm:text-left">{m.value}</p>
+              <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.06em] text-center sm:text-left">{m.label}</p>
             </PremiumKpiCard>
           </motion.div>
         ))}

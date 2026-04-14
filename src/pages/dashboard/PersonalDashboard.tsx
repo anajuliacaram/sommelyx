@@ -160,16 +160,16 @@ export default function PersonalDashboard() {
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="flex flex-col gap-3 md:flex-row md:items-stretch md:justify-between">
-            <div className="section-surface section-surface--full w-full md:flex-1 md:min-w-0 px-5 py-4">
-              <h1 className="text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-3xl">
+            <div className="section-surface section-surface--full w-full md:flex-1 md:min-w-0 px-4 py-3">
+              <h1 className="text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
                 Olá, <span className="text-gradient-wine">{firstName}</span>
               </h1>
-              <p className="mt-1.5 text-[13px] font-medium text-muted-foreground/80">
+              <p className="mt-1 text-[12px] font-medium text-muted-foreground/80">
                 Tudo pronto para revisar sua adega com clareza rápida.
               </p>
             </div>
 
-            <div className="section-surface section-surface--full w-full md:w-auto md:min-w-[320px] px-4 py-4">
+            <div className="section-surface section-surface--full w-full md:w-auto md:min-w-[280px] px-3 py-3">
               <QuickActions
                 variant="personal"
                 layout="inline"
@@ -184,23 +184,23 @@ export default function PersonalDashboard() {
 
         {/* ─── KPI Strip ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-3 gap-3 lg:grid-cols-3">
             {isLoading ? (
-              [1, 2, 3, 4].map((i) => (
-                <div key={i} className="glass-card p-5">
-                  <Skeleton className="h-3.5 w-20 mb-3 rounded-lg" />
-                  <Skeleton className="h-8 w-16 rounded-lg" />
+              [1, 2, 3].map((i) => (
+                <div key={i} className="glass-card p-3.5">
+                  <Skeleton className="h-3 w-16 mb-2 rounded-lg" />
+                  <Skeleton className="h-6 w-12 rounded-lg" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="glass-card p-5">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <kpi.icon className={cn("h-4 w-4", kpi.urgent ? "text-primary" : "text-muted-foreground/50")} />
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{kpi.label}</p>
+                <div key={kpi.label} className="glass-card p-3.5">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <kpi.icon className={cn("h-3.5 w-3.5", kpi.urgent ? "text-primary" : "text-muted-foreground/50")} />
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{kpi.label}</p>
                   </div>
                   <p className={cn(
-                    "text-[28px] font-bold tracking-[-0.03em] leading-none tabular-nums",
+                    "text-[22px] font-bold tracking-[-0.03em] leading-none tabular-nums",
                     kpi.urgent ? "text-primary" : "text-foreground",
                   )}>
                     {kpi.value}
@@ -214,8 +214,8 @@ export default function PersonalDashboard() {
         {/* ─── Priority Block ─── */}
         {priorityItems.length > 0 && (
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-            <div className="glass-card p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground mb-3">Hoje para decidir</p>
+            <div className="glass-card p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground mb-2">Hoje para decidir</p>
               <div className="grid gap-0.5">
                 {priorityItems.map((item, i) => (
                   <button
