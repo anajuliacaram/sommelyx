@@ -843,9 +843,7 @@ export default function InventoryPage() {
                                                 <div className="flex items-center gap-2">
                                                     {renderStockVisual(wine.quantity)}
                                                     {wine.quantity > 0 && wine.quantity <= 2 ? (
-                                                        <Badge className="h-6 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-semibold">
-                                                            Baixo
-                                                        </Badge>
+                                                        <span className="text-[9px] font-semibold text-destructive/80 uppercase tracking-wider">Baixo</span>
                                                     ) : null}
                                                 </div>
                                                 <div className="text-right">
