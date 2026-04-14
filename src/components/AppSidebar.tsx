@@ -92,7 +92,7 @@ export function AppSidebar() {
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex items-center gap-3 px-3 py-3 mb-2 rounded-2xl transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15"
+            className="flex w-full items-center gap-2.5 px-3 py-3 mb-2 rounded-2xl transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15 overflow-hidden"
             aria-label="Ir para o início do dashboard"
             style={{
               background: "rgba(255,255,255,0.03)",
@@ -101,21 +101,21 @@ export function AppSidebar() {
               WebkitBackdropFilter: "blur(8px)",
             }}
           >
-            <div className="flex h-[88px] w-[64px] shrink-0 items-center justify-center">
+            <div className="flex h-[66px] w-[42px] shrink-0 items-center justify-center">
               <img
                 src="/logo-sommelyx-mark.png"
                 alt="Sommelyx"
                 draggable={false}
-                className="h-[88px] w-auto select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
+                className="h-[66px] w-auto max-w-none select-none object-contain drop-shadow-[0_6px_12px_rgba(15,15,20,0.18)] border-none opacity-95"
               />
             </div>
-            <div className="flex flex-col items-start justify-center min-w-0 py-1">
-              <span className="text-[24px] font-bold tracking-[-0.01em] leading-none font-serif translate-y-[1px]" style={{ color: "#F5F5F3" }}>
+            <div className="flex min-w-0 flex-1 flex-col items-start justify-center py-0.5">
+              <span className="block text-[24px] font-bold tracking-[-0.01em] leading-[0.95] font-serif whitespace-nowrap" style={{ color: "#F5F5F3" }}>
                 Sommelyx
               </span>
               <span
                 className={[
-                  "mt-1.5 w-fit inline-flex items-center rounded-md h-5 px-2.5",
+                  "mt-[5px] w-fit inline-flex items-center rounded-md h-5 px-2.5",
                   "text-[9px] font-extrabold uppercase tracking-[0.1em] leading-none shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
                   isCommercial
                     ? "bg-[rgba(198,167,104,0.20)] text-[#1E1811] ring-1 ring-[rgba(198,167,104,0.28)]"
