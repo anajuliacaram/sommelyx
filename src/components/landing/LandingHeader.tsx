@@ -25,23 +25,22 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           (o) =>
             `linear-gradient(to bottom, rgba(255,255,255,${Math.min(o + 0.15, 0.62)}), rgba(255,255,255,${o}))`
         ),
-        borderBottom: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 3px rgba(0,0,0,0.04)",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
       }}
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="mx-auto flex items-center justify-between max-w-6xl h-[52px] sm:h-[58px]">
+      <div className="mx-auto flex items-center justify-between max-w-6xl h-[60px] sm:h-[68px]">
         <a
           href="/"
-          className="flex items-center gap-2 sm:gap-2.5 transition-opacity duration-200 hover:opacity-80 rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
+          className="flex items-center gap-2.5 sm:gap-3 transition-opacity duration-200 hover:opacity-80 rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
         >
           <Logo
             variant="navbar"
-            className="h-12 sm:h-14 md:h-[100px] drop-shadow-[0_2px_8px_rgba(15,15,20,0.08)]"
+            className="h-14 sm:h-16 md:h-[120px] drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]"
           />
-          <span className="font-serif text-[22px] sm:text-[26px] md:text-[35px] tracking-[-0.01em] text-wine opacity-100 font-extrabold">
+          <span className="font-serif text-[26px] sm:text-[32px] md:text-[42px] tracking-[-0.01em] font-extrabold" style={{ color: "#3d0a16" }}>
             Sommelyx
           </span>
         </a>
