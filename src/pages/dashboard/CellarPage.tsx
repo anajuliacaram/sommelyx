@@ -731,12 +731,12 @@ export default function CellarPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border/40">
-                <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Vinho</th>
-                <th className="text-left text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden sm:table-cell text-muted-foreground">Estilo</th>
-                <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden md:table-cell text-muted-foreground">Preço</th>
-                <th className="text-center text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Qtd</th>
-                <th className="text-center text-[9px] font-semibold uppercase tracking-wider px-3 py-2 hidden md:table-cell text-muted-foreground">Status</th>
-                <th className="text-right text-[9px] font-semibold uppercase tracking-wider px-3 py-2 text-muted-foreground">Ações</th>
+                <th className="text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 text-[#7a707f]">Vinho</th>
+                <th className="text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 hidden sm:table-cell text-[#7a707f]">Estilo</th>
+                <th className="text-right text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 hidden md:table-cell text-[#7a707f]">Preço</th>
+                <th className="text-center text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 text-[#7a707f]">Qtd</th>
+                <th className="text-center text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 hidden md:table-cell text-[#7a707f]">Status</th>
+                <th className="text-right text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 text-[#7a707f]">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -746,10 +746,10 @@ export default function CellarPage() {
                 return (
                   <tr
                     key={wine.id}
-                    className="group transition-[transform,background-color,box-shadow,filter] duration-200 ease-out border-b border-[rgba(0,0,0,0.05)] last:border-0 border-l-[3px] hover:bg-[rgba(255,255,255,0.78)] hover:-translate-y-[1px] hover:shadow-[0_10px_20px_-18px_rgba(44,20,31,0.16)]"
+                    className="group transition-[transform,background-color,box-shadow,filter] duration-200 ease-out border-b border-[rgba(0,0,0,0.05)] last:border-0 border-l-[3px] hover:bg-[rgba(255,255,255,0.80)] hover:-translate-y-[1px] hover:shadow-[0_10px_20px_-18px_rgba(44,20,31,0.16)]"
                     style={{ borderLeftColor: getWineTypeAccent(wine.style).borderLeftColor || 'transparent' }}
                   >
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2.25 align-middle">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="h-9 w-7 shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted/20 transition-[filter,transform] duration-200 ease-out group-hover:brightness-[1.03]">
                           {coverImageUrl ? (
@@ -764,21 +764,21 @@ export default function CellarPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 hidden sm:table-cell">
+                    <td className="px-3 py-2.25 hidden sm:table-cell align-middle">
                       <span className={cn("inline-flex items-center justify-center px-2.25 py-0.5 capitalize transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.03]", getStyleBadgeClass(wine.style, true))}>{wine.style || "—"}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-right hidden md:table-cell">
-                      <span className="text-[9.75px] font-semibold text-[#675f6e]">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>
+                    <td className="px-3 py-2.25 text-right hidden md:table-cell align-middle">
+                      <span className="text-[9.75px] font-semibold text-[#665f6d]">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-center">
-                      <span className="text-[10.75px] font-semibold text-[#17131a]">{wine.quantity}</span>
+                    <td className="px-3 py-2.25 text-center align-middle">
+                      <span className="text-[10.75px] font-semibold text-[#17131a] tabular-nums">{wine.quantity}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-center hidden md:table-cell">
+                    <td className="px-3 py-2.25 text-center hidden md:table-cell align-middle">
                       {status ? (
                         <Badge variant="secondary" className={cn("text-[8.5px] h-[18px] px-1.75 transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.03]", statusColor[status])}>{statusLabel[status]}</Badge>
                       ) : <span className="text-[9px] text-muted-foreground">—</span>}
                     </td>
-                    <td className="px-3 py-2.5 text-right">
+                    <td className="px-3 py-2.25 text-right align-middle">
                       <div className="flex gap-0.5 justify-end">
                         <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
                           <UtensilsCrossed className="h-2.75 w-2.75" />
