@@ -161,18 +161,18 @@ export default function ConsumptionPage() {
     <div className="space-y-2.5 max-w-[1200px]">
       {/* Header — compact */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="section-surface !py-2.5 !px-3.5 shadow-[0_14px_32px_-26px_rgba(0,0,0,0.18)]">
-          <h1 className="section-surface__title text-[16px] md:text-[19px] font-serif font-semibold tracking-[-0.034em] text-[#19141b]">Meu Consumo</h1>
-          <p className="section-surface__subtitle text-[10.5px] mt-0.75 text-[#6d6472]">Histórico e insights sobre seus vinhos</p>
+        <div className="section-surface !py-2.5 !px-3.5 border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.76)_100%)] shadow-[0_14px_32px_-26px_rgba(0,0,0,0.18)]">
+          <h1 className="section-surface__title text-[16px] md:text-[19px] font-serif font-semibold tracking-[-0.034em] text-[#111015]">Meu Consumo</h1>
+          <p className="section-surface__subtitle text-[10.5px] mt-0.75 text-[#5d5460]">Histórico e insights sobre seus vinhos</p>
         </div>
       </motion.div>
 
       {/* Period + Source Filters — tighter */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="rounded-[22px] border border-white/14 bg-[rgba(255,255,255,0.44)] p-2 shadow-[0_12px_26px_-22px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.015] backdrop-blur-xl">
-        <div className="grid gap-2.5 md:grid-cols-[1fr_auto]">
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="rounded-[22px] border border-white/16 bg-[rgba(255,255,255,0.42)] p-2 shadow-[0_12px_26px_-22px_rgba(0,0,0,0.16)] ring-1 ring-black/[0.012] backdrop-blur-xl">
+        <div className="grid gap-3.5 md:grid-cols-[1fr_auto]">
           <div className="space-y-1">
-            <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#716775]">Período</span>
-            <div className="flex items-center gap-px rounded-xl border border-white/10 bg-[rgba(255,255,255,0.34)] p-[2.5px] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.14)] ring-1 ring-black/[0.012] backdrop-blur-xl">
+            <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#655c69]">Período</span>
+            <div className="flex items-center gap-px rounded-xl border border-white/10 bg-[rgba(255,255,255,0.30)] p-[2.5px] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.01] backdrop-blur-xl">
               {([
                 { value: "week", label: "Sem" },
                 { value: "month", label: "Mês" },
@@ -187,7 +187,7 @@ export default function ConsumptionPage() {
                       "relative h-6 rounded-lg px-2.25 text-[8.25px] font-semibold uppercase tracking-[0.12em] transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 cursor-pointer",
                       isActive
                         ? "text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-[#19141b] hover:bg-white/40",
+                        : "text-[#665d6b] hover:text-[#111015] hover:bg-white/40",
                     )}
                     onClick={() => setPeriod(p.value)}
                   >
@@ -206,8 +206,8 @@ export default function ConsumptionPage() {
           </div>
 
           <div className="space-y-1">
-            <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#716775]">Escopo</span>
-            <div className="flex items-center gap-px rounded-xl border border-white/10 bg-[rgba(255,255,255,0.34)] p-[2.5px] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.14)] ring-1 ring-black/[0.012] backdrop-blur-xl">
+            <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#655c69]">Escopo</span>
+            <div className="flex items-center gap-px rounded-xl border border-white/10 bg-[rgba(255,255,255,0.30)] p-[2.5px] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.01] backdrop-blur-xl">
               {([
                 { value: "all", label: "Todos", icon: null },
                 { value: "cellar", label: "Adega", icon: GlassWater },
@@ -222,7 +222,7 @@ export default function ConsumptionPage() {
                       "relative h-6 rounded-lg px-2.25 text-[8.25px] font-semibold uppercase tracking-[0.12em] flex items-center gap-1 transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 cursor-pointer",
                       isActive
                         ? "text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-[#19141b] hover:bg-white/40",
+                        : "text-[#665d6b] hover:text-[#111015] hover:bg-white/40",
                     )}
                     onClick={() => setSource(s.value)}
                   >
@@ -254,14 +254,14 @@ export default function ConsumptionPage() {
           { label: "Média", value: avgRating, icon: Star, color: "#22c55e" },
           ].map((m, i) => (
             <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
-            className="card-depth !rounded-xl !p-2 sm:!p-2.25 flex items-center gap-2 shadow-[0_14px_28px_-24px_rgba(0,0,0,0.16)] min-h-[46px] sm:min-h-[48px]"
+            className="card-depth !rounded-xl !p-2 sm:!p-2.25 flex items-center gap-2 shadow-[0_14px_28px_-24px_rgba(0,0,0,0.14)] min-h-[40px] sm:min-h-[42px] border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.80)_0%,rgba(255,255,255,0.72)_100%)]"
             >
             <div className="flex w-5.5 h-5.5 rounded-md items-center justify-center shrink-0" style={{ background: `${m.color}10` }}>
               <m.icon className="h-2.75 w-2.75" style={{ color: m.color }} />
             </div>
             <div className="min-w-0">
-              <p className="text-[12.75px] sm:text-[13px] font-semibold tracking-[-0.022em] text-[#17131a] leading-none tabular-nums">{m.value}</p>
-              <p className="text-[7px] sm:text-[7.5px] font-semibold text-[#726876] uppercase tracking-[0.09em] mt-0.5">{m.label}</p>
+              <p className="text-[13px] sm:text-[13.25px] font-semibold tracking-[-0.022em] text-[#111015] leading-none tabular-nums">{m.value}</p>
+              <p className="text-[7px] sm:text-[7.25px] font-semibold text-[#716878] uppercase tracking-[0.09em] mt-0.5">{m.label}</p>
             </div>
           </motion.div>
         ))}
@@ -269,11 +269,11 @@ export default function ConsumptionPage() {
 
       {/* Histórico header — inline, tight */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}
-        className="flex items-center gap-1.5 pt-0.25"
+        className="flex items-center gap-1.5 pt-0.25 pb-0.5"
       >
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/32 bg-[rgba(255,255,255,0.64)] px-2.5 py-1 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.20)] backdrop-blur-sm">
-          <h2 className="text-[13.75px] md:text-[14.25px] font-semibold text-[#19141b] tracking-[-0.02em]">Histórico</h2>
-          <span className="text-[9px] font-semibold text-[#6d6470] bg-white/68 rounded-full px-1.5 py-0.5 tabular-nums border border-white/50">{filtered.length}</span>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/34 bg-[rgba(255,255,255,0.76)] px-2.5 py-1 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.20)] backdrop-blur-sm">
+          <h2 className="text-[14.25px] md:text-[14.75px] font-semibold text-[#111015] tracking-[-0.02em]">Histórico</h2>
+          <span className="text-[9px] font-semibold text-[#5d5460] bg-white/82 rounded-full px-1.5 py-0.5 tabular-nums border border-white/54">{filtered.length}</span>
         </div>
       </motion.div>
 
@@ -288,7 +288,7 @@ export default function ConsumptionPage() {
         />
       ) : (
         <AnimatePresence mode="popLayout">
-          <div className="section-surface section-surface--full !p-4 sm:!p-5 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.18)]">
+          <div className="section-surface section-surface--full !p-4 sm:!p-5 border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(255,255,255,0.82)_100%)] shadow-[0_18px_40px_-30px_rgba(0,0,0,0.18)]">
             <div className="relative pl-4 sm:pl-5 before:absolute before:left-1.5 before:top-1.5 before:bottom-1.5 before:w-px before:bg-gradient-to-b before:from-[hsl(var(--wine)/0.12)] before:via-[hsl(var(--wine)/0.06)] before:to-transparent">
             {filtered.map((entry, i) => (
               <motion.div
@@ -297,18 +297,18 @@ export default function ConsumptionPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ delay: Math.min(i * 0.015, 0.25) }}
-                className="mb-3 last:mb-0"
+                className="mb-4 last:mb-0"
               >
-                <div className="card-depth relative overflow-hidden !rounded-[20px] !p-3.25 sm:!p-3.75 transition-all group border border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,255,255,0.90)_100%)] shadow-[0_14px_28px_-22px_rgba(0,0,0,0.18)] hover:-translate-y-[1px] hover:shadow-[0_18px_32px_-24px_rgba(0,0,0,0.22)]">
+                <div className="card-depth relative overflow-hidden !rounded-[20px] !p-3.25 sm:!p-3.75 transition-all group border border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(255,255,255,0.82)_100%)] shadow-[0_14px_28px_-22px_rgba(0,0,0,0.18)] hover:-translate-y-[1px] hover:shadow-[0_18px_32px_-24px_rgba(0,0,0,0.22)]">
                   <span className={cn("absolute left-[-0.52rem] top-4 h-2.5 w-2.5 rounded-full border border-white/80 shadow-[0_0_0_6px_rgba(255,255,255,0.45)]", sourceDotClass(entry.source))} />
                   <div className="grid grid-cols-[1fr_auto] gap-3">
                     <div className="min-w-0">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h3 className="truncate text-[11.75px] sm:text-[12.25px] font-semibold tracking-[-0.018em] text-[#18141b] leading-tight">
+                          <h3 className="truncate text-[11.25px] sm:text-[11.75px] font-semibold tracking-[-0.013em] text-[#111015] leading-tight">
                             {entry.wine_name}
                           </h3>
-                          <p className="mt-0.5 text-[9px] sm:text-[9.5px] text-[#6f6775] leading-snug">
+                          <p className="mt-0.5 text-[9.5px] sm:text-[9.85px] text-[#5b5260] leading-snug">
                             {[entry.vintage, entry.country, entry.grape].filter(Boolean).join(" · ")}
                           </p>
                         </div>
@@ -334,7 +334,7 @@ export default function ConsumptionPage() {
                     </div>
 
                     <div className="flex flex-col items-end justify-between gap-2">
-                      <span className="shrink-0 rounded-full border border-white/70 bg-white/72 px-2.5 py-1 text-[8.5px] font-semibold tracking-[0.08em] uppercase text-[#645c6a] backdrop-blur-sm">
+                      <span className="shrink-0 rounded-full border border-white/72 bg-white/82 px-2.5 py-1 text-[8.5px] font-semibold tracking-[0.08em] uppercase text-[#524b59] backdrop-blur-sm">
                         {format(new Date(entry.consumed_at), "dd MMM", { locale: ptBR })}
                       </span>
                       <Button

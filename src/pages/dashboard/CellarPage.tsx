@@ -72,8 +72,8 @@ function getWineTone(style?: string | null) {
 function getStyleBadgeClass(style?: string | null, compact = false) {
   const s = (style || "").toLowerCase();
   const sizing = compact
-    ? "min-h-[22px] rounded-full px-2.5 text-[8.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(0,0,0,0.04)]"
-    : "min-h-[28px] rounded-[14px] px-3.25 text-[9.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_16px_-18px_rgba(0,0,0,0.20)]";
+    ? "min-h-[24px] rounded-full px-2.5 text-[8.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(0,0,0,0.04)]"
+    : "min-h-[24px] rounded-full px-3 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_16px_-18px_rgba(0,0,0,0.20)]";
 
   if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5A162E] via-[#641A31] to-[#451124] text-[#FBF7F8] border-[#8B4B61]/28 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
   if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F6F1E4] via-[#E8DDBC] to-[#D7C49A] text-[#59471E] border-[#E4D5B1]/60 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
