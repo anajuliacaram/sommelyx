@@ -55,9 +55,9 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 
 const statusLabel = { now: "Beber agora", past: "Beber em breve", young: "Em guarda" };
 const statusColor = {
-  now: "bg-emerald-500/22 text-emerald-900 border-emerald-500/28 shadow-[0_1px_2px_rgba(16,185,129,0.12)]",
-  past: "bg-amber-500/22 text-amber-900 border-amber-500/28 shadow-[0_1px_2px_rgba(245,158,11,0.12)]",
-  young: "bg-sky-500/22 text-sky-900 border-sky-500/28 shadow-[0_1px_2px_rgba(14,165,233,0.12)]",
+  now: "bg-emerald-500/14 text-emerald-950 border-emerald-500/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_1px_2px_rgba(16,185,129,0.08)]",
+  past: "bg-amber-500/14 text-amber-950 border-amber-500/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_1px_2px_rgba(245,158,11,0.08)]",
+  young: "bg-sky-500/14 text-sky-950 border-sky-500/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_1px_2px_rgba(14,165,233,0.08)]",
 };
 
 function getWineTone(style?: string | null) {
@@ -72,33 +72,33 @@ function getWineTone(style?: string | null) {
 function getStyleBadgeClass(style?: string | null, compact = false) {
   const s = (style || "").toLowerCase();
   const sizing = compact
-    ? "min-h-[22px] rounded-full px-2.5 text-[8.5px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-    : "min-h-[28px] rounded-[14px] px-3.25 text-[9.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_20px_-18px_rgba(0,0,0,0.26)]";
+    ? "min-h-[22px] rounded-full px-2.5 text-[8.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(0,0,0,0.04)]"
+    : "min-h-[28px] rounded-[14px] px-3.25 text-[9.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_16px_-18px_rgba(0,0,0,0.20)]";
 
-  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5B162E] via-[#6E1D37] to-[#431022] text-[#FBF5F7] border-[#8B4B61]/38 group-hover:brightness-[1.02] group-hover:saturate-[0.94]`;
-  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F7F1DF] via-[#E9DFC7] to-[#D7C59F] text-[#58461F] border-[#E3D5B2]/70 group-hover:brightness-[1.02] group-hover:saturate-[0.93]`;
-  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F2D1DB] via-[#DBA3B5] to-[#BC6C86] text-[#4E2232] border-[#DCA7B8]/55 group-hover:brightness-[1.02] group-hover:saturate-[0.93]`;
-  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F8F0DE] via-[#E7D8B8] to-[#D4C08C] text-[#5D4C2A] border-[#DECFAB]/70 group-hover:brightness-[1.02] group-hover:saturate-[0.93]`;
+  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5A162E] via-[#641A31] to-[#451124] text-[#FBF7F8] border-[#8B4B61]/28 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
+  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F6F1E4] via-[#E8DDBC] to-[#D7C49A] text-[#59471E] border-[#E4D5B1]/60 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
+  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F2D9E1] via-[#DDA8B9] to-[#BF708A] text-[#4C2232] border-[#DCA7B8]/48 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
+  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F5EEDC] via-[#E6D7B4] to-[#D5C18D] text-[#5C4B2A] border-[#DECFAB]/60 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
   return `${sizing} bg-[rgba(255,255,255,0.84)] text-[#574f5c] border-white/48 group-hover:brightness-[1.02]`;
 }
 
 /** Returns inline style for wine-type accent on cards */
 function getWineTypeAccent(style?: string | null): React.CSSProperties {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.22)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.05) 0%, transparent 44%)" };
-  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.22)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.05) 0%, transparent 44%)" };
-  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.22)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.05) 0%, transparent 44%)" };
-  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.22)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.05) 0%, transparent 44%)" };
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.18)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.04) 0%, transparent 44%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.18)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.04) 0%, transparent 44%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.18)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.04) 0%, transparent 44%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.18)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.04) 0%, transparent 44%)" };
   return {};
 }
 
 /** Returns hover accent for wine type */
 function getWineTypeAccentHover(style?: string | null): React.CSSProperties {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.28)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.08) 0%, transparent 44%)" };
-  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.28)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.08) 0%, transparent 44%)" };
-  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.28)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.08) 0%, transparent 44%)" };
-  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.28)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.08) 0%, transparent 44%)" };
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.24)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.065) 0%, transparent 44%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.24)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.065) 0%, transparent 44%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.24)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.065) 0%, transparent 44%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.24)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.065) 0%, transparent 44%)" };
   return {};
 }
 
