@@ -122,8 +122,8 @@ function WineImageThumb({
   }, [src]);
 
   const wrapperClassName = compact
-    ? "relative aspect-square overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
-    : "relative aspect-[4/3] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
+    ? "relative aspect-[4/5] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
+    : "relative aspect-[5/6] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20 max-h-[180px]";
 
   return (
     <div className={wrapperClassName}>
@@ -603,13 +603,13 @@ export default function CellarPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="transition-[filter,transform] duration-200 ease-out group-hover:brightness-[1.03]">
+                <div className="transition-[filter,transform] duration-200 ease-out group-hover:brightness-[1.025]">
                   <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} compact />
                 </div>
 
-                <div className="mt-1 rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-1.75 shadow-[0_14px_32px_-26px_rgba(44,20,31,0.30)] backdrop-blur-[12px]">
+                <div className="mt-0.75 rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-2 shadow-[0_14px_32px_-26px_rgba(44,20,31,0.28)] backdrop-blur-[12px]">
                   {/* ── Top: Name + Vintage + Region ── */}
-                  <div className="flex items-start gap-1 mb-0.75">
+                  <div className="flex items-start gap-1 mb-0.5">
                     <div className="min-w-0 flex-1">
                       <h3 className="line-clamp-1 text-[11.75px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.018em]">
                         {wine.name}
@@ -623,7 +623,7 @@ export default function CellarPage() {
                   </div>
 
                   {/* ── Middle: Status + Wine type badges ── */}
-                  <div className="mb-0.75 flex flex-wrap items-stretch gap-1">
+                  <div className="mb-0.5 flex flex-wrap items-stretch gap-1">
                     {status && (
                       <span className={cn(
                         "inline-flex min-h-[22px] items-center justify-center rounded-full border px-2.5 text-[8.5px] font-semibold tracking-[0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]",
@@ -648,7 +648,7 @@ export default function CellarPage() {
                   </div>
 
                   {/* ── Bottom: Price + Quantity ── */}
-                  <div className="mb-0.75 flex items-baseline justify-between px-0.5">
+                  <div className="mb-0.5 flex items-baseline justify-between px-0.5">
                     <div>
                       <p className="text-[6.75px] uppercase tracking-[0.11em] text-[#908595] mb-0.5 font-medium">Preço</p>
                       <p className="text-[12px] font-semibold leading-none text-[#17131a] tracking-[-0.018em]">
@@ -692,7 +692,7 @@ export default function CellarPage() {
                   </div>
 
                   {hasGroupDetails && (
-                    <div className="mt-2">
+                    <div className="mt-1.5">
                       <button
                         type="button"
                         onClick={() => setExpandedGroups((prev) => ({ ...prev, [wine.groupKey]: !prev[wine.groupKey] }))}
@@ -701,7 +701,7 @@ export default function CellarPage() {
                         {isExpanded ? "Ocultar" : `${wine.entries.length} registros`}
                       </button>
                       {isExpanded && (
-                        <div className="mt-2 space-y-1 rounded-xl border border-white/50 bg-white/72 p-2 backdrop-blur-[10px]">
+                        <div className="mt-1.5 space-y-1 rounded-xl border border-white/50 bg-white/72 p-2 backdrop-blur-[10px]">
                           {wine.entries.map((entry) => (
                         <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/84 px-2.5 py-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter] duration-200 ease-out hover:brightness-[1.01]">
                               <div className="min-w-0">
