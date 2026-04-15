@@ -73,13 +73,13 @@ function getStyleBadgeClass(style?: string | null, compact = false) {
   const s = (style || "").toLowerCase();
   const sizing = compact
     ? "min-h-[22px] rounded-full px-2.5 text-[8.5px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-    : "min-h-[30px] rounded-[14px] px-3.5 text-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_-20px_rgba(0,0,0,0.32)]";
+    : "min-h-[28px] rounded-[14px] px-3.25 text-[9.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_20px_-18px_rgba(0,0,0,0.26)]";
 
-  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5B162E] via-[#6E1D37] to-[#431022] text-[#FBF5F7] border-[#8B4B61]/42 group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
-  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F8F2E1] via-[#EBDFC2] to-[#D8C29A] text-[#53401F] border-[#E2D2AB]/72 group-hover:brightness-[1.03] group-hover:saturate-[0.95]`;
-  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F2D1DB] via-[#DBA3B5] to-[#BC6C86] text-[#4E2232] border-[#DCA7B8]/58 group-hover:brightness-[1.03] group-hover:saturate-[0.95]`;
-  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F7F1DF] via-[#E7D8B7] to-[#D1BF94] text-[#5B4B31] border-[#DDCDAA]/72 group-hover:brightness-[1.03] group-hover:saturate-[0.95]`;
-  return `${sizing} bg-[rgba(255,255,255,0.86)] text-[#574f5c] border-white/52 group-hover:brightness-[1.02]`;
+  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5B162E] via-[#6E1D37] to-[#431022] text-[#FBF5F7] border-[#8B4B61]/38 group-hover:brightness-[1.02] group-hover:saturate-[0.94]`;
+  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F7F1DF] via-[#E9DFC7] to-[#D7C59F] text-[#58461F] border-[#E3D5B2]/70 group-hover:brightness-[1.02] group-hover:saturate-[0.93]`;
+  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F2D1DB] via-[#DBA3B5] to-[#BC6C86] text-[#4E2232] border-[#DCA7B8]/55 group-hover:brightness-[1.02] group-hover:saturate-[0.93]`;
+  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F8F0DE] via-[#E7D8B8] to-[#D4C08C] text-[#5D4C2A] border-[#DECFAB]/70 group-hover:brightness-[1.02] group-hover:saturate-[0.93]`;
+  return `${sizing} bg-[rgba(255,255,255,0.84)] text-[#574f5c] border-white/48 group-hover:brightness-[1.02]`;
 }
 
 /** Returns inline style for wine-type accent on cards */
@@ -603,17 +603,17 @@ export default function CellarPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
-                <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} />
+                <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} compact />
 
-                <div className="mt-1.5 rounded-[18px] border border-white/78 bg-[rgba(255,255,255,0.95)] px-2 py-2 shadow-[0_18px_42px_-30px_rgba(44,20,31,0.38)] backdrop-blur-[12px]">
+                <div className="mt-1 rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-1.75 shadow-[0_14px_32px_-26px_rgba(44,20,31,0.30)] backdrop-blur-[12px]">
                   {/* ── Top: Name + Vintage + Region ── */}
-                  <div className="flex items-start gap-1 mb-1">
+                  <div className="flex items-start gap-1 mb-0.75">
                     <div className="min-w-0 flex-1">
-                      <h3 className="line-clamp-1 text-[12px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.02em]">
+                      <h3 className="line-clamp-1 text-[11.75px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.018em]">
                         {wine.name}
                       </h3>
-                      <p className="mt-0.5 flex items-center gap-1 text-[9px] text-[#6a6170]">
-                        <span className="font-semibold text-[#524955]">{formatVintageLabel(wine.vintage)}</span>
+                      <p className="mt-0.5 flex items-center gap-1 text-[9px] text-[#6e6573]">
+                        <span className="font-semibold text-[#544a59]">{formatVintageLabel(wine.vintage)}</span>
                         <span className="text-[#9a8fa0]">·</span>
                         <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
                       </p>
@@ -621,10 +621,10 @@ export default function CellarPage() {
                   </div>
 
                   {/* ── Middle: Status + Wine type badges ── */}
-                  <div className="mb-1 flex flex-wrap items-stretch gap-1">
+                  <div className="mb-0.75 flex flex-wrap items-stretch gap-1">
                     {status && (
                       <span className={cn(
-                        "inline-flex min-h-[22px] items-center justify-center rounded-full border px-2.5 text-[8.5px] font-bold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
+                        "inline-flex min-h-[22px] items-center justify-center rounded-full border px-2.5 text-[8.5px] font-semibold tracking-[0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
                         statusColor[status]
                       )}>
                         {statusLabel[status]}
@@ -632,7 +632,7 @@ export default function CellarPage() {
                     )}
                     {wine.style && (
                     <span className={cn(
-                        "inline-flex min-h-[30px] min-w-[88px] items-center justify-center rounded-[14px] border px-3.5 text-[10px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm transition-all duration-200",
+                        "inline-flex min-h-[28px] min-w-[84px] items-center justify-center rounded-[14px] border px-3.25 text-[9.5px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm transition-all duration-200",
                         getStyleBadgeClass(wine.style)
                       )}>
                         {wine.style}
@@ -646,25 +646,25 @@ export default function CellarPage() {
                   </div>
 
                   {/* ── Bottom: Price + Quantity ── */}
-                  <div className="mb-1 flex items-baseline justify-between px-0.5">
+                  <div className="mb-0.75 flex items-baseline justify-between px-0.5">
                     <div>
-                      <p className="text-[7px] uppercase tracking-[0.1em] text-[#85788b] mb-0.5 font-semibold">Preço</p>
-                      <p className="text-[12.5px] font-semibold leading-none text-[#17131a] tracking-[-0.02em]">
+                      <p className="text-[6.75px] uppercase tracking-[0.11em] text-[#908595] mb-0.5 font-medium">Preço</p>
+                      <p className="text-[12px] font-semibold leading-none text-[#17131a] tracking-[-0.018em]">
                         {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[7px] uppercase tracking-[0.1em] text-[#85788b] mb-0.5 font-semibold">Qtd</p>
-                      <p className="text-[12.5px] font-semibold leading-none text-[#17131a]/88 tracking-[-0.02em]">{wine.quantity}</p>
+                      <p className="text-[6.75px] uppercase tracking-[0.11em] text-[#908595] mb-0.5 font-medium">Qtd</p>
+                      <p className="text-[12px] font-semibold leading-none text-[#17131a]/88 tracking-[-0.018em]">{wine.quantity}</p>
                     </div>
                   </div>
 
                   {/* ── Actions ── */}
-                  <div className="flex items-center gap-0.5 pt-[3px] border-t border-black/5 mt-auto">
+                  <div className="flex items-center gap-0.5 pt-[2px] border-t border-black/5 mt-auto">
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-[20px] flex-1 rounded-md text-[9px] font-semibold text-[#584c56] hover:text-primary hover:bg-primary/[0.06] transition-all duration-200"
+                      className="h-[18px] flex-1 rounded-md text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-primary/[0.05] transition-all duration-200 px-2"
                       onClick={() => setConsumptionWine(wine)}
                     >
                       <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
@@ -672,20 +672,20 @@ export default function CellarPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-[20px] w-[20px] rounded-md p-0 text-[#7a6f78] hover:text-[#2f2730] hover:bg-black/[0.04] transition-all duration-200"
+                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/85 hover:text-[#2f2730] hover:bg-black/[0.04] transition-all duration-200"
                       onClick={() => setEditWine(wine)}
                       title="Editar"
                     >
-                      <Pencil className="h-2.5 w-2.5" />
+                      <Pencil className="h-2.25 w-2.25" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-[20px] w-[20px] rounded-md p-0 text-[#7a6f78] hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
+                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/85 hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
                       onClick={() => setDeleteTarget(wine)}
                       title="Remover"
                     >
-                      <Trash2 className="h-2.5 w-2.5" />
+                      <Trash2 className="h-2.25 w-2.25" />
                     </Button>
                   </div>
 
@@ -694,23 +694,23 @@ export default function CellarPage() {
                       <button
                         type="button"
                         onClick={() => setExpandedGroups((prev) => ({ ...prev, [wine.groupKey]: !prev[wine.groupKey] }))}
-                        className="inline-flex items-center gap-1 rounded-full border border-white/55 bg-white/72 px-2.5 py-0.5 text-[9px] font-semibold text-[#615763] backdrop-blur-sm transition-all duration-200 hover:border-primary/20 hover:text-primary/80"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/50 bg-white/68 px-2.5 py-0.5 text-[8.5px] font-semibold text-[#665c6b] backdrop-blur-sm transition-all duration-200 hover:border-primary/20 hover:text-primary/80"
                       >
                         {isExpanded ? "Ocultar" : `${wine.entries.length} registros`}
                       </button>
                       {isExpanded && (
-                        <div className="mt-2 space-y-1 rounded-xl border border-white/55 bg-white/74 p-2 backdrop-blur-[10px]">
+                        <div className="mt-2 space-y-1 rounded-xl border border-white/50 bg-white/72 p-2 backdrop-blur-[10px]">
                           {wine.entries.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/82 px-2.5 py-1.25 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/84 px-2.5 py-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
                               <div className="min-w-0">
-                                <p className="truncate text-[11px] font-semibold text-[#17131a]">
+                                <p className="truncate text-[10.5px] font-semibold text-[#17131a]">
                                   {entry.cellar_location || "Sem localização"}
                                 </p>
-                                <p className="text-[9px] text-[#6b6068] font-medium">
+                                <p className="text-[8.5px] text-[#6f6671] font-medium">
                                   {formatVintageLabel(entry.vintage)} · {entry.quantity} gf
                                 </p>
                               </div>
-                      <span className="text-[10px] font-semibold text-primary/80">
+                      <span className="text-[9.5px] font-semibold text-primary/78">
                                 {entry.purchase_price != null ? `R$ ${entry.purchase_price.toFixed(0)}` : "—"}
                               </span>
                             </div>
@@ -759,34 +759,34 @@ export default function CellarPage() {
                       </div>
                     </td>
                     <td className="px-3 py-2 hidden sm:table-cell">
-                      <span className={cn("inline-flex items-center justify-center px-2.5 py-0.5 capitalize transition-all duration-200", getStyleBadgeClass(wine.style, true))}>{wine.style || "—"}</span>
+                      <span className={cn("inline-flex items-center justify-center px-2.25 py-0.5 capitalize transition-all duration-200", getStyleBadgeClass(wine.style, true))}>{wine.style || "—"}</span>
                     </td>
                     <td className="px-3 py-2 text-right hidden md:table-cell">
-                      <span className="text-[10px] font-semibold text-muted-foreground">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>
+                      <span className="text-[10px] font-semibold text-[#66606d]">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>
                     </td>
                     <td className="px-3 py-2 text-center">
-                      <span className="text-[11px] font-bold text-foreground">{wine.quantity}</span>
+                      <span className="text-[11px] font-semibold text-[#17131a]">{wine.quantity}</span>
                     </td>
                     <td className="px-3 py-2 text-center hidden md:table-cell">
                       {status ? (
-                        <Badge variant="secondary" className={`text-[8px] h-4 px-1.5 ${statusColor[status]}`}>{statusLabel[status]}</Badge>
+                        <Badge variant="secondary" className={cn("text-[8.5px] h-[18px] px-1.75", statusColor[status])}>{statusLabel[status]}</Badge>
                       ) : <span className="text-[9px] text-muted-foreground">—</span>}
                     </td>
                     <td className="px-3 py-2 text-right">
                       <div className="flex gap-0.5 justify-end">
-                        <Button size="sm" variant="secondary" className="h-6 w-6 p-0" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
-                          <UtensilsCrossed className="h-3 w-3" />
+                        <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
+                          <UtensilsCrossed className="h-2.75 w-2.75" />
                         </Button>
                         {status === "now" && (
-                          <Button size="sm" variant="secondary" className="h-6 w-6 p-0" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
-                            <GlassWater className="h-3 w-3" />
+                          <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
+                            <GlassWater className="h-2.75 w-2.75" />
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Editar" onClick={() => setEditWine(wine)}>
-                          <Pencil className="h-3 w-3 text-muted-foreground" />
+                        <Button size="sm" variant="ghost" className="h-5.5 w-5.5 p-0" title="Editar" onClick={() => setEditWine(wine)}>
+                          <Pencil className="h-2.75 w-2.75 text-muted-foreground" />
                         </Button>
-                        <Button size="sm" variant="danger" className="h-6 w-6 p-0" title="Remover" onClick={() => setDeleteTarget(wine)}>
-                          <Trash2 className="h-3 w-3" />
+                        <Button size="sm" variant="danger" className="h-5.5 w-5.5 p-0" title="Remover" onClick={() => setDeleteTarget(wine)}>
+                          <Trash2 className="h-2.75 w-2.75" />
                         </Button>
                       </div>
                     </td>
