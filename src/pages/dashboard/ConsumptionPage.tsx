@@ -158,7 +158,7 @@ export default function ConsumptionPage() {
   }
 
   return (
-    <div className="space-y-3.5 max-w-[1200px]">
+    <div className="space-y-3 max-w-[1200px]">
       {/* Header — compact */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface !py-2.5 !px-3.5 shadow-[0_14px_32px_-26px_rgba(0,0,0,0.18)]">
@@ -168,79 +168,85 @@ export default function ConsumptionPage() {
       </motion.div>
 
       {/* Period + Source Filters — tighter */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="flex flex-wrap gap-1.5">
-        <div className="flex items-center gap-px rounded-xl border border-white/12 bg-[rgba(255,255,255,0.40)] p-[3px] shadow-[0_10px_22px_-20px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.015] backdrop-blur-xl">
-          {([
-            { value: "week", label: "Sem" },
-            { value: "month", label: "Mês" },
-            { value: "year", label: "Ano" },
-            { value: "all", label: "Tudo" },
-          ] as { value: Period; label: string }[]).map(p => {
-            const isActive = period === p.value;
-            return (
-              <button
-                key={p.value}
-                aria-pressed={isActive}
-                className={cn(
-                  "relative h-7 rounded-lg px-2.5 text-[9px] font-black uppercase tracking-[0.12em] transition-all duration-200",
-                  "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                  isActive
-                    ? "text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/42",
-                )}
-                onClick={() => setPeriod(p.value)}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="period-pill"
-                    className="absolute inset-0 rounded-lg bg-primary shadow-sm"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10">{p.label}</span>
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-px rounded-xl border border-white/12 bg-[rgba(255,255,255,0.40)] p-[3px] shadow-[0_10px_22px_-20px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.015] backdrop-blur-xl">
-          {([
-            { value: "all", label: "Todos", icon: null },
-            { value: "cellar", label: "Adega", icon: GlassWater },
-            { value: "external", label: "Ext.", icon: MapPin },
-          ] as { value: Source; label: string; icon: any }[]).map(s => {
-            const isActive = source === s.value;
-            return (
-              <button
-                key={s.value}
-                aria-pressed={isActive}
-                className={cn(
-                  "relative h-7 rounded-lg px-2.5 text-[9px] font-black uppercase tracking-[0.12em] flex items-center gap-1 transition-all duration-200",
-                  "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                  isActive
-                    ? "text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/42",
-                )}
-                onClick={() => setSource(s.value)}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="source-pill"
-                    className="absolute inset-0 rounded-lg bg-primary shadow-sm"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-1">
-                  {s.icon && <s.icon className="h-3 w-3 opacity-85" />}
-                  {s.label}
-                </span>
-              </button>
-            );
-          })}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="rounded-[22px] border border-white/14 bg-[rgba(255,255,255,0.44)] p-2.5 shadow-[0_12px_26px_-22px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.015] backdrop-blur-xl">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+          <div className="space-y-1">
+            <span className="text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#716775]">Período</span>
+            <div className="flex items-center gap-px rounded-xl border border-white/10 bg-[rgba(255,255,255,0.34)] p-[3px] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.14)] ring-1 ring-black/[0.012] backdrop-blur-xl">
+              {([
+                { value: "week", label: "Sem" },
+                { value: "month", label: "Mês" },
+                { value: "year", label: "Ano" },
+              ] as { value: Period; label: string }[]).map(p => {
+                const isActive = period === p.value;
+                return (
+                  <button
+                    key={p.value}
+                    aria-pressed={isActive}
+                    className={cn(
+                      "relative h-6.5 rounded-lg px-2.5 text-[8.5px] font-semibold uppercase tracking-[0.12em] transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 cursor-pointer",
+                      isActive
+                        ? "text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-[#19141b] hover:bg-white/40",
+                    )}
+                    onClick={() => setPeriod(p.value)}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="period-pill"
+                        className="absolute inset-0 rounded-lg bg-primary shadow-sm"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10">{p.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#716775]">Escopo</span>
+            <div className="flex items-center gap-px rounded-xl border border-white/10 bg-[rgba(255,255,255,0.34)] p-[3px] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.14)] ring-1 ring-black/[0.012] backdrop-blur-xl">
+              {([
+                { value: "all", label: "Todos", icon: null },
+                { value: "cellar", label: "Adega", icon: GlassWater },
+                { value: "external", label: "Ext.", icon: MapPin },
+              ] as { value: Source; label: string; icon: any }[]).map(s => {
+                const isActive = source === s.value;
+                return (
+                  <button
+                    key={s.value}
+                    aria-pressed={isActive}
+                    className={cn(
+                      "relative h-6.5 rounded-lg px-2.5 text-[8.5px] font-semibold uppercase tracking-[0.12em] flex items-center gap-1 transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 cursor-pointer",
+                      isActive
+                        ? "text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-[#19141b] hover:bg-white/40",
+                    )}
+                    onClick={() => setSource(s.value)}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="source-pill"
+                        className="absolute inset-0 rounded-lg bg-primary shadow-sm"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1">
+                      {s.icon && <s.icon className="h-3 w-3 opacity-85" />}
+                      {s.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </motion.div>
 
       {/* KPI Strip — ultra compact, uniform grid */}
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
           {[
           { label: "Total", value: totalCount, icon: Wine, color: "#8F2D56" },
           { label: "Adega", value: cellarCount, icon: GlassWater, color: "#C9A86A" },
@@ -248,14 +254,14 @@ export default function ConsumptionPage() {
           { label: "Média", value: avgRating, icon: Star, color: "#22c55e" },
           ].map((m, i) => (
             <motion.div key={m.label} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}
-            className="card-depth !rounded-xl !p-2.5 flex items-center gap-2 shadow-[0_14px_28px_-24px_rgba(0,0,0,0.16)]"
+            className="card-depth !rounded-xl !p-2.25 sm:!p-2.5 flex items-center gap-2 shadow-[0_14px_28px_-24px_rgba(0,0,0,0.16)] min-h-[52px]"
             >
             <div className="flex w-6 h-6 rounded-md items-center justify-center shrink-0" style={{ background: `${m.color}10` }}>
               <m.icon className="h-3 w-3" style={{ color: m.color }} />
             </div>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold tracking-[-0.022em] text-[#17131a] leading-none tabular-nums">{m.value}</p>
-              <p className="text-[8px] font-semibold text-[#726876] uppercase tracking-[0.075em] mt-0.5">{m.label}</p>
+              <p className="text-[13px] sm:text-[13.5px] font-semibold tracking-[-0.022em] text-[#17131a] leading-none tabular-nums">{m.value}</p>
+              <p className="text-[7.5px] sm:text-[8px] font-semibold text-[#726876] uppercase tracking-[0.085em] mt-0.5">{m.label}</p>
             </div>
           </motion.div>
         ))}
@@ -263,10 +269,10 @@ export default function ConsumptionPage() {
 
       {/* Histórico header — inline, tight */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}
-        className="flex items-center gap-1.5 pt-1.5"
+        className="flex items-center gap-1.5 pt-0.5"
       >
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/32 bg-[rgba(255,255,255,0.60)] px-2.5 py-1 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.20)] backdrop-blur-sm">
-          <h2 className="text-[13px] md:text-[14px] font-semibold text-[#19141b] tracking-[-0.02em]">Histórico</h2>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/32 bg-[rgba(255,255,255,0.62)] px-2.5 py-1 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.20)] backdrop-blur-sm">
+          <h2 className="text-[13.5px] md:text-[14px] font-semibold text-[#19141b] tracking-[-0.02em]">Histórico</h2>
           <span className="text-[9px] font-semibold text-[#6d6470] bg-white/68 rounded-full px-1.5 py-0.5 tabular-nums border border-white/50">{filtered.length}</span>
         </div>
       </motion.div>
@@ -283,7 +289,7 @@ export default function ConsumptionPage() {
       ) : (
         <AnimatePresence mode="popLayout">
           <div className="section-surface section-surface--full !p-4 sm:!p-5 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.18)]">
-            <div className="relative pl-4 sm:pl-5 before:absolute before:left-1.5 before:top-1.5 before:bottom-1.5 before:w-px before:bg-gradient-to-b before:from-[hsl(var(--wine)/0.16)] before:via-[hsl(var(--wine)/0.08)] before:to-transparent">
+            <div className="relative pl-4 sm:pl-5 before:absolute before:left-1.5 before:top-1.5 before:bottom-1.5 before:w-px before:bg-gradient-to-b before:from-[hsl(var(--wine)/0.14)] before:via-[hsl(var(--wine)/0.07)] before:to-transparent">
             {filtered.map((entry, i) => (
               <motion.div
                 key={entry.id}
