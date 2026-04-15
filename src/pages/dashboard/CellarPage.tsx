@@ -122,8 +122,8 @@ function WineImageThumb({
   }, [src]);
 
   const wrapperClassName = compact
-    ? "relative aspect-[4/5] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
-    : "relative aspect-[5/6] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20 max-h-[180px]";
+    ? "relative h-[114px] sm:h-[120px] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
+    : "relative h-[132px] sm:h-[140px] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
 
   return (
     <div className={wrapperClassName}>
@@ -595,7 +595,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden wine-card-glass px-[6px] py-[6px] transition-[transform,box-shadow,filter] duration-200 ease-out border-l-[3px] cursor-pointer hover:-translate-y-[2px] hover:shadow-[0_18px_34px_-26px_rgba(44,20,31,0.24)]"
+                className="group relative flex h-full min-h-[352px] flex-col overflow-hidden wine-card-glass px-[6px] py-[6px] transition-[transform,box-shadow,filter] duration-200 ease-out border-l-[3px] cursor-pointer hover:-translate-y-[2px] hover:shadow-[0_18px_34px_-26px_rgba(44,20,31,0.24)]"
                 style={getWineTypeAccent(wine.style)}
                 onMouseEnter={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccentHover(wine.style)); }}
                 onMouseLeave={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccent(wine.style)); }}
@@ -607,7 +607,7 @@ export default function CellarPage() {
                   <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} compact />
                 </div>
 
-                <div className="mt-0.75 rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-2 shadow-[0_14px_32px_-26px_rgba(44,20,31,0.28)] backdrop-blur-[12px]">
+                <div className="mt-0.75 flex flex-1 min-h-0 flex-col rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-2 shadow-[0_14px_32px_-26px_rgba(44,20,31,0.28)] backdrop-blur-[12px]">
                   {/* ── Top: Name + Vintage + Region ── */}
                   <div className="flex items-start gap-1 mb-0.5">
                     <div className="min-w-0 flex-1">
