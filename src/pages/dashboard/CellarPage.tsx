@@ -69,32 +69,36 @@ function getWineTone(style?: string | null) {
   return "bg-[#8F2D56]";
 }
 
-function getStyleBadgeClass(style?: string | null) {
+function getStyleBadgeClass(style?: string | null, compact = false) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#8C1F43]/42 text-white border-[#8C1F43]/44 shadow-[0_2px_6px_rgba(140,31,67,0.18)]";
-  if (s.includes("branco")) return "bg-[#F3E2A8]/64 text-[#6A4B10] border-[#D8B85E]/46 shadow-[0_2px_6px_rgba(180,150,60,0.16)]";
-  if (s.includes("rose")) return "bg-[#E89CB0]/34 text-[#6F3348] border-[#C97A93]/32 shadow-[0_2px_6px_rgba(201,122,147,0.12)]";
-  if (s.includes("espum")) return "bg-[#E0CC8A]/42 text-[#5F4716] border-[#C6A768]/34 shadow-[0_2px_6px_rgba(198,167,104,0.14)]";
-  return "bg-primary/12 text-primary/80 border-primary/18";
+  const sizing = compact
+    ? "min-h-[22px] rounded-full px-2.5 text-[8.5px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+    : "min-h-[30px] rounded-[14px] px-3.5 text-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_-20px_rgba(0,0,0,0.32)]";
+
+  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5B162E] via-[#6E1D37] to-[#431022] text-[#FBF5F7] border-[#8B4B61]/42 group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
+  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F8F2E1] via-[#EBDFC2] to-[#D8C29A] text-[#53401F] border-[#E2D2AB]/72 group-hover:brightness-[1.03] group-hover:saturate-[0.95]`;
+  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F2D1DB] via-[#DBA3B5] to-[#BC6C86] text-[#4E2232] border-[#DCA7B8]/58 group-hover:brightness-[1.03] group-hover:saturate-[0.95]`;
+  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F7F1DF] via-[#E7D8B7] to-[#D1BF94] text-[#5B4B31] border-[#DDCDAA]/72 group-hover:brightness-[1.03] group-hover:saturate-[0.95]`;
+  return `${sizing} bg-[rgba(255,255,255,0.86)] text-[#574f5c] border-white/52 group-hover:brightness-[1.02]`;
 }
 
 /** Returns inline style for wine-type accent on cards */
 function getWineTypeAccent(style?: string | null): React.CSSProperties {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.18)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.045) 0%, transparent 42%)" };
-  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.18)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.045) 0%, transparent 42%)" };
-  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.18)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.045) 0%, transparent 42%)" };
-  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.18)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.045) 0%, transparent 42%)" };
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.22)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.05) 0%, transparent 44%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.22)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.05) 0%, transparent 44%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.22)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.05) 0%, transparent 44%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.22)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.05) 0%, transparent 44%)" };
   return {};
 }
 
 /** Returns hover accent for wine type */
 function getWineTypeAccentHover(style?: string | null): React.CSSProperties {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.24)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.075) 0%, transparent 42%)" };
-  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.24)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.075) 0%, transparent 42%)" };
-  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.24)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.075) 0%, transparent 42%)" };
-  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.24)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.075) 0%, transparent 42%)" };
+  if (s.includes("tinto")) return { borderLeftColor: "rgba(120, 20, 30, 0.28)", background: "linear-gradient(90deg, rgba(120, 20, 30, 0.08) 0%, transparent 44%)" };
+  if (s.includes("branco")) return { borderLeftColor: "rgba(180, 150, 60, 0.28)", background: "linear-gradient(90deg, rgba(180, 150, 60, 0.08) 0%, transparent 44%)" };
+  if (s.includes("rose") || s.includes("rosé")) return { borderLeftColor: "rgba(200, 120, 140, 0.28)", background: "linear-gradient(90deg, rgba(200, 120, 140, 0.08) 0%, transparent 44%)" };
+  if (s.includes("espum")) return { borderLeftColor: "rgba(210, 190, 120, 0.28)", background: "linear-gradient(90deg, rgba(210, 190, 120, 0.08) 0%, transparent 44%)" };
   return {};
 }
 
@@ -601,53 +605,57 @@ export default function CellarPage() {
               >
                 <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} />
 
-                <div className="mt-1 rounded-[16px] border border-white/72 bg-[rgba(255,255,255,0.92)] px-[7px] py-[6px] shadow-[0_14px_30px_-24px_rgba(44,20,31,0.28)] backdrop-blur-[10px]">
+                <div className="mt-1.5 rounded-[18px] border border-white/78 bg-[rgba(255,255,255,0.95)] px-2 py-2 shadow-[0_18px_42px_-30px_rgba(44,20,31,0.38)] backdrop-blur-[12px]">
                   {/* ── Top: Name + Vintage + Region ── */}
-                  <div className="flex items-start gap-[5px] mb-[2px]">
+                  <div className="flex items-start gap-1 mb-1">
                     <div className="min-w-0 flex-1">
-                      <h3 className="line-clamp-1 text-[11px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.015em]">
+                      <h3 className="line-clamp-1 text-[12px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.02em]">
                         {wine.name}
                       </h3>
                       <p className="mt-0.5 flex items-center gap-1 text-[9px] text-[#6a6170]">
-                        <span className="font-semibold">{formatVintageLabel(wine.vintage)}</span>
+                        <span className="font-semibold text-[#524955]">{formatVintageLabel(wine.vintage)}</span>
                         <span className="text-[#9a8fa0]">·</span>
                         <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
                       </p>
                     </div>
                   </div>
 
-                  {/* ── Middle: Status badges ── */}
-                  {(status || wine.style) && (
-                    <div className="mb-[2px] flex flex-wrap items-center gap-1">
-                      {status && (
-                        <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2.5 text-[9px] font-bold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", statusColor[status])}>
-                          {statusLabel[status]}
-                        </span>
-                      )}
-                      {wine.style && (
-                        <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2.5 text-[9px] font-bold capitalize tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", getStyleBadgeClass(wine.style))}>
-                          {wine.style}
-                        </span>
-                      )}
-                      {wine.country && (
-                        <span className="inline-flex items-center h-[18px] rounded-full border border-white/60 bg-white/72 px-2.5 text-[9px] font-medium text-[#635968] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-                          {wine.country}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  {/* ── Middle: Status + Wine type badges ── */}
+                  <div className="mb-1 flex flex-wrap items-stretch gap-1">
+                    {status && (
+                      <span className={cn(
+                        "inline-flex min-h-[22px] items-center justify-center rounded-full border px-2.5 text-[8.5px] font-bold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
+                        statusColor[status]
+                      )}>
+                        {statusLabel[status]}
+                      </span>
+                    )}
+                    {wine.style && (
+                    <span className={cn(
+                        "inline-flex min-h-[30px] min-w-[88px] items-center justify-center rounded-[14px] border px-3.5 text-[10px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm transition-all duration-200",
+                        getStyleBadgeClass(wine.style)
+                      )}>
+                        {wine.style}
+                      </span>
+                    )}
+                    {wine.country && (
+                      <span className="inline-flex min-h-[22px] items-center justify-center rounded-full border border-white/60 bg-white/80 px-2.5 text-[8.5px] font-semibold text-[#645b69] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                        {wine.country}
+                      </span>
+                    )}
+                  </div>
 
                   {/* ── Bottom: Price + Quantity ── */}
-                  <div className="mb-[2px] flex items-baseline justify-between px-0.5">
+                  <div className="mb-1 flex items-baseline justify-between px-0.5">
                     <div>
                       <p className="text-[7px] uppercase tracking-[0.1em] text-[#85788b] mb-0.5 font-semibold">Preço</p>
-                      <p className="text-[11.5px] font-semibold leading-none text-[#17131a] tracking-[-0.02em]">
+                      <p className="text-[12.5px] font-semibold leading-none text-[#17131a] tracking-[-0.02em]">
                         {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-[7px] uppercase tracking-[0.1em] text-[#85788b] mb-0.5 font-semibold">Qtd</p>
-                      <p className="text-[11.5px] font-semibold leading-none text-[#17131a]/88 tracking-[-0.02em]">{wine.quantity}</p>
+                      <p className="text-[12.5px] font-semibold leading-none text-[#17131a]/88 tracking-[-0.02em]">{wine.quantity}</p>
                     </div>
                   </div>
 
@@ -702,7 +710,7 @@ export default function CellarPage() {
                                   {formatVintageLabel(entry.vintage)} · {entry.quantity} gf
                                 </p>
                               </div>
-                              <span className="text-[10px] font-semibold text-primary/80">
+                      <span className="text-[10px] font-semibold text-primary/80">
                                 {entry.purchase_price != null ? `R$ ${entry.purchase_price.toFixed(0)}` : "—"}
                               </span>
                             </div>
@@ -751,7 +759,7 @@ export default function CellarPage() {
                       </div>
                     </td>
                     <td className="px-3 py-2 hidden sm:table-cell">
-                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded capitalize bg-primary/5 text-primary">{wine.style || "—"}</span>
+                      <span className={cn("inline-flex items-center justify-center px-2.5 py-0.5 capitalize transition-all duration-200", getStyleBadgeClass(wine.style, true))}>{wine.style || "—"}</span>
                     </td>
                     <td className="px-3 py-2 text-right hidden md:table-cell">
                       <span className="text-[10px] font-semibold text-muted-foreground">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>
