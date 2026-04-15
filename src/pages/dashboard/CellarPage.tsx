@@ -464,13 +464,13 @@ export default function CellarPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquise vinho, produtor, uva, safra…"
-            className="pl-9 h-10 text-[13px] font-medium rounded-xl border-border/40 shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all w-full"
-            style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
+            className="pl-9 h-10 text-[13px] font-medium rounded-xl border-white/40 shadow-[0_10px_20px_-18px_rgba(0,0,0,0.18)] focus:ring-primary/10 focus:border-primary/20 transition-all w-full text-[#19141b] placeholder:text-[#7b707f]"
+            style={{ background: "rgba(255,255,255,0.64)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
           />
         </div>
 
         {/* Filters Row */}
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 rounded-[22px] border border-white/14 bg-[rgba(255,255,255,0.44)] p-2.5 shadow-[0_14px_30px_-26px_rgba(0,0,0,0.16)] backdrop-blur-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
             <div className="flex flex-wrap items-center gap-1">
               <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
@@ -484,24 +484,24 @@ export default function CellarPage() {
                 size="sm"
                 onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
                  className={cn(
-                   "h-[28px] px-3 rounded-full text-[10px] font-bold flex items-center gap-1 border transition-all duration-200",
+                   "h-[28px] px-3 rounded-full text-[10px] font-semibold flex items-center gap-1 border transition-[transform,background-color,filter,box-shadow] duration-200 ease-out cursor-pointer active:scale-[0.98]",
                    lowStock
-                     ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-md hover:shadow-lg hover:brightness-110"
-                     : "bg-white/50 backdrop-blur-sm text-foreground/80 border-white/20 shadow-sm hover:bg-white/60 hover:text-foreground"
+                     ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-[0_10px_20px_-18px_rgba(0,0,0,0.28)] hover:brightness-110"
+                     : "bg-white/54 backdrop-blur-sm text-[#5a5260] border-white/22 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.14)] hover:bg-white/64 hover:text-[#19141b]"
                  )}
               >
                 Baixo estoque
               </Button>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="hidden sm:flex rounded-full p-[2px] bg-white/45 backdrop-blur-sm border border-white/18 shadow-sm">
+              <div className="hidden sm:flex rounded-full p-[2px] bg-[rgba(255,255,255,0.48)] backdrop-blur-sm border border-white/16 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.16)]">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   aria-pressed={viewMode === "grid"}
                   onClick={() => setViewMode("grid")}
-                  className={cn("h-7 w-7 rounded-full transition-all duration-150", viewMode === "grid" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-foreground/50 hover:text-foreground/80")}
+                  className={cn("h-7 w-7 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer", viewMode === "grid" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-[#6f6675] hover:text-[#19141b]")}
                 >
                   <LayoutGrid className="h-3.5 w-3.5" />
                 </Button>
@@ -511,7 +511,7 @@ export default function CellarPage() {
                   size="icon"
                   aria-pressed={viewMode === "list"}
                   onClick={() => setViewMode("list")}
-                  className={cn("h-7 w-7 rounded-full transition-all duration-150", viewMode === "list" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-foreground/50 hover:text-foreground/80")}
+                  className={cn("h-7 w-7 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer", viewMode === "list" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-[#6f6675] hover:text-[#19141b]")}
                 >
                   <List className="h-3.5 w-3.5" />
                 </Button>
@@ -519,7 +519,7 @@ export default function CellarPage() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                className="h-[30px] px-3 pr-7 text-[11px] font-bold rounded-full bg-white/50 backdrop-blur-sm cursor-pointer border border-white/18 text-foreground/80 shadow-sm hover:bg-white/60 transition-all duration-200"
+                className="h-[30px] px-3 pr-7 text-[11px] font-semibold rounded-full bg-[rgba(255,255,255,0.52)] backdrop-blur-sm cursor-pointer border border-white/18 text-[#5b5261] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.16)] hover:bg-white/64 hover:text-[#19141b] transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98]"
               >
                 <option value="drink">Prioridade</option>
                 <option value="drinkNow">Beber agora</option>
@@ -535,10 +535,10 @@ export default function CellarPage() {
 
           {/* Compact Range Sliders — single row */}
           <div className="grid grid-cols-2 gap-2">
-             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.64)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 10px 20px -18px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.28)" }}>
                <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
              </div>
-             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.40)", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.64)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 10px 20px -18px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.28)" }}>
                <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
             </div>
           </div>
@@ -548,15 +548,15 @@ export default function CellarPage() {
 
       {/* Active filter chips summary */}
       {activeChips.length > 0 && (
-        <div className="glass-card p-3 flex flex-wrap gap-2 items-center">
-          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-foreground/55 mr-1">Filtros ativos:</span>
+        <div className="glass-card p-2.5 flex flex-wrap gap-1.5 items-center">
+          <span className="text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#6f6572] mr-1">Filtros ativos:</span>
           {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[26px] text-[10px] rounded-full group border-[hsl(var(--wine)/0.24)] bg-[hsl(var(--wine)/0.10)] text-[hsl(var(--wine))] font-semibold shadow-sm">
+            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[24px] text-[9.5px] rounded-full group border-[hsl(var(--wine)/0.20)] bg-[hsl(var(--wine)/0.08)] text-[hsl(var(--wine))] font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter] duration-200 ease-out hover:brightness-[1.03]">
               {chip.label}
               <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 hover:opacity-100 transition-opacity duration-150" onClick={chip.onRemove} />
             </Badge>
           ))}
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] font-semibold text-destructive hover:bg-destructive/10 ml-1">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[10px] font-semibold text-destructive hover:bg-destructive/10 ml-1 transition-[transform,background-color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer">
             Limpar tudo
           </Button>
         </div>
