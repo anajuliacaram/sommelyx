@@ -595,7 +595,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden wine-card-glass px-[6px] py-[6px] transition-all duration-300 border-l-[3px]"
+                className="group relative flex flex-col overflow-hidden wine-card-glass px-[6px] py-[6px] transition-[transform,box-shadow,filter] duration-200 ease-out border-l-[3px] cursor-pointer hover:-translate-y-[2px] hover:shadow-[0_18px_34px_-26px_rgba(44,20,31,0.24)]"
                 style={getWineTypeAccent(wine.style)}
                 onMouseEnter={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccentHover(wine.style)); }}
                 onMouseLeave={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccent(wine.style)); }}
@@ -603,7 +603,9 @@ export default function CellarPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
-                <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} compact />
+                <div className="transition-[filter,transform] duration-200 ease-out group-hover:brightness-[1.03]">
+                  <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} compact />
+                </div>
 
                 <div className="mt-1 rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-1.75 shadow-[0_14px_32px_-26px_rgba(44,20,31,0.30)] backdrop-blur-[12px]">
                   {/* ── Top: Name + Vintage + Region ── */}
@@ -624,7 +626,7 @@ export default function CellarPage() {
                   <div className="mb-0.75 flex flex-wrap items-stretch gap-1">
                     {status && (
                       <span className={cn(
-                        "inline-flex min-h-[22px] items-center justify-center rounded-full border px-2.5 text-[8.5px] font-semibold tracking-[0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
+                        "inline-flex min-h-[22px] items-center justify-center rounded-full border px-2.5 text-[8.5px] font-semibold tracking-[0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]",
                         statusColor[status]
                       )}>
                         {statusLabel[status]}
@@ -632,14 +634,14 @@ export default function CellarPage() {
                     )}
                     {wine.style && (
                     <span className={cn(
-                        "inline-flex min-h-[28px] min-w-[84px] items-center justify-center rounded-[14px] border px-3.25 text-[9.5px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm transition-all duration-200",
+                        "inline-flex min-h-[28px] min-w-[84px] items-center justify-center rounded-[14px] border px-3.25 text-[9.5px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.03]",
                         getStyleBadgeClass(wine.style)
                       )}>
                         {wine.style}
                       </span>
                     )}
                     {wine.country && (
-                      <span className="inline-flex min-h-[22px] items-center justify-center rounded-full border border-white/60 bg-white/80 px-2.5 text-[8.5px] font-semibold text-[#645b69] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                      <span className="inline-flex min-h-[22px] items-center justify-center rounded-full border border-white/60 bg-white/80 px-2.5 text-[8.5px] font-semibold text-[#645b69] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]">
                         {wine.country}
                       </span>
                     )}
@@ -664,7 +666,7 @@ export default function CellarPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-[18px] flex-1 rounded-md text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-primary/[0.05] transition-all duration-200 px-2"
+                      className="h-[18px] flex-1 rounded-md text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-primary/[0.06] active:scale-[0.98] transition-[transform,background-color,color] duration-200 ease-out px-2 cursor-pointer"
                       onClick={() => setConsumptionWine(wine)}
                     >
                       <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
@@ -672,7 +674,7 @@ export default function CellarPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/85 hover:text-[#2f2730] hover:bg-black/[0.04] transition-all duration-200"
+                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/80 hover:text-[#2f2730] hover:bg-black/[0.05] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
                       onClick={() => setEditWine(wine)}
                       title="Editar"
                     >
@@ -681,7 +683,7 @@ export default function CellarPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/85 hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
+                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/80 hover:text-destructive hover:bg-destructive/[0.06] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
                       onClick={() => setDeleteTarget(wine)}
                       title="Remover"
                     >
@@ -701,7 +703,7 @@ export default function CellarPage() {
                       {isExpanded && (
                         <div className="mt-2 space-y-1 rounded-xl border border-white/50 bg-white/72 p-2 backdrop-blur-[10px]">
                           {wine.entries.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/84 px-2.5 py-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/84 px-2.5 py-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter] duration-200 ease-out hover:brightness-[1.01]">
                               <div className="min-w-0">
                                 <p className="truncate text-[10.5px] font-semibold text-[#17131a]">
                                   {entry.cellar_location || "Sem localização"}
