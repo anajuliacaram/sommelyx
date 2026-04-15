@@ -591,7 +591,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex flex-col overflow-hidden wine-card-glass px-1.5 py-1 transition-all duration-300 border-l-[3px]"
+                className="group relative flex flex-col overflow-hidden wine-card-glass px-[6px] py-[6px] transition-all duration-300 border-l-[3px]"
                 style={getWineTypeAccent(wine.style)}
                 onMouseEnter={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccentHover(wine.style)); }}
                 onMouseLeave={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccent(wine.style)); }}
@@ -601,16 +601,16 @@ export default function CellarPage() {
               >
                 <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} />
 
-                <div className="mt-1 rounded-[16px] border border-white/55 bg-[rgba(255,255,255,0.84)] px-[7px] py-[7px] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.32)] backdrop-blur-[14px]">
+                <div className="mt-1 rounded-[16px] border border-white/72 bg-[rgba(255,255,255,0.92)] px-[7px] py-[6px] shadow-[0_14px_30px_-24px_rgba(44,20,31,0.28)] backdrop-blur-[10px]">
                   {/* ── Top: Name + Vintage + Region ── */}
-                  <div className="flex items-start gap-[5px] mb-[3px]">
+                  <div className="flex items-start gap-[5px] mb-[2px]">
                     <div className="min-w-0 flex-1">
-                      <h3 className="line-clamp-1 text-[11px] font-serif font-bold leading-snug text-[#1f1720] tracking-[-0.01em]">
+                      <h3 className="line-clamp-1 text-[11px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.015em]">
                         {wine.name}
                       </h3>
-                      <p className="mt-0.5 flex items-center gap-1 text-[9.5px] text-[#5a4f57]">
+                      <p className="mt-0.5 flex items-center gap-1 text-[9px] text-[#6a6170]">
                         <span className="font-semibold">{formatVintageLabel(wine.vintage)}</span>
-                        <span className="text-[#7e7380]">·</span>
+                        <span className="text-[#9a8fa0]">·</span>
                         <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
                       </p>
                     </div>
@@ -618,19 +618,19 @@ export default function CellarPage() {
 
                   {/* ── Middle: Status badges ── */}
                   {(status || wine.style) && (
-                    <div className="mb-[3px] flex flex-wrap items-center gap-1">
+                    <div className="mb-[2px] flex flex-wrap items-center gap-1">
                       {status && (
-                        <span className={cn("inline-flex items-center h-[21px] rounded-full border px-3 text-[10px] font-bold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.05)]", statusColor[status])}>
+                        <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2.5 text-[9px] font-bold tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", statusColor[status])}>
                           {statusLabel[status]}
                         </span>
                       )}
                       {wine.style && (
-                        <span className={cn("inline-flex items-center h-[21px] rounded-full border px-3 text-[10px] font-bold capitalize tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.05)]", getStyleBadgeClass(wine.style))}>
+                        <span className={cn("inline-flex items-center h-[18px] rounded-full border px-2.5 text-[9px] font-bold capitalize tracking-[-0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", getStyleBadgeClass(wine.style))}>
                           {wine.style}
                         </span>
                       )}
                       {wine.country && (
-                        <span className="inline-flex items-center h-[21px] rounded-full border border-white/60 bg-white/72 px-3 text-[10px] font-medium text-[#5b4f57] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                        <span className="inline-flex items-center h-[18px] rounded-full border border-white/60 bg-white/72 px-2.5 text-[9px] font-medium text-[#635968] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
                           {wine.country}
                         </span>
                       )}
@@ -638,16 +638,16 @@ export default function CellarPage() {
                   )}
 
                   {/* ── Bottom: Price + Quantity ── */}
-                  <div className="mb-[3px] flex items-baseline justify-between px-0.5">
+                  <div className="mb-[2px] flex items-baseline justify-between px-0.5">
                     <div>
-                      <p className="text-[7px] uppercase tracking-[0.08em] text-[#7b7079] mb-0.5 font-semibold">Preço</p>
-                      <p className="text-[11.5px] font-bold leading-none text-[#1f1720] tracking-[-0.02em]">
+                      <p className="text-[7px] uppercase tracking-[0.1em] text-[#85788b] mb-0.5 font-semibold">Preço</p>
+                      <p className="text-[11.5px] font-semibold leading-none text-[#17131a] tracking-[-0.02em]">
                         {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[7px] uppercase tracking-[0.08em] text-[#7b7079] mb-0.5 font-semibold">Qtd</p>
-                      <p className="text-[11.5px] font-bold leading-none text-[#1f1720]/88 tracking-[-0.02em]">{wine.quantity}</p>
+                      <p className="text-[7px] uppercase tracking-[0.1em] text-[#85788b] mb-0.5 font-semibold">Qtd</p>
+                      <p className="text-[11.5px] font-semibold leading-none text-[#17131a]/88 tracking-[-0.02em]">{wine.quantity}</p>
                     </div>
                   </div>
 
@@ -656,7 +656,7 @@ export default function CellarPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-[22px] flex-1 rounded-md text-[9px] font-semibold text-[#584c56] hover:text-primary hover:bg-primary/[0.08] transition-all duration-200"
+                      className="h-[20px] flex-1 rounded-md text-[9px] font-semibold text-[#584c56] hover:text-primary hover:bg-primary/[0.06] transition-all duration-200"
                       onClick={() => setConsumptionWine(wine)}
                     >
                       <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
@@ -664,7 +664,7 @@ export default function CellarPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-[22px] w-[22px] rounded-md p-0 text-[#7a6f78] hover:text-[#2f2730] hover:bg-black/[0.04] transition-all duration-200"
+                      className="h-[20px] w-[20px] rounded-md p-0 text-[#7a6f78] hover:text-[#2f2730] hover:bg-black/[0.04] transition-all duration-200"
                       onClick={() => setEditWine(wine)}
                       title="Editar"
                     >
@@ -673,7 +673,7 @@ export default function CellarPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-[22px] w-[22px] rounded-md p-0 text-[#7a6f78] hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
+                      className="h-[20px] w-[20px] rounded-md p-0 text-[#7a6f78] hover:text-destructive hover:bg-destructive/[0.06] transition-all duration-200"
                       onClick={() => setDeleteTarget(wine)}
                       title="Remover"
                     >
@@ -686,23 +686,23 @@ export default function CellarPage() {
                       <button
                         type="button"
                         onClick={() => setExpandedGroups((prev) => ({ ...prev, [wine.groupKey]: !prev[wine.groupKey] }))}
-                        className="inline-flex items-center gap-1 rounded-full border border-white/55 bg-white/70 px-2.5 py-1 text-[10px] font-semibold text-[#615763] backdrop-blur-sm transition-all duration-200 hover:border-primary/20 hover:text-primary/80"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/55 bg-white/72 px-2.5 py-0.5 text-[9px] font-semibold text-[#615763] backdrop-blur-sm transition-all duration-200 hover:border-primary/20 hover:text-primary/80"
                       >
                         {isExpanded ? "Ocultar" : `${wine.entries.length} registros`}
                       </button>
                       {isExpanded && (
-                        <div className="mt-2 space-y-1 rounded-xl border border-white/55 bg-white/58 p-2 backdrop-blur-[12px]">
+                        <div className="mt-2 space-y-1 rounded-xl border border-white/55 bg-white/74 p-2 backdrop-blur-[10px]">
                           {wine.entries.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/72 px-2.5 py-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/82 px-2.5 py-1.25 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
                               <div className="min-w-0">
-                                <p className="truncate text-[11px] font-semibold text-[#201920]">
+                                <p className="truncate text-[11px] font-semibold text-[#17131a]">
                                   {entry.cellar_location || "Sem localização"}
                                 </p>
-                                <p className="text-[9.5px] text-[#6b6068] font-medium">
+                                <p className="text-[9px] text-[#6b6068] font-medium">
                                   {formatVintageLabel(entry.vintage)} · {entry.quantity} gf
                                 </p>
                               </div>
-                              <span className="text-[10.5px] font-semibold text-primary/80">
+                              <span className="text-[10px] font-semibold text-primary/80">
                                 {entry.purchase_price != null ? `R$ ${entry.purchase_price.toFixed(0)}` : "—"}
                               </span>
                             </div>
