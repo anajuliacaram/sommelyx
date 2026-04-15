@@ -55,9 +55,9 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
 
 const statusLabel = { now: "Beber agora", past: "Beber em breve", young: "Em guarda" };
 const statusColor = {
-  now: "bg-emerald-500/14 text-emerald-950 border-emerald-500/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_1px_2px_rgba(16,185,129,0.08)]",
-  past: "bg-amber-500/14 text-amber-950 border-amber-500/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_1px_2px_rgba(245,158,11,0.08)]",
-  young: "bg-sky-500/14 text-sky-950 border-sky-500/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_1px_2px_rgba(14,165,233,0.08)]",
+  now: "bg-[rgba(31,122,87,0.10)] text-[hsl(152_42%_28%)] border-[rgba(31,122,87,0.16)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(16,185,129,0.05)]",
+  past: "bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)] border-[rgba(196,137,52,0.16)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(245,158,11,0.05)]",
+  young: "bg-[rgba(89,141,186,0.10)] text-[hsl(210_38%_30%)] border-[rgba(89,141,186,0.16)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(14,165,233,0.05)]",
 };
 
 function getWineTone(style?: string | null) {
@@ -72,14 +72,14 @@ function getWineTone(style?: string | null) {
 function getStyleBadgeClass(style?: string | null, compact = false) {
   const s = (style || "").toLowerCase();
   const sizing = compact
-    ? "min-h-[24px] rounded-full px-2.5 text-[8.5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(0,0,0,0.04)]"
-    : "min-h-[24px] rounded-full px-3 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_16px_-18px_rgba(0,0,0,0.20)]";
+    ? "min-h-[24px] rounded-full px-2.5 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.03)]"
+    : "min-h-[24px] rounded-full px-3 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.03)]";
 
-  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5A162E] via-[#641A31] to-[#451124] text-[#FBF7F8] border-[#8B4B61]/28 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
-  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F6F1E4] via-[#E8DDBC] to-[#D7C49A] text-[#59471E] border-[#E4D5B1]/60 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
-  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F2D9E1] via-[#DDA8B9] to-[#BF708A] text-[#4C2232] border-[#DCA7B8]/48 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
-  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F5EEDC] via-[#E6D7B4] to-[#D5C18D] text-[#5C4B2A] border-[#DECFAB]/60 group-hover:brightness-[1.03] group-hover:saturate-[0.92]`;
-  return `${sizing} bg-[rgba(255,255,255,0.84)] text-[#574f5c] border-white/48 group-hover:brightness-[1.02]`;
+  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5B1831] via-[#651D36] to-[#451326] text-[#FCF7F8] border-[rgba(113,52,72,0.22)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
+  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F7F2E6] via-[#E9DEBF] to-[#D7C99E] text-[#5A4A22] border-[rgba(216,198,154,0.58)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
+  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F4DCE3] via-[#E2B2C2] to-[#C87B95] text-[#4C2232] border-[rgba(220,167,184,0.46)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
+  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F6F0DD] via-[#E8DAB7] to-[#D6C48F] text-[#5B4C2A] border-[rgba(222,207,170,0.58)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
+  return `${sizing} bg-[rgba(255,255,255,0.82)] text-[#564d5c] border-white/40 group-hover:brightness-[1.02]`;
 }
 
 /** Returns inline style for wine-type accent on cards */

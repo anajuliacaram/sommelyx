@@ -58,13 +58,8 @@ const ratingBadgeClass = (r: number) =>
 
 const sourceBadgeClass = (source: Source) =>
   source === "cellar"
-    ? "bg-[rgba(43,122,90,0.12)] text-[hsl(152_44%_28%)] border-[rgba(43,122,90,0.22)]"
-    : "bg-[rgba(201,141,43,0.12)] text-[hsl(29_52%_32%)] border-[rgba(201,141,43,0.22)]";
-
-const sourceDotClass = (source: Source) =>
-  source === "cellar"
-    ? "bg-success"
-    : "bg-amber-500";
+    ? "bg-[rgba(31,122,87,0.10)] text-[hsl(152_42%_28%)] border-[rgba(31,122,87,0.16)]"
+    : "bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)] border-[rgba(196,137,52,0.16)]";
 
 type Period = "week" | "month" | "year" | "all";
 type Source = "all" | "cellar" | "external";
