@@ -744,10 +744,14 @@ export default function CellarPage() {
                 const status = drinkStatus(wine);
                 const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
                 return (
-                  <tr key={wine.id} className="transition-colors border-b border-[rgba(0,0,0,0.05)] last:border-0 border-l-[3px] hover:bg-[rgba(255,255,255,0.75)]" style={{ borderLeftColor: getWineTypeAccent(wine.style).borderLeftColor || 'transparent' }}>
-                    <td className="px-3 py-2">
+                  <tr
+                    key={wine.id}
+                    className="group transition-[transform,background-color,box-shadow,filter] duration-200 ease-out border-b border-[rgba(0,0,0,0.05)] last:border-0 border-l-[3px] hover:bg-[rgba(255,255,255,0.78)] hover:-translate-y-[1px] hover:shadow-[0_10px_20px_-18px_rgba(44,20,31,0.16)]"
+                    style={{ borderLeftColor: getWineTypeAccent(wine.style).borderLeftColor || 'transparent' }}
+                  >
+                    <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="h-9 w-7 shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted/20">
+                        <div className="h-9 w-7 shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted/20 transition-[filter,transform] duration-200 ease-out group-hover:brightness-[1.03]">
                           {coverImageUrl ? (
                             <img src={coverImageUrl} alt={wine.name} className="h-full w-full object-cover" loading="lazy" />
                           ) : (
@@ -755,39 +759,39 @@ export default function CellarPage() {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-bold text-foreground truncate max-w-[200px]">{wine.name}</p>
-                          <p className="text-[9px] text-muted-foreground">{[wine.producer, formatVintageLabel(wine.vintage), wine.country].filter(Boolean).join(" · ")}</p>
+                          <p className="text-[10.75px] font-semibold text-[#18131b] truncate max-w-[200px] tracking-[-0.015em]">{wine.name}</p>
+                          <p className="text-[8.75px] text-[#6e6573] leading-snug">{[wine.producer, formatVintageLabel(wine.vintage), wine.country].filter(Boolean).join(" · ")}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2 hidden sm:table-cell">
-                      <span className={cn("inline-flex items-center justify-center px-2.25 py-0.5 capitalize transition-all duration-200", getStyleBadgeClass(wine.style, true))}>{wine.style || "—"}</span>
+                    <td className="px-3 py-2.5 hidden sm:table-cell">
+                      <span className={cn("inline-flex items-center justify-center px-2.25 py-0.5 capitalize transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.03]", getStyleBadgeClass(wine.style, true))}>{wine.style || "—"}</span>
                     </td>
-                    <td className="px-3 py-2 text-right hidden md:table-cell">
-                      <span className="text-[10px] font-semibold text-[#66606d]">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>
+                    <td className="px-3 py-2.5 text-right hidden md:table-cell">
+                      <span className="text-[9.75px] font-semibold text-[#675f6e]">{wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}</span>
                     </td>
-                    <td className="px-3 py-2 text-center">
-                      <span className="text-[11px] font-semibold text-[#17131a]">{wine.quantity}</span>
+                    <td className="px-3 py-2.5 text-center">
+                      <span className="text-[10.75px] font-semibold text-[#17131a]">{wine.quantity}</span>
                     </td>
-                    <td className="px-3 py-2 text-center hidden md:table-cell">
+                    <td className="px-3 py-2.5 text-center hidden md:table-cell">
                       {status ? (
-                        <Badge variant="secondary" className={cn("text-[8.5px] h-[18px] px-1.75", statusColor[status])}>{statusLabel[status]}</Badge>
+                        <Badge variant="secondary" className={cn("text-[8.5px] h-[18px] px-1.75 transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.03]", statusColor[status])}>{statusLabel[status]}</Badge>
                       ) : <span className="text-[9px] text-muted-foreground">—</span>}
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="px-3 py-2.5 text-right">
                       <div className="flex gap-0.5 justify-end">
-                        <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
+                        <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
                           <UtensilsCrossed className="h-2.75 w-2.75" />
                         </Button>
                         {status === "now" && (
-                          <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
+                          <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
                             <GlassWater className="h-2.75 w-2.75" />
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" className="h-5.5 w-5.5 p-0" title="Editar" onClick={() => setEditWine(wine)}>
-                          <Pencil className="h-2.75 w-2.75 text-muted-foreground" />
+                        <Button size="sm" variant="ghost" className="h-5.5 w-5.5 p-0 text-[#7a6f78]/80 hover:text-[#2f2730] hover:bg-black/[0.05] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer" title="Editar" onClick={() => setEditWine(wine)}>
+                          <Pencil className="h-2.75 w-2.75" />
                         </Button>
-                        <Button size="sm" variant="danger" className="h-5.5 w-5.5 p-0" title="Remover" onClick={() => setDeleteTarget(wine)}>
+                        <Button size="sm" variant="danger" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Remover" onClick={() => setDeleteTarget(wine)}>
                           <Trash2 className="h-2.75 w-2.75" />
                         </Button>
                       </div>
