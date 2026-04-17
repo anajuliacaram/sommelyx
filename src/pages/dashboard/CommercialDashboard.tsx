@@ -390,15 +390,15 @@ export default function CommercialDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1280px] space-y-4">
+      <div className="max-w-[1280px] space-y-5 md:space-y-6">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="surface-clarity rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="surface-clarity rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[25px] font-semibold tracking-[-0.03em] text-foreground sm:text-[28px] font-serif">
+              <h1 className="text-[28px] font-semibold tracking-[-0.04em] text-foreground sm:text-[32px] font-serif">
                 Resumo da operação
               </h1>
-              <p className="mt-1 text-[13px] text-foreground/62 leading-relaxed">
+              <p className="mt-1.5 text-[13px] text-foreground/70 leading-relaxed">
                 {isFiltered
                   ? `${uniqueLabels} rótulos · ${totalBottles} garrafas · ${formatBRL(totalValue)}`
                   : `${totalBottles} un. em estoque`}
@@ -490,24 +490,24 @@ export default function CommercialDashboard() {
         {/* ─── Active Filter Context Bar ─── */}
         {isFiltered && !filtersOpen && (
           <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="surface-clarity flex items-center gap-2 flex-wrap rounded-xl px-4 py-2.5">
-              <span className="text-[11px] font-semibold text-foreground/68 shrink-0">Visualizando:</span>
+            <div className="surface-clarity flex items-center gap-2 flex-wrap rounded-xl px-4 py-3">
+              <span className="text-[11px] font-semibold text-foreground/72 shrink-0">Visualizando:</span>
               {activeFilterLabels.map(({ key, value }) => (
                 <button
                   key={`${key}-${value}`}
                   onClick={() => toggleFilter(key, value)}
-                  className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/15 transition-colors"
+                  className="inline-flex items-center gap-1 rounded-lg bg-primary/12 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/18 transition-colors"
                 >
                   {value}
                   <X className="h-2.5 w-2.5" />
                 </button>
               ))}
-              <span className="text-[11px] text-foreground/54">
+              <span className="text-[11px] text-foreground/60">
                 · {uniqueLabels} rótulos · {totalBottles} garrafas · {formatBRL(totalValue)}
               </span>
               <button
                 onClick={clearFilters}
-                className="ml-auto text-[10px] font-semibold text-foreground/54 hover:text-foreground transition-colors"
+                className="ml-auto text-[10px] font-semibold text-foreground/60 hover:text-foreground transition-colors"
               >
                 Limpar
               </button>
@@ -517,7 +517,7 @@ export default function CommercialDashboard() {
 
         {/* ─── KPI Strip ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
                 <div key={i} className="card-depth p-5">
@@ -568,7 +568,7 @@ export default function CommercialDashboard() {
           </div>
         ) : (
           <>
-          <div className="grid grid-cols-12 gap-4">
+          <div className="grid grid-cols-12 gap-4 md:gap-5">
               {/* ─── Stock Table ─── */}
               <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
                 <div className="chart-surface p-6">
@@ -700,7 +700,7 @@ export default function CommercialDashboard() {
 
             {/* ─── Breakdown Section ─── */}
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
                 {/* By Style */}
                 <div className="chart-surface p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -789,7 +789,7 @@ export default function CommercialDashboard() {
             </motion.div>
 
             {/* ─── Charts ─── */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3">
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
                 <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">

@@ -1,3 +1,4 @@
 VITE_SUPABASE_URL=https://enivxnikegzsshaiifdh.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_h4GrrrPOfJotos73NMkRgQ_2H59AzPf
+VITE_SUPABASE_ANON_KEY=sb_publishable_h4GrrrPOfJotos73NMkRgQ_2H59AzPf
 VITE_APP_URL=http://localhost:5173

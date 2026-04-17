@@ -68,8 +68,8 @@ async function resolveAccessToken(preferredToken?: string | null, forceRefresh =
   if (!forceRefresh && preferredToken) return preferredToken;
 
   if (!forceRefresh) {
-    const { data: sessionData } = await supabase.auth.getSession();
-    const currentToken = sessionData.session?.access_token ?? null;
+    const { data: { session } } = await supabase.auth.getSession();
+    const currentToken = session?.access_token ?? null;
     if (currentToken) return currentToken;
   }
 
@@ -93,6 +93,7 @@ export async function invokeEdgeFunction<T>(
         throw new EdgeFunctionError("Sessão expirada. Faça login novamente.", { status: 401, code: "AUTH_REQUIRED", retryable: false });
       }
 
+      console.log("payload", { function: name, body });
       const invokePromise = supabase.functions.invoke(name, {
         body,
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -171,6 +172,7 @@ export async function invokeEdgeFunction<T>(
         }
       }
 
+      console.log("response", { function: name, data });
       return data as T;
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : "";

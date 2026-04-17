@@ -4,8 +4,14 @@ import type { SupportedStorage, StorageKey } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { getRequiredClientEnv } from "@/lib/env";
 
-const SUPABASE_URL = getRequiredClientEnv("VITE_SUPABASE_URL");
-const SUPABASE_PUBLISHABLE_KEY = getRequiredClientEnv("VITE_SUPABASE_PUBLISHABLE_KEY");
+const DEFAULT_SUPABASE_URL = "https://example.supabase.co";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "demo_key";
+
+const SUPABASE_URL = getRequiredClientEnv("VITE_SUPABASE_URL") || DEFAULT_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY =
+  getRequiredClientEnv("VITE_SUPABASE_PUBLISHABLE_KEY") ||
+  getRequiredClientEnv("VITE_SUPABASE_ANON_KEY") ||
+  DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
 const memoryStorage = new Map<string, string>();
 

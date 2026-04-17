@@ -69,6 +69,8 @@ export interface PairingResponse {
   pairings: PairingResult[];
   wineProfile?: WineProfile | null;
   pairingLogic?: string | null;
+  fallback?: boolean;
+  fallbackReason?: string | null;
 }
 
 export interface WineSuggestionProfile {
@@ -97,6 +99,8 @@ export interface WineSuggestion {
 export interface SuggestionResponse {
   suggestions: WineSuggestion[];
   dishProfile?: DishProfile | null;
+  fallback?: boolean;
+  fallbackReason?: string | null;
 }
 
 export interface WineListPairing {
@@ -130,6 +134,8 @@ export interface WineListAnalysis {
   wines: WineListItem[];
   topPick: string | null;
   bestValue: string | null;
+  fallback?: boolean;
+  fallbackReason?: string | null;
 }
 
 export interface MenuDishItem {
@@ -149,12 +155,15 @@ export interface MenuAnalysis {
   dishes: MenuDishItem[];
   summary: string;
   wineProfile?: WineProfile | null;
+  fallback?: boolean;
+  fallbackReason?: string | null;
 }
 
 export interface TasteCompatibility {
   compatibility: number | null;
   label: string;
   reason: string;
+  fallback?: boolean;
 }
 
 export interface WineInsight {
@@ -700,6 +709,9 @@ export async function getWinePairings(wine: {
       { timeoutMs: 55_000, retries: 1 },
     );
     const data = await request();
+    if (data && (data as any).fallback === true) {
+      return data;
+    }
     const pairingContext = {
       wineName: wine.name,
       producer: wine.producer ?? null,
@@ -714,6 +726,9 @@ export async function getWinePairings(wine: {
     }
 
     const retryData = await request().catch(() => null);
+    if (retryData && (retryData as any).fallback === true) {
+      return retryData;
+    }
     if (retryData && isValidPairings(retryData) && validateWineSpecificity(retryData, "pairings", pairingContext.wineName, pairingContext)) {
       return retryData;
     }
@@ -752,11 +767,17 @@ export async function getDishWineSuggestions(
       { timeoutMs: 55_000, retries: 1 },
     );
     const data = await request();
+    if (data && (data as any).fallback === true) {
+      return data;
+    }
     if (isValidSuggestions(data) && validateWineSpecificity(data, "suggestions", undefined, { dish })) {
       return data;
     }
 
     const retryData = await request().catch(() => null);
+    if (retryData && (retryData as any).fallback === true) {
+      return retryData;
+    }
     if (retryData && isValidSuggestions(retryData) && validateWineSpecificity(retryData, "suggestions", undefined, { dish })) {
       return retryData;
     }
@@ -788,10 +809,16 @@ export async function analyzeWineList(
       { timeoutMs: 45_000, retries: 1 },
     );
     const data = await request();
+    if (data && (data as any).fallback === true) {
+      return data;
+    }
     if (data && Array.isArray(data.wines) && data.wines.length > 0 && validateWineSpecificity(data, "wineList")) {
       return data;
     }
     const retryData = await request().catch(() => null);
+    if (retryData && (retryData as any).fallback === true) {
+      return retryData;
+    }
     if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0 && validateWineSpecificity(retryData, "wineList")) {
       return retryData;
     }
@@ -819,10 +846,16 @@ export async function analyzeMenuForWine(
       { timeoutMs: 45_000, retries: 1 },
     );
     const data = await request();
+    if (data && (data as any).fallback === true) {
+      return data;
+    }
     if (data && Array.isArray(data.dishes) && data.dishes.length > 0 && validateWineSpecificity(data, "menu", { wineName })) {
       return data;
     }
     const retryData = await request().catch(() => null);
+    if (retryData && (retryData as any).fallback === true) {
+      return retryData;
+    }
     if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0 && validateWineSpecificity(retryData, "menu", { wineName })) {
       return retryData;
     }
@@ -866,6 +899,9 @@ export async function getTasteCompatibility(
       },
       { timeoutMs: 8_000, retries: 1 },
     );
+    if (data && (data as any).fallback === true) {
+      return data;
+    }
     if (data && typeof data.compatibility === "number") {
       return data;
     }

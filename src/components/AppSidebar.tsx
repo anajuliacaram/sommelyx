@@ -107,24 +107,23 @@ export function AppSidebar() {
             <div className="shrink-0">
               {!logoBroken ? (
                 <Logo
-                  variant="navbar"
+                  variant="compact"
                   alt="Sommelyx"
                   onError={() => setLogoBroken(true)}
-                  className="h-12 sm:h-14 md:h-16 w-auto select-none object-contain opacity-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.28)]"
+                  className="h-10 w-10 select-none object-contain opacity-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.28)]"
+                  style={{ transform: "none" }}
                 />
               ) : (
-                <span className="text-[18px] font-semibold tracking-[-0.03em] text-[#F7F4EE]">
-                  Sommelyx
-                </span>
+                <span className="text-[18px] font-semibold tracking-[-0.03em] text-[#F7F4EE]">S</span>
               )}
             </div>
-            <div className="flex min-w-0 flex-1 flex-col items-start justify-center py-0.5">
-              <span className="block text-[24px] sm:text-[26px] font-semibold tracking-[-0.04em] leading-[0.95] whitespace-nowrap text-[#F7F4EE]">
+            <div className="flex min-w-0 flex-1 flex-col items-start justify-center">
+              <span className="block font-serif text-[20px] sm:text-[22px] font-semibold tracking-tight leading-none whitespace-nowrap text-[#F7F4EE]">
                 Sommelyx
               </span>
               <span
                 className={[
-                  "mt-[7px] h-5 px-2.5 rounded-full border text-[9px] font-semibold tracking-[0.12em]",
+                  "mt-1 inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.12em] whitespace-nowrap",
                   isCommercial
                     ? "bg-[rgba(255,255,255,0.18)] text-[#F7F4EE] border-[rgba(255,255,255,0.14)]"
                     : "bg-[rgba(255,255,255,0.18)] text-[#F7F4EE] border-[rgba(255,255,255,0.14)]",

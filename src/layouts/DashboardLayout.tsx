@@ -40,14 +40,14 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="relative isolate h-12 flex items-center px-4 md:px-6 gap-3 sticky top-0 z-30 overflow-hidden"
+            className="relative isolate h-16 flex items-center px-5 md:px-7 gap-4 sticky top-0 z-30 overflow-hidden border-b border-[rgba(95,111,82,0.08)] bg-[rgba(248,245,239,0.78)] backdrop-blur-xl shadow-[0_10px_24px_-22px_rgba(58,51,39,0.18)]"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "rounded-xl h-8 w-8 border border-white/8 bg-white/5 text-white/70 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 [&>svg]:h-3.5 [&>svg]:w-3.5",
+                    "rounded-xl h-9 w-9 border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.72)] text-foreground/70 shadow-none hover:bg-[rgba(255,255,255,0.88)] hover:text-foreground hover:border-[rgba(95,111,82,0.16)] [&>svg]:h-3.5 [&>svg]:w-3.5",
                   )}
                 />
               )}
@@ -56,7 +56,7 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "rounded-xl h-9 min-w-[72px] px-2.5 gap-1.5 border border-white/8 bg-white/5 text-white/80 shadow-none hover:bg-white/10 hover:text-white hover:border-white/12 active:scale-95 transition-transform duration-150 [&>svg]:h-4 [&>svg]:w-4",
+                    "rounded-xl h-10 min-w-[78px] px-3 gap-1.5 border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.72)] text-foreground/80 shadow-none hover:bg-[rgba(255,255,255,0.88)] hover:text-foreground hover:border-[rgba(95,111,82,0.16)] active:scale-95 transition-transform duration-150 [&>svg]:h-4 [&>svg]:w-4",
                   )}
                 >
                   <span className="text-[13px] font-semibold leading-none">Menu</span>
@@ -89,8 +89,8 @@ export default function DashboardLayout() {
                   className={cn(
                     "hidden sm:inline-flex items-center h-7 px-3 shrink-0 whitespace-nowrap rounded-full text-[10px] font-bold uppercase tracking-[0.08em]",
                     profileType === "commercial"
-                      ? "bg-[rgba(198,161,110,0.15)] text-[rgba(220,190,150,0.9)] border border-[rgba(198,161,110,0.20)]"
-                      : "bg-[rgba(123,30,43,0.18)] text-[rgba(230,180,185,0.9)] border border-[rgba(123,30,43,0.25)]",
+                      ? "bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))] border border-[rgba(95,111,82,0.14)]"
+                      : "bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))] border border-[rgba(95,111,82,0.14)]",
                   )}
                 >
                   {profileType === "commercial" ? "COMERCIAL" : "PESSOAL"}
@@ -101,7 +101,7 @@ export default function DashboardLayout() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setAlertsOpen(true)}
-                  className="h-8 w-8 rounded-xl relative text-white/60 hover:text-white hover:bg-white/8"
+                  className="h-9 w-9 rounded-xl relative text-foreground/60 hover:text-foreground hover:bg-[rgba(255,255,255,0.8)]"
                   title="Alertas"
                 >
                   <Bell className="h-4.5 w-4.5" />
@@ -116,7 +116,7 @@ export default function DashboardLayout() {
                   type="button"
                   variant="primary"
                   size="icon"
-                  className="h-8 w-8 rounded-xl p-0 text-[11px] font-semibold"
+                  className="h-9 w-9 rounded-xl p-0 text-[11px] font-semibold shadow-[0_10px_24px_-18px_hsl(var(--primary)/0.26)]"
                   onClick={() => navigate("/dashboard/settings")}
                 >
                   {initials}
@@ -125,7 +125,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-5 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-7 lg:px-10">
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-6 pb-[calc(18px+env(safe-area-inset-bottom))] md:px-7 lg:px-10">
             <AnimatedOutlet />
           </div>
         </main>
