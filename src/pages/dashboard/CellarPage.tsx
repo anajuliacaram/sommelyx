@@ -23,6 +23,8 @@ import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { cn } from "@/lib/utils";
+import { getWinePairings, type PairingResult } from "@/lib/sommelier-ai";
+import { AnimatePresence } from "framer-motion";
 const MOBILE_BREAKPOINT = 640;
 function useIsSmallScreen() {
   const [small, setSmall] = useState(false);
@@ -53,10 +55,10 @@ function drinkStatus(w: { drink_from: number | null; drink_until: number | null 
   return null;
 }
 
-const statusLabel = { now: "Beber agora", past: "Beber em breve", young: "Em guarda" };
+const statusLabel = { now: "Beber agora", past: "Pode ter perdido seu auge", young: "Guardar" };
 const statusColor = {
-  now: "bg-[rgba(31,122,87,0.10)] text-[hsl(152_42%_28%)] border-[rgba(31,122,87,0.16)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(16,185,129,0.05)]",
-  past: "bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)] border-[rgba(196,137,52,0.16)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(245,158,11,0.05)]",
+  now: "bg-[rgba(47,116,79,0.10)] text-[hsl(152_38%_26%)] border-[rgba(47,116,79,0.16)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(16,185,129,0.05)]",
+  past: "bg-[rgba(243,234,221,0.94)] text-[hsl(28_7%_42%)] border-[rgba(180,160,137,0.22)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(245,158,11,0.04)]",
   young: "bg-[rgba(89,141,186,0.10)] text-[hsl(210_38%_30%)] border-[rgba(89,141,186,0.16)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_2px_rgba(14,165,233,0.05)]",
 };
 
@@ -80,6 +82,243 @@ function getStyleBadgeClass(style?: string | null, compact = false) {
   if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F4DCE3] via-[#E2B2C2] to-[#C87B95] text-[#4C2232] border-[rgba(220,167,184,0.46)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
   if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F6F0DD] via-[#E8DAB7] to-[#D6C48F] text-[#5B4C2A] border-[rgba(222,207,170,0.58)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
   return `${sizing} bg-[rgba(255,255,255,0.82)] text-[#564d5c] border-white/40 group-hover:brightness-[1.02]`;
+}
+
+function getCardTypeTagClass(style?: string | null) {
+  const s = (style || "").toLowerCase();
+  const base = "inline-flex min-h-[24px] items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-medium leading-none tracking-[-0.01em] border shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]";
+  if (s.includes("tinto")) return `${base} bg-red-50 text-red-700 border-red-100`;
+  if (s.includes("branco")) return `${base} bg-amber-50 text-amber-700 border-amber-100`;
+  if (s.includes("espum")) return `${base} bg-yellow-50 text-yellow-700 border-yellow-100`;
+  if (s.includes("rose") || s.includes("rosé")) return `${base} bg-pink-50 text-pink-700 border-pink-100`;
+  return `${base} bg-neutral-100 text-neutral-600 border-neutral-200`;
+}
+
+function getPriorityTagClass() {
+  return "inline-flex min-h-[24px] items-center justify-center rounded-full border border-[rgba(31,122,87,0.18)] bg-[rgba(31,122,87,0.12)] px-3 py-1.5 text-[11px] font-medium leading-none tracking-[-0.01em] text-[hsl(152_42%_28%)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]";
+}
+
+type SmartCellarStatusKey = "ready" | "soon" | "hold" | "past" | "pronto";
+
+type SmartCellarStatus = {
+  key: SmartCellarStatusKey;
+  label: string;
+  badgeClass: string;
+  hint: string;
+};
+
+type CardAiState = {
+  open: boolean;
+  loading: boolean;
+  error: string | null;
+  source: "ai" | "fallback" | null;
+  pairingLogic: string | null;
+  pairings: PairingResult[];
+};
+
+function getStyleFamily(style?: string | null) {
+  const s = (style || "").toLowerCase();
+  if (s.includes("tinto")) return "tinto";
+  if (s.includes("branco")) return "branco";
+  if (s.includes("espum")) return "espumante";
+  if (s.includes("rose") || s.includes("rosé")) return "rosé";
+  if (s.includes("fortif")) return "fortificado";
+  return "neutro";
+}
+
+function getSmartCellarStatus(wine: Pick<WineType, "drink_from" | "drink_until" | "vintage" | "style">): SmartCellarStatus {
+  const styleFamily = getStyleFamily(wine.style);
+  const age = wine.vintage ? currentYear - wine.vintage : null;
+
+  if (!wine.vintage && !wine.drink_from && !wine.drink_until) {
+    return {
+      key: "pronto",
+      label: "Pronto",
+      badgeClass: "bg-green-100 text-green-800 border-green-200",
+      hint: "Momento ideal para abrir.",
+    };
+  }
+
+  if (wine.drink_from || wine.drink_until) {
+    if (wine.drink_until && currentYear > wine.drink_until) {
+      return {
+        key: "past",
+        label: "Pode ter perdido seu auge",
+        badgeClass: "bg-neutral-100 text-neutral-600 border-neutral-200",
+        hint: "Talvez tenha passado do ponto ideal.",
+      };
+    }
+    if (wine.drink_from && currentYear < wine.drink_from) {
+      return {
+        key: "hold",
+        label: "Guardar",
+        badgeClass: "bg-blue-50 text-blue-700 border-blue-100",
+        hint: "Ainda pede um pouco de guarda.",
+      };
+    }
+    if (wine.drink_until && wine.drink_until - currentYear <= 1) {
+      return {
+        key: "soon",
+        label: "Beber em breve",
+        badgeClass: "bg-amber-50 text-amber-700 border-amber-100",
+        hint: "Melhor abrir em breve.",
+      };
+    }
+    return {
+      key: "ready",
+      label: "Beber agora",
+      badgeClass: "bg-green-100 text-green-800 border-green-200",
+      hint: "Janela ideal de consumo.",
+    };
+  }
+
+  if (age == null) {
+    return {
+      key: "pronto",
+      label: "Pronto",
+      badgeClass: "bg-neutral-100 text-neutral-600 border-neutral-200",
+      hint: "Sem safra suficiente para estimativa.",
+    };
+  }
+
+  const thresholds: Record<string, { hold: number; ready: number; soon: number }> = {
+    tinto: { hold: 2, ready: 8, soon: 12 },
+    branco: { hold: 1, ready: 4, soon: 6 },
+    espumante: { hold: 1, ready: 3, soon: 5 },
+    rosé: { hold: 1, ready: 3, soon: 4 },
+    fortificado: { hold: 3, ready: 12, soon: 18 },
+    neutro: { hold: 2, ready: 6, soon: 9 },
+  };
+  const limits = thresholds[styleFamily];
+
+  if (age < limits.hold) {
+    return {
+      key: "hold",
+      label: "Guardar",
+      badgeClass: "bg-blue-50 text-blue-700 border-blue-100",
+      hint: "Ainda tende a ganhar com guarda.",
+    };
+  }
+  if (age <= limits.ready) {
+    return {
+      key: "ready",
+      label: "Beber agora",
+      badgeClass: "bg-green-100 text-green-800 border-green-200",
+      hint: "Momento ideal para abrir.",
+    };
+  }
+  if (age <= limits.soon) {
+    return {
+      key: "soon",
+      label: "Beber em breve",
+      badgeClass: "bg-amber-50 text-amber-700 border-amber-100",
+      hint: "Começa a pedir atenção.",
+    };
+  }
+  return {
+    key: "past",
+    label: "Pode ter perdido seu auge",
+    badgeClass: "bg-neutral-100 text-neutral-600 border-neutral-200",
+    hint: "Talvez tenha passado do ponto ideal.",
+  };
+}
+
+function buildLocalCellarInsight(wine: Pick<WineType, "style" | "grape" | "region" | "country" | "vintage" | "drink_from" | "drink_until">, status: SmartCellarStatus) {
+  const family = getStyleFamily(wine.style);
+  const age = wine.vintage ? currentYear - wine.vintage : null;
+  const region = wine.region || wine.country;
+
+  if (status.key === "past") {
+    if (family === "tinto") return "Pode ter perdido seu auge: funciona melhor com carnes braseadas, cogumelos e molhos reduzidos.";
+    if (family === "branco") return "Pode ter perdido seu auge: fica mais confortável com pratos cremosos, delicados e pouco agressivos.";
+    if (family === "espumante") return "Pode ter perdido seu auge: ainda pode acompanhar frituras, sal e entradas crocantes com alguma elegância.";
+    return "Pode ter perdido seu auge: prefira pratos de maior intensidade e textura para equilibrar a evolução.";
+  }
+
+  if (status.key === "soon") {
+    if (family === "tinto") return "Beber em breve: carnes grelhadas, cogumelos e ragu mantêm o vinho em boa companhia.";
+    if (family === "branco") return "Beber em breve: combina especialmente com pratos de textura média, como massas leves, aves grelhadas e preparações com molho branco.";
+    if (family === "espumante") return "Beber em breve: petiscos salinos, ostras e entradas crocantes preservam a energia do vinho.";
+    return "Beber em breve: pratos equilibrados e de textura macia ajudam a mostrar seu melhor lado.";
+  }
+
+  if (status.key === "hold") {
+    if (family === "tinto") return "Guardar: ainda pode ganhar profundidade, especialmente se for acompanhado por pratos de textura mais suave.";
+    if (family === "branco") return "Guardar: ainda está jovem, então prefira pratos frescos, ácidos e pouco gordurosos.";
+    if (family === "espumante") return "Guardar: vale mais tempo de garrafa, ou serviço em contexto leve e frio.";
+    return "Guardar: ainda está em construção; dê tempo ou acompanhe com pratos discretos.";
+  }
+
+  if (family === "tinto") {
+    return `Momento ideal para abrir: carnes, cogumelos ou ragu${region ? ` ajudam a traduzir melhor a ${region}` : ""}.`;
+  }
+  if (family === "branco") {
+    return `Momento ideal para abrir: peixe, aves e massas leves${region ? `, especialmente se vier de ${region}` : ""}.`;
+  }
+  if (family === "espumante") {
+    return `Momento ideal para abrir: frituras, ostras e petiscos salgados${age != null ? `, mantendo frescor mesmo com ${age} anos` : ""}.`;
+  }
+  if (family === "rosé") {
+    return `Momento ideal para abrir: saladas, frango e pratos mediterrâneos${region ? `, com eco de ${region}` : ""}.`;
+  }
+  return "Momento ideal para abrir com pratos de textura média e acidez equilibrada.";
+}
+
+function buildFallbackPairings(wine: WineType): PairingResult[] {
+  const family = getStyleFamily(wine.style);
+  const familyMap: Record<string, Array<{ dish: string; reason: string; label: string }>> = {
+    tinto: [
+      { dish: "Picanha grelhada", reason: "Tanino e gordura se encontram com mais equilíbrio em carne suculenta.", label: "gordura + estrutura" },
+      { dish: "Ragu de cogumelos", reason: "A textura terrosa acompanha a profundidade de um tinto.", label: "umami + corpo" },
+      { dish: "Massa ao molho vermelho", reason: "A acidez do molho ajuda a manter o vinho vivo no paladar.", label: "acidez + molho" },
+      { dish: "Cordeiro assado", reason: "A intensidade do prato pede um vinho com presença de boca.", label: "intensidade + intensidade" },
+      { dish: "Queijo curado", reason: "O sal e a untuosidade equilibram a estrutura do vinho.", label: "sal + tanino" },
+    ],
+    branco: [
+      { dish: "Peixe grelhado", reason: "A acidez limpa a textura delicada e preserva frescor.", label: "frescor + leveza" },
+      { dish: "Frango com ervas", reason: "Ervas e leveza pedem um branco mais preciso e elegante.", label: "ervas + precisão" },
+      { dish: "Risoto de limão", reason: "A cremosidade ganha corte com a acidez do vinho.", label: "cremosidade + corte" },
+      { dish: "Queijo de cabra", reason: "O sal do queijo e o frescor do vinho se encontram bem.", label: "sal + acidez" },
+      { dish: "Camarão", reason: "Fruto do mar e branco seco costumam andar no mesmo ritmo.", label: "mar + frescor" },
+    ],
+    espumante: [
+      { dish: "Ostras", reason: "Bolha e salinidade criam limpeza imediata no paladar.", label: "bolha + iodo" },
+      { dish: "Tempurá", reason: "A carbonatação corta a fritura com facilidade.", label: "fritura + bolha" },
+      { dish: "Queijo brie", reason: "A cremosidade do queijo pede contraste de acidez e gás.", label: "cremosidade + acidez" },
+      { dish: "Petiscos salgados", reason: "Salgado e crocância reforçam a sensação de frescor.", label: "sal + crocância" },
+      { dish: "Frango crocante", reason: "A textura frita melhora com bolha fina e final seco.", label: "crocância + corte" },
+    ],
+    rosé: [
+      { dish: "Salmão grelhado", reason: "A gordura delicada do peixe pede um rosé fresco e versátil.", label: "gordura leve + frescor" },
+      { dish: "Frango assado", reason: "Peso médio e tempero leve deixam espaço para a fruta do rosé.", label: "peso médio" },
+      { dish: "Salada com queijo", reason: "Frescor e leveza equilibram sal e folhas.", label: "salada + frescor" },
+      { dish: "Tábua de frios", reason: "Petiscos frios funcionam com fruta e acidez moderadas.", label: "petisco + fruta" },
+      { dish: "Cozinha mediterrânea", reason: "Ervas e tomate pedem um vinho mais ágil e relaxado.", label: "ervas + tomate" },
+    ],
+    fortificado: [
+      { dish: "Queijo azul", reason: "Doçura e sal são a chave para esse estilo.", label: "doce + sal" },
+      { dish: "Chocolate amargo", reason: "A intensidade do cacau pede mais volume e persistência.", label: "cacau + persistência" },
+      { dish: "Pudim de caramelo", reason: "Caramelo e concentração encontram o lado doce do vinho.", label: "caramelo + doçura" },
+      { dish: "Nozes", reason: "Fruta seca ecoa os aromas mais oxidados do fortificado.", label: "fruta seca" },
+      { dish: "Tarte de amêndoas", reason: "A estrutura densa do doce pede um vinho igualmente intenso.", label: "intensidade + doçura" },
+    ],
+    neutro: [
+      { dish: "Massa ao sugo", reason: "Um prato de base simples deixa o vinho aparecer sem atrito.", label: "base + equilíbrio" },
+      { dish: "Frango grelhado", reason: "Textura moderada e preparo limpo funcionam sem exagero.", label: "simples + limpo" },
+      { dish: "Cogumelos", reason: "Umami e textura ajudam a dar direção ao conjunto.", label: "umami + textura" },
+      { dish: "Queijo suave", reason: "Sal e gordura leves organizam o paladar.", label: "sal + gordura" },
+      { dish: "Legumes assados", reason: "Assado e vegetal mantêm o vinho em bom ritmo.", label: "vegetal + assado" },
+    ],
+  };
+
+  return (familyMap[family] || familyMap.neutro).slice(0, 5).map((item, index) => ({
+    dish: item.dish,
+    reason: item.reason,
+    match: index === 0 ? "perfeito" : index < 3 ? "muito bom" : "bom",
+    harmony_type: index === 0 ? "equilíbrio" : index === 1 ? "complemento" : "contraste",
+    harmony_label: item.label,
+    category: index === 0 ? "classico" : "afinidade",
+  }));
 }
 
 /** Returns inline style for wine-type accent on cards */
@@ -122,8 +361,8 @@ function WineImageThumb({
   }, [src]);
 
   const wrapperClassName = compact
-    ? "relative h-[114px] sm:h-[120px] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20"
-    : "relative h-[132px] sm:h-[140px] overflow-hidden rounded-[16px] border border-border/20 bg-muted/20";
+    ? "relative h-[104px] sm:h-[110px] overflow-hidden rounded-[20px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(244,241,236,0.82)_100%)] shadow-[0_14px_28px_-22px_rgba(58,51,39,0.18)]"
+    : "relative h-[132px] sm:h-[140px] overflow-hidden rounded-[20px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(244,241,236,0.82)_100%)] shadow-[0_14px_28px_-22px_rgba(58,51,39,0.18)]";
 
   return (
     <div className={wrapperClassName}>
@@ -145,14 +384,15 @@ function WineImageThumb({
         </>
       ) : (
         <div className={cn("relative flex h-full w-full items-center justify-center overflow-hidden", toneClassName)}>
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10" />
-          <div className="relative flex flex-col items-center gap-1 px-2 text-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/16 text-white/90 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.95),rgba(95,111,82,0.10)_56%,rgba(255,255,255,0.78)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/18 via-transparent to-black/5" />
+          <div className="relative flex flex-col items-center gap-1.5 px-2 text-center">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/50 bg-white/55 text-[hsl(var(--primary))] shadow-[0_8px_18px_-12px_rgba(58,51,39,0.26)] backdrop-blur-md">
               <Wine className="h-3.5 w-3.5" />
             </div>
-            <p className="text-[8px] font-semibold uppercase tracking-[0.14em] text-white/80">
-              Sem imagem
-            </p>
+            <div className="rounded-full border border-white/50 bg-white/45 px-2.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-foreground/70 backdrop-blur-sm">
+              Cover indisponível
+            </div>
           </div>
         </div>
       )}
@@ -170,9 +410,9 @@ const styleOptions = [
 ];
 
 const drinkWindowOptions = [
-  { value: "now", label: "Pronto para beber" },
-  { value: "young", label: "Pode estar muito jovem" },
-  { value: "past", label: "Pode ter passado do pico" },
+  { value: "now", label: "Beber agora" },
+  { value: "young", label: "Guardar" },
+  { value: "past", label: "Pode ter perdido seu auge" },
 ];
 
 type CellarWineGroup = WineType & {
@@ -215,6 +455,7 @@ export default function CellarPage() {
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [consumptionWine, setConsumptionWine] = useState<WineType | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [cardAiStates, setCardAiStates] = useState<Record<string, CardAiState>>({});
   const isMobile = useIsSmallScreen();
 
   // Derive dynamic filter options from wine data
@@ -312,6 +553,96 @@ export default function CellarPage() {
       };
     });
   }, [wines]);
+
+  const getCardAiState = (id: string): CardAiState => cardAiStates[id] || {
+    open: false,
+    loading: false,
+    error: null,
+    source: null,
+    pairingLogic: null,
+    pairings: [],
+  };
+
+  const toggleCardAi = async (wine: CellarWineGroup) => {
+    const current = getCardAiState(wine.id);
+    if (current.open) {
+      setCardAiStates((prev) => ({
+        ...prev,
+        [wine.id]: { ...current, open: false },
+      }));
+      return;
+    }
+
+    setCardAiStates((prev) => ({
+      ...prev,
+      [wine.id]: {
+        ...current,
+        open: true,
+        loading: current.pairings.length === 0 && current.source !== "fallback",
+        error: null,
+      },
+    }));
+
+    if (current.pairings.length > 0) return;
+
+    try {
+      const result = await getWinePairings({
+        name: wine.name,
+        style: wine.style,
+        grape: wine.grape,
+        region: wine.region,
+        producer: wine.producer,
+        vintage: wine.vintage,
+        country: wine.country,
+      });
+
+      setCardAiStates((prev) => ({
+        ...prev,
+        [wine.id]: {
+          open: true,
+          loading: false,
+          error: null,
+          source: result.fallback ? "fallback" : "ai",
+          pairingLogic: result.pairingLogic || buildLocalCellarInsight(wine, getSmartCellarStatus(wine)),
+          pairings: (result.pairings || []).slice(0, 5),
+        },
+      }));
+    } catch (error) {
+      const fallbackPairings = buildFallbackPairings(wine);
+      setCardAiStates((prev) => ({
+        ...prev,
+        [wine.id]: {
+          open: true,
+          loading: false,
+          error: error instanceof Error ? error.message : "Não foi possível carregar sugestões agora.",
+          source: "fallback",
+          pairingLogic: buildLocalCellarInsight(wine, getSmartCellarStatus(wine)),
+          pairings: fallbackPairings,
+        },
+      }));
+    }
+  };
+
+  const toggleCardInsight = (wine: CellarWineGroup) => {
+    const current = getCardAiState(wine.id);
+    setCardAiStates((prev) => ({
+      ...prev,
+      [wine.id]: {
+        ...current,
+        open: !current.open,
+      },
+    }));
+    if (!current.open && current.pairings.length === 0 && !current.loading) {
+      void toggleCardAi(wine);
+    }
+  };
+
+  const handleRecipeClick = (dish: string) => {
+    toast({
+      title: "Ver receita",
+      description: `Receita de ${dish} em breve.`,
+    });
+  };
 
 
   const clearFilters = () => {
@@ -588,6 +919,9 @@ export default function CellarPage() {
         <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {filtered.map((wine, i) => {
             const status = drinkStatus(wine);
+            const smartStatus = getSmartCellarStatus(wine);
+            const aiState = getCardAiState(wine.id);
+            const cardInsight = buildLocalCellarInsight(wine, smartStatus);
             const isExpanded = !!expandedGroups[wine.groupKey];
             const hasGroupDetails = wine.entries.length > 1;
             const hasPriceVariance = wine.distinctPriceCount > 1;
@@ -595,7 +929,7 @@ export default function CellarPage() {
             return (
               <motion.div
                 key={wine.id}
-                className="group relative flex h-full min-h-[352px] flex-col overflow-hidden wine-card-glass px-[6px] py-[6px] transition-[transform,box-shadow,filter] duration-200 ease-out border-l-[3px] cursor-pointer hover:-translate-y-[2px] hover:shadow-[0_18px_34px_-26px_rgba(44,20,31,0.24)]"
+                className="group relative flex h-full min-h-[312px] flex-col overflow-hidden wine-card-glass px-[4px] py-[3px] transition-[transform,box-shadow,filter] duration-200 ease-out border-l-[3px] cursor-pointer hover:-translate-y-[2px] hover:shadow-[0_18px_34px_-26px_rgba(44,20,31,0.24)]"
                 style={getWineTypeAccent(wine.style)}
                 onMouseEnter={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccentHover(wine.style)); }}
                 onMouseLeave={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccent(wine.style)); }}
@@ -607,88 +941,173 @@ export default function CellarPage() {
                   <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} compact />
                 </div>
 
-                <div className="mt-0.75 flex flex-1 min-h-0 flex-col rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-2 shadow-[0_14px_32px_-26px_rgba(44,20,31,0.28)] backdrop-blur-[12px]">
-                  {/* ── Top: Name + Vintage + Region ── */}
-                  <div className="flex items-start gap-1 mb-0.5">
+                <div className="mt-0.25 flex flex-1 min-h-0 flex-col rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-[5px] shadow-[0_14px_32px_-26px_rgba(44,20,31,0.28)] backdrop-blur-[12px]">
+                  {/* ── Top: Name + Status ── */}
+                  <div className="mb-0.75 flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <h3 className="line-clamp-1 text-[11.75px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.018em]">
+                      <h3 className="line-clamp-1 text-[12.5px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.018em]">
                         {wine.name}
                       </h3>
-                      <p className="mt-0.5 flex items-center gap-1 text-[9px] text-[#6e6573]">
+                      <p className="mt-0.5 flex items-center gap-1 text-[8.75px] text-[#6e6573]">
                         <span className="font-semibold text-[#544a59]">{formatVintageLabel(wine.vintage)}</span>
                         <span className="text-[#9a8fa0]">·</span>
                         <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
                       </p>
                     </div>
+                    <span className={cn("inline-flex shrink-0 items-center justify-center rounded-full border px-2.5 py-1 text-[10.5px] sm:text-[11px] font-semibold leading-none tracking-[-0.01em]", smartStatus.badgeClass)}>
+                      {smartStatus.label}
+                    </span>
                   </div>
 
-                  {/* ── Middle: Status + Wine type badges ── */}
-                  <div className="mb-0.5 flex flex-wrap items-stretch gap-1">
-                    {status && (
-                      <span className={cn(
-                        "inline-flex min-h-[22px] items-center justify-center rounded-full border px-2.5 text-[8.5px] font-semibold tracking-[0.01em] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]",
-                        statusColor[status]
-                      )}>
-                        {statusLabel[status]}
-                      </span>
-                    )}
-                    {wine.style && (
-                    <span className={cn(
-                        "inline-flex min-h-[28px] min-w-[84px] items-center justify-center rounded-[14px] border px-3.25 text-[9.5px] font-semibold capitalize tracking-[-0.01em] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.03]",
-                        getStyleBadgeClass(wine.style)
-                      )}>
-                        {wine.style}
-                      </span>
-                    )}
-                    {wine.country && (
-                      <span className="inline-flex min-h-[22px] items-center justify-center rounded-full border border-white/60 bg-white/80 px-2.5 text-[8.5px] font-semibold text-[#645b69] backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]">
-                        {wine.country}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* ── Bottom: Price + Quantity ── */}
-                  <div className="mb-0.5 flex items-baseline justify-between px-0.5">
-                    <div>
-                      <p className="text-[6.75px] uppercase tracking-[0.11em] text-[#908595] mb-0.5 font-medium">Preço</p>
-                      <p className="text-[12px] font-semibold leading-none text-[#17131a] tracking-[-0.018em]">
-                        {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
-                      </p>
+                  {/* ── Middle: Tags + AI insight ── */}
+                  <div className="mb-0.75 space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      {wine.style && (
+                        <span className={getCardTypeTagClass(wine.style)}>
+                          {wine.style}
+                        </span>
+                      )}
+                      {wine.country && (
+                        <span className="inline-flex min-h-[24px] items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-[11px] font-medium leading-none text-neutral-600 shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]">
+                          {wine.country}
+                        </span>
+                      )}
+                      {wine.grape && (
+                        <span className="inline-flex min-h-[24px] items-center justify-center rounded-full border border-white/60 bg-white/78 px-3 py-1.5 text-[11px] font-medium leading-none text-[#645b69] shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]">
+                          {wine.grape}
+                        </span>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-[6.75px] uppercase tracking-[0.11em] text-[#908595] mb-0.5 font-medium">Qtd</p>
-                      <p className="text-[12px] font-semibold leading-none text-[#17131a]/88 tracking-[-0.018em]">{wine.quantity}</p>
+
+                    <div className="rounded-[16px] border border-white/60 bg-[rgba(255,255,255,0.70)] px-2.5 py-2 shadow-[0_10px_24px_-22px_rgba(58,51,39,0.18)] backdrop-blur-sm">
+                      <div className="space-y-2">
+                        <div className="min-w-0">
+                          <p className="line-clamp-1 text-[10.5px] font-medium leading-snug text-[#665c6b]">
+                            {cardInsight}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="h-10 w-full rounded-full border border-[rgba(183,121,31,0.14)] bg-[linear-gradient(180deg,rgba(255,249,240,0.96)_0%,rgba(255,255,255,0.94)_100%)] px-3.5 text-[11px] font-semibold text-[#584f61] shadow-[0_8px_18px_-16px_rgba(58,51,39,0.14)] hover:text-[#1b161d] hover:bg-[linear-gradient(180deg,rgba(255,244,225,0.98)_0%,rgba(255,255,255,0.96)_100%)] active:scale-[0.98] transition-[transform,background-color,color] duration-200 ease-out"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void toggleCardAi(wine);
+                          }}
+                        >
+                          <UtensilsCrossed className="mr-1.5 h-3.5 w-3.5 text-[#B7791F]" />
+                          Harmonizar esta garrafa
+                        </Button>
+                      </div>
+
+                      <AnimatePresence initial={false}>
+                        {aiState.open && (
+                          <motion.div
+                            key={`ai-${wine.id}`}
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="mt-2 space-y-2 border-t border-black/5 pt-2">
+                              {aiState.loading ? (
+                                <div className="flex items-center gap-2 text-[10px] text-[#6e6573]">
+                                  <span className="h-2 w-2 animate-pulse rounded-full bg-primary/40" />
+                                  Aguardando sugestões...
+                                </div>
+                              ) : (
+                                <>
+                                  <p className="text-[10px] leading-relaxed text-[#5f5564]">
+                                    {aiState.pairingLogic || cardInsight}
+                                  </p>
+                                  {aiState.error && (
+                                    <p className="text-[10px] font-medium text-amber-700">
+                                      {aiState.error}
+                                    </p>
+                                  )}
+                                  <div className="space-y-1.5">
+                                    {aiState.pairings.slice(0, 5).map((pairing, index) => (
+                                      <div
+                                        key={`${pairing.dish}-${index}`}
+                                        className="rounded-xl border border-white/60 bg-white/86 px-2.5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                                      >
+                                        <div className="flex items-start justify-between gap-2">
+                                          <div className="min-w-0 flex-1">
+                                            <p className="text-[11px] font-semibold leading-tight text-[#17131a]">
+                                              {pairing.dish}
+                                            </p>
+                                            <p className="mt-0.5 text-[9.5px] leading-snug text-[#6f6671]">
+                                              {pairing.reason}
+                                            </p>
+                                          </div>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-[22px] shrink-0 rounded-full border border-white/60 bg-white/80 px-2 text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-white/95"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleRecipeClick(pairing.dish);
+                                            }}
+                                          >
+                                            Ver receita
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
 
                   {/* ── Actions ── */}
-                  <div className="flex items-center gap-0.5 pt-[2px] border-t border-black/5 mt-auto">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-[18px] flex-1 rounded-md text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-primary/[0.06] active:scale-[0.98] transition-[transform,background-color,color] duration-200 ease-out px-2 cursor-pointer"
-                      onClick={() => setConsumptionWine(wine)}
-                    >
-                      <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/80 hover:text-[#2f2730] hover:bg-black/[0.05] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
-                      onClick={() => setEditWine(wine)}
-                      title="Editar"
-                    >
-                      <Pencil className="h-2.25 w-2.25" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-[18px] w-[18px] rounded-md p-0 text-[#7a6f78]/80 hover:text-destructive hover:bg-destructive/[0.06] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
-                      onClick={() => setDeleteTarget(wine)}
-                      title="Remover"
-                    >
-                      <Trash2 className="h-2.25 w-2.25" />
-                    </Button>
+                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-black/5 pt-1.5">
+                    <div className="min-w-0">
+                      <p className="text-[6.5px] uppercase tracking-[0.11em] text-[#908595] font-medium">Preço</p>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <p className="text-[15px] font-bold leading-none text-[#121212] tracking-[-0.025em]">
+                          {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
+                        </p>
+                        <span className="inline-flex h-[18px] items-center rounded-full border border-white/60 bg-white/78 px-2 text-[8.25px] font-semibold leading-none text-[#645b69]">
+                          Qtd {wine.quantity}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-[22px] flex-none rounded-full px-2.5 text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-primary/[0.06] active:scale-[0.98] transition-[transform,background-color,color] duration-200 ease-out cursor-pointer"
+                        onClick={() => setConsumptionWine(wine)}
+                      >
+                        <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-[22px] w-[22px] rounded-full p-0 text-[#7a6f78]/80 hover:text-[#2f2730] hover:bg-black/[0.05] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
+                        onClick={() => setEditWine(wine)}
+                        title="Editar"
+                      >
+                        <Pencil className="h-2.5 w-2.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-[22px] w-[22px] rounded-full p-0 text-[#7a6f78]/80 hover:text-destructive hover:bg-destructive/[0.06] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
+                        onClick={() => setDeleteTarget(wine)}
+                        title="Remover"
+                      >
+                        <Trash2 className="h-2.5 w-2.5" />
+                      </Button>
+                    </div>
                   </div>
 
                   {hasGroupDetails && (

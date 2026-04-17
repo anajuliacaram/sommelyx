@@ -75,13 +75,13 @@ export function MultiSelectDropdown({
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
-                    variant={hasSelection ? "secondary" : "outline"}
+                    variant="outline"
                     size="sm"
                     className={cn(
-                        "h-[28px] px-3 py-1 rounded-full text-[9.25px] font-semibold flex items-center gap-1 border transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out active:scale-[0.98]",
+                        "h-10 sm:h-10 px-4 py-2 rounded-full text-[12px] font-semibold flex items-center gap-1.5 border transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out active:scale-[0.98]",
                         hasSelection
-                            ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-[0_4px_12px_hsl(var(--wine)/0.16)] hover:brightness-110"
-                            : "bg-[rgba(255,255,255,0.72)] text-foreground/82 border-white/14 shadow-[0_1px_2px_rgba(0,0,0,0.022)] hover:bg-[rgba(255,255,255,0.80)] hover:border-white/18 hover:text-foreground"
+                            ? "bg-[#6F7F5B] text-white border-[#6F7F5B] shadow-[0_10px_18px_-16px_rgba(111,127,91,0.48)] hover:bg-[#6F7F5B] hover:text-white"
+                            : "bg-white text-neutral-700 border-neutral-200 shadow-[0_1px_2px_rgba(0,0,0,0.022)] hover:bg-neutral-100 hover:border-neutral-300 hover:text-neutral-900"
                     )}
                 >
                     <span className="truncate max-w-[80px]">{triggerLabel}</span>
@@ -97,23 +97,23 @@ export function MultiSelectDropdown({
                 align="start"
                 avoidCollisions={false}
                 sideOffset={4}
-                className="w-[220px] p-2 rounded-[18px] shadow-[0_16px_36px_-28px_rgba(0,0,0,0.18)] bg-[rgba(255,255,255,0.94)] border border-white/16 backdrop-blur-xl"
+                className="w-[92vw] max-w-[280px] sm:w-[240px] p-3 rounded-[20px] shadow-[0_18px_40px_-28px_rgba(58,51,39,0.18)] bg-[rgba(255,255,255,0.96)] border border-[rgba(95,111,82,0.10)] backdrop-blur-xl"
             >
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 px-0.5">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 px-0.5">
                         {showSearch && (
                             <div className="relative flex-1">
-                                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-400" />
                                 <Input
                                     placeholder={searchPlaceholder}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="h-7 pl-7 rounded-[12px] bg-[rgba(255,255,255,0.72)] border-white/14 text-[11px] text-foreground placeholder:text-muted-foreground/45 focus:border-[hsl(var(--wine)/0.28)] focus:ring-[hsl(var(--wine)/0.08)]"
+                                    className="h-9 pl-8 rounded-[14px] bg-white border-neutral-200 text-[12px] text-neutral-900 placeholder:text-neutral-400 focus:border-[#6F7F5B] focus:ring-[#6F7F5B]/20 focus:shadow-[0_0_0_3px_rgba(111,127,91,0.08)]"
                                 />
                             </div>
                         )}
                         {!showSearch ? <div className="flex-1" /> : null}
-                        <div className="flex rounded-full bg-[rgba(255,255,255,0.68)] p-0.5 shrink-0 border border-white/14 shadow-[0_1px_2px_rgba(0,0,0,0.022)]">
+                        <div className="flex rounded-full bg-white p-0.5 shrink-0 border border-neutral-200 shadow-[0_1px_2px_rgba(0,0,0,0.022)]">
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -121,7 +121,7 @@ export function MultiSelectDropdown({
                                 onClick={() => setSortMode("alpha")}
                                 className={cn(
                                     "h-6 w-6 rounded-full transition-[transform,background-color,color] duration-150",
-                                    sortMode === "alpha" ? "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-[hsl(var(--wine))]" : "text-muted-foreground/55 hover:text-foreground/75"
+                                    sortMode === "alpha" ? "bg-[#6F7F5B] shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-white" : "text-neutral-500 hover:text-neutral-800"
                                 )}
                                 title="Ordem alfabética"
                             >
@@ -135,7 +135,7 @@ export function MultiSelectDropdown({
                                 onClick={() => setSortMode("count")}
                                 className={cn(
                                     "h-6 w-6 rounded-full transition-[transform,background-color,color] duration-150",
-                                    sortMode === "count" ? "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-[hsl(var(--wine))]" : "text-muted-foreground/55 hover:text-foreground/75"
+                                    sortMode === "count" ? "bg-[#6F7F5B] shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-white" : "text-neutral-500 hover:text-neutral-800"
                                 )}
                                 title="Ordenar por quantidade"
                             >
@@ -145,8 +145,8 @@ export function MultiSelectDropdown({
                         </div>
                     </div>
 
-                    <ScrollArea className="max-h-[200px]">
-                        <div className="space-y-px">
+                    <ScrollArea className="max-h-[240px]">
+                        <div className="space-y-1">
                             {filteredOptions.length === 0 ? (
                                 <div className="p-2 text-center text-[11px] text-muted-foreground/50 font-medium">
                                     Nenhum resultado
@@ -157,11 +157,11 @@ export function MultiSelectDropdown({
                                     return (
                                         <div
                                             key={opt.value}
-                                            className={cn(
-                                                "flex items-center gap-2 px-2 py-1.5 rounded-[12px] cursor-pointer transition-[background-color,color,transform] duration-150",
+                                        className={cn(
+                                                "flex items-center gap-2 px-2.5 py-2 rounded-[14px] cursor-pointer transition-[background-color,color,transform] duration-150",
                                                 isChecked
-                                                    ? "bg-[hsl(var(--wine)/0.08)] text-[hsl(var(--wine))]"
-                                                    : "hover:bg-[rgba(255,255,255,0.72)] text-foreground/80"
+                                                    ? "bg-[rgba(111,127,91,0.10)] text-[#6F7F5B]"
+                                                    : "hover:bg-neutral-100 text-neutral-700"
                                             )}
                                             onClick={() => onChange(opt.value)}
                                         >
@@ -170,8 +170,8 @@ export function MultiSelectDropdown({
                                                 className={cn(
                                                     "pointer-events-none rounded h-3.5 w-3.5 transition-colors duration-150",
                                                     isChecked
-                                                        ? "border-[hsl(var(--wine))] bg-[hsl(var(--wine))] text-white"
-                                                        : "border-border/60"
+                                                        ? "border-[#6F7F5B] bg-[#6F7F5B] text-white"
+                                                        : "border-neutral-300"
                                                 )}
                                             />
                                             <span className={cn(
@@ -184,7 +184,7 @@ export function MultiSelectDropdown({
                                                 <span className={cn(
                                                     "text-[9px] font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
                                                     isChecked
-                                                        ? "bg-[hsl(var(--wine)/0.15)] text-[hsl(var(--wine))]"
+                                                        ? "bg-[rgba(111,127,91,0.14)] text-[#6F7F5B]"
                                                         : "bg-muted/50 text-muted-foreground/60"
                                                 )}>
                                                     {opt.count}
@@ -201,7 +201,7 @@ export function MultiSelectDropdown({
                         <div className="pt-1 border-t border-border/20 px-0.5">
                             <Button
                                 variant="ghost"
-                                className="w-full h-6 text-[10px] font-semibold text-[hsl(var(--wine)/0.70)] hover:text-[hsl(var(--wine))] hover:bg-[hsl(var(--wine)/0.05)] justify-center rounded-[12px] transition-[background-color,color,transform] duration-150"
+                                className="w-full h-8 text-[10px] font-semibold text-[#6F7F5B] hover:text-[#556446] hover:bg-[rgba(111,127,91,0.06)] justify-center rounded-[12px] transition-[background-color,color,transform] duration-150"
                                 onClick={() => {
                                     onClear()
                                     setOpen(false)

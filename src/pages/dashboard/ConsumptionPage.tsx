@@ -3,7 +3,7 @@ import { useConsumption, useDeleteConsumption } from "@/hooks/useConsumption";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Wine, MapPin, Trash2, Calendar, GlassWater, TrendingUp, Globe, Grape, Star } from "@/icons/lucide";
+import { Wine, MapPin, Trash2, Calendar, GlassWater, TrendingUp, Globe, Grape, Star, Check, LayoutGrid, List } from "@/icons/lucide";
 import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,14 +61,28 @@ const sourceBadgeClass = (source: Source) =>
     ? "bg-[rgba(31,122,87,0.10)] text-[hsl(152_42%_28%)] border-[rgba(31,122,87,0.16)]"
     : "bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)] border-[rgba(196,137,52,0.16)]";
 
+const filterChipBase =
+  "inline-flex items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-[12px] font-semibold tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 cursor-pointer";
+
+const filterChipInactive =
+  "bg-white text-neutral-700 border-neutral-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:bg-[#faf8f2] hover:border-neutral-300 hover:text-neutral-900";
+
+const filterChipActive =
+  "bg-[#6F7F5B] text-white border-transparent shadow-[0_10px_18px_-16px_rgba(111,127,91,0.45)]";
+
+const toggleChipBase =
+  "inline-flex items-center justify-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[11px] font-semibold tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 cursor-pointer";
+
 type Period = "week" | "month" | "year" | "all";
 type Source = "all" | "cellar" | "external";
+type ViewMode = "list" | "grid";
 
 export default function ConsumptionPage() {
   const { data: entries, isLoading } = useConsumption();
   const deleteConsumption = useDeleteConsumption();
   const [source, setSource] = useState<Source>("all");
   const [period, setPeriod] = useState<Period>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const isMobile = useIsMobile();
 
   const periodStart = useMemo(() => {
@@ -171,11 +185,11 @@ export default function ConsumptionPage() {
         animate="visible"
         variants={fadeUp}
         custom={1}
-        className="inline-flex max-w-full flex-wrap items-end gap-3 rounded-[22px] border border-white/16 bg-[rgba(255,255,255,0.42)] p-2 shadow-[0_10px_24px_-20px_rgba(0,0,0,0.14)] ring-1 ring-black/[0.01]"
+        className="flex max-w-full flex-wrap items-start gap-6 rounded-2xl border border-neutral-200/60 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-md"
       >
-        <div className="space-y-1">
-          <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#655c69]">Período</span>
-          <div className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-[rgba(255,255,255,0.34)] p-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.025)]">
+        <div className="flex min-w-fit flex-col gap-2">
+          <span className="block text-[11px] font-medium uppercase tracking-wider text-neutral-400">Período</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-neutral-100/70 px-1.5 py-1 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">
             {([
               { value: "week", label: "Sem" },
               { value: "month", label: "Mês" },
@@ -187,8 +201,10 @@ export default function ConsumptionPage() {
                   key={p.value}
                   aria-pressed={isActive}
                   className={cn(
-                    "chip-surface h-[1.75rem] px-3 text-[8.5px] transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 cursor-pointer",
-                    isActive ? "chip-surface--active" : "chip-surface--soft hover:text-[#111015] hover:bg-white/72",
+                    "min-h-[48px] px-4 py-2.5 text-[15px] font-medium rounded-full transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 cursor-pointer",
+                    isActive
+                      ? "bg-gradient-to-r from-[#6B7D5A] to-[#4E5F44] text-white border border-transparent shadow-md ring-1 ring-white/40 hover:brightness-110"
+                      : "bg-white/60 text-neutral-700 border border-neutral-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] hover:bg-white hover:text-neutral-900 hover:shadow-sm",
                   )}
                   onClick={() => setPeriod(p.value)}
                 >
@@ -199,27 +215,39 @@ export default function ConsumptionPage() {
           </div>
         </div>
 
-        <div className="space-y-1">
-          <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#655c69]">Escopo</span>
-          <div className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-[rgba(255,255,255,0.34)] p-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.025)]">
+        <div className="h-8 w-px bg-neutral-200/60" aria-hidden="true" />
+
+        <div className="flex min-w-fit flex-col gap-2">
+          <span className="block text-[11px] font-medium uppercase tracking-wider text-neutral-400">Escopo</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-neutral-100/70 px-1.5 py-1 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">
             {([
               { value: "all", label: "Todos", icon: null },
               { value: "cellar", label: "Adega", icon: GlassWater },
               { value: "external", label: "Ext.", icon: MapPin },
             ] as { value: Source; label: string; icon: any }[]).map((s) => {
               const isActive = source === s.value;
+              const Icon = s.icon;
               return (
                 <button
                   key={s.value}
                   aria-pressed={isActive}
                   className={cn(
-                    "chip-surface h-[1.75rem] px-3 text-[8.5px] flex items-center gap-1 transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 cursor-pointer",
-                    isActive ? "chip-surface--active" : "chip-surface--soft hover:text-[#111015] hover:bg-white/72",
+                    "min-h-[48px] px-4 py-2.5 text-[15px] font-medium rounded-full flex items-center gap-2 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 cursor-pointer",
+                    isActive
+                      ? "bg-gradient-to-r from-[#6B7D5A] to-[#4E5F44] text-white border border-transparent shadow-md ring-1 ring-white/40 hover:brightness-110"
+                      : "bg-white/60 text-neutral-700 border border-neutral-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] hover:bg-white hover:text-neutral-900 hover:shadow-sm",
                   )}
                   onClick={() => setSource(s.value)}
                 >
-                  <span className="relative z-10 flex items-center gap-1">
-                    {s.icon && <s.icon className="h-3 w-3 opacity-85" />}
+                  <span className="relative z-10 flex items-center gap-2">
+                    {Icon && (
+                      <Icon
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-opacity duration-200",
+                          isActive ? "opacity-100" : "opacity-70",
+                        )}
+                      />
+                    )}
                     {s.label}
                   </span>
                 </button>
@@ -251,14 +279,15 @@ export default function ConsumptionPage() {
         ))}
       </div>
 
-      {/* Histórico header — inline, tight */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}
-        className="flex items-center gap-1.5 pt-0.25 pb-0.5"
-      >
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/34 bg-[rgba(255,255,255,0.76)] px-2.5 py-1 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.20)] backdrop-blur-sm">
-          <h2 className="text-[14.25px] md:text-[14.75px] font-semibold text-[#111015] tracking-[-0.02em]">Histórico</h2>
-          <span className="text-[9px] font-semibold text-[#5d5460] bg-white/82 rounded-full px-1.5 py-0.5 tabular-nums border border-white/54">{filtered.length}</span>
+      {/* Histórico header — section card */}
+      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6} className="section-surface section-surface--full flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="section-surface__title text-[14.5px] md:text-[15px] font-serif font-semibold tracking-[-0.03em] text-[#111015]">Histórico</h2>
+          <p className="section-surface__subtitle text-[10.25px] mt-0.75 text-[#5d5460]">Resumo das degustações e consumo recente</p>
         </div>
+        <span className="inline-flex shrink-0 items-center rounded-full border border-neutral-200 bg-neutral-100 px-2 py-1 text-[10px] font-semibold leading-none text-neutral-600 tabular-nums">
+          {filtered.length}
+        </span>
       </motion.div>
 
       {filtered.length === 0 ? (
@@ -272,7 +301,7 @@ export default function ConsumptionPage() {
         />
       ) : (
         <AnimatePresence mode="popLayout">
-          <div className="section-surface section-surface--full !p-4 sm:!p-5 border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(255,255,255,0.82)_100%)] shadow-[0_1px_2px_rgba(0,0,0,0.025)]">
+          <div className="section-surface section-surface--full !p-4 sm:!p-5">
             <div className="space-y-3">
             {filtered.map((entry, i) => (
               <motion.div

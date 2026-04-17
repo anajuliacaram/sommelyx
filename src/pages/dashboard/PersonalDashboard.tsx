@@ -109,9 +109,27 @@ export default function PersonalDashboard() {
 
   const kpis = useMemo(
     () => [
-      { label: "Garrafas", value: `${totalBottles}`, icon: Layers, urgent: false },
-      { label: "Valor estimado", value: totalValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }), icon: Star, urgent: false },
-      { label: "Beber agora", value: `${drinkNow}`, icon: GlassWater, urgent: drinkNow > 0 },
+      {
+        label: "Garrafas",
+        value: `${totalBottles}`,
+        icon: Layers,
+        iconTone: "text-[#6F7F5B]",
+        iconBg: "bg-[rgba(111,127,91,0.10)]",
+      },
+      {
+        label: "Valor estimado",
+        value: totalValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }),
+        icon: Star,
+        iconTone: "text-[#B48C3A]",
+        iconBg: "bg-[rgba(180,155,80,0.12)]",
+      },
+      {
+        label: "Beber agora",
+        value: `${drinkNow}`,
+        icon: GlassWater,
+        iconTone: "text-emerald-600",
+        iconBg: "bg-emerald-50",
+      },
     ],
     [drinkNow, totalBottles, totalValue],
   );
@@ -151,20 +169,56 @@ export default function PersonalDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1280px] space-y-2.5">
+      <div className="max-w-[1280px] space-y-4 md:space-y-5">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="flex flex-col gap-2.5 md:flex-row md:items-stretch md:justify-between">
-            <div className="section-surface section-surface--full w-full md:flex-1 md:min-w-0">
-              <h1 className="text-[17px] md:text-[20px] font-semibold tracking-[-0.03em] text-foreground">
+          <div className="flex flex-col gap-6">
+            <div className="section-surface section-surface--full w-full">
+              <h1 className="text-[23px] md:text-[28px] font-semibold tracking-[-0.04em] text-foreground">
                 Olá, <span className="text-gradient-wine">{firstName}</span>
               </h1>
-              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground/68">
+              <p className="mt-1 text-[12px] md:text-[13px] font-medium text-muted-foreground/78">
                 Tudo pronto para revisar sua adega.
               </p>
             </div>
 
-            <div className="section-surface section-surface--full w-full md:w-auto md:min-w-[260px]">
+            <div className="card-depth rounded-[26px] p-5 md:p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div className="min-w-0 max-w-2xl">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Resumo inteligente</p>
+                  <h2 className="text-[18px] md:text-[20px] font-semibold tracking-[-0.03em] text-foreground">
+                    {totalBottles} garrafas, {drinkNow} prontas para abrir e {inGuard} em guarda
+                  </h2>
+                  <p className="mt-2 text-[12px] md:text-[13px] leading-relaxed text-muted-foreground">
+                    {pastPeak > 0
+                      ? `${pastPeak} vinho${pastPeak > 1 ? "s" : ""} já pedem atenção.`
+                      : "Sua adega está em boa forma hoje."}
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-3 md:min-w-[390px] lg:min-w-[420px]">
+                  {kpis.map((kpi) => (
+                    <div
+                      key={kpi.label}
+                      className="group min-h-[118px] rounded-2xl border border-neutral-200 bg-gradient-to-br from-white to-neutral-50 p-5 shadow-[0_10px_24px_-20px_rgba(58,51,39,0.22)] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:shadow-[0_14px_30px_-20px_rgba(58,51,39,0.26)]"
+                    >
+                      <div className="flex h-full flex-col justify-between gap-4">
+                        <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl shadow-[0_8px_18px_-14px_rgba(58,51,39,0.2)]", kpi.iconBg)}>
+                          <kpi.icon className={cn("h-4.5 w-4.5", kpi.iconTone)} />
+                        </div>
+                        <div className="min-w-0 space-y-1">
+                          <p className="text-[12px] font-semibold uppercase tracking-[0.11em] text-neutral-600">{kpi.label}</p>
+                          <p className="text-[24px] md:text-[26px] lg:text-[28px] font-bold leading-[0.95] tracking-[-0.05em] text-neutral-900 tabular-nums">
+                            {kpi.value}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="section-surface section-surface--full w-full">
               <QuickActions
                 variant="personal"
                 layout="inline"
@@ -177,45 +231,11 @@ export default function PersonalDashboard() {
           </div>
         </motion.div>
 
-        {/* ─── KPI Strip — compact inline ─── */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-          <div className="grid grid-cols-3 gap-1.5">
-            {isLoading ? (
-              [1, 2, 3].map((i) => (
-                <div key={i} className="card-depth p-2.5">
-                  <Skeleton className="h-3 w-14 mb-1.5 rounded" />
-                  <Skeleton className="h-5 w-10 rounded" />
-                </div>
-              ))
-            ) : (
-              kpis.map((kpi) => (
-                <div key={kpi.label} className="card-depth p-2.5 flex items-center gap-2">
-                  <div className={cn(
-                    "flex h-7 w-7 items-center justify-center rounded-lg shrink-0",
-                    kpi.urgent ? "bg-primary/8" : "bg-muted/15"
-                  )}>
-                    <kpi.icon className={cn("h-3.5 w-3.5", kpi.urgent ? "text-primary" : "text-muted-foreground/50")} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className={cn(
-                      "text-[13px] font-bold tracking-[-0.02em] leading-none tabular-nums",
-                      kpi.urgent ? "text-primary" : "text-foreground",
-                    )}>
-                      {kpi.value}
-                    </p>
-                    <p className="text-[8px] font-semibold uppercase tracking-[0.04em] text-muted-foreground mt-0.5">{kpi.label}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </motion.div>
-
         {/* ─── Priority Block ─── */}
         {priorityItems.length > 0 && (
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={2}>
-            <div className="card-depth p-3">
-              <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-muted-foreground mb-1.5">Hoje para decidir</p>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+            <div className="card-depth p-4">
+              <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-muted-foreground mb-2">Insights de hoje</p>
               <div className="grid gap-px">
                 {priorityItems.map((item, i) => (
                   <button
@@ -247,10 +267,10 @@ export default function PersonalDashboard() {
 
         <div className="grid grid-cols-12 gap-2.5">
           {/* ─── Ready to Drink ─── */}
-          <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
-            <div className="card-depth p-3.5">
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
-                <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-foreground">Prontos para abrir</h2>
+          <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+            <div className="card-depth p-4">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">Prontos para abrir</h2>
                 <Button variant="ghost" size="sm" className="text-[11px] text-muted-foreground h-7" onClick={() => navigate("/dashboard/cellar")}>
                   Ver adega <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
@@ -292,11 +312,11 @@ export default function PersonalDashboard() {
           </motion.div>
 
           {/* ─── Right Column ─── */}
-          <div className="col-span-12 grid gap-2.5 lg:col-span-5">
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-              <div className="card-depth p-3.5">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-foreground">Alertas</h2>
+          <div className="col-span-12 grid gap-3 lg:col-span-5">
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+              <div className="card-depth p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">Alertas</h2>
                   <Button variant="ghost" size="sm" className="text-[11px] text-muted-foreground h-7" onClick={() => navigate("/dashboard/alerts")}>
                     Ver todos <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
@@ -321,10 +341,10 @@ export default function PersonalDashboard() {
               </div>
             </motion.div>
 
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
-              <div className="chart-surface p-3.5">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-[12px] font-semibold text-foreground">Consumo</h2>
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+              <div className="chart-surface p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-[13px] font-semibold text-foreground">Consumo</h2>
                   <span className="text-[10px] font-semibold text-foreground/50">
                     {consumption.length} total
                   </span>

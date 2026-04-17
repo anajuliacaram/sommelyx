@@ -463,10 +463,10 @@ export default function InventoryPage() {
             {/* --- HEADER --- */}
             <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-3">
                 <div>
-                    <h1 className="section-surface__title text-xl md:text-2xl font-serif font-black italic tracking-tight" style={{ letterSpacing: "-0.04em" }}>
+                    <h1 className="section-surface__title text-[26px] md:text-[30px] font-semibold tracking-[-0.04em]">
                         Estoque
                     </h1>
-                    <p className="section-surface__subtitle text-[12px] mt-0.5 font-medium text-muted-foreground">Operação comercial · leitura rápida de disponibilidade e valor</p>
+                    <p className="section-surface__subtitle text-[12px] mt-1 font-medium text-muted-foreground">Operação comercial · leitura rápida de disponibilidade e valor</p>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                         <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">{summary.labels} rótulos</span>
                         <span className="text-muted-foreground/30">·</span>
@@ -498,7 +498,7 @@ export default function InventoryPage() {
                         </Button>
                     </div>
                     <MagneticButton>
-                        <Button variant="primary" className="h-10 px-4 rounded-2xl shadow-float font-bold text-[12px] uppercase tracking-wider" onClick={() => setAddWineOpen(true)}>
+                        <Button variant="primary" className="h-12 px-5 rounded-[18px] shadow-[0_16px_30px_-20px_hsl(var(--primary)/0.28)] font-bold text-[12px] uppercase tracking-[0.12em]" onClick={() => setAddWineOpen(true)}>
                             <Plus className="h-3.5 w-3.5 mr-1.5" /> Cadastrar produto
                         </Button>
                     </MagneticButton>
@@ -782,24 +782,26 @@ export default function InventoryPage() {
                                 <div
                                     key={wine.id}
                                     className={cn(
-                                         "rounded-2xl border border-white/14 bg-white/55 backdrop-blur-md p-3 shadow-sm",
+                                        "group rounded-[24px] border border-white/18 bg-white/72 backdrop-blur-md p-4 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]",
                                         selected && "ring-2 ring-primary/20",
                                     )}
                                 >
-                                    <div className="flex items-start gap-3">
+                                    <div className="flex items-start gap-3.5">
                                         <div onClick={(e) => e.stopPropagation()}>
                                             <Checkbox checked={selected} onCheckedChange={() => toggleSelect(wine.id)} />
                                         </div>
 
-                                        <div className="w-11 h-14 rounded-xl bg-muted/30 flex items-center justify-center shrink-0 border border-black/5 overflow-hidden">
+                                        <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-2xl border border-white/40 bg-[linear-gradient(145deg,rgba(95,111,82,0.18),rgba(255,255,255,0.86))] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
                                             {wine.image_url ? (
-                                                <img src={wine.image_url} className="w-full h-full object-cover" />
+                                                <img src={wine.image_url} className="h-full w-full object-cover" />
                                             ) : (
-                                                <Package className="h-5 w-5 text-muted-foreground/50" />
+                                                <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(95,111,82,0.10)_55%,rgba(255,255,255,0.82)_100%)]">
+                                                    <Package className="h-5 w-5 text-primary/70" />
+                                                </div>
                                             )}
                                         </div>
 
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1 min-w-0 space-y-1.5">
                                             <button
                                                 type="button"
                                                 className="w-full text-left"
@@ -808,38 +810,36 @@ export default function InventoryPage() {
                                                     setEditWineOpen(true);
                                                 }}
                                             >
-                                                <p className="font-extrabold text-[14px] text-foreground leading-tight truncate">
+                                                <p className="truncate text-[15px] font-semibold tracking-[-0.03em] text-foreground leading-tight">
                                                     {wine.name}
                                                 </p>
-                                                <p className="text-[11px] font-medium text-muted-foreground mt-0.5 truncate">
-                                                    {[wine.producer || "Produtor não informado", wine.vintage ? `Safra ${wine.vintage}` : "Safra NV"].join(" · ")}
+                                                <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground/80">
+                                                    {[wine.vintage ? `Safra ${wine.vintage}` : "Safra NV", wine.country || "País não informado"].join(" · ")}
                                                 </p>
-                                                <p className="text-[11px] font-medium text-muted-foreground mt-0.5 truncate">
-                                                    {[wine.country || "País não informado", wine.region || "Região não informada"].join(" · ")}
-                                                </p>
-                                                {(() => {
-                                                  const locs = (allLocations ?? [])
-                                                    .filter((l) => l.wine_id === wine.id)
-                                                    .map((l) => ({ id: l.id, label: l.formatted_label ?? l.manual_label ?? "", quantity: l.quantity }))
-                                                    .filter((l) => !!l.label)
-                                                    .slice(0, 2);
-                                                  return locs.length ? (
-                                                    <div className="mt-2 flex flex-wrap gap-1.5">
-                                                      {locs.map((l) => (
+                                                <div className="mt-2 flex flex-wrap gap-1.5">
+                                                    {wine.style ? (
                                                         <Badge
-                                                          key={l.id}
-                                                          variant="secondary"
-                                                          className="h-5 rounded-full px-2 text-[9px] font-bold tracking-wide bg-[#6E1E2A]/[0.06] text-[#6E1E2A] border border-[#6E1E2A]/[0.12]"
+                                                            variant="secondary"
+                                                            className="h-5 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] px-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--primary))]"
                                                         >
-                                                          {l.label}{isCommercial ? ` • ${l.quantity} un.` : ""}
+                                                            {wine.style.charAt(0).toUpperCase() + wine.style.slice(1)}
                                                         </Badge>
-                                                      ))}
-                                                    </div>
-                                                  ) : null;
-                                                })()}
+                                                    ) : null}
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={cn(
+                                                            "h-5 rounded-full px-2.5 text-[9px] font-bold uppercase tracking-[0.12em]",
+                                                            wine.quantity > 0
+                                                                ? "border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))]"
+                                                                : "border border-[rgba(196,137,52,0.16)] bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)]",
+                                                        )}
+                                                    >
+                                                        {wine.quantity > 0 ? "Em estoque" : "Sem estoque"}
+                                                    </Badge>
+                                                </div>
                                             </button>
 
-                                            <div className="mt-2 flex items-center justify-between gap-2">
+                                            <div className="mt-3 flex items-center justify-between gap-3">
                                                 <div className="flex items-center gap-2">
                                                     {renderStockVisual(wine.quantity)}
                                                     {wine.quantity > 0 && wine.quantity <= 2 ? (
@@ -847,10 +847,10 @@ export default function InventoryPage() {
                                                     ) : null}
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-[12px] font-black text-foreground">
+                                                    <p className="text-[12px] font-black tracking-[-0.02em] text-foreground">
                                                         R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                                                     </p>
-                                                    <p className="text-[10px] font-semibold text-muted-foreground">
+                                                    <p className="text-[10px] font-semibold text-muted-foreground/72">
                                                         R$ {unitPrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}/un.
                                                     </p>
                                                 </div>
@@ -863,7 +863,7 @@ export default function InventoryPage() {
                                                     type="button"
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-9 w-9 rounded-2xl"
+                                                    className="h-9 w-9 rounded-2xl bg-white/60 backdrop-blur-md"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <MoreHorizontal className="h-4 w-4" />
@@ -1250,7 +1250,7 @@ export default function InventoryPage() {
                 <SheetContent
                     side={isMobile ? "bottom" : "right"}
                     className={cn(
-                        isMobile ? "mobile-bottom-sheet !p-0 max-h-[85vh]" : "w-[420px] sm:w-[520px]",
+                        isMobile ? "mobile-bottom-sheet !p-0 max-h-[86vh]" : "w-[420px] sm:w-[520px]",
                     )}
                 >
                     {isMobile ? <div className="mobile-bottom-sheet-handle" /> : null}
@@ -1261,9 +1261,9 @@ export default function InventoryPage() {
                         <SheetDescription>Refine a lista sem perder agilidade operacional.</SheetDescription>
                     </SheetHeader>
 
-                    <ScrollArea className={cn(isMobile ? "h-[calc(85vh-240px)]" : "h-[calc(100vh-180px)]", "mt-5 pr-3")}>
-                        <div className="space-y-6 pb-2">
-                            <div className="grid grid-cols-1 gap-3">
+                    <ScrollArea className={cn(isMobile ? "h-[calc(86vh-240px)]" : "h-[calc(100vh-180px)]", "mt-5 pr-3")}>
+                        <div className="space-y-5 pb-2">
+                            <div className="grid grid-cols-1 gap-2.5">
                                 <MultiSelectDropdown
                                     title="Estilo"
                                     options={dynamicOptions.styles}
@@ -1328,9 +1328,9 @@ export default function InventoryPage() {
                         </div>
                     </ScrollArea>
 
-                    <SheetFooter className="pt-4 pb-[calc(12px+env(safe-area-inset-bottom))]">
-                        <Button variant="ghost" onClick={clearAllFilters} className="w-full sm:w-auto">Limpar filtros</Button>
-                        <Button variant="primary" onClick={() => setFilterOpen(false)} className="w-full sm:w-auto">Aplicar</Button>
+                    <SheetFooter className="pt-4 pb-[calc(12px+env(safe-area-inset-bottom))] gap-2">
+                        <Button variant="ghost" onClick={clearAllFilters} className="w-full sm:w-auto h-11 rounded-[16px]">Limpar filtros</Button>
+                        <Button variant="primary" onClick={() => setFilterOpen(false)} className="w-full sm:w-auto h-11 rounded-[16px] shadow-[0_14px_26px_-18px_hsl(var(--primary)/0.30)]">Aplicar</Button>
                     </SheetFooter>
                     </div>
                 </SheetContent>

@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "rounded-[14px] text-primary-foreground bg-gradient-to-br from-primary to-wine-vivid shadow-[0_4px_12px_hsl(var(--wine)/0.16),inset_0_1px_1px_rgba(255,255,255,0.08)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_hsl(var(--wine)/0.20),inset_0_1px_1px_rgba(255,255,255,0.10)] hover:brightness-105 tracking-[-0.01em]",
+          "rounded-[16px] text-primary-foreground bg-gradient-to-br from-primary via-primary to-[hsl(var(--forest-light))] shadow-[0_8px_20px_hsl(var(--primary)/0.18),inset_0_1px_1px_rgba(255,255,255,0.10)] hover:-translate-y-0.5 hover:shadow-[0_12px_26px_hsl(var(--primary)/0.22),inset_0_1px_1px_rgba(255,255,255,0.14)] hover:brightness-105 tracking-[-0.01em]",
         secondary:
           "rounded-[14px] bg-[rgba(255,255,255,0.74)] text-[#1A1715] border border-[rgba(255,255,255,0.16)] shadow-[0_1px_2px_rgba(0,0,0,0.022)] backdrop-blur-md hover:bg-[rgba(255,255,255,0.82)] hover:border-[rgba(255,255,255,0.22)] hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] tracking-[-0.01em]",
         outline:
@@ -24,7 +24,7 @@ const buttonVariants = cva(
 
         // Back-compat
         default:
-          "rounded-[14px] text-primary-foreground bg-gradient-to-br from-primary to-wine-vivid shadow-[0_4px_12px_hsl(var(--wine)/0.16)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_hsl(var(--wine)/0.20)] tracking-[-0.01em]",
+          "rounded-[16px] text-primary-foreground bg-gradient-to-br from-primary via-primary to-[hsl(var(--forest-light))] shadow-[0_8px_20px_hsl(var(--primary)/0.18)] hover:-translate-y-0.5 hover:shadow-[0_12px_26px_hsl(var(--primary)/0.22)] tracking-[-0.01em]",
         destructive: "rounded-[14px] bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:-translate-y-0.5",
         link: "text-primary underline-offset-4 hover:underline",
         premium: "btn-premium text-white rounded-[14px] border-0 font-semibold tracking-[-0.01em] shadow-float",

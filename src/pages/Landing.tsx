@@ -26,7 +26,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden selection:bg-wine/20 selection:text-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-[#F4F1EC] selection:bg-wine/20 selection:text-foreground">
       <LandingBackground />
       <LandingHeader onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
       <LandingHero onSignup={handleStartFreeClick} />
