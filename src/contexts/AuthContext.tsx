@@ -38,7 +38,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profileType, setProfileTypeState] = useState<ProfileType>(null);
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
-  const initializedRef = useRef(false);
   const emailRedirectTo = `${(appUrl ?? window.location.origin).replace(/\/$/, "")}/auth/confirm`;
 
   const fetchProfileType = useCallback(async (userId: string): Promise<ProfileType> => {
@@ -61,54 +60,63 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     mountedRef.current = true;
+    const loadingTimeout = window.setTimeout(() => {
+      if (mountedRef.current) setLoading(false);
+    }, 3000);
 
-    // Set up listener FIRST (per Supabase best practice)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         if (!mountedRef.current) return;
         debugAuth("[Auth] State change:", event);
 
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        setLoading(false);
 
         if (newSession?.user) {
-          // Use setTimeout to avoid Supabase lock contention during auth events
-          setTimeout(async () => {
-            if (!mountedRef.current) return;
-            const pt = await fetchProfileType(newSession.user.id);
-            if (mountedRef.current) {
-              setProfileTypeState(pt);
-              setLoading(false);
-            }
-          }, 0);
+          void fetchProfileType(newSession.user.id).then((pt) => {
+            if (mountedRef.current) setProfileTypeState(pt);
+          });
         } else {
           setProfileTypeState(null);
-          setLoading(false);
         }
       }
     );
 
-    // Then get initial session
-    supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
-      if (!mountedRef.current || initializedRef.current) return;
-      initializedRef.current = true;
+    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
+      if (!mountedRef.current) return;
+      if (error) {
+        console.error("[Auth] Initial session error:", error);
+      }
       debugAuth("[Auth] Initial session:", initialSession ? "found" : "none");
 
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
+      setLoading(false);
 
       if (initialSession?.user) {
-        const pt = await fetchProfileType(initialSession.user.id);
-        if (mountedRef.current) setProfileTypeState(pt);
+        void fetchProfileType(initialSession.user.id).then((pt) => {
+          if (mountedRef.current) setProfileTypeState(pt);
+        });
       }
+    }).catch((error) => {
+      console.error("[Auth] getSession failed:", error);
       if (mountedRef.current) setLoading(false);
     });
 
     return () => {
       mountedRef.current = false;
+      window.clearTimeout(loadingTimeout);
       subscription.unsubscribe();
     };
   }, [fetchProfileType]);
+
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log("loading:", loading);
+      console.log("session:", session);
+    }
+  }, [loading, session]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({

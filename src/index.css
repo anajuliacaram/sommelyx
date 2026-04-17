@@ -157,13 +157,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-color: #1d2622;
+    background-color: #f4f1ec;
     background-image:
-      radial-gradient(ellipse 80% 55% at 12% 20%, rgba(94, 16, 40, 0.10) 0%, transparent 65%),
-      radial-gradient(ellipse 75% 55% at 88% 75%, rgba(36, 52, 38, 0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 45% at 72% 18%, rgba(138, 75, 42, 0.08) 0%, transparent 55%),
-      linear-gradient(170deg, #1d2622 0%, #1f2a22 50%, #1c2520 100%);
-    background-attachment: fixed;
+      radial-gradient(ellipse 85% 60% at 12% 0%, rgba(95, 111, 82, 0.045) 0%, transparent 62%),
+      radial-gradient(ellipse 70% 50% at 88% 14%, rgba(164, 145, 111, 0.06) 0%, transparent 58%),
+      linear-gradient(180deg, #f6f3ef 0%, #f4f1ec 52%, #efe9df 100%);
+    background-attachment: scroll;
     min-height: 100vh;
     color: #1C1C1C;
   }
@@ -505,10 +504,10 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 14% 10%, rgba(95, 111, 82, 0.08), transparent 28%),
-      radial-gradient(circle at 85% 0%, rgba(164, 145, 111, 0.16), transparent 24%),
-      radial-gradient(circle at 84% 82%, rgba(95, 111, 82, 0.06), transparent 30%);
-    mix-blend-mode: multiply;
+      radial-gradient(circle at 14% 10%, rgba(95, 111, 82, 0.045), transparent 30%),
+      radial-gradient(circle at 85% 0%, rgba(164, 145, 111, 0.08), transparent 26%),
+      radial-gradient(circle at 84% 82%, rgba(95, 111, 82, 0.035), transparent 32%);
+    mix-blend-mode: normal;
   }
 
   /* Subtle noise grain on dashboard */
@@ -517,7 +516,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.022;
+    opacity: 0.012;
     background-image:
       radial-gradient(circle at 1px 1px, rgba(43, 38, 30, 0.35) 1px, transparent 0);
     background-size: 18px 18px;
