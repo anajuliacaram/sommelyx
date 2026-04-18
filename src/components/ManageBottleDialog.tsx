@@ -68,6 +68,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedGrapes, setSelectedGrapes] = useState<string[]>([]);
+  const [styleFilter, setStyleFilter] = useState<"all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa">("all");
 
   const [extWineName, setExtWineName] = useState("");
   const [extProducer, setExtProducer] = useState("");
