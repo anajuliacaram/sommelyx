@@ -300,6 +300,72 @@ function rankCellarWinesForDish(dish: string, wines: Record<string, unknown>[]) 
   return [...wines].sort((a, b) => scoreCellarWineForDish(b, dish) - scoreCellarWineForDish(a, dish));
 }
 
+function getWinePrice(wine: Record<string, unknown>): number | null {
+  const p = (wine as any).purchase_price ?? (wine as any).current_value;
+  if (p == null) return null;
+  const n = Number(p);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function rankCellarWinesByIntent(
+  dish: string,
+  wines: Record<string, unknown>[],
+  intent: "everyday" | "value" | "special",
+) {
+  // Score técnico primeiro — só vinhos com compatibilidade mínima entram
+  const scored = wines.map((w) => ({ wine: w, score: scoreCellarWineForDish(w, dish) }));
+  // Filtro de compatibilidade mínima (score >= 8 = pelo menos uma afinidade técnica clara)
+  const compatible = scored.filter((s) => s.score >= 8);
+  const pool = compatible.length >= 3 ? compatible : scored; // fallback se quase nada combina
+
+  const withPrices = pool.map((s) => ({ ...s, price: getWinePrice(s.wine) }));
+  const pricedOnly = withPrices.filter((s) => s.price != null) as Array<{ wine: Record<string, unknown>; score: number; price: number }>;
+
+  if (intent === "value") {
+    // Mais barato primeiro entre os compatíveis. Sem preço vai pro fim.
+    const sorted = [...pricedOnly].sort((a, b) => {
+      // primeiro só compatibilidade aceitável (score >= 8), depois preço asc
+      if (a.score < 8 && b.score >= 8) return 1;
+      if (b.score < 8 && a.score >= 8) return -1;
+      return a.price - b.price;
+    });
+    const noPrice = withPrices.filter((s) => s.price == null).sort((a, b) => b.score - a.score);
+    return [...sorted, ...noPrice].map((s) => s.wine);
+  }
+
+  if (intent === "special") {
+    // Mais caro primeiro, MAS com sanity check: se prato simples, evita topo de gama desproporcional
+    const lowerDish = dish.toLowerCase();
+    const simpleDish = /pizza|macarr[aã]o|massa simples|ovo|arroz|strogon|sandu|hamb[uú]rguer|feij[aã]o|lasanha caseira|frango grelhado|salada/.test(lowerDish);
+    const median = pricedOnly.length > 0
+      ? [...pricedOnly].sort((a, b) => a.price - b.price)[Math.floor(pricedOnly.length / 2)].price
+      : 0;
+    const ceiling = simpleDish && median > 0 ? median * 2.5 : Infinity;
+
+    const sorted = [...pricedOnly].sort((a, b) => {
+      const aOver = a.price > ceiling ? 1 : 0;
+      const bOver = b.price > ceiling ? 1 : 0;
+      if (aOver !== bOver) return aOver - bOver; // vinhos absurdamente caros pro prato vão pro fim
+      return b.price - a.price;
+    });
+    const noPrice = withPrices.filter((s) => s.price == null).sort((a, b) => b.score - a.score);
+    return [...sorted, ...noPrice].map((s) => s.wine);
+  }
+
+  // everyday — preço mediano
+  if (pricedOnly.length === 0) return pool.sort((a, b) => b.score - a.score).map((s) => s.wine);
+  const sortedByPrice = [...pricedOnly].sort((a, b) => a.price - b.price);
+  const median = sortedByPrice[Math.floor(sortedByPrice.length / 2)].price;
+  const sorted = [...pricedOnly].sort((a, b) => {
+    const da = Math.abs(a.price - median);
+    const db = Math.abs(b.price - median);
+    if (da !== db) return da - db;
+    return b.score - a.score;
+  });
+  const noPrice = withPrices.filter((s) => s.price == null).sort((a, b) => b.score - a.score);
+  return [...sorted, ...noPrice].map((s) => s.wine);
+}
+
 async function callAI(
   systemPrompt: string,
   userPrompt: string,
