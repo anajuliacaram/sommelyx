@@ -279,7 +279,7 @@ export default function AlertsPage() {
             const SectionIcon = cfg.icon;
 
             return (
-              <motion.div key={key} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1.5">
+              <motion.div key={key} id={`alerts-${key}`} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1.5 scroll-mt-20">
                 {/* ── Section header ── */}
                 <div className="flex items-center gap-2 px-1">
                   <div className={cn("w-5 h-5 rounded-md flex items-center justify-center px-[4px]", cfg.accentBg)}>
