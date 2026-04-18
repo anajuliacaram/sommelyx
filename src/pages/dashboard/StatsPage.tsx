@@ -53,8 +53,8 @@ export default function StatsPage() {
     <div className="space-y-2.5 max-w-[1200px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface">
-          <h1 className="text-base font-serif font-bold tracking-tight text-foreground">Relatórios & Analytics</h1>
-          <p className="text-[10px] text-muted-foreground">Inteligência sobre sua coleção</p>
+          <h1 className="t-title">Relatórios & analytics</h1>
+          <p className="t-subtitle mt-1.5">Inteligência sobre a evolução da sua coleção</p>
         </div>
       </motion.div>
 

@@ -153,8 +153,8 @@ export default function ActivityLogPage() {
     <div className="space-y-4 max-w-[1000px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface section-surface--full">
-          <h1 className="section-surface__title text-lg md:text-xl font-serif font-bold tracking-tight">Log de Atividades</h1>
-          <p className="section-surface__subtitle text-[11px]">Registro de todas as movimentações</p>
+          <h1 className="t-title">Log de atividades</h1>
+          <p className="t-subtitle mt-1.5">Registro completo de movimentações da sua adega</p>
         </div>
       </motion.div>
 

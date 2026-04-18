@@ -92,8 +92,8 @@ export default function SalesPage() {
     <div className="space-y-4 max-w-[1000px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface section-surface--full">
-          <h1 className="section-surface__title text-lg md:text-xl font-serif font-bold tracking-tight">Vendas</h1>
-          <p className="section-surface__subtitle text-[11px]">Histórico de vendas registradas</p>
+          <h1 className="t-title">Vendas</h1>
+          <p className="t-subtitle mt-1.5">Histórico de vendas e desempenho comercial</p>
         </div>
       </motion.div>
 

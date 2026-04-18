@@ -171,16 +171,16 @@ export default function AlertsPage() {
     <div className="space-y-3 max-w-3xl">
       {/* ── Header ── */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <div className="glass-card px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-[10px] bg-primary/8 flex items-center justify-center">
-                <Bell className="h-3.5 w-3.5 text-primary" />
+        <div className="glass-card px-5 py-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-[12px] bg-primary/10 flex items-center justify-center shrink-0">
+                <Bell className="h-5 w-5 text-primary" />
               </div>
-              <div>
-                <h1 className="text-[15px] font-serif font-bold text-foreground leading-tight">Alertas</h1>
-                <p className="text-[10px] text-muted-foreground leading-none mt-0.5">
-                  {visibleAlerts.length} alerta{visibleAlerts.length !== 1 ? "s" : ""} ativo{visibleAlerts.length !== 1 ? "s" : ""}
+              <div className="min-w-0">
+                <h1 className="t-title">Alertas</h1>
+                <p className="t-subtitle mt-1">
+                  {visibleAlerts.length} alerta{visibleAlerts.length !== 1 ? "s" : ""} ativo{visibleAlerts.length !== 1 ? "s" : ""} no momento
                 </p>
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function AlertsPage() {
               <button
                 type="button"
                 onClick={() => setDismissedIds(new Set(alerts.map(a => a.id)))}
-                className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-lg hover:bg-black/[0.04]"
+                className="t-meta font-semibold text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-black/[0.04] shrink-0"
               >
                 Limpar tudo
               </button>
