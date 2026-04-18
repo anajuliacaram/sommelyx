@@ -594,13 +594,13 @@ JULGAMENTO HONESTO — use toda a escala:
 NEM TODOS os vinhos devem ser positivos. Se um vinho é ruim para o prato, diga.`;
 
       const rankedCellarWines = hasCellar
-        ? rankCellarWinesForDish(dish, (userWines as any[]).slice(0, 40)).slice(0, 8)
+        ? rankCellarWinesByIntent(dish, (userWines as any[]).slice(0, 40), normalizedIntent).slice(0, 8)
         : [];
       const cellarContext = hasCellar
-        ? `\nVinhos na adega do usuário (pré-filtrados localmente por compatibilidade técnica; preço inclui valor pago ou valor de mercado quando disponível):\n${rankedCellarWines.map((w: any) => {
+        ? `\nVinhos da adega — JÁ ORDENADOS pelo servidor conforme a intenção "${normalizedIntent}". Você DEVE manter EXATAMENTE esta ordem nas suas sugestões (a primeira da lista é a primeira a sugerir):\n${rankedCellarWines.map((w: any, i: number) => {
             const price = w.purchase_price ?? w.current_value;
             const priceTxt = price != null ? `R$ ${Number(price).toFixed(0)}` : "preço não informado";
-            return `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"} | Preço: ${priceTxt}`;
+            return `${i + 1}. ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"} | Preço: ${priceTxt}`;
           }).join("\n")}`
         : "";
       const intentLabel = normalizedIntent === "value"
@@ -612,14 +612,21 @@ NEM TODOS os vinhos devem ser positivos. Se um vinho é ruim para o prato, diga.
       userPrompt = `Prato: "${dish}"
 Intenção do cliente: ${intentLabel}${cellarContext}
 
+REGRA CRÍTICA DE ORDENAÇÃO:
+- A lista de vinhos da adega acima JÁ ESTÁ ORDENADA pelo servidor segundo a intenção "${normalizedIntent}".
+- Você DEVE manter exatamente essa ordem nas suas sugestões — o primeiro vinho da lista vira a primeira sugestão.
+- NUNCA promova um vinho caro para o topo quando a intenção é "value" (custo-benefício).
+- NUNCA sugira rótulo premium (Champagne grande marca, Barolo, Bordeaux Grand Cru, ícones) para pratos cotidianos como pizza, macarrão simples, ovo, frango grelhado, sanduíche.
+- Se um vinho da lista é tecnicamente INCOMPATÍVEL com o prato, descarte-o e use o próximo da lista — não invente justificativa.
+
 INSTRUÇÕES:
 1. Decomponha "${dish}" tecnicamente (proteína, gordura, cocção, intensidade, sofisticação)
 2. Para cada vinho, execute as 5 ETAPAS do perfil técnico
-3. Aplique o critério de INTENÇÃO para escolher quais rótulos colocar primeiro
+3. Mantenha a ORDEM da lista pré-ranqueada acima
 4. Na explicação, cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não) e por que se encaixa na intenção
 5. Em cada reason, mencione ao menos 1 aspecto que diferencia este rótulo de outro da mesma uva
 6. Use compatibilityLabel honestamente — nem tudo é "Excelente escolha"
-7. Sugira de 3 a 5 vinhos reais da adega, ordenados conforme a intenção, sem inventar categorias genéricas`;
+7. Sugira de 3 a 5 vinhos reais da adega, NA ORDEM dada, sem inventar categorias genéricas`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
