@@ -15,9 +15,9 @@ const periodOptions: Array<{ value: PeriodFilter; label: string }> = [
 ];
 
 const sourceOptions: Array<{ value: SourceFilter; label: string }> = [
+  { value: "all", label: "Todas" },
   { value: "cellar", label: "Minha adega" },
   { value: "external", label: "Adega externa" },
-  { value: "all", label: "Todas" },
 ];
 
 function FilterPill({
@@ -75,7 +75,7 @@ function buildMonthWindow(size: number) {
 export default function ConsumptionPage() {
   const { data: entries = [], isLoading } = useConsumption();
   const [period, setPeriod] = useState<PeriodFilter>("month");
-  const [source, setSource] = useState<SourceFilter>("cellar");
+  const [source, setSource] = useState<SourceFilter>("all");
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
