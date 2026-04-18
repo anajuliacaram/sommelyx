@@ -8,6 +8,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const BUCKET = "wine-label-images";
+const AI_TIMEOUT_MS = 45_000;
+const AI_MODEL = "google/gemini-2.5-flash-image";
+
 type WineRow = {
   id: string;
   user_id: string;
@@ -21,46 +25,12 @@ type WineRow = {
   image_url: string | null;
 };
 
-type ResolverCandidate = {
-  image_url: string;
-  score: number;
-  source: "vivino" | "wine-searcher" | "google-images";
-};
-
 function normalizeText(value?: string | null) {
   return value?.trim().replace(/\s+/g, " ") || "";
 }
 
-function normalizeForMatch(value?: string | null) {
-  return normalizeText(value)
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function tokenize(text: string) {
-  return normalizeForMatch(text)
-    .split(" ")
-    .filter((token) => token.length > 2 && !["wine", "vinho", "label", "rótulo", "rotulo"].includes(token));
-}
-
-function buildQuery(row: Pick<WineRow, "name" | "producer" | "vintage" | "style" | "country" | "region" | "grape">) {
-  return [
-    normalizeText(row.name),
-    normalizeText(row.producer),
-    row.vintage ? String(row.vintage) : "",
-    normalizeText(row.style),
-    normalizeText(row.country),
-    normalizeText(row.region),
-    normalizeText(row.grape),
-  ].filter(Boolean).join(" ");
-}
-
 function getTone(style?: string | null) {
-  const s = normalizeForMatch(style);
+  const s = (style || "").toLowerCase();
   if (s.includes("branco")) return { a: "#E9DFAF", b: "#B9984F", c: "#FFF8E7" };
   if (s.includes("espum")) return { a: "#EDE0BC", b: "#C5A45D", c: "#FFF8E7" };
   if (s.includes("rose")) return { a: "#DDA2B4", b: "#A34C68", c: "#FFF6F8" };
@@ -77,7 +47,7 @@ function escapeXml(value: string) {
     .replace(/'/g, "&apos;");
 }
 
-function buildGeneratedPlaceholder(row: WineRow) {
+function buildSvgFallback(row: WineRow) {
   const tone = getTone(row.style);
   const name = escapeXml(normalizeText(row.name) || "Wine");
   const producer = escapeXml(normalizeText(row.producer) || "Sommelyx");
@@ -119,95 +89,79 @@ function buildGeneratedPlaceholder(row: WineRow) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-function scoreCandidate(candidate: string, row: WineRow, sourceBonus: number) {
-  const haystack = normalizeForMatch(candidate);
-  const queryTokens = tokenize(buildQuery(row));
-  let score = sourceBonus;
-
-  for (const token of queryTokens) {
-    if (haystack.includes(token)) {
-      score += token.length >= 6 ? 4 : 2;
-    }
-  }
-
-  const vintage = row.vintage ? String(row.vintage) : "";
-  if (vintage && haystack.includes(vintage)) score += 6;
-
-  if (normalizeForMatch(row.name) && haystack.includes(normalizeForMatch(row.name))) score += 8;
-  if (normalizeForMatch(row.producer) && haystack.includes(normalizeForMatch(row.producer))) score += 6;
-  if (normalizeForMatch(row.style) && haystack.includes(normalizeForMatch(row.style))) score += 2;
-  if (normalizeForMatch(row.country) && haystack.includes(normalizeForMatch(row.country))) score += 2;
-  if (normalizeForMatch(row.region) && haystack.includes(normalizeForMatch(row.region))) score += 2;
-  if (normalizeForMatch(row.grape) && haystack.includes(normalizeForMatch(row.grape))) score += 2;
-
-  return score;
+function buildImagePrompt(row: WineRow) {
+  const parts: string[] = [];
+  parts.push(
+    "Editorial product photography of a single full wine bottle standing upright, centered, hero shot, studio lighting, soft warm key light, gentle vignette, ultra-realistic, 4k, no text overlay, no watermark, no logos other than the wine label itself, photorealistic, premium magazine style, neutral elegant background (soft gradient: warm cream to deep wine).",
+  );
+  const wineDescriptor: string[] = [];
+  if (row.producer) wineDescriptor.push(`producer: ${row.producer}`);
+  if (row.name) wineDescriptor.push(`wine name: ${row.name}`);
+  if (row.vintage) wineDescriptor.push(`vintage: ${row.vintage}`);
+  if (row.style) wineDescriptor.push(`style: ${row.style}`);
+  if (row.country) wineDescriptor.push(`country: ${row.country}`);
+  if (row.region) wineDescriptor.push(`region: ${row.region}`);
+  if (row.grape) wineDescriptor.push(`grape: ${row.grape}`);
+  parts.push(`The bottle should look like a real ${row.style || "wine"} bottle from a real producer with this identity — ${wineDescriptor.join(", ")}.`);
+  parts.push(
+    "Render the actual front label legibly with the producer name and the wine name typed elegantly — but do NOT invent extra disclaimers. Bottle glass color must match the style (dark green/black for tinto, clear for branco/espumante, light pink for rosé, dark amber for fortificado). Foil capsule must look premium. Composition: 3:4 portrait, bottle filling 70% of the frame, centered, slightly tilted shadow on the surface.",
+  );
+  return parts.join("\n");
 }
 
-async function fetchText(url: string, timeoutMs = 12_000) {
+function decodeBase64(b64: string): Uint8Array {
+  const clean = b64.replace(/\s/g, "");
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function generateBottleImage(row: WineRow): Promise<{ ok: true; bytes: Uint8Array; mime: string } | { ok: false; error: string }> {
+  const apiKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
+  if (!apiKey) return { ok: false, error: "LOVABLE_API_KEY missing" };
+
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
   try {
-    const response = await fetch(url, {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
       signal: controller.signal,
       headers: {
-        "user-agent": "Mozilla/5.0 (compatible; SommelyxBot/1.0)",
-        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        model: AI_MODEL,
+        modalities: ["image", "text"],
+        messages: [
+          { role: "user", content: buildImagePrompt(row) },
+        ],
+      }),
     });
-    if (!response.ok) return null;
-    return await response.text();
-  } catch {
-    return null;
+
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => "");
+      return { ok: false, error: `AI image gen status ${resp.status}: ${text.slice(0, 240)}` };
+    }
+
+    const json = await resp.json().catch(() => null) as any;
+    const dataUrl: string | undefined = json?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!dataUrl || typeof dataUrl !== "string") {
+      return { ok: false, error: "AI returned no image" };
+    }
+
+    const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+    if (!match) return { ok: false, error: "Invalid image data url" };
+    const mime = match[1];
+    const bytes = decodeBase64(match[2]);
+    if (!bytes.length) return { ok: false, error: "Decoded image empty" };
+    return { ok: true, bytes, mime };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "AI fetch failed" };
   } finally {
     clearTimeout(timeout);
   }
-}
-
-function extractCandidates(html: string, source: ResolverCandidate["source"], row: WineRow, sourceBonus: number) {
-  const candidates: ResolverCandidate[] = [];
-  const patterns = [
-    /<meta[^>]+property=["']og:image(?:secure_url)?["'][^>]+content=["']([^"']+)["']/gi,
-    /<meta[^>]+name=["']twitter:image(?:\:src)?["'][^>]+content=["']([^"']+)["']/gi,
-    /<img[^>]+(?:data-src|data-lazy-src|src)=["']([^"']+)["'][^>]*>/gi,
-    /<source[^>]+srcset=["']([^"']+)["']/gi,
-  ];
-
-  for (const pattern of patterns) {
-    for (const match of html.matchAll(pattern)) {
-      const rawUrl = match[1]?.trim();
-      if (!rawUrl) continue;
-      const imageUrl = rawUrl.split(",")[0].trim().split(" ")[0];
-      if (!/^https?:\/\//i.test(imageUrl)) continue;
-      if (!/(jpg|jpeg|png|webp|gif)(\?|$)/i.test(imageUrl) && !/gstatic|vivino|wine-searcher/i.test(imageUrl)) continue;
-      const index = match.index ?? html.indexOf(match[0]);
-      const snippet = html.slice(Math.max(0, index - 180), Math.min(html.length, index + 280));
-      const score = scoreCandidate(`${snippet} ${imageUrl}`, row, sourceBonus);
-      candidates.push({ image_url: imageUrl, score, source });
-    }
-  }
-
-  return candidates;
-}
-
-async function searchVivino(row: WineRow) {
-  const query = encodeURIComponent(buildQuery(row));
-  const html = await fetchText(`https://www.vivino.com/search/wines?q=${query}`);
-  if (!html) return [];
-  return extractCandidates(html, "vivino", row, 8);
-}
-
-async function searchWineSearcher(row: WineRow) {
-  const query = encodeURIComponent(buildQuery(row));
-  const html = await fetchText(`https://www.wine-searcher.com/find/${query}`);
-  if (!html) return [];
-  return extractCandidates(html, "wine-searcher", row, 6);
-}
-
-async function searchGoogleImages(row: WineRow) {
-  const query = encodeURIComponent(buildQuery(row));
-  const html = await fetchText(`https://www.google.com/search?tbm=isch&q=${query}`);
-  if (!html) return [];
-  return extractCandidates(html, "google-images", row, 4);
 }
 
 function jsonResponse(payload: unknown, status = 200) {
@@ -243,10 +197,10 @@ serve(async (req) => {
       return jsonResponse({ error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
     }
 
-    const { wineId } = await req.json();
-    if (typeof wineId !== "string" || !wineId.trim()) {
-      return jsonResponse({ error: "Wine ID inválido." }, 400);
-    }
+    const body = await req.json().catch(() => ({}));
+    const wineId = typeof body?.wineId === "string" ? body.wineId.trim() : "";
+    const force = body?.force === true || body?.regenerate === true;
+    if (!wineId) return jsonResponse({ error: "Wine ID inválido." }, 400);
 
     const { data: wine, error: wineError } = await adminClient
       .from("wines")
@@ -260,43 +214,50 @@ serve(async (req) => {
     }
 
     const row = wine as WineRow;
-    if (row.image_url) {
-      return jsonResponse({
-        ok: true,
-        image_url: row.image_url,
-        source: row.image_url.startsWith("data:image/svg+xml") ? "generated" : "cached",
-      });
+
+    // Se já tem imagem real (não SVG ilustrativo) e não foi pedido para regenerar, devolve cacheada
+    const hasRealImage = !!row.image_url && !row.image_url.startsWith("data:image/svg+xml");
+    if (hasRealImage && !force) {
+      return jsonResponse({ ok: true, image_url: row.image_url, source: "cached" });
     }
 
-    const searchOrder = [
-      { runner: searchVivino, source: "vivino" as const },
-      { runner: searchWineSearcher, source: "wine-searcher" as const },
-      { runner: searchGoogleImages, source: "google-images" as const },
-    ];
+    // Tenta gerar via IA (Nano Banana) e fazer upload no bucket
+    const aiResult = await generateBottleImage(row);
+    if (aiResult.ok) {
+      const ext = aiResult.mime === "image/jpeg" ? "jpg" : aiResult.mime === "image/webp" ? "webp" : "png";
+      const path = `${row.user_id}/ai/${row.id}-${Date.now()}.${ext}`;
+      const { error: uploadError } = await adminClient.storage
+        .from(BUCKET)
+        .upload(path, aiResult.bytes, {
+          cacheControl: "31536000",
+          upsert: true,
+          contentType: aiResult.mime,
+        });
 
-    const allCandidates: ResolverCandidate[] = [];
-    for (const step of searchOrder) {
-      try {
-        const candidates = await step.runner(row);
-        allCandidates.push(...candidates);
-        const best = candidates.sort((a, b) => b.score - a.score)[0];
-        if (best?.image_url) {
-          const { error: updateError } = await adminClient
-            .from("wines")
-            .update({ image_url: best.image_url })
-            .eq("id", row.id)
-            .eq("user_id", user.id);
+      if (!uploadError) {
+        const { data: pub } = adminClient.storage.from(BUCKET).getPublicUrl(path);
+        const publicUrl = pub.publicUrl;
+        await adminClient
+          .from("wines")
+          .update({ image_url: publicUrl })
+          .eq("id", row.id)
+          .eq("user_id", user.id);
 
-          if (!updateError) {
-            return jsonResponse({ ok: true, image_url: best.image_url, source: best.source });
-          }
-        }
-      } catch (error) {
-        console.warn("wine image source failed", step.source, error instanceof Error ? error.message : error);
+        return jsonResponse({
+          ok: true,
+          image_url: publicUrl,
+          source: "ai-generated",
+          duration_ms: Date.now() - startTime,
+        });
       }
+
+      console.warn("wine-image-resolver upload failed:", uploadError.message);
+    } else {
+      console.warn("wine-image-resolver AI failed:", aiResult.error);
     }
 
-    const fallback = buildGeneratedPlaceholder(row);
+    // Fallback final: SVG ilustrativo
+    const fallback = buildSvgFallback(row);
     await adminClient
       .from("wines")
       .update({ image_url: fallback })
@@ -307,7 +268,6 @@ serve(async (req) => {
       ok: true,
       image_url: fallback,
       source: "generated",
-      candidates: allCandidates.length,
       duration_ms: Date.now() - startTime,
     });
   } catch (error) {
