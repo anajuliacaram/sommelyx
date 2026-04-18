@@ -214,9 +214,14 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </div>
 
               <div
-                className="max-h-[260px] overflow-y-auto rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm divide-y divide-black/5"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(0,0,0,0.15) transparent" }}
+                className="max-h-[260px] overflow-y-scroll rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm divide-y divide-black/5 cellar-scroll"
+                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
               >
+                {filteredWines.length > 4 && (
+                  <div className="sticky top-0 z-10 bg-gradient-to-b from-white/95 to-white/70 backdrop-blur-sm px-3 py-1.5 text-[10.5px] tracking-[0.12em] uppercase text-[#7B1E2B]/70 font-medium border-b border-black/5">
+                    Role para ver todos os {filteredWines.length} vinhos ↓
+                  </div>
+                )}
                 {filteredWines.length === 0 ? (
                   <div className="px-4 py-8 text-center">
                     <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado</p>
