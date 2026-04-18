@@ -119,7 +119,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-6 pb-[calc(18px+env(safe-area-inset-bottom))] md:px-7 lg:px-10">
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-[calc(18px+env(safe-area-inset-bottom))] md:px-7 md:pt-4 lg:px-10">
             <AnimatedOutlet />
           </div>
         </main>
