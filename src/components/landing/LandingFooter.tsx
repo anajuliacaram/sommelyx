@@ -72,8 +72,8 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
             <Linkedin size={16} />
           </a>
         </div>
-        <p className="text-[11px] sm:text-[12px] font-medium text-[#5F5F5F]">
-          © {new Date().getFullYear()} Sommelyx
+        <p className="text-[11px] sm:text-[12px] font-medium text-[#5F5F5F] inline-flex items-center gap-1">
+          © {new Date().getFullYear()} <BrandName size="sm" className="text-[12px]" />
         </p>
       </div>
     </footer>

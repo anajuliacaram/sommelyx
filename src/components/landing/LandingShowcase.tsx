@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, Wine, Sparkles, TrendingUp, Clock, AlertTriangle, ChefHat, Star } from "@/icons/lucide";
+import { BrandName } from "@/components/BrandName";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -246,7 +247,7 @@ export function LandingShowcase() {
             Por dentro do produto
           </span>
           <h2 className="text-[26px] sm:text-[34px] font-semibold tracking-[-0.02em] text-[#1A1A1A] leading-[1.1]">
-            Veja o Sommelyx em ação
+            Veja o <BrandName className="text-[26px] sm:text-[34px]" /> em ação
           </h2>
           <p className="mt-3 text-[14px] sm:text-[15px] leading-relaxed text-[#5F5F5F]">
             Três telas que mostram o nível de clareza e densidade do produto.
