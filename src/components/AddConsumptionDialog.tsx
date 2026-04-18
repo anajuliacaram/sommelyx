@@ -92,7 +92,20 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
     setTastingNotes("");
     setRating(0);
     setConsumedAt(new Date().toISOString().split("T")[0]);
+    setWineSearch("");
+    setTypeFilter("all");
   };
+
+  const cellarWines = useMemo(() => (wines || []).filter((w) => w.quantity > 0), [wines]);
+  const filteredWines = useMemo(() => {
+    const q = wineSearch.trim().toLowerCase();
+    return cellarWines.filter((w) => {
+      if (typeFilter !== "all" && classifyWineType(w.style) !== typeFilter) return false;
+      if (!q) return true;
+      const hay = `${w.name} ${w.producer || ""} ${w.grape || ""} ${w.country || ""} ${w.region || ""} ${w.vintage || ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [cellarWines, wineSearch, typeFilter]);
 
   const handleSelectWine = (wineId: string) => {
     setSelectedWineId(wineId);
