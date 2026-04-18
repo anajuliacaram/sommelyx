@@ -143,8 +143,8 @@ serve(async (req) => {
 
     const header = lines[0] || "";
     const dataLines = lines.slice(1);
-    const CHUNK_SIZE = 150;
-    const MAX_CHUNKS = 5;
+    const CHUNK_SIZE = 120;
+    const MAX_CHUNKS = 25;
 
     const chunks: string[] = [];
     if (lines.length <= CHUNK_SIZE + 1) {
