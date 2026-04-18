@@ -332,29 +332,57 @@
 
 
 @layer utilities {
-  .type-heading-xl {
-    @apply text-2xl font-semibold tracking-tight text-foreground;
+  /* ── Sommelyx Typographic Scale (oficial) ──
+     Title 30 / Subtitle 15 / Body 14 / Meta 12
+     Use estas classes em TODOS os cabeçalhos de página, cards e seções.
+     ────────────────────────────────────────── */
+  .t-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 30px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: hsl(var(--foreground-strong));
+  }
+  @media (max-width: 640px) {
+    .t-title { font-size: 26px; }
   }
 
-  .type-heading-lg {
-    @apply text-xl font-semibold tracking-tight text-foreground;
+  .t-subtitle {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 400;
+    color: hsl(var(--foreground-secondary));
   }
 
-  .type-heading-md {
-    @apply text-lg font-medium tracking-tight text-foreground;
+  .t-body {
+    font-size: 14px;
+    line-height: 1.55;
+    color: hsl(var(--foreground));
   }
 
-  .type-body {
-    @apply text-base text-foreground;
+  .t-meta {
+    font-size: 12px;
+    line-height: 1.4;
+    color: hsl(var(--muted-foreground));
   }
 
-  .type-body-muted {
-    @apply text-sm text-muted-foreground;
+  .t-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: hsl(var(--muted-foreground));
   }
 
-  .type-label {
-    @apply text-xs uppercase tracking-wide text-muted-foreground;
-  }
+  /* ── Aliases legados (mantidos para compat) ── */
+  .type-heading-xl { @apply text-2xl font-semibold tracking-tight text-foreground; }
+  .type-heading-lg { @apply text-xl font-semibold tracking-tight text-foreground; }
+  .type-heading-md { @apply text-lg font-medium tracking-tight text-foreground; }
+  .type-body { @apply text-base text-foreground; }
+  .type-body-muted { @apply text-sm text-muted-foreground; }
+  .type-label { @apply text-xs uppercase tracking-wide text-muted-foreground; }
 
   .layout-section {
     @apply gap-6;
