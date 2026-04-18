@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
+import { callOpenAIResponses } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,10 +34,8 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[taste-compatibility] openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
+    const AI_MODEL = Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview";
+    console.log(`[taste-compatibility] provider=lovable model=${AI_MODEL}`);
 
     const body = await req.json();
     const { targetWine, userCellar } = body;
@@ -101,8 +99,8 @@ Vinho a avaliar:
     const result = await callOpenAIResponses<any>({
       functionName: "taste-compatibility",
       requestId: crypto.randomUUID(),
-      apiKey: OPENAI_API_KEY,
-      model: OPENAI_MODEL,
+      apiKey: "",
+      model: AI_MODEL,
       timeoutMs: 30_000,
       temperature: 0.2,
       instructions: systemPrompt,

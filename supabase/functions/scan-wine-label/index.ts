@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
+import { callOpenAIResponses } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -317,20 +317,8 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[${FUNCTION_NAME}] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!OPENAI_API_KEY) {
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing OPENAI_API_KEY`);
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_api_key" });
-      return fail(500, {
-        ok: false,
-        code: "CONFIG_ERROR",
-        error: "O scanner está temporariamente indisponível. Tente novamente em instantes.",
-        requestId,
-        retryable: true,
-      });
-    }
+    const AI_MODEL = Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview";
+    console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=lovable model=${AI_MODEL}`);
 
     const systemPrompt =
       `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia SOMENTE informações que estejam EXPLICITAMENTE VISÍVEIS no rótulo.\n\n` +
@@ -376,8 +364,8 @@ serve(async (req) => {
     const openaiResult = await callOpenAIResponses<{ wine: Record<string, unknown> }>({
       functionName: FUNCTION_NAME,
       requestId,
-      apiKey: OPENAI_API_KEY,
-      model: OPENAI_MODEL,
+      apiKey: "",
+      model: AI_MODEL,
       timeoutMs: AI_TIMEOUT_MS,
       temperature: 0.1,
       instructions: systemPrompt,
