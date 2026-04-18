@@ -119,6 +119,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
   const [wineSearchState, setWineSearchState] = useState("");
   const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
+  const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante">("all");
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const reset = () => {
     setSource(null);
@@ -141,6 +142,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setLastMenuAttachment(null);
     setWineSearchState("");
     setWineSortState("az");
+    setWineStyleFilter("all");
   };
 
   const handleClose = (v: boolean) => {
@@ -516,7 +518,18 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 { key: "oldest", label: "Mais antigos", icon: History },
               ];
 
+              const matchesStyle = (style: string | null | undefined) => {
+                if (wineStyleFilter === "all") return true;
+                const s = (style ?? "").toLowerCase();
+                if (wineStyleFilter === "tinto") return s.includes("tint");
+                if (wineStyleFilter === "branco") return s.includes("branc") || s.includes("white");
+                if (wineStyleFilter === "rosé") return s.includes("ros");
+                if (wineStyleFilter === "espumante") return s.includes("espum") || s.includes("champ") || s.includes("sparkl");
+                return true;
+              };
+
               const filtered = availableWines
+                .filter((w) => matchesStyle(w.style))
                 .filter((w) => {
                   if (!wineSearch.trim()) return true;
                   const q = wineSearch.toLowerCase();
@@ -533,6 +546,74 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                   if (sortKey === "newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                   return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
                 });
+
+              const styleFilterOptions: Array<{
+                key: typeof wineStyleFilter;
+                label: string;
+                bg: string;
+                bgActive: string;
+                border: string;
+                borderActive: string;
+                text: string;
+                textActive: string;
+                dot: string;
+              }> = [
+                {
+                  key: "all",
+                  label: "Todos",
+                  bg: "bg-background/40",
+                  bgActive: "bg-foreground/[0.06]",
+                  border: "border-border/30",
+                  borderActive: "border-foreground/20",
+                  text: "text-muted-foreground/70",
+                  textActive: "text-foreground",
+                  dot: "bg-foreground/40",
+                },
+                {
+                  key: "tinto",
+                  label: "Tinto",
+                  bg: "bg-[hsl(348,40%,50%/0.05)]",
+                  bgActive: "bg-[hsl(348,40%,50%/0.14)]",
+                  border: "border-[hsl(348,40%,50%/0.18)]",
+                  borderActive: "border-[hsl(348,45%,45%/0.45)]",
+                  text: "text-[hsl(348,30%,40%)]",
+                  textActive: "text-[hsl(348,55%,32%)]",
+                  dot: "bg-[hsl(348,55%,40%)]",
+                },
+                {
+                  key: "branco",
+                  label: "Branco",
+                  bg: "bg-[hsl(45,55%,55%/0.06)]",
+                  bgActive: "bg-[hsl(45,55%,55%/0.16)]",
+                  border: "border-[hsl(45,50%,50%/0.20)]",
+                  borderActive: "border-[hsl(45,55%,45%/0.50)]",
+                  text: "text-[hsl(40,35%,38%)]",
+                  textActive: "text-[hsl(40,55%,30%)]",
+                  dot: "bg-[hsl(45,60%,55%)]",
+                },
+                {
+                  key: "rosé",
+                  label: "Rosé",
+                  bg: "bg-[hsl(340,50%,72%/0.08)]",
+                  bgActive: "bg-[hsl(340,50%,72%/0.20)]",
+                  border: "border-[hsl(340,45%,65%/0.22)]",
+                  borderActive: "border-[hsl(340,50%,55%/0.45)]",
+                  text: "text-[hsl(340,30%,45%)]",
+                  textActive: "text-[hsl(340,45%,35%)]",
+                  dot: "bg-[hsl(340,55%,65%)]",
+                },
+                {
+                  key: "espumante",
+                  label: "Espumante",
+                  bg: "bg-[hsl(48,40%,80%/0.10)]",
+                  bgActive: "bg-[hsl(48,45%,75%/0.22)]",
+                  border: "border-[hsl(48,35%,60%/0.22)]",
+                  borderActive: "border-[hsl(48,45%,50%/0.45)]",
+                  text: "text-[hsl(42,28%,42%)]",
+                  textActive: "text-[hsl(42,45%,32%)]",
+                  dot: "bg-[hsl(48,55%,62%)]",
+                },
+              ];
 
               return (
               <motion.div
@@ -577,6 +658,26 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           )}
                         >
                           <Icon className="h-3 w-3" />
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Style filter chips (color-coded by wine type) */}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    {styleFilterOptions.map((opt) => {
+                      const active = wineStyleFilter === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          onClick={() => setWineStyleFilter(opt.key)}
+                          className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] border transition-all duration-150",
+                            active ? `${opt.bgActive} ${opt.borderActive} ${opt.textActive} shadow-[0_1px_4px_-2px_rgba(0,0,0,0.08)]` : `${opt.bg} ${opt.border} ${opt.text} hover:-translate-y-[1px]`
+                          )}
+                        >
+                          <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
                           {opt.label}
                         </button>
                       );
