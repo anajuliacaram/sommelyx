@@ -125,6 +125,63 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               Cancele quando quiser
             </span>
           </motion.div>
+
+          {/* Mini value cards — Estoque / Giro / Reposição (proporcionais, sob os CTAs) */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            custom={5}
+            className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl"
+          >
+            {[
+              {
+                icon: Layers,
+                title: "Estoque",
+                desc: "Saiba o que você tem, em segundos.",
+                color: "hsl(var(--wine))",
+                bg: "rgba(123,30,43,0.08)",
+                border: "rgba(123,30,43,0.14)",
+              },
+              {
+                icon: TrendingUp,
+                title: "Giro",
+                desc: "Entenda o que vende mais.",
+                color: "#5F6F52",
+                bg: "rgba(95,111,82,0.10)",
+                border: "rgba(95,111,82,0.18)",
+              },
+              {
+                icon: AlertTriangle,
+                title: "Reposição",
+                desc: "Nunca perca uma oportunidade.",
+                color: "#B8860B",
+                bg: "rgba(198,167,104,0.12)",
+                border: "rgba(198,167,104,0.22)",
+              },
+            ].map((item) => (
+              <motion.div
+                key={item.title}
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="rounded-xl p-2.5"
+                style={glassCard}
+              >
+                <div className="flex items-start gap-2">
+                  <div
+                    className="flex h-7 w-7 items-center justify-center rounded-lg shrink-0"
+                    style={{ background: item.bg, border: `1px solid ${item.border}` }}
+                  >
+                    <item.icon className="h-3.5 w-3.5" style={{ color: item.color }} strokeWidth={1.8} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[9.5px] font-semibold uppercase tracking-[0.10em] text-[#1A1A1A]">{item.title}</p>
+                    <p className="mt-0.5 text-[11px] leading-snug text-[#5F5F5F]">{item.desc}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
 
         {/* Right: Organized grid of dashboard cards */}
@@ -279,63 +336,6 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
         </div>
       </div>
 
-      {/* Mini value cards — Estoque / Giro / Reposição */}
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-40px" }}
-        variants={fadeUp}
-        custom={5}
-        className="mx-auto mt-8 sm:mt-10 max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
-      >
-        {[
-          {
-            icon: Layers,
-            title: "Estoque",
-            desc: "Saiba exatamente o que você tem, em segundos.",
-            color: "hsl(var(--wine))",
-            bg: "rgba(123,30,43,0.08)",
-            border: "rgba(123,30,43,0.14)",
-          },
-          {
-            icon: TrendingUp,
-            title: "Giro",
-            desc: "Entenda o que vende ou consome mais.",
-            color: "#5F6F52",
-            bg: "rgba(95,111,82,0.10)",
-            border: "rgba(95,111,82,0.18)",
-          },
-          {
-            icon: AlertTriangle,
-            title: "Reposição",
-            desc: "Nunca perca uma oportunidade de venda.",
-            color: "#B8860B",
-            bg: "rgba(198,167,104,0.12)",
-            border: "rgba(198,167,104,0.22)",
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={item.title}
-            whileHover={{ y: -3 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-2xl p-4 sm:p-5"
-            style={glassCard}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0"
-                style={{ background: item.bg, border: `1px solid ${item.border}` }}
-              >
-                <item.icon className="h-4.5 w-4.5" style={{ color: item.color }} strokeWidth={1.8} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.10em] text-[#1A1A1A]">{item.title}</p>
-                <p className="mt-1 text-[13px] leading-snug text-[#5F5F5F]">{item.desc}</p>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
     </section>
   );
 }
