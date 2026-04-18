@@ -13,19 +13,9 @@ export function SectionHeader({ eyebrow, title, description, action, className }
   return (
     <div className={cn("flex items-start justify-between gap-4", className)}>
       <div className="min-w-0">
-        {eyebrow ? (
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[rgba(26,23,19,0.5)]">
-            {eyebrow}
-          </p>
-        ) : null}
-        <h2 className="mt-1 font-serif text-[2rem] font-semibold tracking-[-0.03em] text-[#1A1713]">
-          {title}
-        </h2>
-        {description ? (
-          <p className="mt-1 text-sm text-[rgba(26,23,19,0.6)]">
-            {description}
-          </p>
-        ) : null}
+        {eyebrow ? <p className="t-eyebrow">{eyebrow}</p> : null}
+        <h2 className={cn("t-title", eyebrow && "mt-1.5")}>{title}</h2>
+        {description ? <p className="t-subtitle mt-1.5">{description}</p> : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
