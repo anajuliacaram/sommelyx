@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
+import { Search, Star, Wine as WineIcon, X, ImageOff, Image as ImageIcon } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
@@ -131,6 +131,20 @@ export default function PersonalCellarPage() {
             </div>
             <button
               type="button"
+              onClick={toggleLabels}
+              aria-pressed={showLabels}
+              title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-all"
+              style={{
+                background: showLabels ? "rgba(95,111,82,0.14)" : "rgba(255,255,255,0.78)",
+                border: `1px solid ${showLabels ? "rgba(95,111,82,0.22)" : "rgba(95,111,82,0.12)"}`,
+                color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
+              }}
+            >
+              {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
               className="editorial-btn-primary ml-auto"
               onClick={() => setAddOpen(true)}
             >
@@ -187,18 +201,51 @@ export default function PersonalCellarPage() {
               return (
                 <EditorialCard key={w.id} style={{ padding: 18, cursor: "pointer" }}>
                   <div onClick={() => setEditWine(w)}>
-                    {showLabels && w.image_url && (
-                      <div
-                        className="mb-3 flex h-[140px] items-center justify-center overflow-hidden rounded-[12px]"
-                        style={{ background: "rgba(95,111,82,0.06)" }}
-                      >
-                        <img
-                          src={w.image_url}
-                          alt={w.name}
-                          loading="lazy"
-                          className="h-full w-auto object-contain"
-                        />
-                      </div>
+                    {showLabels && (
+                      w.image_url ? (
+                        <div
+                          className="mb-3 flex h-[160px] items-center justify-center overflow-hidden rounded-[16px] transition-all duration-200"
+                          style={{ background: "rgba(95,111,82,0.06)" }}
+                        >
+                          <img
+                            src={w.image_url}
+                            alt={w.name}
+                            loading="lazy"
+                            className="h-full w-auto object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="mb-3 relative flex h-[160px] items-center justify-center overflow-hidden rounded-[16px] transition-all duration-200"
+                          style={{
+                            background: `linear-gradient(160deg, ${color} 0%, ${color}dd 60%, ${color}88 100%)`,
+                          }}
+                        >
+                          <div
+                            className="rounded-[14px] px-5 py-3 text-center backdrop-blur-md"
+                            style={{
+                              background: "rgba(255,255,255,0.22)",
+                              border: "1px solid rgba(255,255,255,0.30)",
+                            }}
+                          >
+                            <div
+                              className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-full"
+                              style={{ background: "rgba(255,255,255,0.85)" }}
+                            >
+                              <WineIcon className="h-4 w-4" style={{ color }} />
+                            </div>
+                            <p
+                              className="text-[10px] font-bold uppercase"
+                              style={{ letterSpacing: "0.14em", color: "rgba(255,255,255,0.95)" }}
+                            >
+                              Rótulo indisponível
+                            </p>
+                            <p className="mt-0.5 text-[10px]" style={{ color: "rgba(255,255,255,0.78)" }}>
+                              Prévia ilustrativa
+                            </p>
+                          </div>
+                        </div>
+                      )
                     )}
                     <div className="mb-3 flex items-start justify-between">
                       <div
