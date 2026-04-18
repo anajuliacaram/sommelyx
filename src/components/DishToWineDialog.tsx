@@ -233,7 +233,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setStep("photo");
   }, [dish]);
 
-  const handleSearch = source === "cellar" ? handleSearchCellar : handleSearchExternal;
+  // Router: from "dish" step, cellar goes to intent picker; external goes to photo upload.
+  const handleSearch = useCallback((dishName?: string) => {
+    const query = dishName || dish.trim();
+    if (!query) return;
+    setDish(query);
+    if (source === "cellar") {
+      setStep("intent");
+    } else {
+      handleSearchExternal(query);
+    }
+  }, [dish, source, handleSearchExternal]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
