@@ -121,7 +121,7 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="px-0 pb-1">
+          <div className="px-0 pb-0">
             {isCommercial ? (
               <div className="space-y-2.5">
                 <Button
