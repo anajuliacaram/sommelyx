@@ -243,28 +243,37 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     drink_until: row.drink_until,
   });
 
+  const LARGE_IMPORT_DUPLICATE_THRESHOLD = 220;
+
   const buildDraftRow = (row: ParsedWine, index: number, sourceRows: ParsedWine[] = []): DraftWine => {
     const type = normalizeType(row.style);
     const duplicateGroupKey = normalizeSearchText(row.name);
-    const duplicates = sourceRows.filter((candidate, candidateIndex) => {
-      if (candidateIndex === index) return false;
-      const nameSimilarity = similarityScore(candidate.name, row.name);
-      const producerSimilarity = similarityScore(candidate.producer, row.producer);
-      return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5);
-    });
-    const duplicateIndexes = sourceRows
-      .map((candidate, candidateIndex) => {
-        if (candidateIndex === index) return null;
-        const nameSimilarity = similarityScore(candidate.name, row.name);
-        const producerSimilarity = similarityScore(candidate.producer, row.producer);
-        return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5) ? candidateIndex : null;
-      })
-      .filter((value): value is number => value !== null);
-    const cellarDuplicate = cellarWines?.find((wine) => {
-      const nameSimilarity = similarityScore(wine.name, row.name);
-      const producerSimilarity = similarityScore(wine.producer, row.producer);
-      return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5);
-    });
+    const shouldCheckDuplicates = sourceRows.length > 0 && sourceRows.length <= LARGE_IMPORT_DUPLICATE_THRESHOLD;
+    const duplicates = shouldCheckDuplicates
+      ? sourceRows.filter((candidate, candidateIndex) => {
+          if (candidateIndex === index) return false;
+          const nameSimilarity = similarityScore(candidate.name, row.name);
+          const producerSimilarity = similarityScore(candidate.producer, row.producer);
+          return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5);
+        })
+      : [];
+    const duplicateIndexes = shouldCheckDuplicates
+      ? sourceRows
+          .map((candidate, candidateIndex) => {
+            if (candidateIndex === index) return null;
+            const nameSimilarity = similarityScore(candidate.name, row.name);
+            const producerSimilarity = similarityScore(candidate.producer, row.producer);
+            return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5) ? candidateIndex : null;
+          })
+          .filter((value): value is number => value !== null)
+      : [];
+    const cellarDuplicate = shouldCheckDuplicates
+      ? cellarWines?.find((wine) => {
+          const nameSimilarity = similarityScore(wine.name, row.name);
+          const producerSimilarity = similarityScore(wine.producer, row.producer);
+          return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5);
+        })
+      : null;
 
     const errors: string[] = [];
     if (!row.name?.trim()) errors.push("Nome obrigatório");
@@ -286,7 +295,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       confidence,
       errors,
       image_url: cellarDuplicate?.image_url || buildGeneratedThumbnail({ ...row, style: type }),
-      duplicateWarning: duplicates.length > 0 || cellarDuplicate ? `Possível duplicado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""} detectado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""}` : null,
+      duplicateWarning: shouldCheckDuplicates && (duplicates.length > 0 || cellarDuplicate) ? `Possível duplicado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""} detectado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""}` : null,
       duplicateGroupKey,
       duplicateIndexes,
     };
