@@ -232,7 +232,7 @@ export function LandingShowcase() {
   const activeTab = tabs.find((t) => t.key === active)!;
 
   return (
-    <section className="relative px-4 sm:px-8 pt-6 pb-10 z-10">
+    <section className="relative px-4 sm:px-8 pt-3 pb-7 z-10">
       <div className="mx-auto max-w-5xl">
         <motion.div
           className="text-center mx-auto max-w-2xl mb-6"

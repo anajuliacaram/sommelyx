@@ -36,8 +36,8 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
   };
 
   return (
-    <section className="relative z-10 px-4 sm:px-8 pt-20 sm:pt-24 lg:pt-28 pb-8 sm:pb-12">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
+    <section className="relative z-10 px-4 sm:px-8 pt-16 sm:pt-20 lg:pt-24 pb-6 sm:pb-8">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
         {/* Left */}
         <div className="text-left">
           <motion.div
@@ -127,16 +127,37 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
           </motion.div>
         </div>
 
-        {/* Right: Floating cards (Adega + Consumo + IA) */}
-        <div className="relative h-[420px] sm:h-[460px] lg:h-[480px]">
+        {/* Right: Floating cards (IA + Adega + Consumo + Alerta) */}
+        <div className="relative h-[460px] sm:h-[500px] lg:h-[520px]">
           {/* Glow background */}
           <div className="absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.14)", filter: "blur(70px)" }} />
           <div className="absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.16)", filter: "blur(90px)" }} />
 
-          {/* Card 1 — Adega (back) */}
+          {/* Card TOP-RIGHT — IA dark pill (preenche canto superior) */}
           <motion.div
-            {...float(0.15)}
-            className="absolute top-0 left-0 sm:left-2 w-[78%] max-w-[320px] rounded-2xl p-4"
+            {...float(0.10)}
+            className="absolute top-0 right-0 sm:right-2 w-[64%] max-w-[280px] rounded-2xl p-3.5"
+            style={{
+              ...glassCard,
+              background: "linear-gradient(160deg, rgba(55,30,36,0.96) 0%, rgba(28,15,20,1) 100%)",
+              border: "1px solid rgba(198,167,104,0.22)",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.18)", border: "1px solid rgba(198,167,104,0.28)" }}>
+                <Sparkles className="h-3.5 w-3.5 text-[#C6A768]" />
+              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[#C6A768]">Inteligência</p>
+            </div>
+            <p className="text-[11.5px] leading-relaxed font-medium text-[#F8F6F3]">
+              "Seu Brunello 2018 está na <span className="text-[#C6A768]">janela ideal</span>. Considere abrir nos próximos 60 dias."
+            </p>
+          </motion.div>
+
+          {/* Card LEFT — Adega */}
+          <motion.div
+            {...float(0.22)}
+            className="absolute top-[150px] left-0 sm:-left-2 w-[78%] max-w-[320px] rounded-2xl p-4"
             style={glassCard}
           >
             <div className="flex items-center justify-between">
@@ -168,31 +189,28 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </div>
           </motion.div>
 
-          {/* Card 2 — IA (right, top) */}
+          {/* Card RIGHT-MIDDLE — Alerta de reposição */}
           <motion.div
-            {...float(0.35)}
-            className="absolute top-8 right-0 w-[62%] max-w-[260px] rounded-2xl p-4"
-            style={{
-              ...glassCard,
-              background: "linear-gradient(160deg, rgba(55,30,36,0.96) 0%, rgba(28,15,20,1) 100%)",
-              border: "1px solid rgba(198,167,104,0.22)",
-            }}
+            {...float(0.40)}
+            className="absolute top-[210px] right-0 sm:-right-2 w-[58%] max-w-[230px] rounded-2xl p-3.5"
+            style={glassCard}
           >
-            <div className="flex items-center gap-2 mb-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.18)", border: "1px solid rgba(198,167,104,0.28)" }}>
-                <Sparkles className="h-3.5 w-3.5 text-[#C6A768]" />
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.24)" }}>
+                <AlertTriangle className="h-3.5 w-3.5" style={{ color: "#B8860B" }} />
               </div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[#C6A768]">Inteligência</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.10em]" style={{ color: "#8B6914" }}>Reposição</p>
             </div>
-            <p className="text-[12px] leading-relaxed font-medium text-[#F8F6F3]">
-              "Seu Brunello 2018 está na <span className="text-[#C6A768]">janela ideal</span>. Considere abrir nos próximos 60 dias."
+            <p className="text-[11.5px] leading-snug font-medium text-[#1A1A1A]">
+              <span className="font-semibold text-wine">3 rótulos</span> abaixo do mínimo
             </p>
+            <p className="mt-0.5 text-[10.5px] text-[#5F5F5F]">Veja sugestão de compra</p>
           </motion.div>
 
-          {/* Card 3 — Consumo (front, bottom) */}
+          {/* Card BOTTOM — Consumo */}
           <motion.div
             {...float(0.55)}
-            className="absolute bottom-0 left-6 sm:left-12 w-[80%] max-w-[340px] rounded-2xl p-4"
+            className="absolute bottom-0 left-4 sm:left-10 w-[82%] max-w-[340px] rounded-2xl p-4"
             style={glassCard}
           >
             <div className="flex items-center justify-between mb-3">
@@ -234,7 +252,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
         viewport={{ once: true, margin: "-40px" }}
         variants={fadeUp}
         custom={5}
-        className="mx-auto mt-12 sm:mt-16 max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
+        className="mx-auto mt-8 sm:mt-10 max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
       >
         {[
           {
