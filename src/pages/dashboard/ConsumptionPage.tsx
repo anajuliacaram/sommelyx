@@ -261,13 +261,16 @@ export default function ConsumptionPage() {
 
       {/* Monthly chart */}
       <EditorialCard>
-        <div className="mb-4 flex items-baseline justify-between">
+        <div className="mb-3 flex items-baseline justify-between">
           <div>
             <Kicker>Ritmo de consumo</Kicker>
-            <h2 className="editorial-h2 mt-1">Últimos 6 meses</h2>
+            <h2 className="editorial-h2 mt-1">{chart.title}</h2>
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[rgba(58,51,39,0.5)]">
+            garrafas / {period === "week" ? "dia" : "mês"}
+          </span>
         </div>
-        <Sparkbar data={monthly} accent="#7B1E2B" height={140} />
+        <Sparkbar data={chart.data} accent="#7B1E2B" height={110} barWidth={period === "year" ? 8 : 12} />
       </EditorialCard>
 
       {/* Filtros inteligentes */}
