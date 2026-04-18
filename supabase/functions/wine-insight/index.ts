@@ -34,10 +34,8 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[wine-insight] openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
+    const AI_MODEL = Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview";
+    console.log(`[wine-insight] provider=lovable model=${AI_MODEL}`);
 
     const body = await req.json();
     const { alertType, wineName, style, grape, region, country, vintage, drinkFrom, drinkUntil } = body;
@@ -104,8 +102,8 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
     const result = await callOpenAIResponses<any>({
       functionName: "wine-insight",
       requestId: crypto.randomUUID(),
-      apiKey: OPENAI_API_KEY,
-      model: OPENAI_MODEL,
+      apiKey: "",
+      model: AI_MODEL,
       timeoutMs: 35_000,
       temperature: 0.75,
       instructions: systemPrompt,
