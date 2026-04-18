@@ -248,7 +248,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
   const activeMeta = categories.find((c) => c.key === activeCat)!;
 
   return (
-    <section id="pricing" className="relative px-4 sm:px-8 pt-4 pb-10 z-10">
+    <section id="pricing" className="relative px-4 sm:px-8 pt-3 pb-8 z-10">
       <div className="mx-auto max-w-5xl">
         <motion.div
           className="text-center mx-auto max-w-2xl mb-8"
