@@ -608,6 +608,150 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return await readTextFile(file);
   };
 
+  // ── LOCAL DETERMINISTIC CSV PARSER ──
+  // Auto-detects delimiter (`,`, `;`, `\t`, `|`), maps PT/EN headers, returns parsed wines.
+  const detectDelimiter = (sample: string): string => {
+    const candidates = [",", ";", "\t", "|"];
+    const firstLine = sample.split(/\r?\n/).find((l) => l.trim().length > 0) || "";
+    let best = ",";
+    let bestCount = 0;
+    for (const d of candidates) {
+      const count = firstLine.split(d).length - 1;
+      if (count > bestCount) {
+        bestCount = count;
+        best = d;
+      }
+    }
+    return best;
+  };
+
+  const splitCsvLine = (line: string, delimiter: string): string[] => {
+    const out: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === delimiter && !inQuotes) {
+        out.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    out.push(current);
+    return out.map((c) => c.trim().replace(/^"|"$/g, ""));
+  };
+
+  const HEADER_ALIAS: Record<string, EditableField> = {
+    // name
+    nome: "name", "nome do vinho": "name", vinho: "name", produto: "name", rotulo: "name", rótulo: "name", name: "name", wine: "name", label: "name",
+    // producer
+    produtor: "producer", vinicola: "producer", vinícola: "producer", marca: "producer", winery: "producer", producer: "producer", brand: "producer",
+    // vintage
+    safra: "vintage", ano: "vintage", year: "vintage", vintage: "vintage",
+    // style
+    tipo: "style", estilo: "style", style: "style", type: "style", categoria: "style",
+    // country
+    pais: "country", país: "country", country: "country", origem: "country",
+    // region
+    regiao: "region", região: "region", region: "region", "denominação": "region", denominacao: "region", appellation: "region",
+    // grape
+    uva: "grape", uvas: "grape", varietal: "grape", grape: "grape", cepage: "grape", cépage: "grape", grapes: "grape",
+    // quantity
+    quantidade: "quantity", qtd: "quantity", qte: "quantity", qty: "quantity", quantity: "quantity", estoque: "quantity", garrafas: "quantity",
+    // price
+    preco: "purchase_price", preço: "purchase_price", "preço de compra": "purchase_price", "preco de compra": "purchase_price",
+    valor: "purchase_price", custo: "purchase_price", price: "purchase_price", cost: "purchase_price",
+    // location
+    "localizacao": "cellar_location", "localização": "cellar_location", local: "cellar_location", adega: "cellar_location", location: "cellar_location", posicao: "cellar_location", posição: "cellar_location",
+    // drink window
+    "beber de": "drink_from", "drink from": "drink_from", "consumir de": "drink_from",
+    "beber ate": "drink_until", "beber até": "drink_until", "drink until": "drink_until", "consumir ate": "drink_until", "consumir até": "drink_until",
+  };
+
+  const normalizeHeader = (h: string) =>
+    h
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[._-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const mapHeaderToField = (header: string): EditableField | undefined => {
+    const norm = normalizeHeader(header);
+    if (HEADER_ALIAS[norm]) return HEADER_ALIAS[norm];
+    // partial match
+    for (const [alias, field] of Object.entries(HEADER_ALIAS)) {
+      if (norm.includes(alias) || alias.includes(norm)) return field;
+    }
+    return undefined;
+  };
+
+  const parseCsvLocally = (text: string): { wines: ParsedWine[]; mapping: Record<string, string> } => {
+    if (!text || !text.trim()) return { wines: [], mapping: {} };
+    const delimiter = detectDelimiter(text);
+    const lines = text.replace(/\r\n/g, "\n").split("\n").filter((l) => l.trim().length > 0);
+    if (lines.length < 2) return { wines: [], mapping: {} };
+
+    const headerCells = splitCsvLine(lines[0], delimiter);
+    const fieldByCol: (EditableField | undefined)[] = headerCells.map(mapHeaderToField);
+    const mapping: Record<string, string> = {};
+    headerCells.forEach((h, i) => {
+      if (fieldByCol[i]) mapping[h] = fieldByCol[i] as string;
+    });
+
+    // Need at least the name column to be useful
+    const hasName = fieldByCol.includes("name");
+    if (!hasName) return { wines: [], mapping };
+
+    const wines: ParsedWine[] = [];
+    for (let r = 1; r < lines.length; r++) {
+      const cells = splitCsvLine(lines[r], delimiter);
+      const row: Partial<ParsedWine> = {};
+      cells.forEach((value, colIndex) => {
+        const field = fieldByCol[colIndex];
+        if (!field || !value) return;
+        if (field === "vintage" || field === "drink_from" || field === "drink_until") {
+          row[field] = parseYear(value);
+        } else if (field === "quantity") {
+          row.quantity = parseQuantity(value);
+        } else if (field === "purchase_price") {
+          row.purchase_price = parsePrice(value);
+        } else if (field === "style") {
+          row.style = normalizeStyle(value);
+        } else {
+          (row as any)[field] = normalizeText(value);
+        }
+      });
+      const name = (row.name || "").trim();
+      if (name.length >= 2 && name.length <= 120) {
+        wines.push({
+          name,
+          producer: row.producer,
+          vintage: row.vintage,
+          style: row.style,
+          country: row.country,
+          region: row.region,
+          grape: row.grape,
+          quantity: row.quantity ?? 1,
+          purchase_price: row.purchase_price,
+          cellar_location: row.cellar_location,
+          drink_from: row.drink_from,
+          drink_until: row.drink_until,
+        });
+      }
+    }
+    return { wines, mapping };
+  };
+
   const reset = () => {
     setStep("upload");
     setDraftWines([]);
