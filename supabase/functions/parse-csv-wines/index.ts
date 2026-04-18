@@ -111,11 +111,11 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[parse-csv-wines] openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")?.trim() || "";
+    const AI_MODEL = Deno.env.get("AI_MODEL")?.trim() || "google/gemini-2.5-flash";
+    console.log(`[parse-csv-wines] lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${AI_MODEL}`);
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
