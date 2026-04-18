@@ -215,8 +215,13 @@ serve(async (req) => {
 
     const row = wine as WineRow;
 
-    // Se já tem imagem real (não SVG ilustrativo) e não foi pedido para regenerar, devolve cacheada
-    const hasRealImage = !!row.image_url && !row.image_url.startsWith("data:image/svg+xml");
+    // Considera "imagem real" apenas o que está no nosso bucket (upload manual ou IA),
+    // ignorando SVG ilustrativo, placeholders quebrados (wine-searcher alert.jpg, etc.) e fontes externas não confiáveis.
+    const url = row.image_url || "";
+    const isOurBucket = url.includes("/storage/v1/object/public/wine-label-images/");
+    const isBadPlaceholder = /alert\.jpg|placeholder|notfound|not[-_]?found|404\.|missing/i.test(url);
+    const isSvgFallback = url.startsWith("data:image/svg+xml");
+    const hasRealImage = !!url && isOurBucket && !isBadPlaceholder && !isSvgFallback;
     if (hasRealImage && !force) {
       return jsonResponse({ ok: true, image_url: row.image_url, source: "cached" });
     }
