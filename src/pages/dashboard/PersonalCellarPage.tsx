@@ -32,8 +32,8 @@ export default function PersonalCellarPage() {
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
   const [sort, setSort] = useState<
-    "window" | "recent" | "rating" | "vintage" | "vintage_old" | "value" | "value_low"
-  >("window");
+    "recent" | "value_low" | "value" | "vintage_old" | "vintage"
+  >("recent");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [showLabels, setShowLabels] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -66,13 +66,11 @@ export default function PersonalCellarPage() {
         String(w.vintage ?? "").includes(q)
       );
     });
-    if (sort === "window") list = list.slice().sort((a, b) => (a.drink_until ?? 9999) - (b.drink_until ?? 9999));
-    else if (sort === "recent") list = list.slice().sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime());
-    else if (sort === "rating") list = list.slice().sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
-    else if (sort === "vintage") list = list.slice().sort((a, b) => (b.vintage ?? 0) - (a.vintage ?? 0));
+    if (sort === "recent") list = list.slice().sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime());
+    else if (sort === "value_low") list = list.slice().sort((a, b) => (Number(a.current_value) || Number(a.purchase_price) || Infinity) - (Number(b.current_value) || Number(b.purchase_price) || Infinity));
+    else if (sort === "value") list = list.slice().sort((a, b) => (Number(b.current_value) || Number(b.purchase_price) || 0) - (Number(a.current_value) || Number(a.purchase_price) || 0));
     else if (sort === "vintage_old") list = list.slice().sort((a, b) => (a.vintage ?? 9999) - (b.vintage ?? 9999));
-    else if (sort === "value") list = list.slice().sort((a, b) => (Number(b.current_value) || 0) - (Number(a.current_value) || 0));
-    else if (sort === "value_low") list = list.slice().sort((a, b) => (Number(a.current_value) || Infinity) - (Number(b.current_value) || Infinity));
+    else if (sort === "vintage") list = list.slice().sort((a, b) => (b.vintage ?? 0) - (a.vintage ?? 0));
     return list;
   }, [wines, query, styleFilter, sort]);
 
@@ -138,13 +136,11 @@ export default function PersonalCellarPage() {
                 color: "#1a1713",
               }}
             >
-              <option value="window">Janela ideal</option>
-              <option value="recent">Recém-adicionados</option>
-              <option value="rating">Maior nota</option>
-              <option value="vintage">Safra mais nova</option>
-              <option value="vintage_old">Safra mais antiga</option>
-              <option value="value">Mais caros</option>
+              <option value="recent">Adicionados mais recentemente</option>
               <option value="value_low">Mais baratos</option>
+              <option value="value">Mais caros</option>
+              <option value="vintage_old">Safra mais antiga</option>
+              <option value="vintage">Safra mais nova</option>
             </select>
             <div className="editorial-segmented">
               <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
