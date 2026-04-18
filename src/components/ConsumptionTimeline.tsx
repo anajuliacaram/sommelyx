@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { Star } from "@/icons/lucide";
 import type { ConsumptionEntry } from "@/hooks/useConsumption";
+import { useWines } from "@/hooks/useWines";
 import { getStyleColor } from "@/lib/sommelyx-data";
 
 function getMonthKey(date: Date) {
