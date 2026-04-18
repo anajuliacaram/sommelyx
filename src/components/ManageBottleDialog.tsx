@@ -209,6 +209,17 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
     [baseWines]
   );
 
+  const matchesStyleFilter = (style: string | null | undefined, filter: typeof styleFilter) => {
+    if (filter === "all") return true;
+    const s = (style || "").toLowerCase();
+    if (filter === "tinto") return s.includes("tinto") || s.includes("red");
+    if (filter === "branco") return s.includes("branco") || s.includes("white");
+    if (filter === "rose") return s.includes("rosé") || s.includes("rose");
+    if (filter === "espumante") return s.includes("espumante") || s.includes("sparkling") || s.includes("champagne");
+    if (filter === "sobremesa") return s.includes("sobremesa") || s.includes("fortificado") || s.includes("dessert");
+    return true;
+  };
+
   const filteredWines = useMemo(() => {
     return baseWines.filter(w => {
       if (searchText) {
@@ -220,11 +231,12 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
           String(w.vintage).includes(q);
         if (!match) return false;
       }
+      if (!matchesStyleFilter(w.style, styleFilter)) return false;
       if (selectedCountries.length > 0 && (!w.country || !selectedCountries.includes(w.country))) return false;
       if (selectedGrapes.length > 0 && (!w.grape || !selectedGrapes.includes(w.grape))) return false;
       return true;
     });
-  }, [baseWines, searchText, selectedCountries, selectedGrapes]);
+  }, [baseWines, searchText, selectedCountries, selectedGrapes, styleFilter]);
 
   const selectedWine = wines?.find(w => w.id === wineId);
   const activeFilterCount = selectedCountries.length + selectedGrapes.length;
