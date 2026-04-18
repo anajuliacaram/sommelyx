@@ -61,6 +61,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [tastingNotes, setTastingNotes] = useState("");
   const [rating, setRating] = useState<number>(0);
   const [consumedAt, setConsumedAt] = useState(new Date().toISOString().split("T")[0]);
+  const [wineSearch, setWineSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<WineTypeFilter>("all");
 
   useEffect(() => {
     if (open && preSelectedWine) {
