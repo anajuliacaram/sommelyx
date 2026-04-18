@@ -78,16 +78,21 @@ export function MultiSelectDropdown({
                     variant="outline"
                     size="sm"
                     className={cn(
-                        "h-10 sm:h-10 px-4 py-2 rounded-full text-[12px] font-semibold flex items-center gap-1.5 border transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out active:scale-[0.98]",
+                        "h-10 px-3.5 rounded-full text-[13px] font-medium flex items-center gap-1.5 border transition-all duration-200 ease-out hover:-translate-y-px active:scale-[0.98]",
                         hasSelection
-                            ? "bg-[#6F7F5B] text-white border-[#6F7F5B] shadow-[0_10px_18px_-16px_rgba(111,127,91,0.48)] hover:bg-[#6F7F5B] hover:text-white"
-                            : "bg-white text-neutral-700 border-neutral-200 shadow-[0_1px_2px_rgba(0,0,0,0.022)] hover:bg-neutral-100 hover:border-neutral-300 hover:text-neutral-900"
+                            ? "bg-[rgba(123,30,43,0.08)] text-[#7B1E2B] border-[#7B1E2B] hover:bg-[rgba(123,30,43,0.12)]"
+                            : "bg-[rgba(255,255,255,0.7)] text-[#3A3327] border-[rgba(95,111,82,0.15)] hover:bg-black/[0.04] hover:border-[rgba(95,111,82,0.25)]"
                     )}
                 >
-                    <span className="truncate max-w-[80px]">{triggerLabel}</span>
+                    <span className="truncate max-w-[120px]">{triggerLabel}</span>
+                    {hasSelection && selected.length > 1 && (
+                        <span className="ml-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#7B1E2B] px-1 text-[9px] font-bold text-white">
+                            {selected.length}
+                        </span>
+                    )}
                     <ChevronDown className={cn(
-                        "h-3 w-3 shrink-0 transition-transform duration-200",
-                        hasSelection ? "opacity-70" : "opacity-50",
+                        "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
+                        hasSelection ? "opacity-70" : "opacity-45",
                         open && "rotate-180"
                     )} />
                 </Button>
@@ -96,8 +101,8 @@ export function MultiSelectDropdown({
                 side="bottom"
                 align="start"
                 avoidCollisions={false}
-                sideOffset={4}
-                className="w-[92vw] max-w-[280px] sm:w-[240px] p-3 rounded-[20px] shadow-[0_18px_40px_-28px_rgba(58,51,39,0.18)] bg-[rgba(255,255,255,0.96)] border border-[rgba(95,111,82,0.10)] backdrop-blur-xl"
+                sideOffset={6}
+                className="w-[92vw] max-w-[280px] sm:w-[260px] p-3 rounded-[18px] shadow-[0_18px_40px_-22px_rgba(58,51,39,0.20)] bg-[rgba(255,255,255,0.96)] border border-[rgba(95,111,82,0.10)] backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1"
             >
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2 px-0.5">
@@ -158,10 +163,10 @@ export function MultiSelectDropdown({
                                         <div
                                             key={opt.value}
                                         className={cn(
-                                                "flex items-center gap-2 px-2.5 py-2 rounded-[14px] cursor-pointer transition-[background-color,color,transform] duration-150",
+                                                "flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] cursor-pointer transition-colors duration-150",
                                                 isChecked
-                                                    ? "bg-[rgba(111,127,91,0.10)] text-[#6F7F5B]"
-                                                    : "hover:bg-neutral-100 text-neutral-700"
+                                                    ? "bg-[rgba(123,30,43,0.06)] text-[#7B1E2B]"
+                                                    : "hover:bg-black/[0.04] text-[#3A3327]"
                                             )}
                                             onClick={() => onChange(opt.value)}
                                         >
@@ -170,13 +175,13 @@ export function MultiSelectDropdown({
                                                 className={cn(
                                                     "pointer-events-none rounded h-3.5 w-3.5 transition-colors duration-150",
                                                     isChecked
-                                                        ? "border-[#6F7F5B] bg-[#6F7F5B] text-white"
+                                                        ? "border-[#7B1E2B] bg-[#7B1E2B] text-white"
                                                         : "border-neutral-300"
                                                 )}
                                             />
                                             <span className={cn(
-                                                "text-[11px] leading-normal flex-1 truncate",
-                                                isChecked ? "font-bold" : "font-medium"
+                                                "text-[12px] leading-normal flex-1 truncate",
+                                                isChecked ? "font-semibold" : "font-medium"
                                             )}>
                                                 {opt.label}
                                             </span>
@@ -184,7 +189,7 @@ export function MultiSelectDropdown({
                                                 <span className={cn(
                                                     "text-[9px] font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
                                                     isChecked
-                                                        ? "bg-[rgba(111,127,91,0.14)] text-[#6F7F5B]"
+                                                        ? "bg-[rgba(123,30,43,0.10)] text-[#7B1E2B]"
                                                         : "bg-muted/50 text-muted-foreground/60"
                                                 )}>
                                                     {opt.count}
@@ -198,10 +203,10 @@ export function MultiSelectDropdown({
                     </ScrollArea>
 
                     {hasSelection && (
-                        <div className="pt-1 border-t border-border/20 px-0.5">
+                        <div className="pt-1 border-t border-[rgba(95,111,82,0.12)] px-0.5">
                             <Button
                                 variant="ghost"
-                                className="w-full h-8 text-[10px] font-semibold text-[#6F7F5B] hover:text-[#556446] hover:bg-[rgba(111,127,91,0.06)] justify-center rounded-[12px] transition-[background-color,color,transform] duration-150"
+                                className="w-full h-8 text-[11px] font-semibold text-[#7B1E2B] hover:text-[#5A1420] hover:bg-[rgba(123,30,43,0.06)] justify-center rounded-[10px] transition-colors duration-150"
                                 onClick={() => {
                                     onClear()
                                     setOpen(false)
