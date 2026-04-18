@@ -60,11 +60,21 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
       toast.error("Avaliação deve ser entre 0 e 5");
       return;
     }
+    const vintageNum = vintage === "" ? null : Number(vintage);
+    if (vintageNum != null && (!Number.isFinite(vintageNum) || vintageNum < 1800 || vintageNum > 2100)) {
+      toast.error("Safra inválida");
+      return;
+    }
     try {
       await update.mutateAsync({
         id: entry.id,
         updates: {
           wine_name: wineName.trim() || entry.wine_name,
+          producer: producer.trim() || null,
+          vintage: vintageNum,
+          country: country.trim() || null,
+          region: region.trim() || null,
+          grape: grape.trim() || null,
           style: style || null,
           rating: ratingNum,
           location: location.trim() || null,
