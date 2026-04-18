@@ -469,7 +469,7 @@ INSTRUÇÕES:
 
     }
     const hasCellar = (userWines as any[] | undefined)?.length ? (userWines as any[]).length > 0 : false;
-    if (mode === "food-to-wine") {
+    } else if (mode === "food-to-wine") {
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
 ${PROFILE_CONSTRUCTION_RULES}
