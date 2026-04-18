@@ -9,7 +9,7 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -301,90 +301,40 @@ function rankCellarWinesForDish(dish: string, wines: Record<string, unknown>[]) 
 }
 
 async function callAI(
-  apiKey: string,
+  _apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   tools: unknown[],
-  toolChoice: unknown,
-  signal: AbortSignal,
+  _toolChoice: unknown,
+  _signal: AbortSignal,
 ) {
   const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
   const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
   const schema = (tools?.[0] as any)?.function?.parameters || {};
 
-  if (openaiKey) {
-    const result = await callOpenAIResponses<any>({
-      functionName: "wine-pairings",
-      requestId: crypto.randomUUID(),
-      apiKey: openaiKey,
-      model: openaiModel,
-      timeoutMs: 60_000,
-      temperature: 0.35,
-      instructions: systemPrompt,
-      input: [
-        {
-          role: "user",
-          content: [{ type: "input_text", text: userPrompt }],
-        },
-      ],
-      schema,
-      maxOutputTokens: 5_000,
-    });
-
-    if (result.ok) {
-      return { ok: true, status: 200, errText: "", parsed: result.parsed };
-    }
-
-    return { ok: false, status: result.status, errText: result.error, parsed: null };
-  }
-
-  const aiResponse = await fetch(AI_URL, {
-    method: "POST",
-    signal,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      tools,
-      tool_choice: toolChoice,
-      temperature: 0.75,
-    }),
+  const result = await callOpenAIResponses<any>({
+    functionName: "wine-pairings",
+    requestId: crypto.randomUUID(),
+    apiKey: openaiKey,
+    model: openaiModel,
+    timeoutMs: 60_000,
+    temperature: 0.35,
+    instructions: systemPrompt,
+    input: [
+      {
+        role: "user",
+        content: [{ type: "input_text", text: userPrompt }],
+      },
+    ],
+    schema,
+    maxOutputTokens: 5_000,
   });
 
-  if (!aiResponse.ok) {
-    const errText = await aiResponse.text().catch(() => "");
-    return { ok: false, status: aiResponse.status, errText, parsed: null };
+  if (result.ok) {
+    return { ok: true, status: 200, errText: "", parsed: result.parsed };
   }
 
-  const aiData = await aiResponse.json();
-  let parsed;
-  try {
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (toolCall?.function?.arguments) {
-      parsed = typeof toolCall.function.arguments === "string"
-        ? JSON.parse(toolCall.function.arguments)
-        : toolCall.function.arguments;
-    } else {
-      const content = aiData.choices?.[0]?.message?.content || "";
-      const jsonStart = content.indexOf("{");
-      const jsonEnd = content.lastIndexOf("}");
-      if (jsonStart !== -1 && jsonEnd > jsonStart) {
-        parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
-      } else {
-        parsed = JSON.parse(content);
-      }
-    }
-  } catch {
-    parsed = null;
-  }
-
-  return { ok: true, status: 200, errText: "", parsed };
+  return { ok: false, status: result.status, errText: result.error, parsed: null };
 }
 
 serve(async (req) => {
@@ -415,11 +365,10 @@ serve(async (req) => {
     }
     userId = user.id;
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[wine-pairings] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) {
+    console.log(`[wine-pairings] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!OPENAI_API_KEY) {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
     }
