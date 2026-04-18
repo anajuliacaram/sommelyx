@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "h-12 rounded-[14px] bg-gradient-to-br from-[#7B1E2B] to-[#A12C3A] px-5 text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:opacity-95",
+          "btn-primary-premium h-12 rounded-[14px] px-5 text-[15px] font-semibold text-white",
         secondary:
           "h-11 rounded-xl border border-[rgba(95,111,82,0.18)] bg-white px-4 text-[14px] text-[#3A3327] hover:bg-[rgba(0,0,0,0.03)] shadow-none",
         tertiary:
@@ -20,18 +20,18 @@ const buttonVariants = cva(
         ghost:
           "h-11 rounded-xl bg-transparent px-3 text-[#6B6B6B] hover:bg-[#F5EFE6] hover:text-[#1A1A1A] shadow-none",
         danger:
-          "h-12 rounded-2xl bg-gradient-to-r from-[#7B1E2B] to-[#5A1420] px-4 text-white shadow-[0_8px_24px_rgba(123,30,43,0.18)] hover:opacity-95",
+          "btn-primary-premium h-12 rounded-2xl px-4 text-white",
         success:
           "h-11 rounded-xl border border-black/10 bg-white px-4 text-[#333] hover:bg-[#F8F8F8] hover:border-black/15 shadow-none",
 
         // Back-compat aliases
         default:
-          "h-12 rounded-[14px] bg-gradient-to-br from-[#7B1E2B] to-[#A12C3A] px-5 text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:opacity-95",
+          "btn-primary-premium h-12 rounded-[14px] px-5 text-[15px] font-semibold text-white",
         destructive:
-          "h-12 rounded-[14px] bg-gradient-to-br from-[#7B1E2B] to-[#A12C3A] px-5 text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:opacity-95",
+          "btn-primary-premium h-12 rounded-[14px] px-5 text-[15px] font-semibold text-white",
         link: "h-11 rounded-xl bg-transparent px-0 text-[#6A1A28] underline-offset-4 hover:text-[#1A1A1A] hover:underline shadow-none",
         premium:
-          "h-12 rounded-[14px] bg-gradient-to-br from-[#7B1E2B] to-[#A12C3A] px-5 text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:opacity-95",
+          "btn-primary-premium h-12 rounded-[14px] px-5 text-[15px] font-semibold text-white",
         glass:
           "h-11 rounded-xl border border-[rgba(95,111,82,0.18)] bg-white px-4 text-[14px] text-[#3A3327] hover:bg-[rgba(0,0,0,0.03)] shadow-none",
       },
