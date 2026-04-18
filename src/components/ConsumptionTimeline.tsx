@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { Star } from "@/icons/lucide";
+import { Star, Pencil } from "@/icons/lucide";
 import type { ConsumptionEntry } from "@/hooks/useConsumption";
 import { useWines } from "@/hooks/useWines";
 import { getStyleColor } from "@/lib/sommelyx-data";
+import { EditConsumptionDialog } from "@/components/EditConsumptionDialog";
 
 function getMonthKey(date: Date) {
   return format(date, "yyyy-MM");
