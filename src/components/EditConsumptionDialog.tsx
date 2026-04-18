@@ -26,6 +26,11 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
   const update = useUpdateConsumption();
   const del = useDeleteConsumption();
   const [wineName, setWineName] = useState("");
+  const [producer, setProducer] = useState("");
+  const [vintage, setVintage] = useState("");
+  const [country, setCountry] = useState("");
+  const [region, setRegion] = useState("");
+  const [grape, setGrape] = useState("");
   const [style, setStyle] = useState<string>("");
   const [rating, setRating] = useState<string>("");
   const [location, setLocation] = useState("");
@@ -34,6 +39,11 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
   useEffect(() => {
     if (entry) {
       setWineName(entry.wine_name ?? "");
+      setProducer(entry.producer ?? "");
+      setVintage(entry.vintage != null ? String(entry.vintage) : "");
+      setCountry(entry.country ?? "");
+      setRegion(entry.region ?? "");
+      setGrape(entry.grape ?? "");
       setStyle(entry.style ?? "");
       setRating(entry.rating != null ? String(entry.rating) : "");
       setLocation(entry.location ?? "");
