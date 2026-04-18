@@ -31,6 +31,20 @@ export function useConsumption() {
   return useQuery({
     queryKey: ["consumption", user?.id ?? "demo"],
     queryFn: async () => {
+      // Authenticated user → ALWAYS read real data from Supabase (ignore demo data)
+      if (user) {
+        const { data, error } = await supabase
+          .from("consumption_log")
+          .select(
+            "id,user_id,wine_id,source,wine_name,producer,country,region,grape,style,vintage,location,tasting_notes,rating,consumed_at,created_at",
+          )
+          .eq("user_id", user.id)
+          .order("consumed_at", { ascending: false });
+        if (error) throw error;
+        console.log("[consumption] loaded:", data?.length ?? 0, "entries");
+        return data as ConsumptionEntry[];
+      }
+      // Anonymous preview → fall back to demo data when present
       if (sommelyxData?.consumption?.length) {
         const now = new Date().toISOString();
         return sommelyxData.consumption.map((entry, index) => ({
@@ -52,16 +66,7 @@ export function useConsumption() {
           created_at: now,
         })) as ConsumptionEntry[];
       }
-      if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase
-        .from("consumption_log")
-        .select(
-          "id,user_id,wine_id,source,wine_name,producer,country,region,grape,style,vintage,location,tasting_notes,rating,consumed_at,created_at",
-        )
-        .eq("user_id", user.id)
-        .order("consumed_at", { ascending: false });
-      if (error) throw error;
-      return data as ConsumptionEntry[];
+      throw new Error("Not authenticated");
     },
     enabled: !!user || !!sommelyxData?.consumption?.length,
   });
