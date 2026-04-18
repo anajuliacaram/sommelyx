@@ -11,7 +11,7 @@ const corsHeaders = {
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 const AI_TIMEOUT_MS = 60_000;
-const AI_URL = "https://ai.lovable.dev/v1/chat/completions";
+
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 10;
@@ -317,11 +317,20 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[${FUNCTION_NAME}] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) {
+    console.log(`[${FUNCTION_NAME}] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!OPENAI_API_KEY) {
+      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing OPENAI_API_KEY`);
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_api_key" });
+      return fail(500, {
+        ok: false,
+        code: "CONFIG_ERROR",
+        error: "O scanner está temporariamente indisponível. Tente novamente em instantes.",
+        requestId,
+        retryable: true,
+      });
+    }
       console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing API keys`);
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_api_key" });
       return fail(500, {
