@@ -1218,7 +1218,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           region: w.region || null,
           grape: w.grape || null,
           purchase_price: typeof (w.price ?? w.purchase_price) === "number" ? (w.price ?? w.purchase_price) : null,
-          current_value: null,
+          current_value: typeof (w as any).current_value === "number" ? (w as any).current_value : null,
           cellar_location: w.cellar_location || null,
           drink_from: w.drink_from || null,
           drink_until: w.drink_until || null,
