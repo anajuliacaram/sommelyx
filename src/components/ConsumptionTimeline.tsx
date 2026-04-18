@@ -83,7 +83,9 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
               <div className="flex flex-col">
                 {month.events.map((entry, index) => {
                   const date = new Date(entry.consumed_at);
-                  const color = getStyleColor(entry.style);
+                  const styleSource =
+                    entry.style ?? (entry.wine_id ? wineStyleById.get(entry.wine_id) ?? null : null);
+                  const color = styleSource ? getStyleColor(styleSource) : "rgba(95,111,82,0.25)";
                   return (
                     <div
                       key={entry.id}
