@@ -955,7 +955,7 @@ export default function CellarPage() {
       toast({ title: `"${deleteTarget.name}" removido da adega.` });
       setDeleteTarget(null);
     } catch {
-      toast({ title: "Erro ao remover vinho", variant: "destructive" });
+      toast({ title: "Não conseguimos remover o vinho", description: "Verifique sua conexão e tente novamente. O vinho permanece na adega.", variant: "destructive" });
     }
   };
 
@@ -964,7 +964,7 @@ export default function CellarPage() {
       await wineEvent.mutateAsync({ wineId: wine.id, eventType: "open", quantity: 1 });
       toast({ title: `🍷 "${wine.name}" aberto!` });
     } catch {
-      toast({ title: "Erro ao registrar abertura", variant: "destructive" });
+      toast({ title: "Não conseguimos registrar a abertura", description: "Verifique sua conexão e tente novamente.", variant: "destructive" });
     }
   };
 

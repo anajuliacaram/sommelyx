@@ -192,7 +192,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
       setSuccess(`${items.length} consumo(s) registrado(s) com sucesso!`);
       setTimeout(() => { resetAll(); onOpenChange(false); }, 1500);
     } catch {
-      toast({ title: "Erro ao registrar consumos", variant: "destructive" });
+      toast({ title: "Não conseguimos registrar os consumos", description: "Verifique sua conexão e tente novamente.", variant: "destructive" });
       setSubmitting(false);
     }
   };

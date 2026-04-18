@@ -273,7 +273,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setSuccess(true);
       setTimeout(() => { setSuccess(false); onOpenChange(false); }, 1200);
     } catch {
-      toast({ title: "Erro ao salvar alterações", variant: "destructive" });
+      toast({ title: "Não conseguimos salvar as alterações", description: "Verifique sua conexão e tente novamente. Suas edições foram preservadas no formulário.", variant: "destructive" });
     }
   };
 

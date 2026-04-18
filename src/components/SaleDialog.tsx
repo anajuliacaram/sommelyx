@@ -148,7 +148,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
       setSuccess(`Venda registrada! ${items.length} item(ns), total R$ ${totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
       setTimeout(() => { reset(); onOpenChange(false); }, 1800);
     } catch {
-      toast({ title: "Erro ao registrar venda", variant: "destructive" });
+      toast({ title: "Não conseguimos registrar a venda", description: "Verifique sua conexão e tente novamente. Os itens permanecem no carrinho.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }

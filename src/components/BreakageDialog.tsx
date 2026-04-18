@@ -86,7 +86,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
       setSuccess(`Ruptura registrada: ${qty} garrafa(s) de ${selectedWine?.name ?? ""}`);
       setTimeout(() => { reset(); onOpenChange(false); }, 1500);
     } catch {
-      toast({ title: "Erro ao registrar ruptura", variant: "destructive" });
+      toast({ title: "Não conseguimos registrar a ruptura", description: "Verifique sua conexão e tente novamente.", variant: "destructive" });
     }
   };
 

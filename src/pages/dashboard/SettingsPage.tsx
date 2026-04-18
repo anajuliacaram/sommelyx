@@ -91,7 +91,7 @@ export default function SettingsPage() {
       await setProfileType(switchTarget);
       toast({ title: `Modo alterado para ${switchTarget === "personal" ? "Adega Pessoal" : "Operação Comercial"}` });
     } catch {
-      toast({ title: "Erro ao trocar perfil", variant: "destructive" });
+      toast({ title: "Não conseguimos trocar de perfil", description: "Verifique sua conexão e tente novamente. Se persistir, recarregue a página.", variant: "destructive" });
     } finally {
       setSwitchTarget(null);
     }
