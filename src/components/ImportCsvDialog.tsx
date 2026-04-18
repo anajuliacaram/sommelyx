@@ -1319,6 +1319,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           ),
         );
         return;
+      case "current_value":
+        updateWineRow(rowIndex, field, rawValue ? Number.parseFloat(rawValue) : undefined);
+        return;
       default:
         updateWineRow(rowIndex, field, rawValue);
     }
