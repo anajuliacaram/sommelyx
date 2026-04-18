@@ -51,40 +51,46 @@ serve(async (req) => {
 
     const currentYear = new Date().getFullYear();
 
-    const systemPrompt = `Você é um sommelier experiente e enólogo. Forneça uma análise técnica breve (2-3 frases) sobre o estado de evolução de um vinho.
-Seja específico com base na uva, região e safra quando disponíveis.
-Use linguagem acessível mas com autoridade técnica.
-Responda APENAS em JSON válido:
-{
-  "insight": "Texto da análise técnica",
-  "recommendation": "Uma recomendação prática curta (1 frase)"
-}`;
+    const systemPrompt = `Você é um sommelier-mestre e enólogo brasileiro com 25 anos de experiência. Produza uma análise técnica REAL e ESPECÍFICA do vinho informado, evitando frases genéricas, evasivas ou vagas.
+
+REGRAS OBRIGATÓRIAS:
+- NUNCA use frases padronizadas como "este vinho é interessante", "ótimo momento para apreciar" ou "recomendo abrir em breve" sem contexto técnico.
+- SEMPRE cite características específicas da uva (taninos, acidez, álcool típico), do terroir (clima, solo, altitude) e do estilo (envelhecimento esperado).
+- Quando a safra estiver disponível, mencione o ano e o que se espera dela após esse tempo de guarda (ex.: "após 8 anos, taninos polidos, notas terciárias de couro e tabaco").
+- Use vocabulário enológico real: terciário, redução, bouquet, fenólicos, atenuação aromática, oxidação benéfica, etc.
+- Português brasileiro, autoridade técnica, sem jargão pomposo.
+
+FORMATO:
+- "insight": 2 a 4 frases densas, técnicas e específicas para ESTE vinho. Sem reticências. Sem repetir o nome do vinho.
+- "recommendation": 1 frase prática e específica (temperatura de serviço em °C, decantação, harmonização, ou ação imediata).
+
+Responda APENAS em JSON válido.`;
 
     let userPrompt: string;
 
     if (alertType === "drink_now") {
-      userPrompt = `Este vinho está na janela ideal de consumo (${drinkFrom || "?"}–${drinkUntil || "?"}, estamos em ${currentYear}).
+      userPrompt = `Vinho na janela ideal de consumo. Janela: ${drinkFrom || "?"}–${drinkUntil || "?"}. Ano atual: ${currentYear}.
 
-Vinho: ${wineName}
+Nome: ${wineName}
 Estilo: ${style || "Não informado"}
 Uva: ${grape || "Não informada"}
 Região: ${region || "Não informada"}
 País: ${country || "Não informado"}
 Safra: ${vintage || "Não informada"}
 
-Explique por que este é o momento ideal para abri-lo, com base nas características de evolução da uva/região/estilo. Sugira como melhor apreciá-lo.`;
+Análise pedida: explique tecnicamente por que ESTE vinho específico está no auge agora — cite a curva de evolução típica da uva/região, o estágio fenólico e aromático esperado após esse tempo, e o que o consumidor deve perceber na taça. Recomendação: temperatura ideal em °C e se decanta ou não, com justificativa.`;
     } else if (alertType === "past_peak") {
       const yearsOver = drinkUntil ? currentYear - drinkUntil : 0;
-      userPrompt = `Este vinho passou da janela ideal de consumo (janela era ${drinkFrom || "?"}–${drinkUntil || "?"}, estamos em ${currentYear}, ${yearsOver} ano(s) além).
+      userPrompt = `Vinho ${yearsOver > 0 ? `${yearsOver} ano(s) além` : "no limite"} da janela ideal. Janela: ${drinkFrom || "?"}–${drinkUntil || "?"}. Ano atual: ${currentYear}.
 
-Vinho: ${wineName}
+Nome: ${wineName}
 Estilo: ${style || "Não informado"}
 Uva: ${grape || "Não informada"}
 Região: ${region || "Não informada"}
 País: ${country || "Não informado"}
 Safra: ${vintage || "Não informada"}
 
-Explique tecnicamente o que pode ter acontecido com o vinho (oxidação, perda de frescor, taninos, etc.) com base na uva e estilo. Dê uma recomendação prática (abrir logo, usar em culinária, etc.).`;
+Análise pedida: avalie tecnicamente o estado provável — perda de fruta primária, evolução de terciários, risco de oxidação ou madeirização conforme a uva e o estilo. Seja honesto: ainda vale beber, está no limite, ou já passou? Recomendação: ação concreta (abrir em até X semanas, servir ligeiramente mais frio para mascarar oxidação, usar em redução culinária, etc.).`;
     } else {
       return new Response(JSON.stringify({ error: "alertType deve ser 'drink_now' ou 'past_peak'" }), {
         status: 400,
@@ -97,8 +103,8 @@ Explique tecnicamente o que pode ter acontecido com o vinho (oxidação, perda d
       requestId: crypto.randomUUID(),
       apiKey: OPENAI_API_KEY,
       model: OPENAI_MODEL,
-      timeoutMs: 30_000,
-      temperature: 0.6,
+      timeoutMs: 35_000,
+      temperature: 0.55,
       instructions: systemPrompt,
       input: [{ role: "user", content: [{ type: "input_text", text: userPrompt }] }],
       schema: {
@@ -110,7 +116,7 @@ Explique tecnicamente o que pode ter acontecido com o vinho (oxidação, perda d
         required: ["insight", "recommendation"],
         additionalProperties: false,
       },
-      maxOutputTokens: 300,
+      maxOutputTokens: 600,
     });
 
     if (!result.ok) {
