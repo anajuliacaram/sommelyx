@@ -19,6 +19,9 @@ const plans = [
     badge: "Mais popular",
     price: "R$ 29",
     period: "/mês",
+    annualPrice: "R$ 280",
+    annualHighlight: "Ganhe 2 meses grátis",
+    annualDetail: "por 12 meses na assinatura anual",
     desc: "Para colecionadores e uso pessoal",
     features: [
       "Toda sua adega organizada",
@@ -35,6 +38,9 @@ const plans = [
     badge: null,
     price: "R$ 59",
     period: "/mês",
+    annualPrice: "R$ 600",
+    annualHighlight: "Ganhe 3 meses grátis",
+    annualDetail: "por 12 meses na assinatura anual",
     desc: "Para restaurantes, bares e lojas",
     features: [
       "Tudo do Pro, mais:",
@@ -61,7 +67,7 @@ const faqs: { q: string; a: string; cat: FaqCategory }[] = [
   { cat: "planos", q: "Como funciona o teste grátis de 14 dias?", a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser, sem cobrança." },
   { cat: "planos", q: "Qual a diferença entre Pro e Business?", a: "O Pro é para adega pessoal (coleção, consumo, alertas e organização). O Business é para operação comercial, com foco em estoque, vendas e acompanhamento da operação." },
   { cat: "planos", q: "Posso trocar de plano depois?", a: "Sim. Você pode mudar de plano a qualquer momento, mantendo seus dados intactos." },
-  { cat: "planos", q: "Preciso cadastrar cartão para começar?", a: "Não. O teste grátis de 14 dias começa sem cartão de crédito. Você só insere o pagamento se decidir continuar." },
+  { cat: "planos", q: "Existe desconto na assinatura anual?", a: "Sim. No Pro você paga R$ 280 por 12 meses (ganha 2 meses grátis). No Business, R$ 600 por 12 meses (ganha 3 meses grátis)." },
   { cat: "planos", q: "Como cancelo minha assinatura?", a: "A qualquer momento, em dois cliques nas configurações da conta. Sem perguntas, sem multa." },
 
   // Funcionalidades
