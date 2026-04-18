@@ -128,8 +128,8 @@ export async function invokeEdgeFunction<T>(
             if (body?.requestId) requestId = String(body.requestId);
             if (body?.request_id) requestId = String(body.request_id);
             if (typeof body?.retryable === "boolean") retryable = body.retryable;
-          } else if (error.message && !error.message.includes("non-2xx")) {
-            message = error.message;
+          } else if ((error as any)?.message && !(error as any).message.includes("non-2xx")) {
+            message = (error as any).message;
           }
         } catch { /* ignore parse errors */ }
 

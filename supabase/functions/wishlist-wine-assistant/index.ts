@@ -192,11 +192,10 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[wishlist-wine-assistant] openai_key=${maskSecret(openaiKey)} lovable_key=${maskSecret(apiKey)} model=${openaiModel}`);
-    if (!apiKey && !openaiKey) {
+    console.log(`[wishlist-wine-assistant] openai_key=${maskSecret(openaiKey)} model=${openaiModel}`);
+    if (!openaiKey) {
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
@@ -253,7 +252,7 @@ Regras:
     });
 
     let parsed: Record<string, unknown>;
-    if (openaiKey) {
+    {
       const result = await callOpenAIResponses<any>({
         functionName: FUNCTION_NAME,
         requestId: crypto.randomUUID(),
@@ -266,10 +265,11 @@ Regras:
           {
             role: "user",
             content: userContent.map((part) => {
-              if (part.type === "text") return { type: "input_text", text: String((part as any).text ?? "") };
-              if (part.type === "image_url") return { type: "input_image", image_url: String((part as any).image_url.url ?? ""), detail: "high" as const };
-              return { type: "input_text", text: "" };
-            }).filter((item) => item.type === "input_text" ? item.text.trim().length > 0 : Boolean(item.image_url)),
+              if ((part as any).type === "text") {
+                return { type: "input_text" as const, text: String((part as any).text ?? "") };
+              }
+              return { type: "input_image" as const, image_url: String((part as any).image_url?.url ?? ""), detail: "high" as const };
+            }).filter((item) => item.type === "input_text" ? (item as any).text.trim().length > 0 : Boolean((item as any).image_url)),
           },
         ],
         schema: {
@@ -307,13 +307,6 @@ Regras:
             headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
           });
         }
-        if (result.status === 402) {
-          await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
-          return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
         await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: result.status });
         return new Response(JSON.stringify({ error: "Serviço de IA indisponível." }), {
           status: 502,
@@ -322,92 +315,6 @@ Regras:
       }
 
       parsed = result.parsed;
-    } else {
-      const controller = new AbortController();
-      const wineTimeout = setTimeout(() => controller.abort(), 60_000);
-
-      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages,
-          tools: [
-            {
-              type: "function",
-              function: {
-                name: "suggest_wishlist_wine",
-                description: "Gerar sugestão estruturada para wishlist",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    suggestion: {
-                      type: "object",
-                      properties: {
-                        wine_name: { type: "string" },
-                        producer: { type: "string" },
-                        vintage: { type: "number" },
-                        style: { type: "string" },
-                        country: { type: "string" },
-                        region: { type: "string" },
-                        grape: { type: "string" },
-                        target_price: { type: "number" },
-                        ai_summary: { type: "string" },
-                        notes: { type: "string" },
-                      },
-                      required: ["wine_name"],
-                    },
-                  },
-                  required: ["suggestion"],
-                },
-              },
-            },
-          ],
-          tool_choice: { type: "function", function: { name: "suggest_wishlist_wine" } },
-          temperature: 0.2,
-          max_tokens: 700,
-        }),
-      });
-
-      clearTimeout(wineTimeout);
-
-      if (!aiResponse.ok) {
-        if (aiResponse.status === 429) {
-          await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
-          return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
-            status: 429,
-            headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
-          });
-        }
-        if (aiResponse.status === 402) {
-          await logAudit(userId, 402, "ai_error", Date.now() - startTime, { reason: "credits_exhausted" });
-          return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: aiResponse.status });
-        return new Response(JSON.stringify({ error: "Serviço de IA indisponível." }), {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const aiData = await aiResponse.json();
-      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-      if (!toolCall) {
-        await logAudit(userId, 422, "ai_error", Date.now() - startTime, { reason: "no_tool_call" });
-        return new Response(JSON.stringify({ error: "Não foi possível gerar sugestões." }), {
-          status: 422,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      parsed = JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
     }
     const suggestionRaw = (parsed.suggestion ?? {}) as Record<string, unknown>;
 

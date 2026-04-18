@@ -1048,7 +1048,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 placeholder={column.placeholder}
                 type={column.kind === "number" ? "number" : "text"}
                 min={column.kind === "number" ? 0 : undefined}
-                step={column.key === "purchase_price" ? "0.01" : undefined}
+                step={(column.key as string) === "purchase_price" ? "0.01" : undefined}
                 disabled={!editMode}
                 list={listId}
                 className={cn(sharedInputClass, column.align === "right" && "text-right")}

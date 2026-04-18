@@ -5,8 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -46,75 +44,39 @@ REGRAS:
 - Se não conhecer o vinho específico, use o produtor e a região para inferir a faixa.
 - Retorne SOMENTE o JSON, sem texto adicional.`;
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[estimate-wine-price] openai_key=${maskSecret(openaiKey)} lovable_key=${maskSecret(apiKey)} model=${openaiModel}`);
-    if (!apiKey && !openaiKey) {
+    console.log(`[estimate-wine-price] openai_key=${maskSecret(openaiKey)} model=${openaiModel}`);
+    if (!openaiKey) {
       return new Response(
-        JSON.stringify({ error: "API key not configured" }),
+        JSON.stringify({ error: "OPENAI_API_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const parsed = openaiKey
-      ? await (async () => {
-          const result = await callOpenAIResponses<any>({
-            functionName: "estimate-wine-price",
-            requestId: crypto.randomUUID(),
-            apiKey: openaiKey,
-            model: openaiModel,
-            timeoutMs: 30_000,
-            temperature: 0.3,
-            instructions: systemPrompt,
-            input: [{ role: "user", content: [{ type: "input_text", text: `Estime o preço de mercado no Brasil para este vinho:\n\n${wineDesc}` }] }],
-            schema: {
-              type: "object",
-              properties: {
-                estimated_price: { type: "number" },
-                confidence: { type: "string", enum: ["alta", "media", "baixa"] },
-                reasoning: { type: "string" },
-              },
-              required: ["estimated_price", "confidence", "reasoning"],
-              additionalProperties: false,
-            },
-            maxOutputTokens: 300,
-          });
-          if (!result.ok) throw new Error(`AI provider error: ${result.status} - ${result.error}`);
-          return result.parsed;
-        })()
-      : await (async () => {
-          const aiResp = await fetch(LOVABLE_API_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-              model: "google/gemini-2.5-flash",
-              messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: `Estime o preço de mercado no Brasil para este vinho:\n\n${wineDesc}` },
-              ],
-              temperature: 0.3,
-            }),
-          });
-
-          if (!aiResp.ok) {
-            const errText = await aiResp.text();
-            console.error("AI API error:", aiResp.status, errText);
-            throw new Error("Falha ao consultar inteligência");
-          }
-
-          const aiData = await aiResp.json();
-          const rawContent = aiData.choices?.[0]?.message?.content ?? "";
-          const jsonMatch = rawContent.match(/\{[\s\S]*?\}/);
-          if (!jsonMatch) {
-            console.error("Could not parse AI response:", rawContent);
-            throw new Error("Resposta inválida da inteligência");
-          }
-          return JSON.parse(jsonMatch[0]);
-        })();
+    const result = await callOpenAIResponses<any>({
+      functionName: "estimate-wine-price",
+      requestId: crypto.randomUUID(),
+      apiKey: openaiKey,
+      model: openaiModel,
+      timeoutMs: 30_000,
+      temperature: 0.3,
+      instructions: systemPrompt,
+      input: [{ role: "user", content: [{ type: "input_text", text: `Estime o preço de mercado no Brasil para este vinho:\n\n${wineDesc}` }] }],
+      schema: {
+        type: "object",
+        properties: {
+          estimated_price: { type: "number" },
+          confidence: { type: "string", enum: ["alta", "media", "baixa"] },
+          reasoning: { type: "string" },
+        },
+        required: ["estimated_price", "confidence", "reasoning"],
+        additionalProperties: false,
+      },
+      maxOutputTokens: 300,
+    });
+    if (!result.ok) throw new Error(`OpenAI error: ${result.status} - ${result.error}`);
+    const parsed = result.parsed;
     const price = Number(parsed.estimated_price);
 
     if (!Number.isFinite(price) || price < 0) {
