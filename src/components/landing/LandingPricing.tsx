@@ -175,7 +175,7 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
           </span>
         </div>
 
-        <div className="mb-5">
+        <div className="mb-3">
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-[0.10em]"
             style={
@@ -196,6 +196,55 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
             14 dias grátis
           </span>
         </div>
+
+        {/* Annual plan highlight */}
+        {plan.annualPrice && (
+          <div
+            className="mb-5 rounded-2xl p-3 relative overflow-hidden"
+            style={
+              isLight
+                ? {
+                    background: "linear-gradient(135deg, rgba(95,111,82,0.10) 0%, rgba(198,167,104,0.10) 100%)",
+                    border: "1px solid rgba(95,111,82,0.22)",
+                  }
+                : {
+                    background: "linear-gradient(135deg, rgba(198,167,104,0.16) 0%, rgba(198,167,104,0.06) 100%)",
+                    border: "1px solid rgba(198,167,104,0.32)",
+                  }
+            }
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p
+                  className="text-[9.5px] font-bold uppercase tracking-[0.12em]"
+                  style={{ color: isLight ? "#3F4D36" : "#C6A768" }}
+                >
+                  ou {plan.annualPrice}
+                </p>
+                <p className="mt-0.5 text-[11px] leading-snug" style={{ color: sub }}>
+                  {plan.annualDetail}
+                </p>
+              </div>
+              <span
+                className="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.08em]"
+                style={
+                  isLight
+                    ? {
+                        color: "#FFFFFF",
+                        background: "linear-gradient(135deg, #5F6F52, #4A5640)",
+                      }
+                    : {
+                        color: "#1A1A1A",
+                        background: "#C6A768",
+                      }
+                }
+              >
+                <Sparkles className="h-2.5 w-2.5" strokeWidth={2.5} />
+                {plan.annualHighlight}
+              </span>
+            </div>
+          </div>
+        )}
 
         <Button
           variant={isLight ? "primary" : "secondary"}
