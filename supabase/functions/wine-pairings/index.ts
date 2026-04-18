@@ -685,7 +685,7 @@ INSTRUÇÕES:
         : "";
 
       const result = await callAI(
-        LOVABLE_API_KEY,
+        OPENAI_API_KEY,
         systemPrompt,
         userPrompt + retryHint,
         tools,
