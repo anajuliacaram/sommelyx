@@ -3,7 +3,6 @@ import { AnimatedOutlet } from "@/components/AnimatedOutlet";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell } from "@/icons/lucide";
 import { useState } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
@@ -12,14 +11,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertsSheet } from "@/components/AlertsSheet";
 
 export default function DashboardLayout() {
   const { user, profileType } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
-  const [alertsOpen, setAlertsOpen] = useState(false);
   const navigate = useNavigate();
   const { drinkNow, lowStock } = useWineMetrics();
   const { data: wines } = useWines();
