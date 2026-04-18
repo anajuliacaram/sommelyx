@@ -145,6 +145,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setWineSearchState("");
     setWineSortState("az");
     setWineStyleFilter("all");
+    setIntent("everyday");
   };
 
   const handleClose = (v: boolean) => {
