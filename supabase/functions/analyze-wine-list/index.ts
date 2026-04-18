@@ -749,8 +749,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         functionName: "analyze-wine-list",
         requestId: crypto.randomUUID(),
         apiKey: "",
-        model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview",
-        timeoutMs: 60_000,
+        model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash-lite",
+        timeoutMs: 40_000,
         temperature: 0.2,
         instructions: systemPrompt,
         input: messagesForAI.map((message) => ({
