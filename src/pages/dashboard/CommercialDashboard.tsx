@@ -527,15 +527,17 @@ export default function CommercialDashboard() {
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="card-depth p-5">
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/[0.06]">
-                      <kpi.icon className="h-4 w-4 text-primary/60" />
-                    </div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 whitespace-nowrap">{kpi.label}</p>
+                <div key={kpi.label} className="card-depth p-5 text-left">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.10em] text-muted-foreground">
+                      {kpi.label}
+                    </p>
+                    <kpi.icon className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.75} />
                   </div>
-                  <p className="text-[26px] font-bold tracking-[-0.02em] text-foreground leading-none tabular-nums">{kpi.value}</p>
-                  <p className="text-[12px] text-muted-foreground/60 mt-2 font-medium">{kpi.detail}</p>
+                  <p className="text-[28px] font-semibold tracking-[-0.025em] text-foreground leading-none tabular-nums">
+                    {kpi.value}
+                  </p>
+                  <p className="text-[11.5px] text-muted-foreground/80 mt-2.5 font-medium">{kpi.detail}</p>
                 </div>
               ))
             )}
