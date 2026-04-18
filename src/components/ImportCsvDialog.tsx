@@ -52,6 +52,7 @@ type EditableField =
   | "style"
   | "quantity"
   | "purchase_price"
+  | "current_value"
   | "country"
   | "region"
   | "grape"
