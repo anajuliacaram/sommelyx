@@ -558,7 +558,11 @@ interface WineSummary {
   producer?: string | null;
   quantity?: number;
   vintage?: number | null;
+  purchase_price?: number | null;
+  current_value?: number | null;
 }
+
+export type PairingIntent = "everyday" | "value" | "special";
 
 const PAIRING_RULES: { keywords: string[]; styles: string[]; explanation: string }[] = [
   { keywords: ["carne", "churrasco", "picanha", "costela", "bife", "cordeiro", "assado", "hambúrguer", "burger"], styles: ["tinto"], explanation: "Taninos estruturados equilibram a gordura e a proteína de carnes vermelhas" },
