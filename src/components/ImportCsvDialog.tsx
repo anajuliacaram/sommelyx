@@ -114,7 +114,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
   const [fileName, setFileName] = useState("");
   const [editMode, setEditMode] = useState(true);
-  const [showAdvancedColumns, setShowAdvancedColumns] = useState(false);
+  const [showAdvancedColumns, setShowAdvancedColumns] = useState(true);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [bulkProducer, setBulkProducer] = useState("");
   const [bulkVintage, setBulkVintage] = useState("");
