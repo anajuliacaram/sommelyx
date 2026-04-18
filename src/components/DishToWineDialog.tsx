@@ -169,11 +169,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     }
   };
 
-  // Search cellar wines for a dish
-  const handleSearchCellar = useCallback(async (dishName?: string) => {
-    const query = dishName || dish.trim();
+  // Search cellar wines for a dish (called after intent is selected)
+  const handleSearchCellar = useCallback(async (chosenIntent?: PairingIntent) => {
+    const query = dish.trim();
     if (!query) return;
-    setDish(query);
     setLoading(true);
     setError(null);
     try {
@@ -185,8 +184,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         country: w.country,
         producer: w.producer,
         vintage: w.vintage,
+        purchase_price: w.purchase_price ?? null,
+        current_value: w.current_value ?? null,
       }));
-      const result = await getDishWineSuggestions(query, cellarWines);
+      const result = await getDishWineSuggestions(query, cellarWines, chosenIntent ?? intent);
       setSuggestions(result.suggestions);
       setDishProfile(result.dishProfile || null);
       setStep("results");
@@ -195,7 +196,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     } finally {
       setLoading(false);
     }
-  }, [dish, wines]);
+  }, [dish, wines, intent]);
 
   // Search food pairings for a selected wine
   const handleSearchWinePairings = useCallback(async () => {
