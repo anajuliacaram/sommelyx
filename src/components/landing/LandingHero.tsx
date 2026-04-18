@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Layers, TrendingUp, AlertTriangle, Wine, Sparkles, Clock } from "@/icons/lucide";
+import { ArrowRight, Check, Layers, TrendingUp, AlertTriangle, Wine, Sparkles, Clock, Star, Calendar } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 
