@@ -119,6 +119,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
   const [wineSearchState, setWineSearchState] = useState("");
   const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
+  const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante">("all");
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const reset = () => {
     setSource(null);
@@ -141,6 +142,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setLastMenuAttachment(null);
     setWineSearchState("");
     setWineSortState("az");
+    setWineStyleFilter("all");
   };
 
   const handleClose = (v: boolean) => {
