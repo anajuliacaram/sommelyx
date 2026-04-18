@@ -1,15 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useWines, Wine } from "@/hooks/useWines";
 import { toast } from "sonner";
-import { Wine as WineIcon, MapPin, Star } from "@/icons/lucide";
+import { Wine as WineIcon, MapPin, Star, Search } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
+
+type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
+
+const TYPE_FILTERS: { id: WineTypeFilter; label: string; pill: string; dot: string }[] = [
+  { id: "all", label: "Todos", pill: "bg-[#EFEDE8] text-[#1C1C1C]", dot: "bg-[#1C1C1C]/30" },
+  { id: "tinto", label: "Tinto", pill: "bg-[#7B1E2B] text-white", dot: "bg-[#7B1E2B]" },
+  { id: "branco", label: "Branco", pill: "bg-[#C8A96A] text-white", dot: "bg-[#C8A96A]" },
+  { id: "rose", label: "Rosé", pill: "bg-[#E8A0A6] text-white", dot: "bg-[#E8A0A6]" },
+  { id: "espumante", label: "Espumante", pill: "bg-[#6A8F6B] text-white", dot: "bg-[#6A8F6B]" },
+  { id: "sobremesa", label: "Sobremesa", pill: "bg-[#A67C52] text-white", dot: "bg-[#A67C52]" },
+];
+
+function classifyWineType(style?: string | null): WineTypeFilter {
+  const s = (style || "").toLowerCase();
+  if (!s) return "all";
+  if (/(espumante|sparkl|champ|prosecco|cava|frisante)/.test(s)) return "espumante";
+  if (/(ros[eé])/.test(s)) return "rose";
+  if (/(sobremesa|dessert|fortific|porto|sauternes|licoroso|tokaj)/.test(s)) return "sobremesa";
+  if (/(branco|white|chardonnay|sauvignon blanc|riesling|verdejo|albariño|albarino)/.test(s)) return "branco";
+  if (/(tinto|red|cabernet|merlot|malbec|pinot noir|syrah|shiraz|tempranillo|sangiovese|nebbiolo)/.test(s)) return "tinto";
+  return "all";
+}
+
+function dotForWine(style?: string | null): string {
+  const t = classifyWineType(style);
+  const found = TYPE_FILTERS.find((f) => f.id === t);
+  return found && t !== "all" ? found.dot : "bg-[#1C1C1C]/25";
+}
 
 interface AddConsumptionDialogProps {
   open: boolean;
