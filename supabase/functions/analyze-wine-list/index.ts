@@ -226,6 +226,11 @@ function hasTechnicalLanguage(text?: string | null) {
   return TECHNICAL_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+function hasGenericWineLanguage(text?: string | null) {
+  if (!text) return false;
+  return GENERIC_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 function hasComparativeLanguage(text?: string | null) {
   if (!text) return false;
   return COMPARATIVE_PATTERNS.some((pattern) => pattern.test(text));
