@@ -1,9 +1,49 @@
 // Meu Consumo — perfil Pessoal
 // Design "Editorial" fiel ao design-reference (extras.jsx ConsumptionPage).
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useConsumption } from "@/hooks/useConsumption";
 import { ConsumptionTimeline } from "@/components/ConsumptionTimeline";
+
+type PeriodFilter = "week" | "month" | "year";
+type SourceFilter = "cellar" | "external" | "all";
+
+const periodOptions: Array<{ value: PeriodFilter; label: string }> = [
+  { value: "week", label: "Semana" },
+  { value: "month", label: "Mês" },
+  { value: "year", label: "Ano" },
+];
+
+const sourceOptions: Array<{ value: SourceFilter; label: string }> = [
+  { value: "cellar", label: "Minha adega" },
+  { value: "external", label: "Adega externa" },
+  { value: "all", label: "Todas" },
+];
+
+function FilterPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="h-9 rounded-full px-4 text-[12px] font-medium tracking-[-0.005em] transition-all"
+      style={{
+        background: active ? "#7B1E2B" : "#F4F1EC",
+        color: active ? "#FFFFFF" : "#6B645C",
+        boxShadow: active ? "0 2px 8px rgba(123,30,43,0.18)" : "none",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   EditorialCard,
@@ -34,6 +74,29 @@ function buildMonthWindow(size: number) {
 
 export default function ConsumptionPage() {
   const { data: entries = [], isLoading } = useConsumption();
+  const [period, setPeriod] = useState<PeriodFilter>("month");
+  const [source, setSource] = useState<SourceFilter>("cellar");
+
+  const filteredEntries = useMemo(() => {
+    const now = new Date();
+    return entries.filter((entry) => {
+      const d = new Date(entry.consumed_at);
+      // period
+      if (period === "week") {
+        const diff = (now.getTime() - d.getTime()) / 86_400_000;
+        if (diff > 7 || diff < 0) return false;
+      } else if (period === "month") {
+        if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false;
+      } else if (period === "year") {
+        if (d.getFullYear() !== now.getFullYear()) return false;
+      }
+      // source
+      const isCellar = !!entry.wine_id || entry.source === "cellar";
+      if (source === "cellar" && !isCellar) return false;
+      if (source === "external" && isCellar) return false;
+      return true;
+    });
+  }, [entries, period, source]);
 
   const months = useMemo(() => buildMonthWindow(6), []);
   const monthly = useMemo(() => {
@@ -146,8 +209,36 @@ export default function ConsumptionPage() {
         <Sparkbar data={monthly} accent="#7B1E2B" height={140} />
       </EditorialCard>
 
+      {/* Filtros inteligentes */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(26,23,19,0.45)]">
+            Período
+          </span>
+          <div className="flex items-center gap-1.5">
+            {periodOptions.map((opt) => (
+              <FilterPill key={opt.value} active={period === opt.value} onClick={() => setPeriod(opt.value)}>
+                {opt.label}
+              </FilterPill>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(26,23,19,0.45)]">
+            Origem
+          </span>
+          <div className="flex items-center gap-1.5">
+            {sourceOptions.map((opt) => (
+              <FilterPill key={opt.value} active={source === opt.value} onClick={() => setSource(opt.value)}>
+                {opt.label}
+              </FilterPill>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Timeline */}
-      <ConsumptionTimeline entries={entries} />
+      <ConsumptionTimeline entries={filteredEntries} />
     </div>
   );
 }
