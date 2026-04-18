@@ -26,6 +26,7 @@ type ConsumptionTimelineProps = {
 
 export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: ConsumptionTimelineProps) {
   const { data: wines = [] } = useWines();
+  const [editing, setEditing] = useState<ConsumptionEntry | null>(null);
 
   const wineStyleById = useMemo(() => {
     const map = new Map<string, string | null>();
