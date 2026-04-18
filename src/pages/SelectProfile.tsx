@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BrandName } from "@/components/BrandName";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wine, BarChart3, ArrowRight, Check, Sparkles, Mail } from "@/icons/lucide";
 import { useNavigate, Navigate } from "react-router-dom";

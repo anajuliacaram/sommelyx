@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
+import { BrandName } from "@/components/BrandName";
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Tente novamente em instantes.");
 

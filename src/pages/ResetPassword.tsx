@@ -10,6 +10,7 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { supabase } from "@/integrations/supabase/client";
 import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
+import { BrandName } from "@/components/BrandName";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
