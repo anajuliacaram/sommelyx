@@ -1,17 +1,14 @@
 import { useState, useMemo } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2, Star } from "@/icons/lucide";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
@@ -41,13 +38,28 @@ interface ConsumptionItem {
 
 let itemCounter = 0;
 
+// Wine type color dot — consistent with the rest of the app
+const wineTypeColor = (style?: string | null): string => {
+  if (!style) return "#9CA3AF";
+  const s = style.toLowerCase();
+  if (s.includes("tinto") || s.includes("red")) return "#7B1E2B";
+  if (s.includes("branco") || s.includes("white")) return "#D4B86A";
+  if (s.includes("rosé") || s.includes("rose")) return "#E8A4A4";
+  if (s.includes("espumante") || s.includes("sparkling") || s.includes("champagne")) return "#A8C49A";
+  if (s.includes("sobremesa") || s.includes("fortificado")) return "#8B5A2B";
+  return "#9CA3AF";
+};
+
+const RATING_LABELS: Record<number, string> = {
+  1: "Ruim", 2: "Regular", 3: "Bom", 4: "Muito bom", 5: "Excelente",
+};
+
 export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogProps) {
   const { profileType } = useAuth();
   const [items, setItems] = useState<ConsumptionItem[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Current item being added
   const [source, setSource] = useState<"cellar" | "external">("cellar");
   const [wineId, setWineId] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -57,7 +69,6 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedGrapes, setSelectedGrapes] = useState<string[]>([]);
 
-  // External fields
   const [extWineName, setExtWineName] = useState("");
   const [extProducer, setExtProducer] = useState("");
   const [extCountry, setExtCountry] = useState("");
@@ -223,323 +234,439 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
 
   const canAddItem = source === "cellar" ? !!wineId : !!extWineName.trim();
 
+  // Section label — matches Harmonização modal
+  const SectionLabel = ({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) => (
+    <div className="flex items-center gap-1.5 mb-2">
+      {icon}
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3A3327]/55">
+        {children}
+      </span>
+    </div>
+  );
+
   return (
     <>
       <Sheet open={open} onOpenChange={v => { if (!v) resetAll(); onOpenChange(v); }}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="font-serif text-lg flex items-center gap-2">
-              <WineIcon className="h-5 w-5 text-primary" />
-              Adicionar Consumo
-            </SheetTitle>
-          </SheetHeader>
-
-          <AnimatePresence mode="wait">
-            {success ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center py-16 gap-4"
+        <SheetContent
+          className="w-full sm:max-w-[460px] overflow-y-auto bg-[#F4F1EC] border-l border-black/[0.04] p-0"
+        >
+          {/* Header — premium block icon + serif title */}
+          <div className="px-6 pt-6 pb-5 sm:px-7 sm:pt-7">
+            <div className="flex items-start gap-3.5">
+              <div
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
+                style={{ background: "rgba(123,30,43,0.08)" }}
               >
-                <div className="w-14 h-14 rounded-full gradient-wine flex items-center justify-center glow-wine">
-                  <Check className="h-7 w-7 text-primary-foreground" />
-                </div>
-                <p className="text-sm font-medium text-foreground text-center">{success}</p>
-              </motion.div>
-            ) : (
-              <motion.div key="form" className="mt-5 space-y-4">
-                {/* Added items list */}
-                {items.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Vinhos adicionados ({items.length})
-                    </Label>
-                    <div className="space-y-1.5">
-                      {items.map((item, i) => (
-                        <motion.div
-                          key={item.id}
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-2 p-2 rounded-lg border border-border/50 bg-accent/30"
-                        >
-                          <Badge variant={item.source === "cellar" ? "default" : "secondary"} className="text-[8px] shrink-0 h-5">
-                            {item.source === "cellar" ? "Adega" : "Ext."}
-                          </Badge>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
-                            <p className="text-[9px] text-muted-foreground">
-                              {item.quantity} un.{item.rating ? ` · ${item.rating === 1 ? "Ruim" : item.rating === 2 ? "Regular" : item.rating === 3 ? "Bom" : item.rating === 4 ? "Muito bom" : "Excelente"}` : ""}
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="danger"
-                            size="icon"
-                            onClick={() => removeItem(item.id)}
-                            className="shrink-0 h-6 w-6 rounded-md"
-                            aria-label="Remover item"
+                <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
+              </div>
+              <div className="min-w-0 flex-1 pt-0.5">
+                <h2
+                  className="text-[26px] sm:text-[28px] font-semibold text-[#1A1713] leading-[1.15]"
+                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif", letterSpacing: "-0.02em" }}
+                >
+                  Adicionar Consumo
+                </h2>
+                <p className="text-[13px] leading-relaxed text-[#3A3327]/60 mt-1">
+                  Registre uma degustação da sua adega ou de um consumo externo
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-6 sm:px-7 pb-8">
+            <AnimatePresence mode="wait">
+              {success ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center py-20 gap-4"
+                >
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(123,30,43,0.25)]"
+                    style={{ background: "linear-gradient(135deg, #7B1E2B, #A12C3A)" }}
+                  >
+                    <Check className="h-7 w-7 text-white" />
+                  </div>
+                  <p className="text-[14px] font-medium text-[#1A1713] text-center">{success}</p>
+                </motion.div>
+              ) : (
+                <motion.div key="form" className="space-y-5">
+                  {/* Added items list */}
+                  {items.length > 0 && (
+                    <div className="space-y-2">
+                      <SectionLabel>Vinhos adicionados ({items.length})</SectionLabel>
+                      <div className="space-y-1.5">
+                        {items.map(item => (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-[12px] border border-black/[0.06] bg-white/70"
                           >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Divider if items exist */}
-                {items.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-px bg-border/50" />
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Adicionar mais</span>
-                    <div className="flex-1 h-px bg-border/50" />
-                  </div>
-                )}
-
-                {/* Source checkbox */}
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Origem</Label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox checked={source === "cellar"} onCheckedChange={() => { setSource("cellar"); setWineId(""); }} />
-                      <span className="text-sm">Minha adega</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox checked={source === "external"} onCheckedChange={() => { setSource("external"); setWineId(""); }} />
-                      <span className="text-sm">Externo</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* CELLAR: Wine selector */}
-                {source === "cellar" && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Vinho</Label>
-                    {selectedWine ? (
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl border border-primary/20 bg-primary/5">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[12px] font-semibold text-foreground truncate">{selectedWine.name}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ")} — {selectedWine.quantity} un.
-                          </p>
-                        </div>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => setWineId("")} className="shrink-0 h-6 w-6 rounded-lg">
-                          <X className="h-3.5 w-3.5 text-muted-foreground" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                          <Input
-                            placeholder="Buscar por nome, uva, país, safra..."
-                            value={searchText}
-                            onChange={e => setSearchText(e.target.value)}
-                            className="pl-9 h-9 text-[12px] rounded-xl"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={cn(
-                              "absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg",
-                              showFilters || activeFilterCount > 0 ? "bg-primary/10 text-primary hover:bg-primary/10" : "text-muted-foreground hover:bg-muted/40"
-                            )}
-                          >
-                            <Filter className="h-3.5 w-3.5" />
-                            {activeFilterCount > 0 && (
-                              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-[8px] font-bold text-primary-foreground flex items-center justify-center">
-                                {activeFilterCount}
-                              </span>
-                            )}
-                          </Button>
-                        </div>
-
-                        <AnimatePresence>
-                          {showFilters && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden space-y-2"
-                            >
-                              {countries.length > 0 && (
-                                <div>
-                                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">País</p>
-                                  <div className="flex flex-wrap gap-1">
-                                    {countries.map(c => (
-                                      <Badge
-                                        key={c}
-                                        variant={selectedCountries.includes(c) ? "default" : "outline"}
-                                        className={cn("text-[10px] cursor-pointer transition-all h-6", selectedCountries.includes(c) ? "bg-primary text-primary-foreground" : "hover:bg-accent")}
-                                        onClick={() => toggleFilter(c, selectedCountries, setSelectedCountries)}
-                                      >{c}</Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {grapesList.length > 0 && (
-                                <div>
-                                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Uva</p>
-                                  <div className="flex flex-wrap gap-1">
-                                    {grapesList.map(g => (
-                                      <Badge
-                                        key={g}
-                                        variant={selectedGrapes.includes(g) ? "default" : "outline"}
-                                        className={cn("text-[10px] cursor-pointer transition-all h-6", selectedGrapes.includes(g) ? "bg-primary text-primary-foreground" : "hover:bg-accent")}
-                                        onClick={() => toggleFilter(g, selectedGrapes, setSelectedGrapes)}
-                                      >{g}</Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {activeFilterCount > 0 && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => { setSelectedCountries([]); setSelectedGrapes([]); }}
-                                  className="h-7 px-2 text-[10px] font-semibold text-primary hover:bg-primary/10"
-                                >
-                                  Limpar filtros
-                                </Button>
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-
-                        <ScrollArea className="max-h-[180px] rounded-xl border border-border/50">
-                          {filteredWines.length === 0 ? (
-                            <div className="px-3 py-6 text-center">
-                              <p className="text-[11px] text-muted-foreground">
-                                {baseWines.length === 0 ? "Nenhum vinho cadastrado" : "Nenhum vinho encontrado"}
+                            <span
+                              className="h-2.5 w-2.5 shrink-0 rounded-full"
+                              style={{ background: wineTypeColor(item.style) }}
+                              aria-hidden
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-[#1A1713] truncate leading-tight">
+                                {item.wineName}
+                              </p>
+                              <p className="text-[11px] text-[#3A3327]/60 mt-0.5">
+                                {item.quantity} un.{item.rating ? ` · ${RATING_LABELS[item.rating]}` : ""}
+                                {item.source === "external" ? " · Externo" : ""}
                               </p>
                             </div>
-                          ) : (
-                            <div className="divide-y divide-border/30">
-                              {filteredWines.map(w => (
-                                <Button
-                                  key={w.id}
-                                  type="button"
-                                  variant="ghost"
-                                  onClick={() => setWineId(w.id)}
-                                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-none h-auto justify-start hover:bg-muted/40"
-                                >
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-[11px] font-semibold text-foreground truncate">{w.name}</p>
-                                    <p className="text-[9px] text-muted-foreground truncate">
-                                      {[w.producer, w.vintage, w.grape, w.country].filter(Boolean).join(" · ")}
-                                    </p>
-                                  </div>
-                                  <span className="text-[10px] font-bold text-muted-foreground shrink-0">{w.quantity} un.</span>
-                                </Button>
-                              ))}
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="shrink-0 h-7 w-7 rounded-full flex items-center justify-center text-[#3A3327]/50 hover:text-[#7B1E2B] hover:bg-[#7B1E2B]/8 transition-all duration-200"
+                              aria-label="Remover item"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ORIGEM — selectable cards */}
+                  <div>
+                    <SectionLabel>Origem</SectionLabel>
+                    <div className="grid grid-cols-2 gap-2">
+                      {([
+                        { value: "cellar" as const, label: "Minha adega", desc: "Registrar abertura" },
+                        { value: "external" as const, label: "Externo", desc: "Restaurante / outro" },
+                      ]).map(opt => {
+                        const active = source === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => { setSource(opt.value); setWineId(""); }}
+                            className={cn(
+                              "group relative text-left px-3.5 py-3 rounded-[14px] border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                              active
+                                ? "border-[#7B1E2B] bg-[rgba(123,30,43,0.05)] shadow-[0_4px_14px_-6px_rgba(123,30,43,0.25)]"
+                                : "border-black/[0.08] bg-white/65 hover:bg-white hover:-translate-y-px",
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className={cn(
+                                "h-4 w-4 rounded-full border flex items-center justify-center transition-colors",
+                                active ? "border-[#7B1E2B] bg-[#7B1E2B]" : "border-black/20 bg-white",
+                              )}>
+                                {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
+                              </div>
+                              <span className={cn(
+                                "text-[13px] font-semibold",
+                                active ? "text-[#7B1E2B]" : "text-[#1A1713]",
+                              )}>
+                                {opt.label}
+                              </span>
                             </div>
-                          )}
-                        </ScrollArea>
-                        <p className="text-[9px] text-muted-foreground">{filteredWines.length} vinho(s) encontrado(s)</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* EXTERNAL: Manual entry or scan */}
-                {source === "external" && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs text-muted-foreground">Dados do vinho</Label>
-                      <Button type="button" variant="secondary" size="sm" className="h-7 text-[10px] gap-1.5" onClick={() => setScanOpen(true)}>
-                        <Camera className="h-3 w-3" />
-                        Escanear Rótulo
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div className="col-span-2">
-                        <Input value={extWineName} onChange={e => setExtWineName(e.target.value)} placeholder="Nome do vinho *" className="h-9 text-[12px] rounded-xl" />
-                      </div>
-                      <Input value={extProducer} onChange={e => setExtProducer(e.target.value)} placeholder="Produtor" className="h-9 text-[12px] rounded-xl" />
-                      <Input value={extVintage} onChange={e => setExtVintage(e.target.value)} placeholder="Safra" type="number" className="h-9 text-[12px] rounded-xl" />
-                      <Input value={extCountry} onChange={e => setExtCountry(e.target.value)} placeholder="País" className="h-9 text-[12px] rounded-xl" />
-                      <Input value={extRegion} onChange={e => setExtRegion(e.target.value)} placeholder="Região" className="h-9 text-[12px] rounded-xl" />
-                      <Input value={extGrape} onChange={e => setExtGrape(e.target.value)} placeholder="Uva" className="h-9 text-[12px] rounded-xl" />
-                      <Input value={extLocation} onChange={e => setExtLocation(e.target.value)} placeholder="Local (restaurante...)" className="h-9 text-[12px] rounded-xl" />
+                            <p className="text-[11px] text-[#3A3327]/55 mt-1 ml-6">{opt.desc}</p>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
 
-                {/* Quantity & notes for current item */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Quantidade</Label>
-                    <Input type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} className="h-9 text-[12px] rounded-xl" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Observações</Label>
-                    <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Opcional..." className="h-9 text-[12px] rounded-xl" />
-                  </div>
-                </div>
+                  {/* CELLAR: Wine selector */}
+                  {source === "cellar" && (
+                    <div>
+                      <SectionLabel>Vinho</SectionLabel>
+                      {selectedWine ? (
+                        <div className="flex items-center gap-3 p-3 rounded-[14px] border border-[#7B1E2B]/25 bg-[rgba(123,30,43,0.04)]">
+                          <span
+                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ background: wineTypeColor(selectedWine.style) }}
+                            aria-hidden
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold text-[#1A1713] truncate leading-tight">{selectedWine.name}</p>
+                            <p className="text-[11px] text-[#3A3327]/60 mt-0.5">
+                              {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ")} — {selectedWine.quantity} un.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setWineId("")}
+                            className="shrink-0 h-7 w-7 rounded-full flex items-center justify-center text-[#3A3327]/55 hover:text-[#1A1713] hover:bg-black/[0.05] transition-all"
+                            aria-label="Trocar vinho"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#3A3327]/45" />
+                            <Input
+                              placeholder="Buscar por nome, uva, país, safra…"
+                              value={searchText}
+                              onChange={e => setSearchText(e.target.value)}
+                              className="pl-11 pr-12 h-12 text-[13px] rounded-[14px] bg-white"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowFilters(!showFilters)}
+                              className={cn(
+                                "absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200",
+                                showFilters || activeFilterCount > 0
+                                  ? "bg-[#7B1E2B]/10 text-[#7B1E2B]"
+                                  : "text-[#3A3327]/55 hover:bg-black/[0.05]",
+                              )}
+                              aria-label="Filtros"
+                            >
+                              <Filter className="h-3.5 w-3.5" />
+                              {activeFilterCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#7B1E2B] text-[9px] font-bold text-white flex items-center justify-center">
+                                  {activeFilterCount}
+                                </span>
+                              )}
+                            </button>
+                          </div>
 
-                {/* Rating - only for personal profile */}
-                {profileType !== "commercial" && (
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Star className="h-3 w-3" /> Avaliação
-                  </Label>
-                  <div className="flex gap-1 flex-wrap">
-                    {([
-                      { value: 1, label: "Ruim" },
-                      { value: 2, label: "Regular" },
-                      { value: 3, label: "Bom" },
-                      { value: 4, label: "Muito bom" },
-                      { value: 5, label: "Excelente" },
-                    ] as const).map((opt) => (
-                      <Button
-                        key={opt.value}
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                          "text-[10px] px-2.5 h-7 border transition-all",
-                          rating === opt.value
-                            ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground"
-                            : "border-border/60 bg-background/40 hover:bg-background",
+                          <AnimatePresence>
+                            {showFilters && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="space-y-2.5 p-3 rounded-[14px] border border-black/[0.06] bg-white/60 backdrop-blur-sm">
+                                  {countries.length > 0 && (
+                                    <div>
+                                      <p className="text-[10px] font-semibold text-[#3A3327]/55 uppercase tracking-[0.12em] mb-1.5">País</p>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {countries.map(c => {
+                                          const on = selectedCountries.includes(c);
+                                          return (
+                                            <button
+                                              key={c}
+                                              type="button"
+                                              onClick={() => toggleFilter(c, selectedCountries, setSelectedCountries)}
+                                              className={cn(
+                                                "h-7 px-2.5 rounded-full text-[11px] font-medium border transition-all",
+                                                on
+                                                  ? "bg-[rgba(123,30,43,0.08)] border-[#7B1E2B] text-[#7B1E2B]"
+                                                  : "bg-white/70 border-black/[0.08] text-[#3A3327] hover:bg-black/[0.04]",
+                                              )}
+                                            >{c}</button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {grapesList.length > 0 && (
+                                    <div>
+                                      <p className="text-[10px] font-semibold text-[#3A3327]/55 uppercase tracking-[0.12em] mb-1.5">Uva</p>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {grapesList.map(g => {
+                                          const on = selectedGrapes.includes(g);
+                                          return (
+                                            <button
+                                              key={g}
+                                              type="button"
+                                              onClick={() => toggleFilter(g, selectedGrapes, setSelectedGrapes)}
+                                              className={cn(
+                                                "h-7 px-2.5 rounded-full text-[11px] font-medium border transition-all",
+                                                on
+                                                  ? "bg-[rgba(123,30,43,0.08)] border-[#7B1E2B] text-[#7B1E2B]"
+                                                  : "bg-white/70 border-black/[0.08] text-[#3A3327] hover:bg-black/[0.04]",
+                                              )}
+                                            >{g}</button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {activeFilterCount > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => { setSelectedCountries([]); setSelectedGrapes([]); }}
+                                      className="h-7 px-2.5 text-[11px] font-semibold text-[#7B1E2B] hover:bg-[#7B1E2B]/8 rounded-full transition-all"
+                                    >
+                                      Limpar filtros
+                                    </button>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          <ScrollArea className="max-h-[200px] rounded-[14px] border border-black/[0.06] bg-white/60">
+                            {filteredWines.length === 0 ? (
+                              <div className="px-4 py-8 text-center">
+                                <p className="text-[12px] text-[#3A3327]/55">
+                                  {baseWines.length === 0 ? "Nenhum vinho cadastrado" : "Nenhum vinho encontrado"}
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="divide-y divide-black/[0.05]">
+                                {filteredWines.map(w => (
+                                  <button
+                                    key={w.id}
+                                    type="button"
+                                    onClick={() => setWineId(w.id)}
+                                    className="w-full flex items-center gap-3 px-3.5 py-3 text-left hover:bg-black/[0.03] transition-colors"
+                                  >
+                                    <span
+                                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                                      style={{ background: wineTypeColor(w.style) }}
+                                      aria-hidden
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[13px] font-semibold text-[#1A1713] truncate leading-tight">{w.name}</p>
+                                      <p className="text-[11px] text-[#3A3327]/60 truncate mt-0.5">
+                                        {[w.producer, w.vintage, w.grape, w.country].filter(Boolean).join(" · ")}
+                                      </p>
+                                    </div>
+                                    <span className="text-[11px] font-semibold text-[#3A3327]/65 shrink-0">{w.quantity} un.</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </ScrollArea>
+                          <p className="text-[11px] text-[#3A3327]/50 px-1">{filteredWines.length} vinho(s) encontrado(s)</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* EXTERNAL: Manual entry or scan */}
+                  {source === "external" && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3A3327]/55">
+                          Dados do vinho
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setScanOpen(true)}
+                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[11px] font-semibold text-[#7B1E2B] bg-[rgba(123,30,43,0.06)] hover:bg-[rgba(123,30,43,0.10)] transition-all"
+                        >
+                          <Camera className="h-3.5 w-3.5" />
+                          Escanear rótulo
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input value={extWineName} onChange={e => setExtWineName(e.target.value)} placeholder="Nome do vinho *" className="col-span-2 h-11 text-[13px] rounded-[12px]" />
+                        <Input value={extProducer} onChange={e => setExtProducer(e.target.value)} placeholder="Produtor" className="h-11 text-[13px] rounded-[12px]" />
+                        <Input value={extVintage} onChange={e => setExtVintage(e.target.value)} placeholder="Safra" type="number" className="h-11 text-[13px] rounded-[12px]" />
+                        <Input value={extCountry} onChange={e => setExtCountry(e.target.value)} placeholder="País" className="h-11 text-[13px] rounded-[12px]" />
+                        <Input value={extRegion} onChange={e => setExtRegion(e.target.value)} placeholder="Região" className="h-11 text-[13px] rounded-[12px]" />
+                        <Input value={extGrape} onChange={e => setExtGrape(e.target.value)} placeholder="Uva" className="h-11 text-[13px] rounded-[12px]" />
+                        <Input value={extLocation} onChange={e => setExtLocation(e.target.value)} placeholder="Local (restaurante…)" className="h-11 text-[13px] rounded-[12px]" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quantidade + Observações — grouped block */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <SectionLabel>Quantidade</SectionLabel>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={e => setQuantity(e.target.value)}
+                        className="h-11 text-[13px] rounded-[12px]"
+                      />
+                    </div>
+                    <div>
+                      <SectionLabel>Observações</SectionLabel>
+                      <Input
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                        placeholder="Opcional…"
+                        className="h-11 text-[13px] rounded-[12px]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Avaliação — premium star system (only personal) */}
+                  {profileType !== "commercial" && (
+                    <div>
+                      <SectionLabel icon={<Star className="h-3 w-3 text-[#3A3327]/55" />}>Avaliação</SectionLabel>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map(v => {
+                            const filled = rating >= v;
+                            return (
+                              <button
+                                key={v}
+                                type="button"
+                                onClick={() => setRating(rating === v ? 0 : v)}
+                                className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-black/[0.04] transition-all duration-200"
+                                aria-label={`${v} estrela${v > 1 ? "s" : ""}`}
+                              >
+                                <Star
+                                  className={cn(
+                                    "h-5 w-5 transition-all duration-200",
+                                    filled ? "text-[#7B1E2B]" : "text-[#3A3327]/25",
+                                  )}
+                                  fill={filled ? "#7B1E2B" : "none"}
+                                  strokeWidth={1.75}
+                                />
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {rating > 0 && (
+                          <span className="text-[12px] font-medium text-[#7B1E2B] ml-1">
+                            {RATING_LABELS[rating]}
+                          </span>
                         )}
-                        onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
-                      >
-                        {opt.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                )}
+                      </div>
+                    </div>
+                  )}
 
-                {/* Add to list button */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  disabled={!canAddItem}
-                  onClick={addItemToList}
-                  className="w-full h-10 text-[12px] font-semibold gap-1.5 border border-border/70 border-dashed bg-background/50 hover:bg-background"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Adicionar à lista
-                </Button>
+                  {/* Add to list — secondary action */}
+                  <button
+                    type="button"
+                    disabled={!canAddItem}
+                    onClick={addItemToList}
+                    className={cn(
+                      "w-full h-11 rounded-[14px] text-[13px] font-semibold inline-flex items-center justify-center gap-1.5 transition-all duration-200",
+                      canAddItem
+                        ? "bg-white/70 border border-black/[0.08] text-[#1A1713] hover:bg-white hover:-translate-y-px"
+                        : "bg-white/40 border border-dashed border-black/[0.10] text-[#3A3327]/40 cursor-not-allowed",
+                    )}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar à lista
+                  </button>
 
-                {/* Submit all */}
-                <Button
-                  type="button"
-                  variant="primary"
-                  disabled={submitting || items.length === 0}
-                  onClick={handleSubmitAll}
-                  className="w-full h-11 text-[13px] font-medium"
-                >
-                  {submitting ? "Salvando..." : `Confirmar ${items.length} consumo(s)`}
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  {/* PRIMARY — gradient wine button */}
+                  <button
+                    type="button"
+                    disabled={submitting || items.length === 0}
+                    onClick={handleSubmitAll}
+                    className={cn(
+                      "w-full h-[52px] rounded-[16px] text-white text-[15px] font-semibold transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[0_10px_28px_-10px_rgba(123,30,43,0.5)]",
+                      submitting || items.length === 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:-translate-y-px hover:shadow-[0_14px_32px_-10px_rgba(123,30,43,0.6)] active:translate-y-0",
+                    )}
+                    style={{
+                      background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)",
+                    }}
+                  >
+                    {submitting
+                      ? "Salvando…"
+                      : items.length === 0
+                        ? "Adicione um vinho à lista"
+                        : `Confirmar ${items.length} consumo${items.length > 1 ? "s" : ""}`}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </SheetContent>
       </Sheet>
 
