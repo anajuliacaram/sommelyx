@@ -26,6 +26,7 @@ import {
   PairingSheetHero,
   PairingLoadingState,
   PairingErrorState,
+  PremiumChoiceCard,
   RecipeButton,
   harmonyLabelMap,
   matchDotColor,
