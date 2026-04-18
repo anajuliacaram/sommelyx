@@ -441,8 +441,14 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           </AnimatePresence>
 
           {/* Helper line */}
-          <p className="mt-5 text-center text-[12px] text-[#5F5F5F]">
-            Não encontrou? <button className="font-semibold text-wine hover:underline" onClick={() => document.querySelector<HTMLElement>('[aria-label="Fale com a Sommelière"]')?.click()}>Fale com a Sommelière</button>
+          <p className="mt-6 text-center text-[15px] sm:text-[16px] text-[#3A3A3A] font-medium">
+            Não encontrou?{" "}
+            <a
+              href="mailto:sommelyx@gmail.com"
+              className="font-semibold text-wine hover:underline"
+            >
+              Fale com a Sommelière
+            </a>
           </p>
         </motion.div>
       </div>
