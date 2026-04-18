@@ -519,6 +519,62 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               </motion.div>
             )}
 
+            {/* ── Step 2a-bis: Intent picker (cellar only) ── */}
+            {step === "intent" && (
+              <motion.div
+                key="intent"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-4"
+              >
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
+                    Como você quer harmonizar?
+                  </p>
+                  <p className="text-[12px] text-muted-foreground">
+                    Vamos sugerir o vinho ideal da sua adega para <span className="font-semibold text-foreground/80">{dish}</span>.
+                  </p>
+                </div>
+
+                <div className="space-y-2.5">
+                  <PremiumChoiceCard
+                    index={0}
+                    icon={Heart}
+                    title="Para o dia a dia"
+                    description="Vinhos de custo médio que harmonizam muito bem"
+                    onClick={() => { setIntent("everyday"); handleSearchCellar("everyday"); }}
+                  />
+                  <PremiumChoiceCard
+                    index={1}
+                    icon={DollarSign}
+                    title="Melhor custo-benefício"
+                    description="A melhor harmonização entre os rótulos mais econômicos"
+                    onClick={() => { setIntent("value"); handleSearchCellar("value"); }}
+                  />
+                  <PremiumChoiceCard
+                    index={2}
+                    icon={Crown}
+                    title="Para um momento inesquecível"
+                    description="Os rótulos mais especiais que combinam com o prato"
+                    accent="gold"
+                    onClick={() => { setIntent("special"); handleSearchCellar("special"); }}
+                  />
+                </div>
+
+                {loading && (
+                  <div className="flex items-center justify-center gap-2 text-[12px] text-muted-foreground pt-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Consultando sommelier…
+                  </div>
+                )}
+
+                {error && (
+                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                )}
+              </motion.div>
+            )}
+
             {/* ── Step 2b: Select Wine from Cellar (Premium Finder) ── */}
             {step === "select-wine" && (() => {
               type SortKey = "az" | "za" | "newest" | "oldest";
