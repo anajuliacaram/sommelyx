@@ -210,9 +210,15 @@ REGRAS DE EXTRAÇÃO AGRESSIVA (CRÍTICAS — não retornar só o nome!):
 
 11. **Não retorne cabeçalhos como vinho** (Nome, Produto, Vinho sozinhos).
 
-12. **Qualidade sobre quantidade**: prefira 5 vinhos completos a 50 com só nome.
+12. **CABEÇALHOS DE SEÇÃO = PRODUTOR/VINÍCOLA**: Quando encontrar uma linha em CAIXA ALTA isolada (sem preço, sem quantidade) seguida de várias linhas de vinhos abaixo (ex: "FECOVITA - BUENOS AIRES", "FINCA LA LUZ - MENDOZA", "BODEGA NORTON", "CHATEAU MARGAUX"), trate essa linha como o **produtor (vinícola)** dos vinhos imediatamente abaixo dela, até encontrar o próximo cabeçalho. NÃO inclua o cabeçalho como um vinho — apenas use-o como produtor para preencher o campo \`producer\` das linhas seguintes que ainda não têm produtor explícito.
+   - Exemplo: linha "FECOVITA - BUENOS AIRES" + abaixo "Malbec Reserva 2020 R$ 89,90" → vinho com name: "Malbec Reserva 2020", producer: "FECOVITA", region: "Buenos Aires", vintage: 2020, style: "tinto", country: "Argentina".
+   - Mantenha a parte antes do hífen/traço como produtor, e a parte depois como região, quando aplicável.
 
-13. **Sempre retorne os 12 campos** (deixe undefined apenas se realmente impossível inferir).
+13. **IGNORE PRODUTOS QUE NÃO SÃO VINHO**: azeite, azeite de oliva, vinagre, destilados (gin, vodka, whisky, rum, cachaça, tequila), licores genéricos não-vínicos, cervejas, refrigerantes, água, sucos, conservas, alimentos. Só retorne vinhos, espumantes, fortificados (Porto, Sherry, Madeira) e vinhos de sobremesa.
+
+14. **Qualidade sobre quantidade**: prefira 5 vinhos completos a 50 com só nome.
+
+15. **Sempre retorne os 12 campos** (deixe undefined apenas se realmente impossível inferir).
 
 Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`;
 
