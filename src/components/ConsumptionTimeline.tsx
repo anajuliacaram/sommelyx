@@ -88,10 +88,14 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                   const styleSource =
                     entry.style ?? (entry.wine_id ? wineStyleById.get(entry.wine_id) ?? null : null);
                   const color = styleSource ? getStyleColor(styleSource) : "rgba(95,111,82,0.25)";
+                  const isDemo = entry.user_id === "demo";
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={entry.id}
-                      className="flex items-stretch gap-3 py-3"
+                      onClick={() => !isDemo && setEditing(entry)}
+                      disabled={isDemo}
+                      className="group flex items-stretch gap-3 py-3 text-left transition-colors hover:bg-[rgba(123,30,43,0.025)] disabled:cursor-default"
                       style={{
                         borderBottom:
                           index < month.events.length - 1
@@ -127,13 +131,21 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                         </div>
                       </div>
 
-                      <div className="flex min-w-[52px] shrink-0 items-center justify-end gap-1 text-[11px] font-medium text-[#C9B469]">
-                        <Star className="h-3 w-3 fill-current" />
-                        <span className="tabular-nums">
-                          {entry.rating != null ? entry.rating.toFixed(1) : "—"}
+                      <div className="flex min-w-[52px] shrink-0 items-center justify-end gap-2 text-[11px] font-medium text-[#C9B469]">
+                        <span className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-current" />
+                          <span className="tabular-nums">
+                            {entry.rating != null ? entry.rating.toFixed(1) : "—"}
+                          </span>
                         </span>
+                        {!isDemo && (
+                          <Pencil
+                            className="h-3.5 w-3.5 text-[rgba(26,23,19,0.3)] opacity-0 transition-opacity group-hover:opacity-100"
+                            aria-hidden
+                          />
+                        )}
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
