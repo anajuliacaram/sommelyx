@@ -37,7 +37,7 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         // Premium clean editorial standard (estilo "Harmonização IA")
-        "fixed left-1/2 top-1/2 z-50 grid w-[calc(100vw-1.5rem)] max-w-[720px] -translate-x-1/2 -translate-y-1/2 gap-5 rounded-[24px] border border-black/[0.04] bg-[#F4F1EC] p-6 sm:p-8 shadow-[0_30px_80px_rgba(0,0,0,0.10)] duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-h-[calc(100dvh-2rem)] overflow-y-auto",
+        "fixed left-1/2 top-1/2 z-50 grid w-[calc(100vw-1.5rem)] max-w-[720px] -translate-x-1/2 -translate-y-1/2 gap-5 rounded-[24px] border border-black/[0.04] bg-[#F4F1EC] p-5 sm:p-7 shadow-[0_30px_80px_rgba(0,0,0,0.10)] duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 max-h-[calc(100dvh-2rem)] overflow-y-auto",
         className,
       )}
       {...props}
@@ -53,7 +53,7 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col gap-1.5 mb-5 text-left pr-10 [&>p]:mt-1.5", className)} {...props} />
+  <div className={cn("flex flex-col gap-3 mb-5 text-left pr-10 [&>p]:mt-0", className)} {...props} />
 );
 DialogHeader.displayName = "DialogHeader";
 
