@@ -105,7 +105,7 @@ export function AppSidebar() {
             <div className="flex items-center gap-2">
               <img src="/logo-sommelyx-mark.png" className="w-20 h-20 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] px-0 ml-0 text-left" alt="Sommelyx" />
 
-              <div className="flex flex-col -ml-1">
+              <div className="flex flex-col text-left mx-0 ml-0">
                 <span
                   className="text-[22px] font-bold tracking-tight text-white leading-none"
                   style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
