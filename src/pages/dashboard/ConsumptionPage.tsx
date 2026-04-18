@@ -83,12 +83,12 @@ export default function ConsumptionPage() {
   const { data: entries = [], isLoading } = useConsumption();
   const [period, setPeriod] = useState<PeriodFilter>("month");
   const [source, setSource] = useState<SourceFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("recent");
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
-    return entries.filter((entry) => {
+    const filtered = entries.filter((entry) => {
       const d = new Date(entry.consumed_at);
-      // period
       if (period === "week") {
         const diff = (now.getTime() - d.getTime()) / 86_400_000;
         if (diff > 7 || diff < 0) return false;
@@ -97,13 +97,22 @@ export default function ConsumptionPage() {
       } else if (period === "year") {
         if (d.getFullYear() !== now.getFullYear()) return false;
       }
-      // source
       const isCellar = !!entry.wine_id || entry.source === "cellar";
       if (source === "cellar" && !isCellar) return false;
       if (source === "external" && isCellar) return false;
       return true;
     });
-  }, [entries, period, source]);
+
+    const sorted = [...filtered];
+    if (sortBy === "recent") {
+      sorted.sort((a, b) => new Date(b.consumed_at).getTime() - new Date(a.consumed_at).getTime());
+    } else if (sortBy === "old") {
+      sorted.sort((a, b) => new Date(a.consumed_at).getTime() - new Date(b.consumed_at).getTime());
+    } else if (sortBy === "rating") {
+      sorted.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
+    }
+    return sorted;
+  }, [entries, period, source, sortBy]);
 
   const months = useMemo(() => buildMonthWindow(6), []);
   // Buckets reativos ao filtro de Período + Origem
