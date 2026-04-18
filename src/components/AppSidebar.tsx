@@ -102,13 +102,18 @@ export function AppSidebar() {
               boxShadow: "0 20px 38px -28px rgba(12, 18, 14, 0.72)",
             }}
           >
-            <div className="flex items-center gap-3">
-              <img src="/logo-sommelyx-mark.png" className="w-12 h-12" alt="Sommelyx" />
+            <div className="flex items-center gap-3.5">
+              <img src="/logo-sommelyx-mark.png" className="w-16 h-16 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]" alt="Sommelyx" />
 
               <div className="flex flex-col">
-                <span className="text-[17px] font-semibold tracking-tight text-white">Sommelyx</span>
+                <span
+                  className="text-[22px] font-bold tracking-tight text-white leading-none"
+                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                >
+                  Sommelyx
+                </span>
 
-                <span className="mt-1 text-[10px] px-2 py-[2px] rounded-full bg-white/10 text-white/70 backdrop-blur-sm w-fit">
+                <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] px-2 py-[3px] rounded-full bg-white/12 text-white/80 backdrop-blur-sm w-fit">
                   {isCommercial ? "COMERCIAL" : "PESSOAL"}
                 </span>
               </div>
@@ -129,10 +134,10 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_8px_24px_rgba(123,30,43,0.25)] transition-all duration-200 flex items-center justify-center"
+                  className="group w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_10px_28px_-12px_rgba(123,30,43,0.45)] transition-all duration-200 flex items-center justify-center gap-2 font-semibold text-[14px]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-[#7B1E2B] transition-colors group-hover:text-[#8E2433]" />
+                  <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-white/90 transition-colors group-hover:text-white" />
                   Registrar venda
                 </Button>
                 <Button
