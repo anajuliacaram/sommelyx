@@ -32,6 +32,18 @@ export default function PersonalCellarPage() {
   const [styleFilter, setStyleFilter] = useState("todos");
   const [sort, setSort] = useState<"window" | "rating" | "vintage" | "value">("window");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [showLabels, setShowLabels] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const v = window.localStorage.getItem("cellar:showLabels");
+    return v === null ? true : v === "1";
+  });
+  const toggleLabels = () => {
+    setShowLabels((prev) => {
+      const next = !prev;
+      try { window.localStorage.setItem("cellar:showLabels", next ? "1" : "0"); } catch {}
+      return next;
+    });
+  };
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [editWine, setEditWine] = useState<Wine | null>(null);
