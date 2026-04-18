@@ -111,32 +111,6 @@ export default function DashboardLayout() {
 
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setAlertsOpen(true)}
-                  className={cn(
-                    "group relative h-10 w-10 rounded-xl p-0",
-                    "border border-[rgba(123,30,43,0.18)]",
-                    "bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] text-white",
-                    "shadow-[0_2px_6px_rgba(123,30,43,0.25),inset_0_1px_0_rgba(255,255,255,0.12)]",
-                    "hover:from-[#8B2333] hover:to-[#6A1820] hover:text-white",
-                    "hover:shadow-[0_4px_12px_rgba(123,30,43,0.35),inset_0_1px_0_rgba(255,255,255,0.15)]",
-                    "active:scale-[0.96] transition-all duration-200",
-                  )}
-                  title="Alertas"
-                >
-                  <Bell className="h-4 w-4 text-white/95 transition-transform duration-200 group-hover:scale-110" />
-                  {alertCount > 0 ? (
-                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center text-[#1A1713] bg-[#C9B469] shadow-[0_0_6px_rgba(201,180,105,0.55)] ring-2 ring-[#5A1420]">
-                      {alertCount}
-                    </span>
-                  ) : (
-                    <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[#C9B469] shadow-[0_0_4px_rgba(201,180,105,0.6)]" />
-                  )}
-                </Button>
-
-                <Button
-                  type="button"
                   variant="primary"
                   size="icon"
                   className="h-9 w-9 rounded-xl p-0 text-[11px] font-semibold shadow-[0_10px_24px_-18px_hsl(var(--primary)/0.26)]"
