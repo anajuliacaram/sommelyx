@@ -1460,11 +1460,29 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               <Button
                 variant="secondary"
                 size="sm"
+                onClick={addBlankRow}
+                className="h-9 text-[12px] px-3"
+                disabled={!editMode}
+              >
+                + Adicionar linha
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={mergeSelectedRows}
                 className="h-9 text-[12px] px-3"
                 disabled={selectedRows.length < 2}
               >
                 Mesclar selecionadas
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={removeSelectedRows}
+                className="h-9 text-[12px] px-3 text-rose-700 hover:bg-rose-50"
+                disabled={selectedRows.length === 0}
+              >
+                Remover selecionadas
               </Button>
               <Button variant="ghost" size="sm" onClick={reset} className="h-9 text-[12px] px-3">
                 <X className="h-3.5 w-3.5 mr-1" /> Trocar
