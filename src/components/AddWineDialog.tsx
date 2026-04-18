@@ -559,7 +559,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     <div>
                       <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Estilo</label>
                       <Select value={style} onValueChange={setStyle}>
-                        <SelectTrigger className="h-12 rounded-[14px] border bg-white text-[16px] px-4 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)] transition-all duration-150" style={{ borderColor: '#E5E2DC', color: style ? '#1F1F1F' : '#9A9A9A' }}>
+                        <SelectTrigger className="input-premium" style={{ color: style ? '#1F1F1F' : '#9A9A9A' }}>
                           <SelectValue placeholder="Selecionar estilo..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border bg-white shadow-lg" style={{ borderColor: '#E5E2DC' }}>
@@ -664,7 +664,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           )}
                         </div>
                         <div className="relative">
-                          <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0.00"} className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]" style={{ color: '#1F1F1F', borderColor: '#E5E2DC', opacity: estimating ? 0.6 : 1 }} />
+                          <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0.00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1 }} />
                           {estimating && (
                             <div className="absolute right-4 top-1/2 -translate-y-1/2">
                               <div className="w-4 h-4 border-2 border-[#6F7F5B] border-t-transparent rounded-full animate-spin" />
@@ -706,13 +706,12 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       </div>
                       <div>
                         <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Notas de degustação</label>
-                        <textarea
+                        <Textarea
                           value={notes}
                           onChange={e => setNotes(e.target.value)}
                           placeholder="Aromas, sabores, impressões..."
                           rows={3}
-                          className="w-full px-4 py-3 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)] resize-none"
-                          style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                          className="resize-none"
                         />
                       </div>
                     </CollapsibleContent>
