@@ -118,10 +118,6 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-[#2E5E3E]" strokeWidth={3} />
-              Sem cartão
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-[#2E5E3E]" strokeWidth={3} />
               Cancele quando quiser
             </span>
           </motion.div>
