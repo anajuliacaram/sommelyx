@@ -36,7 +36,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
   };
 
   return (
-    <section className="relative z-10 px-5 sm:px-8 pt-12 sm:pt-20 lg:pt-24 pb-6 sm:pb-8">
+    <section className="relative z-10 px-5 sm:px-8 pt-3 sm:pt-6 lg:pt-8 pb-6 sm:pb-8">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
         {/* Left */}
         <div className="text-left">
