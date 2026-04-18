@@ -332,6 +332,44 @@
 
 
 @layer utilities {
+  /* ── Sommelyx Microinteractions (oficial) ──
+     Curva: cubic-bezier(0.22, 1, 0.36, 1) · 200ms
+     Hover: lift -1px + scale 1.01 · Active: scale 0.97
+     ────────────────────────────────────────── */
+  .interactive {
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .interactive-lift {
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .interactive-lift:hover {
+    transform: translateY(-1px) scale(1.01);
+  }
+  .interactive-press {
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .interactive-press:active {
+    transform: scale(0.97);
+  }
+  .row-hover {
+    transition: background-color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .row-hover:hover {
+    background-color: rgba(123, 30, 43, 0.04);
+  }
+  /* Respeita preferência do usuário por menos movimento */
+  @media (prefers-reduced-motion: reduce) {
+    .interactive-lift:hover,
+    .interactive-press:active,
+    .interactive { transform: none !important; transition: none !important; }
+  }
+
   /* ── Sommelyx Typographic Scale (oficial) ──
      Title 30 / Subtitle 15 / Body 14 / Meta 12
      Use estas classes em TODOS os cabeçalhos de página, cards e seções.
