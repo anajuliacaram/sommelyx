@@ -32,6 +32,18 @@ export default function PersonalCellarPage() {
   const [styleFilter, setStyleFilter] = useState("todos");
   const [sort, setSort] = useState<"window" | "rating" | "vintage" | "value">("window");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [showLabels, setShowLabels] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const v = window.localStorage.getItem("cellar:showLabels");
+    return v === null ? true : v === "1";
+  });
+  const toggleLabels = () => {
+    setShowLabels((prev) => {
+      const next = !prev;
+      try { window.localStorage.setItem("cellar:showLabels", next ? "1" : "0"); } catch {}
+      return next;
+    });
+  };
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [editWine, setEditWine] = useState<Wine | null>(null);
@@ -119,6 +131,20 @@ export default function PersonalCellarPage() {
             </div>
             <button
               type="button"
+              onClick={toggleLabels}
+              className="h-10 rounded-[14px] px-3 text-[12px] font-semibold transition-all"
+              style={{
+                background: showLabels ? "rgba(95,111,82,0.14)" : "rgba(255,255,255,0.78)",
+                border: `1px solid ${showLabels ? "rgba(95,111,82,0.22)" : "rgba(95,111,82,0.12)"}`,
+                color: showLabels ? "#5F7F52" : "rgba(26,23,21,0.72)",
+              }}
+              aria-pressed={showLabels}
+              title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
+            >
+              {showLabels ? "Rótulos: on" : "Rótulos: off"}
+            </button>
+            <button
+              type="button"
               className="editorial-btn-primary ml-auto"
               onClick={() => setAddOpen(true)}
             >
@@ -175,6 +201,19 @@ export default function PersonalCellarPage() {
               return (
                 <EditorialCard key={w.id} style={{ padding: 18, cursor: "pointer" }}>
                   <div onClick={() => setEditWine(w)}>
+                    {showLabels && w.image_url && (
+                      <div
+                        className="mb-3 flex h-[140px] items-center justify-center overflow-hidden rounded-[12px]"
+                        style={{ background: "rgba(95,111,82,0.06)" }}
+                      >
+                        <img
+                          src={w.image_url}
+                          alt={w.name}
+                          loading="lazy"
+                          className="h-full w-auto object-contain"
+                        />
+                      </div>
+                    )}
                     <div className="mb-3 flex items-start justify-between">
                       <div
                         className="h-[22px] w-[22px] rounded-full"
@@ -272,12 +311,26 @@ export default function PersonalCellarPage() {
                 w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until;
               return (
                 <div key={w.id} className="editorial-row" onClick={() => setEditWine(w)}>
-                  <div
-                    className="editorial-bottle-icon"
-                    style={{ background: `${color}14`, color }}
-                  >
-                    <WineIcon className="h-4 w-4" />
-                  </div>
+                  {showLabels && w.image_url ? (
+                    <div
+                      className="editorial-bottle-icon overflow-hidden"
+                      style={{ background: "rgba(95,111,82,0.06)", padding: 0 }}
+                    >
+                      <img
+                        src={w.image_url}
+                        alt={w.name}
+                        loading="lazy"
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="editorial-bottle-icon"
+                      style={{ background: `${color}14`, color }}
+                    >
+                      <WineIcon className="h-4 w-4" />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-2">
                       <h4 className="text-[14px] font-bold" style={{ color: "#1a1713" }}>
