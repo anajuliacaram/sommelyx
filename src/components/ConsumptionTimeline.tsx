@@ -153,6 +153,11 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
           ))}
         </div>
       )}
+      <EditConsumptionDialog
+        entry={editing}
+        open={!!editing}
+        onOpenChange={(o) => !o && setEditing(null)}
+      />
     </section>
   );
 }
