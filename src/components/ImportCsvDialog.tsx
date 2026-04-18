@@ -941,10 +941,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const ext = file.name.split(".").pop()?.toLowerCase() || "";
       const isStructured = ["csv", "tsv", "txt", "xlsx", "xls", "ods"].includes(ext);
 
-      if (isStructured && local.wines.length >= 1) {
+      // Only use the fast path if the local parse extracted RICH data (avg ≥4 fields per row).
+      const avgFieldsPerRow = local.wines.length > 0
+        ? local.wines.reduce((sum, w) => {
+            return sum + Object.values(w).filter((v) => v !== undefined && v !== null && v !== "").length;
+          }, 0) / local.wines.length
+        : 0;
+
+      if (isStructured && local.wines.length >= 1 && avgFieldsPerRow >= 4) {
         rebuildDraftRows(local.wines);
         setColumnMapping(local.mapping);
-        setAiNotes(local.wines.length > 0 ? `Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.` : "");
+        setAiNotes(`Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.`);
         setParseErrors([]);
         setEditMode(true);
         setShowAdvancedColumns(false);
