@@ -1,7 +1,7 @@
 import { invokeEdgeFunction, EdgeFunctionError } from "@/lib/edge-invoke";
 import type { AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 
-const ANALYSIS_FALLBACK_MESSAGE = "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente.";
+const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes.";
 
 // ── Types ──
 
