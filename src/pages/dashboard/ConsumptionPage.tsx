@@ -7,6 +7,7 @@ import { ConsumptionTimeline } from "@/components/ConsumptionTimeline";
 
 type PeriodFilter = "week" | "month" | "year";
 type SourceFilter = "cellar" | "external" | "all";
+type SortBy = "recent" | "old" | "rating";
 
 const periodOptions: Array<{ value: PeriodFilter; label: string }> = [
   { value: "week", label: "Semana" },
@@ -18,6 +19,12 @@ const sourceOptions: Array<{ value: SourceFilter; label: string }> = [
   { value: "all", label: "Todas" },
   { value: "cellar", label: "Minha adega" },
   { value: "external", label: "Adega externa" },
+];
+
+const sortOptions: Array<{ value: SortBy; label: string }> = [
+  { value: "recent", label: "Mais recentes" },
+  { value: "old", label: "Mais antigos" },
+  { value: "rating", label: "Melhor avaliados" },
 ];
 
 function FilterPill({
@@ -76,12 +83,12 @@ export default function ConsumptionPage() {
   const { data: entries = [], isLoading } = useConsumption();
   const [period, setPeriod] = useState<PeriodFilter>("month");
   const [source, setSource] = useState<SourceFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("recent");
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
-    return entries.filter((entry) => {
+    const filtered = entries.filter((entry) => {
       const d = new Date(entry.consumed_at);
-      // period
       if (period === "week") {
         const diff = (now.getTime() - d.getTime()) / 86_400_000;
         if (diff > 7 || diff < 0) return false;
@@ -90,13 +97,22 @@ export default function ConsumptionPage() {
       } else if (period === "year") {
         if (d.getFullYear() !== now.getFullYear()) return false;
       }
-      // source
       const isCellar = !!entry.wine_id || entry.source === "cellar";
       if (source === "cellar" && !isCellar) return false;
       if (source === "external" && isCellar) return false;
       return true;
     });
-  }, [entries, period, source]);
+
+    const sorted = [...filtered];
+    if (sortBy === "recent") {
+      sorted.sort((a, b) => new Date(b.consumed_at).getTime() - new Date(a.consumed_at).getTime());
+    } else if (sortBy === "old") {
+      sorted.sort((a, b) => new Date(a.consumed_at).getTime() - new Date(b.consumed_at).getTime());
+    } else if (sortBy === "rating") {
+      sorted.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
+    }
+    return sorted;
+  }, [entries, period, source, sortBy]);
 
   const months = useMemo(() => buildMonthWindow(6), []);
   // Buckets reativos ao filtro de Período + Origem
@@ -294,6 +310,18 @@ export default function ConsumptionPage() {
           <div className="flex items-center gap-1.5">
             {sourceOptions.map((opt) => (
               <FilterPill key={opt.value} active={source === opt.value} onClick={() => setSource(opt.value)}>
+                {opt.label}
+              </FilterPill>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-[rgba(123,30,43,0.18)] bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+            Ordenar
+          </span>
+          <div className="flex items-center gap-1.5">
+            {sortOptions.map((opt) => (
+              <FilterPill key={opt.value} active={sortBy === opt.value} onClick={() => setSortBy(opt.value)}>
                 {opt.label}
               </FilterPill>
             ))}
