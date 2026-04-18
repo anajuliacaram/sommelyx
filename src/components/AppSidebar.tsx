@@ -134,10 +134,10 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_8px_24px_rgba(123,30,43,0.25)] transition-all duration-200 flex items-center justify-center"
+                  className="group w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_10px_28px_-12px_rgba(123,30,43,0.45)] transition-all duration-200 flex items-center justify-center gap-2 font-semibold text-[14px]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-[#7B1E2B] transition-colors group-hover:text-[#8E2433]" />
+                  <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-white/90 transition-colors group-hover:text-white" />
                   Registrar venda
                 </Button>
                 <Button
