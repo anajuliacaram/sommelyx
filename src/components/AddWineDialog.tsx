@@ -719,12 +719,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
                   <Button
                     type="submit"
-                    disabled={addWine.isPending || !name.trim()}
+                    disabled={!name.trim()}
+                    loading={addWine.isPending}
+                    loadingText="Salvando…"
                     variant="primary"
                     className="w-full"
                   >
                     <Plus className="h-4 w-4" />
-                    {addWine.isPending ? "Salvando..." : isCommercial ? "Cadastrar produto" : "Salvar vinho"}
+                    {isCommercial ? "Cadastrar produto" : "Salvar vinho"}
                   </Button>
 
                   {missingFields.length > 0 && (

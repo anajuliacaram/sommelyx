@@ -413,17 +413,18 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
               <Button
                 onClick={handleSubmit}
                 disabled={
-                  isSubmitting ||
-                    items.length === 0 ||
+                  items.length === 0 ||
                     !items.every((i) => !!i.locationId) ||
                     !normalizeAuditName(responsibleName) ||
                   !normalizeAuditText(reason) ||
                   (normalizeAuditText(reason) === "Outro" && !normalizeAuditText(auditNotes))
                 }
+                loading={isSubmitting}
+                loadingText="Registrando…"
                 variant="primary"
                 className="w-full"
               >
-                {isSubmitting ? "Registrando..." : "Confirmar Venda"}
+                Confirmar Venda
               </Button>
             </motion.div>
           )}
