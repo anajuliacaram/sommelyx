@@ -76,13 +76,21 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
 
   return (
     <motion.article
-      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.88)] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-28px_rgba(44,20,31,0.18)]"
+      className={cn(
+        "group flex h-full flex-col overflow-hidden rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.88)] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.16)] hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-28px_rgba(44,20,31,0.18)]",
+      )}
+      style={{ transition: "all 0.25s ease" }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
     >
       {showLabel ? (
-        <div className="relative h-[180px] overflow-hidden bg-[rgba(247,243,236,0.85)]">
+        <div
+          className="relative h-[200px] overflow-hidden bg-[rgba(247,243,236,0.85)]"
+          style={{
+            background: `linear-gradient(to bottom, ${getStyleColor(wine.style) || styleColor.tinto}26, transparent), rgba(247,243,236,0.85)`,
+          }}
+        >
           {coverImageUrl ? (
             <img
               src={coverImageUrl}
