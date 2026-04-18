@@ -103,8 +103,8 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
       requestId: crypto.randomUUID(),
       apiKey: OPENAI_API_KEY,
       model: OPENAI_MODEL,
-      timeoutMs: 30_000,
-      temperature: 0.6,
+      timeoutMs: 35_000,
+      temperature: 0.55,
       instructions: systemPrompt,
       input: [{ role: "user", content: [{ type: "input_text", text: userPrompt }] }],
       schema: {
