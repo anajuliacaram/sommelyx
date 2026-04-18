@@ -100,7 +100,19 @@ export function useAddConsumption() {
 }
 
 export type ConsumptionUpdate = Partial<
-  Pick<ConsumptionEntry, "wine_name" | "style" | "rating" | "tasting_notes" | "location" | "vintage">
+  Pick<
+    ConsumptionEntry,
+    | "wine_name"
+    | "style"
+    | "rating"
+    | "tasting_notes"
+    | "location"
+    | "vintage"
+    | "producer"
+    | "region"
+    | "country"
+    | "grape"
+  >
 >;
 
 export function useUpdateConsumption() {

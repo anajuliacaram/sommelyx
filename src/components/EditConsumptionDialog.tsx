@@ -26,6 +26,11 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
   const update = useUpdateConsumption();
   const del = useDeleteConsumption();
   const [wineName, setWineName] = useState("");
+  const [producer, setProducer] = useState("");
+  const [vintage, setVintage] = useState("");
+  const [country, setCountry] = useState("");
+  const [region, setRegion] = useState("");
+  const [grape, setGrape] = useState("");
   const [style, setStyle] = useState<string>("");
   const [rating, setRating] = useState<string>("");
   const [location, setLocation] = useState("");
@@ -34,6 +39,11 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
   useEffect(() => {
     if (entry) {
       setWineName(entry.wine_name ?? "");
+      setProducer(entry.producer ?? "");
+      setVintage(entry.vintage != null ? String(entry.vintage) : "");
+      setCountry(entry.country ?? "");
+      setRegion(entry.region ?? "");
+      setGrape(entry.grape ?? "");
       setStyle(entry.style ?? "");
       setRating(entry.rating != null ? String(entry.rating) : "");
       setLocation(entry.location ?? "");
@@ -50,11 +60,21 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
       toast.error("Avaliação deve ser entre 0 e 5");
       return;
     }
+    const vintageNum = vintage === "" ? null : Number(vintage);
+    if (vintageNum != null && (!Number.isFinite(vintageNum) || vintageNum < 1800 || vintageNum > 2100)) {
+      toast.error("Safra inválida");
+      return;
+    }
     try {
       await update.mutateAsync({
         id: entry.id,
         updates: {
           wine_name: wineName.trim() || entry.wine_name,
+          producer: producer.trim() || null,
+          vintage: vintageNum,
+          country: country.trim() || null,
+          region: region.trim() || null,
+          grape: grape.trim() || null,
           style: style || null,
           rating: ratingNum,
           location: location.trim() || null,
@@ -96,6 +116,38 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
             <Input value={wineName} onChange={(e) => setWineName(e.target.value)} />
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">Vinícola / Produtor</Label>
+              <Input value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Ex: Château Margaux" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">Safra</Label>
+              <Input
+                type="number"
+                value={vintage}
+                onChange={(e) => setVintage(e.target.value)}
+                placeholder="2020"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">País</Label>
+              <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="França" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">Região</Label>
+              <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Bordeaux" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[12px]">Uva / Blend</Label>
+            <Input
+              value={grape}
+              onChange={(e) => setGrape(e.target.value)}
+              placeholder="Ex: Cabernet Sauvignon, Merlot"
+            />
+          </div>
           <div className="space-y-1.5">
             <Label className="text-[12px]">Tipo</Label>
             <div className="flex flex-wrap gap-1.5">

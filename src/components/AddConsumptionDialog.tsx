@@ -176,6 +176,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
               </div>
             </div>
+            <div className="space-y-1.5">
+              <Label>Uva / Blend</Label>
+              <Input value={grape} onChange={(e) => setGrape(e.target.value)} placeholder="Ex: Cabernet Sauvignon, Merlot" disabled={source === "cellar" && !!selectedWineId} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
