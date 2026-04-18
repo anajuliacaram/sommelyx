@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Search, Star, Wine as WineIcon, X, ImageOff, Image as ImageIcon } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
+import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import {
@@ -49,6 +50,8 @@ export default function PersonalCellarPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [editWine, setEditWine] = useState<Wine | null>(null);
+  const [consumptionOpen, setConsumptionOpen] = useState(false);
+  const [preSelectedWine, setPreSelectedWine] = useState<Wine | null>(null);
 
   const filtered = useMemo(() => {
     let list = wines.filter((w) => {
@@ -73,13 +76,9 @@ export default function PersonalCellarPage() {
     return list;
   }, [wines, query, styleFilter, sort]);
 
-  const handleOpenBottle = async (w: Wine) => {
-    try {
-      await wineEvent.mutateAsync({ wineId: w.id, eventType: "open", quantity: 1 });
-      toast({ title: `🍷 "${w.name}" aberto`, description: "Consumo registrado." });
-    } catch {
-      toast({ title: "Não conseguimos registrar o consumo", description: "Verifique sua conexão e tente novamente.", variant: "destructive" });
-    }
+  const handleOpenBottle = (w: Wine) => {
+    setPreSelectedWine(w);
+    setConsumptionOpen(true);
   };
 
   return (
@@ -454,6 +453,14 @@ export default function PersonalCellarPage() {
           onOpenChange={(v) => !v && setEditWine(null)}
         />
       )}
+      <AddConsumptionDialog
+        open={consumptionOpen}
+        onOpenChange={(v) => {
+          setConsumptionOpen(v);
+          if (!v) setPreSelectedWine(null);
+        }}
+        preSelectedWine={preSelectedWine}
+      />
     </>
   );
 }

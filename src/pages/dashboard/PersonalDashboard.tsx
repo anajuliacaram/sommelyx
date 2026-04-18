@@ -21,6 +21,7 @@ import {
 } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
+import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
@@ -85,6 +86,11 @@ export default function PersonalDashboard() {
   const [manageOpen, setManageOpen] = useState(false);
   const [dishToWineOpen, setDishToWineOpen] = useState(false);
   const [wineListScanOpen, setWineListScanOpen] = useState(false);
+  const [consumptionOpen, setConsumptionOpen] = useState(false);
+  const [preSelectedWine, setPreSelectedWine] = useState<{
+    id: string; name: string; producer?: string | null; country?: string | null;
+    region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null;
+  } | null>(null);
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
   const [showOnboarding, setShowOnboarding] = useState(
@@ -151,13 +157,20 @@ export default function PersonalDashboard() {
     return candidates[0] ?? null;
   }, [wines, currentYear]);
 
-  const handleOpenBottle = async (wineId: string, wineName: string) => {
-    try {
-      await wineEvent.mutateAsync({ wineId, eventType: "open", quantity: 1 });
-      toast({ title: `🍷 "${wineName}" aberto`, description: "Consumo registrado com sucesso." });
-    } catch {
-      toast({ title: "Não conseguimos registrar o consumo", description: "Verifique sua conexão e tente novamente.", variant: "destructive" });
-    }
+  const handleOpenBottle = (wineId: string, _wineName: string) => {
+    const w = wines.find((x) => x.id === wineId);
+    if (!w) return;
+    setPreSelectedWine({
+      id: w.id,
+      name: w.name,
+      producer: w.producer,
+      country: w.country,
+      region: w.region,
+      grape: w.grape,
+      style: w.style,
+      vintage: w.vintage,
+    });
+    setConsumptionOpen(true);
   };
 
   return (
@@ -667,6 +680,14 @@ export default function PersonalDashboard() {
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
       <DishToWineDialog open={dishToWineOpen} onOpenChange={setDishToWineOpen} />
       <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
+      <AddConsumptionDialog
+        open={consumptionOpen}
+        onOpenChange={(v) => {
+          setConsumptionOpen(v);
+          if (!v) setPreSelectedWine(null);
+        }}
+        preSelectedWine={preSelectedWine}
+      />
     </>
   );
 }
