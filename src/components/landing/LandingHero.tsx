@@ -36,8 +36,8 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
   };
 
   return (
-    <section className="relative z-10 px-4 sm:px-8 pt-20 sm:pt-24 lg:pt-28 pb-8 sm:pb-12">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
+    <section className="relative z-10 px-4 sm:px-8 pt-16 sm:pt-20 lg:pt-24 pb-6 sm:pb-8">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
         {/* Left */}
         <div className="text-left">
           <motion.div
