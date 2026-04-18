@@ -512,12 +512,50 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             )}
                           </AnimatePresence>
 
-                          <ScrollArea className="max-h-[200px] rounded-[14px] border border-black/[0.06] bg-white/60">
+                          {/* Wine type filter pills */}
+                          {(() => {
+                            const pills = [
+                              { value: "all" as const, label: "Todos", bg: "#EFEDE8", fg: "#1A1713" },
+                              { value: "tinto" as const, label: "Tinto", bg: "#7B1E2B", fg: "#FFFFFF" },
+                              { value: "branco" as const, label: "Branco", bg: "#C8A96A", fg: "#FFFFFF" },
+                              { value: "rose" as const, label: "Rosé", bg: "#E8A0A6", fg: "#FFFFFF" },
+                              { value: "espumante" as const, label: "Espumante", bg: "#6A8F6B", fg: "#FFFFFF" },
+                              { value: "sobremesa" as const, label: "Sobremesa", bg: "#A67C52", fg: "#FFFFFF" },
+                            ];
+                            return (
+                              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+                                {pills.map(p => {
+                                  const active = styleFilter === p.value;
+                                  return (
+                                    <button
+                                      key={p.value}
+                                      type="button"
+                                      onClick={() => setStyleFilter(p.value)}
+                                      className={cn(
+                                        "shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                                        active
+                                          ? "scale-[1.05] shadow-sm border-transparent"
+                                          : "bg-white/70 text-[#3A3327] border-black/[0.08] hover:bg-white",
+                                      )}
+                                      style={active ? { background: p.bg, color: p.fg, borderColor: "transparent" } : undefined}
+                                    >
+                                      {p.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
+
+                          <ScrollArea className="max-h-[260px] rounded-[14px] border border-black/[0.06] bg-white/60">
                             {filteredWines.length === 0 ? (
                               <div className="px-4 py-8 text-center">
                                 <p className="text-[12px] text-[#3A3327]/55">
                                   {baseWines.length === 0 ? "Nenhum vinho cadastrado" : "Nenhum vinho encontrado"}
                                 </p>
+                                {baseWines.length > 0 && (
+                                  <p className="text-[11px] text-[#3A3327]/45 mt-1">Use a busca ou ajuste os filtros</p>
+                                )}
                               </div>
                             ) : (
                               <div className="divide-y divide-black/[0.05]">
