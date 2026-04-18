@@ -130,12 +130,12 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
                 filter: "saturate(1.08)",
               }}
             />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.04em]" style={{ color: "#6C5F55" }}>
+            <span className="text-[12px] font-semibold uppercase tracking-[0.04em]" style={{ color: "#4A4036" }}>
               {wine.style || "Vinho"}
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 text-[11.5px] font-medium tracking-tight text-[#A8822B]">
-            <span className="text-[10px]">⭐</span>
+          <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold tracking-tight text-[#8A6A1F]">
+            <span className="text-[11px]">⭐</span>
             {ratingLabel}
           </span>
         </div>
@@ -144,7 +144,7 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
           <h3 className="font-serif text-[1.28rem] font-semibold leading-[1.08] tracking-[-0.03em] text-[#1A1A1A]">
             {wine.name}
           </h3>
-          <p className="text-[13px] font-medium text-[#7A7A7A]">
+          <p className="text-[13.5px] font-medium text-[#5C544B]">
             {formatVintageLabel(wine.vintage)} · {wine.region || wine.country || "Região n/i"}
           </p>
         </div>
@@ -160,7 +160,7 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
               style={{ left: `calc(${indicator}% - 5px)` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[10px] font-medium text-[#A39A90]">
+          <div className="flex items-center justify-between text-[11.5px] font-semibold text-[#6F665C]">
             <span>{wine.drink_from ?? "—"}</span>
             <span>{wine.drink_until ?? "—"}</span>
           </div>
@@ -170,11 +170,11 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
           <div className="min-w-0 space-y-1">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: palette.dot }} />
-              <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6F6A60]">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#4A4036]">
                 {wine.style || "Vinho"}
               </span>
             </div>
-            <p className="mt-1 text-base font-semibold text-[#1A1713]">
+            <p className="mt-1 text-[15px] font-semibold text-[#1A1713]">
               Qtd {wine.quantity} · {priceLabel}
             </p>
           </div>
