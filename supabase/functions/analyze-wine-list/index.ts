@@ -718,77 +718,31 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       let responseStatus = 200;
       let responseBodyPreview: string | null = null;
 
-      if (OPENAI_API_KEY) {
-        const openaiResult = await callOpenAIResponses<any>({
-          functionName: "analyze-wine-list",
-          requestId: crypto.randomUUID(),
-          apiKey: OPENAI_API_KEY,
-          model: OPENAI_MODEL,
-          timeoutMs: 60_000,
-          temperature: 0.2,
-          instructions: systemPrompt,
-          input: messagesForAI.map((message) => ({
-            role: message.role,
-            content: Array.isArray(message.content)
-              ? message.content.map((part: any) => {
-                if (part.type === "text") return { type: "input_text", text: String(part.text || "") };
-                if (part.type === "image_url") return { type: "input_image", image_url: String(part.image_url?.url || ""), detail: "high" as const };
-                return { type: "input_text", text: "" };
-              }).filter((part: any) => part.type === "input_text" ? part.text.trim().length > 0 : Boolean(part.image_url))
-              : [{ type: "input_text", text: String(message.content || "") }],
-          })),
-          schema: (tools[0] as any)?.function?.parameters || {},
-          maxOutputTokens: 8_000,
-        });
+      const openaiResult = await callOpenAIResponses<any>({
+        functionName: "analyze-wine-list",
+        requestId: crypto.randomUUID(),
+        apiKey: OPENAI_API_KEY,
+        model: OPENAI_MODEL,
+        timeoutMs: 60_000,
+        temperature: 0.2,
+        instructions: systemPrompt,
+        input: messagesForAI.map((message) => ({
+          role: message.role,
+          content: Array.isArray(message.content)
+            ? message.content.map((part: any) => {
+              if (part.type === "text") return { type: "input_text" as const, text: String(part.text || "") };
+              if (part.type === "image_url") return { type: "input_image" as const, image_url: String(part.image_url?.url || ""), detail: "high" as const };
+              return { type: "input_text" as const, text: "" };
+            }).filter((part: any) => part.type === "input_text" ? part.text.trim().length > 0 : Boolean(part.image_url))
+            : [{ type: "input_text" as const, text: String(message.content || "") }],
+        })),
+        schema: (tools[0] as any)?.function?.parameters || {},
+        maxOutputTokens: 8_000,
+      });
 
-        if (!openaiResult.ok) {
-          responseStatus = openaiResult.status;
-          responseBodyPreview = openaiResult.error;
-          console.log({
-            input: {
-              mode: isMenuMode ? "menu-for-wine" : "wine-list",
-              wineName: isMenuMode ? wineName : null,
-              attempt: attempt + 1,
-            },
-            response: {
-              ok: false,
-              status: responseStatus,
-              body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
-            },
-            parsed: null,
-            error: responseBodyPreview,
-          });
-
-          if (responseStatus === 429) {
-            return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
-          }
-          if (responseStatus === 402) {
-            return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
-          }
-          throw new Error(`AI provider error: ${responseStatus} - ${responseBodyPreview || ""}`);
-        }
-
-        parsed = openaiResult.parsed;
-        responseStatus = 200;
-      } else {
-        const aiResponse = await fetch(AI_URL, {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
-            messages: messagesForAI,
-            tools,
-            tool_choice: toolChoice,
-            temperature: 0.3,
-          }),
-        });
-
-        responseStatus = aiResponse.status;
-        responseBodyPreview = aiResponse.ok ? null : await aiResponse.text().catch(() => "");
+      if (!openaiResult.ok) {
+        responseStatus = openaiResult.status;
+        responseBodyPreview = openaiResult.error;
         console.log({
           input: {
             mode: isMenuMode ? "menu-for-wine" : "wine-list",
@@ -796,44 +750,22 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
             attempt: attempt + 1,
           },
           response: {
-            ok: aiResponse.ok,
-            status: aiResponse.status,
+            ok: false,
+            status: responseStatus,
             body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
           },
           parsed: null,
-          error: aiResponse.ok ? null : responseBodyPreview,
+          error: responseBodyPreview,
         });
 
-        if (!aiResponse.ok) {
-          const errText = responseBodyPreview || "";
-          console.error("AI gateway error:", aiResponse.status, errText);
-          if (aiResponse.status === 429) {
-            return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
-          }
-          if (aiResponse.status === 402) {
-            return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
-          }
-          throw new Error(`AI gateway error: ${aiResponse.status} - ${errText}`);
+        if (responseStatus === 429) {
+          return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
         }
-
-        const aiData = await aiResponse.json();
-        parsed = extractToolArguments(aiData);
-
-        console.log({
-          input: {
-            mode: isMenuMode ? "menu-for-wine" : "wine-list",
-            wineName: isMenuMode ? wineName : null,
-            attempt: attempt + 1,
-          },
-          response: {
-            ok: true,
-            status: aiResponse.status,
-            body: null,
-          },
-          parsed,
-          error: null,
-        });
+        throw new Error(`OpenAI error: ${responseStatus} - ${responseBodyPreview || ""}`);
       }
+
+      parsed = openaiResult.parsed;
+      responseStatus = 200;
 
       clearTimeout(timeout);
 
