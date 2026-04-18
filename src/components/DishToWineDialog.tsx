@@ -1211,6 +1211,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       const meta = [s.grape, s.vintage ? `Safra ${s.vintage}` : null, s.region, s.country].filter(Boolean).join(" · ");
                       const hLabel = s.harmony_label || (s.harmony_type && harmonyLabel[s.harmony_type]);
 
+                      // Match wine na adega para exibir preço
+                      const matchedWine = s.fromCellar
+                        ? wines?.find((w) => w.name?.toLowerCase().trim() === s.wineName?.toLowerCase().trim())
+                        : null;
+                      const winePrice = matchedWine?.purchase_price ?? matchedWine?.current_value ?? null;
+                      const priceLabel = matchedWine?.purchase_price != null
+                        ? "Pago"
+                        : matchedWine?.current_value != null
+                          ? "Mercado"
+                          : null;
+
                       const compatColor = s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
                         s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
                         s.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
@@ -1242,12 +1253,24 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                                 <p className="text-[11px] text-muted-foreground/70 pl-[18px]">{meta}</p>
                               )}
                             </div>
-                            {s.fromCellar && (
-                              <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                                <Wine className="h-3 w-3" />
-                                Na adega
-                              </span>
-                            )}
+                            <div className="shrink-0 flex flex-col items-end gap-1">
+                              {s.fromCellar && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                                  <Wine className="h-3 w-3" />
+                                  Na adega
+                                </span>
+                              )}
+                              {winePrice != null && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(38,36%,52%/0.14)] px-2.5 py-1 text-[10.5px] font-bold tracking-tight text-[hsl(38,55%,30%)]">
+                                  R$ {Number(winePrice).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                  {priceLabel && (
+                                    <span className="ml-0.5 text-[8.5px] font-semibold uppercase tracking-wider opacity-70">
+                                      {priceLabel}
+                                    </span>
+                                  )}
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {/* Wine structure pills */}
