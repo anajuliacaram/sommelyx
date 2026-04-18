@@ -756,6 +756,7 @@ export async function getWinePairings(wine: {
 export async function getDishWineSuggestions(
   dish: string,
   userWines?: WineSummary[],
+  intent?: PairingIntent,
 ): Promise<SuggestionResponse> {
   try {
     const request = () => invokeEdgeFunction<{ suggestions: WineSuggestion[] }>(
@@ -763,6 +764,7 @@ export async function getDishWineSuggestions(
       {
         mode: "food-to-wine",
         dish,
+        intent: intent ?? "everyday",
         userWines: userWines?.slice(0, 30)?.map((w) => ({
           name: w.name,
           style: w.style,
@@ -771,6 +773,8 @@ export async function getDishWineSuggestions(
           country: w.country,
           vintage: w.vintage,
           producer: w.producer,
+          purchase_price: w.purchase_price ?? null,
+          current_value: w.current_value ?? null,
         })),
       },
       { timeoutMs: 90_000, retries: 1 },
