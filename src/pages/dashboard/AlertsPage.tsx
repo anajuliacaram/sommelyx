@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { getWineInsight, type WineInsight } from "@/lib/sommelier-ai";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { getStyleColor, getStyleFamily } from "@/components/editorial/EditorialPrimitives";
 
 const currentYear = new Date().getFullYear();
 
