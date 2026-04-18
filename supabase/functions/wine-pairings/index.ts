@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
+import { callOpenAIResponses } from "../_shared/openai.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -301,22 +301,17 @@ function rankCellarWinesForDish(dish: string, wines: Record<string, unknown>[]) 
 }
 
 async function callAI(
-  _apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   tools: unknown[],
-  _toolChoice: unknown,
-  _signal: AbortSignal,
 ) {
-  const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-  const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
   const schema = (tools?.[0] as any)?.function?.parameters || {};
 
   const result = await callOpenAIResponses<any>({
     functionName: "wine-pairings",
     requestId: crypto.randomUUID(),
-    apiKey: openaiKey,
-    model: openaiModel,
+    apiKey: "",
+    model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview",
     timeoutMs: 60_000,
     temperature: 0.35,
     instructions: systemPrompt,
@@ -366,13 +361,6 @@ serve(async (req) => {
     }
     userId = user.id;
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[wine-pairings] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!OPENAI_API_KEY) {
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return jsonResponse({ error: "Serviço de análise indisponível no momento. Tente novamente em instantes." }, 500);
-    }
 
     let body: Record<string, unknown>;
     try {
@@ -687,12 +675,9 @@ INSTRUÇÕES:
         : "";
 
       const result = await callAI(
-        OPENAI_API_KEY,
         systemPrompt,
         userPrompt + retryHint,
         tools,
-        toolChoice,
-        controller.signal,
       );
 
       clearTimeout(timeout);
@@ -716,8 +701,10 @@ INSTRUÇÕES:
       if (!result.ok) {
         if (result.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
         if (result.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+        if (result.status === 422) return jsonResponse({ error: "A análise retornou um formato inválido. Tente novamente em instantes." }, 422);
+        if (result.status === 504) return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
         console.error("AI gateway error:", result.status, result.errText);
-        return jsonResponse({ error: "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);
+        return jsonResponse({ error: result.errText || "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);
       }
 
       if (!result.parsed) {

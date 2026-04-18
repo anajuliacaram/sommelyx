@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
-import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
+import { callOpenAIResponses } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -433,10 +433,6 @@ serve(async (req) => {
       return jsonResponse({ error: "Sessão inválida" }, 401);
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[analyze-wine-list] openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const parsedBody = BodySchema.safeParse(await req.json());
     if (!parsedBody.success) {
@@ -721,8 +717,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       const openaiResult = await callOpenAIResponses<any>({
         functionName: "analyze-wine-list",
         requestId: crypto.randomUUID(),
-        apiKey: OPENAI_API_KEY,
-        model: OPENAI_MODEL,
+        apiKey: "",
+        model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview",
         timeoutMs: 60_000,
         temperature: 0.2,
         instructions: systemPrompt,
@@ -761,7 +757,13 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         if (responseStatus === 429) {
           return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
         }
-        throw new Error(`OpenAI error: ${responseStatus} - ${responseBodyPreview || ""}`);
+        if (responseStatus === 402) {
+          return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+        }
+        if (responseStatus === 422) {
+          return jsonResponse({ error: "A análise retornou um formato inválido. Tente novamente em instantes." }, 422);
+        }
+        throw new Error(`AI error: ${responseStatus} - ${responseBodyPreview || ""}`);
       }
 
       parsed = openaiResult.parsed;
