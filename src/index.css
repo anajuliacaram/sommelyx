@@ -422,6 +422,21 @@
   .type-body-muted { @apply text-sm text-muted-foreground; }
   .type-label { @apply text-xs uppercase tracking-wide text-muted-foreground; }
 
+  /* ── Sommelyx Spacing Scale (oficial) ──
+     Section 28 / Card 20 / Title→Content 12
+     Use estas classes em todas as páginas e cards.
+     ────────────────────────────────────────── */
+  .stack-section > * + * { margin-top: 28px; }
+  .stack-card > * + * { margin-top: 20px; }
+  .stack-title > * + * { margin-top: 12px; }
+  .stack-row > * + * { margin-top: 8px; }
+  .pad-card { padding: 20px; }
+  @media (max-width: 640px) {
+    .stack-section > * + * { margin-top: 22px; }
+    .stack-card > * + * { margin-top: 16px; }
+    .pad-card { padding: 16px; }
+  }
+
   .layout-section {
     @apply gap-6;
   }

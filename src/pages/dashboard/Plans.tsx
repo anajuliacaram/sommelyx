@@ -47,7 +47,7 @@ export default function Plans() {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-7">
       {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <h1 className="t-title">Meu plano</h1>

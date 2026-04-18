@@ -390,7 +390,7 @@ export default function CommercialDashboard() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1280px] space-y-5 md:space-y-6">
+      <div className="max-w-[1280px] space-y-7">
         {/* ─── Header ─── */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="surface-clarity rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

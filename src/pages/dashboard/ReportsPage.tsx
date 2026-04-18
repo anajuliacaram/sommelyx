@@ -107,7 +107,7 @@ export default function ReportsPage() {
   if (isLoading) return <div className="text-muted-foreground text-sm p-8">Carregando…</div>;
 
   return (
-    <div className="space-y-3 max-w-[1200px]">
+    <div className="space-y-7 max-w-[1200px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface">
           <h1 className="t-title">Relatórios</h1>

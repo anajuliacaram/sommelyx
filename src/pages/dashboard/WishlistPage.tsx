@@ -273,7 +273,7 @@ export default function WishlistPage() {
   if (isLoading) return <div className="text-sm text-muted-foreground p-4">Carregando wishlist…</div>;
 
   return (
-    <div className="space-y-5 max-w-[980px]">
+    <div className="space-y-7 max-w-[980px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="glass-card p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>

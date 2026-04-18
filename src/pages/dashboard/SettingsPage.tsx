@@ -98,7 +98,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-7 max-w-2xl">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface section-surface--full">
           <div className="flex items-center gap-2.5">

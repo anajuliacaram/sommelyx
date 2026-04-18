@@ -168,7 +168,7 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="space-y-3 max-w-3xl">
+    <div className="space-y-7 max-w-3xl">
       {/* ── Header ── */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="glass-card px-5 py-4">
