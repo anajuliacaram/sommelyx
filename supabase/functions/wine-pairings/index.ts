@@ -311,8 +311,8 @@ async function callAI(
     functionName: "wine-pairings",
     requestId: crypto.randomUUID(),
     apiKey: "",
-    model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview",
-    timeoutMs: 60_000,
+    model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash-lite",
+    timeoutMs: 45_000,
     temperature: 0.35,
     instructions: systemPrompt,
     input: [
@@ -322,7 +322,7 @@ async function callAI(
       },
     ],
     schema,
-    maxOutputTokens: 5_000,
+    maxOutputTokens: 2_500,
   });
 
   if (result.ok) {
