@@ -387,100 +387,133 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const enrichDraftRows = async () => {
     setEnriching(true);
     try {
-      // Use the parse-csv-wines edge function in "enrich mode" by sending only names
-      // for rows that are missing producer/style/country/region/grape.
-      const enriched = await Promise.all(
-        draftWines.map(async (row) => {
-          const match = findBestCellarMatch(row);
-          const inferredType = row.type || inferTypeFromText(row.name) || inferTypeFromText(row.producer) || inferTypeFromText(row.grape);
+      // Show advanced columns so the user sees enriched fields
+      setShowAdvancedColumns(true);
 
-          // Ask the AI to enrich this single wine using its name as the seed
-          let aiEnriched: Partial<DraftWine> = {};
-          const needsEnrichment = !row.producer || !row.country || !row.region || !row.grape || !row.style;
-          if (needsEnrichment && row.name?.trim()) {
-            try {
-              const seed = [
-                row.name,
-                row.producer && `Produtor: ${row.producer}`,
-                row.vintage && `Safra: ${row.vintage}`,
-              ].filter(Boolean).join(" — ");
-              const ai = await invokeEdgeFunction<{ wines?: any[] }>(
-                "parse-csv-wines",
-                { csvContent: `name\n${seed}`, fileName: "enrich.csv", fileType: "text/csv" },
-                { timeoutMs: 35_000, retries: 0 },
-              );
-              const w = ai?.wines?.[0];
-              if (w && typeof w === "object") {
-                aiEnriched = {
-                  producer: row.producer || (typeof w.producer === "string" ? w.producer : undefined),
-                  country: row.country || (typeof w.country === "string" ? w.country : undefined),
-                  region: row.region || (typeof w.region === "string" ? w.region : undefined),
-                  grape: row.grape || (typeof w.grape === "string" ? w.grape : undefined),
-                  style: row.style || row.type || normalizeStyle(w.style),
-                  vintage: row.vintage ?? (typeof w.vintage === "number" ? w.vintage : undefined),
-                };
-              }
-            } catch {
-              // ignore — keep original row
+      // Identify rows that need enrichment (missing producer/country/region/grape/style)
+      const rowsNeedingEnrichment = draftWines
+        .map((row, index) => ({ row, index }))
+        .filter(({ row }) =>
+          row.name?.trim() && (!row.producer || !row.country || !row.region || !row.grape || !row.style),
+        );
+
+      // Build a CSV-style batch payload: one chunk of up to 30 wines per AI call
+      // This is dramatically faster than 1 call per row.
+      const BATCH_SIZE = 30;
+      const aiResultsByName = new Map<string, any>();
+
+      for (let i = 0; i < rowsNeedingEnrichment.length; i += BATCH_SIZE) {
+        const batch = rowsNeedingEnrichment.slice(i, i + BATCH_SIZE);
+        const csvLines = ["name,producer,vintage"];
+        for (const { row } of batch) {
+          const safeName = (row.name || "").replace(/"/g, '""');
+          const safeProducer = (row.producer || "").replace(/"/g, '""');
+          csvLines.push(`"${safeName}","${safeProducer}",${row.vintage ?? ""}`);
+        }
+        try {
+          const ai = await invokeEdgeFunction<{ wines?: any[] }>(
+            "parse-csv-wines",
+            { csvContent: csvLines.join("\n"), fileName: "enrich-batch.csv", fileType: "text/csv" },
+            { timeoutMs: 90_000, retries: 1 },
+          );
+          for (const w of ai?.wines || []) {
+            if (w && typeof w === "object" && typeof w.name === "string") {
+              aiResultsByName.set(normalizeSearchText(w.name), w);
             }
           }
+        } catch (batchErr) {
+          console.warn("Enrichment batch failed", batchErr);
+        }
+      }
 
-          let resolvedPrice = row.price;
-          if (resolvedPrice == null) {
-            try {
-              const result = await invokeEdgeFunction<{ estimated_price?: number }>(
-                "estimate-wine-price",
-                {
-                  name: row.name,
-                  producer: row.producer || aiEnriched.producer || match?.wine?.producer || null,
-                  vintage: row.vintage ?? aiEnriched.vintage ?? match?.wine?.vintage ?? null,
-                  style: inferredType || aiEnriched.style || row.style || null,
-                  country: row.country || aiEnriched.country || match?.wine?.country || null,
-                  region: row.region || aiEnriched.region || match?.wine?.region || null,
-                  grape: row.grape || aiEnriched.grape || match?.wine?.grape || null,
-                },
-                { timeoutMs: 35_000, retries: 0 },
-              );
-              if (typeof result?.estimated_price === "number") {
-                resolvedPrice = result.estimated_price;
+      // Apply AI enrichment + price estimation per row (in parallel for prices, capped)
+      const PRICE_CONCURRENCY = 5;
+      const enriched: DraftWine[] = [];
+      for (let i = 0; i < draftWines.length; i += PRICE_CONCURRENCY) {
+        const slice = draftWines.slice(i, i + PRICE_CONCURRENCY);
+        const settled = await Promise.all(
+          slice.map(async (row) => {
+            const match = findBestCellarMatch(row);
+            const aiMatch = aiResultsByName.get(normalizeSearchText(row.name)) || {};
+            const inferredType =
+              row.type ||
+              normalizeStyle(aiMatch.style) ||
+              inferTypeFromText(row.name) ||
+              inferTypeFromText(row.producer) ||
+              inferTypeFromText(row.grape);
+
+            const aiEnriched = {
+              producer: row.producer || (typeof aiMatch.producer === "string" ? aiMatch.producer : undefined),
+              country: row.country || (typeof aiMatch.country === "string" ? aiMatch.country : undefined),
+              region: row.region || (typeof aiMatch.region === "string" ? aiMatch.region : undefined),
+              grape: row.grape || (typeof aiMatch.grape === "string" ? aiMatch.grape : undefined),
+              style: row.style || row.type || normalizeStyle(aiMatch.style),
+              vintage: row.vintage ?? (typeof aiMatch.vintage === "number" ? aiMatch.vintage : undefined),
+            };
+
+            let resolvedPrice = row.price ?? row.purchase_price;
+            if (resolvedPrice == null) {
+              try {
+                const result = await invokeEdgeFunction<{ estimated_price?: number }>(
+                  "estimate-wine-price",
+                  {
+                    name: row.name,
+                    producer: row.producer || aiEnriched.producer || match?.wine?.producer || null,
+                    vintage: row.vintage ?? aiEnriched.vintage ?? match?.wine?.vintage ?? null,
+                    style: inferredType || aiEnriched.style || row.style || null,
+                    country: row.country || aiEnriched.country || match?.wine?.country || null,
+                    region: row.region || aiEnriched.region || match?.wine?.region || null,
+                    grape: row.grape || aiEnriched.grape || match?.wine?.grape || null,
+                  },
+                  { timeoutMs: 30_000, retries: 0 },
+                );
+                if (typeof result?.estimated_price === "number") {
+                  resolvedPrice = result.estimated_price;
+                }
+              } catch {
+                // Keep undefined if price estimation fails
               }
-            } catch {
-              resolvedPrice = row.price;
             }
-          }
-          const finalStyle = (aiEnriched.style as string | undefined) || inferredType || row.type || row.style;
-          const nextRow: DraftWine = {
-            ...row,
-            name: row.name?.trim() || row.name,
-            producer: row.producer || (aiEnriched.producer as string | undefined) || match?.wine?.producer || undefined,
-            vintage: row.vintage ?? (aiEnriched.vintage as number | undefined) ?? match?.wine?.vintage ?? undefined,
-            type: finalStyle,
-            style: finalStyle,
-            country: row.country || (aiEnriched.country as string | undefined) || match?.wine?.country || undefined,
-            region: row.region || (aiEnriched.region as string | undefined) || match?.wine?.region || undefined,
-            grape: row.grape || (aiEnriched.grape as string | undefined) || match?.wine?.grape || undefined,
-            price: resolvedPrice,
-            purchase_price: resolvedPrice,
-            image_url: row.image_url || match?.wine?.image_url || buildGeneratedThumbnail({
+
+            const finalStyle = aiEnriched.style || inferredType || row.type || row.style;
+            const nextRow: DraftWine = {
               ...row,
+              name: row.name?.trim() || row.name,
+              producer: row.producer || aiEnriched.producer || match?.wine?.producer || undefined,
+              vintage: row.vintage ?? aiEnriched.vintage ?? match?.wine?.vintage ?? undefined,
               type: finalStyle,
-            }),
-          };
-          const validation = computeRowErrors([nextRow])[0];
-          const errors = validation ? (Object.values(validation).filter(Boolean) as string[]) : [];
-          return {
-            ...nextRow,
-            errors,
-            confidence: scoreDraftRow({ ...nextRow, errors }),
-            duplicateWarning: row.duplicateWarning || (match ? "Combinação semelhante à sua adega" : null),
-          };
-        }),
-      );
+              style: finalStyle,
+              country: row.country || aiEnriched.country || match?.wine?.country || undefined,
+              region: row.region || aiEnriched.region || match?.wine?.region || undefined,
+              grape: row.grape || aiEnriched.grape || match?.wine?.grape || undefined,
+              price: resolvedPrice,
+              purchase_price: resolvedPrice,
+              image_url: row.image_url || match?.wine?.image_url || buildGeneratedThumbnail({ ...row, type: finalStyle }),
+            };
+            const validation = computeRowErrors([nextRow])[0];
+            const errors = validation ? (Object.values(validation).filter(Boolean) as string[]) : [];
+            return {
+              ...nextRow,
+              errors,
+              confidence: scoreDraftRow({ ...nextRow, errors }),
+              duplicateWarning: row.duplicateWarning || (match ? "Combinação semelhante à sua adega" : null),
+            };
+          }),
+        );
+        enriched.push(...settled);
+      }
 
       setDraftWines(enriched);
       toast({
         title: "Dados enriquecidos",
-        description: "Produtor, região, uva e preço foram completados com nossa inteligência.",
+        description: `Produtor, região, uva, tipo e preço completados em ${enriched.length} vinho(s).`,
+      });
+    } catch (err) {
+      console.error("Enrichment error:", err);
+      toast({
+        title: "Não foi possível completar todos os dados",
+        description: "Tente novamente em alguns instantes ou complete manualmente.",
+        variant: "destructive",
       });
     } finally {
       setEnriching(false);
