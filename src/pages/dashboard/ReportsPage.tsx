@@ -110,8 +110,8 @@ export default function ReportsPage() {
     <div className="space-y-3 max-w-[1200px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="section-surface">
-          <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Relatórios</h1>
-          <p className="text-[10px] text-muted-foreground/70">Análise de estoque e vendas com dados reais</p>
+          <h1 className="t-title">Relatórios</h1>
+          <p className="t-subtitle mt-1.5">Análise de estoque e vendas em tempo real</p>
         </div>
       </motion.div>
 

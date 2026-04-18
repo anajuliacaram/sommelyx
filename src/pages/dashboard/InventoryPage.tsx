@@ -463,16 +463,14 @@ export default function InventoryPage() {
             {/* --- HEADER --- */}
             <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-3">
                 <div>
-                    <h1 className="section-surface__title text-[26px] md:text-[30px] font-semibold tracking-[-0.04em]">
-                        Estoque
-                    </h1>
-                    <p className="section-surface__subtitle text-[12px] mt-1 font-medium text-muted-foreground">Operação comercial · leitura rápida de disponibilidade e valor</p>
-                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">{summary.labels} rótulos</span>
-                        <span className="text-muted-foreground/30">·</span>
-                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">{summary.bottles} garrafas</span>
-                        <span className="text-muted-foreground/30">·</span>
-                        <span className="text-[10px] font-semibold text-muted-foreground/70 tabular-nums">R$ {summary.totalValue.toLocaleString("pt-BR")}</span>
+                    <h1 className="t-title">Estoque</h1>
+                    <p className="t-subtitle mt-1.5">Disponibilidade e valor da operação em tempo real</p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span className="t-meta font-semibold tabular-nums">{summary.labels} rótulos</span>
+                        <span className="text-muted-foreground/40">·</span>
+                        <span className="t-meta font-semibold tabular-nums">{summary.bottles} garrafas</span>
+                        <span className="text-muted-foreground/40">·</span>
+                        <span className="t-meta font-semibold tabular-nums">R$ {summary.totalValue.toLocaleString("pt-BR")}</span>
                     </div>
                 </div>
 

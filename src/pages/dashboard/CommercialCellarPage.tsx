@@ -1005,13 +1005,9 @@ export default function CellarPage() {
         <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.78)] px-5 py-5 shadow-[0_12px_28px_-26px_rgba(0,0,0,0.16)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0 max-w-3xl space-y-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8C8578]">
-                Adega pessoal
-              </p>
-              <h1 className="font-serif text-[2rem] font-semibold tracking-[-0.04em] text-[#1A1A1A] sm:text-[2.35rem]">
-                Minha Adega
-              </h1>
-              <p className="text-sm font-medium text-[#6F6A60]">
+              <p className="t-eyebrow">Adega pessoal</p>
+              <h1 className="t-title mt-1.5">Minha adega</h1>
+              <p className="t-subtitle mt-1.5">
                 {filtered.length} rótulo{filtered.length !== 1 ? "s" : ""} · {visibleBottleCount} garrafa{visibleBottleCount !== 1 ? "s" : ""} em estoque
               </p>
             </div>

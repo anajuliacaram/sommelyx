@@ -395,13 +395,11 @@ export default function CommercialDashboard() {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <div className="surface-clarity rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[28px] font-semibold tracking-[-0.04em] text-foreground sm:text-[32px] font-serif">
-                Resumo da operação
-              </h1>
-              <p className="mt-1.5 text-[13px] text-foreground/70 leading-relaxed">
+              <h1 className="t-title">Resumo da operação</h1>
+              <p className="t-subtitle mt-1.5">
                 {isFiltered
                   ? `${uniqueLabels} rótulos · ${totalBottles} garrafas · ${formatBRL(totalValue)}`
-                  : `${totalBottles} un. em estoque`}
+                  : `${totalBottles} unidades em estoque`}
                 {lowStock > 0 && !isFiltered && (
                   <> · <span className="text-primary font-medium">{lowStock} para repor</span></>
                 )}

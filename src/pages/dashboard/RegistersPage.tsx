@@ -56,8 +56,8 @@ export default function RegistersPage() {
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="glass-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground">Cadastros</h1>
-            <p className="text-[11px] text-muted-foreground mt-1">Clientes e fornecedores</p>
+            <h1 className="t-title">Cadastros</h1>
+            <p className="t-subtitle mt-1.5">Clientes e fornecedores da sua operação</p>
           </div>
           <Button variant="primary" size="sm" className="h-8 px-3 text-[11px] font-bold shrink-0" onClick={() => setShowForm(!showForm)}>
             <Plus className="h-3 w-3 mr-1" /> Novo cadastro

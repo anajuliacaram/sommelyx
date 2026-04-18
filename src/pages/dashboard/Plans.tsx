@@ -50,8 +50,8 @@ export default function Plans() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-        <h1 className="text-xl md:text-2xl font-serif font-bold text-foreground tracking-tight">Meu Plano</h1>
-        <p className="text-sm text-muted-foreground mt-1">Gerencie sua assinatura e recursos.</p>
+        <h1 className="t-title">Meu plano</h1>
+        <p className="t-subtitle mt-1.5">Gerencie sua assinatura e recursos disponíveis</p>
       </motion.div>
 
       {/* Current plan badge */}
