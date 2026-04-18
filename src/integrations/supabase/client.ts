@@ -4,14 +4,13 @@ import type { SupportedStorage, StorageKey } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { getRequiredClientEnv } from "@/lib/env";
 
-const DEFAULT_SUPABASE_URL = "https://example.supabase.co";
-const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "demo_key";
-
-const SUPABASE_URL = getRequiredClientEnv("VITE_SUPABASE_URL") || DEFAULT_SUPABASE_URL;
+const SUPABASE_URL =
+  getRequiredClientEnv("VITE_SUPABASE_URL") ||
+  "https://xhjcwxspndvcsgdlmaqy.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY =
   getRequiredClientEnv("VITE_SUPABASE_PUBLISHABLE_KEY") ||
   getRequiredClientEnv("VITE_SUPABASE_ANON_KEY") ||
-  DEFAULT_SUPABASE_PUBLISHABLE_KEY;
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoamN3eHNwbmR2Y3NnZGxtYXF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzQxNjEsImV4cCI6MjA4NzYxMDE2MX0.FDcg9CBpj40OlK69Y-jhu7IOsg4P4J5W27VoT3HZqYM";
 
 const memoryStorage = new Map<string, string>();
 
