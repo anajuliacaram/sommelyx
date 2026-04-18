@@ -207,6 +207,130 @@
   }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   BUSINESS THEME — Scoped tokens (modo Comercial)
+   Aplicado apenas em [data-theme='business']. Modo Pessoal intacto.
+   ───────────────────────────────────────────────────────────── */
+[data-theme="business"] {
+  /* Surfaces — neutras, executivas */
+  --bg: 0 0% 95%;
+  --surface: 0 0% 100%;
+  --surface-soft: 0 0% 93%;
+
+  /* Brand — vinho mais sóbrio */
+  --primary: 351 67% 18%;
+  --primary-foreground: 0 0% 100%;
+  --primary-soft: 351 60% 26%;
+
+  /* Accent — dourado discreto */
+  --accent: 38 35% 55%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Texto */
+  --foreground: 0 0% 7%;
+  --foreground-strong: 0 0% 7%;
+  --foreground-secondary: 0 0% 33%;
+  --muted-foreground: 0 0% 33%;
+
+  /* Bordas mais definidas */
+  --border: 0 0% 87%;
+  --input: 0 0% 87%;
+  --ring: 351 67% 18%;
+
+  /* Cards sólidos */
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 7%;
+
+  /* Estados */
+  --success: 140 26% 34%;
+
+  /* Background do shell — neutro */
+  background: hsl(var(--bg));
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+[data-theme="business"] * {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Cards — sólidos, sem glass pesado */
+[data-theme="business"] .card-depth,
+[data-theme="business"] .glass-card {
+  background: hsl(var(--surface)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.02) !important;
+}
+
+[data-theme="business"] .card-depth:hover,
+[data-theme="business"] .glass-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  transform: none !important;
+}
+
+/* Botão primário — sólido sem gradient */
+[data-theme="business"] .btn-primary-premium {
+  background: hsl(var(--primary)) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 1px solid hsl(var(--primary)) !important;
+}
+
+[data-theme="business"] .btn-primary-premium:hover {
+  background: hsl(var(--primary-soft)) !important;
+  opacity: 1 !important;
+}
+
+/* Tipografia mais corporativa */
+[data-theme="business"] .dashboard-shell h1,
+[data-theme="business"] .dashboard-shell h2,
+[data-theme="business"] .dashboard-shell h3,
+[data-theme="business"] h1,
+[data-theme="business"] h2,
+[data-theme="business"] h3 {
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+
+/* Inputs e filtros — fundo branco, borda definida */
+[data-theme="business"] input,
+[data-theme="business"] select,
+[data-theme="business"] textarea {
+  background: hsl(var(--surface));
+  border-color: hsl(var(--border));
+}
+
+[data-theme="business"] input:hover,
+[data-theme="business"] select:hover,
+[data-theme="business"] textarea:hover {
+  border-color: hsl(var(--primary));
+}
+
+/* Badge "Business" — pill sólido */
+.business-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  padding: 0 0.75rem;
+  border-radius: 9999px;
+  background: hsl(351 67% 18%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(74, 15, 24, 0.18);
+}
+
+
 @layer utilities {
   .type-heading-xl {
     @apply text-2xl font-semibold tracking-tight text-foreground;
