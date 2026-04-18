@@ -367,6 +367,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         </SheetHeader>
 
         <PairingSheetHero
+          icon="sparkles"
           title="Analisar Carta"
           subtitle="Envie a carta de vinhos e descubra as melhores escolhas para você"
         />
@@ -375,38 +376,83 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           {step === "capture" && (
             <motion.div
               key="capture"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-10"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-5"
             >
-              <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center shadow-[0_8px_24px_hsl(var(--wine)/0.2)]">
-                <Camera className="h-7 w-7 text-primary-foreground" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-base font-semibold text-foreground mb-1">Fotografe a carta</h3>
-                  <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
-                    Envie uma foto ou PDF da carta de vinhos. Nossa inteligência avalia os rótulos e aponta as melhores escolhas para você.
-                </p>
+              {/* Drag & drop zone */}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.dataset.dragging = "true";
+                }}
+                onDragLeave={(e) => {
+                  e.currentTarget.dataset.dragging = "false";
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.dataset.dragging = "false";
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) handleFile(file);
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                role="button"
+                tabIndex={0}
+                className="group relative flex flex-col items-center justify-center gap-3 rounded-[20px] py-9 px-5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01]"
+                style={{
+                  background: "rgba(255,255,255,0.78)",
+                  border: "1.5px dashed rgba(123,30,43,0.22)",
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  boxShadow: "0 8px 24px -16px rgba(123,30,43,0.14), inset 0 1px 0 rgba(255,255,255,0.7)",
+                }}
+              >
+                <div
+                  className="flex h-16 w-16 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(123,30,43,0.10) 0%, rgba(200,169,106,0.10) 100%)",
+                    border: "1px solid rgba(123,30,43,0.14)",
+                    boxShadow: "0 6px 18px -10px rgba(123,30,43,0.20), inset 0 1px 0 rgba(255,255,255,0.6)",
+                  }}
+                >
+                  <Camera className="h-7 w-7 text-[#7B1E2B]" strokeWidth={1.75} />
+                </div>
+                <div className="text-center max-w-[300px]">
+                  <p
+                    className="text-[16px] font-semibold tracking-[-0.01em] text-[#1A1713]"
+                    style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                  >
+                    Fotografe ou envie a carta
+                  </p>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.6)]">
+                    Arraste uma imagem ou PDF aqui, ou escolha uma das opções abaixo. A inteligência Sommelyx avalia cada rótulo para você.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-3 w-full mt-2">
+              <div className="flex flex-col gap-2.5">
                 <Button
                   variant="primary"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="w-full"
+                  className="w-full h-14 text-[15px]"
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  Tirar Foto
+                  Tirar foto
                 </Button>
-                  <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="w-full">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Escolher imagem ou PDF
-                  </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-12 text-[14px]"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Escolher imagem ou PDF
+                </Button>
               </div>
 
-                <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-                <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
             </motion.div>
           )}
 

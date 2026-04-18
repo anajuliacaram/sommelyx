@@ -26,6 +26,7 @@ import {
   PairingSheetHero,
   PairingLoadingState,
   PairingErrorState,
+  PremiumChoiceCard,
   RecipeButton,
   harmonyLabelMap,
   matchDotColor,
@@ -341,6 +342,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         </SheetHeader>
 
         <PairingSheetHero
+          icon="utensils"
           title="Harmonizar"
           subtitle="Encontre a combinação perfeita entre vinho e gastronomia"
         />
@@ -368,43 +370,27 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3"
               >
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
                   De onde vem o vinho?
                 </p>
 
-                <button
-                  onClick={() => handleSelectSource("cellar")}
-                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
-                      <Wine className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-[14px] font-semibold text-foreground">Da minha adega</p>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">
-                        Harmonize com vinhos que você já tem
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => handleSelectSource("external")}
-                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-accent/12 flex items-center justify-center group-hover:bg-accent/18 group-hover:scale-105 transition-all duration-200">
-                      <Camera className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-[14px] font-semibold text-foreground">Adega externa</p>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">
-                        Envie a foto da carta de vinhos ou do cardápio
-                      </p>
-                    </div>
-                  </div>
-                </button>
+                <div className="space-y-2.5">
+                  <PremiumChoiceCard
+                    index={0}
+                    icon={Wine}
+                    title="Da minha adega"
+                    description="Harmonize com vinhos que você já tem"
+                    onClick={() => handleSelectSource("cellar")}
+                  />
+                  <PremiumChoiceCard
+                    index={1}
+                    icon={Camera}
+                    title="Adega externa"
+                    description="Envie a foto da carta de vinhos ou do cardápio"
+                    accent="gold"
+                    onClick={() => handleSelectSource("external")}
+                  />
+                </div>
               </motion.div>
             )}
 
@@ -417,47 +403,30 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3"
               >
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
                   {subModeTitle} — Como quer harmonizar?
                 </p>
 
-                <button
-                  onClick={() => handleSelectSubMode("by-dish")}
-                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
-                      <ChefHat className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-[14px] font-semibold text-foreground">Tenho um prato em mente</p>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">
-                        {source === "cellar"
-                          ? "O Sommelyx sugere vinhos da sua adega para o prato"
-                          : "Digite o prato e envie a foto da carta de vinhos"}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => handleSelectSubMode("by-wine")}
-                  className="w-full text-left rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/[0.06] hover:border-primary/25 hover:shadow-[0_4px_16px_-6px_hsl(var(--primary)/0.12)] p-5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group active:scale-[0.98]"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/14 group-hover:scale-105 transition-all duration-200">
-                      <Wine className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-[14px] font-semibold text-foreground">Tenho um vinho em mente</p>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">
-                        {source === "cellar"
-                          ? "O Sommelyx sugere pratos ideais para o vinho escolhido"
-                          : "Digite o vinho e envie a foto do cardápio"}
-                      </p>
-                    </div>
-                  </div>
-                </button>
+                <div className="space-y-2.5">
+                  <PremiumChoiceCard
+                    index={0}
+                    icon={ChefHat}
+                    title="Tenho um prato em mente"
+                    description={source === "cellar"
+                      ? "O Sommelyx sugere vinhos da sua adega para o prato"
+                      : "Digite o prato e envie a foto da carta de vinhos"}
+                    onClick={() => handleSelectSubMode("by-dish")}
+                  />
+                  <PremiumChoiceCard
+                    index={1}
+                    icon={Wine}
+                    title="Tenho um vinho em mente"
+                    description={source === "cellar"
+                      ? "O Sommelyx sugere pratos ideais para o vinho escolhido"
+                      : "Digite o vinho e envie a foto do cardápio"}
+                    onClick={() => handleSelectSubMode("by-wine")}
+                  />
+                </div>
               </motion.div>
             )}
 
