@@ -196,7 +196,73 @@ export default function AlertsPage() {
         </div>
       </motion.div>
 
-      {/* ── Empty state ── */}
+      {/* ── Ações inteligentes (CTA premium) ── */}
+      {visibleAlerts.length > 0 && (
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-3 pt-1">
+          <div className="flex items-center gap-2 px-1">
+            <Sparkles className="h-3.5 w-3.5 text-[#7B1E2B]" />
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+              Ações inteligentes
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={scrollToDrinkNow}
+            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:scale-[1.015] active:scale-[0.99]"
+            style={{
+              height: 64,
+              background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)",
+              boxShadow: "0 10px 25px rgba(123,30,43,0.18), inset 0 1px 0 rgba(255,255,255,0.12)",
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/0 to-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="relative flex h-full items-center gap-3.5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/12 backdrop-blur-sm ring-1 ring-white/15">
+                <GlassWater className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[16px] font-semibold leading-none text-white">Beber agora</span>
+                  {cellarAnalysis.drinkNowCount > 0 && (
+                    <span className="rounded-full bg-[#C9B469] px-1.5 py-0.5 text-[10px] font-bold text-[#1A1713] shadow-[0_0_6px_rgba(201,180,105,0.45)]">
+                      {cellarAnalysis.drinkNowCount}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-[11.5px] font-medium leading-none text-white/75">
+                  Veja os vinhos no momento ideal
+                </p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-white/85 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setAnalysisOpen(true)}
+            className="group relative w-full rounded-2xl bg-white/85 px-5 text-left backdrop-blur-md transition-all duration-300 hover:bg-white hover:scale-[1.01] active:scale-[0.99]"
+            style={{
+              height: 56,
+              border: "1px solid rgba(123, 30, 43, 0.15)",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
+            }}
+          >
+            <div className="flex h-full items-center gap-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[rgba(123,30,43,0.06)] ring-1 ring-[rgba(123,30,43,0.12)]">
+                <BarChart3 className="h-4 w-4 text-[#7B1E2B]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[14px] font-semibold leading-none text-[#7B1E2B]">Analisar adega</div>
+                <p className="mt-1 text-[11px] font-medium leading-none text-[rgba(58,51,39,0.55)]">
+                  Entenda valor, giro e consumo
+                </p>
+              </div>
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/70 transition-transform duration-300 group-hover:rotate-12" />
+            </div>
+          </button>
+        </motion.div>
+      )}
       {visibleAlerts.length === 0 ? (
         <motion.div className="glass-card px-5 py-10 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
           <div className="w-9 h-9 rounded-xl bg-emerald-600/8 flex items-center justify-center mx-auto mb-2.5">
