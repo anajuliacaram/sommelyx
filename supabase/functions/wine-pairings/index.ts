@@ -371,7 +371,7 @@ serve(async (req) => {
     console.log(`[wine-pairings] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
     if (!OPENAI_API_KEY) {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
+      return jsonResponse({ error: "Serviço de análise indisponível no momento. Tente novamente em instantes." }, 500);
     }
 
     let body: Record<string, unknown>;
@@ -717,7 +717,7 @@ INSTRUÇÕES:
         if (result.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
         if (result.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
         console.error("AI gateway error:", result.status, result.errText);
-        return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
+        return jsonResponse({ error: "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);
       }
 
       if (!result.parsed) {
@@ -836,6 +836,7 @@ INSTRUÇÕES:
       ? Array.isArray(parsed.pairings) ? parsed.pairings.length : 0
       : Array.isArray(parsed.suggestions) ? parsed.suggestions.length : 0;
 
+    // Degradar com elegância: se temos qualquer resultado, devolver mesmo sem passar 100% na validação.
     if (!validationResult.passed && parsedCount > 0) {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success_with_warnings", Date.now() - startTime, {
         mode,
@@ -846,13 +847,16 @@ INSTRUÇÕES:
     }
 
     if (!validationResult.passed) {
-      const specificityMessage = "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente.";
+      // Mensagem consultiva e específica por modo, com motivo + ação.
+      const friendlyMessage = mode === "wine-to-food"
+        ? "Não conseguimos sugerir pratos confiáveis para este vinho agora. Tente novamente em instantes ou informe um vinho com mais detalhes (uva, região, safra)."
+        : "Não conseguimos sugerir vinhos para este prato agora. Tente reformular o prato (ex: 'risoto de funghi com parmesão') ou tente novamente em instantes.";
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 422, "validation_error", Date.now() - startTime, {
         mode,
-        reason: specificityMessage,
+        reason: friendlyMessage,
         validation_failures: validationResult.failures.slice(0, 12),
       });
-      return jsonResponse({ error: specificityMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
+      return jsonResponse({ error: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
     }
 
     await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success", Date.now() - startTime, {
@@ -873,6 +877,6 @@ INSTRUÇÕES:
     if (isAbort) {
       return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
     }
-    return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
+    return jsonResponse({ error: "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes." }, 500);
   }
 });

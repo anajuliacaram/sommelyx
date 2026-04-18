@@ -877,13 +877,15 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     }
 
     if (!validationResult.passed) {
-      const specificityMessage = "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente.";
+      const friendlyMessage = isMenuMode
+        ? "Não conseguimos analisar este cardápio agora. Tente uma foto com melhor iluminação e foco nos pratos, ou tente novamente em instantes."
+        : "Não conseguimos analisar esta carta de vinhos agora. Tente uma foto mais nítida da carta ou tente novamente em instantes.";
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", user.id, "analyze-wine-list", 422, "validation_error", 0, {
-        reason: specificityMessage,
+        reason: friendlyMessage,
         validation_failures: validationResult.failures.slice(0, 12),
         mode,
       });
-      return jsonResponse({ error: specificityMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
+      return jsonResponse({ error: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
     }
 
     return jsonResponse(isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed));
@@ -892,8 +894,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     const isAbort = errMsg.toLowerCase().includes("abort");
     console.error("analyze-wine-list error:", errMsg);
     if (isAbort) {
-      return jsonResponse({ error: "A análise demorou mais que o esperado. Tente novamente." }, 504);
+      return jsonResponse({ error: "A análise demorou mais que o esperado. Tente novamente em instantes." }, 504);
     }
-    return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
+    return jsonResponse({ error: "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente." }, 500);
   }
 });
