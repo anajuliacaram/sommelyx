@@ -207,7 +207,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
         </div>
 
         {/* Right: Organized grid of dashboard cards */}
-        <div className="relative">
+        <div className="relative lg:pt-24 xl:pt-32">
           {/* Glow background */}
           <div className="pointer-events-none absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.14)", filter: "blur(70px)" }} />
           <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.16)", filter: "blur(90px)" }} />
