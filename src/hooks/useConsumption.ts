@@ -99,6 +99,34 @@ export function useAddConsumption() {
   });
 }
 
+export type ConsumptionUpdate = Partial<
+  Pick<ConsumptionEntry, "wine_name" | "style" | "rating" | "tasting_notes" | "location" | "vintage">
+>;
+
+export function useUpdateConsumption() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: ConsumptionUpdate }) => {
+      if (!user) throw new Error("Not authenticated");
+      if (updates.rating != null) {
+        if (!Number.isFinite(updates.rating) || updates.rating < 0 || updates.rating > 5)
+          throw new Error("Avaliação inválida");
+      }
+      const { error } = await supabase
+        .from("consumption_log")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["consumption"] });
+    },
+  });
+}
+
 export function useDeleteConsumption() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
