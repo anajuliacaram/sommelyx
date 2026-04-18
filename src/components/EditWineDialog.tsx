@@ -273,7 +273,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
       setSuccess(true);
       setTimeout(() => { setSuccess(false); onOpenChange(false); }, 1200);
     } catch {
-      toast({ title: "Erro ao salvar alterações", variant: "destructive" });
+      toast({ title: "Não conseguimos salvar as alterações", description: "Verifique sua conexão e tente novamente. Suas edições foram preservadas no formulário.", variant: "destructive" });
     }
   };
 
@@ -622,7 +622,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 <Label className="text-xs text-muted-foreground">Notas de degustação</Label>
                 <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
               </div>
-              <Button variant="primary" type="submit" disabled={updateWine.isPending || !name.trim()} className="w-full h-11 text-[13px] font-medium">
+              <Button variant="primary" type="submit" disabled={!name.trim()} loading={updateWine.isPending} loadingText="Salvando…" className="w-full h-11 text-[13px] font-medium">
                 <Save className="h-4 w-4 mr-1.5" />
                 {updateWine.isPending ? "Salvando..." : "Salvar Alterações"}
               </Button>

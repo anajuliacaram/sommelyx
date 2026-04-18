@@ -78,7 +78,7 @@ export default function PersonalCellarPage() {
       await wineEvent.mutateAsync({ wineId: w.id, eventType: "open", quantity: 1 });
       toast({ title: `🍷 "${w.name}" aberto`, description: "Consumo registrado." });
     } catch {
-      toast({ title: "Erro ao registrar consumo", variant: "destructive" });
+      toast({ title: "Não conseguimos registrar o consumo", description: "Verifique sua conexão e tente novamente.", variant: "destructive" });
     }
   };
 

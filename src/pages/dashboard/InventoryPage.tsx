@@ -336,7 +336,7 @@ export default function InventoryPage() {
             toast({ title: `${selectedIds.length} vinhos removidos.` });
             setSelectedIds([]);
         } catch {
-            toast({ title: "Erro ao remover vinhos.", variant: "destructive" });
+            toast({ title: "Não conseguimos remover os vinhos", description: "Verifique sua conexão e tente novamente. Os vinhos permanecem no estoque.", variant: "destructive" });
         }
     };
 
@@ -371,7 +371,7 @@ export default function InventoryPage() {
             await wineEvent.mutateAsync({ wineId, eventType: diff > 0 ? "add" : "open", quantity: quantityAbs });
             toast({ title: diff > 0 ? "Entrada registrada!" : "Saída registrada!", variant: "default" });
         } catch {
-            toast({ title: "Erro ao atualizar estoque.", variant: "destructive" });
+            toast({ title: "Não conseguimos atualizar o estoque", description: "Verifique sua conexão e tente novamente.", variant: "destructive" });
         } finally {
             setStockBusyWineId((current) => (current === wineId ? null : current));
         }

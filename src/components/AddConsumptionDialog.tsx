@@ -105,7 +105,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
       resetForm();
       onOpenChange(false);
     } catch {
-      toast.error("Erro ao registrar consumo");
+      toast.error("Não conseguimos registrar o consumo", { description: "Verifique sua conexão e tente novamente. Se o problema persistir, recarregue a página." });
     }
   };
 

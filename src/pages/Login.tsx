@@ -81,7 +81,7 @@ export default function Login() {
           : getErrorMessage(err) === "Email not confirmed"
             ? "Confirme seu email antes de fazer login."
             : getErrorMessage(err);
-      toast({ title: "Erro ao entrar", description: msg, variant: "destructive" });
+      toast({ title: "Não conseguimos entrar", description: msg || "Verifique seu e-mail e senha e tente novamente.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
