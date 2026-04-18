@@ -44,7 +44,7 @@ function isSdkRelayError(message: string) {
 }
 
 function classifyEdgeError(message: string, status?: number): string {
-  if (status === 401) return "Sessão expirada. Faça login novamente.";
+  if (status === 401) return "Sua sessão expirou. Faça login novamente.";
   if (isTransportErrorMessage(message)) {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       return "Sem conexão. Verifique sua internet.";
@@ -52,7 +52,7 @@ function classifyEdgeError(message: string, status?: number): string {
     return "O serviço está temporariamente indisponível. Tente novamente em instantes.";
   }
   if (isSdkRelayError(message)) return "A solicitação não pôde ser enviada. Tente novamente.";
-  if (message.toLowerCase().includes("tempo limite")) return "A busca demorou mais que o esperado. Tente novamente.";
+  if (message.toLowerCase().includes("tempo limite")) return "Demorou mais que o esperado. Tente novamente.";
   if (status === 429) return "Muitas requisições. Aguarde um momento e tente novamente.";
   if (status === 402) return "Limite de uso atingido. Tente novamente mais tarde.";
   if (status === 503 || status === 504) return "O serviço está temporariamente indisponível. Tente novamente em instantes.";
@@ -94,16 +94,23 @@ export async function invokeEdgeFunction<T>(
       }
 
       console.log("payload", { function: name, body });
-      const invokePromise = supabase.functions.invoke(name, {
-        body,
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new EdgeFunctionError("A busca demorou mais que o esperado. Tente novamente.", { retryable: true })), timeoutMs),
-      );
-
-      const { data, error } = await Promise.race([invokePromise, timeoutPromise]);
+      let data: T | null = null;
+      let error: unknown = null;
+      try {
+        const result = await supabase.functions.invoke(name, {
+          body,
+          headers: { Authorization: `Bearer ${accessToken}` },
+          signal: controller.signal,
+          timeout: timeoutMs,
+        });
+        data = result.data;
+        error = result.error;
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (error) {
         const status = typeof (error as any)?.status === "number" ? (error as any).status : undefined;

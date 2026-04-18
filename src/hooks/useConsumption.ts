@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { getSommelyxData } from "@/lib/sommelyx-data";
 
 export interface ConsumptionEntry {
   id: string;
@@ -25,10 +26,32 @@ export type ConsumptionInsert = Omit<ConsumptionEntry, "id" | "created_at">;
 
 export function useConsumption() {
   const { user } = useAuth();
+  const sommelyxData = getSommelyxData();
 
   return useQuery({
-    queryKey: ["consumption", user?.id],
+    queryKey: ["consumption", user?.id ?? "demo"],
     queryFn: async () => {
+      if (sommelyxData?.consumption?.length) {
+        const now = new Date().toISOString();
+        return sommelyxData.consumption.map((entry, index) => ({
+          id: `${entry.wineId}-${index}`,
+          user_id: "demo",
+          wine_id: entry.wineId,
+          source: "cellar" as const,
+          wine_name: entry.wine_name,
+          producer: null,
+          country: null,
+          region: null,
+          grape: null,
+          style: null,
+          vintage: null,
+          location: null,
+          tasting_notes: null,
+          rating: entry.rating ?? null,
+          consumed_at: entry.consumed_at,
+          created_at: now,
+        })) as ConsumptionEntry[];
+      }
       if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("consumption_log")
@@ -40,7 +63,7 @@ export function useConsumption() {
       if (error) throw error;
       return data as ConsumptionEntry[];
     },
-    enabled: !!user,
+    enabled: !!user || !!sommelyxData?.consumption?.length,
   });
 }
 

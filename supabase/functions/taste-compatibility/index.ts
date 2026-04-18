@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -36,7 +37,10 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
+    console.log(`[taste-compatibility] openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) throw new Error("AI provider not configured");
 
     const body = await req.json();
     const { targetWine, userCellar } = body;
@@ -97,52 +101,94 @@ Vinho a avaliar:
 - Região: ${targetWine.region || "Não informada"}
 - Produtor: ${targetWine.producer || "Não informado"}`;
 
-    const aiResponse = await fetch(AI_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.2,
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos esgotados." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
-    }
-
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content || "";
-
     let parsed;
-    try {
-      const jsonStart = content.indexOf("{");
-      const jsonEnd = content.lastIndexOf("}");
-      if (jsonStart !== -1 && jsonEnd > jsonStart) {
-        parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
-      } else {
-        parsed = JSON.parse(content);
+    if (OPENAI_API_KEY) {
+      const result = await callOpenAIResponses<any>({
+        functionName: "taste-compatibility",
+        requestId: crypto.randomUUID(),
+        apiKey: OPENAI_API_KEY,
+        model: OPENAI_MODEL,
+        timeoutMs: 30_000,
+        temperature: 0.2,
+        instructions: systemPrompt,
+        input: [{ role: "user", content: [{ type: "input_text", text: userPrompt }] }],
+        schema: {
+          type: "object",
+          properties: {
+            compatibility: { type: "number" },
+            label: { type: "string" },
+            reason: { type: "string" },
+          },
+          required: ["compatibility", "label", "reason"],
+          additionalProperties: false,
+        },
+        maxOutputTokens: 300,
+      });
+
+      if (!result.ok) {
+        if (result.status === 429) {
+          return new Response(JSON.stringify({ error: "Muitas requisições." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (result.status === 402) {
+          return new Response(JSON.stringify({ error: "Créditos esgotados." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        throw new Error(`AI provider error: ${result.status} - ${result.error}`);
       }
-    } catch {
-      parsed = { compatibility: null, label: "Não disponível", reason: "" };
+
+      parsed = result.parsed;
+    } else {
+      const aiResponse = await fetch(AI_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.2,
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        if (aiResponse.status === 429) {
+          return new Response(JSON.stringify({ error: "Muitas requisições." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (aiResponse.status === 402) {
+          return new Response(JSON.stringify({ error: "Créditos esgotados." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        throw new Error(`AI gateway error: ${aiResponse.status}`);
+      }
+
+      const aiData = await aiResponse.json();
+      const content = aiData.choices?.[0]?.message?.content || "";
+
+      try {
+        const jsonStart = content.indexOf("{");
+        const jsonEnd = content.lastIndexOf("}");
+        if (jsonStart !== -1 && jsonEnd > jsonStart) {
+          parsed = JSON.parse(content.slice(jsonStart, jsonEnd + 1));
+        } else {
+          parsed = JSON.parse(content);
+        }
+      } catch {
+        parsed = { compatibility: null, label: "Não disponível", reason: "" };
+      }
     }
 
     return new Response(JSON.stringify(parsed), {

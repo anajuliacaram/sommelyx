@@ -189,9 +189,8 @@
   .dashboard-shell h2 { font-size: 1.45rem; }
   .dashboard-shell h3 { font-size: 1.15rem; }
 
-  /* Landing/marketing keeps serif */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Libre Baskerville', Georgia, serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     letter-spacing: -0.02em;
     line-height: 1.2;
     font-weight: 600;
@@ -209,12 +208,49 @@
 }
 
 @layer utilities {
+  .type-heading-xl {
+    @apply text-2xl font-semibold tracking-tight text-foreground;
+  }
+
+  .type-heading-lg {
+    @apply text-xl font-semibold tracking-tight text-foreground;
+  }
+
+  .type-heading-md {
+    @apply text-lg font-medium tracking-tight text-foreground;
+  }
+
+  .type-body {
+    @apply text-base text-foreground;
+  }
+
+  .type-body-muted {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .type-label {
+    @apply text-xs uppercase tracking-wide text-muted-foreground;
+  }
+
+  .layout-section {
+    @apply gap-6;
+  }
+
+  .layout-card {
+    @apply rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-sm;
+  }
+
+  .layout-stack {
+    @apply space-y-4;
+  }
 
   /* ── Glass Card — Premium Unified ── */
   .glass-card {
-    border-radius: 20px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.87) 0%, rgba(255, 255, 255, 0.81) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.022);
     transition: background 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -224,13 +260,13 @@
   }
 
   .glass-card:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(255, 255, 255, 0.84) 100%);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.86);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.045);
     transform: translateY(-1px);
   }
 
   .dark .glass-card {
-    background: linear-gradient(180deg, rgba(18, 18, 20, 0.76) 0%, rgba(18, 18, 20, 0.70) 100%);
+    background: rgba(18, 18, 20, 0.76);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
   }
@@ -761,39 +797,39 @@
   }
 
   .dashboard-shell .card-depth {
-    border-radius: 24px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(250, 246, 238, 0.92) 100%);
-    border: 1px solid rgba(95, 111, 82, 0.10);
-    box-shadow:
-      0 18px 40px -30px rgba(58, 51, 39, 0.24),
-      0 1px 2px rgba(58, 51, 39, 0.05);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
     transition: background 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dashboard-shell .card-depth:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(251, 247, 239, 0.95) 100%);
+    background: rgba(255, 255, 255, 0.86);
     transform: translateY(-1px);
   }
 
   .dashboard-shell .glass-card,
   .dashboard-shell .glass-card-sm,
   .dashboard-shell .wine-card-glass {
-    border-radius: 24px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 244, 236, 0.92) 100%);
-    border: 1px solid rgba(95, 111, 82, 0.10);
-    box-shadow:
-      0 18px 40px -30px rgba(58, 51, 39, 0.24),
-      0 1px 2px rgba(58, 51, 39, 0.05);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
   }
 
   .dashboard-shell .surface-clarity {
-    border-radius: 24px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 243, 234, 0.88) 100%);
-    border: 1px solid rgba(95, 111, 82, 0.10);
-    box-shadow:
-      0 14px 32px -28px rgba(58, 51, 39, 0.20),
-      0 1px 2px rgba(58, 51, 39, 0.05);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
   }
 
   .dashboard-shell .reading-surface,
@@ -804,12 +840,12 @@
     width: fit-content;
     max-width: 100%;
     padding: 1rem 1.1rem;
-    border-radius: 24px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(247, 241, 230, 0.86) 100%);
-    border: 1px solid rgba(95, 111, 82, 0.10);
-    box-shadow:
-      0 14px 32px -28px rgba(58, 51, 39, 0.20),
-      0 1px 2px rgba(58, 51, 39, 0.05);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
   }
 
   .dashboard-shell .section-surface {

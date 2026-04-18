@@ -41,14 +41,7 @@ const getPostAuthTarget = (profileType: "personal" | "commercial" | null) =>
 
 const PublicAuthRoute = ({ children }: { children: JSX.Element }) => {
   const { user, profileType, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F4F1EC] text-sm font-medium text-neutral-600">
-        Carregando...
-      </div>
-    );
-  }
-  if (user) return <Navigate to={getPostAuthTarget(profileType)} replace />;
+  if (!loading && user) return <Navigate to={getPostAuthTarget(profileType)} replace />;
   return children;
 };
 

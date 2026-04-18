@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Check, Camera, FileSpreadsheet, Sparkles } from "@/icons/lucide";
+import { ChevronDown, Plus, Check, Camera, FileSpreadsheet, Sparkles, Wine } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -389,13 +389,23 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   return (
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto p-0 border-l border-[#E5E2DC] shadow-[0_0_40px_-10px_rgba(0,0,0,0.12)]" style={{ backgroundColor: '#F4F1EC' }}>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-l border-black/5 shadow-[0_20px_60px_rgba(0,0,0,0.12)]" style={{ backgroundColor: '#F6F3EF' }}>
 
-          <div className="px-6 pt-6 pb-8 h-full flex flex-col">
-            <SheetHeader className="mb-7">
-              <SheetTitle className="font-serif text-[28px] font-semibold tracking-[-0.01em]" style={{ color: '#1F1F1F' }}>
-                {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
-              </SheetTitle>
+          <div className="px-6 py-6 flex h-full flex-col">
+            <SheetHeader className="mb-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
+                  <Wine className="h-5 w-5 text-[#7B1E2B]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <SheetTitle className="font-serif text-2xl font-semibold tracking-tight" style={{ color: '#1E1E1E' }}>
+                    {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
+                  </SheetTitle>
+                  <p className="mt-1 text-sm font-medium tracking-tight text-[#6B6B6B] leading-relaxed">
+                    Complete manualmente ou use rótulo, escaneamento e CSV.
+                  </p>
+                </div>
+              </div>
             </SheetHeader>
 
             <AnimatePresence mode="wait">
@@ -426,23 +436,23 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     </div>
                   )}
                   <div className="flex gap-3 w-full pt-2">
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
+                      className="flex-1"
                       onClick={() => { reset(); onOpenChange(false); }}
-                      className="flex-1 h-12 rounded-[14px] border text-[14px] font-semibold transition-all hover:bg-white/60"
-                      style={{ color: '#4A4A4A', borderColor: '#E5E2DC' }}
                     >
                       Concluir
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="primary"
+                      className="flex-1"
                       onClick={() => reset()}
-                      className="flex-1 h-12 rounded-[14px] text-[14px] font-semibold text-white transition-all hover:opacity-90 flex items-center justify-center gap-2"
-                      style={{ backgroundColor: '#6F7F5B' }}
                     >
                       <Plus className="h-4 w-4" />
                       Adicionar outro
-                    </button>
+                    </Button>
                   </div>
                 </motion.div>
               ) : (
@@ -712,15 +722,15 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     </CollapsibleContent>
                   </Collapsible>
 
-                  <button
+                  <Button
                     type="submit"
                     disabled={addWine.isPending || !name.trim()}
-                    className="w-full h-[52px] rounded-[14px] text-[15px] font-semibold text-white flex items-center justify-center gap-2 transition-all duration-150 hover:brightness-95 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#6F7F5B' }}
+                    variant="primary"
+                    className="w-full"
                   >
                     <Plus className="h-4 w-4" />
                     {addWine.isPending ? "Salvando..." : isCommercial ? "Cadastrar produto" : "Salvar vinho"}
-                  </button>
+                  </Button>
 
                   {missingFields.length > 0 && (
                     <div

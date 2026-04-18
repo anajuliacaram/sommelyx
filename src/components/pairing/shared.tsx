@@ -331,23 +331,23 @@ export function PremiumResultCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={cn("list-none rounded-2xl overflow-hidden transition-all duration-250 hover:-translate-y-0.5", extraClass)}
+      className={cn("list-none rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5", extraClass)}
       style={{
         background: isHighlighted
           ? "rgba(255,255,255,0.92)"
-          : "rgba(255,255,255,0.88)",
-        backdropFilter: "blur(10px) saturate(1.08)",
-        WebkitBackdropFilter: "blur(10px) saturate(1.08)",
+          : "rgba(255,255,255,0.86)",
+        backdropFilter: "blur(12px) saturate(1.05)",
+        WebkitBackdropFilter: "blur(12px) saturate(1.05)",
         border: isHighlighted
-          ? "1px solid rgba(255,255,255,0.28)"
-          : "1px solid rgba(255,255,255,0.25)",
+          ? "1px solid rgba(0,0,0,0.05)"
+          : "1px solid rgba(0,0,0,0.05)",
         boxShadow: isHighlighted
-          ? "0 10px 34px -12px rgba(44,20,31,0.14), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)"
-          : "0 6px 22px -10px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.62)",
+          ? "0 10px 34px -12px rgba(44,20,31,0.12), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)"
+          : "0 6px 22px -10px rgba(30,20,20,0.06), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.62)",
       }}
     >
       {accentColor && <div className="h-[2px] w-full" style={{ background: accentColor }} />}
-      <div className="p-4 sm:p-5 space-y-3">
+      <div className="p-4 space-y-3">
         {children}
       </div>
     </motion.li>
@@ -361,15 +361,15 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-2.5 py-1">
-      <div className="w-7 h-7 rounded-lg bg-primary/[0.08] flex items-center justify-center">
-        <Icon className="h-3.5 w-3.5 text-primary/70" />
+    <div className="flex items-center gap-3 py-1">
+      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12 flex items-center justify-center">
+        <Icon className="h-4 w-4 text-[#7B1E2B]" />
       </div>
-      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#888]">
+      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#777]">
         {label}
       </span>
       {count != null && (
-        <span className="text-[10px] font-bold text-[#aaa] ml-auto">{count}</span>
+        <span className="text-[10px] font-bold text-[#999] ml-auto">{count}</span>
       )}
     </div>
   );
@@ -456,14 +456,10 @@ export function PairingErrorState({
 
 export function RecipeButton({ onClick }: { onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary/80 hover:text-primary bg-primary/[0.04] hover:bg-primary/[0.08] px-3 py-1.5 rounded-lg border border-primary/[0.06] transition-all duration-200 hover:-translate-y-[0.5px]"
-    >
+    <Button type="button" onClick={onClick} variant="ghost" size="sm" className="h-8 px-3 text-[11px]">
       <BookOpen className="h-3.5 w-3.5" />
       Ver receita
-    </button>
+    </Button>
   );
 }
 
@@ -479,28 +475,13 @@ export function PairingSheetHero({
   subtitle: string;
 }) {
   return (
-    <div className="relative -mx-6 -mt-2 px-6 pt-6 pb-5 mb-2 overflow-hidden">
-      {/* Subtle gradient background */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(180deg, rgba(123,35,48,0.04) 0%, transparent 100%)",
-        }}
-      />
-      <div className="relative flex items-center gap-3.5">
-        <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-          style={{
-            background: "linear-gradient(135deg, hsl(var(--wine)) 0%, hsl(var(--wine-light)) 100%)",
-            boxShadow: "0 8px 24px -8px rgba(123,35,48,0.30)",
-          }}
-        >
-          <UtensilsCrossed className="h-5 w-5 text-white" />
-        </div>
-        <div>
-          <h2 className="text-xl font-serif font-bold text-[#1A1A1A] tracking-tight">{title}</h2>
-          <p className="text-[12.5px] text-[#888] mt-0.5 leading-relaxed">{subtitle}</p>
-        </div>
+    <div className="mb-6 flex items-start gap-4">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20 shadow-[0_8px_24px_-10px_rgba(123,30,43,0.18)]">
+        <UtensilsCrossed className="h-5 w-5 text-[#7B1E2B]" />
+      </div>
+      <div className="min-w-0">
+        <h2 className="text-2xl font-semibold tracking-tight text-[#1E1E1E]">{title}</h2>
+        <p className="mt-1 text-sm font-medium tracking-tight text-[#6B6B6B] leading-relaxed">{subtitle}</p>
       </div>
     </div>
   );

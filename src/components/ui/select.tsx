@@ -14,12 +14,12 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex h-12 w-full items-center justify-between rounded-[14px] border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.88)] px-4 py-3 text-[14px] font-medium tracking-[-0.01em] text-[#201c1f] ring-offset-background shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm placeholder:text-[#7a7279] focus:outline-none focus:ring-2 focus:ring-primary/[0.15] focus:border-primary/30 focus:bg-[rgba(255,255,255,0.96)] focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.05)] disabled:cursor-not-allowed disabled:opacity-40 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] [&>span]:line-clamp-1",
-      className,
-    )}
+    <SelectPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "flex h-12 w-full items-center justify-between rounded-xl border border-border bg-white px-4 text-[15px] font-medium tracking-tight text-[#201c1f] ring-offset-background shadow-[0_1px_2px_rgba(0,0,0,0.02)] placeholder:text-[#8A8580] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20 focus:border-[#7B1E2B] disabled:cursor-not-allowed disabled:opacity-40 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] [&>span]:line-clamp-1",
+        className,
+      )}
     {...props}
   >
     {children}
@@ -66,7 +66,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-[20px] border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.96)] text-popover-foreground shadow-[0_22px_54px_-28px_rgba(15,15,20,0.18),0_2px_8px_rgba(15,15,20,0.05)] backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-2xl border border-black/10 bg-white text-popover-foreground shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className,
@@ -94,7 +94,7 @@ const SelectLabel = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Label ref={ref} className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)} {...props} />
+      <SelectPrimitive.Label ref={ref} className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold text-[#5F5F5F]", className)} {...props} />
 ));
 SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
@@ -104,10 +104,10 @@ const SelectItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
-    className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-[14px] py-2.5 pl-8 pr-2.5 text-[13px] font-medium outline-none transition-colors duration-150 data-[disabled]:pointer-events-none data-[disabled]:opacity-40 focus:bg-primary/[0.06] focus:text-foreground hover:bg-muted/30",
-      className,
-    )}
+      className={cn(
+      "relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 pl-8 pr-2.5 text-[14px] font-medium outline-none transition-colors duration-150 data-[disabled]:pointer-events-none data-[disabled]:opacity-40 focus:bg-primary/[0.06] focus:text-foreground hover:bg-muted/30",
+        className,
+      )}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">

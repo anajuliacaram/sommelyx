@@ -12,7 +12,6 @@ import { WineListScannerDialog } from "@/components/WineListScannerDialog";
 import { QuickActions } from "@/components/QuickActions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
-import { Logo } from "@/components/Logo";
 import {
   Sidebar,
   SidebarContent,
@@ -55,7 +54,6 @@ export function AppSidebar() {
   const { profileType, signOut, user } = useAuth();
   const { setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
-  const [logoBroken, setLogoBroken] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [addWithScan, setAddWithScan] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -104,33 +102,16 @@ export function AppSidebar() {
               boxShadow: "0 20px 38px -28px rgba(12, 18, 14, 0.72)",
             }}
           >
-            <div className="shrink-0">
-              {!logoBroken ? (
-                <Logo
-                  variant="compact"
-                  alt="Sommelyx"
-                  onError={() => setLogoBroken(true)}
-                  className="h-10 w-10 select-none object-contain opacity-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.28)]"
-                  style={{ transform: "none" }}
-                />
-              ) : (
-                <span className="text-[18px] font-semibold tracking-[-0.03em] text-[#F7F4EE]">S</span>
-              )}
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col items-start justify-center">
-              <span className="block font-serif text-[20px] sm:text-[22px] font-semibold tracking-tight leading-none whitespace-nowrap text-[#F7F4EE]">
-                Sommelyx
-              </span>
-              <span
-                className={[
-                  "mt-1 inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.12em] whitespace-nowrap",
-                  isCommercial
-                    ? "bg-[rgba(255,255,255,0.18)] text-[#F7F4EE] border-[rgba(255,255,255,0.14)]"
-                    : "bg-[rgba(255,255,255,0.18)] text-[#F7F4EE] border-[rgba(255,255,255,0.14)]",
-                ].join(" ")}
-              >
-                {isCommercial ? "COMERCIAL" : "PESSOAL"}
-              </span>
+            <div className="flex items-center gap-3">
+              <img src="/logo-sommelyx-mark.png" className="w-12 h-12" alt="Sommelyx" />
+
+              <div className="flex flex-col">
+                <span className="text-[17px] font-semibold tracking-tight text-white">Sommelyx</span>
+
+                <span className="mt-1 text-[10px] px-2 py-[2px] rounded-full bg-white/10 text-white/70 backdrop-blur-sm w-fit">
+                  {isCommercial ? "COMERCIAL" : "PESSOAL"}
+                </span>
+              </div>
             </div>
           </Link>
 
@@ -148,7 +129,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-11 rounded-[18px] border border-[rgba(95,111,82,0.12)] bg-[rgba(255,255,255,0.80)] text-[14px] font-semibold text-neutral-900 gap-1.5 px-4 backdrop-blur-sm transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.92)] hover:border-[rgba(95,111,82,0.18)] hover:shadow-[0_8px_20px_-16px_rgba(58,51,39,0.18)] active:translate-y-[0.5px]"
+                  className="w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_8px_24px_rgba(123,30,43,0.25)] transition-all duration-200 flex items-center justify-center"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-[#7B1E2B] transition-colors group-hover:text-[#8E2433]" />

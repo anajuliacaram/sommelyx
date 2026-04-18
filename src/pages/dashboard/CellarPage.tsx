@@ -4,6 +4,7 @@ import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, Ut
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { RangeSliderFilter } from "@/components/RangeSliderFilter";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -17,6 +18,7 @@ import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
+import { WineCard } from "@/components/WineCard";
 import { useToast } from "@/hooks/use-toast";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
@@ -68,7 +70,7 @@ function getWineTone(style?: string | null) {
   if (s.includes("branco")) return "bg-[#DDBD74]";
   if (s.includes("rose")) return "bg-[#C97A93]";
   if (s.includes("espum")) return "bg-[#B8A06A]";
-  return "bg-[#8F2D56]";
+  return "bg-[#C5BAAA]";
 }
 
 function getStyleBadgeClass(style?: string | null, compact = false) {
@@ -345,11 +347,13 @@ function WineImageThumb({
   src,
   alt,
   toneClassName,
+  isGenerated = false,
   compact = false,
 }: {
   src: string | null | undefined;
   alt: string;
   toneClassName: string;
+  isGenerated?: boolean;
   compact?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
@@ -361,7 +365,7 @@ function WineImageThumb({
   }, [src]);
 
   const wrapperClassName = compact
-    ? "relative h-[104px] sm:h-[110px] overflow-hidden rounded-[20px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(244,241,236,0.82)_100%)] shadow-[0_14px_28px_-22px_rgba(58,51,39,0.18)]"
+    ? "relative h-[200px] sm:h-[214px] overflow-hidden rounded-t-3xl bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(244,241,236,0.82)_100%)]"
     : "relative h-[132px] sm:h-[140px] overflow-hidden rounded-[20px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(244,241,236,0.82)_100%)] shadow-[0_14px_28px_-22px_rgba(58,51,39,0.18)]";
 
   return (
@@ -373,6 +377,7 @@ function WineImageThumb({
             src={src}
             alt={alt}
             loading="lazy"
+            decoding="async"
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
             className={cn(
@@ -380,7 +385,12 @@ function WineImageThumb({
               loaded ? "opacity-100" : "opacity-0",
             )}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/16 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/12 to-transparent" />
+          {isGenerated && (
+            <div className="absolute right-3 top-3 rounded-full border border-white/20 bg-white/70 px-2.5 py-1 text-[10px] font-medium tracking-wide text-[#5F5F5F] shadow-[0_10px_24px_-18px_rgba(0,0,0,0.28)] backdrop-blur-md">
+              Imagem ilustrativa
+            </div>
+          )}
         </>
       ) : (
         <div className={cn("relative flex h-full w-full items-center justify-center overflow-hidden", toneClassName)}>
@@ -415,6 +425,222 @@ const drinkWindowOptions = [
   { value: "past", label: "Pode ter perdido seu auge" },
 ];
 
+const wineTypePalette: Record<string, { dot: string; text: string; label: string }> = {
+  tinto: { dot: "#7B1E2B", text: "#7B1E2B", label: "Tinto" },
+  rose: { dot: "#D8A7A7", text: "#A96F7A", label: "Rosé" },
+  branco: { dot: "#C8A95B", text: "#A68B34", label: "Branco" },
+  espumante: { dot: "#8FAF8B", text: "#6F8F6B", label: "Espumante" },
+  neutral: { dot: "#C5BAAA", text: "#7A746B", label: "Vinho" },
+};
+
+function formatMoney(value: number | null | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "—";
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
+}
+
+function getWineTypePaletteFor(style?: string | null) {
+  const s = (style || "").toLowerCase();
+  if (s.includes("tint")) return wineTypePalette.tinto;
+  if (s.includes("ros")) return wineTypePalette.rose;
+  if (s.includes("branc") || s.includes("white")) return wineTypePalette.branco;
+  if (s.includes("espum") || s.includes("champ")) return wineTypePalette.espumante;
+  return wineTypePalette.neutral;
+}
+
+function getDrinkWindowIndicator(wine: Pick<WineType, "drink_from" | "drink_until" | "vintage">) {
+  if (wine.drink_from != null && wine.drink_until != null && wine.drink_until > wine.drink_from) {
+    const span = wine.drink_until - wine.drink_from;
+    const raw = ((currentYear - wine.drink_from) / span) * 100;
+    return Math.max(6, Math.min(94, raw));
+  }
+
+  if (wine.drink_from != null && wine.drink_until == null) {
+    return currentYear <= wine.drink_from ? 20 : 78;
+  }
+
+  if (wine.drink_until != null && wine.drink_from == null) {
+    return currentYear > wine.drink_until ? 84 : 56;
+  }
+
+  if (wine.vintage != null) {
+    const age = currentYear - wine.vintage;
+    return Math.max(16, Math.min(84, 28 + age * 4));
+  }
+
+  return 50;
+}
+
+function getTypeAccentLabel(style?: string | null) {
+  return getWineTypePaletteFor(style).label;
+}
+
+function getWineTypeLabelColor(style?: string | null) {
+  return getWineTypePaletteFor(style).text;
+}
+
+function EditorialLabelPreview({
+  src,
+  alt,
+  styleTone,
+  generated = false,
+}: {
+  src: string | null | undefined;
+  alt: string;
+  styleTone: string;
+  generated?: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  return (
+    <div className="relative h-[180px] overflow-hidden rounded-[22px] border border-black/5 bg-[#F7F3EC]">
+      {src && !failed ? (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <div className={`flex h-full items-center justify-center ${styleTone}`}>
+          <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/65 px-4 py-3 text-center shadow-[0_10px_24px_-20px_rgba(0,0,0,0.18)] backdrop-blur-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-[#7B1E2B]">
+              <Wine className="h-4 w-4" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#6F6A60]">Rótulo indisponível</p>
+              <p className="text-[10px] font-medium text-[#8A8276]">Prévia ilustrativa</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#F4F1EC] via-[#F4F1EC]/75 to-transparent" />
+      {generated && (
+        <div className="absolute right-3 top-3 rounded-full border border-black/5 bg-white/72 px-2 py-1 text-[9px] font-medium text-[#6F6A60] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.18)] backdrop-blur-sm">
+          Imagem ilustrativa
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EditorialWineCard({
+  wine,
+  showLabels,
+  onOpen,
+}: {
+  wine: CellarWineGroup;
+  showLabels: boolean;
+  onOpen: (wine: CellarWineGroup) => void;
+}) {
+  const palette = getWineTypePaletteFor(wine.style);
+  const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
+  const coverIsGenerated = !!coverImageUrl?.startsWith("data:image/svg+xml");
+  const indicator = getDrinkWindowIndicator(wine);
+  const priceLabel = formatMoney(wine.displayPurchasePrice);
+  const ratingLabel = typeof wine.rating === "number" ? wine.rating.toFixed(1) : "—";
+
+  return (
+    <motion.article
+      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.88)] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-28px_rgba(44,20,31,0.18)]"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {showLabels ? (
+        <EditorialLabelPreview
+          src={coverImageUrl}
+          alt={wine.name}
+          generated={coverIsGenerated}
+          styleTone={getWineTone(wine.style)}
+        />
+      ) : null}
+
+      <div className={cn("flex flex-1 flex-col px-5", showLabels ? "pt-4 pb-5" : "py-5")}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span
+              className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: palette.dot }}
+            />
+            <span
+              className="text-[11px] font-medium tracking-[0.12em] uppercase"
+              style={{ color: palette.text }}
+            >
+              {getTypeAccentLabel(wine.style)}
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium tracking-tight text-[#B48B34]">
+            <span className="text-[10px]">⭐</span>
+            {ratingLabel}
+          </span>
+        </div>
+
+        <div className="mt-4 space-y-1">
+          <h3 className="font-serif text-[1.28rem] font-semibold leading-[1.08] tracking-[-0.03em] text-[#1A1A1A]">
+            {wine.name}
+          </h3>
+          <p className="text-[13px] font-medium text-[#7A7A7A]">
+            {formatVintageLabel(wine.vintage)} · {wine.region || wine.country || "Região n/i"}
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-2">
+          <div className="relative h-px rounded-full bg-[#E7DED3]">
+            <div
+              className="absolute left-0 top-0 h-full rounded-full bg-[#D7C29C]"
+              style={{ width: `${indicator}%` }}
+            />
+            <span
+              className="absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#C8A95B] shadow-[0_0_0_3px_rgba(255,255,255,0.86)]"
+              style={{ left: `calc(${indicator}% - 5px)` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-[10px] font-medium text-[#A39A90]">
+            <span>{wine.drink_from ?? "—"}</span>
+            <span>{wine.drink_until ?? "—"}</span>
+          </div>
+        </div>
+
+        <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+          <div className="min-w-0 space-y-1">
+            <div className="flex items-center gap-1.5">
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: palette.dot }}
+              />
+              <span className="text-[11px] font-medium tracking-[0.08em] uppercase text-[#6F6A60]">
+                {getTypeAccentLabel(wine.style)}
+              </span>
+            </div>
+            <p className="text-[12px] text-[#7A7A7A]">
+              Qtd {wine.quantity} · {priceLabel}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => onOpen(wine)}
+            className="h-9 rounded-full border-black/10 bg-white/80 px-4 text-[12px] font-medium text-[#55505A] shadow-none hover:border-black/15 hover:bg-white"
+          >
+            Abrir
+          </Button>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
 type CellarWineGroup = WineType & {
   groupKey: string;
   entries: WineType[];
@@ -447,6 +673,7 @@ export default function CellarPage() {
   const [vintageRange, setVintageRange] = useState<[number, number]>([1980, currentYear]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showLabels, setShowLabels] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [editWine, setEditWine] = useState<WineType | null>(null);
@@ -773,66 +1000,56 @@ export default function CellarPage() {
   const visibleBottleCount = filtered.reduce((sum, wine) => sum + wine.quantity, 0);
 
   return (
-      <div className="space-y-4 max-w-[1200px]">
-      {/* Header */}
-      <div className="section-surface section-surface--full rounded-[24px] px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-xl md:text-[1.95rem] font-serif font-semibold text-foreground tracking-[-0.03em]">Minha Adega</h1>
-          <p className="text-[13px] md:text-[14px] text-foreground/62 font-medium mt-0.5">
-            {filtered.length} rótulo{filtered.length !== 1 ? "s" : ""} · {visibleBottleCount} garrafa{visibleBottleCount !== 1 ? "s" : ""} em estoque
-          </p>
-        </div>
-        <Button variant="primary" size="sm" onClick={() => setAddOpen(true)} className="h-9 px-5 text-xs font-semibold">
-          <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar vinho
-        </Button>
-      </div>
-
-      {/* Search + Actions */}
-      <div className="flex flex-col gap-2.5">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
-          <Input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Pesquise vinho, produtor, uva, safra…"
-            className="pl-9 h-10 text-[13px] font-medium rounded-xl border-white/40 shadow-[0_10px_20px_-18px_rgba(0,0,0,0.18)] focus:ring-primary/10 focus:border-primary/20 transition-all w-full text-[#19141b] placeholder:text-[#7b707f]"
-            style={{ background: "rgba(255,255,255,0.64)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
-          />
-        </div>
-
-        {/* Filters Row */}
-        <div className="flex flex-col gap-1.5 rounded-[22px] border border-white/14 bg-[rgba(255,255,255,0.44)] p-2.5 shadow-[0_14px_30px_-26px_rgba(0,0,0,0.16)] backdrop-blur-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-            <div className="flex flex-wrap items-center gap-1">
-              <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
-              <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
-              <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
-              <MultiSelectDropdown title="Safra" options={dynamicOptions.vintageOptions || []} selected={selectedVintages} onChange={(v) => { setSelectedVintages(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedVintages([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar safra..." />
-              <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
-                 className={cn(
-                   "h-[28px] px-3 rounded-full text-[10px] font-semibold flex items-center gap-1 border transition-[transform,background-color,filter,box-shadow] duration-200 ease-out cursor-pointer active:scale-[0.98]",
-                   lowStock
-                     ? "bg-[hsl(var(--wine))] text-white border-[hsl(var(--wine))] shadow-[0_10px_20px_-18px_rgba(0,0,0,0.28)] hover:brightness-110"
-                     : "bg-white/54 backdrop-blur-sm text-[#5a5260] border-white/22 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.14)] hover:bg-white/64 hover:text-[#19141b]"
-                 )}
-              >
-                Baixo estoque
-              </Button>
+    <div className="min-h-screen bg-[#F4F1EC] text-[#1A1A1A]">
+      <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.78)] px-5 py-5 shadow-[0_12px_28px_-26px_rgba(0,0,0,0.16)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0 max-w-3xl space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8C8578]">
+                Adega pessoal
+              </p>
+              <h1 className="font-serif text-[2rem] font-semibold tracking-[-0.04em] text-[#1A1A1A] sm:text-[2.35rem]">
+                Minha Adega
+              </h1>
+              <p className="text-sm font-medium text-[#6F6A60]">
+                {filtered.length} rótulo{filtered.length !== 1 ? "s" : ""} · {visibleBottleCount} garrafa{visibleBottleCount !== 1 ? "s" : ""} em estoque
+              </p>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="hidden sm:flex rounded-full p-[2px] bg-[rgba(255,255,255,0.48)] backdrop-blur-sm border border-white/16 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.16)]">
+            <Button variant="primary" size="sm" onClick={() => setAddOpen(true)} className="h-10 px-5 text-[13px] font-medium">
+              <Plus className="mr-1.5 h-4 w-4" /> Adicionar vinho
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.72)] p-4 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)]">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="relative w-full xl:max-w-[460px]">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9C9488]" />
+              <Input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Pesquise vinho, produtor, uva, safra…"
+                className="h-11 rounded-full border-black/5 bg-white/85 pl-9 text-[13px] font-medium text-[#1A1A1A] placeholder:text-[#9C9488] shadow-none focus:border-[#C8A95B] focus:ring-[#C8A95B]/15"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/75 px-3 py-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8C8578]">Rótulos</span>
+                <Switch checked={showLabels} onCheckedChange={setShowLabels} />
+                <span className="text-[11px] font-medium text-[#6F6A60]">Exibir rótulos</span>
+              </div>
+              <div className="hidden sm:flex rounded-full border border-black/5 bg-white/75 p-[2px]">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   aria-pressed={viewMode === "grid"}
                   onClick={() => setViewMode("grid")}
-                  className={cn("h-7 w-7 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer", viewMode === "grid" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-[#6f6675] hover:text-[#19141b]")}
+                  className={cn(
+                    "h-8 w-8 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer",
+                    viewMode === "grid" ? "bg-[#7B1E2B] text-white hover:bg-[#7B1E2B]" : "text-[#7B6F76] hover:text-[#1A1A1A]",
+                  )}
                 >
                   <LayoutGrid className="h-3.5 w-3.5" />
                 </Button>
@@ -842,7 +1059,10 @@ export default function CellarPage() {
                   size="icon"
                   aria-pressed={viewMode === "list"}
                   onClick={() => setViewMode("list")}
-                  className={cn("h-7 w-7 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer", viewMode === "list" ? "bg-[hsl(var(--wine))] text-white shadow-sm hover:bg-[hsl(var(--wine))]" : "text-[#6f6675] hover:text-[#19141b]")}
+                  className={cn(
+                    "h-8 w-8 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer",
+                    viewMode === "list" ? "bg-[#7B1E2B] text-white hover:bg-[#7B1E2B]" : "text-[#7B6F76] hover:text-[#1A1A1A]",
+                  )}
                 >
                   <List className="h-3.5 w-3.5" />
                 </Button>
@@ -850,7 +1070,7 @@ export default function CellarPage() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                className="h-[30px] px-3 pr-7 text-[11px] font-semibold rounded-full bg-[rgba(255,255,255,0.52)] backdrop-blur-sm cursor-pointer border border-white/18 text-[#5b5261] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.16)] hover:bg-white/64 hover:text-[#19141b] transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98]"
+                className="h-9 rounded-full border border-black/5 bg-white/78 px-3 pr-7 text-[11px] font-medium text-[#5F5A53] shadow-none transition-[transform,background-color,color,filter] duration-200 ease-out hover:bg-white active:scale-[0.98]"
               >
                 <option value="drink">Prioridade</option>
                 <option value="drinkNow">Beber agora</option>
@@ -861,37 +1081,58 @@ export default function CellarPage() {
                 <option value="value">Valor</option>
                 <option value="qty">Quantidade</option>
               </select>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => { setLowStock(!lowStock); setActiveSavedFilter(null); }}
+                className={cn(
+                  "h-9 rounded-full border px-3 text-[11px] font-medium transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98]",
+                  lowStock
+                    ? "border-[#7B1E2B]/20 bg-[#7B1E2B]/8 text-[#7B1E2B] hover:bg-[#7B1E2B]/10"
+                    : "border-black/5 bg-white/78 text-[#6F6A60] hover:bg-white hover:text-[#1A1A1A]",
+                )}
+              >
+                Baixo estoque
+              </Button>
             </div>
           </div>
 
-          {/* Compact Range Sliders — single row */}
-          <div className="grid grid-cols-2 gap-2">
-             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.64)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 10px 20px -18px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.28)" }}>
-               <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
-             </div>
-             <div className="rounded-xl px-3 py-1.5" style={{ background: "rgba(255,255,255,0.64)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.30)", boxShadow: "0 10px 20px -18px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.28)" }}>
-               <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
+          <div className="mt-4 grid gap-2.5 lg:grid-cols-2">
+            <div className="rounded-[24px] border border-black/5 bg-white/72 p-2.5">
+              <div className="flex flex-wrap items-center gap-1">
+                <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
+                <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
+                <MultiSelectDropdown title="Uva" options={dynamicOptions.grapes} selected={selectedGrapes} onChange={(v) => { setSelectedGrapes(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedGrapes([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar uva..." />
+                <MultiSelectDropdown title="Safra" options={dynamicOptions.vintageOptions || []} selected={selectedVintages} onChange={(v) => { setSelectedVintages(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedVintages([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar safra..." />
+                <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5 rounded-[24px] border border-black/5 bg-white/72 p-2.5">
+              <div className="rounded-[18px] border border-black/5 bg-white/78 px-3 py-2">
+                <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
+              </div>
+              <div className="rounded-[18px] border border-black/5 bg-white/78 px-3 py-2">
+                <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-
-      {/* Active filter chips summary */}
-      {activeChips.length > 0 && (
-        <div className="glass-card p-2.5 flex flex-wrap gap-1.5 items-center">
-          <span className="text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#6f6572] mr-1">Filtros ativos:</span>
-          {activeChips.map((chip, i) => (
-            <Badge key={i} variant="secondary" className="pl-3 pr-2 h-[24px] text-[9.5px] rounded-full group border-[hsl(var(--wine)/0.20)] bg-[hsl(var(--wine)/0.08)] text-[hsl(var(--wine))] font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter] duration-200 ease-out hover:brightness-[1.03]">
-              {chip.label}
-              <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 hover:opacity-100 transition-opacity duration-150" onClick={chip.onRemove} />
-            </Badge>
-          ))}
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[10px] font-semibold text-destructive hover:bg-destructive/10 ml-1 transition-[transform,background-color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer">
-            Limpar tudo
-          </Button>
-        </div>
-      )}
+        {activeChips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[24px] border border-black/5 bg-[rgba(255,255,255,0.70)] p-3 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.12)]">
+            <span className="mr-1 text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#8C8578]">Filtros ativos:</span>
+            {activeChips.map((chip, i) => (
+              <Badge key={i} variant="secondary" className="group h-[24px] rounded-full border-[hsl(var(--wine)/0.16)] bg-[hsl(var(--wine)/0.08)] pl-3 pr-2 text-[9.5px] font-semibold text-[hsl(var(--wine))] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter] duration-200 ease-out hover:brightness-[1.03]">
+                {chip.label}
+                <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 transition-opacity duration-150 hover:opacity-100" onClick={chip.onRemove} />
+              </Badge>
+            ))}
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="ml-1 h-7 text-[10px] font-medium text-[#7B1E2B] hover:bg-[#7B1E2B]/8">
+              Limpar tudo
+            </Button>
+          </div>
+        )}
 
       {/* Content */}
       {isLoading ? (
@@ -916,246 +1157,27 @@ export default function CellarPage() {
           } : undefined}
         />
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {filtered.map((wine, i) => {
-            const status = drinkStatus(wine);
-            const smartStatus = getSmartCellarStatus(wine);
-            const aiState = getCardAiState(wine.id);
-            const cardInsight = buildLocalCellarInsight(wine, smartStatus);
-            const isExpanded = !!expandedGroups[wine.groupKey];
-            const hasGroupDetails = wine.entries.length > 1;
-            const hasPriceVariance = wine.distinctPriceCount > 1;
-            const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
-            return (
-              <motion.div
-                key={wine.id}
-                className="group relative flex h-full min-h-[312px] flex-col overflow-hidden wine-card-glass px-[4px] py-[3px] transition-[transform,box-shadow,filter] duration-200 ease-out border-l-[3px] cursor-pointer hover:-translate-y-[2px] hover:shadow-[0_18px_34px_-26px_rgba(44,20,31,0.24)]"
-                style={getWineTypeAccent(wine.style)}
-                onMouseEnter={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccentHover(wine.style)); }}
-                onMouseLeave={(e) => { Object.assign(e.currentTarget.style, getWineTypeAccent(wine.style)); }}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <div className="transition-[filter,transform] duration-200 ease-out group-hover:brightness-[1.025]">
-                  <WineImageThumb src={coverImageUrl} alt={wine.name} toneClassName={getWineTone(wine.style)} compact />
-                </div>
-
-                <div className="mt-0.25 flex flex-1 min-h-0 flex-col rounded-[18px] border border-white/70 bg-[rgba(255,255,255,0.96)] px-2 py-[5px] shadow-[0_14px_32px_-26px_rgba(44,20,31,0.28)] backdrop-blur-[12px]">
-                  {/* ── Top: Name + Status ── */}
-                  <div className="mb-0.75 flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="line-clamp-1 text-[12.5px] font-serif font-semibold leading-snug text-[#17131a] tracking-[-0.018em]">
-                        {wine.name}
-                      </h3>
-                      <p className="mt-0.5 flex items-center gap-1 text-[8.75px] text-[#6e6573]">
-                        <span className="font-semibold text-[#544a59]">{formatVintageLabel(wine.vintage)}</span>
-                        <span className="text-[#9a8fa0]">·</span>
-                        <span className="truncate font-medium">{wine.region || wine.country || "Região n/i"}</span>
-                      </p>
-                    </div>
-                    <span className={cn("inline-flex shrink-0 items-center justify-center rounded-full border px-2.5 py-1 text-[10.5px] sm:text-[11px] font-semibold leading-none tracking-[-0.01em]", smartStatus.badgeClass)}>
-                      {smartStatus.label}
-                    </span>
-                  </div>
-
-                  {/* ── Middle: Tags + AI insight ── */}
-                  <div className="mb-0.75 space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                      {wine.style && (
-                        <span className={getCardTypeTagClass(wine.style)}>
-                          {wine.style}
-                        </span>
-                      )}
-                      {wine.country && (
-                        <span className="inline-flex min-h-[24px] items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-[11px] font-medium leading-none text-neutral-600 shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]">
-                          {wine.country}
-                        </span>
-                      )}
-                      {wine.grape && (
-                        <span className="inline-flex min-h-[24px] items-center justify-center rounded-full border border-white/60 bg-white/78 px-3 py-1.5 text-[11px] font-medium leading-none text-[#645b69] shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]">
-                          {wine.grape}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="rounded-[16px] border border-white/60 bg-[rgba(255,255,255,0.70)] px-2.5 py-2 shadow-[0_10px_24px_-22px_rgba(58,51,39,0.18)] backdrop-blur-sm">
-                      <div className="space-y-2">
-                        <div className="min-w-0">
-                          <p className="line-clamp-1 text-[10.5px] font-medium leading-snug text-[#665c6b]">
-                            {cardInsight}
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          className="h-10 w-full rounded-full border border-[rgba(183,121,31,0.14)] bg-[linear-gradient(180deg,rgba(255,249,240,0.96)_0%,rgba(255,255,255,0.94)_100%)] px-3.5 text-[11px] font-semibold text-[#584f61] shadow-[0_8px_18px_-16px_rgba(58,51,39,0.14)] hover:text-[#1b161d] hover:bg-[linear-gradient(180deg,rgba(255,244,225,0.98)_0%,rgba(255,255,255,0.96)_100%)] active:scale-[0.98] transition-[transform,background-color,color] duration-200 ease-out"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void toggleCardAi(wine);
-                          }}
-                        >
-                          <UtensilsCrossed className="mr-1.5 h-3.5 w-3.5 text-[#B7791F]" />
-                          Harmonizar esta garrafa
-                        </Button>
-                      </div>
-
-                      <AnimatePresence initial={false}>
-                        {aiState.open && (
-                          <motion.div
-                            key={`ai-${wine.id}`}
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                            className="overflow-hidden"
-                          >
-                            <div className="mt-2 space-y-2 border-t border-black/5 pt-2">
-                              {aiState.loading ? (
-                                <div className="flex items-center gap-2 text-[10px] text-[#6e6573]">
-                                  <span className="h-2 w-2 animate-pulse rounded-full bg-primary/40" />
-                                  Aguardando sugestões...
-                                </div>
-                              ) : (
-                                <>
-                                  <p className="text-[10px] leading-relaxed text-[#5f5564]">
-                                    {aiState.pairingLogic || cardInsight}
-                                  </p>
-                                  {aiState.error && (
-                                    <p className="text-[10px] font-medium text-amber-700">
-                                      {aiState.error}
-                                    </p>
-                                  )}
-                                  <div className="space-y-1.5">
-                                    {aiState.pairings.slice(0, 5).map((pairing, index) => (
-                                      <div
-                                        key={`${pairing.dish}-${index}`}
-                                        className="rounded-xl border border-white/60 bg-white/86 px-2.5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
-                                      >
-                                        <div className="flex items-start justify-between gap-2">
-                                          <div className="min-w-0 flex-1">
-                                            <p className="text-[11px] font-semibold leading-tight text-[#17131a]">
-                                              {pairing.dish}
-                                            </p>
-                                            <p className="mt-0.5 text-[9.5px] leading-snug text-[#6f6671]">
-                                              {pairing.reason}
-                                            </p>
-                                          </div>
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-[22px] shrink-0 rounded-full border border-white/60 bg-white/80 px-2 text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-white/95"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleRecipeClick(pairing.dish);
-                                            }}
-                                          >
-                                            Ver receita
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* ── Actions ── */}
-                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-black/5 pt-1.5">
-                    <div className="min-w-0">
-                      <p className="text-[6.5px] uppercase tracking-[0.11em] text-[#908595] font-medium">Preço</p>
-                      <div className="mt-0.5 flex items-center gap-2">
-                        <p className="text-[15px] font-bold leading-none text-[#121212] tracking-[-0.025em]">
-                          {wine.displayPurchasePrice != null ? `R$ ${wine.displayPurchasePrice.toFixed(0)}` : "—"}
-                        </p>
-                        <span className="inline-flex h-[18px] items-center rounded-full border border-white/60 bg-white/78 px-2 text-[8.25px] font-semibold leading-none text-[#645b69]">
-                          Qtd {wine.quantity}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-[22px] flex-none rounded-full px-2.5 text-[8.5px] font-semibold text-[#5d5260] hover:text-primary hover:bg-primary/[0.06] active:scale-[0.98] transition-[transform,background-color,color] duration-200 ease-out cursor-pointer"
-                        onClick={() => setConsumptionWine(wine)}
-                      >
-                        <UtensilsCrossed className="mr-1 h-2.5 w-2.5" /> Consumo
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-[22px] w-[22px] rounded-full p-0 text-[#7a6f78]/80 hover:text-[#2f2730] hover:bg-black/[0.05] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
-                        onClick={() => setEditWine(wine)}
-                        title="Editar"
-                      >
-                        <Pencil className="h-2.5 w-2.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-[22px] w-[22px] rounded-full p-0 text-[#7a6f78]/80 hover:text-destructive hover:bg-destructive/[0.06] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer"
-                        onClick={() => setDeleteTarget(wine)}
-                        title="Remover"
-                      >
-                        <Trash2 className="h-2.5 w-2.5" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {hasGroupDetails && (
-                    <div className="mt-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setExpandedGroups((prev) => ({ ...prev, [wine.groupKey]: !prev[wine.groupKey] }))}
-                        className="inline-flex items-center gap-1 rounded-full border border-white/50 bg-white/68 px-2.5 py-0.5 text-[8.5px] font-semibold text-[#665c6b] backdrop-blur-sm transition-all duration-200 hover:border-primary/20 hover:text-primary/80"
-                      >
-                        {isExpanded ? "Ocultar" : `${wine.entries.length} registros`}
-                      </button>
-                      {isExpanded && (
-                        <div className="mt-1.5 space-y-1 rounded-xl border border-white/50 bg-white/72 p-2 backdrop-blur-[10px]">
-                          {wine.entries.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/84 px-2.5 py-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter] duration-200 ease-out hover:brightness-[1.01]">
-                              <div className="min-w-0">
-                                <p className="truncate text-[10.5px] font-semibold text-[#17131a]">
-                                  {entry.cellar_location || "Sem localização"}
-                                </p>
-                                <p className="text-[8.5px] text-[#6f6671] font-medium">
-                                  {formatVintageLabel(entry.vintage)} · {entry.quantity} gf
-                                </p>
-                              </div>
-                      <span className="text-[9.5px] font-semibold text-primary/78">
-                                {entry.purchase_price != null ? `R$ ${entry.purchase_price.toFixed(0)}` : "—"}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((wine) => (
+            <WineCard
+              key={wine.id}
+              wine={wine}
+              showLabel={showLabels}
+              onOpen={handleOpen}
+            />
+          ))}
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
+        <div className="overflow-hidden rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.76)] shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)]">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border/40">
-                <th className="text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 text-[#7a707f]">Vinho</th>
-                <th className="text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 hidden sm:table-cell text-[#7a707f]">Estilo</th>
-                <th className="text-right text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 hidden md:table-cell text-[#7a707f]">Preço</th>
-                <th className="text-center text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 text-[#7a707f]">Qtd</th>
-                <th className="text-center text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 hidden md:table-cell text-[#7a707f]">Status</th>
-                <th className="text-right text-[8.5px] font-semibold uppercase tracking-[0.14em] px-3 py-2.5 text-[#7a707f]">Ações</th>
+              <tr className="border-b border-black/5 bg-black/[0.02]">
+                <th className="px-3 py-2.5 text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578]">Vinho</th>
+                <th className="hidden px-3 py-2.5 text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578] sm:table-cell">Estilo</th>
+                <th className="hidden px-3 py-2.5 text-right text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578] md:table-cell">Preço</th>
+                <th className="px-3 py-2.5 text-center text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578]">Qtd</th>
+                <th className="hidden px-3 py-2.5 text-center text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578] md:table-cell">Status</th>
+                <th className="px-3 py-2.5 text-right text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578]">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -1165,7 +1187,7 @@ export default function CellarPage() {
                 return (
                   <tr
                     key={wine.id}
-                    className="group transition-[transform,background-color,box-shadow,filter] duration-200 ease-out border-b border-[rgba(0,0,0,0.05)] last:border-0 border-l-[3px] hover:bg-[rgba(255,255,255,0.80)] hover:-translate-y-[1px] hover:shadow-[0_10px_20px_-18px_rgba(44,20,31,0.16)]"
+                    className="group border-b border-black/5 transition-[transform,background-color,box-shadow,filter] duration-200 ease-out last:border-0 hover:bg-black/[0.015] hover:-translate-y-[1px]"
                     style={{ borderLeftColor: getWineTypeAccent(wine.style).borderLeftColor || 'transparent' }}
                   >
                     <td className="px-3 py-2.25 align-middle">
@@ -1248,6 +1270,7 @@ export default function CellarPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
     </div>
   );
 }

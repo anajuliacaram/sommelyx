@@ -27,6 +27,7 @@ import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { QuickActions } from "@/components/QuickActions";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
+import { DailyInsight } from "@/components/dashboard/DailyInsight";
 import { useAuth } from "@/contexts/AuthContext";
 import { useConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
@@ -182,10 +183,10 @@ export default function PersonalDashboard() {
               </p>
             </div>
 
-            <div className="card-depth rounded-[26px] p-5 md:p-6">
-              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                <div className="min-w-0 max-w-2xl">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground mb-2">Resumo inteligente</p>
+            <div className="card-depth rounded-[26px] px-5 py-6 md:px-6 md:py-8">
+              <div className="flex flex-col gap-6">
+                <div className="min-w-0 max-w-xl">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Resumo inteligente</p>
                   <h2 className="text-[18px] md:text-[20px] font-semibold tracking-[-0.03em] text-foreground">
                     {totalBottles} garrafas, {drinkNow} prontas para abrir e {inGuard} em guarda
                   </h2>
@@ -195,13 +196,14 @@ export default function PersonalDashboard() {
                       : "Sua adega está em boa forma hoje."}
                   </p>
                 </div>
-                <div className="grid grid-cols-3 gap-3 md:min-w-[390px] lg:min-w-[420px]">
+
+                <div className="grid grid-cols-3 gap-4">
                   {kpis.map((kpi) => (
                     <div
                       key={kpi.label}
-                      className="group min-h-[118px] rounded-2xl border border-neutral-200 bg-gradient-to-br from-white to-neutral-50 p-5 shadow-[0_10px_24px_-20px_rgba(58,51,39,0.22)] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:shadow-[0_14px_30px_-20px_rgba(58,51,39,0.26)]"
+                      className="group h-auto rounded-2xl border border-neutral-200 bg-gradient-to-br from-white to-neutral-50 p-4 shadow-[0_10px_24px_-20px_rgba(58,51,39,0.22)] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:shadow-[0_14px_30px_-20px_rgba(58,51,39,0.26)]"
                     >
-                      <div className="flex h-full flex-col justify-between gap-4">
+                      <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
                         <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl shadow-[0_8px_18px_-14px_rgba(58,51,39,0.2)]", kpi.iconBg)}>
                           <kpi.icon className={cn("h-4.5 w-4.5", kpi.iconTone)} />
                         </div>
@@ -228,6 +230,12 @@ export default function PersonalDashboard() {
                 onAnalyzeList={() => setWineListScanOpen(true)}
               />
             </div>
+
+            <DailyInsight
+              wines={wines}
+              onOpenWine={(wine) => void handleOpenBottle(wine.id, wine.name)}
+              onViewRecs={() => navigate("/dashboard/cellar")}
+            />
           </div>
         </motion.div>
 

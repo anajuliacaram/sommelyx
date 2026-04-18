@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,7 +10,7 @@ const corsHeaders = {
 
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const AI_TIMEOUT_MS = 55_000;
+const AI_TIMEOUT_MS = 60_000;
 const AI_URL = "https://ai.lovable.dev/v1/chat/completions";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -317,10 +318,12 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const AI_MODEL = "google/gemini-2.5-flash";
-    if (!LOVABLE_API_KEY) {
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing LOVABLE_API_KEY`);
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_lovable_api_key" });
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
+    console.log(`[${FUNCTION_NAME}] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) {
+      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing API keys`);
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_api_key" });
       return fail(500, {
         ok: false,
         code: "CONFIG_ERROR",
@@ -366,88 +369,229 @@ serve(async (req) => {
       `  }\n` +
       `}`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+    let durationMs = 0;
+    let responseStatus = 200;
+    let parsedArgs: Record<string, unknown> | null = null;
+    let responsePreview: string | null = null;
 
-    const aiResponse = await fetch(AI_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        messages: [
-          { role: "system", content: systemPrompt },
+    if (OPENAI_API_KEY) {
+      const openaiResult = await callOpenAIResponses<{ wine: Record<string, unknown> }>({
+        functionName: FUNCTION_NAME,
+        requestId,
+        apiKey: OPENAI_API_KEY,
+        model: OPENAI_MODEL,
+        timeoutMs: AI_TIMEOUT_MS,
+        temperature: 0.1,
+        instructions: systemPrompt,
+        input: [
           {
             role: "user",
             content: [
-              { type: "text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
-              { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
+              { type: "input_text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
+              { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}`, detail: "high" },
             ],
           },
         ],
-        temperature: 0.1,
-      }),
+        schema: {
+          type: "object",
+          properties: {
+            wine: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                producer: { type: "string" },
+                vintage: { type: ["number", "null"] },
+                style: { type: ["string", "null"] },
+                country: { type: ["string", "null"] },
+                region: { type: ["string", "null"] },
+                grape: { type: ["string", "null"] },
+                food_pairing: { type: ["string", "null"] },
+                tasting_notes: { type: ["string", "null"] },
+                cellar_location: { type: ["string", "null"] },
+                purchase_price: { type: ["number", "null"] },
+                drink_from: { type: ["number", "null"] },
+                drink_until: { type: ["number", "null"] },
+              },
+              required: ["name"],
+              additionalProperties: true,
+            },
+          },
+          required: ["wine"],
+          additionalProperties: true,
+        },
+        maxOutputTokens: 1_200,
+      });
+
+      if (!openaiResult.ok) {
+        responsePreview = openaiResult.error;
+        const status = openaiResult.status;
+        console.log({
+          input: { requestId, imageMime, imageBytes: imageBase64.length },
+          response: { ok: false, status, body: responsePreview ? String(responsePreview).slice(0, 240) : null },
+          parsed: null,
+          error: responsePreview,
+        });
+
+        if (status === 429) {
+          await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
+          return fail(429, {
+            ok: false,
+            code: "AI_RATE_LIMIT",
+            error: "Muitas requisições agora. Tente novamente em instantes.",
+            requestId,
+            retryable: true,
+          });
+        }
+        if (status === 402) {
+          await logAudit(userId, 402, "ai_error", durationMs, { request_id: requestId, reason: "credits_exhausted" });
+          return fail(402, {
+            ok: false,
+            code: "AI_CREDITS_EXHAUSTED",
+            error: "A análise não está disponível no momento. Tente novamente mais tarde.",
+            requestId,
+            retryable: true,
+          });
+        }
+
+        await logAudit(userId, 502, "ai_error", durationMs, {
+          request_id: requestId,
+          ai_status: status,
+          ai_body_preview: String(responsePreview || "").slice(0, 400),
+        });
+        return fail(502, {
+          ok: false,
+          code: "AI_UNAVAILABLE",
+          error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+          requestId,
+          retryable: true,
+        });
+      }
+
+      parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
+      responseStatus = 200;
+      console.log({
+        input: { requestId, imageMime, imageBytes: imageBase64.length },
+        response: { ok: true, status: 200, body: null },
+        parsed: parsedArgs,
+        error: null,
+      });
+    } else {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
+      const aiResponse = await fetch(AI_URL, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
+                { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
+              ],
+            },
+          ],
+          temperature: 0.1,
+        }),
+      });
+
+      clearTimeout(timeout);
+
+      responseStatus = aiResponse.status;
+      responsePreview = aiResponse.ok ? null : await aiResponse.text().catch(() => "");
+      console.log({
+        input: {
+          requestId,
+          imageMime,
+          imageBytes: imageBase64.length,
+        },
+        response: {
+          ok: aiResponse.ok,
+          status: aiResponse.status,
+          body: responsePreview ? String(responsePreview).slice(0, 240) : null,
+        },
+        parsed: null,
+        error: aiResponse.ok ? null : responsePreview,
+      });
+
+      if (!aiResponse.ok) {
+        const bodyText = responsePreview || "";
+
+        if (aiResponse.status === 429) {
+          await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
+          return fail(429, {
+            ok: false,
+            code: "AI_RATE_LIMIT",
+            error: "Muitas requisições agora. Tente novamente em instantes.",
+            requestId,
+            retryable: true,
+          });
+        }
+        if (aiResponse.status === 402) {
+          await logAudit(userId, 402, "ai_error", durationMs, { request_id: requestId, reason: "credits_exhausted" });
+          return fail(402, {
+            ok: false,
+            code: "AI_CREDITS_EXHAUSTED",
+            error: "A análise não está disponível no momento. Tente novamente mais tarde.",
+            requestId,
+            retryable: true,
+          });
+        }
+
+        console.error(`[${FUNCTION_NAME}] request_id=${requestId} ai_status=${aiResponse.status} body=${bodyText.slice(0, 240)}`);
+        await logAudit(userId, 502, "ai_error", durationMs, {
+          request_id: requestId,
+          ai_status: aiResponse.status,
+          ai_body_preview: bodyText.slice(0, 400),
+        });
+        return fail(502, {
+          ok: false,
+          code: "AI_UNAVAILABLE",
+          error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+          requestId,
+          retryable: true,
+        });
+      }
+
+      const aiData = await aiResponse.json().catch(() => null);
+      if (!aiData) {
+        await logAudit(userId, 502, "ai_error", durationMs, { request_id: requestId, reason: "invalid_ai_json" });
+        return fail(502, {
+          ok: false,
+          code: "AI_INVALID_RESPONSE",
+          error: "O serviço de análise retornou uma resposta inválida. Tente novamente.",
+          requestId,
+          retryable: true,
+        });
+      }
+
+      const content = aiData.choices?.[0]?.message?.content || "";
+      parsedArgs = extractJsonFromText(content);
+    }
+
+    durationMs = Date.now() - startTime;
+
+    console.log({
+      input: {
+        requestId,
+        imageMime,
+        imageBytes: imageBase64.length,
+      },
+      response: {
+        ok: true,
+        status: responseStatus,
+        body: null,
+      },
+      parsed: parsedArgs,
+      error: null,
     });
-
-    clearTimeout(timeout);
-    const durationMs = Date.now() - startTime;
-
-    if (!aiResponse.ok) {
-      const bodyText = await aiResponse.text().catch(() => "");
-
-      if (aiResponse.status === 429) {
-        await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
-        return fail(429, {
-          ok: false,
-          code: "AI_RATE_LIMIT",
-          error: "Muitas requisições agora. Tente novamente em instantes.",
-          requestId,
-          retryable: true,
-        });
-      }
-      if (aiResponse.status === 402) {
-        await logAudit(userId, 402, "ai_error", durationMs, { request_id: requestId, reason: "credits_exhausted" });
-        return fail(402, {
-          ok: false,
-          code: "AI_CREDITS_EXHAUSTED",
-          error: "A análise não está disponível no momento. Tente novamente mais tarde.",
-          requestId,
-          retryable: true,
-        });
-      }
-
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} ai_status=${aiResponse.status} body=${bodyText.slice(0, 240)}`);
-      await logAudit(userId, 502, "ai_error", durationMs, {
-        request_id: requestId,
-        ai_status: aiResponse.status,
-        ai_body_preview: bodyText.slice(0, 400),
-      });
-      return fail(502, {
-        ok: false,
-        code: "AI_UNAVAILABLE",
-        error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    const aiData = await aiResponse.json().catch(() => null);
-    if (!aiData) {
-      await logAudit(userId, 502, "ai_error", durationMs, { request_id: requestId, reason: "invalid_ai_json" });
-      return fail(502, {
-        ok: false,
-        code: "AI_INVALID_RESPONSE",
-        error: "O serviço de análise retornou uma resposta inválida. Tente novamente.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    const content = aiData.choices?.[0]?.message?.content || "";
-    const parsedArgs = extractJsonFromText(content);
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
       await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "no_structured_output" });

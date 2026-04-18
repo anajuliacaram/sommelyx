@@ -65,20 +65,20 @@ export function LocationAuditDialog({
     <Dialog open={open} onOpenChange={(v) => { if (!busy) onOpenChange(v); }}>
       <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-[18px] tracking-tight">{title}</DialogTitle>
-          <DialogDescription className="text-[12px] leading-relaxed">{subtitle}</DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{subtitle}</DialogDescription>
         </DialogHeader>
 
         <div className="mt-2 grid gap-4">
           <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Localização</p>
+            <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Localização</p>
             <div className="mt-2 grid grid-cols-12 gap-3 items-start">
               <div className="col-span-12 sm:col-span-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Anterior</p>
+                <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Anterior</p>
                 <p className="text-[13px] font-semibold text-foreground truncate">{previousLabel || "—"}</p>
               </div>
               <div className="col-span-12 sm:col-span-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">Nova</p>
+                <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Nova</p>
                 <p className="text-[13px] font-semibold text-foreground truncate">{newLabel || "—"}</p>
               </div>
             </div>
@@ -87,7 +87,7 @@ export function LocationAuditDialog({
           {requireAudit ? (
             <div className="grid gap-3">
               <div>
-                <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                   Nome do responsável <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -95,7 +95,7 @@ export function LocationAuditDialog({
                   onChange={(e) => setResponsibleName(e.target.value)}
                   onBlur={() => setTouched(true)}
                   placeholder="Ex.: Ana / Equipe salão / Gerência"
-                  className="mt-1 h-10 rounded-2xl"
+                  className="mt-1"
                 />
                 {touched && errors.responsible ? (
                   <p className="mt-1 text-[11px] text-destructive flex items-center gap-1.5">
@@ -106,11 +106,11 @@ export function LocationAuditDialog({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                     Motivo <span className="text-destructive">*</span>
                   </Label>
                   <Select value={reason} onValueChange={(v) => { setReason(v as any); setTouched(true); }}>
-                    <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                    <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Selecionar..." />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl">
@@ -128,7 +128,7 @@ export function LocationAuditDialog({
                   ) : null}
                 </div>
                 <div>
-                  <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                     Observação {normalizeAuditText(String(reason || "")) === "Outro" ? <span className="text-destructive">*</span> : null}
                   </Label>
                   <Textarea
@@ -137,7 +137,7 @@ export function LocationAuditDialog({
                     onBlur={() => setTouched(true)}
                     placeholder="Adicione contexto, se necessário"
                     rows={3}
-                    className="mt-1 rounded-2xl"
+                    className="mt-1"
                   />
                   {touched && errors.notes ? (
                     <p className="mt-1 text-[11px] text-destructive flex items-center gap-1.5">
@@ -154,13 +154,12 @@ export function LocationAuditDialog({
           )}
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button type="button" variant="outline" className="h-10 rounded-2xl" onClick={() => onOpenChange(false)} disabled={busy}>
+            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={busy}>
               Cancelar
             </Button>
             <Button
               type="button"
               variant="primary"
-              className="h-10 rounded-2xl"
               disabled={!canSubmit}
               onClick={async () => {
                 setTouched(true);
@@ -181,4 +180,3 @@ export function LocationAuditDialog({
     </Dialog>
   );
 }
-

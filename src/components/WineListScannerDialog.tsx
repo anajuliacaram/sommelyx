@@ -394,12 +394,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 <Button
                   variant="primary"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="h-11 text-[13px] font-semibold"
+                  className="w-full"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Tirar Foto
                 </Button>
-                  <Button variant="ghost" onClick={() => fileInputRef.current?.click()} className="h-11 text-[13px] font-medium border border-border/60 bg-background/60 hover:bg-background">
+                  <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="w-full">
                     <Upload className="h-4 w-4 mr-2" />
                     Escolher imagem ou PDF
                   </Button>
@@ -432,7 +432,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             >
               <div className="flex items-center justify-between">
                 <SectionHeader icon="wine" label={`${filteredWines.length} vinho${filteredWines.length !== 1 ? "s" : ""}${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
-                <Button variant="ghost" size="sm" onClick={reset} className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="sm" onClick={reset} className="px-2 font-medium text-[10px]">
                   <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
                 </Button>
               </div>
@@ -484,7 +484,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     value={mealQuery}
                     onChange={(e) => setMealQuery(e.target.value)}
                     placeholder="O que você vai comer?"
-                    className="h-9 rounded-xl bg-background/80 text-[12px]"
+                    className="rounded-xl"
                   />
                   <div className="flex flex-wrap gap-1.5">
                     {[

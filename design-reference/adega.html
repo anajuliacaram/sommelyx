@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sommelyx — Adega Pessoal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+// Tweak defaults — editable via tweaks panel
+window.__TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "variant": "ritual",
+  "accent": "#7B1E2B",
+  "serifHeadings": true
+}/*EDITMODE-END*/;
+</script>
+
+<script src="data.js"></script>
+<script type="text/babel" src="shared.jsx"></script>
+<script type="text/babel" src="variant-editorial.jsx"></script>
+<script type="text/babel" src="variant-ritual.jsx"></script>
+<script type="text/babel" src="extras.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const ACCENT_SWATCHES = [
+  { name: "Forest", value: "#5F7F52", dark: "#3F5538" },
+  { name: "Wine",   value: "#7B1E2B", dark: "#5A141F" },
+  { name: "Copper", value: "#B07A4C", dark: "#7D5333" },
+  { name: "Ink",    value: "#2A3B4A", dark: "#17232E" },
+];
+
+function App() {
+  const defaults = window.__TWEAK_DEFAULTS;
+  const [variant, setVariant] = useState(defaults.variant);
+  const [accent, setAccent] = useState(defaults.accent);
+  const [serif, setSerif] = useState(defaults.serifHeadings);
+  const [editOpen, setEditOpen] = useState(false);
+  const [openWine, setOpenWine] = useState(null);
+  const [toast, setToast] = useState("");
+  const [route, setRoute] = useState("overview");
+  const [showAdd, setShowAdd] = useState(false);
+  const [showHarmonize, setShowHarmonize] = useState(false);
+
+  // Expose accent as CSS vars
+  useEffect(() => {
+    const swatch = ACCENT_SWATCHES.find((s) => s.value === accent) || ACCENT_SWATCHES[0];
+    document.documentElement.style.setProperty("--primary", swatch.value);
+    document.documentElement.style.setProperty("--primary-dark", swatch.dark);
+  }, [accent]);
+
+  // Edit-mode handshake
+  useEffect(() => {
+    const onMsg = (e) => {
+      const d = e.data || {};
+      if (d.type === "__activate_edit_mode") setEditOpen(true);
+      if (d.type === "__deactivate_edit_mode") setEditOpen(false);
+    };
+    window.addEventListener("message", onMsg);
+    window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
+  const persist = (edits) => {
+    window.parent.postMessage({ type: "__edit_mode_set_keys", edits }, "*");
+  };
+
+  const handleOpenBottle = (wine) => setOpenWine(wine);
+  const handleConfirmOpen = ({ occasion, rating }) => {
+    const msg = rating > 0
+      ? `"${openWine.name}" aberto — nota ${rating}/10`
+      : `"${openWine.name}" aberto · ${occasion || "consumo registrado"}`;
+    setToast(msg);
+    setOpenWine(null);
+  };
+
+  return (
+    <div className="app-root">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <div className="sidebar-logo-mark">S</div>
+          <div>
+            <div className="sidebar-logo-text">Sommelyx</div>
+            <div className="sidebar-logo-chip">PESSOAL</div>
+          </div>
+        </div>
+
+        <button className="sidebar-cta" onClick={() => setShowAdd(true)}>{Icons.plus} Adicionar vinho</button>
+        <button className="sidebar-cta-secondary" onClick={() => setShowHarmonize(true)}>{Icons.sparkles} Harmonizar prato</button>
+
+        <div className="sidebar-section-label">Navegação</div>
+        <div className={`sidebar-item ${route === "overview" ? "active" : ""}`} onClick={() => setRoute("overview")}>{Icons.home}<span>Visão geral</span></div>
+        <div className={`sidebar-item ${route === "cellar" ? "active" : ""}`} onClick={() => setRoute("cellar")}>{Icons.glass}<span>Minha Adega</span></div>
+        <div className={`sidebar-item ${route === "consumption" ? "active" : ""}`} onClick={() => setRoute("consumption")}>{Icons.wine}<span>Meu Consumo</span></div>
+        <div className="sidebar-item">{Icons.bell}<span>Alertas</span></div>
+        <div className="sidebar-item">{Icons.heart}<span>Wishlist</span></div>
+
+        <div className="sidebar-section-label">Sistema</div>
+        <div className="sidebar-item">{Icons.settings}<span>Preferências</span></div>
+
+        <div className="sidebar-footer">
+          <div className="sidebar-avatar">AJ</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--fg)" }}>Ana Julia</div>
+            <div style={{ fontSize: 10.5, color: "rgba(58,51,39,0.55)" }}>ana@sommelyx.app</div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="main">
+        <div className="mobile-topbar">
+          <div className="flex items-center gap-2.5">
+            <div className="sidebar-logo-mark" style={{ width: 30, height: 30, borderRadius: 9, fontSize: 15 }}>S</div>
+            <div style={{ fontFamily: "'Libre Baskerville', serif", fontSize: 17, fontWeight: 600, color: "var(--fg)" }}>Sommelyx</div>
+          </div>
+          <button className="btn-ghost-v1" style={{ height: 36, width: 36 }}>{Icons.menu}</button>
+        </div>
+
+        <div className="variant-top-switch">
+          <div className="variant-switch">
+            <button className={variant === "editorial" ? "active" : ""}
+              onClick={() => { setVariant("editorial"); persist({ variant: "editorial" }); }}>
+              Editorial
+            </button>
+            <button className={variant === "ritual" ? "active" : ""}
+              onClick={() => { setVariant("ritual"); persist({ variant: "ritual" }); }}>
+              Ritual
+            </button>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] hidden sm:inline"
+            style={{ color: "rgba(58,51,39,0.45)" }}>
+            Dashboard · Adega Pessoal
+          </span>
+        </div>
+
+        {route === "cellar" ? (
+          <CellarPage accent={accent} serif={serif} onOpenBottle={handleOpenBottle} />
+        ) : route === "consumption" ? (
+          <ConsumptionPage accent={accent} serif={serif} />
+        ) : variant === "editorial" ? (
+          <VariantEditorial accent={accent} serif={serif} onOpenBottle={handleOpenBottle} onToast={setToast} onHarmonize={() => setShowHarmonize(true)} onAdd={() => setShowAdd(true)} />
+        ) : (
+          <VariantRitual accent={accent} serif={serif} onOpenBottle={handleOpenBottle} onToast={setToast} onHarmonize={() => setShowHarmonize(true)} onAdd={() => setShowAdd(true)} />
+        )}
+      </main>
+
+      {/* Tweaks panel */}
+      <div className={`tweaks-panel ${editOpen ? "open" : ""}`}>
+        <h4>Tweaks</h4>
+
+        <div className="tweaks-row">
+          <span className="tweaks-label">Variante</span>
+          <div className="variant-switch">
+            <button className={variant === "editorial" ? "active" : ""}
+              onClick={() => { setVariant("editorial"); persist({ variant: "editorial" }); }}>
+              Editorial
+            </button>
+            <button className={variant === "ritual" ? "active" : ""}
+              onClick={() => { setVariant("ritual"); persist({ variant: "ritual" }); }}>
+              Ritual
+            </button>
+          </div>
+        </div>
+
+        <div className="tweaks-row">
+          <span className="tweaks-label">Cor de destaque</span>
+          <div className="swatch-grid">
+            {ACCENT_SWATCHES.map((s) => (
+              <button key={s.value}
+                title={s.name}
+                className={`swatch ${s.value === accent ? "active" : ""}`}
+                style={{ background: `linear-gradient(145deg, ${s.value}, ${s.dark})` }}
+                onClick={() => { setAccent(s.value); persist({ accent: s.value }); }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="tweaks-row">
+          <span className="tweaks-label">Títulos em serifa</span>
+          <button className="toggle-switch" onClick={() => { setSerif(!serif); persist({ serifHeadings: !serif }); }}>
+            <div className={`toggle-track ${serif ? "on" : ""}`}>
+              <div className="toggle-knob" />
+            </div>
+            <span className="text-[12px] font-semibold" style={{ color: "var(--fg)" }}>
+              {serif ? "Baskerville" : "Jakarta"}
+            </span>
+          </button>
+        </div>
+
+        <p className="text-[10.5px]" style={{ color: "rgba(58,51,39,0.5)", lineHeight: 1.45, marginTop: 10 }}>
+          Ative o modo Tweaks no toolbar para personalizar. Você também pode alternar variantes no topo.
+        </p>
+      </div>
+
+      {openWine && <OpenBottleDialog wine={openWine} onConfirm={handleConfirmOpen} onCancel={() => setOpenWine(null)} />}
+      {showAdd && <AddWineDialog onClose={() => setShowAdd(false)} onSave={(w) => { setShowAdd(false); setToast(`"${w.name}" adicionado à adega`); }} />}
+      {showHarmonize && <HarmonizeDialog onClose={() => setShowHarmonize(false)} />}
+      <Toast message={toast} onClose={() => setToast("")} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

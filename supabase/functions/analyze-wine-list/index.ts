@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
+import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -210,7 +211,7 @@ function hasComparativeLanguage(text?: string | null) {
 
 function isLenientMenuAnalysis(data: any, wineName?: string | null): boolean {
   const dishes = Array.isArray(data?.dishes) ? data.dishes : [];
-  if (dishes.length < 3) return false;
+  if (dishes.length < 1) return false;
   return dishes.every((item: any) =>
     typeof item?.name === "string" &&
     item.name.trim().length > 0 &&
@@ -224,7 +225,7 @@ function isLenientMenuAnalysis(data: any, wineName?: string | null): boolean {
 
 function isLenientWineListAnalysis(data: any): boolean {
   const wines = Array.isArray(data?.wines) ? data.wines : [];
-  if (wines.length < 3) return false;
+  if (wines.length < 1) return false;
   return wines.every((w: any) => {
     const reasoning = typeof w?.reasoning === "string" ? w.reasoning.trim() : "";
     const description = typeof w?.description === "string" ? w.description.trim() : "";
@@ -436,7 +437,10 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
+    console.log(`[analyze-wine-list] openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) throw new Error("AI provider not configured");
 
     const parsedBody = BodySchema.safeParse(await req.json());
     if (!parsedBody.success) {
@@ -714,39 +718,128 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           ? [...userContent, { type: "text" as const, text: retryHint }]
           : userContent },
       ];
+      let parsed: any = null;
+      let responseStatus = 200;
+      let responseBodyPreview: string | null = null;
 
-      const aiResponse = await fetch(AI_URL, {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: messagesForAI,
-          tools,
-          tool_choice: toolChoice,
-          temperature: 0.3,
-        }),
-      });
+      if (OPENAI_API_KEY) {
+        const openaiResult = await callOpenAIResponses<any>({
+          functionName: "analyze-wine-list",
+          requestId: crypto.randomUUID(),
+          apiKey: OPENAI_API_KEY,
+          model: OPENAI_MODEL,
+          timeoutMs: 60_000,
+          temperature: 0.2,
+          instructions: systemPrompt,
+          input: messagesForAI.map((message) => ({
+            role: message.role,
+            content: Array.isArray(message.content)
+              ? message.content.map((part: any) => {
+                if (part.type === "text") return { type: "input_text", text: String(part.text || "") };
+                if (part.type === "image_url") return { type: "input_image", image_url: String(part.image_url?.url || ""), detail: "high" as const };
+                return { type: "input_text", text: "" };
+              }).filter((part: any) => part.type === "input_text" ? part.text.trim().length > 0 : Boolean(part.image_url))
+              : [{ type: "input_text", text: String(message.content || "") }],
+          })),
+          schema: (tools[0] as any)?.function?.parameters || {},
+          maxOutputTokens: 8_000,
+        });
 
-      clearTimeout(timeout);
+        if (!openaiResult.ok) {
+          responseStatus = openaiResult.status;
+          responseBodyPreview = openaiResult.error;
+          console.log({
+            input: {
+              mode: isMenuMode ? "menu-for-wine" : "wine-list",
+              wineName: isMenuMode ? wineName : null,
+              attempt: attempt + 1,
+            },
+            response: {
+              ok: false,
+              status: responseStatus,
+              body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
+            },
+            parsed: null,
+            error: responseBodyPreview,
+          });
 
-      if (!aiResponse.ok) {
-        const errText = await aiResponse.text();
-        console.error("AI gateway error:", aiResponse.status, errText);
-        if (aiResponse.status === 429) {
-          return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
+          if (responseStatus === 429) {
+            return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
+          }
+          if (responseStatus === 402) {
+            return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+          }
+          throw new Error(`AI provider error: ${responseStatus} - ${responseBodyPreview || ""}`);
         }
-        if (aiResponse.status === 402) {
-          return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+
+        parsed = openaiResult.parsed;
+        responseStatus = 200;
+      } else {
+        const aiResponse = await fetch(AI_URL, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: messagesForAI,
+            tools,
+            tool_choice: toolChoice,
+            temperature: 0.3,
+          }),
+        });
+
+        responseStatus = aiResponse.status;
+        responseBodyPreview = aiResponse.ok ? null : await aiResponse.text().catch(() => "");
+        console.log({
+          input: {
+            mode: isMenuMode ? "menu-for-wine" : "wine-list",
+            wineName: isMenuMode ? wineName : null,
+            attempt: attempt + 1,
+          },
+          response: {
+            ok: aiResponse.ok,
+            status: aiResponse.status,
+            body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
+          },
+          parsed: null,
+          error: aiResponse.ok ? null : responseBodyPreview,
+        });
+
+        if (!aiResponse.ok) {
+          const errText = responseBodyPreview || "";
+          console.error("AI gateway error:", aiResponse.status, errText);
+          if (aiResponse.status === 429) {
+            return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
+          }
+          if (aiResponse.status === 402) {
+            return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+          }
+          throw new Error(`AI gateway error: ${aiResponse.status} - ${errText}`);
         }
-        throw new Error(`AI gateway error: ${aiResponse.status} - ${errText}`);
+
+        const aiData = await aiResponse.json();
+        parsed = extractToolArguments(aiData);
+
+        console.log({
+          input: {
+            mode: isMenuMode ? "menu-for-wine" : "wine-list",
+            wineName: isMenuMode ? wineName : null,
+            attempt: attempt + 1,
+          },
+          response: {
+            ok: true,
+            status: aiResponse.status,
+            body: null,
+          },
+          parsed,
+          error: null,
+        });
       }
 
-      const aiData = await aiResponse.json();
-      const parsed = extractToolArguments(aiData);
+      clearTimeout(timeout);
 
       if (!parsed) {
         console.error("AI parse error on attempt", attempt);
@@ -763,9 +856,9 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           if (d.reason) textsToValidate.push(d.reason);
         }
         validationResult = validateWineSpecificity(textsToValidate, wineName || "", null, { wineName });
-        if (!validationResult.passed || !Array.isArray(lastParsed.dishes) || lastParsed.dishes.length < 5) {
-          if (Array.isArray(lastParsed.dishes) && lastParsed.dishes.length < 5) {
-            validationResult.failures.push(`Expected at least 5 dishes, received ${lastParsed.dishes.length}`);
+        if (!validationResult.passed || !Array.isArray(lastParsed.dishes) || lastParsed.dishes.length < 1) {
+          if (Array.isArray(lastParsed.dishes) && lastParsed.dishes.length < 1) {
+            validationResult.failures.push(`Expected at least 1 dish, received ${lastParsed.dishes.length}`);
           }
           validationResult.passed = false;
         }
@@ -803,8 +896,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
               wineSpecificFailures.push(`Reasoning lacks comparative or technical language for ${w.name || "vinho"}`);
             }
 
-            if (!Array.isArray(w.pairings) || w.pairings.length < 3) {
-              wineSpecificFailures.push(`Expected at least 3 pairings for ${w.name || "vinho"}`);
+            if (!Array.isArray(w.pairings) || w.pairings.length < 1) {
+              wineSpecificFailures.push(`Expected at least 1 pairing for ${w.name || "vinho"}`);
             } else {
               for (const pairing of w.pairings) {
                 const why = typeof pairing?.why === "string" ? pairing.why : "";
@@ -847,10 +940,16 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       throw new Error("Não foi possível interpretar a resposta da IA.");
     }
 
+    const parsedCount = isMenuMode
+      ? Array.isArray(lastParsed.dishes) ? lastParsed.dishes.length : 0
+      : Array.isArray(lastParsed.wines) ? lastParsed.wines.length : 0;
+
+    if (!validationResult.passed && parsedCount > 0) {
+      return jsonResponse(isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed));
+    }
+
     if (!validationResult.passed) {
-      const specificityMessage = isMenuMode
-        ? "A análise do cardápio não ficou específica o suficiente. Tente novamente com uma imagem mais nítida."
-        : "A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.";
+      const specificityMessage = "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente.";
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", user.id, "analyze-wine-list", 422, "validation_error", 0, {
         reason: specificityMessage,
         validation_failures: validationResult.failures.slice(0, 12),
@@ -867,6 +966,6 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     if (isAbort) {
       return jsonResponse({ error: "A análise demorou mais que o esperado. Tente novamente." }, 504);
     }
-    return jsonResponse({ error: "Não foi possível analisar a carta. Tente novamente." }, 500);
+    return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
   }
 });

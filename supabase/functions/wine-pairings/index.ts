@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -307,6 +308,36 @@ async function callAI(
   toolChoice: unknown,
   signal: AbortSignal,
 ) {
+  const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+  const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
+  const schema = (tools?.[0] as any)?.function?.parameters || {};
+
+  if (openaiKey) {
+    const result = await callOpenAIResponses<any>({
+      functionName: "wine-pairings",
+      requestId: crypto.randomUUID(),
+      apiKey: openaiKey,
+      model: openaiModel,
+      timeoutMs: 60_000,
+      temperature: 0.35,
+      instructions: systemPrompt,
+      input: [
+        {
+          role: "user",
+          content: [{ type: "input_text", text: userPrompt }],
+        },
+      ],
+      schema,
+      maxOutputTokens: 5_000,
+    });
+
+    if (result.ok) {
+      return { ok: true, status: 200, errText: "", parsed: result.parsed };
+    }
+
+    return { ok: false, status: result.status, errText: result.error, parsed: null };
+  }
+
   const aiResponse = await fetch(AI_URL, {
     method: "POST",
     signal,
@@ -385,9 +416,12 @@ serve(async (req) => {
     userId = user.id;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
+    console.log(`[wine-pairings] request_id=${requestId} openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
+      return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
     }
 
     let body: Record<string, unknown>;
@@ -574,8 +608,8 @@ INSTRUÇÕES:
               },
               pairings: {
                 type: "array",
-                minItems: 3,
-                maxItems: 5,
+                  minItems: 5,
+                  maxItems: 5,
                 items: {
                   type: "object",
                   properties: {
@@ -642,8 +676,8 @@ INSTRUÇÕES:
               },
               suggestions: {
                 type: "array",
-                minItems: 3,
-                maxItems: 5,
+              minItems: 5,
+              maxItems: 5,
                 items: {
                   type: "object",
                   properties: {
@@ -695,7 +729,7 @@ INSTRUÇÕES:
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 55_000);
+      const timeout = setTimeout(() => controller.abort(), 90_000);
 
       const retryHint = attempt > 0
         ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre "${wineName}". Cite o nome do vinho, mencione produtor/região/posicionamento.`
@@ -712,11 +746,27 @@ INSTRUÇÕES:
 
       clearTimeout(timeout);
 
+      console.log({
+        input: {
+          mode,
+          wineName: mode === "wine-to-food" ? wineName : null,
+          dish: mode === "food-to-wine" ? dish : null,
+          attempt: attempt + 1,
+        },
+        response: {
+          ok: result.ok,
+          status: result.status,
+          errText: result.errText ? String(result.errText).slice(0, 240) : "",
+        },
+        parsed: result.parsed,
+        error: result.ok ? null : result.errText,
+      });
+
       if (!result.ok) {
         if (result.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
         if (result.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
         console.error("AI gateway error:", result.status, result.errText);
-        return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
+        return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
       }
 
       if (!result.parsed) {
@@ -744,8 +794,8 @@ INSTRUÇÕES:
           vintage: wineVintage,
           grape: wineGrape,
         });
-        if (!Array.isArray(lastParsed.pairings) || lastParsed.pairings.length < 3 || lastParsed.pairings.length > 5) {
-          validationResult.failures.push(`Expected 3-5 pairings, received ${Array.isArray(lastParsed.pairings) ? lastParsed.pairings.length : 0}`);
+        if (!Array.isArray(lastParsed.pairings) || lastParsed.pairings.length < 1) {
+          validationResult.failures.push(`Expected at least 1 pairing, received ${Array.isArray(lastParsed.pairings) ? lastParsed.pairings.length : 0}`);
           validationResult.passed = false;
         }
         if (typeof lastParsed.pairingLogic !== "string" || lastParsed.pairingLogic.trim().length < 45 || !hasTechnicalLanguage(lastParsed.pairingLogic)) {
@@ -779,8 +829,8 @@ INSTRUÇÕES:
         if (hasCellar && suggestions.some((s: any) => s.fromCellar !== true)) {
           validationResult.failures.push("All cellar suggestions must come from real wines in the cellar");
         }
-        if (suggestions.length < 3 || suggestions.length > 5) {
-          validationResult.failures.push(`Expected 3-5 suggestions, received ${suggestions.length}`);
+        if (suggestions.length < 1) {
+          validationResult.failures.push(`Expected at least 1 suggestion, received ${suggestions.length}`);
         }
         for (const s of suggestions) {
           const hasConcreteRef = Boolean(s.region || s.country || s.grape || s.vintage);
@@ -831,9 +881,21 @@ INSTRUÇÕES:
     }
 
     const parsed = lastParsed || (mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] });
+    const parsedCount = mode === "wine-to-food"
+      ? Array.isArray(parsed.pairings) ? parsed.pairings.length : 0
+      : Array.isArray(parsed.suggestions) ? parsed.suggestions.length : 0;
+
+    if (!validationResult.passed && parsedCount > 0) {
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success_with_warnings", Date.now() - startTime, {
+        mode,
+        result_count: parsedCount,
+        validation_failures: validationResult.failures.slice(0, 12),
+      });
+      return jsonResponse(parsed);
+    }
 
     if (!validationResult.passed) {
-      const specificityMessage = "A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.";
+      const specificityMessage = "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente.";
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 422, "validation_error", Date.now() - startTime, {
         mode,
         reason: specificityMessage,
@@ -860,6 +922,6 @@ INSTRUÇÕES:
     if (isAbort) {
       return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
     }
-    return jsonResponse({ error: "Não conseguimos gerar a sugestão agora." }, 500);
+    return jsonResponse({ error: "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente." }, 500);
   }
 });

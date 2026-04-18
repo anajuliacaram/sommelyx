@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -156,13 +156,17 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
   return (
     <Sheet open={open} onOpenChange={v => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle className="font-serif text-lg flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-primary" />
-            Registrar venda
-          </SheetTitle>
-          <p className="text-[11px] text-muted-foreground">{today}</p>
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
+              <ShoppingCart className="h-5 w-5 text-[#7B1E2B]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <SheetTitle>Registrar venda</SheetTitle>
+              <SheetDescription>{today}</SheetDescription>
+            </div>
+          </div>
         </SheetHeader>
 
         <AnimatePresence mode="wait">
@@ -179,19 +183,18 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
               <p className="text-sm font-medium text-foreground text-center">{success}</p>
             </motion.div>
           ) : (
-            <motion.div key="form" className="mt-5 space-y-4">
-              <div className="glass-card p-4 space-y-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+            <motion.div key="form" className="mt-1 flex flex-col gap-5">
+              <div className="rounded-2xl border border-black/5 bg-white p-4 space-y-3">
+                <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                   Auditoria da operação
                 </p>
                 <div className="grid grid-cols-1 gap-3">
                   <div>
-                    <Label className="text-xs text-muted-foreground">Nome do responsável *</Label>
+                    <Label>Nome do responsável *</Label>
                     <Input
                       placeholder="Ex.: Ana / Equipe salão / Gerência"
                       value={responsibleName}
                       onChange={e => setResponsibleName(e.target.value)}
-                      className="h-9 text-[12px]"
                       autoComplete="off"
                       onFocus={() => {
                         if (!responsibleName && typeof user?.user_metadata?.full_name === "string") {
@@ -204,9 +207,9 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Motivo *</Label>
+                      <Label>Motivo *</Label>
                       <Select value={reason} onValueChange={setReason}>
-                        <SelectTrigger className="h-9 rounded-xl">
+                        <SelectTrigger className="rounded-xl">
                           <SelectValue placeholder="Selecionar..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl">
@@ -220,14 +223,13 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                     </div>
 
                     <div>
-                      <Label className="text-xs text-muted-foreground">
+                      <Label>
                         Observação {reason === "Outro" ? "*" : "(opcional)"}
                       </Label>
                       <Input
                         placeholder="Ex.: mesa 14 / jantar harmonizado"
                         value={auditNotes}
                         onChange={(e) => setAuditNotes(e.target.value)}
-                        className="h-9 text-[12px]"
                         required={reason === "Outro"}
                       />
                     </div>
@@ -237,24 +239,23 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
               {/* Customer */}
               <div>
-                <Label className="text-xs text-muted-foreground">Cliente</Label>
+                <Label>Cliente</Label>
                 <Input
                   placeholder="Nome do cliente (opcional)"
                   value={customer}
                   onChange={e => setCustomer(e.target.value)}
-                  className="h-9 text-[12px]"
                 />
               </div>
 
               {/* Items list */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">Itens da venda</Label>
+                  <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Itens da venda</Label>
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
-                    className="h-7 text-[10px] px-2 rounded-lg"
+                    className="rounded-xl px-3.5"
                     onClick={() => setPickingItem(true)}
                   >
                     <Plus className="h-3 w-3 mr-1" /> Adicionar item
@@ -276,7 +277,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                           placeholder="Buscar vinho..."
                           value={searchText}
                           onChange={e => setSearchText(e.target.value)}
-                          className="pl-9 h-9 text-[12px] rounded-xl"
+                          className="pl-9 rounded-xl"
                           autoFocus
                         />
                       </div>
@@ -317,7 +318,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => { setPickingItem(false); setSearchText(""); }}
-                        className="h-7 px-2 text-[10px] font-semibold text-muted-foreground hover:text-foreground"
+                        className="rounded-lg px-2 font-medium"
                       >
                         Cancelar
                       </Button>
@@ -333,7 +334,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                 )}
 
                 {items.map(item => (
-                  <div key={item.id} className="rounded-xl border border-border/50 p-3 space-y-2">
+                  <div key={item.id} className="rounded-2xl border border-black/5 bg-white p-3 space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
@@ -341,46 +342,44 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                       </div>
                       <Button
                         type="button"
-                        variant="danger"
+                        variant="ghost"
                         size="icon"
                         onClick={() => removeItem(item.id)}
-                        className="shrink-0 h-6 w-6 rounded-lg"
+                        className="shrink-0 h-9 w-9 rounded-full bg-black/5 text-[#6B6B6B] hover:bg-black/10 hover:text-[#1A1A1A]"
                         aria-label="Remover item"
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-[9px] text-muted-foreground">Qtd</Label>
-                        <Input
-                          type="number"
-                          min="1"
+                    <div>
+                      <Label>Qtd</Label>
+                      <Input
+                        type="number"
+                        min="1"
                           value={item.quantity}
                           onChange={e => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
-                          className="h-8 text-[11px]"
                         />
                       </div>
-                      <div>
-                        <Label className="text-[9px] text-muted-foreground">Preço unit. (R$)</Label>
-                        <Input
-                          type="number"
-                          min="0"
+                    <div>
+                      <Label>Preço unit. (R$)</Label>
+                      <Input
+                        type="number"
+                        min="0"
                           step="0.01"
                           value={item.unitPrice}
                           onChange={e => updateItem(item.id, "unitPrice", parseFloat(e.target.value) || 0)}
-                          className="h-8 text-[11px]"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label className="text-[9px] text-muted-foreground">Localização (obrigatório)</Label>
+                      <Label>Localização (obrigatório)</Label>
                       <Select
                         value={item.locationId}
                         onValueChange={(v) => updateItem(item.id, "locationId", v)}
                       >
-                        <SelectTrigger className="h-8 rounded-xl text-[11px]">
+                        <SelectTrigger className="rounded-xl">
                           <SelectValue placeholder="Selecionar..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl">
@@ -411,18 +410,18 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                 </div>
               )}
 
-                <Button
-                  onClick={handleSubmit}
-                  disabled={
-                    isSubmitting ||
+              <Button
+                onClick={handleSubmit}
+                disabled={
+                  isSubmitting ||
                     items.length === 0 ||
                     !items.every((i) => !!i.locationId) ||
                     !normalizeAuditName(responsibleName) ||
-                    !normalizeAuditText(reason) ||
-                    (normalizeAuditText(reason) === "Outro" && !normalizeAuditText(auditNotes))
-                  }
+                  !normalizeAuditText(reason) ||
+                  (normalizeAuditText(reason) === "Outro" && !normalizeAuditText(auditNotes))
+                }
                 variant="primary"
-                className="w-full h-11 text-[13px] font-medium shadow-float"
+                className="w-full"
               >
                 {isSubmitting ? "Registrando..." : "Confirmar Venda"}
               </Button>

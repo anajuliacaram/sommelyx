@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile, type Recipe } from "@/lib/sommelier-ai";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { ModalBase } from "@/components/ui/ModalBase";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
@@ -334,7 +335,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto border-border/30">
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-black/5">
         <SheetHeader className="sr-only">
           <SheetTitle>Harmonizar</SheetTitle>
         </SheetHeader>
@@ -350,7 +351,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
               variant="ghost"
               size="sm"
               onClick={goBack}
-              className="h-8 px-2 text-[11px] text-muted-foreground hover:text-foreground -mt-2"
+              className="px-2 text-[11px] font-medium text-muted-foreground hover:text-foreground -mt-2"
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Voltar
@@ -479,7 +480,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       value={dish}
                       onChange={(e) => setDish(e.target.value)}
                       placeholder="Digite o prato ou ingrediente…"
-                      className="pl-9 h-11 text-sm"
+                      className="pl-9"
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                       autoFocus
                     />
@@ -489,7 +490,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                 <Button
                   onClick={() => handleSearch()}
                   disabled={!dish.trim() || loading}
-                  className="w-full h-10 text-[13px] font-medium"
+                  className="w-full"
                 >
                   {loading ? (
                     <>
@@ -516,7 +517,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSearch(d)}
-                          className="h-8 px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary rounded-xl"
+                          className="rounded-xl px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
                         >
                           {d}
                         </Button>
@@ -1410,32 +1411,34 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       {/* Recipe Modal */}
       {recipeModal && (
         <Dialog open={!!recipeModal} onOpenChange={(v) => !v && setRecipeModal(null)}>
-          <DialogContent className="max-w-md rounded-3xl p-0 overflow-hidden">
-            <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/20">
-              <DialogTitle className="text-base font-serif font-bold">{recipeModal.dish}</DialogTitle>
-            </DialogHeader>
+          <ModalBase
+            title={recipeModal.dish}
+            icon={<BookOpen className="h-5 w-5" />}
+            onClose={() => setRecipeModal(null)}
+            className="sm:max-w-md"
+          >
             <ScrollArea className="max-h-[65vh]">
-              <div className="px-5 py-4 space-y-4">
+              <div className="space-y-4 pr-1">
                 {recipeModal.recipe.description && (
-                  <p className="text-[13px] text-foreground/70 leading-relaxed italic">{recipeModal.recipe.description}</p>
+                  <p className="text-sm text-black/70 leading-relaxed italic">{recipeModal.recipe.description}</p>
                 )}
                 <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Ingredientes</h4>
-                  <ul className="space-y-1">
+                  <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-black/50">Ingredientes</h4>
+                  <ul className="space-y-2">
                     {recipeModal.recipe.ingredients.map((ing, i) => (
-                      <li key={i} className="text-[13px] text-foreground/80 flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/30 mt-1.5 shrink-0" />
+                      <li key={i} className="flex items-start gap-2 text-sm text-black/70 leading-relaxed">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7B1E2B]/35" />
                         {ing}
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Modo de preparo</h4>
+                  <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-black/50">Modo de preparo</h4>
                   <ol className="space-y-2">
                     {recipeModal.recipe.steps.map((step, i) => (
-                      <li key={i} className="text-[13px] text-foreground/80 flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-primary/8 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-black/70 leading-relaxed">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-black/5 text-[10px] font-bold text-[#5F5F5F]">
                           {i + 1}
                         </span>
                         {step}
@@ -1443,16 +1446,16 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                     ))}
                   </ol>
                 </div>
-                <div className="rounded-xl bg-primary/5 border border-primary/10 p-3">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Sparkles className="h-3 w-3 text-primary" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">Por que harmoniza</span>
+                <div className="rounded-2xl border border-black/5 bg-white p-4">
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <Sparkles className="h-3 w-3 text-[#7B1E2B]" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-black/50">Por que harmoniza</span>
                   </div>
-                  <p className="text-[12px] text-foreground/70 leading-relaxed">{recipeModal.recipe.wine_reason}</p>
+                  <p className="text-sm text-black/70 leading-relaxed">{recipeModal.recipe.wine_reason}</p>
                 </div>
               </div>
             </ScrollArea>
-          </DialogContent>
+          </ModalBase>
         </Dialog>
       )}
     </Sheet>

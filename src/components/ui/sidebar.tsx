@@ -246,7 +246,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
           <>
             <span
               aria-hidden="true"
-              className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-wine ring-2 ring-background shadow-[0_10px_24px_-18px_rgba(110,30,42,0.85)]"
+              className="absolute -bottom-1 -right-1 w-3 h-3 bg-[#6F8F6B] border-2 border-white rounded-full"
             />
             <span className="sr-only">Toggle Sidebar</span>
           </>

@@ -1,6 +1,8 @@
 import { invokeEdgeFunction, EdgeFunctionError } from "@/lib/edge-invoke";
 import type { AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 
+const ANALYSIS_FALLBACK_MESSAGE = "Não foi possível analisar com precisão. Tente ajustar o prato ou tente novamente.";
+
 // ── Types ──
 
 export interface WineTechnicalProfile {
@@ -213,9 +215,9 @@ function classifyError(err: unknown): ClassifiedError {
     return { type: "ai_fail", message: "A solicitação não pôde ser enviada. Tente novamente." };
   }
   if (lower.includes("créditos") || lower.includes("esgotados") || lower.includes("ai gateway error") || lower.includes("não conseguimos")) {
-    return { type: "ai_fail", message: "Não conseguimos gerar a sugestão agora. Tente novamente em instantes." };
+    return { type: "ai_fail", message: ANALYSIS_FALLBACK_MESSAGE };
   }
-  return { type: "unknown", message: "Não conseguimos gerar a sugestão agora." };
+  return { type: "unknown", message: ANALYSIS_FALLBACK_MESSAGE };
 }
 
 const GENERIC_RESPONSE_PHRASES = [
@@ -353,15 +355,12 @@ function hasDishContext(text: string, dish?: string | null) {
 }
 
 function isUserFacingAnalysisError(message: string) {
-  return (
-    message.startsWith("A análise não ficou específica o suficiente.") ||
-    message.startsWith("A análise do cardápio não ficou específica o suficiente.")
-  );
+  return message.startsWith(ANALYSIS_FALLBACK_MESSAGE);
 }
 
 function isValidLenientMenu(data: any, wineName: string): boolean {
   const dishes = Array.isArray(data?.dishes) ? data.dishes : [];
-  if (dishes.length < 3) return false;
+  if (dishes.length < 1) return false;
   return dishes.every((item: any) =>
     typeof item?.name === "string" &&
     item.name.trim().length > 0 &&
@@ -375,7 +374,7 @@ function isValidLenientMenu(data: any, wineName: string): boolean {
 
 function isValidLenientWineList(data: any): boolean {
   const wines = Array.isArray(data?.wines) ? data.wines : [];
-  if (wines.length < 3) return false;
+  if (wines.length < 1) return false;
   return wines.every((item: any) => {
     const itemContext = {
       wineName: item.name,
@@ -395,7 +394,7 @@ function isValidLenientWineList(data: any): boolean {
       hasSpecificLabelContext([reasoning, description, item?.verdict], itemContext);
 
     const pairings = Array.isArray(item?.pairings) ? item.pairings : [];
-    const pairingsOk = pairings.length >= 2 && pairings.every((pairing: any) =>
+    const pairingsOk = pairings.length >= 1 && pairings.every((pairing: any) =>
       typeof pairing?.dish === "string" &&
       typeof pairing?.why === "string" &&
       pairing.dish.trim().length > 0 &&
@@ -433,7 +432,7 @@ function validateWineSpecificity(
 
   if (kind === "pairings") {
     const pairings = Array.isArray(data.pairings) ? data.pairings : [];
-    if (pairings.length < 3) return false;
+    if (pairings.length < 1) return false;
     return pairings.every((item: any) =>
       typeof item?.dish === "string" &&
       typeof item?.reason === "string" &&
@@ -449,7 +448,7 @@ function validateWineSpecificity(
 
   if (kind === "suggestions") {
     const suggestions = Array.isArray(data.suggestions) ? data.suggestions : [];
-    if (suggestions.length < 3) return false;
+    if (suggestions.length < 1) return false;
     return suggestions.every((item: any) =>
       typeof item?.wineName === "string" &&
       typeof item?.reason === "string" &&
@@ -504,7 +503,7 @@ function validateWineSpecificity(
         !hasGenericWineLanguage(item.verdict) &&
         item.verdict.trim().length >= 30 &&
         Array.isArray(item.pairings) &&
-        item.pairings.length >= 3 &&
+        item.pairings.length >= 1 &&
         item.pairings.every((pairing: any) =>
           typeof pairing?.dish === "string" &&
           typeof pairing?.why === "string" &&
@@ -522,7 +521,7 @@ function validateWineSpecificity(
 
   if (kind === "menu") {
     const dishes = Array.isArray(data.dishes) ? data.dishes : [];
-    if (dishes.length < 5) return false;
+    if (dishes.length < 1) return false;
     return dishes.every((item: any) =>
       typeof item?.name === "string" &&
       item.name.trim().length > 0 &&
@@ -671,14 +670,14 @@ function fallbackPairingsForWine(_wine: { name?: string; style?: string | null; 
 function isValidPairings(data: unknown): data is PairingResponse {
   if (!data || typeof data !== "object") return false;
   const d = data as Record<string, unknown>;
-  if (!Array.isArray(d.pairings) || d.pairings.length < 3 || d.pairings.length > 5) return false;
+  if (!Array.isArray(d.pairings) || d.pairings.length < 1) return false;
   return d.pairings.every((p: any) => typeof p.dish === "string" && p.dish.length > 0);
 }
 
 function isValidSuggestions(data: unknown): data is SuggestionResponse {
   if (!data || typeof data !== "object") return false;
   const d = data as Record<string, unknown>;
-  if (!Array.isArray(d.suggestions) || d.suggestions.length < 3 || d.suggestions.length > 5) return false;
+  if (!Array.isArray(d.suggestions) || d.suggestions.length < 1) return false;
   return d.suggestions.every((s: any) => typeof s.wineName === "string" && s.wineName.length > 0);
 }
 
@@ -706,10 +705,13 @@ export async function getWinePairings(wine: {
         wineVintage: wine.vintage,
         wineCountry: wine.country,
       },
-      { timeoutMs: 55_000, retries: 1 },
+      { timeoutMs: 90_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
+      return data;
+    }
+    if (data && Array.isArray(data.pairings) && data.pairings.length > 0) {
       return data;
     }
     const pairingContext = {
@@ -721,7 +723,7 @@ export async function getWinePairings(wine: {
       vintage: wine.vintage ?? null,
       grape: wine.grape ?? null,
     };
-    if (isValidPairings(data) && validateWineSpecificity(data, "pairings", pairingContext.wineName, pairingContext)) {
+    if (isValidPairings(data)) {
       return data;
     }
 
@@ -729,11 +731,14 @@ export async function getWinePairings(wine: {
     if (retryData && (retryData as any).fallback === true) {
       return retryData;
     }
-    if (retryData && isValidPairings(retryData) && validateWineSpecificity(retryData, "pairings", pairingContext.wineName, pairingContext)) {
+    if (retryData && Array.isArray(retryData.pairings) && retryData.pairings.length > 0) {
+      return retryData;
+    }
+    if (retryData && isValidPairings(retryData)) {
       return retryData;
     }
 
-    throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
+    throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
       throw err;
@@ -764,13 +769,13 @@ export async function getDishWineSuggestions(
           producer: w.producer,
         })),
       },
-      { timeoutMs: 55_000, retries: 1 },
+      { timeoutMs: 90_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
       return data;
     }
-    if (isValidSuggestions(data) && validateWineSpecificity(data, "suggestions", undefined, { dish })) {
+    if (isValidSuggestions(data)) {
       return data;
     }
 
@@ -778,11 +783,11 @@ export async function getDishWineSuggestions(
     if (retryData && (retryData as any).fallback === true) {
       return retryData;
     }
-    if (retryData && isValidSuggestions(retryData) && validateWineSpecificity(retryData, "suggestions", undefined, { dish })) {
+    if (retryData && isValidSuggestions(retryData)) {
       return retryData;
     }
 
-    throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
+    throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
       throw err;
@@ -806,25 +811,25 @@ export async function analyzeWineList(
     const request = () => invokeEdgeFunction<WineListAnalysis>(
       "analyze-wine-list",
       { ...attachment, userProfile },
-      { timeoutMs: 45_000, retries: 1 },
+      { timeoutMs: 60_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
       return data;
     }
-    if (data && Array.isArray(data.wines) && data.wines.length > 0 && validateWineSpecificity(data, "wineList")) {
+    if (data && Array.isArray(data.wines) && data.wines.length > 0) {
       return data;
     }
     const retryData = await request().catch(() => null);
     if (retryData && (retryData as any).fallback === true) {
       return retryData;
     }
-    if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0 && validateWineSpecificity(retryData, "wineList")) {
+    if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0) {
       return retryData;
     }
     if (data && isValidLenientWineList(data)) return data;
     if (retryData && isValidLenientWineList(retryData)) return retryData;
-    throw new Error("A análise não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
+    throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
       throw err;
@@ -843,25 +848,25 @@ export async function analyzeMenuForWine(
     const request = () => invokeEdgeFunction<MenuAnalysis>(
       "analyze-wine-list",
       { ...attachment, mode: "menu-for-wine", wineName },
-      { timeoutMs: 45_000, retries: 1 },
+      { timeoutMs: 60_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
       return data;
     }
-    if (data && Array.isArray(data.dishes) && data.dishes.length > 0 && validateWineSpecificity(data, "menu", { wineName })) {
+    if (data && Array.isArray(data.dishes) && data.dishes.length > 0) {
       return data;
     }
     const retryData = await request().catch(() => null);
     if (retryData && (retryData as any).fallback === true) {
       return retryData;
     }
-    if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0 && validateWineSpecificity(retryData, "menu", { wineName })) {
+    if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0) {
       return retryData;
     }
     if (data && isValidLenientMenu(data, wineName)) return data;
     if (retryData && isValidLenientMenu(retryData, wineName)) return retryData;
-    throw new Error("A análise do cardápio não ficou específica o suficiente. Tente novamente com uma imagem mais nítida.");
+    throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
       throw err;

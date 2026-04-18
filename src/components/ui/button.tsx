@@ -5,36 +5,41 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-[transform,background-color,border-color,box-shadow,color,filter] duration-200 ease-premium active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-all duration-200 ease-premium active:scale-[0.98] font-medium tracking-tight",
   {
     variants: {
       variant: {
         primary:
-          "rounded-[16px] text-primary-foreground bg-gradient-to-br from-primary via-primary to-[hsl(var(--forest-light))] shadow-[0_8px_20px_hsl(var(--primary)/0.18),inset_0_1px_1px_rgba(255,255,255,0.10)] hover:-translate-y-0.5 hover:shadow-[0_12px_26px_hsl(var(--primary)/0.22),inset_0_1px_1px_rgba(255,255,255,0.14)] hover:brightness-105 tracking-[-0.01em]",
+          "h-12 rounded-2xl bg-gradient-to-r from-[#7B1E2B] to-[#5A1420] px-4 text-white shadow-[0_8px_24px_rgba(123,30,43,0.18)] hover:opacity-95",
         secondary:
-          "rounded-[14px] bg-[rgba(255,255,255,0.74)] text-[#1A1715] border border-[rgba(255,255,255,0.16)] shadow-[0_1px_2px_rgba(0,0,0,0.022)] backdrop-blur-md hover:bg-[rgba(255,255,255,0.82)] hover:border-[rgba(255,255,255,0.22)] hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] tracking-[-0.01em]",
+          "h-11 rounded-xl border border-black/10 bg-white px-4 text-[#333] hover:bg-[#F8F8F8] hover:border-black/15 shadow-none",
+        tertiary:
+          "h-11 rounded-xl bg-[#F5EFE6] px-4 text-[#6A1A28] hover:bg-[#EADFCC] shadow-none",
         outline:
-          "rounded-[14px] bg-[rgba(255,255,255,0.48)] border border-white/14 text-foreground hover:bg-[rgba(255,255,255,0.58)] hover:-translate-y-0.5 hover:border-primary/14",
+          "h-11 rounded-xl border border-black/10 bg-white px-4 text-[#333] hover:bg-[#F8F8F8] hover:border-black/15 shadow-none",
         ghost:
-          "rounded-[14px] bg-transparent text-foreground hover:bg-[rgba(255,255,255,0.12)]",
+          "h-11 rounded-xl bg-transparent px-3 text-[#6B6B6B] hover:bg-[#F5EFE6] hover:text-[#1A1A1A] shadow-none",
         danger:
-          "rounded-[14px] bg-destructive text-destructive-foreground shadow-[0_2px_8px_rgba(220,38,38,0.14)] hover:-translate-y-0.5 hover:bg-destructive/90 hover:shadow-[0_4px_14px_rgba(220,38,38,0.18)]",
+          "h-12 rounded-2xl bg-gradient-to-r from-[#7B1E2B] to-[#5A1420] px-4 text-white shadow-[0_8px_24px_rgba(123,30,43,0.18)] hover:opacity-95",
         success:
-          "rounded-[14px] bg-success text-success-foreground shadow-[0_2px_8px_rgba(16,185,129,0.14)] hover:-translate-y-0.5 hover:bg-success/90",
+          "h-11 rounded-xl border border-black/10 bg-white px-4 text-[#333] hover:bg-[#F8F8F8] hover:border-black/15 shadow-none",
 
-        // Back-compat
+        // Back-compat aliases
         default:
-          "rounded-[16px] text-primary-foreground bg-gradient-to-br from-primary via-primary to-[hsl(var(--forest-light))] shadow-[0_8px_20px_hsl(var(--primary)/0.18)] hover:-translate-y-0.5 hover:shadow-[0_12px_26px_hsl(var(--primary)/0.22)] tracking-[-0.01em]",
-        destructive: "rounded-[14px] bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:-translate-y-0.5",
-        link: "text-primary underline-offset-4 hover:underline",
-        premium: "btn-premium text-white rounded-[14px] border-0 font-semibold tracking-[-0.01em] shadow-float",
-        glass: "btn-glass rounded-[14px] px-6 font-semibold backdrop-blur-xl",
+          "h-12 rounded-2xl bg-gradient-to-r from-[#7B1E2B] to-[#5A1420] px-4 text-white shadow-[0_8px_24px_rgba(123,30,43,0.18)] hover:opacity-95",
+        destructive:
+          "h-12 rounded-2xl bg-gradient-to-r from-[#7B1E2B] to-[#5A1420] px-4 text-white shadow-[0_8px_24px_rgba(123,30,43,0.18)] hover:opacity-95",
+        link: "h-11 rounded-xl bg-transparent px-0 text-[#6A1A28] underline-offset-4 hover:text-[#1A1A1A] hover:underline shadow-none",
+        premium:
+          "h-12 rounded-2xl bg-gradient-to-r from-[#7B1E2B] to-[#5A1420] px-4 text-white shadow-[0_8px_24px_rgba(123,30,43,0.18)] hover:opacity-95",
+        glass:
+          "h-11 rounded-xl border border-black/10 bg-white px-4 text-[#333] hover:bg-[#F8F8F8] hover:border-black/15 shadow-none",
       },
       size: {
-        default: "h-11 px-6 text-[14px]",
-        sm: "h-9 px-4 text-[13px]",
-        lg: "h-12 px-8 text-[15px]",
-        icon: "h-10 w-10 p-0",
+        default: "h-12 px-4 text-[15px]",
+        sm: "h-11 px-4 text-[14px]",
+        lg: "h-12 px-5 text-[15px]",
+        icon: "h-11 w-11 p-0",
       },
     },
     defaultVariants: {

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -105,8 +106,11 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
+    console.log(`[parse-csv-wines] openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) {
+      console.error("AI provider is not configured");
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
@@ -241,6 +245,34 @@ Regras:
     };
 
     async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
+      if (OPENAI_API_KEY) {
+        const result = await callOpenAIResponses<any>({
+          functionName: FUNCTION_NAME,
+          requestId: crypto.randomUUID(),
+          apiKey: OPENAI_API_KEY,
+          model: OPENAI_MODEL,
+          timeoutMs: 60_000,
+          temperature: 0.1,
+          instructions: systemPrompt,
+          input: [
+            {
+              role: "user",
+              content: [
+                { type: "input_text", text: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
+              ],
+            },
+          ],
+          schema: toolDef.function.parameters as Record<string, unknown>,
+          maxOutputTokens: 6_000,
+        });
+
+        if (!result.ok) {
+          return { errorStatus: result.status };
+        }
+
+        return { result: result.parsed };
+      }
+
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {

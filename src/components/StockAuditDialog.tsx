@@ -88,10 +88,8 @@ export function StockAuditDialog({
     <Dialog open={open} onOpenChange={(v) => { if (!busy) onOpenChange(v); }}>
       <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-[18px] tracking-tight">
-            {payload.title ?? "Registrar alteração de estoque"}
-          </DialogTitle>
-          <DialogDescription className="text-[12px] leading-relaxed">
+          <DialogTitle>{payload.title ?? "Registrar alteração de estoque"}</DialogTitle>
+          <DialogDescription>
             Antes de concluir, informe quem realizou esta alteração e o motivo, para manter o histórico da operação.
           </DialogDescription>
         </DialogHeader>
@@ -126,7 +124,7 @@ export function StockAuditDialog({
           </div>
 
           {success ? (
-            <div className="glass-card p-6 flex items-center gap-3">
+            <div className="rounded-2xl border border-black/5 bg-white p-6 flex items-center gap-3">
               <div className="h-10 w-10 rounded-2xl bg-success/10 text-success flex items-center justify-center ring-1 ring-success/15">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
@@ -140,11 +138,11 @@ export function StockAuditDialog({
               <div className="grid gap-3">
                 {locations?.length ? (
                   <div>
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                       Localização {requireLocation ? <span className="text-destructive">*</span> : null}
                     </Label>
                     <Select value={locationId} onValueChange={(v) => { setLocationId(v); setTouched(true); }}>
-                      <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                      <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Selecionar..." />
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl">
@@ -164,15 +162,15 @@ export function StockAuditDialog({
                 ) : null}
 
                 <div>
-                  <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Nome do responsável <span className="text-destructive">*</span>
-                  </Label>
+                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                      Nome do responsável <span className="text-destructive">*</span>
+                    </Label>
                   <Input
                     value={responsibleName}
                     onChange={(e) => setResponsibleName(e.target.value)}
                     onBlur={() => setTouched(true)}
                     placeholder="Ex.: Ana / Equipe salão / Gerência"
-                    className="mt-1 h-10 rounded-2xl"
+                    className="mt-1"
                   />
                   {touched && errors.responsible ? (
                     <p className="mt-1 text-[11px] text-destructive flex items-center gap-1.5">
@@ -183,11 +181,11 @@ export function StockAuditDialog({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                       Motivo da alteração <span className="text-destructive">*</span>
                     </Label>
                     <Select value={reason} onValueChange={(v) => { setReason(v as any); setTouched(true); }}>
-                      <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                      <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Selecionar..." />
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl">
@@ -206,7 +204,7 @@ export function StockAuditDialog({
                   </div>
 
                   <div>
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                       Observação complementar
                     </Label>
                     <Textarea
@@ -215,7 +213,7 @@ export function StockAuditDialog({
                       onBlur={() => setTouched(true)}
                       placeholder="Adicione contexto, se necessário"
                       rows={3}
-                      className="mt-1 rounded-2xl"
+                      className="mt-1"
                     />
                     {touched && errors.notes ? (
                       <p className="mt-1 text-[11px] text-destructive flex items-center gap-1.5">
@@ -229,8 +227,7 @@ export function StockAuditDialog({
               <DialogFooter className="mt-2 gap-2 sm:gap-2">
                 <Button
                   type="button"
-                  variant="outline"
-                  className="h-10 rounded-2xl"
+                  variant="secondary"
                   onClick={() => onOpenChange(false)}
                   disabled={busy}
                 >
@@ -239,7 +236,6 @@ export function StockAuditDialog({
                 <Button
                   type="button"
                   variant="primary"
-                  className="h-10 rounded-2xl"
                   disabled={!canSubmit}
                   onClick={async () => {
                     setTouched(true);

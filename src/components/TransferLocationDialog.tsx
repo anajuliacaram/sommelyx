@@ -59,23 +59,23 @@ export function TransferLocationDialog({
     <Dialog open={open} onOpenChange={(v) => { if (!transfer.isPending) onOpenChange(v); }}>
       <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-[18px] tracking-tight">Transferir entre localizações</DialogTitle>
-          <DialogDescription className="text-[12px] leading-relaxed">
+          <DialogTitle>Transferir entre localizações</DialogTitle>
+          <DialogDescription>
             Mova garrafas entre setores, gôndolas e linhas sem alterar o total do estoque. Isso fica registrado no Log.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3">
           <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Vinho</p>
+            <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Vinho</p>
             <p className="mt-1 text-[13px] font-semibold text-foreground truncate">{wineName}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">De</Label>
+              <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">De</Label>
               <Select value={fromId} onValueChange={setFromId}>
-                <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecionar..." />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl">
@@ -88,9 +88,9 @@ export function TransferLocationDialog({
               </Select>
             </div>
             <div>
-              <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Para</Label>
+              <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Para</Label>
               <Select value={toId} onValueChange={setToId}>
-                <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecionar..." />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl">
@@ -105,14 +105,14 @@ export function TransferLocationDialog({
           </div>
 
           <div>
-            <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Quantidade</Label>
+            <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Quantidade</Label>
             <Input
               type="number"
               min={1}
               max={fromLoc?.quantity ?? 999}
               value={qty}
               onChange={(e) => setQty(e.target.value)}
-              className="mt-1 h-10 rounded-2xl"
+              className="mt-1"
             />
             {fromLoc && Number.parseInt(qty || "0", 10) > fromLoc.quantity ? (
               <p className="mt-1 text-[11px] text-destructive">Quantidade maior que o disponível na localização de origem.</p>
@@ -122,14 +122,14 @@ export function TransferLocationDialog({
           {isCommercial ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                   Responsável <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   value={responsibleName}
                   onChange={(e) => setResponsibleName(e.target.value)}
                   placeholder="Ex.: Ana / Equipe salão / Gerência"
-                  className="mt-1 h-10 rounded-2xl"
+                  className="mt-1"
                   onFocus={() => {
                     if (!responsibleName && typeof user?.user_metadata?.full_name === "string") {
                       setResponsibleName(String(user.user_metadata.full_name));
@@ -138,11 +138,11 @@ export function TransferLocationDialog({
                 />
               </div>
               <div>
-                <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                   Motivo <span className="text-destructive">*</span>
                 </Label>
                 <Select value={reason} onValueChange={setReason}>
-                  <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                  <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Selecionar..." />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl">
@@ -155,14 +155,14 @@ export function TransferLocationDialog({
                 </Select>
               </div>
               <div className="sm:col-span-2">
-                <Label className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
                   Observação {normalizeAuditText(reason) === "Outro" ? <span className="text-destructive">*</span> : null}
                 </Label>
                 <Input
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Adicione contexto, se necessário"
-                  className="mt-1 h-10 rounded-2xl"
+                  className="mt-1"
                 />
               </div>
             </div>
@@ -170,13 +170,12 @@ export function TransferLocationDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-2">
-          <Button type="button" variant="outline" className="h-10 rounded-2xl" onClick={close} disabled={transfer.isPending}>
+          <Button type="button" variant="secondary" onClick={close} disabled={transfer.isPending}>
             Cancelar
           </Button>
           <Button
             type="button"
             variant="primary"
-            className="h-10 rounded-2xl"
             disabled={!canSubmit || transfer.isPending}
             onClick={async () => {
               try {
@@ -203,4 +202,3 @@ export function TransferLocationDialog({
     </Dialog>
   );
 }
-

@@ -1,38 +1,38 @@
 export function LandingBackground() {
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#F4F1EC]">
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-gradient-to-br from-[#F4F1EC] via-[#EFE7DD] to-[#E6DBCF]">
       <div
-        className="absolute inset-x-0 top-0 h-[36rem]"
+        className="absolute inset-x-0 top-0 h-[22rem]"
         style={{
-          background: "linear-gradient(180deg, rgba(23,32,27,0.14) 0%, rgba(23,32,27,0.08) 42%, rgba(244,241,236,0) 100%)",
+          background: "linear-gradient(180deg, rgba(123,30,43,0.08) 0%, rgba(123,30,43,0.04) 42%, rgba(244,241,236,0) 100%)",
         }}
       />
       <div
-        className="absolute top-[-10%] left-[-8%] w-[56vw] h-[56vw] rounded-full"
+        className="absolute top-[-8%] left-[-8%] w-[42vw] h-[42vw] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(198,167,104,0.16) 0%, transparent 68%)",
-          filter: "blur(110px)",
+          background: "radial-gradient(circle, rgba(198,167,104,0.14) 0%, transparent 68%)",
+          filter: "blur(72px)",
         }}
       />
       <div
-        className="absolute top-[4%] right-[-12%] w-[48vw] h-[48vw] rounded-full"
+        className="absolute top-[4%] right-[-12%] w-[34vw] h-[34vw] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(110,30,42,0.10) 0%, transparent 70%)",
-          filter: "blur(130px)",
+          background: "radial-gradient(circle, rgba(110,30,42,0.08) 0%, transparent 70%)",
+          filter: "blur(78px)",
         }}
       />
       <div
-        className="absolute top-[40%] left-[18%] w-[42vw] h-[42vw] rounded-full"
+        className="absolute top-[36%] left-[18%] w-[30vw] h-[30vw] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 72%)",
-          filter: "blur(100px)",
+          background: "radial-gradient(circle, rgba(255,255,255,0.42) 0%, transparent 72%)",
+          filter: "blur(70px)",
         }}
       />
       <div
-        className="absolute bottom-[5%] right-[10%] w-[32vw] h-[32vw] rounded-full"
+        className="absolute bottom-[5%] right-[10%] w-[24vw] h-[24vw] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(95,111,82,0.12) 0%, transparent 72%)",
-          filter: "blur(115px)",
+          background: "radial-gradient(circle, rgba(95,111,82,0.09) 0%, transparent 72%)",
+          filter: "blur(72px)",
         }}
       />
 

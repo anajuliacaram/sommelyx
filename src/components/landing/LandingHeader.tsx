@@ -11,8 +11,8 @@ interface LandingHeaderProps {
 
 export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
   const { scrollY } = useScroll();
-  const blur = useTransform(scrollY, [0, 120], [18, 32]);
-  const opacity = useTransform(scrollY, [0, 120], [0.38, 0.58]);
+  const blur = useTransform(scrollY, [0, 120], [10, 16]);
+  const opacity = useTransform(scrollY, [0, 120], [0.72, 0.84]);
 
   return (
     <motion.header
@@ -22,8 +22,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
         WebkitBackdropFilter: useTransform(blur, (v) => `blur(${v}px) saturate(1.3)`),
         background: useTransform(
           opacity,
-          (o) =>
-            `linear-gradient(to bottom, rgba(255,255,255,${Math.min(o + 0.15, 0.62)}), rgba(255,255,255,${o}))`
+          (o) => `linear-gradient(to bottom, rgba(255,255,255,${Math.min(o + 0.06, 0.92)}), rgba(255,255,255,${o}))`
         ),
         boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
       }}
@@ -40,7 +39,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             variant="navbar"
             className="h-10 sm:h-12 md:h-14 drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]"
           />
-          <span className="font-serif text-[22px] sm:text-[26px] md:text-[32px] tracking-[-0.01em] font-extrabold" style={{ color: "#3d0a16" }}>
+          <span className="font-serif text-[22px] sm:text-[26px] md:text-[32px] tracking-[-0.01em] font-extrabold" style={{ color: "#1A1A1A" }}>
             Sommelyx
           </span>
         </a>
@@ -49,10 +48,10 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://instagram.com/sommelyx"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
-            style={{
-              background: "rgba(255,255,255,0.72)",
-              border: "1px solid rgba(255,255,255,0.5)",
+              className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
+              style={{
+              background: "rgba(255,255,255,0.88)",
+              border: "1px solid rgba(0,0,0,0.06)",
               color: "hsl(var(--wine))",
               boxShadow: "0 8px 18px -14px rgba(0,0,0,0.18)",
             }}
@@ -64,10 +63,10 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             href="https://www.linkedin.com/company/sommelyx/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
-            style={{
-              background: "rgba(255,255,255,0.72)",
-              border: "1px solid rgba(255,255,255,0.5)",
+              className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
+              style={{
+              background: "rgba(255,255,255,0.88)",
+              border: "1px solid rgba(0,0,0,0.06)",
               color: "hsl(var(--wine))",
               boxShadow: "0 8px 18px -14px rgba(0,0,0,0.18)",
             }}
