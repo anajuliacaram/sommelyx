@@ -160,7 +160,7 @@ export function AppSidebar() {
 
         <SidebarContent className="px-3 pt-1 gap-0">
           <SidebarGroup className="py-0">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold mb-1 mt-1 px-3 text-neutral-600">
+            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-bold mb-2 mt-3 px-3 text-neutral-600">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -186,7 +186,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-0 py-0">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold mb-1 mt-0 px-3 text-neutral-600">
+            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-bold mb-2 mt-3 px-3 text-neutral-600">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -218,7 +218,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={signOut}
-                  className="sidebar-item !h-[38px] !text-[12px] hover:!bg-red-500/10 hover:!text-red-600 hover:!border-red-500/15"
+                  className="sidebar-item md:!h-[38px] md:!text-[12px] hover:!bg-red-500/10 hover:!text-red-600 hover:!border-red-500/15"
                 >
                   <LogOut className="h-4 w-4 shrink-0" />
                   <span className="font-medium">Sair</span>
