@@ -1,15 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useWines, Wine } from "@/hooks/useWines";
 import { toast } from "sonner";
-import { Wine as WineIcon, MapPin, Star } from "@/icons/lucide";
+import { Wine as WineIcon, MapPin, Star, Search } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
+
+type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
+
+const TYPE_FILTERS: { id: WineTypeFilter; label: string; pill: string; dot: string }[] = [
+  { id: "all", label: "Todos", pill: "bg-[#EFEDE8] text-[#1C1C1C]", dot: "bg-[#1C1C1C]/30" },
+  { id: "tinto", label: "Tinto", pill: "bg-[#7B1E2B] text-white", dot: "bg-[#7B1E2B]" },
+  { id: "branco", label: "Branco", pill: "bg-[#C8A96A] text-white", dot: "bg-[#C8A96A]" },
+  { id: "rose", label: "Rosé", pill: "bg-[#E8A0A6] text-white", dot: "bg-[#E8A0A6]" },
+  { id: "espumante", label: "Espumante", pill: "bg-[#6A8F6B] text-white", dot: "bg-[#6A8F6B]" },
+  { id: "sobremesa", label: "Sobremesa", pill: "bg-[#A67C52] text-white", dot: "bg-[#A67C52]" },
+];
+
+function classifyWineType(style?: string | null): WineTypeFilter {
+  const s = (style || "").toLowerCase();
+  if (!s) return "all";
+  if (/(espumante|sparkl|champ|prosecco|cava|frisante)/.test(s)) return "espumante";
+  if (/(ros[eé])/.test(s)) return "rose";
+  if (/(sobremesa|dessert|fortific|porto|sauternes|licoroso|tokaj)/.test(s)) return "sobremesa";
+  if (/(branco|white|chardonnay|sauvignon blanc|riesling|verdejo|albariño|albarino)/.test(s)) return "branco";
+  if (/(tinto|red|cabernet|merlot|malbec|pinot noir|syrah|shiraz|tempranillo|sangiovese|nebbiolo)/.test(s)) return "tinto";
+  return "all";
+}
+
+function dotForWine(style?: string | null): string {
+  const t = classifyWineType(style);
+  const found = TYPE_FILTERS.find((f) => f.id === t);
+  return found && t !== "all" ? found.dot : "bg-[#1C1C1C]/25";
+}
 
 interface AddConsumptionDialogProps {
   open: boolean;
@@ -34,6 +61,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [tastingNotes, setTastingNotes] = useState("");
   const [rating, setRating] = useState<number>(0);
   const [consumedAt, setConsumedAt] = useState(new Date().toISOString().split("T")[0]);
+  const [wineSearch, setWineSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<WineTypeFilter>("all");
 
   useEffect(() => {
     if (open && preSelectedWine) {
@@ -63,7 +92,20 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
     setTastingNotes("");
     setRating(0);
     setConsumedAt(new Date().toISOString().split("T")[0]);
+    setWineSearch("");
+    setTypeFilter("all");
   };
+
+  const cellarWines = useMemo(() => (wines || []).filter((w) => w.quantity > 0), [wines]);
+  const filteredWines = useMemo(() => {
+    const q = wineSearch.trim().toLowerCase();
+    return cellarWines.filter((w) => {
+      if (typeFilter !== "all" && classifyWineType(w.style) !== typeFilter) return false;
+      if (!q) return true;
+      const hay = `${w.name} ${w.producer || ""} ${w.grape || ""} ${w.country || ""} ${w.region || ""} ${w.vintage || ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [cellarWines, wineSearch, typeFilter]);
 
   const handleSelectWine = (wineId: string) => {
     setSelectedWineId(wineId);
@@ -137,19 +179,78 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
             </div>
           </div>
 
-          {source === "cellar" && wines && wines.length > 0 && (
-            <div className="space-y-1.5">
-              <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Selecionar vinho</Label>
-              <Select value={selectedWineId} onValueChange={handleSelectWine}>
-                <SelectTrigger className="rounded-xl"><SelectValue placeholder="Escolha um vinho da adega" /></SelectTrigger>
-                <SelectContent>
-                  {wines.filter(w => w.quantity > 0).map((w) => (
-                    <SelectItem key={w.id} value={w.id}>
-                      {w.name} {w.vintage ? `(${w.vintage})` : ""} — {w.quantity} garrafa{w.quantity !== 1 ? "s" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {source === "cellar" && cellarWines.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs tracking-[0.12em] uppercase text-black/50">Selecionar vinho</Label>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/40" />
+                <Input
+                  value={wineSearch}
+                  onChange={(e) => setWineSearch(e.target.value)}
+                  placeholder="Buscar por nome, produtor, uva, safra…"
+                  className="pl-9 rounded-xl"
+                />
+              </div>
+
+              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+                {TYPE_FILTERS.map((f) => {
+                  const active = typeFilter === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setTypeFilter(f.id)}
+                      className={cn(
+                        "shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-all duration-200",
+                        f.pill,
+                        active ? "scale-[1.05] shadow-sm ring-1 ring-black/10" : "opacity-80 hover:opacity-100",
+                      )}
+                    >
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                className="max-h-[260px] overflow-y-auto rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm divide-y divide-black/5"
+                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(0,0,0,0.15) transparent" }}
+              >
+                {filteredWines.length === 0 ? (
+                  <div className="px-4 py-8 text-center">
+                    <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado</p>
+                    <p className="text-xs text-black/50 mt-1">Use a busca ou ajuste os filtros</p>
+                  </div>
+                ) : (
+                  filteredWines.map((w) => {
+                    const selected = selectedWineId === w.id;
+                    return (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => handleSelectWine(w.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all",
+                          "hover:bg-[#F6F4F1] active:scale-[0.99]",
+                          selected && "bg-[#F6F4F1]",
+                        )}
+                      >
+                        <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", dotForWine(w.style))} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13.5px] font-semibold text-[#1C1C1C] truncate">{w.name}</p>
+                          <p className="text-[11.5px] text-black/55 truncate">
+                            {[w.grape, w.vintage, w.country].filter(Boolean).join(" · ") || w.producer || "—"}
+                          </p>
+                        </div>
+                        <span className="text-[11.5px] font-medium text-black/60 shrink-0">
+                          {w.quantity} gf{w.quantity !== 1 ? "s" : ""}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
             </div>
           )}
 
