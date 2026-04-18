@@ -131,20 +131,6 @@ export default function PersonalCellarPage() {
             </div>
             <button
               type="button"
-              onClick={toggleLabels}
-              className="h-10 rounded-[14px] px-3 text-[12px] font-semibold transition-all"
-              style={{
-                background: showLabels ? "rgba(95,111,82,0.14)" : "rgba(255,255,255,0.78)",
-                border: `1px solid ${showLabels ? "rgba(95,111,82,0.22)" : "rgba(95,111,82,0.12)"}`,
-                color: showLabels ? "#5F7F52" : "rgba(26,23,21,0.72)",
-              }}
-              aria-pressed={showLabels}
-              title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
-            >
-              {showLabels ? "Rótulos: on" : "Rótulos: off"}
-            </button>
-            <button
-              type="button"
               className="editorial-btn-primary ml-auto"
               onClick={() => setAddOpen(true)}
             >
