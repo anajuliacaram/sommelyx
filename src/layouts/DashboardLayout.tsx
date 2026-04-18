@@ -33,7 +33,10 @@ export default function DashboardLayout() {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="dashboard-shell h-dvh overflow-hidden flex w-full relative">
+      <div
+        className="dashboard-shell h-dvh overflow-hidden flex w-full relative"
+        data-theme={profileType === "commercial" ? "business" : undefined}
+      >
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
@@ -95,16 +98,18 @@ export default function DashboardLayout() {
               </div>
 
               <div className="flex items-center gap-2.5">
-                <span
-                  className={cn(
-                    "hidden sm:inline-flex items-center h-7 px-3 shrink-0 whitespace-nowrap rounded-full text-[10px] font-bold uppercase tracking-[0.08em]",
-                    profileType === "commercial"
-                      ? "bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))] border border-[rgba(95,111,82,0.14)]"
-                      : "bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))] border border-[rgba(95,111,82,0.14)]",
-                  )}
-                >
-                  {profileType === "commercial" ? "COMERCIAL" : "PESSOAL"}
-                </span>
+                {profileType === "commercial" ? (
+                  <span className="business-mode-badge hidden sm:inline-flex">Business</span>
+                ) : (
+                  <span
+                    className={cn(
+                      "hidden sm:inline-flex items-center h-7 px-3 shrink-0 whitespace-nowrap rounded-full text-[10px] font-bold uppercase tracking-[0.08em]",
+                      "bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))] border border-[rgba(95,111,82,0.14)]",
+                    )}
+                  >
+                    PESSOAL
+                  </span>
+                )}
 
                 <Button
                   type="button"
