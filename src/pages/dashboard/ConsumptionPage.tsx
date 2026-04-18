@@ -212,7 +212,7 @@ export default function ConsumptionPage() {
       {/* Filtros inteligentes */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(26,23,19,0.45)]">
+          <span className="rounded-full border border-[rgba(123,30,43,0.18)] bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
             Período
           </span>
           <div className="flex items-center gap-1.5">
@@ -224,7 +224,7 @@ export default function ConsumptionPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(26,23,19,0.45)]">
+          <span className="rounded-full border border-[rgba(123,30,43,0.18)] bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
             Origem
           </span>
           <div className="flex items-center gap-1.5">
