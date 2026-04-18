@@ -52,7 +52,7 @@ export default function RegistersPage() {
   if (isLoading) return <div className="text-sm text-muted-foreground p-4">Carregando cadastros…</div>;
 
   return (
-    <div className="space-y-4 max-w-[900px]">
+    <div className="space-y-7 max-w-[900px]">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
         <div className="glass-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
