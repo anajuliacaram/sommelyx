@@ -1157,7 +1157,7 @@ export default function CellarPage() {
           } : undefined}
         />
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className={cn("grid gap-4", showLabels ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" : "grid-cols-[repeat(auto-fill,minmax(260px,1fr))]") }>
           {filtered.map((wine) => (
             <WineCard
               key={wine.id}
