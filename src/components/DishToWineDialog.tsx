@@ -330,8 +330,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     } else if (step === "ext-menu-photo") {
       setStep("ext-wine-input");
       setPreview(null);
-    } else if (step === "results") {
+    } else if (step === "intent") {
       setStep("dish");
+    } else if (step === "results") {
+      setStep(source === "cellar" ? "intent" : "dish");
       setSuggestions(null);
     } else if (step === "wine-results") {
       setStep("select-wine");
