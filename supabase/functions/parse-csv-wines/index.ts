@@ -105,12 +105,11 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[parse-csv-wines] openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) {
-      console.error("AI provider is not configured");
+    console.log(`[parse-csv-wines] openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is not configured");
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
@@ -245,71 +244,31 @@ Regras:
     };
 
     async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
-      if (OPENAI_API_KEY) {
-        const result = await callOpenAIResponses<any>({
-          functionName: FUNCTION_NAME,
-          requestId: crypto.randomUUID(),
-          apiKey: OPENAI_API_KEY,
-          model: OPENAI_MODEL,
-          timeoutMs: 60_000,
-          temperature: 0.1,
-          instructions: systemPrompt,
-          input: [
-            {
-              role: "user",
-              content: [
-                { type: "input_text", text: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
-              ],
-            },
-          ],
-          schema: toolDef.function.parameters as Record<string, unknown>,
-          maxOutputTokens: 6_000,
-        });
-
-        if (!result.ok) {
-          return { errorStatus: result.status };
-        }
-
-        return { result: result.parsed };
-      }
-
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
-          temperature: 0.1,
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: `Analise o conteúdo abaixo e extraia os dados de vinhos. Retorne APENAS via tool_call.\n\n${chunkText}`,
-            },
-          ],
-          tools: [toolDef],
-          tool_choice: { type: "function", function: { name: "extract_wines" } },
-        }),
+      const result = await callOpenAIResponses<any>({
+        functionName: FUNCTION_NAME,
+        requestId: crypto.randomUUID(),
+        apiKey: OPENAI_API_KEY,
+        model: OPENAI_MODEL,
+        timeoutMs: 60_000,
+        temperature: 0.1,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: "user",
+            content: [
+              { type: "input_text", text: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
+            ],
+          },
+        ],
+        schema: toolDef.function.parameters as Record<string, unknown>,
+        maxOutputTokens: 6_000,
       });
 
-      if (!response.ok) {
-        return { errorStatus: response.status };
+      if (!result.ok) {
+        return { errorStatus: result.status };
       }
 
-      const data = await response.json();
-      const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-      if (!toolCall) {
-        const content = data.choices?.[0]?.message?.content;
-        if (typeof content === "string" && content.trim().startsWith("{")) {
-          try { return { result: JSON.parse(content) }; } catch { /* ignore */ }
-        }
-        return { errorStatus: 422 };
-      }
-
-      const result = JSON.parse(toolCall.function.arguments);
-      return { result };
+      return { result: result.parsed };
     }
 
     // ── PARALLEL chunk processing for speed ──
