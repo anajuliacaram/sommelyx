@@ -1022,13 +1022,13 @@
   }
   [data-sidebar="sidebar"] ::-webkit-scrollbar-thumb,
   [data-sidebar="content"]::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, hsl(82 18% 32%) 0%, hsl(82 16% 28%) 45%, hsl(355 38% 26%) 100%);
+    background: linear-gradient(180deg, hsla(82, 18%, 22%, 0.5) 0%, hsla(82, 16%, 18%, 0.5) 45%, hsla(355, 38%, 18%, 0.5) 100%);
     border-radius: 9999px;
-    box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.06);
+    box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.05);
   }
   [data-sidebar="sidebar"] ::-webkit-scrollbar-thumb:hover,
   [data-sidebar="content"]::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, hsl(82 22% 36%) 0%, hsl(82 18% 30%) 45%, hsl(355 44% 30%) 100%);
+    background: linear-gradient(180deg, hsla(82, 22%, 26%, 0.55) 0%, hsla(82, 18%, 20%, 0.55) 45%, hsla(355, 44%, 22%, 0.55) 100%);
   }
 }
 
