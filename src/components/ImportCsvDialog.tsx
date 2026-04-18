@@ -52,6 +52,7 @@ type EditableField =
   | "style"
   | "quantity"
   | "purchase_price"
+  | "current_value"
   | "country"
   | "region"
   | "grape"
@@ -87,13 +88,14 @@ const baseColumns: ColumnDef[] = [
   { key: "vintage", label: "Safra", kind: "number", placeholder: "2020", optional: true },
   { key: "style", label: "Estilo", kind: "select", placeholder: "Selecionar", optional: true },
   { key: "quantity", label: "Quantidade", kind: "number", align: "right", placeholder: "1" },
-  { key: "purchase_price", label: "Preço", kind: "number", align: "right", placeholder: "0,00", optional: true },
+  { key: "purchase_price", label: "Varejo R$", kind: "number", align: "right", placeholder: "0,00", optional: true },
+  { key: "current_value", label: "Gôndola R$", kind: "number", align: "right", placeholder: "0,00", optional: true },
 ];
 
 const advancedColumns: ColumnDef[] = [
   { key: "country", label: "País", kind: "text", placeholder: "País", optional: true },
   { key: "region", label: "Região", kind: "text", placeholder: "Região", optional: true },
-  { key: "grape", label: "Uva", kind: "text", placeholder: "Uva", optional: true },
+  { key: "grape", label: "Uva/Blend", kind: "text", placeholder: "Uva", optional: true },
   { key: "cellar_location", label: "Localização", kind: "text", placeholder: "Adega", optional: true },
   { key: "drink_from", label: "Beber de", kind: "number", placeholder: "2025", optional: true },
   { key: "drink_until", label: "Beber até", kind: "number", placeholder: "2030", optional: true },
@@ -976,6 +978,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         return row.quantity ?? "";
       case "purchase_price":
         return formatPrice((row as DraftWine).price ?? row.purchase_price);
+      case "current_value":
+        return formatPrice((row as any).current_value);
       case "vintage":
         return row.vintage ?? "";
       case "drink_from":
@@ -1214,7 +1218,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           region: w.region || null,
           grape: w.grape || null,
           purchase_price: typeof (w.price ?? w.purchase_price) === "number" ? (w.price ?? w.purchase_price) : null,
-          current_value: null,
+          current_value: typeof (w as any).current_value === "number" ? (w as any).current_value : null,
           cellar_location: w.cellar_location || null,
           drink_from: w.drink_from || null,
           drink_until: w.drink_until || null,
@@ -1314,6 +1318,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               : row,
           ),
         );
+        return;
+      case "current_value":
+        updateWineRow(rowIndex, field, rawValue ? Number.parseFloat(rawValue) : undefined);
         return;
       default:
         updateWineRow(rowIndex, field, rawValue);
