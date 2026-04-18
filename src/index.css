@@ -437,6 +437,30 @@
     .pad-card { padding: 16px; }
   }
 
+  /* ── Sommelyx Input Premium (canônico) ──
+     Use em qualquer <input>/<select> nativo onde o componente Input não couber.
+     ────────────────────────────────────────── */
+  .input-premium {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    font-size: 16px;
+    color: #1F1F1F;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #E5E2DC;
+    outline: none;
+    transition: border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .input-premium::placeholder { color: #9A9A9A; }
+  .input-premium:hover { border-color: #D0CDC6; }
+  .input-premium:focus {
+    border-color: #6F7F5B;
+    box-shadow: 0 0 0 2px rgba(111, 127, 91, 0.15);
+  }
+  .input-premium:disabled { opacity: 0.6; cursor: not-allowed; }
+
   .layout-section {
     @apply gap-6;
   }
