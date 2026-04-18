@@ -30,7 +30,9 @@ export default function PersonalCellarPage() {
 
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
-  const [sort, setSort] = useState<"window" | "rating" | "vintage" | "value">("window");
+  const [sort, setSort] = useState<
+    "window" | "recent" | "rating" | "vintage" | "vintage_old" | "value" | "value_low"
+  >("window");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [showLabels, setShowLabels] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
