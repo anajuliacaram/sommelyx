@@ -369,7 +369,7 @@ serve(async (req) => {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime);
       return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
     }
-    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines } = body as Record<string, any>;
+    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines, intent } = body as Record<string, any>;
     const wineProducer = (body as any).wineProducer || null;
     const wineVintage = (body as any).wineVintage || null;
     const wineCountry = (body as any).wineCountry || null;
