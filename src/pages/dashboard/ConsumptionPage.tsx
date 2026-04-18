@@ -7,6 +7,7 @@ import { ConsumptionTimeline } from "@/components/ConsumptionTimeline";
 
 type PeriodFilter = "week" | "month" | "year";
 type SourceFilter = "cellar" | "external" | "all";
+type SortBy = "recent" | "old" | "rating";
 
 const periodOptions: Array<{ value: PeriodFilter; label: string }> = [
   { value: "week", label: "Semana" },
@@ -18,6 +19,12 @@ const sourceOptions: Array<{ value: SourceFilter; label: string }> = [
   { value: "all", label: "Todas" },
   { value: "cellar", label: "Minha adega" },
   { value: "external", label: "Adega externa" },
+];
+
+const sortOptions: Array<{ value: SortBy; label: string }> = [
+  { value: "recent", label: "Mais recentes" },
+  { value: "old", label: "Mais antigos" },
+  { value: "rating", label: "Melhor avaliados" },
 ];
 
 function FilterPill({
