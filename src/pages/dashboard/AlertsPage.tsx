@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2, X } from "@/icons/lucide";
+import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2, X, BarChart3 } from "@/icons/lucide";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useWines } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,7 @@ export default function AlertsPage() {
   const [insights, setInsights] = useState<Record<string, WineInsight>>({});
   const [loadingInsight, setLoadingInsight] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [analysisOpen, setAnalysisOpen] = useState(false);
 
   const alerts = useMemo(() => {
     if (!wines) return [];
