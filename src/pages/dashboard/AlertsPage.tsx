@@ -326,25 +326,51 @@ export default function AlertsPage() {
 
                 {/* ── Alert cards ── */}
                 <div className="space-y-1">
-                  {items.map((a, i) => (
+                  {items.map((a, i) => {
+                    const wineColor = getStyleColor(a.style);
+                    const familyLabel = (() => {
+                      const fam = getStyleFamily(a.style);
+                      const map: Record<string, string> = { tinto: "Tinto", branco: "Branco", "rosé": "Rosé", espumante: "Espumante", sobremesa: "Sobremesa" };
+                      return map[fam] || "Tinto";
+                    })();
+                    return (
                     <motion.div key={a.id} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
-                      <div className="glass-card overflow-hidden">
+                      <div className="glass-card overflow-hidden relative">
+                        {/* Barra lateral colorida por tipo de vinho */}
+                        <span
+                          aria-hidden
+                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-[2px]"
+                          style={{ background: wineColor, boxShadow: `0 0 8px ${wineColor}40` }}
+                        />
                         {/* Card row */}
                         <div
-                          className="py-2 gap-2 cursor-pointer group transition-colors hover:bg-black/[0.015] flex items-center justify-start px-[30px]"
+                          className="py-2 gap-2 cursor-pointer group transition-colors hover:bg-black/[0.015] flex items-center justify-start px-[24px]"
                           onClick={() => navigate("/dashboard/cellar")}
                           role="button"
                           tabIndex={0}
                         >
-                          {/* Icon */}
-                          <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center shrink-0", a.bg)}>
-                            <a.icon className={cn("h-2.5 w-2.5", a.tone)} />
-                          </div>
+                          {/* Bolinha colorida tipo de vinho */}
+                          <span
+                            aria-hidden
+                            className="h-2.5 w-2.5 rounded-full shrink-0 ring-1 ring-black/5"
+                            style={{ background: wineColor }}
+                          />
 
                           {/* Text */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold truncate text-foreground leading-tight text-base font-sans">{a.wineName}</p>
-                            <p className="text-muted-foreground leading-tight mt-px font-medium text-xs">{a.desc}</p>
+                            <div className="flex items-center gap-1.5 leading-none">
+                              <span
+                                className="text-[10px] font-semibold uppercase"
+                                style={{ letterSpacing: "0.12em", color: wineColor }}
+                              >
+                                {familyLabel}
+                              </span>
+                              {a.vintage && (
+                                <span className="text-[10px] font-medium text-muted-foreground/60">· {a.vintage}</span>
+                              )}
+                            </div>
+                            <p className="font-semibold truncate text-foreground leading-tight text-[14px] font-sans mt-0.5">{a.wineName}</p>
+                            <p className="text-muted-foreground leading-tight mt-px font-medium text-[11px]">{a.desc}</p>
                           </div>
 
                           {/* Actions cluster */}
