@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Wine, Utensils, Store } from "@/icons/lucide";
+import { Wine, UtensilsCrossed, ShoppingCart } from "@/icons/lucide";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -20,7 +20,7 @@ const audiences = [
     border: "rgba(123,30,43,0.14)",
   },
   {
-    icon: Utensils,
+    icon: UtensilsCrossed,
     title: "Restaurantes & Bares",
     desc: "Carta sob controle, giro por rótulo e harmonização instantânea para sua brigada.",
     accent: "#5F6F52",
@@ -28,7 +28,7 @@ const audiences = [
     border: "rgba(95,111,82,0.18)",
   },
   {
-    icon: Store,
+    icon: ShoppingCart,
     title: "Lojistas & Importadores",
     desc: "Estoque, vendas e reposição em tempo real. Decisões financeiras com base em dados.",
     accent: "#B8860B",
