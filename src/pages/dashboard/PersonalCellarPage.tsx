@@ -122,9 +122,12 @@ export default function PersonalCellarPage() {
               }}
             >
               <option value="window">Janela ideal</option>
+              <option value="recent">Recém-adicionados</option>
               <option value="rating">Maior nota</option>
               <option value="vintage">Safra mais nova</option>
-              <option value="value">Maior valor</option>
+              <option value="vintage_old">Safra mais antiga</option>
+              <option value="value">Mais caros</option>
+              <option value="value_low">Mais baratos</option>
             </select>
             <div className="editorial-segmented">
               <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
