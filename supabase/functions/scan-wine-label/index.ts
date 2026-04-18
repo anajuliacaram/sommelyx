@@ -331,16 +331,6 @@ serve(async (req) => {
         retryable: true,
       });
     }
-      console.error(`[${FUNCTION_NAME}] request_id=${requestId} missing API keys`);
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { request_id: requestId, reason: "missing_api_key" });
-      return fail(500, {
-        ok: false,
-        code: "CONFIG_ERROR",
-        error: "O scanner está temporariamente indisponível. Tente novamente em instantes.",
-        requestId,
-        retryable: true,
-      });
-    }
 
     const systemPrompt =
       `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia SOMENTE informações que estejam EXPLICITAMENTE VISÍVEIS no rótulo.\n\n` +
