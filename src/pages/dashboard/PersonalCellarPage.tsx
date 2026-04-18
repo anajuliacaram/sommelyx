@@ -311,12 +311,26 @@ export default function PersonalCellarPage() {
                 w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until;
               return (
                 <div key={w.id} className="editorial-row" onClick={() => setEditWine(w)}>
-                  <div
-                    className="editorial-bottle-icon"
-                    style={{ background: `${color}14`, color }}
-                  >
-                    <WineIcon className="h-4 w-4" />
-                  </div>
+                  {showLabels && w.image_url ? (
+                    <div
+                      className="editorial-bottle-icon overflow-hidden"
+                      style={{ background: "rgba(95,111,82,0.06)", padding: 0 }}
+                    >
+                      <img
+                        src={w.image_url}
+                        alt={w.name}
+                        loading="lazy"
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="editorial-bottle-icon"
+                      style={{ background: `${color}14`, color }}
+                    >
+                      <WineIcon className="h-4 w-4" />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-2">
                       <h4 className="text-[14px] font-bold" style={{ color: "#1a1713" }}>
