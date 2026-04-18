@@ -85,6 +85,15 @@ export function useWines() {
   return useQuery({
     queryKey: ["wines", user?.id ?? "demo"],
     queryFn: async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from("wines")
+          .select("id,user_id,name,producer,country,region,grape,vintage,style,purchase_price,current_value,quantity,rating,drink_from,drink_until,cellar_location,food_pairing,tasting_notes,image_url,created_at,updated_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data as Wine[];
+      }
       if (sommelyxData?.wines?.length) {
         const now = new Date().toISOString();
         return sommelyxData.wines.map((wine, index) => ({
@@ -111,14 +120,7 @@ export function useWines() {
           updated_at: now,
         })) as Wine[];
       }
-      if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase
-        .from("wines")
-        .select("id,user_id,name,producer,country,region,grape,vintage,style,purchase_price,current_value,quantity,rating,drink_from,drink_until,cellar_location,food_pairing,tasting_notes,image_url,created_at,updated_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as Wine[];
+      throw new Error("Not authenticated");
     },
     enabled: !!user || !!sommelyxData?.wines?.length,
     staleTime: 30_000,
@@ -134,6 +136,20 @@ export function useWineMetrics() {
   const { data: kpiRows, isLoading: kpiLoading } = useQuery({
     queryKey: ["wines-kpi", user?.id ?? "demo"],
     queryFn: async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from("wines")
+          .select("quantity,current_value,purchase_price,drink_from,drink_until")
+          .eq("user_id", user.id);
+        if (error) throw error;
+        return data as Array<{
+          quantity: number;
+          current_value: number | null;
+          purchase_price: number | null;
+          drink_from: number | null;
+          drink_until: number | null;
+        }>;
+      }
       if (sommelyxData?.wines?.length) {
         return sommelyxData.wines.map((w) => ({
           quantity: w.quantity,
@@ -143,19 +159,7 @@ export function useWineMetrics() {
           drink_until: w.drink_until,
         }));
       }
-      if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase
-        .from("wines")
-        .select("quantity,current_value,purchase_price,drink_from,drink_until")
-        .eq("user_id", user.id);
-      if (error) throw error;
-      return data as Array<{
-        quantity: number;
-        current_value: number | null;
-        purchase_price: number | null;
-        drink_from: number | null;
-        drink_until: number | null;
-      }>;
+      throw new Error("Not authenticated");
     },
     enabled: !!user || !!sommelyxData?.wines?.length,
     staleTime: 30_000, // avoid refetch on every mount
