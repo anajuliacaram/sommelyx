@@ -24,6 +24,14 @@ type ConsumptionTimelineProps = {
 };
 
 export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: ConsumptionTimelineProps) {
+  const { data: wines = [] } = useWines();
+
+  const wineStyleById = useMemo(() => {
+    const map = new Map<string, string | null>();
+    wines.forEach((w) => map.set(w.id, w.style));
+    return map;
+  }, [wines]);
+
   const months = useMemo(() => {
     const map = new Map<string, { key: string; label: string; events: ConsumptionEntry[] }>();
     entries.forEach((entry) => {
