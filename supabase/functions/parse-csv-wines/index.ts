@@ -250,31 +250,60 @@ Regras:
     };
 
     async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
-      const result = await callOpenAIResponses<any>({
-        functionName: FUNCTION_NAME,
-        requestId: crypto.randomUUID(),
-        apiKey: OPENAI_API_KEY,
-        model: OPENAI_MODEL,
-        timeoutMs: 60_000,
-        temperature: 0.1,
-        instructions: systemPrompt,
-        input: [
-          {
-            role: "user",
-            content: [
-              { type: "input_text", text: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
-            ],
+      const requestId = crypto.randomUUID();
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60_000);
+
+      try {
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=lovable model=${AI_MODEL}`);
+        const response = await fetch("https://ai.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
           },
-        ],
-        schema: toolDef.function.parameters as Record<string, unknown>,
-        maxOutputTokens: 6_000,
-      });
+          body: JSON.stringify({
+            model: AI_MODEL,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
+            ],
+            tools: [toolDef],
+            tool_choice: { type: "function", function: { name: "extract_wines" } },
+            temperature: 0.1,
+          }),
+        });
 
-      if (!result.ok) {
-        return { errorStatus: result.status };
+        if (!response.ok) {
+          const errText = await response.text().catch(() => "");
+          console.log(`[${FUNCTION_NAME}] request_id=${requestId} status=${response.status} error=${errText.slice(0, 300)}`);
+          return { errorStatus: response.status };
+        }
+
+        const data = await response.json();
+        const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
+        const argsRaw = toolCall?.function?.arguments;
+        if (!argsRaw) {
+          console.log(`[${FUNCTION_NAME}] request_id=${requestId} no_tool_call`);
+          return { errorStatus: 422 };
+        }
+        let parsed: any;
+        try {
+          parsed = typeof argsRaw === "string" ? JSON.parse(argsRaw) : argsRaw;
+        } catch (e) {
+          console.log(`[${FUNCTION_NAME}] request_id=${requestId} parse_error=${e instanceof Error ? e.message : "unknown"}`);
+          return { errorStatus: 422 };
+        }
+        return { result: parsed };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "unknown";
+        const isAbort = message.toLowerCase().includes("abort");
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} error=${message}`);
+        return { errorStatus: isAbort ? 504 : 500 };
+      } finally {
+        clearTimeout(timeout);
       }
-
-      return { result: result.parsed };
     }
 
     // ── PARALLEL chunk processing for speed ──
