@@ -200,46 +200,53 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
         {/* Annual plan highlight */}
         {plan.annualPrice && (
           <div
-            className="mb-5 rounded-2xl p-3 relative overflow-hidden"
+            className="mb-5 rounded-2xl p-4 relative overflow-hidden"
             style={
               isLight
                 ? {
-                    background: "linear-gradient(135deg, rgba(95,111,82,0.10) 0%, rgba(198,167,104,0.10) 100%)",
-                    border: "1px solid rgba(95,111,82,0.22)",
+                    background: "linear-gradient(135deg, rgba(95,111,82,0.16) 0%, rgba(198,167,104,0.14) 100%)",
+                    border: "1px solid rgba(95,111,82,0.32)",
+                    boxShadow: "0 8px 24px -16px rgba(95,111,82,0.35)",
                   }
                 : {
-                    background: "linear-gradient(135deg, rgba(198,167,104,0.16) 0%, rgba(198,167,104,0.06) 100%)",
-                    border: "1px solid rgba(198,167,104,0.32)",
+                    background: "linear-gradient(135deg, rgba(198,167,104,0.24) 0%, rgba(198,167,104,0.10) 100%)",
+                    border: "1px solid rgba(198,167,104,0.45)",
+                    boxShadow: "0 8px 24px -14px rgba(198,167,104,0.35)",
                   }
             }
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="min-w-0">
                 <p
-                  className="text-[9.5px] font-bold uppercase tracking-[0.12em]"
-                  style={{ color: isLight ? "#3F4D36" : "#C6A768" }}
+                  className="text-[18px] sm:text-[20px] font-bold tracking-[-0.01em] leading-none"
+                  style={{ color: isLight ? "#2E3A26" : "#E8C97A" }}
                 >
                   ou {plan.annualPrice}
                 </p>
-                <p className="mt-0.5 text-[11px] leading-snug" style={{ color: sub }}>
+                <p
+                  className="mt-1 text-[12px] sm:text-[13px] font-semibold leading-snug"
+                  style={{ color: isLight ? "#3F4D36" : "#F5E9CC" }}
+                >
                   {plan.annualDetail}
                 </p>
               </div>
               <span
-                className="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.08em]"
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] sm:text-[13px] font-bold uppercase tracking-[0.06em]"
                 style={
                   isLight
                     ? {
                         color: "#FFFFFF",
                         background: "linear-gradient(135deg, #5F6F52, #4A5640)",
+                        boxShadow: "0 6px 16px -8px rgba(95,111,82,0.55)",
                       }
                     : {
                         color: "#1A1A1A",
-                        background: "#C6A768",
+                        background: "linear-gradient(135deg, #E8C97A, #C6A768)",
+                        boxShadow: "0 6px 16px -8px rgba(198,167,104,0.55)",
                       }
                 }
               >
-                <Sparkles className="h-2.5 w-2.5" strokeWidth={2.5} />
+                <Sparkles className="h-3.5 w-3.5" strokeWidth={2.5} />
                 {plan.annualHighlight}
               </span>
             </div>
