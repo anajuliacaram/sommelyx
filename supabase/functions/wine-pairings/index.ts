@@ -469,6 +469,28 @@ INSTRUÇÕES:
 7. Varie os harmony_type (contraste/semelhança/complemento/equilíbrio/limpeza)`;
 
     } else if (mode === "food-to-wine") {
+      // ── Intent (cliente escolheu como quer harmonizar) ──
+      const normalizedIntent: "everyday" | "value" | "special" =
+        intent === "value" || intent === "special" ? intent : "everyday";
+
+      const INTENT_RULES: Record<string, string> = {
+        everyday: `INTENÇÃO DO CLIENTE: HARMONIZAR PARA O DIA A DIA.
+Critério de ranqueamento: priorize vinhos da adega de PREÇO MÉDIO (faixa intermediária dos rótulos disponíveis) que tenham COMPATIBILIDADE ALTA ou EXCELENTE com o prato.
+- NÃO sugira o rótulo mais caro nem o mais barato como primeira opção.
+- Priorize rótulos que combinam BEM e que o cliente pode abrir sem peso na consciência.
+- Bom senso enológico permanece soberano: jamais sugira um vinho que tecnicamente NÃO combina, mesmo se for preço médio.`,
+        value: `INTENÇÃO DO CLIENTE: MELHOR CUSTO-BENEFÍCIO.
+Critério de ranqueamento: entre os vinhos da adega que de fato HARMONIZAM com o prato (compatibilidade no mínimo "Boa opção"), ordene do MAIS BARATO para o mais caro.
+- A primeira sugestão deve ser o vinho de MENOR preço que ainda harmoniza tecnicamente bem.
+- NUNCA sugira um vinho barato que tecnicamente é INCOMPATÍVEL só porque é barato.
+- Filtro de bom senso: se o prato é simples (ex: ovo com arroz, macarrão alho e óleo), nem mencione tintos encorpados ou rótulos premium.`,
+        special: `INTENÇÃO DO CLIENTE: MOMENTO INESQUECÍVEL / OCASIÃO ESPECIAL.
+Critério de ranqueamento: entre os vinhos que harmonizam EXCEPCIONALMENTE com o prato, priorize os de MAIOR preço/posicionamento da adega.
+- A primeira sugestão deve ser o vinho mais notável/caro que TECNICAMENTE eleva o prato.
+- FILTRO ENOLÓGICO INEGOCIÁVEL: jamais sugira um Barolo de R$2000 para um strogonoff de carne, ou um Champagne grande marca para ovo com arroz. O vinho deve estar à altura do prato e o prato à altura do vinho.
+- Se o prato é simples/cotidiano, seja honesto: "Para esta receita, mesmo em ocasião especial, não vale abrir os rótulos mais caros — sugerimos estes vinhos médios que combinam melhor."`,
+      };
+
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
 ${PROFILE_CONSTRUCTION_RULES}
@@ -481,15 +503,19 @@ ${hasCellar ? `REGRA CRÍTICA: O usuário tem vinhos NA ADEGA. Você DEVE:
 5. Para cada vinho, a explicação DEVE citar o nome do rótulo e uma característica específica dele.
 6. Os vinhos já foram pré-filtrados localmente; você deve apenas explicar e ranquear os melhores.` : "Sugira tipos específicos de vinho com rótulos de referência."}
 
+${INTENT_RULES[normalizedIntent]}
+
 FLUXO OBRIGATÓRIO:
-1. Analise "${dish}" tecnicamente (proteína, gordura, cocção, intensidade, texturas)
+1. Analise "${dish}" tecnicamente (proteína, gordura, cocção, intensidade, texturas, sofisticação)
 2. Para cada vinho candidato, execute as 5 ETAPAS do perfil técnico
 3. Compare perfil do vinho vs perfil do prato usando lógica técnica:
    - acidez × gordura
    - tanino × proteína
    - intensidade × intensidade
    - textura × textura
-4. Classifique honestamente cada sugestão
+   - SOFISTICAÇÃO do vinho × SOFISTICAÇÃO do prato (não case rótulo premium com prato cotidiano)
+4. Aplique o critério de INTENÇÃO acima para ordenar (preço médio / mais barato / mais caro entre os compatíveis)
+5. Classifique honestamente cada sugestão
 
 JULGAMENTO HONESTO — use toda a escala:
 - Excelente escolha: harmonia excepcional
@@ -505,17 +531,29 @@ NEM TODOS os vinhos devem ser positivos. Se um vinho é ruim para o prato, diga.
         ? rankCellarWinesForDish(dish, (userWines as any[]).slice(0, 40)).slice(0, 8)
         : [];
       const cellarContext = hasCellar
-        ? `\nVinhos na adega do usuário (pré-filtrados localmente por compatibilidade):\n${rankedCellarWines.map((w: any) => `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"}`).join("\n")}`
+        ? `\nVinhos na adega do usuário (pré-filtrados localmente por compatibilidade técnica; preço inclui valor pago ou valor de mercado quando disponível):\n${rankedCellarWines.map((w: any) => {
+            const price = w.purchase_price ?? w.current_value;
+            const priceTxt = price != null ? `R$ ${Number(price).toFixed(0)}` : "preço não informado";
+            return `- ${w.name} | Produtor: ${w.producer || "?"} | Uva: ${w.grape || "?"} | Região: ${w.region || "?"}, ${w.country || "?"} | Safra: ${w.vintage || "?"} | Estilo: ${w.style || "?"} | Preço: ${priceTxt}`;
+          }).join("\n")}`
         : "";
-      userPrompt = `Prato: "${dish}"${cellarContext}
+      const intentLabel = normalizedIntent === "value"
+        ? "MELHOR CUSTO-BENEFÍCIO (priorize os mais baratos compatíveis)"
+        : normalizedIntent === "special"
+          ? "MOMENTO INESQUECÍVEL (priorize os mais caros compatíveis, respeitando o nível do prato)"
+          : "DIA A DIA (priorize preço médio entre os compatíveis)";
+
+      userPrompt = `Prato: "${dish}"
+Intenção do cliente: ${intentLabel}${cellarContext}
 
 INSTRUÇÕES:
-1. Decomponha "${dish}" tecnicamente (proteína, gordura, cocção, intensidade)
+1. Decomponha "${dish}" tecnicamente (proteína, gordura, cocção, intensidade, sofisticação)
 2. Para cada vinho, execute as 5 ETAPAS do perfil técnico
-3. Na explicação, cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não)
-4. Em cada reason, mencione ao menos 1 aspecto que diferencia este rótulo de outro da mesma uva
-5. Use compatibilityLabel honestamente — nem tudo é "Excelente escolha"
-6. Sugira de 3 a 5 vinhos reais da adega, sem inventar categorias genéricas`;
+3. Aplique o critério de INTENÇÃO para escolher quais rótulos colocar primeiro
+4. Na explicação, cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não) e por que se encaixa na intenção
+5. Em cada reason, mencione ao menos 1 aspecto que diferencia este rótulo de outro da mesma uva
+6. Use compatibilityLabel honestamente — nem tudo é "Excelente escolha"
+7. Sugira de 3 a 5 vinhos reais da adega, ordenados conforme a intenção, sem inventar categorias genéricas`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse({ error: "Mode inválido" }, 400);
