@@ -198,16 +198,17 @@ export default function AlertsPage() {
                               <button
                                 type="button"
                                 className={cn(
-                                  "flex items-center gap-1 font-semibold pl-1.5 pr-2 rounded-md shrink-0 transition-all text-sm",
+                                  "flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-md shrink-0 transition-all text-[11px]",
                                   expandedId === a.id
-                                    ? "bg-primary/8 text-primary border-primary/15 py-0.5 border"
-                                    : "bg-transparent text-muted-foreground border-border/30 hover:bg-primary/5 hover:text-primary hover:border-primary/15 border-2 px-[2px] py-[2px]",
+                                    ? "bg-primary/10 text-primary border border-primary/20"
+                                    : "bg-transparent text-muted-foreground border border-border/40 hover:bg-primary/5 hover:text-primary hover:border-primary/20",
                                 )}
                                 onClick={(e) => { e.stopPropagation(); handleInsight(a); }}
                                 disabled={loadingInsight === a.id}
+                                title="Análise Sommelyx"
                               >
-                                {loadingInsight === a.id ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Sparkles className="h-2.5 w-2.5" />}
-                                IA
+                                {loadingInsight === a.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                                Analisar
                               </button>
                             )}
 
