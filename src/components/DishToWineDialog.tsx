@@ -663,6 +663,26 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                       );
                     })}
                   </div>
+
+                  {/* Style filter chips (color-coded by wine type) */}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    {styleFilterOptions.map((opt) => {
+                      const active = wineStyleFilter === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          onClick={() => setWineStyleFilter(opt.key)}
+                          className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] border transition-all duration-150",
+                            active ? `${opt.bgActive} ${opt.borderActive} ${opt.textActive} shadow-[0_1px_4px_-2px_rgba(0,0,0,0.08)]` : `${opt.bg} ${opt.border} ${opt.text} hover:-translate-y-[1px]`
+                          )}
+                        >
+                          <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Wine list */}
