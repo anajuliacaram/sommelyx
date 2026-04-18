@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
+
+function maskSecret(value?: string | null) {
+  if (!value) return "missing";
+  const trimmed = value.trim();
+  if (trimmed.length <= 6) return `${trimmed.slice(0, 2)}…`;
+  return `${trimmed.slice(0, 6)}…`;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
