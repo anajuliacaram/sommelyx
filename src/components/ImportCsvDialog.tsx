@@ -378,10 +378,44 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const enrichDraftRows = async () => {
     setEnriching(true);
     try {
+      // Use the parse-csv-wines edge function in "enrich mode" by sending only names
+      // for rows that are missing producer/style/country/region/grape.
       const enriched = await Promise.all(
         draftWines.map(async (row) => {
           const match = findBestCellarMatch(row);
           const inferredType = row.type || inferTypeFromText(row.name) || inferTypeFromText(row.producer) || inferTypeFromText(row.grape);
+
+          // Ask the AI to enrich this single wine using its name as the seed
+          let aiEnriched: Partial<DraftWine> = {};
+          const needsEnrichment = !row.producer || !row.country || !row.region || !row.grape || !row.style;
+          if (needsEnrichment && row.name?.trim()) {
+            try {
+              const seed = [
+                row.name,
+                row.producer && `Produtor: ${row.producer}`,
+                row.vintage && `Safra: ${row.vintage}`,
+              ].filter(Boolean).join(" — ");
+              const ai = await invokeEdgeFunction<{ wines?: any[] }>(
+                "parse-csv-wines",
+                { csvContent: `name\n${seed}`, fileName: "enrich.csv", fileType: "text/csv" },
+                { timeoutMs: 35_000, retries: 0 },
+              );
+              const w = ai?.wines?.[0];
+              if (w && typeof w === "object") {
+                aiEnriched = {
+                  producer: row.producer || (typeof w.producer === "string" ? w.producer : undefined),
+                  country: row.country || (typeof w.country === "string" ? w.country : undefined),
+                  region: row.region || (typeof w.region === "string" ? w.region : undefined),
+                  grape: row.grape || (typeof w.grape === "string" ? w.grape : undefined),
+                  style: row.style || row.type || normalizeStyle(w.style),
+                  vintage: row.vintage ?? (typeof w.vintage === "number" ? w.vintage : undefined),
+                };
+              }
+            } catch {
+              // ignore — keep original row
+            }
+          }
+
           let resolvedPrice = row.price;
           if (resolvedPrice == null) {
             try {
@@ -389,12 +423,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 "estimate-wine-price",
                 {
                   name: row.name,
-                  producer: row.producer || match?.wine?.producer || null,
-                  vintage: row.vintage ?? match?.wine?.vintage ?? null,
-                  style: inferredType || row.style || null,
-                  country: row.country || match?.wine?.country || null,
-                  region: row.region || match?.wine?.region || null,
-                  grape: row.grape || match?.wine?.grape || null,
+                  producer: row.producer || aiEnriched.producer || match?.wine?.producer || null,
+                  vintage: row.vintage ?? aiEnriched.vintage ?? match?.wine?.vintage ?? null,
+                  style: inferredType || aiEnriched.style || row.style || null,
+                  country: row.country || aiEnriched.country || match?.wine?.country || null,
+                  region: row.region || aiEnriched.region || match?.wine?.region || null,
+                  grape: row.grape || aiEnriched.grape || match?.wine?.grape || null,
                 },
                 { timeoutMs: 35_000, retries: 0 },
               );
@@ -405,21 +439,22 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               resolvedPrice = row.price;
             }
           }
+          const finalStyle = (aiEnriched.style as string | undefined) || inferredType || row.type || row.style;
           const nextRow: DraftWine = {
             ...row,
             name: row.name?.trim() || row.name,
-            producer: row.producer || match?.wine?.producer || undefined,
-            vintage: row.vintage ?? match?.wine?.vintage ?? undefined,
-            type: inferredType || row.type || row.style,
-            style: inferredType || row.type || row.style,
-            country: row.country || match?.wine?.country || undefined,
-            region: row.region || match?.wine?.region || undefined,
-            grape: row.grape || match?.wine?.grape || undefined,
+            producer: row.producer || (aiEnriched.producer as string | undefined) || match?.wine?.producer || undefined,
+            vintage: row.vintage ?? (aiEnriched.vintage as number | undefined) ?? match?.wine?.vintage ?? undefined,
+            type: finalStyle,
+            style: finalStyle,
+            country: row.country || (aiEnriched.country as string | undefined) || match?.wine?.country || undefined,
+            region: row.region || (aiEnriched.region as string | undefined) || match?.wine?.region || undefined,
+            grape: row.grape || (aiEnriched.grape as string | undefined) || match?.wine?.grape || undefined,
             price: resolvedPrice,
             purchase_price: resolvedPrice,
             image_url: row.image_url || match?.wine?.image_url || buildGeneratedThumbnail({
               ...row,
-              type: inferredType || row.type || row.style,
+              type: finalStyle,
             }),
           };
           const validation = computeRowErrors([nextRow])[0];
@@ -436,7 +471,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setDraftWines(enriched);
       toast({
         title: "Dados enriquecidos",
-        description: "As linhas foram completadas com sugestões inteligentes e auto-preenchimento.",
+        description: "Produtor, região, uva e preço foram completados com nossa inteligência.",
       });
     } finally {
       setEnriching(false);
