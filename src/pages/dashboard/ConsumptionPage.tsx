@@ -98,6 +98,7 @@ export default function ConsumptionPage() {
     });
   }, [entries, period, source]);
 
+  const months = useMemo(() => buildMonthWindow(6), []);
   // Buckets reativos ao filtro de Período + Origem
   const chart = useMemo(() => {
     const now = new Date();
