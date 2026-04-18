@@ -421,6 +421,7 @@ OBRIGATÓRIO em CADA explicação:
 
     let systemPrompt: string;
     let userPrompt: string;
+    const hasCellar = (userWines as any[] | undefined)?.length ? (userWines as any[]).length > 0 : false;
 
     if (mode === "wine-to-food") {
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
@@ -467,9 +468,7 @@ INSTRUÇÕES:
 6. Em CADA reason, cite ao menos 1 característica ESPECÍFICA de "${wineName}" (não da uva genérica)
 7. Varie os harmony_type (contraste/semelhança/complemento/equilíbrio/limpeza)`;
 
-    }
-    const hasCellar = (userWines as any[] | undefined)?.length ? (userWines as any[]).length > 0 : false;
-    if (mode === "food-to-wine") {
+    } else if (mode === "food-to-wine") {
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
 
 ${PROFILE_CONSTRUCTION_RULES}
