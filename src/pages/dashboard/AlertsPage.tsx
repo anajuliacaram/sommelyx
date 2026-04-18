@@ -409,6 +409,70 @@ export default function AlertsPage() {
           })}
         </div>
       )}
+
+      {/* ── Modal: Análise Sommelyx geral da adega ── */}
+      <Dialog open={analysisOpen} onOpenChange={setAnalysisOpen}>
+        <DialogContent className="max-w-lg p-0 overflow-hidden bg-white border-[rgba(123,30,43,0.15)]">
+          <div
+            className="px-6 py-5"
+            style={{ background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)" }}
+          >
+            <DialogHeader className="space-y-2">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <DialogTitle
+                  className="text-[22px] font-bold leading-none text-white"
+                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                >
+                  Análise Sommelyx
+                </DialogTitle>
+              </div>
+              <p className="text-[12px] font-medium leading-snug text-white/80">
+                Diagnóstico técnico completo da sua adega
+              </p>
+            </DialogHeader>
+          </div>
+
+          <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-xl border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.04)] px-3 py-2.5">
+                <div className="text-[18px] font-bold leading-none text-[#7B1E2B] tabular-nums">
+                  {cellarAnalysis.totalBottles}
+                </div>
+                <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.55)]">
+                  Garrafas
+                </div>
+              </div>
+              <div className="rounded-xl border border-[rgba(95,127,82,0.15)] bg-[rgba(95,127,82,0.05)] px-3 py-2.5">
+                <div className="text-[14px] font-bold leading-tight text-[#5F7F52] tabular-nums">
+                  R$ {cellarAnalysis.totalValue.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                </div>
+                <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.55)]">
+                  Valor
+                </div>
+              </div>
+              <div className="rounded-xl border border-[rgba(180,140,58,0.18)] bg-[rgba(180,140,58,0.06)] px-3 py-2.5">
+                <div className="text-[14px] font-bold leading-tight text-[#B48C3A] capitalize">
+                  {cellarAnalysis.dominantStyle}
+                </div>
+                <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.55)]">
+                  {cellarAnalysis.dominantPct}% do estoque
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {cellarAnalysis.lines.map((line, i) => (
+                <p key={i} className="text-[13.5px] leading-[1.7] text-[#2A2A2A]">
+                  {line}
+                </p>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
