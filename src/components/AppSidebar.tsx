@@ -218,7 +218,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={signOut}
-                  className="sidebar-item !h-[38px] !text-[12px] hover:!bg-red-500/10 hover:!text-red-600 hover:!border-red-500/15"
+                  className="sidebar-item md:!h-[38px] md:!text-[12px] hover:!bg-red-500/10 hover:!text-red-600 hover:!border-red-500/15"
                 >
                   <LogOut className="h-4 w-4 shrink-0" />
                   <span className="font-medium">Sair</span>
