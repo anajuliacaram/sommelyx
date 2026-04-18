@@ -112,6 +112,60 @@ export default function AlertsPage() {
 
   const hasAiSupport = (type: string) => type === "drink_now" || type === "past_peak";
 
+  const cellarAnalysis = useMemo(() => {
+    const list = wines ?? [];
+    const inStock = list.filter(w => w.quantity > 0);
+    const totalBottles = inStock.reduce((s, w) => s + w.quantity, 0);
+    const totalValue = inStock.reduce((s, w) => s + (Number(w.current_value || w.purchase_price || 0) * w.quantity), 0);
+    const styleCounts: Record<string, number> = {};
+    inStock.forEach(w => {
+      const s = (w.style || "").toLowerCase();
+      let fam = "outros";
+      if (s.includes("tint")) fam = "tintos";
+      else if (s.includes("branc")) fam = "brancos";
+      else if (s.includes("ros")) fam = "rosés";
+      else if (s.includes("espum") || s.includes("champ")) fam = "espumantes";
+      else if (s.includes("sobrem") || s.includes("fort")) fam = "sobremesa";
+      styleCounts[fam] = (styleCounts[fam] || 0) + w.quantity;
+    });
+    const dominantStyle = Object.entries(styleCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+    const dominantPct = totalBottles > 0 && styleCounts[dominantStyle]
+      ? Math.round((styleCounts[dominantStyle] / totalBottles) * 100) : 0;
+    const drinkNowCount = grouped.drink_now.length;
+    const pastPeakCount = grouped.past_peak.length;
+    const lowStockCount = grouped.low_stock.length;
+    const avgRating = inStock.filter(w => w.rating).reduce((s, w, _, arr) => s + (Number(w.rating) || 0) / arr.length, 0);
+    const oldestVintage = inStock.reduce((m, w) => (w.vintage && (!m || w.vintage < m) ? w.vintage : m), null as number | null);
+
+    const lines: string[] = [];
+    if (totalBottles === 0) {
+      lines.push("Sua adega está vazia. Comece adicionando rótulos para receber análises técnicas reais sobre composição, evolução e janela de consumo.");
+    } else {
+      lines.push(`Adega com ${totalBottles} garrafa${totalBottles > 1 ? "s" : ""} ativa${totalBottles > 1 ? "s" : ""}, dominância de ${dominantStyle} (${dominantPct}% do estoque). Valor estimado em circulação: R$ ${totalValue.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}.`);
+      if (drinkNowCount > 0) {
+        lines.push(`${drinkNowCount} rótulo${drinkNowCount > 1 ? "s" : ""} no auge da janela ideal — priorize abertura nos próximos 60–90 dias para capturar o ápice de complexidade aromática terciária antes da inflexão evolutiva.`);
+      }
+      if (pastPeakCount > 0) {
+        lines.push(`${pastPeakCount} vinho${pastPeakCount > 1 ? "s ultrapassaram" : " ultrapassou"} a janela técnica recomendada. Risco de oxidação avançada e perda de fruta primária — considere consumo imediato ou uso culinário em reduções.`);
+      }
+      if (lowStockCount > 0 && profileType === "commercial") {
+        lines.push(`${lowStockCount} referência${lowStockCount > 1 ? "s" : ""} com estoque crítico (≤2 unidades). Revisar reposição para manter giro e disponibilidade no salão.`);
+      }
+      if (avgRating > 0) {
+        lines.push(`Curadoria média da casa: ${avgRating.toFixed(1)}/5. ${oldestVintage ? `Safra mais antiga em estoque: ${oldestVintage}.` : ""}`);
+      }
+      if (drinkNowCount === 0 && pastPeakCount === 0) {
+        lines.push("Nenhum vinho em janela crítica no momento — perfil de guarda equilibrado, com tempo para evolução fenólica adequada.");
+      }
+    }
+    return { lines, totalBottles, totalValue, dominantStyle, dominantPct, drinkNowCount, pastPeakCount, lowStockCount };
+  }, [wines, grouped, profileType]);
+
+  const scrollToDrinkNow = () => {
+    const el = document.getElementById("alerts-drink_now");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="space-y-3 max-w-3xl">
       {/* ── Header ── */}
