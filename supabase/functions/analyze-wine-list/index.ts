@@ -433,11 +433,10 @@ serve(async (req) => {
       return jsonResponse({ error: "Sessão inválida" }, 401);
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[analyze-wine-list] openai_key=${maskSecret(OPENAI_API_KEY)} lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!LOVABLE_API_KEY && !OPENAI_API_KEY) throw new Error("AI provider not configured");
+    console.log(`[analyze-wine-list] openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const parsedBody = BodySchema.safeParse(await req.json());
     if (!parsedBody.success) {
