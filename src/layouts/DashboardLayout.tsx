@@ -47,7 +47,14 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "rounded-xl h-9 w-9 border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.72)] text-foreground/70 shadow-none hover:bg-[rgba(255,255,255,0.88)] hover:text-foreground hover:border-[rgba(95,111,82,0.16)] [&>svg]:h-3.5 [&>svg]:w-3.5",
+                    "group relative rounded-xl h-10 w-10 p-0",
+                    "border border-[rgba(123,30,43,0.18)]",
+                    "bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] text-white",
+                    "shadow-[0_2px_6px_rgba(123,30,43,0.25),inset_0_1px_0_rgba(255,255,255,0.12)]",
+                    "hover:from-[#8B2333] hover:to-[#6A1820] hover:shadow-[0_4px_12px_rgba(123,30,43,0.35),inset_0_1px_0_rgba(255,255,255,0.15)]",
+                    "active:scale-[0.96] transition-all duration-200",
+                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white/95 [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110",
+                    "after:absolute after:top-1.5 after:right-1.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-[#C9B469] after:shadow-[0_0_4px_rgba(201,180,105,0.6)]",
                   )}
                 />
               )}
@@ -56,10 +63,16 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "rounded-xl h-10 min-w-[78px] px-3 gap-1.5 border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.72)] text-foreground/80 shadow-none hover:bg-[rgba(255,255,255,0.88)] hover:text-foreground hover:border-[rgba(95,111,82,0.16)] active:scale-95 transition-transform duration-150 [&>svg]:h-4 [&>svg]:w-4",
+                    "group relative rounded-xl h-10 min-w-[88px] px-3.5 gap-2",
+                    "border border-[rgba(123,30,43,0.18)]",
+                    "bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] text-white",
+                    "shadow-[0_2px_6px_rgba(123,30,43,0.25),inset_0_1px_0_rgba(255,255,255,0.12)]",
+                    "hover:from-[#8B2333] hover:to-[#6A1820]",
+                    "active:scale-95 transition-all duration-200",
+                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white/95",
                   )}
                 >
-                  <span className="text-[13px] font-semibold leading-none">Menu</span>
+                  <span className="text-[13px] font-semibold tracking-[-0.005em] leading-none text-white">Menu</span>
                 </SidebarTrigger>
               )}
 
