@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
-import { Check, Sparkles } from "@/icons/lucide";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Sparkles, CreditCard, Wine, ShieldCheck } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -47,16 +48,39 @@ const plans = [
   },
 ];
 
-const faqs = [
-  { q: "Como funciona o teste grátis de 14 dias?", a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser, sem cobrança." },
-  { q: "Qual a diferença entre Pro e Business?", a: "O Pro é para adega pessoal (coleção, consumo, alertas e organização). O Business é para operação comercial, com foco em estoque, vendas e acompanhamento da operação." },
-  { q: "Posso trocar de plano depois?", a: "Sim. Você pode mudar de plano a qualquer momento, mantendo seus dados." },
-  { q: "Consigo importar minha planilha?", a: "Sim. Você pode importar CSV, Excel e PDF. O Sommelyx mapeia as colunas automaticamente e você confirma antes de salvar." },
-  { q: "Os dados são preenchidos automaticamente?", a: "Sim. Em importações e na wishlist, nossa inteligência identifica rótulo, produtor, safra, país, região e outros detalhes para acelerar seu cadastro." },
-  { q: "Posso cadastrar vinhos por foto do rótulo?", a: "Sim. Envie uma foto nítida do rótulo e o Sommelyx extrai as informações para preencher o cadastro." },
-  { q: "Meus dados ficam privados?", a: "Sim. Sua conta é isolada e seus dados ficam disponíveis apenas para você e sua operação." },
-  { q: "Funciona bem no celular?", a: "Sim. O layout é responsivo e pensado para operação rápida, inclusive no mobile." },
-] as const;
+type FaqCategory = "planos" | "funcionalidades" | "privacidade";
+
+const categories: { key: FaqCategory; label: string; icon: typeof CreditCard; accent: string; bg: string; border: string; soft: string }[] = [
+  { key: "planos", label: "Planos & Cobrança", icon: CreditCard, accent: "#7B1E2B", bg: "rgba(123,30,43,0.08)", border: "rgba(123,30,43,0.18)", soft: "rgba(123,30,43,0.04)" },
+  { key: "funcionalidades", label: "Funcionalidades", icon: Wine, accent: "#5F6F52", bg: "rgba(95,111,82,0.10)", border: "rgba(95,111,82,0.20)", soft: "rgba(95,111,82,0.04)" },
+  { key: "privacidade", label: "Privacidade & Suporte", icon: ShieldCheck, accent: "#B8860B", bg: "rgba(198,167,104,0.12)", border: "rgba(198,167,104,0.24)", soft: "rgba(198,167,104,0.05)" },
+];
+
+const faqs: { q: string; a: string; cat: FaqCategory }[] = [
+  // Planos
+  { cat: "planos", q: "Como funciona o teste grátis de 14 dias?", a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser, sem cobrança." },
+  { cat: "planos", q: "Qual a diferença entre Pro e Business?", a: "O Pro é para adega pessoal (coleção, consumo, alertas e organização). O Business é para operação comercial, com foco em estoque, vendas e acompanhamento da operação." },
+  { cat: "planos", q: "Posso trocar de plano depois?", a: "Sim. Você pode mudar de plano a qualquer momento, mantendo seus dados intactos." },
+  { cat: "planos", q: "Preciso cadastrar cartão para começar?", a: "Não. O teste grátis de 14 dias começa sem cartão de crédito. Você só insere o pagamento se decidir continuar." },
+  { cat: "planos", q: "Como cancelo minha assinatura?", a: "A qualquer momento, em dois cliques nas configurações da conta. Sem perguntas, sem multa." },
+
+  // Funcionalidades
+  { cat: "funcionalidades", q: "Consigo importar minha planilha?", a: "Sim. Importe CSV, Excel e PDF. O Sommelyx mapeia as colunas automaticamente e você confirma antes de salvar." },
+  { cat: "funcionalidades", q: "Posso cadastrar vinhos por foto do rótulo?", a: "Sim. Envie uma foto nítida do rótulo e nossa inteligência extrai produtor, safra, país, região e estilo para preencher o cadastro." },
+  { cat: "funcionalidades", q: "Os dados são preenchidos automaticamente?", a: "Sim. Em importações e na wishlist, identificamos rótulo, produtor, safra, região e mais para acelerar seu cadastro." },
+  { cat: "funcionalidades", q: "A inteligência harmoniza pratos com meus vinhos?", a: "Sim. Informe o prato e a Inteligência Sommelyx sugere os melhores vinhos da SUA adega, com justificativa enológica." },
+  { cat: "funcionalidades", q: "Recebo alertas da janela ideal de consumo?", a: "Sim. O sistema acompanha drink_from / drink_until e avisa quando uma garrafa está no auge ou prestes a passar." },
+  { cat: "funcionalidades", q: "Tem controle de vendas e giro?", a: "No plano Business: controle de vendas, giro por rótulo, relatórios financeiros automáticos e log de movimentações." },
+  { cat: "funcionalidades", q: "Funciona bem no celular?", a: "Sim. Layout responsivo pensado para operação rápida — inclusive escaneamento de rótulos pela câmera do celular." },
+  { cat: "funcionalidades", q: "Consigo organizar por localização física?", a: "Sim. Cadastre zonas, setores, prateleiras e posições. Encontre qualquer garrafa em segundos." },
+
+  // Privacidade
+  { cat: "privacidade", q: "Meus dados ficam privados?", a: "Sim. Sua conta é isolada com Row-Level Security. Seus dados são acessíveis apenas para você e sua operação." },
+  { cat: "privacidade", q: "Onde meus dados são armazenados?", a: "Em infraestrutura segura na nuvem, com backups automáticos e criptografia em trânsito e em repouso." },
+  { cat: "privacidade", q: "Posso exportar meus dados?", a: "Sim. Seus vinhos são seus. Exporte em CSV a qualquer momento, sem fricção." },
+  { cat: "privacidade", q: "Como funciona o suporte?", a: "Use o botão 'Falar com um Sommelier' no canto da tela. Respondemos por e-mail com foco em resolver, não em empurrar." },
+];
+
 
 interface LandingPricingProps {
   onSignup: () => void;
