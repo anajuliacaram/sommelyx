@@ -159,20 +159,62 @@ serve(async (req) => {
 
     const wasTruncated = dataLines.length > chunks.length * CHUNK_SIZE;
 
-    const systemPrompt = `Você é um especialista em dados de vinhos. Receba conteúdo bruto de arquivo (CSV/TSV, planilha ou PDF) e extraia dados de vinhos mapeando colunas para campos corretos.
+    const systemPrompt = `Você é um SOMMELIER-DATA-SCIENTIST de elite. Receba conteúdo bruto de arquivo (CSV/TSV, planilha, PDF, Word ou texto) e extraia TODOS os dados de vinhos, MESMO quando o arquivo é desorganizado, sem cabeçalhos claros, ou misturado com texto livre.
 
-Campos: name (OBRIGATÓRIO), producer, vintage (number), style (tinto/branco/rose/espumante/sobremesa/fortificado), country, region, grape, quantity (number, padrão 1), purchase_price (number), cellar_location, drink_from (number), drink_until (number).
+Campos a extrair POR LINHA:
+- name (OBRIGATÓRIO, string) — nome do rótulo (ex: "Don Perignon Vintage")
+- producer (string) — vinícola/produtor (ex: "Moët & Chandon")
+- vintage (number 1900-2026) — ano da safra
+- style (string) — OBRIGATÓRIO inferir: tinto/branco/rose/espumante/sobremesa/fortificado
+- country (string) — país de origem
+- region (string) — região/denominação (ex: "Bordeaux", "Mendoza")
+- grape (string) — uva(s) principal(is) (ex: "Malbec", "Cabernet Sauvignon")
+- quantity (number ≥1, padrão 1) — quantas garrafas
+- purchase_price (number, BRL) — preço pago
+- cellar_location (string) — localização física se mencionada
+- drink_from (number, ano) — janela de consumo início
+- drink_until (number, ano) — janela de consumo fim
 
-Regras:
-1. Identifique colunas independente de nome/idioma/ordem.
-2. Separe dados mistos (ex: "Malbec 2020" → grape + vintage).
-3. Infira estilo pela uva/nome se ausente.
-4. Normalize estilos para: tinto, branco, rose, espumante, sobremesa, fortificado.
-5. Limpe preços (remova R$/$, vírgula→ponto).
-6. Quantidade ausente = 1.
-7. Ignore linhas vazias/totalizadores.
-8. Não retorne cabeçalhos como vinho.
-9. Prefira qualidade sobre quantidade.`;
+REGRAS DE EXTRAÇÃO AGRESSIVA (CRÍTICAS — não retornar só o nome!):
+
+1. **NUNCA retorne só o name.** Se o conteúdo tem só nomes soltos, INFIRA produtor, estilo, país, região e uva pelo conhecimento enológico mundial.
+   Exemplos OBRIGATÓRIOS de inferência:
+   - "Don Perignon" → producer: "Moët & Chandon", style: "espumante", country: "França", region: "Champagne", grape: "Chardonnay/Pinot Noir"
+   - "Catena Zapata Malbec 2018" → producer: "Catena Zapata", grape: "Malbec", vintage: 2018, style: "tinto", country: "Argentina", region: "Mendoza"
+   - "Sassicaia 2015" → producer: "Tenuta San Guido", style: "tinto", country: "Itália", region: "Bolgheri", grape: "Cabernet Sauvignon/Cabernet Franc", vintage: 2015
+   - "Cloudy Bay Sauvignon Blanc" → producer: "Cloudy Bay", grape: "Sauvignon Blanc", style: "branco", country: "Nova Zelândia", region: "Marlborough"
+   - "Veuve Clicquot Brut" → producer: "Veuve Clicquot", style: "espumante", country: "França", region: "Champagne"
+
+2. **Identifique colunas** independente de nome/idioma/ordem (Nome, Wine, Produto, Rótulo, Vinho = name; Tipo, Estilo, Categoria = style; Safra, Ano, Vintage = vintage; etc.).
+
+3. **Separe dados mistos** (ex: "Malbec 2020" → grape: "Malbec" + vintage: 2020; "Tinto Reserva 750ml" → style: "tinto").
+
+4. **Inferência de estilo é OBRIGATÓRIA** quando ausente:
+   - Uva tinta (Malbec, Cabernet, Merlot, Syrah, Pinot Noir, Tempranillo, Sangiovese, Tannat) → "tinto"
+   - Uva branca (Chardonnay, Sauvignon Blanc, Riesling, Pinot Grigio, Albariño) → "branco"
+   - Champagne, Cava, Prosecco, Franciacorta, Crémant → "espumante"
+   - Porto, Sherry, Madeira, Marsala → "fortificado"
+   - Sauternes, Tokaji, Ice Wine, Moscato → "sobremesa"
+
+5. **Inferência de região/país** pelo nome do rótulo, produtor ou denominação.
+
+6. **Normalize estilos** para EXATAMENTE: tinto, branco, rose, espumante, sobremesa, fortificado.
+
+7. **Limpe preços** (remova R$/$, espaços, vírgula→ponto). Se preço total parece quantidade × unitário, mantenha unitário.
+
+8. **Quantidade**: ausente = 1. Aceite "qtd", "estoque", "garrafas", "und".
+
+9. **Janela de consumo**: se houver "beber até 2030" ou "drink window 2024-2030", preencha drink_from/drink_until.
+
+10. **Ignore** linhas vazias, totalizadores ("TOTAL", "SUBTOTAL"), cabeçalhos repetidos, separadores.
+
+11. **Não retorne cabeçalhos como vinho** (Nome, Produto, Vinho sozinhos).
+
+12. **Qualidade sobre quantidade**: prefira 5 vinhos completos a 50 com só nome.
+
+13. **Sempre retorne os 12 campos** (deixe undefined apenas se realmente impossível inferir).
+
+Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`;
 
     function normalizeStyle(value: unknown) {
       const v = typeof value === "string" ? value.trim().toLowerCase() : "";
