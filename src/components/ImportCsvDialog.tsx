@@ -558,6 +558,47 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return nextErrors;
   };
 
+  const addBlankRow = () => {
+    syncRows((current) => [
+      ...current,
+      {
+        name: "",
+        producer: "",
+        type: "tinto",
+        style: "tinto",
+        quantity: 1,
+        confidence: 0,
+        errors: [],
+      } as DraftWine,
+    ]);
+  };
+
+  const removeRow = (index: number) => {
+    syncRows((current) => current.filter((_, i) => i !== index));
+    setSelectedRows((current) => current.filter((i) => i !== index).map((i) => (i > index ? i - 1 : i)));
+  };
+
+  const removeSelectedRows = () => {
+    if (selectedRows.length === 0) return;
+    const set = new Set(selectedRows);
+    syncRows((current) => current.filter((_, i) => !set.has(i)));
+    setSelectedRows([]);
+  };
+
+  const STYLE_ACCENT: Record<string, { bar: string; dot: string; chip: string; chipText: string }> = {
+    tinto: { bar: "#7B1E2B", dot: "#7B1E2B", chip: "rgba(123,30,43,0.10)", chipText: "#7B1E2B" },
+    branco: { bar: "#C8A96A", dot: "#C8A96A", chip: "rgba(200,169,106,0.16)", chipText: "#8A6E2E" },
+    rose: { bar: "#E8A0A6", dot: "#E8A0A6", chip: "rgba(232,160,166,0.18)", chipText: "#A34C68" },
+    espumante: { bar: "#6A8F6B", dot: "#6A8F6B", chip: "rgba(106,143,107,0.16)", chipText: "#3F5E40" },
+    sobremesa: { bar: "#A67C52", dot: "#A67C52", chip: "rgba(166,124,82,0.16)", chipText: "#6F4F2C" },
+    fortificado: { bar: "#6B2C2C", dot: "#6B2C2C", chip: "rgba(107,44,44,0.14)", chipText: "#4A1010" },
+  };
+
+  const accentForRow = (row: DraftWine) => {
+    const key = (row.type || row.style || "").toLowerCase();
+    return STYLE_ACCENT[key] || { bar: "#D4D0C7", dot: "#A39A90", chip: "rgba(0,0,0,0.05)", chipText: "#5F5F5F" };
+  };
+
   const syncRows = (updater: (rows: DraftWine[]) => DraftWine[]) => {
     setDraftWines((current) => {
       const next = updater(current);
