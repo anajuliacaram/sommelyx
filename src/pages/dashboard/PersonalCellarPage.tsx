@@ -201,6 +201,19 @@ export default function PersonalCellarPage() {
               return (
                 <EditorialCard key={w.id} style={{ padding: 18, cursor: "pointer" }}>
                   <div onClick={() => setEditWine(w)}>
+                    {showLabels && w.image_url && (
+                      <div
+                        className="mb-3 flex h-[140px] items-center justify-center overflow-hidden rounded-[12px]"
+                        style={{ background: "rgba(95,111,82,0.06)" }}
+                      >
+                        <img
+                          src={w.image_url}
+                          alt={w.name}
+                          loading="lazy"
+                          className="h-full w-auto object-contain"
+                        />
+                      </div>
+                    )}
                     <div className="mb-3 flex items-start justify-between">
                       <div
                         className="h-[22px] w-[22px] rounded-full"
