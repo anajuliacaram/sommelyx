@@ -30,7 +30,9 @@ export default function PersonalCellarPage() {
 
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
-  const [sort, setSort] = useState<"window" | "rating" | "vintage" | "value">("window");
+  const [sort, setSort] = useState<
+    "window" | "recent" | "rating" | "vintage" | "vintage_old" | "value" | "value_low"
+  >("window");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [showLabels, setShowLabels] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -62,9 +64,12 @@ export default function PersonalCellarPage() {
       );
     });
     if (sort === "window") list = list.slice().sort((a, b) => (a.drink_until ?? 9999) - (b.drink_until ?? 9999));
+    else if (sort === "recent") list = list.slice().sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime());
     else if (sort === "rating") list = list.slice().sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
     else if (sort === "vintage") list = list.slice().sort((a, b) => (b.vintage ?? 0) - (a.vintage ?? 0));
+    else if (sort === "vintage_old") list = list.slice().sort((a, b) => (a.vintage ?? 9999) - (b.vintage ?? 9999));
     else if (sort === "value") list = list.slice().sort((a, b) => (Number(b.current_value) || 0) - (Number(a.current_value) || 0));
+    else if (sort === "value_low") list = list.slice().sort((a, b) => (Number(a.current_value) || Infinity) - (Number(b.current_value) || Infinity));
     return list;
   }, [wines, query, styleFilter, sort]);
 
@@ -117,9 +122,12 @@ export default function PersonalCellarPage() {
               }}
             >
               <option value="window">Janela ideal</option>
+              <option value="recent">Recém-adicionados</option>
               <option value="rating">Maior nota</option>
               <option value="vintage">Safra mais nova</option>
-              <option value="value">Maior valor</option>
+              <option value="vintage_old">Safra mais antiga</option>
+              <option value="value">Mais caros</option>
+              <option value="value_low">Mais baratos</option>
             </select>
             <div className="editorial-segmented">
               <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
