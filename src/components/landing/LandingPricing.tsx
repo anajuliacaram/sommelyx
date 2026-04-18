@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check } from "@/icons/lucide";
+import { Check, Sparkles } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -8,92 +8,87 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
 const plans = [
   {
     name: "Pro",
+    badge: "Mais popular",
     price: "R$ 29",
     period: "/mês",
-    desc: "Para quem coleciona e quer controle total",
+    desc: "Para colecionadores e uso pessoal",
     features: [
-      "Organize toda sua adega em um só lugar",
-      "Saiba o momento ideal de consumo",
+      "Toda sua adega organizada",
+      "Janela ideal de consumo com alertas",
       "Histórico completo de degustações",
-      "Insights inteligentes da sua coleção",
+      "Inteligência Sommelyx (harmonização e insights)",
     ],
-    cta: "Começar grátis",
+    cta: "Começar teste grátis",
+    isLight: true,
+    highlighted: true,
   },
   {
     name: "Business",
+    badge: null,
     price: "R$ 59",
     period: "/mês",
     desc: "Para restaurantes, bares e lojas",
     features: [
-      "Controle total de estoque e vendas",
+      "Tudo do Pro, mais:",
+      "Controle de vendas e giro de estoque",
       "Relatórios financeiros automáticos",
-      "Análise de giro e performance",
-      "Gestão operacional simplificada",
+      "Gestão operacional e log de movimentações",
     ],
-    cta: "Começar grátis",
+    cta: "Começar teste grátis",
+    isLight: false,
+    highlighted: false,
   },
 ];
 
 const faqs = [
-  { q: "Como funciona o teste grátis de 14 dias?", a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser." },
+  { q: "Como funciona o teste grátis de 14 dias?", a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser, sem cobrança." },
   { q: "Qual a diferença entre Pro e Business?", a: "O Pro é para adega pessoal (coleção, consumo, alertas e organização). O Business é para operação comercial, com foco em estoque, vendas e acompanhamento da operação." },
   { q: "Posso trocar de plano depois?", a: "Sim. Você pode mudar de plano a qualquer momento, mantendo seus dados." },
   { q: "Consigo importar minha planilha?", a: "Sim. Você pode importar CSV, Excel e PDF. O Sommelyx mapeia as colunas automaticamente e você confirma antes de salvar." },
   { q: "Os dados são preenchidos automaticamente?", a: "Sim. Em importações e na wishlist, nossa inteligência identifica rótulo, produtor, safra, país, região e outros detalhes para acelerar seu cadastro." },
   { q: "Posso cadastrar vinhos por foto do rótulo?", a: "Sim. Envie uma foto nítida do rótulo e o Sommelyx extrai as informações para preencher o cadastro." },
   { q: "Meus dados ficam privados?", a: "Sim. Sua conta é isolada e seus dados ficam disponíveis apenas para você e sua operação." },
-  { q: "Consigo acompanhar reposição e alertas?", a: "Sim. O sistema destaca itens críticos e ajuda a priorizar reposição para evitar ruptura." },
-  { q: "Posso registrar entradas e saídas?", a: "Sim. Você registra movimentações e mantém o histórico organizado para consultar depois." },
-  { q: "Tem suporte se eu tiver dúvida?", a: "Sim. Use o botão \"Falar com um Sommelier\" no canto da tela para enviar uma mensagem por e-mail." },
   { q: "Funciona bem no celular?", a: "Sim. O layout é responsivo e pensado para operação rápida, inclusive no mobile." },
 ] as const;
-
-const glassCard = {
-  background: "rgba(255,255,255,0.92)",
-  backdropFilter: "blur(6px) saturate(1.06)",
-  WebkitBackdropFilter: "blur(6px) saturate(1.06)",
-  border: "1px solid rgba(255,255,255,0.48)",
-  boxShadow:
-    "0 10px 28px -18px rgba(44,20,31,0.18), 0 1px 2px rgba(0,0,0,0.04)",
-} as const;
 
 interface LandingPricingProps {
   onSignup: () => void;
 }
 
-function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof plans[0]; i: number; isLight: boolean; onSignup: () => void; mobile?: boolean }) {
-  const titleColor = isLight ? "#1A1A1A" : "#F8F6F3";
-  const bodyColor = isLight ? "#5F5F5F" : "rgba(248,246,243,0.78)";
-  const dividerColor = isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)";
-  const bulletBackground = isLight ? "rgba(110,30,42,0.08)" : "rgba(255,255,255,0.14)";
-  const bulletBorder = isLight ? "rgba(110,30,42,0.12)" : "rgba(255,255,255,0.14)";
-  const bulletIconColor = isLight ? "text-[#6E1E2A]/70" : "text-[#C6A768]/80";
+function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]; i: number; onSignup: () => void; mobile?: boolean }) {
+  const isLight = plan.isLight;
+  const txt = isLight ? "#1A1A1A" : "#F8F6F3";
+  const sub = isLight ? "#5F5F5F" : "rgba(248,246,243,0.72)";
 
   return (
     <motion.div
       key={plan.name}
       className={`
         ${mobile ? "snap-start shrink-0 w-[88%] max-w-[380px]" : ""}
-        relative rounded-3xl shadow-md overflow-hidden flex flex-col h-full transition-all duration-300 bg-white
+        relative rounded-3xl overflow-hidden flex flex-col h-full
       `}
       style={
-          isLight
+        isLight
           ? {
-              ...glassCard,
               background: "rgba(255,255,255,0.96)",
-              boxShadow: "0 10px 28px -18px rgba(44,20,31,0.18), 0 1px 2px rgba(0,0,0,0.04)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              border: plan.highlighted ? "1.5px solid rgba(123,30,43,0.35)" : "1px solid rgba(0,0,0,0.06)",
+              boxShadow: plan.highlighted
+                ? "0 30px 80px -40px rgba(110,30,42,0.45), 0 1px 2px rgba(0,0,0,0.04)"
+                : "0 14px 40px -22px rgba(44,20,31,0.18), 0 1px 2px rgba(0,0,0,0.04)",
             }
           : {
-              background: "linear-gradient(180deg, rgba(55,30,36,0.96) 0%, rgba(41,22,28,0.98) 52%, rgba(28,15,20,1) 100%)",
-              border: "1px solid rgba(198,167,104,0.16)",
-              boxShadow: "0 10px 28px -18px rgba(44,20,31,0.35), inset 0 1px 0 rgba(255,255,255,0.08)",
+              background: "linear-gradient(180deg, rgba(43,43,43,0.98) 0%, rgba(31,28,32,0.99) 55%, rgba(23,21,24,1) 100%)",
+              border: "1px solid rgba(198,167,104,0.18)",
+              boxShadow: "0 18px 50px -28px rgba(15,15,20,0.50)",
             }
       }
       initial="hidden"
@@ -101,97 +96,122 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
       viewport={{ once: true, margin: "-40px" }}
       variants={fadeUp}
       custom={i + 1}
-      {...(!mobile && { whileHover: { y: -4, transition: { duration: 0.3, ease: "easeOut" } } })}
+      whileHover={!mobile ? { y: -5 } : undefined}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
     >
+      {/* "Mais popular" badge */}
+      {plan.badge && (
+        <div className="absolute -top-px left-0 right-0 flex justify-center">
+          <span
+            className="inline-flex items-center gap-1 rounded-b-xl px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-md"
+            style={{
+              background: "linear-gradient(135deg, #7B1E2B, #6E1E2A)",
+            }}
+          >
+            <Sparkles className="h-3 w-3" />
+            {plan.badge}
+          </span>
+        </div>
+      )}
+
+      {/* Radial overlays */}
       {isLight ? (
         <>
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.08),transparent_55%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_35%,rgba(198,167,104,0.08),transparent_55%)]" />
-          {/* Top highlight */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)" }} />
         </>
       ) : (
         <>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.35),transparent_60%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_82%_18%,rgba(198,167,104,0.18),transparent_55%)]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-[linear-gradient(90deg,transparent,rgba(198,167,104,0.65),transparent)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.32),transparent_60%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_82%_18%,rgba(198,167,104,0.16),transparent_55%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-[linear-gradient(90deg,transparent,rgba(198,167,104,0.6),transparent)]" />
         </>
       )}
 
-      <div className={`relative p-6 flex flex-col flex-1`}>
-        <h3 className="text-[18px] font-semibold tracking-tight" style={{ color: titleColor }}>
+      <div className={`relative p-6 sm:p-7 flex flex-col flex-1 ${plan.badge ? "pt-9" : ""}`}>
+        <h3 className="text-[20px] font-semibold tracking-tight" style={{ color: txt }}>
           {plan.name}
         </h3>
-        <p className="mt-2 mb-5 text-sm leading-relaxed" style={{ color: bodyColor }}>
+        <p className="mt-1.5 mb-4 text-[13.5px] leading-relaxed" style={{ color: sub }}>
           {plan.desc}
         </p>
 
-        <div className="mb-4 flex items-end gap-2">
-          <span className="text-4xl font-semibold tracking-tight leading-none" style={{ color: titleColor }}>
+        <div className="mb-3 flex items-end gap-1.5">
+          <span className="text-[40px] font-semibold tracking-[-0.02em] leading-none" style={{ color: txt }}>
             {plan.price}
           </span>
-          <span className="pb-[4px] text-sm font-medium" style={{ color: bodyColor }}>
+          <span className="pb-[5px] text-[13px] font-medium" style={{ color: sub }}>
             {plan.period}
           </span>
         </div>
 
-        <div className={`${mobile ? "mb-5" : "mb-7"} flex items-center gap-2.5`}>
+        <div className="mb-5">
           <span
-            className="chip-surface px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em]"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-[0.10em]"
             style={
               isLight
                 ? {
                     color: "#6E1E2A",
                     background: "rgba(123,30,43,0.08)",
                     border: "1px solid rgba(123,30,43,0.14)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.62)",
                   }
                 : {
-                    color: "#F8F6F3",
-                    background: "linear-gradient(135deg, rgba(198,167,104,0.22), rgba(110,30,42,0.18))",
-                    border: "1px solid rgba(198,167,104,0.34)",
-                    boxShadow: "0 10px 28px -8px rgba(198,167,104,0.24)",
+                    color: "#C6A768",
+                    background: "rgba(198,167,104,0.12)",
+                    border: "1px solid rgba(198,167,104,0.28)",
                   }
             }
           >
-            <Check className={isLight ? "h-4 w-4 text-[#6E1E2A]/80" : "h-4 w-4 text-[#C6A768]"} strokeWidth={2.5} />
+            <Check className="h-3 w-3" strokeWidth={3} />
             14 dias grátis
           </span>
         </div>
 
         <Button
-          variant="primary"
-          className="w-full h-12 rounded-2xl px-6 font-medium shadow-sm"
+          variant={isLight ? "primary" : "secondary"}
+          className={`w-full h-11 rounded-2xl px-6 text-[13px] font-semibold ${
+            isLight
+              ? "shadow-[0_18px_44px_-22px_rgba(110,30,42,0.55)]"
+              : "bg-[#C6A768] hover:bg-[#B8995A] text-[#1A1A1A] shadow-[0_18px_44px_-22px_rgba(198,167,104,0.45)]"
+          }`}
           onClick={onSignup}
         >
           {plan.cta}
         </Button>
 
-        <div className={`${mobile ? "mt-5 mb-4" : "mt-6 mb-5"} h-px w-full`} style={{ background: dividerColor }} />
+        <div
+          className="mt-5 mb-4 h-px w-full"
+          style={{ background: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)" }}
+        />
 
-        <ul className="space-y-2 flex-1">
-          {plan.features.map(f => (
-            <li
-              key={f}
-              className="flex items-start gap-2.5 text-sm leading-relaxed font-medium"
-              style={{ color: bodyColor }}
-            >
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px]"
-                style={
-                  isLight
-                    ? { background: bulletBackground, border: `1px solid ${bulletBorder}` }
-                    : { background: bulletBackground, border: `1px solid ${bulletBorder}` }
-                }
+        <ul className="space-y-2.5 flex-1">
+          {plan.features.map((f, idx) => {
+            const isHeader = idx === 0 && f.endsWith(":");
+            return (
+              <li
+                key={f}
+                className="flex items-start gap-2.5 text-[13px] leading-relaxed"
+                style={{ color: isLight ? "rgba(26,26,26,0.85)" : "rgba(248,246,243,0.82)" }}
               >
-                <Check
-                  className={`h-3 w-3 ${bulletIconColor}`}
-                  strokeWidth={2.5}
-                />
-              </div>
-              {f}
-            </li>
-          ))}
+                {!isHeader && (
+                  <div
+                    className="w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 mt-[2px]"
+                    style={
+                      isLight
+                        ? { background: "rgba(110,30,42,0.08)", border: "1px solid rgba(110,30,42,0.14)" }
+                        : { background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.22)" }
+                    }
+                  >
+                    <Check
+                      className={isLight ? "h-2.5 w-2.5 text-[#6E1E2A]/80" : "h-2.5 w-2.5 text-[#C6A768]"}
+                      strokeWidth={3}
+                    />
+                  </div>
+                )}
+                <span className={isHeader ? "font-semibold" : ""}>{f}</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </motion.div>
@@ -200,74 +220,73 @@ function PlanCard({ plan, i, isLight, onSignup, mobile = false }: { plan: typeof
 
 export function LandingPricing({ onSignup }: LandingPricingProps) {
   return (
-    <section id="pricing" className="relative px-5 sm:px-8 pt-6 pb-14 overflow-hidden z-10 sm:pt-0 sm:pb-0">
-      <div className="mx-auto max-w-5xl relative z-10">
+    <section id="pricing" className="relative px-4 sm:px-8 pt-4 pb-10 z-10">
+      <div className="mx-auto max-w-5xl">
         <motion.div
-          className="section-surface section-surface--full mx-auto sm:mb-8 max-w-3xl sm:px-6 sm:py-4 items-center text-center mt-0 py-3 px-5 mb-5"
-        initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
+          className="text-center mx-auto max-w-2xl mb-8"
+          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
-          <h2 className="section-surface__title sm:text-[2rem] md:text-[2.25rem] max-w-[640px] font-bold text-2xl">
+          <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.14em] text-wine mb-3">
+            Planos
+          </span>
+          <h2 className="text-[26px] sm:text-[34px] font-semibold tracking-[-0.02em] text-[#1A1A1A] leading-[1.1]">
             Escolha o plano ideal para sua adega
           </h2>
-          <p className="section-surface__subtitle mt-2.5 sm:text-[14px] max-w-xl mx-auto leading-relaxed font-medium text-sm text-[#5F5F5F]">
+          <p className="mt-3 text-[14px] sm:text-[15px] leading-relaxed text-[#5F5F5F]">
             Comece sem compromisso. Cancele quando quiser.
           </p>
         </motion.div>
 
-        {/* Mobile */}
-        <div className="md:hidden -mx-5 px-5 overflow-x-auto scrollbar-hide pb-2">
-          <div className="flex gap-4 snap-x snap-mandatory">
+        {/* Mobile carousel */}
+        <div className="md:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide pb-2">
+          <div className="flex gap-3 snap-x snap-mandatory">
             {plans.map((plan, i) => (
-              <PlanCard key={plan.name} plan={plan} i={i} isLight={i === 0} onSignup={onSignup} mobile />
+              <PlanCard key={plan.name} plan={plan} i={i} onSignup={onSignup} mobile />
             ))}
           </div>
         </div>
 
         {/* Desktop */}
-        <div className="hidden md:grid grid-cols-2 gap-5 sm:gap-6 max-w-[800px] mx-auto items-stretch">
+        <div className="hidden md:grid grid-cols-2 gap-5 max-w-[800px] mx-auto items-stretch">
           {plans.map((plan, i) => (
-            <PlanCard key={plan.name} plan={plan} i={i} isLight={i === 0} onSignup={onSignup} />
+            <PlanCard key={plan.name} plan={plan} i={i} onSignup={onSignup} />
           ))}
         </div>
 
         {/* FAQ */}
         <motion.div
-          className="mx-auto mt-10 sm:mt-12 max-w-3xl"
+          className="mx-auto mt-12 max-w-3xl"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
           variants={fadeUp}
           custom={4}
         >
-          <div className="mx-auto max-w-3xl space-y-4 rounded-[28px] bg-white p-5 shadow-md border border-border">
-            <h3 className="text-2xl font-semibold tracking-tight text-[#1A1A1A]">
+          <div className="text-center mb-6">
+            <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.14em] text-wine mb-2">
+              Dúvidas
+            </span>
+            <h3 className="text-[22px] sm:text-[26px] font-semibold tracking-[-0.02em] text-[#1A1A1A]">
               Perguntas frequentes
             </h3>
-            <p className="text-sm text-[#5F5F5F]">
-              Respostas rápidas para decidir com confiança.
-            </p>
           </div>
 
-          <div className="mt-6">
-            <Accordion type="single" collapsible className="mx-auto max-w-3xl space-y-4">
-              {faqs.map((item, idx) => (
-                <AccordionItem
-                  key={item.q}
-                  value={`faq-${idx}`}
-                  className="group overflow-hidden rounded-xl border border-border bg-white p-5 shadow-md transition-all duration-300 ease-out data-[state=open]:shadow-[0_16px_36px_-24px_rgba(44,20,31,0.18)]"
-                >
-                  <AccordionTrigger
-                    className="py-0 text-left text-base font-medium tracking-tight text-[#1A1A1A] hover:no-underline [&>svg]:text-[#7B1E2B]"
-                  >
-                    {item.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-3 text-sm leading-relaxed text-muted-foreground">
-                    {item.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+          <Accordion type="single" collapsible defaultValue="faq-0" className="space-y-2.5">
+            {faqs.map((item, idx) => (
+              <AccordionItem
+                key={item.q}
+                value={`faq-${idx}`}
+                className="overflow-hidden rounded-xl border border-black/[0.06] bg-white/92 backdrop-blur-sm px-4 transition-all duration-300 data-[state=open]:border-wine/25 data-[state=open]:shadow-[0_14px_36px_-22px_rgba(110,30,42,0.20)]"
+              >
+                <AccordionTrigger className="py-3.5 text-left text-[14px] font-semibold tracking-tight text-[#1A1A1A] hover:no-underline data-[state=open]:text-wine [&>svg]:text-wine">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="pb-3.5 pt-0 text-[13.5px] leading-relaxed text-[#5F5F5F]">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </motion.div>
       </div>
     </section>
