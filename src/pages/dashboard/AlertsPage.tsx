@@ -249,21 +249,23 @@ export default function AlertsPage() {
                                     <span className="text-[12px] text-muted-foreground italic">Consultando inteligência Sommelyx…</span>
                                   </div>
                                 ) : insights[a.id] ? (
-                                  <div className="space-y-2.5">
-                                    <div className="flex items-center gap-2 pb-2 border-b border-primary/10">
-                                      <Sparkles className="h-4 w-4 text-primary shrink-0" />
+                                  <div className="space-y-3">
+                                    <div className="flex items-center gap-2.5 pb-2.5 border-b border-primary/15">
+                                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                                        <Sparkles className="h-3.5 w-3.5 text-primary" />
+                                      </div>
                                       <h4
-                                        className="font-serif text-[15px] font-bold tracking-tight text-foreground"
+                                        className="font-serif text-[19px] font-bold leading-none tracking-[-0.01em] text-foreground"
                                         style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
                                       >
                                         Análise Sommelyx
                                       </h4>
                                     </div>
-                                    <p className="text-[13px] leading-[1.65] text-foreground/85">
+                                    <p className="text-[13.5px] leading-[1.7] text-foreground/85">
                                       {insights[a.id].insight}
                                     </p>
                                     {insights[a.id].recommendation && (
-                                      <div className="flex items-start gap-2 rounded-lg bg-primary/[0.06] px-3 py-2 mt-2">
+                                      <div className="flex items-start gap-2 rounded-lg bg-primary/[0.07] border border-primary/10 px-3 py-2.5 mt-2">
                                         <Wine className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
                                         <p className="text-[12.5px] font-medium text-primary leading-snug">
                                           {insights[a.id].recommendation}
