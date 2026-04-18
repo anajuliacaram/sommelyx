@@ -106,12 +106,7 @@ export function AppSidebar() {
               <img src="/logo-sommelyx-mark.png" className="w-20 h-20 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] px-0 ml-0 text-left" alt="Sommelyx" />
 
               <div className="flex flex-col text-left -ml-3">
-                <span
-                  className="text-[22px] font-bold tracking-tight text-white leading-none"
-                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
-                >
-                  Sommelyx
-                </span>
+                <BrandName tone="light" className="text-[22px] leading-none" />
 
                 <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] py-[3px] rounded-full bg-white/12 text-white/80 backdrop-blur-sm w-fit px-0">
                   {isCommercial ? "COMERCIAL" : "PESSOAL"}

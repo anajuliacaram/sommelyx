@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { BrandName } from "@/components/BrandName";
 import { Instagram, Linkedin } from "lucide-react";
 
 interface LandingFooterProps {
@@ -21,7 +22,7 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
         <div className="flex items-center gap-3 min-w-[220px] sm:min-w-[250px]">
           <Logo variant="compact" className="h-12 sm:h-14 w-auto shrink-0 opacity-100 drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]" />
           <div className="flex flex-col leading-none min-w-0">
-            <span className="font-serif font-extrabold text-[20px] sm:text-[24px] tracking-[-0.01em]" style={{ color: "#1A1A1A" }}>Sommelyx</span>
+            <BrandName className="text-[20px] sm:text-[24px]" />
             <span className="mt-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.14em] text-[#5F5F5F] whitespace-nowrap">
               Gestão inteligente de adegas
             </span>
