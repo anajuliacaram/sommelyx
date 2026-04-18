@@ -315,6 +315,18 @@ export default function ConsumptionPage() {
             ))}
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-[rgba(123,30,43,0.18)] bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+            Ordenar
+          </span>
+          <div className="flex items-center gap-1.5">
+            {sortOptions.map((opt) => (
+              <FilterPill key={opt.value} active={sortBy === opt.value} onClick={() => setSortBy(opt.value)}>
+                {opt.label}
+              </FilterPill>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Timeline */}
