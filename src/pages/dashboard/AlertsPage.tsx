@@ -242,22 +242,32 @@ export default function AlertsPage() {
                               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                               className="overflow-hidden"
                             >
-                              <div className="mx-3 mb-2.5 rounded-lg bg-black/[0.02] border border-border/15 px-3 py-2">
+                              <div className="mx-3 mb-3 rounded-xl bg-gradient-to-br from-primary/[0.04] to-primary/[0.01] border border-primary/15 px-4 py-3.5">
                                 {loadingInsight === a.id ? (
                                   <div className="flex items-center gap-2 py-1">
-                                    <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                                    <span className="text-[10px] text-muted-foreground italic">Analisando…</span>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                                    <span className="text-[12px] text-muted-foreground italic">Consultando inteligência Sommelyx…</span>
                                   </div>
                                 ) : insights[a.id] ? (
-                                  <div className="space-y-1.5">
-                                    <div className="flex items-start gap-1.5">
-                                      <Sparkles className="h-3 w-3 text-primary shrink-0 mt-0.5" />
-                                      <p className="text-[10px] leading-[1.6] text-foreground/80">{insights[a.id].insight}</p>
+                                  <div className="space-y-2.5">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-primary/10">
+                                      <Sparkles className="h-4 w-4 text-primary shrink-0" />
+                                      <h4
+                                        className="font-serif text-[15px] font-bold tracking-tight text-foreground"
+                                        style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                                      >
+                                        Análise Sommelyx
+                                      </h4>
                                     </div>
+                                    <p className="text-[13px] leading-[1.65] text-foreground/85">
+                                      {insights[a.id].insight}
+                                    </p>
                                     {insights[a.id].recommendation && (
-                                      <div className="flex items-start gap-1.5 rounded-md bg-primary/[0.04] px-2 py-1.5">
-                                        <Wine className="h-3 w-3 text-primary shrink-0 mt-px" />
-                                        <p className="text-[10px] font-medium text-primary leading-snug">{insights[a.id].recommendation}</p>
+                                      <div className="flex items-start gap-2 rounded-lg bg-primary/[0.06] px-3 py-2 mt-2">
+                                        <Wine className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                                        <p className="text-[12.5px] font-medium text-primary leading-snug">
+                                          {insights[a.id].recommendation}
+                                        </p>
                                       </div>
                                     )}
                                   </div>
