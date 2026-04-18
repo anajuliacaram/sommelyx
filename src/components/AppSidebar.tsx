@@ -189,8 +189,8 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-1 py-0">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold mb-1 mt-1 px-3 text-neutral-600">
+          <SidebarGroup className="mt-0 py-0">
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold mb-1 mt-0 px-3 text-neutral-600">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
