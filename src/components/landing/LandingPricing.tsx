@@ -66,7 +66,7 @@ const faqs: { q: string; a: string; cat: FaqCategory }[] = [
   // Planos
   { cat: "planos", q: "Como funciona o teste grátis de 14 dias?", a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser, sem cobrança." },
   { cat: "planos", q: "Qual a diferença entre Pro e Business?", a: "O Pro é para adega pessoal (coleção, consumo, alertas e organização). O Business é para operação comercial, com foco em estoque, vendas e acompanhamento da operação." },
-  { cat: "planos", q: "Posso trocar de plano depois?", a: "Sim. Você pode mudar de plano a qualquer momento, mantendo seus dados intactos." },
+  { cat: "planos", q: "Posso trocar de plano depois?", a: "Não recomendamos, pois as funções entre Business e Pro são bem diferentes. Se você deseja gerir sua adega pessoal e a do seu estabelecimento, o ideal é ter uma conta para cada." },
   { cat: "planos", q: "Existe desconto na assinatura anual?", a: "Sim. No Pro você paga R$ 280 por 12 meses (ganha 2 meses grátis). No Business, R$ 600 por 12 meses (ganha 3 meses grátis)." },
   { cat: "planos", q: "Como cancelo minha assinatura?", a: "A qualquer momento, em dois cliques nas configurações da conta. Sem perguntas, sem multa." },
 
