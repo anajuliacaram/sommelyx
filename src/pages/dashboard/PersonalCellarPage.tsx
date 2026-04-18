@@ -84,19 +84,37 @@ export default function PersonalCellarPage() {
   return (
     <>
       <div className="editorial-page">
-        <header>
-          <Kicker>Adega</Kicker>
-          <div className="mt-1 flex flex-wrap items-baseline justify-between gap-4">
-            <h1 className="editorial-page-h1">Minha Adega</h1>
+        {/* Unified Header + Controls */}
+        <EditorialCard style={{ padding: "16px 18px" }}>
+          {/* Top row: title + counter + filter chips + add */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col">
+              <Kicker>Adega</Kicker>
+              <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight">
+                Minha Adega
+              </h1>
+            </div>
             <div className="text-[12px]" style={{ color: "rgba(58,51,39,0.6)" }}>
               <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
             </div>
+            <div className="ml-auto flex flex-wrap items-center gap-1.5">
+              {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)}>
+                  {s}
+                </Chip>
+              ))}
+              <button
+                type="button"
+                className="editorial-btn-primary ml-1"
+                onClick={() => setAddOpen(true)}
+              >
+                + Adicionar
+              </button>
+            </div>
           </div>
-        </header>
 
-        {/* Controls */}
-        <EditorialCard style={{ padding: "16px 18px" }}>
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Bottom row: search + sort + view + labels */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <div className="editorial-search min-w-[200px] flex-1">
               <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
               <input
@@ -150,20 +168,6 @@ export default function PersonalCellarPage() {
             >
               {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
             </button>
-            <div className="ml-auto flex flex-wrap items-center gap-1.5">
-              {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
-                <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)}>
-                  {s}
-                </Chip>
-              ))}
-              <button
-                type="button"
-                className="editorial-btn-primary ml-1"
-                onClick={() => setAddOpen(true)}
-              >
-                + Adicionar
-              </button>
-            </div>
           </div>
         </EditorialCard>
 
