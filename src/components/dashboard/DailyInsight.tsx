@@ -285,18 +285,18 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
   return (
     <section className="space-y-4">
       <motion.div
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#1B3B27] to-[#102515] p-6 text-white shadow-[0_18px_40px_-24px_rgba(18,54,31,0.65)]"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#1B3B27] to-[#102515] p-4 sm:p-5 text-white shadow-[0_14px_32px_-22px_rgba(18,54,31,0.6)]"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="pointer-events-none absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-6 bottom-0 h-24 w-24 rounded-full bg-[#C8A96A]/10 blur-2xl" />
+        <div className="pointer-events-none absolute -right-10 top-0 h-24 w-24 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[#C8A96A]/10 blur-2xl" />
 
-        <div className="relative flex items-start justify-between gap-4">
+        <div className="relative flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">INSIGHT DO DIA</p>
-            <p className="mt-2 max-w-2xl text-[18px] font-semibold tracking-tight text-white sm:text-[20px]">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/70">INSIGHT DO DIA</p>
+            <p className="mt-1.5 max-w-2xl text-[15px] font-semibold tracking-tight text-white sm:text-[16px] leading-snug">
               {insightSentence}
             </p>
           </div>
@@ -305,11 +305,11 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
             <Button
               type="button"
               variant="secondary"
-              className="h-10 shrink-0 rounded-2xl bg-white text-[#1A1A1A] hover:bg-white/95"
+              className="h-8 shrink-0 rounded-xl bg-white text-[#1A1A1A] hover:bg-white/95 text-[12px] px-3"
               onClick={onViewRecs ?? (() => navigate("/dashboard/cellar"))}
             >
               Ver recomendações
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
