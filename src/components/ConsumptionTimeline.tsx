@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { Star } from "@/icons/lucide";
 import type { ConsumptionEntry } from "@/hooks/useConsumption";
+import { useWines } from "@/hooks/useWines";
 import { getStyleColor } from "@/lib/sommelyx-data";
 
 function getMonthKey(date: Date) {
@@ -23,6 +24,14 @@ type ConsumptionTimelineProps = {
 };
 
 export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: ConsumptionTimelineProps) {
+  const { data: wines = [] } = useWines();
+
+  const wineStyleById = useMemo(() => {
+    const map = new Map<string, string | null>();
+    wines.forEach((w) => map.set(w.id, w.style));
+    return map;
+  }, [wines]);
+
   const months = useMemo(() => {
     const map = new Map<string, { key: string; label: string; events: ConsumptionEntry[] }>();
     entries.forEach((entry) => {
@@ -74,7 +83,9 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
               <div className="flex flex-col">
                 {month.events.map((entry, index) => {
                   const date = new Date(entry.consumed_at);
-                  const color = getStyleColor(entry.style);
+                  const styleSource =
+                    entry.style ?? (entry.wine_id ? wineStyleById.get(entry.wine_id) ?? null : null);
+                  const color = styleSource ? getStyleColor(styleSource) : "rgba(95,111,82,0.25)";
                   return (
                     <div
                       key={entry.id}
@@ -96,8 +107,8 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       </div>
 
                       <div
-                        className="w-[4px] shrink-0 rounded-full self-stretch"
-                        style={{ background: color, minHeight: 32 }}
+                        className="w-[3px] shrink-0 rounded-full self-stretch"
+                        style={{ background: color, minHeight: 32, opacity: 0.85 }}
                       />
 
                       <div className="min-w-0 flex-1">
