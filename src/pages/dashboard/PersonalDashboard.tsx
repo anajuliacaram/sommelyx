@@ -455,23 +455,23 @@ export default function PersonalDashboard() {
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-baseline gap-2">
                             <h4
-                              className="text-[14px] font-bold"
+                              className="text-[15px] font-bold"
                               style={{ color: "#1a1713", letterSpacing: "-0.01em" }}
                             >
                               {w.name}
                             </h4>
                             {w.vintage && (
                               <span
-                                className="text-[11px] tabular-nums"
-                                style={{ color: "rgba(58,51,39,0.55)" }}
+                                className="text-[12.5px] tabular-nums"
+                                style={{ color: "rgba(58,51,39,0.6)" }}
                               >
                                 {w.vintage}
                               </span>
                             )}
                           </div>
                           <p
-                            className="mt-0.5 truncate text-[11px]"
-                            style={{ color: "rgba(58,51,39,0.58)" }}
+                            className="mt-0.5 truncate text-[12px]"
+                            style={{ color: "rgba(58,51,39,0.6)" }}
                           >
                             {[w.producer, [w.region, w.country].filter(Boolean).join(", "), w.cellar_location]
                               .filter(Boolean)
@@ -480,8 +480,8 @@ export default function PersonalDashboard() {
                           <div className="mt-1.5 flex items-center gap-3">
                             <StyleBadge style={w.style} />
                             <span
-                              className="text-[10px] font-semibold"
-                              style={{ color: "rgba(58,51,39,0.5)" }}
+                              className="text-[11.5px] font-semibold"
+                              style={{ color: "rgba(58,51,39,0.55)" }}
                             >
                               {w.quantity} un.
                               {w.drink_until ? (
@@ -496,17 +496,17 @@ export default function PersonalDashboard() {
                         <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
                           {w.rating != null && (
                             <div
-                              className="flex items-center gap-1 text-[11px] font-semibold tabular-nums"
+                              className="flex items-center gap-1 text-[12.5px] font-semibold tabular-nums"
                               style={{ color: "#B48C3A" }}
                             >
-                              <Star className="h-3 w-3 fill-current" />
+                              <Star className="h-3.5 w-3.5 fill-current" />
                               <span>{Number(w.rating).toFixed(1)}</span>
                             </div>
                           )}
                           {w.current_value != null && (
                             <span
-                              className="text-[10px] font-semibold"
-                              style={{ color: "rgba(58,51,39,0.45)" }}
+                              className="text-[11.5px] font-semibold"
+                              style={{ color: "rgba(58,51,39,0.55)" }}
                             >
                               R$ {Number(w.current_value).toLocaleString("pt-BR")}
                             </span>
