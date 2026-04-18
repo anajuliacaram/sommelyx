@@ -1,11 +1,11 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile, type Recipe } from "@/lib/sommelier-ai";
+import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile, type Recipe, type PairingIntent } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
@@ -71,6 +71,7 @@ type Step =
   | "source"
   | "sub-mode"
   | "dish"
+  | "intent"
   | "select-wine"
   | "results"
   | "wine-results"
@@ -121,6 +122,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
   const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante">("all");
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
+  const [intent, setIntent] = useState<PairingIntent>("everyday");
   const reset = () => {
     setSource(null);
     setSubMode(null);
@@ -143,6 +145,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setWineSearchState("");
     setWineSortState("az");
     setWineStyleFilter("all");
+    setIntent("everyday");
   };
 
   const handleClose = (v: boolean) => {
@@ -166,11 +169,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     }
   };
 
-  // Search cellar wines for a dish
-  const handleSearchCellar = useCallback(async (dishName?: string) => {
-    const query = dishName || dish.trim();
+  // Search cellar wines for a dish (called after intent is selected)
+  const handleSearchCellar = useCallback(async (chosenIntent?: PairingIntent) => {
+    const query = dish.trim();
     if (!query) return;
-    setDish(query);
     setLoading(true);
     setError(null);
     try {
@@ -182,8 +184,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
         country: w.country,
         producer: w.producer,
         vintage: w.vintage,
+        purchase_price: w.purchase_price ?? null,
+        current_value: w.current_value ?? null,
       }));
-      const result = await getDishWineSuggestions(query, cellarWines);
+      const result = await getDishWineSuggestions(query, cellarWines, chosenIntent ?? intent);
       setSuggestions(result.suggestions);
       setDishProfile(result.dishProfile || null);
       setStep("results");
@@ -192,7 +196,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     } finally {
       setLoading(false);
     }
-  }, [dish, wines]);
+  }, [dish, wines, intent]);
 
   // Search food pairings for a selected wine
   const handleSearchWinePairings = useCallback(async () => {
@@ -229,7 +233,17 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     setStep("photo");
   }, [dish]);
 
-  const handleSearch = source === "cellar" ? handleSearchCellar : handleSearchExternal;
+  // Router: from "dish" step, cellar goes to intent picker; external goes to photo upload.
+  const handleSearch = useCallback((dishName?: string) => {
+    const query = dishName || dish.trim();
+    if (!query) return;
+    setDish(query);
+    if (source === "cellar") {
+      setStep("intent");
+    } else {
+      handleSearchExternal(query);
+    }
+  }, [dish, source, handleSearchExternal]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -316,8 +330,10 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
     } else if (step === "ext-menu-photo") {
       setStep("ext-wine-input");
       setPreview(null);
-    } else if (step === "results") {
+    } else if (step === "intent") {
       setStep("dish");
+    } else if (step === "results") {
+      setStep(source === "cellar" ? "intent" : "dish");
       setSuggestions(null);
     } else if (step === "wine-results") {
       setStep("select-wine");
@@ -494,6 +510,62 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                         </Button>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {error && (
+                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                )}
+              </motion.div>
+            )}
+
+            {/* ── Step 2a-bis: Intent picker (cellar only) ── */}
+            {step === "intent" && (
+              <motion.div
+                key="intent"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-4"
+              >
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
+                    Como você quer harmonizar?
+                  </p>
+                  <p className="text-[12px] text-muted-foreground">
+                    Vamos sugerir o vinho ideal da sua adega para <span className="font-semibold text-foreground/80">{dish}</span>.
+                  </p>
+                </div>
+
+                <div className="space-y-2.5">
+                  <PremiumChoiceCard
+                    index={0}
+                    icon={Heart}
+                    title="Para o dia a dia"
+                    description="Vinhos de custo médio que harmonizam muito bem"
+                    onClick={() => { setIntent("everyday"); handleSearchCellar("everyday"); }}
+                  />
+                  <PremiumChoiceCard
+                    index={1}
+                    icon={DollarSign}
+                    title="Melhor custo-benefício"
+                    description="A melhor harmonização entre os rótulos mais econômicos"
+                    onClick={() => { setIntent("value"); handleSearchCellar("value"); }}
+                  />
+                  <PremiumChoiceCard
+                    index={2}
+                    icon={Crown}
+                    title="Para um momento inesquecível"
+                    description="Os rótulos mais especiais que combinam com o prato"
+                    accent="gold"
+                    onClick={() => { setIntent("special"); handleSearchCellar("special"); }}
+                  />
+                </div>
+
+                {loading && (
+                  <div className="flex items-center justify-center gap-2 text-[12px] text-muted-foreground pt-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Consultando sommelier…
                   </div>
                 )}
 
