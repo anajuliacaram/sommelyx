@@ -143,20 +143,20 @@ export default function PersonalCellarPage() {
             >
               {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
             </button>
-            <button
-              type="button"
-              className="editorial-btn-primary ml-auto"
-              onClick={() => setAddOpen(true)}
-            >
-              + Adicionar
-            </button>
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
-              <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)}>
-                {s}
-              </Chip>
-            ))}
+            <div className="ml-auto flex flex-wrap items-center gap-1.5">
+              {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)}>
+                  {s}
+                </Chip>
+              ))}
+              <button
+                type="button"
+                className="editorial-btn-primary ml-1"
+                onClick={() => setAddOpen(true)}
+              >
+                + Adicionar
+              </button>
+            </div>
           </div>
         </EditorialCard>
 
