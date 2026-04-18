@@ -1070,7 +1070,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         }
         setParseErrors([
           String(data.error),
-          "Dica: para CSV/Excel, garanta uma linha de cabeçalho com colunas como 'Nome', 'Produtor', 'Safra', 'Tipo', 'Quantidade', 'Preço'.",
+          "Nossa inteligência está instável agora. Tente novamente em alguns instantes ou divida o arquivo em partes menores.",
+          "Para CSV/Excel, garanta uma linha de cabeçalho com colunas como 'Nome', 'Produtor', 'Safra', 'Tipo', 'Quantidade', 'Preço'.",
         ]);
         setDraftWines([]);
         setStep("preview");
@@ -1126,8 +1127,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           : /rate|429/i.test(msg) ? "Muitas tentativas seguidas. Aguarde 1 minuto e tente novamente."
           : /unauth|401|sess/i.test(msg) ? "Sessão expirada. Faça login novamente."
           : /word|mammoth/i.test(msg) ? msg
-          : "Erro ao analisar o arquivo. Verifique o formato e tente novamente.";
-      setParseErrors([friendly]);
+          : /dns|network|connect|fetch|gateway|503|502|504/i.test(msg)
+            ? "Nossa inteligência está instável no momento. Aguarde alguns instantes e tente novamente."
+            : "Erro ao analisar o arquivo. Verifique o formato e tente novamente.";
+      setParseErrors([friendly, "Se persistir, tente exportar o arquivo como CSV ou Excel (.xlsx) com colunas: Nome, Produtor, Safra, Tipo, Quantidade, Preço."]);
       setDraftWines([]);
       setStep("preview");
     }
