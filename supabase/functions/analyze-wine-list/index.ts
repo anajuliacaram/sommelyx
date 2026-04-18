@@ -39,6 +39,31 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+async function logToDb(
+  supabaseUrl: string,
+  serviceKey: string,
+  userId: string,
+  functionName: string,
+  statusCode: number,
+  outcome: string,
+  durationMs: number,
+  metadata?: Record<string, unknown>,
+) {
+  try {
+    const adminClient = createClient(supabaseUrl, serviceKey);
+    await adminClient.from("edge_function_logs").insert({
+      user_id: userId,
+      function_name: functionName,
+      status_code: statusCode,
+      outcome,
+      duration_ms: durationMs,
+      metadata: metadata || {},
+    });
+  } catch {
+    // silent on logging failures
+  }
+}
+
 // ── Anti-Genericity Validation (same as wine-pairings) ──
 const GENERIC_PATTERNS = [
   /cabernet sauvignon (?:possui|tem|apresenta|é conhecid)/i,
