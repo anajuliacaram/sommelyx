@@ -464,25 +464,107 @@ export function RecipeButton({ onClick }: { onClick: () => void }) {
 }
 
 /* ═══════════════════════════════════════════════
-   SHEET HERO HEADER — Flagship opening
+   SHEET HERO HEADER — Premium unified opening
    ═══════════════════════════════════════════════ */
 
 export function PairingSheetHero({
   title,
   subtitle,
+  icon = "utensils",
 }: {
   title: string;
   subtitle: string;
+  icon?: "utensils" | "sparkles" | "wine" | "chef";
 }) {
+  const Icon = icon === "sparkles" ? Sparkles : icon === "wine" ? Wine : icon === "chef" ? ChefHat : UtensilsCrossed;
   return (
-    <div className="mb-6 flex items-start gap-4">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20 shadow-[0_8px_24px_-10px_rgba(123,30,43,0.18)]">
-        <UtensilsCrossed className="h-5 w-5 text-[#7B1E2B]" />
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      className="mb-6 flex items-start gap-4"
+    >
+      <div
+        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px]"
+        style={{
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(14px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+          border: "1px solid rgba(255,255,255,0.55)",
+          boxShadow: "0 10px 28px -14px rgba(123,30,43,0.22), inset 0 1px 0 rgba(255,255,255,0.7)",
+        }}
+      >
+        <Icon className="h-6 w-6 text-[#7B1E2B]" strokeWidth={1.75} />
       </div>
-      <div className="min-w-0">
-        <h2 className="text-2xl font-semibold tracking-tight text-[#1E1E1E]">{title}</h2>
-        <p className="mt-1 text-sm font-medium tracking-tight text-[#6B6B6B] leading-relaxed">{subtitle}</p>
+      <div className="min-w-0 pt-1">
+        <h2
+          className="text-[28px] font-semibold tracking-[-0.02em] leading-[1.1] text-[#1A1713]"
+          style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontWeight: 600 }}
+        >
+          {title}
+        </h2>
+        <p className="mt-1.5 text-[14px] font-medium leading-snug text-[rgba(58,51,39,0.6)]">{subtitle}</p>
       </div>
-    </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   PREMIUM CHOICE CARD — Unified selectable card
+   Used across Harmonizar / Analisar Carta flows
+   ═══════════════════════════════════════════════ */
+
+export function PremiumChoiceCard({
+  icon: IconCmp,
+  title,
+  description,
+  onClick,
+  selected = false,
+  accent = "wine",
+  index = 0,
+}: {
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  title: string;
+  description: string;
+  onClick: () => void;
+  selected?: boolean;
+  accent?: "wine" | "gold";
+  index?: number;
+}) {
+  const accentColor = accent === "gold" ? "#B7791F" : "#7B1E2B";
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.985 }}
+      className="group w-full text-left rounded-[18px] p-[18px] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
+      style={{
+        background: selected ? "rgba(123,30,43,0.05)" : "rgba(255,255,255,0.92)",
+        border: `1px solid ${selected ? accentColor : "rgba(0,0,0,0.06)"}`,
+        boxShadow: selected
+          ? `0 10px 26px -14px ${accentColor}33, inset 0 1px 0 rgba(255,255,255,0.7)`
+          : "0 4px 14px -10px rgba(58,51,39,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
+      }}
+    >
+      <div className="flex items-center gap-3.5">
+        <div
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-105"
+          style={{
+            background: selected ? `${accentColor}1A` : "rgba(123,30,43,0.07)",
+            border: `1px solid ${selected ? `${accentColor}33` : "rgba(123,30,43,0.10)"}`,
+          }}
+        >
+          <IconCmp className="h-[18px] w-[18px]" strokeWidth={1.8} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px] font-semibold tracking-[-0.005em] text-[#1A1713]">{title}</p>
+          <p className="mt-0.5 text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.6)]">{description}</p>
+        </div>
+      </div>
+    </motion.button>
   );
 }
