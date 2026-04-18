@@ -107,8 +107,8 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       </div>
 
                       <div
-                        className="w-[4px] shrink-0 rounded-full self-stretch"
-                        style={{ background: color, minHeight: 32 }}
+                        className="w-[3px] shrink-0 rounded-full self-stretch"
+                        style={{ background: color, minHeight: 32, opacity: 0.85 }}
                       />
 
                       <div className="min-w-0 flex-1">
