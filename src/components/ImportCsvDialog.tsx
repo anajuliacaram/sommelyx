@@ -978,6 +978,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         return row.quantity ?? "";
       case "purchase_price":
         return formatPrice((row as DraftWine).price ?? row.purchase_price);
+      case "current_value":
+        return formatPrice((row as any).current_value);
       case "vintage":
         return row.vintage ?? "";
       case "drink_from":
