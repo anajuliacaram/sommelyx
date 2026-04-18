@@ -519,8 +519,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         onChange={e => setName(e.target.value)}
                         placeholder="Ex: Malbec Reserva"
                         required
-                        className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
-                        style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                        className="input-premium"
                       />
                     </div>
                     <div>
@@ -530,8 +529,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         value={producer}
                         onChange={e => setProducer(e.target.value)}
                         placeholder="Ex: Catena Zapata"
-                        className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
-                        style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                        className="input-premium"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -543,8 +541,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           min="1"
                           value={quantity}
                           onChange={e => setQuantity(e.target.value)}
-                          className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
-                          style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                        className="input-premium"
                         />
                       </div>
                       <div>
@@ -555,8 +552,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           value={vintage}
                           onChange={e => setVintage(e.target.value)}
                           placeholder="2020"
-                          className="w-full h-12 px-4 text-[16px] rounded-[14px] border bg-white outline-none transition-all duration-150 placeholder:text-[#9A9A9A] hover:border-[#D0CDC6] focus:border-[#6F7F5B] focus:shadow-[0_0_0_2px_rgba(111,127,91,0.15)]"
-                          style={{ color: '#1F1F1F', borderColor: '#E5E2DC' }}
+                        className="input-premium"
                         />
                       </div>
                     </div>
