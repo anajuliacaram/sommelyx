@@ -243,6 +243,10 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
 }
 
 export function LandingPricing({ onSignup }: LandingPricingProps) {
+  const [activeCat, setActiveCat] = useState<FaqCategory>("planos");
+  const filteredFaqs = faqs.filter((f) => f.cat === activeCat);
+  const activeMeta = categories.find((c) => c.key === activeCat)!;
+
   return (
     <section id="pricing" className="relative px-4 sm:px-8 pt-4 pb-10 z-10">
       <div className="mx-auto max-w-5xl">
@@ -277,9 +281,9 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           ))}
         </div>
 
-        {/* FAQ */}
+        {/* FAQ — categorias coloridas */}
         <motion.div
-          className="mx-auto mt-12 max-w-3xl"
+          className="mx-auto mt-14 max-w-3xl"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
@@ -290,29 +294,97 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
             <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.14em] text-wine mb-2">
               Dúvidas
             </span>
-            <h3 className="text-[22px] sm:text-[26px] font-semibold tracking-[-0.02em] text-[#1A1A1A]">
+            <h3 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em] text-[#1A1A1A]">
               Perguntas frequentes
             </h3>
+            <p className="mt-2 text-[13.5px] text-[#5F5F5F]">
+              Respostas rápidas, organizadas por tema.
+            </p>
           </div>
 
-          <Accordion type="single" collapsible defaultValue="faq-0" className="space-y-2.5">
-            {faqs.map((item, idx) => (
-              <AccordionItem
-                key={item.q}
-                value={`faq-${idx}`}
-                className="overflow-hidden rounded-xl border border-black/[0.06] bg-white/92 backdrop-blur-sm px-4 transition-all duration-300 data-[state=open]:border-wine/25 data-[state=open]:shadow-[0_14px_36px_-22px_rgba(110,30,42,0.20)]"
-              >
-                <AccordionTrigger className="py-3.5 text-left text-[14px] font-semibold tracking-tight text-[#1A1A1A] hover:no-underline data-[state=open]:text-wine [&>svg]:text-wine">
-                  {item.q}
-                </AccordionTrigger>
-                <AccordionContent className="pb-3.5 pt-0 text-[13.5px] leading-relaxed text-[#5F5F5F]">
-                  {item.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          {/* Category tabs */}
+          <div className="flex justify-center mb-5 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+            <div className="inline-flex gap-1.5 p-1 rounded-2xl bg-white/70 backdrop-blur-md border border-black/[0.06] shadow-sm">
+              {categories.map((c) => {
+                const isActive = c.key === activeCat;
+                return (
+                  <button
+                    key={c.key}
+                    onClick={() => setActiveCat(c.key)}
+                    className="relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-semibold transition-colors whitespace-nowrap"
+                    style={{ color: isActive ? "#fff" : "#5F5F5F" }}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="faq-pill"
+                        className="absolute inset-0 rounded-xl"
+                        style={{ background: c.accent }}
+                        transition={{ type: "spring", stiffness: 360, damping: 32 }}
+                      />
+                    )}
+                    <c.icon className="relative z-10 h-3.5 w-3.5" />
+                    <span className="relative z-10">{c.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* FAQ list */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeCat}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Accordion type="single" collapsible defaultValue="faq-0" className="space-y-2.5">
+                {filteredFaqs.map((item, idx) => (
+                  <AccordionItem
+                    key={item.q}
+                    value={`faq-${idx}`}
+                    className="group relative overflow-hidden rounded-xl border bg-white/92 backdrop-blur-sm pl-5 pr-4 transition-all duration-300"
+                    style={{
+                      borderColor: "rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    {/* Color accent bar */}
+                    <span
+                      className="absolute left-0 top-0 bottom-0 w-[3px] transition-opacity duration-300 opacity-60 group-data-[state=open]:opacity-100"
+                      style={{ background: activeMeta.accent }}
+                    />
+                    <AccordionTrigger
+                      className="py-3.5 text-left text-[14px] font-semibold tracking-tight text-[#1A1A1A] hover:no-underline [&>svg]:transition-colors"
+                      style={{
+                        ['--tw-text-opacity' as string]: 1,
+                      }}
+                    >
+                      <span className="group-data-[state=open]:font-semibold" style={{ color: undefined }}>{item.q}</span>
+                    </AccordionTrigger>
+                    <AccordionContent
+                      className="pb-3.5 pt-0 text-[13.5px] leading-relaxed text-[#5F5F5F]"
+                    >
+                      <div
+                        className="rounded-lg p-3"
+                        style={{ background: activeMeta.soft, border: `1px solid ${activeMeta.border}` }}
+                      >
+                        {item.a}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Helper line */}
+          <p className="mt-5 text-center text-[12px] text-[#5F5F5F]">
+            Não encontrou? <button className="font-semibold text-wine hover:underline" onClick={() => document.querySelector<HTMLElement>('[aria-label="Fale com a Sommelière"]')?.click()}>Fale com a Sommelière</button>
+          </p>
         </motion.div>
       </div>
     </section>
   );
 }
+
