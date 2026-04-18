@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2, X } from "@/icons/lucide";
+import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2, X, BarChart3 } from "@/icons/lucide";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useWines } from "@/hooks/useWines";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,7 @@ export default function AlertsPage() {
   const [insights, setInsights] = useState<Record<string, WineInsight>>({});
   const [loadingInsight, setLoadingInsight] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [analysisOpen, setAnalysisOpen] = useState(false);
 
   const alerts = useMemo(() => {
     if (!wines) return [];
@@ -110,6 +112,60 @@ export default function AlertsPage() {
 
   const hasAiSupport = (type: string) => type === "drink_now" || type === "past_peak";
 
+  const cellarAnalysis = useMemo(() => {
+    const list = wines ?? [];
+    const inStock = list.filter(w => w.quantity > 0);
+    const totalBottles = inStock.reduce((s, w) => s + w.quantity, 0);
+    const totalValue = inStock.reduce((s, w) => s + (Number(w.current_value || w.purchase_price || 0) * w.quantity), 0);
+    const styleCounts: Record<string, number> = {};
+    inStock.forEach(w => {
+      const s = (w.style || "").toLowerCase();
+      let fam = "outros";
+      if (s.includes("tint")) fam = "tintos";
+      else if (s.includes("branc")) fam = "brancos";
+      else if (s.includes("ros")) fam = "rosés";
+      else if (s.includes("espum") || s.includes("champ")) fam = "espumantes";
+      else if (s.includes("sobrem") || s.includes("fort")) fam = "sobremesa";
+      styleCounts[fam] = (styleCounts[fam] || 0) + w.quantity;
+    });
+    const dominantStyle = Object.entries(styleCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+    const dominantPct = totalBottles > 0 && styleCounts[dominantStyle]
+      ? Math.round((styleCounts[dominantStyle] / totalBottles) * 100) : 0;
+    const drinkNowCount = grouped.drink_now.length;
+    const pastPeakCount = grouped.past_peak.length;
+    const lowStockCount = grouped.low_stock.length;
+    const avgRating = inStock.filter(w => w.rating).reduce((s, w, _, arr) => s + (Number(w.rating) || 0) / arr.length, 0);
+    const oldestVintage = inStock.reduce((m, w) => (w.vintage && (!m || w.vintage < m) ? w.vintage : m), null as number | null);
+
+    const lines: string[] = [];
+    if (totalBottles === 0) {
+      lines.push("Sua adega está vazia. Comece adicionando rótulos para receber análises técnicas reais sobre composição, evolução e janela de consumo.");
+    } else {
+      lines.push(`Adega com ${totalBottles} garrafa${totalBottles > 1 ? "s" : ""} ativa${totalBottles > 1 ? "s" : ""}, dominância de ${dominantStyle} (${dominantPct}% do estoque). Valor estimado em circulação: R$ ${totalValue.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}.`);
+      if (drinkNowCount > 0) {
+        lines.push(`${drinkNowCount} rótulo${drinkNowCount > 1 ? "s" : ""} no auge da janela ideal — priorize abertura nos próximos 60–90 dias para capturar o ápice de complexidade aromática terciária antes da inflexão evolutiva.`);
+      }
+      if (pastPeakCount > 0) {
+        lines.push(`${pastPeakCount} vinho${pastPeakCount > 1 ? "s ultrapassaram" : " ultrapassou"} a janela técnica recomendada. Risco de oxidação avançada e perda de fruta primária — considere consumo imediato ou uso culinário em reduções.`);
+      }
+      if (lowStockCount > 0 && profileType === "commercial") {
+        lines.push(`${lowStockCount} referência${lowStockCount > 1 ? "s" : ""} com estoque crítico (≤2 unidades). Revisar reposição para manter giro e disponibilidade no salão.`);
+      }
+      if (avgRating > 0) {
+        lines.push(`Curadoria média da casa: ${avgRating.toFixed(1)}/5. ${oldestVintage ? `Safra mais antiga em estoque: ${oldestVintage}.` : ""}`);
+      }
+      if (drinkNowCount === 0 && pastPeakCount === 0) {
+        lines.push("Nenhum vinho em janela crítica no momento — perfil de guarda equilibrado, com tempo para evolução fenólica adequada.");
+      }
+    }
+    return { lines, totalBottles, totalValue, dominantStyle, dominantPct, drinkNowCount, pastPeakCount, lowStockCount };
+  }, [wines, grouped, profileType]);
+
+  const scrollToDrinkNow = () => {
+    const el = document.getElementById("alerts-drink_now");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="space-y-3 max-w-3xl">
       {/* ── Header ── */}
@@ -140,7 +196,73 @@ export default function AlertsPage() {
         </div>
       </motion.div>
 
-      {/* ── Empty state ── */}
+      {/* ── Ações inteligentes (CTA premium) ── */}
+      {visibleAlerts.length > 0 && (
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-3 pt-1">
+          <div className="flex items-center gap-2 px-1">
+            <Sparkles className="h-3.5 w-3.5 text-[#7B1E2B]" />
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+              Ações inteligentes
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={scrollToDrinkNow}
+            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:scale-[1.015] active:scale-[0.99]"
+            style={{
+              height: 64,
+              background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)",
+              boxShadow: "0 10px 25px rgba(123,30,43,0.18), inset 0 1px 0 rgba(255,255,255,0.12)",
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/0 to-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="relative flex h-full items-center gap-3.5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/12 backdrop-blur-sm ring-1 ring-white/15">
+                <GlassWater className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[16px] font-semibold leading-none text-white">Beber agora</span>
+                  {cellarAnalysis.drinkNowCount > 0 && (
+                    <span className="rounded-full bg-[#C9B469] px-1.5 py-0.5 text-[10px] font-bold text-[#1A1713] shadow-[0_0_6px_rgba(201,180,105,0.45)]">
+                      {cellarAnalysis.drinkNowCount}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-[11.5px] font-medium leading-none text-white/75">
+                  Veja os vinhos no momento ideal
+                </p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-white/85 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setAnalysisOpen(true)}
+            className="group relative w-full rounded-2xl bg-white/85 px-5 text-left backdrop-blur-md transition-all duration-300 hover:bg-white hover:scale-[1.01] active:scale-[0.99]"
+            style={{
+              height: 56,
+              border: "1px solid rgba(123, 30, 43, 0.15)",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
+            }}
+          >
+            <div className="flex h-full items-center gap-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[rgba(123,30,43,0.06)] ring-1 ring-[rgba(123,30,43,0.12)]">
+                <BarChart3 className="h-4 w-4 text-[#7B1E2B]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[14px] font-semibold leading-none text-[#7B1E2B]">Analisar adega</div>
+                <p className="mt-1 text-[11px] font-medium leading-none text-[rgba(58,51,39,0.55)]">
+                  Entenda valor, giro e consumo
+                </p>
+              </div>
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/70 transition-transform duration-300 group-hover:rotate-12" />
+            </div>
+          </button>
+        </motion.div>
+      )}
       {visibleAlerts.length === 0 ? (
         <motion.div className="glass-card px-5 py-10 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
           <div className="w-9 h-9 rounded-xl bg-emerald-600/8 flex items-center justify-center mx-auto mb-2.5">
@@ -157,7 +279,7 @@ export default function AlertsPage() {
             const SectionIcon = cfg.icon;
 
             return (
-              <motion.div key={key} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1.5">
+              <motion.div key={key} id={`alerts-${key}`} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1.5 scroll-mt-20">
                 {/* ── Section header ── */}
                 <div className="flex items-center gap-2 px-1">
                   <div className={cn("w-5 h-5 rounded-md flex items-center justify-center px-[4px]", cfg.accentBg)}>
@@ -287,6 +409,70 @@ export default function AlertsPage() {
           })}
         </div>
       )}
+
+      {/* ── Modal: Análise Sommelyx geral da adega ── */}
+      <Dialog open={analysisOpen} onOpenChange={setAnalysisOpen}>
+        <DialogContent className="max-w-lg p-0 overflow-hidden bg-white border-[rgba(123,30,43,0.15)]">
+          <div
+            className="px-6 py-5"
+            style={{ background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)" }}
+          >
+            <DialogHeader className="space-y-2">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <DialogTitle
+                  className="text-[22px] font-bold leading-none text-white"
+                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                >
+                  Análise Sommelyx
+                </DialogTitle>
+              </div>
+              <p className="text-[12px] font-medium leading-snug text-white/80">
+                Diagnóstico técnico completo da sua adega
+              </p>
+            </DialogHeader>
+          </div>
+
+          <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-xl border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.04)] px-3 py-2.5">
+                <div className="text-[18px] font-bold leading-none text-[#7B1E2B] tabular-nums">
+                  {cellarAnalysis.totalBottles}
+                </div>
+                <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.55)]">
+                  Garrafas
+                </div>
+              </div>
+              <div className="rounded-xl border border-[rgba(95,127,82,0.15)] bg-[rgba(95,127,82,0.05)] px-3 py-2.5">
+                <div className="text-[14px] font-bold leading-tight text-[#5F7F52] tabular-nums">
+                  R$ {cellarAnalysis.totalValue.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                </div>
+                <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.55)]">
+                  Valor
+                </div>
+              </div>
+              <div className="rounded-xl border border-[rgba(180,140,58,0.18)] bg-[rgba(180,140,58,0.06)] px-3 py-2.5">
+                <div className="text-[14px] font-bold leading-tight text-[#B48C3A] capitalize">
+                  {cellarAnalysis.dominantStyle}
+                </div>
+                <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.55)]">
+                  {cellarAnalysis.dominantPct}% do estoque
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {cellarAnalysis.lines.map((line, i) => (
+                <p key={i} className="text-[13.5px] leading-[1.7] text-[#2A2A2A]">
+                  {line}
+                </p>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
