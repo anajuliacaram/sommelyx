@@ -222,13 +222,44 @@ export default function AlertsPage() {
                 <GlassWater className="h-5 w-5 text-white" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[16px] font-semibold leading-none text-white">Beber agora</span>
                   {cellarAnalysis.drinkNowCount > 0 && (
                     <span className="rounded-full bg-[#C9B469] px-1.5 py-0.5 text-[10px] font-bold text-[#1A1713] shadow-[0_0_6px_rgba(201,180,105,0.45)]">
                       {cellarAnalysis.drinkNowCount}
                     </span>
                   )}
+                  {/* Bolinhas por tipo de vinho na seção drink_now */}
+                  {(() => {
+                    const counts: Record<string, number> = {};
+                    grouped.drink_now.forEach(a => {
+                      const s = (a.style || "").toLowerCase();
+                      let fam = "outros";
+                      if (s.includes("tint")) fam = "tinto";
+                      else if (s.includes("branc")) fam = "branco";
+                      else if (s.includes("ros")) fam = "rose";
+                      else if (s.includes("espum") || s.includes("champ")) fam = "espumante";
+                      else if (s.includes("sobrem") || s.includes("fort")) fam = "fort";
+                      counts[fam] = (counts[fam] || 0) + 1;
+                    });
+                    const colorMap: Record<string, string> = {
+                      tinto: "#7B1E2B",
+                      branco: "#EFE3B0",
+                      rose: "#E8A4B0",
+                      espumante: "#F4E27A",
+                      fort: "#5A1420",
+                      outros: "#C9B469",
+                    };
+                    const labelMap: Record<string, string> = {
+                      tinto: "Tinto", branco: "Branco", rose: "Rosé", espumante: "Espumante", fort: "Fortificado", outros: "Outros",
+                    };
+                    return Object.entries(counts).map(([fam, n]) => (
+                      <span key={fam} className="inline-flex items-center gap-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-white/90 ring-1 ring-white/15" title={`${labelMap[fam]}: ${n}`}>
+                        <span className="h-1.5 w-1.5 rounded-full ring-1 ring-white/40" style={{ background: colorMap[fam] }} />
+                        {n}
+                      </span>
+                    ));
+                  })()}
                 </div>
                 <p className="mt-1 text-[11.5px] font-medium leading-none text-white/75">
                   Veja os vinhos no momento ideal
@@ -241,24 +272,26 @@ export default function AlertsPage() {
           <button
             type="button"
             onClick={() => setAnalysisOpen(true)}
-            className="group relative w-full rounded-2xl bg-white/85 px-5 text-left backdrop-blur-md transition-all duration-300 hover:bg-white hover:scale-[1.01] active:scale-[0.99]"
+            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
             style={{
               height: 56,
-              border: "1px solid rgba(123, 30, 43, 0.15)",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
+              background: "linear-gradient(135deg, #1B3B27 0%, #2A5A3C 60%, #102515 100%)",
+              boxShadow: "0 10px 25px rgba(18,54,31,0.22), inset 0 1px 0 rgba(255,255,255,0.10)",
+              border: "1px solid rgba(201,180,105,0.20)",
             }}
           >
-            <div className="flex h-full items-center gap-3.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[rgba(123,30,43,0.06)] ring-1 ring-[rgba(123,30,43,0.12)]">
-                <BarChart3 className="h-4 w-4 text-[#7B1E2B]" />
+            <div className="absolute -right-8 top-0 h-20 w-20 rounded-full bg-[#C9B469]/10 blur-2xl pointer-events-none" />
+            <div className="relative flex h-full items-center gap-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15 backdrop-blur-sm">
+                <BarChart3 className="h-4 w-4 text-[#C9B469]" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[14px] font-semibold leading-none text-[#7B1E2B]">Analisar adega</div>
-                <p className="mt-1 text-[11px] font-medium leading-none text-[rgba(58,51,39,0.55)]">
+                <div className="text-[14px] font-semibold leading-none text-white">Analisar com Sommelyx</div>
+                <p className="mt-1 text-[11px] font-medium leading-none text-white/70">
                   Entenda valor, giro e consumo
                 </p>
               </div>
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/70 transition-transform duration-300 group-hover:rotate-12" />
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#C9B469] transition-transform duration-300 group-hover:rotate-12" />
             </div>
           </button>
         </motion.div>
