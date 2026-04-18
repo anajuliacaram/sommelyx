@@ -61,30 +61,63 @@ export function StyleBadge({ style, className }: { style?: string | null; classN
 }
 
 /* ── Chip (filtro) ───────────────────────────────────── */
+export type ChipTone = "default" | "tinto" | "branco" | "rosé" | "espumante" | "sobremesa";
+
+const CHIP_TONES: Record<ChipTone, { bg: string; color: string; border: string }> = {
+  // Verde sálvia (padrão / "todos")
+  default:    { bg: "rgba(95,111,82,0.14)",  color: "#5F7F52", border: "rgba(95,111,82,0.22)" },
+  // Bordô suave
+  tinto:      { bg: "rgba(123,30,43,0.10)",  color: "#7B1E2B", border: "rgba(123,30,43,0.22)" },
+  // Amarelo dourado suave
+  branco:     { bg: "rgba(212,175,55,0.16)", color: "#8B6914", border: "rgba(212,175,55,0.30)" },
+  // Rosa suave
+  "rosé":     { bg: "rgba(216,123,143,0.16)", color: "#B0556C", border: "rgba(216,123,143,0.28)" },
+  // Verde claro
+  espumante:  { bg: "rgba(132,168,108,0.16)", color: "#4F7A3D", border: "rgba(132,168,108,0.28)" },
+  // Laranja suave
+  sobremesa:  { bg: "rgba(214,124,52,0.14)", color: "#A85A1F", border: "rgba(214,124,52,0.26)" },
+};
+
+function inferChipTone(children: ReactNode): ChipTone {
+  if (typeof children !== "string") return "default";
+  const s = children.trim().toLowerCase();
+  if (s === "tinto") return "tinto";
+  if (s === "branco") return "branco";
+  if (s === "rosé" || s === "rose") return "rosé";
+  if (s === "espumante") return "espumante";
+  if (s === "sobremesa") return "sobremesa";
+  return "default";
+}
+
 export function Chip({
   active,
   onClick,
   children,
+  tone,
 }: {
   active?: boolean;
   onClick?: () => void;
   children: ReactNode;
+  tone?: ChipTone;
 }) {
+  const resolvedTone = tone ?? inferChipTone(children);
+  const palette = CHIP_TONES[resolvedTone];
   return (
     <button
       type="button"
       onClick={onClick}
       className="inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.06em] transition-all"
       style={{
-        background: active ? "rgba(95,111,82,0.14)" : "rgba(255,255,255,0.76)",
-        color: active ? "#5F7F52" : "rgba(26,23,21,0.72)",
-        border: `1px solid ${active ? "rgba(95,111,82,0.22)" : "rgba(95,111,82,0.10)"}`,
+        background: active ? palette.bg : "rgba(255,255,255,0.76)",
+        color: active ? palette.color : "rgba(26,23,21,0.72)",
+        border: `1px solid ${active ? palette.border : "rgba(95,111,82,0.10)"}`,
       }}
     >
       {children}
     </button>
   );
 }
+
 
 /* ── Card editorial (card-depth-v1) ──────────────────── */
 export function EditorialCard({
