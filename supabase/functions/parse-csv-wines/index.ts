@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
+
+function maskSecret(value?: string | null) {
+  if (!value) return "missing";
+  const trimmed = value.trim();
+  if (trimmed.length <= 6) return `${trimmed.slice(0, 2)}…`;
+  return `${trimmed.slice(0, 6)}…`;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -105,11 +111,11 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[parse-csv-wines] openai_key=${maskSecret(OPENAI_API_KEY)} model=${OPENAI_MODEL}`);
-    if (!OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")?.trim() || "";
+    const AI_MODEL = Deno.env.get("AI_MODEL")?.trim() || "google/gemini-2.5-flash";
+    console.log(`[parse-csv-wines] lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${AI_MODEL}`);
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
@@ -244,31 +250,60 @@ Regras:
     };
 
     async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
-      const result = await callOpenAIResponses<any>({
-        functionName: FUNCTION_NAME,
-        requestId: crypto.randomUUID(),
-        apiKey: OPENAI_API_KEY,
-        model: OPENAI_MODEL,
-        timeoutMs: 60_000,
-        temperature: 0.1,
-        instructions: systemPrompt,
-        input: [
-          {
-            role: "user",
-            content: [
-              { type: "input_text", text: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
-            ],
+      const requestId = crypto.randomUUID();
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60_000);
+
+      try {
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=lovable model=${AI_MODEL}`);
+        const response = await fetch("https://ai.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
           },
-        ],
-        schema: toolDef.function.parameters as Record<string, unknown>,
-        maxOutputTokens: 6_000,
-      });
+          body: JSON.stringify({
+            model: AI_MODEL,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
+            ],
+            tools: [toolDef],
+            tool_choice: { type: "function", function: { name: "extract_wines" } },
+            temperature: 0.1,
+          }),
+        });
 
-      if (!result.ok) {
-        return { errorStatus: result.status };
+        if (!response.ok) {
+          const errText = await response.text().catch(() => "");
+          console.log(`[${FUNCTION_NAME}] request_id=${requestId} status=${response.status} error=${errText.slice(0, 300)}`);
+          return { errorStatus: response.status };
+        }
+
+        const data = await response.json();
+        const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
+        const argsRaw = toolCall?.function?.arguments;
+        if (!argsRaw) {
+          console.log(`[${FUNCTION_NAME}] request_id=${requestId} no_tool_call`);
+          return { errorStatus: 422 };
+        }
+        let parsed: any;
+        try {
+          parsed = typeof argsRaw === "string" ? JSON.parse(argsRaw) : argsRaw;
+        } catch (e) {
+          console.log(`[${FUNCTION_NAME}] request_id=${requestId} parse_error=${e instanceof Error ? e.message : "unknown"}`);
+          return { errorStatus: 422 };
+        }
+        return { result: parsed };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "unknown";
+        const isAbort = message.toLowerCase().includes("abort");
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} error=${message}`);
+        return { errorStatus: isAbort ? 504 : 500 };
+      } finally {
+        clearTimeout(timeout);
       }
-
-      return { result: result.parsed };
     }
 
     // ── PARALLEL chunk processing for speed ──
