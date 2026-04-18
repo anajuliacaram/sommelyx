@@ -260,7 +260,7 @@ export function AlertsSheet({ open, onOpenChange, profileType }: AlertsSheetProp
                         )}
                       </AnimatePresence>
                     </div>
-                  ))}
+                  );})}
                 </div>
               );
             })
