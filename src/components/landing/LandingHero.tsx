@@ -213,27 +213,6 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
           <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.16)", filter: "blur(90px)" }} />
 
           <div className="relative grid grid-cols-2 gap-3 sm:gap-3.5">
-            {/* IA — full width top */}
-            <motion.div
-              {...float(0.10)}
-              className="col-span-2 rounded-2xl p-4"
-              style={{
-                ...glassCard,
-                background: "linear-gradient(160deg, rgba(55,30,36,0.96) 0%, rgba(28,15,20,1) 100%)",
-                border: "1px solid rgba(198,167,104,0.22)",
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.18)", border: "1px solid rgba(198,167,104,0.28)" }}>
-                  <Sparkles className="h-3.5 w-3.5 text-[#C6A768]" />
-                </div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[#C6A768]">Inteligência Sommelyx</p>
-              </div>
-              <p className="text-[12px] leading-relaxed font-medium text-[#F8F6F3]">
-                "Seu Brunello 2018 está na <span className="text-[#C6A768]">janela ideal</span>. Considere abrir nos próximos 60 dias."
-              </p>
-            </motion.div>
-
             {/* Adega — full width */}
             <motion.div
               {...float(0.18)}
