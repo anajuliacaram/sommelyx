@@ -10,9 +10,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-const UserProfileSchema = z.object({
+
   topStyles: z.array(z.string()).optional(),
   topGrapes: z.array(z.string()).optional(),
   topCountries: z.array(z.string()).optional(),
