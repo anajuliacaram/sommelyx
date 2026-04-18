@@ -116,6 +116,38 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
             <Input value={wineName} onChange={(e) => setWineName(e.target.value)} />
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">Vinícola / Produtor</Label>
+              <Input value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Ex: Château Margaux" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">Safra</Label>
+              <Input
+                type="number"
+                value={vintage}
+                onChange={(e) => setVintage(e.target.value)}
+                placeholder="2020"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">País</Label>
+              <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="França" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">Região</Label>
+              <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Bordeaux" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[12px]">Uva / Blend</Label>
+            <Input
+              value={grape}
+              onChange={(e) => setGrape(e.target.value)}
+              placeholder="Ex: Cabernet Sauvignon, Merlot"
+            />
+          </div>
           <div className="space-y-1.5">
             <Label className="text-[12px]">Tipo</Label>
             <div className="flex flex-wrap gap-1.5">
