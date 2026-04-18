@@ -928,16 +928,67 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
     try {
       const raw = await fileToCsvLikeText(file);
+      if (!raw || !raw.trim()) {
+        setParseErrors(["Não conseguimos ler o conteúdo do arquivo. Verifique se ele contém dados de vinhos."]);
+        setDraftWines([]);
+        setStep("preview");
+        return;
+      }
       const csvContent = raw.length > MAX_CLIENT_INPUT_CHARS ? raw.slice(0, MAX_CLIENT_INPUT_CHARS) : raw;
 
-      const data = await invokeEdgeFunction<any>(
-        "parse-csv-wines",
-        { csvContent, fileName: file.name, fileType: file.type || null },
-        { timeoutMs: 45_000, retries: 1 },
-      );
+      // ── 1) FAST PATH: local deterministic parser for CSV/TSV/spreadsheet exports ──
+      const local = parseCsvLocally(csvContent);
+      const ext = file.name.split(".").pop()?.toLowerCase() || "";
+      const isStructured = ["csv", "tsv", "txt", "xlsx", "xls", "ods"].includes(ext);
+
+      if (isStructured && local.wines.length >= 1) {
+        rebuildDraftRows(local.wines);
+        setColumnMapping(local.mapping);
+        setAiNotes(local.wines.length > 0 ? `Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.` : "");
+        setParseErrors([]);
+        setEditMode(true);
+        setShowAdvancedColumns(false);
+        setSelectedRows([]);
+        setBulkProducer("");
+        setBulkVintage("");
+        setStep("preview");
+        return;
+      }
+
+      // ── 2) AI FALLBACK: PDFs, Word, or CSVs without recognizable headers ──
+      let data: any = null;
+      try {
+        data = await invokeEdgeFunction<any>(
+          "parse-csv-wines",
+          { csvContent, fileName: file.name, fileType: file.type || null },
+          { timeoutMs: 60_000, retries: 1 },
+        );
+      } catch (aiErr: any) {
+        // If we have ANY local rows, use them as fallback even if AI fails
+        if (local.wines.length > 0) {
+          rebuildDraftRows(local.wines);
+          setColumnMapping(local.mapping);
+          setAiNotes("Importação automática (sem IA). Revise os campos antes de confirmar.");
+          setParseErrors([]);
+          setStep("preview");
+          return;
+        }
+        throw aiErr;
+      }
 
       if (data?.error) {
-        setParseErrors([String(data.error)]);
+        if (local.wines.length > 0) {
+          rebuildDraftRows(local.wines);
+          setColumnMapping(local.mapping);
+          setAiNotes("");
+          setParseErrors([`A análise inteligente falhou (${data.error}). Mostrando dados extraídos localmente para você revisar.`]);
+          setStep("preview");
+          return;
+        }
+        setParseErrors([
+          String(data.error),
+          "Dica: para CSV/Excel, garanta uma linha de cabeçalho com colunas como 'Nome', 'Produtor', 'Safra', 'Tipo', 'Quantidade', 'Preço'.",
+        ]);
         setDraftWines([]);
         setStep("preview");
         return;
@@ -959,8 +1010,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }));
 
       const validWines = wines.filter((w) => w.name.length >= 2 && w.name.length <= 120);
-      rebuildDraftRows(validWines);
-      setColumnMapping(data?.column_mapping || {});
+      // Merge AI + local results when both produced rows
+      const merged = validWines.length > 0 ? validWines : local.wines;
+      rebuildDraftRows(merged);
+      setColumnMapping({ ...(local.mapping || {}), ...(data?.column_mapping || {}) });
       setAiNotes(data?.notes || "");
       setParseErrors([]);
       setEditMode(true);
@@ -969,8 +1022,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setBulkProducer("");
       setBulkVintage("");
       setStep("preview");
-      if (validWines.length === 0) {
-        setParseErrors(["Não encontramos linhas válidas de vinho neste arquivo."]);
+      if (merged.length === 0) {
+        setParseErrors([
+          "Não encontramos linhas válidas de vinho neste arquivo.",
+          "Dica: para CSV/Excel, inclua um cabeçalho com 'Nome', 'Produtor', 'Safra', 'Tipo', 'Quantidade'.",
+        ]);
       }
 
       if (raw.length > MAX_CLIENT_INPUT_CHARS) {
@@ -980,8 +1036,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         });
       }
     } catch (err: any) {
-      console.error("AI parse error:", err);
-      setParseErrors([err?.message || "Erro ao analisar o arquivo. Tente novamente."]);
+      console.error("Import parse error:", err);
+      const msg = String(err?.message || "");
+      const friendly =
+        /timeout|abort/i.test(msg) ? "A análise demorou demais. Tente um arquivo menor ou divida em partes."
+          : /rate|429/i.test(msg) ? "Muitas tentativas seguidas. Aguarde 1 minuto e tente novamente."
+          : /unauth|401|sess/i.test(msg) ? "Sessão expirada. Faça login novamente."
+          : /word|mammoth/i.test(msg) ? msg
+          : "Erro ao analisar o arquivo. Verifique o formato e tente novamente.";
+      setParseErrors([friendly]);
       setDraftWines([]);
       setStep("preview");
     }
