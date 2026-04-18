@@ -102,10 +102,10 @@ export function AppSidebar() {
               boxShadow: "0 20px 38px -28px rgba(12, 18, 14, 0.72)",
             }}
           >
-            <div className="flex items-center gap-3.5">
-              <img src="/logo-sommelyx-mark.png" className="w-16 h-16 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]" alt="Sommelyx" />
+            <div className="flex items-center gap-2">
+              <img src="/logo-sommelyx-mark.png" className="w-20 h-20 -ml-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]" alt="Sommelyx" />
 
-              <div className="flex flex-col">
+              <div className="flex flex-col -ml-1">
                 <span
                   className="text-[22px] font-bold tracking-tight text-white leading-none"
                   style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
