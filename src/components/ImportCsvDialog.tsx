@@ -378,10 +378,44 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const enrichDraftRows = async () => {
     setEnriching(true);
     try {
+      // Use the parse-csv-wines edge function in "enrich mode" by sending only names
+      // for rows that are missing producer/style/country/region/grape.
       const enriched = await Promise.all(
         draftWines.map(async (row) => {
           const match = findBestCellarMatch(row);
           const inferredType = row.type || inferTypeFromText(row.name) || inferTypeFromText(row.producer) || inferTypeFromText(row.grape);
+
+          // Ask the AI to enrich this single wine using its name as the seed
+          let aiEnriched: Partial<DraftWine> = {};
+          const needsEnrichment = !row.producer || !row.country || !row.region || !row.grape || !row.style;
+          if (needsEnrichment && row.name?.trim()) {
+            try {
+              const seed = [
+                row.name,
+                row.producer && `Produtor: ${row.producer}`,
+                row.vintage && `Safra: ${row.vintage}`,
+              ].filter(Boolean).join(" — ");
+              const ai = await invokeEdgeFunction<{ wines?: any[] }>(
+                "parse-csv-wines",
+                { csvContent: `name\n${seed}`, fileName: "enrich.csv", fileType: "text/csv" },
+                { timeoutMs: 35_000, retries: 0 },
+              );
+              const w = ai?.wines?.[0];
+              if (w && typeof w === "object") {
+                aiEnriched = {
+                  producer: row.producer || (typeof w.producer === "string" ? w.producer : undefined),
+                  country: row.country || (typeof w.country === "string" ? w.country : undefined),
+                  region: row.region || (typeof w.region === "string" ? w.region : undefined),
+                  grape: row.grape || (typeof w.grape === "string" ? w.grape : undefined),
+                  style: row.style || row.type || normalizeStyle(w.style),
+                  vintage: row.vintage ?? (typeof w.vintage === "number" ? w.vintage : undefined),
+                };
+              }
+            } catch {
+              // ignore — keep original row
+            }
+          }
+
           let resolvedPrice = row.price;
           if (resolvedPrice == null) {
             try {
@@ -389,12 +423,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 "estimate-wine-price",
                 {
                   name: row.name,
-                  producer: row.producer || match?.wine?.producer || null,
-                  vintage: row.vintage ?? match?.wine?.vintage ?? null,
-                  style: inferredType || row.style || null,
-                  country: row.country || match?.wine?.country || null,
-                  region: row.region || match?.wine?.region || null,
-                  grape: row.grape || match?.wine?.grape || null,
+                  producer: row.producer || aiEnriched.producer || match?.wine?.producer || null,
+                  vintage: row.vintage ?? aiEnriched.vintage ?? match?.wine?.vintage ?? null,
+                  style: inferredType || aiEnriched.style || row.style || null,
+                  country: row.country || aiEnriched.country || match?.wine?.country || null,
+                  region: row.region || aiEnriched.region || match?.wine?.region || null,
+                  grape: row.grape || aiEnriched.grape || match?.wine?.grape || null,
                 },
                 { timeoutMs: 35_000, retries: 0 },
               );
@@ -405,21 +439,22 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               resolvedPrice = row.price;
             }
           }
+          const finalStyle = (aiEnriched.style as string | undefined) || inferredType || row.type || row.style;
           const nextRow: DraftWine = {
             ...row,
             name: row.name?.trim() || row.name,
-            producer: row.producer || match?.wine?.producer || undefined,
-            vintage: row.vintage ?? match?.wine?.vintage ?? undefined,
-            type: inferredType || row.type || row.style,
-            style: inferredType || row.type || row.style,
-            country: row.country || match?.wine?.country || undefined,
-            region: row.region || match?.wine?.region || undefined,
-            grape: row.grape || match?.wine?.grape || undefined,
+            producer: row.producer || (aiEnriched.producer as string | undefined) || match?.wine?.producer || undefined,
+            vintage: row.vintage ?? (aiEnriched.vintage as number | undefined) ?? match?.wine?.vintage ?? undefined,
+            type: finalStyle,
+            style: finalStyle,
+            country: row.country || (aiEnriched.country as string | undefined) || match?.wine?.country || undefined,
+            region: row.region || (aiEnriched.region as string | undefined) || match?.wine?.region || undefined,
+            grape: row.grape || (aiEnriched.grape as string | undefined) || match?.wine?.grape || undefined,
             price: resolvedPrice,
             purchase_price: resolvedPrice,
             image_url: row.image_url || match?.wine?.image_url || buildGeneratedThumbnail({
               ...row,
-              type: inferredType || row.type || row.style,
+              type: finalStyle,
             }),
           };
           const validation = computeRowErrors([nextRow])[0];
@@ -436,7 +471,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setDraftWines(enriched);
       toast({
         title: "Dados enriquecidos",
-        description: "As linhas foram completadas com sugestões inteligentes e auto-preenchimento.",
+        description: "Produtor, região, uva e preço foram completados com nossa inteligência.",
       });
     } finally {
       setEnriching(false);
@@ -521,6 +556,47 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }
     });
     return nextErrors;
+  };
+
+  const addBlankRow = () => {
+    syncRows((current) => [
+      ...current,
+      {
+        name: "",
+        producer: "",
+        type: "tinto",
+        style: "tinto",
+        quantity: 1,
+        confidence: 0,
+        errors: [],
+      } as DraftWine,
+    ]);
+  };
+
+  const removeRow = (index: number) => {
+    syncRows((current) => current.filter((_, i) => i !== index));
+    setSelectedRows((current) => current.filter((i) => i !== index).map((i) => (i > index ? i - 1 : i)));
+  };
+
+  const removeSelectedRows = () => {
+    if (selectedRows.length === 0) return;
+    const set = new Set(selectedRows);
+    syncRows((current) => current.filter((_, i) => !set.has(i)));
+    setSelectedRows([]);
+  };
+
+  const STYLE_ACCENT: Record<string, { bar: string; dot: string; chip: string; chipText: string }> = {
+    tinto: { bar: "#7B1E2B", dot: "#7B1E2B", chip: "rgba(123,30,43,0.10)", chipText: "#7B1E2B" },
+    branco: { bar: "#C8A96A", dot: "#C8A96A", chip: "rgba(200,169,106,0.16)", chipText: "#8A6E2E" },
+    rose: { bar: "#E8A0A6", dot: "#E8A0A6", chip: "rgba(232,160,166,0.18)", chipText: "#A34C68" },
+    espumante: { bar: "#6A8F6B", dot: "#6A8F6B", chip: "rgba(106,143,107,0.16)", chipText: "#3F5E40" },
+    sobremesa: { bar: "#A67C52", dot: "#A67C52", chip: "rgba(166,124,82,0.16)", chipText: "#6F4F2C" },
+    fortificado: { bar: "#6B2C2C", dot: "#6B2C2C", chip: "rgba(107,44,44,0.14)", chipText: "#4A1010" },
+  };
+
+  const accentForRow = (row: DraftWine) => {
+    const key = (row.type || row.style || "").toLowerCase();
+    return STYLE_ACCENT[key] || { bar: "#D4D0C7", dot: "#A39A90", chip: "rgba(0,0,0,0.05)", chipText: "#5F5F5F" };
   };
 
   const syncRows = (updater: (rows: DraftWine[]) => DraftWine[]) => {
@@ -941,10 +1017,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const ext = file.name.split(".").pop()?.toLowerCase() || "";
       const isStructured = ["csv", "tsv", "txt", "xlsx", "xls", "ods"].includes(ext);
 
-      if (isStructured && local.wines.length >= 1) {
+      // Only use the fast path if the local parse extracted RICH data (avg ≥4 fields per row).
+      const avgFieldsPerRow = local.wines.length > 0
+        ? local.wines.reduce((sum, w) => {
+            return sum + Object.values(w).filter((v) => v !== undefined && v !== null && v !== "").length;
+          }, 0) / local.wines.length
+        : 0;
+
+      if (isStructured && local.wines.length >= 1 && avgFieldsPerRow >= 4) {
         rebuildDraftRows(local.wines);
         setColumnMapping(local.mapping);
-        setAiNotes(local.wines.length > 0 ? `Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.` : "");
+        setAiNotes(`Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.`);
         setParseErrors([]);
         setEditMode(true);
         setShowAdvancedColumns(false);
@@ -1377,11 +1460,29 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               <Button
                 variant="secondary"
                 size="sm"
+                onClick={addBlankRow}
+                className="h-9 text-[12px] px-3"
+                disabled={!editMode}
+              >
+                + Adicionar linha
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={mergeSelectedRows}
                 className="h-9 text-[12px] px-3"
                 disabled={selectedRows.length < 2}
               >
                 Mesclar selecionadas
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={removeSelectedRows}
+                className="h-9 text-[12px] px-3 text-rose-700 hover:bg-rose-50"
+                disabled={selectedRows.length === 0}
+              >
+                Remover selecionadas
               </Button>
               <Button variant="ghost" size="sm" onClick={reset} className="h-9 text-[12px] px-3">
                 <X className="h-3.5 w-3.5 mr-1" /> Trocar
@@ -1548,52 +1649,49 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                           <div className="h-full overflow-auto">
                             <table className="min-w-full border-separate border-spacing-0 text-[12px]">
                               <thead className="sticky top-0 z-10 bg-white">
-                                <tr className="bg-black/5 text-xs uppercase tracking-wide">
-                                  <th className="sticky top-0 z-20 w-10 px-3 py-2 text-left font-semibold text-black/50">
+                                <tr className="text-xs uppercase tracking-wide" style={{ background: "linear-gradient(180deg, #F8F6F2 0%, #F2EFE9 100%)" }}>
+                                  <th className="sticky top-0 z-20 w-12 px-3 py-3 text-left font-semibold text-black/50 border-b border-black/10">
                                     <Checkbox checked={allRowsSelected} onCheckedChange={toggleAllRows} />
                                   </th>
                                   {visibleColumns.map((column) => (
                                     <th
                                       key={column.key}
                                       className={cn(
-                                        "sticky top-0 z-20 px-3 py-2 text-left font-semibold text-black/50",
+                                        "sticky top-0 z-20 px-3 py-3 text-left font-semibold text-[#5F5F5F] text-[10.5px] tracking-[0.08em] border-b border-black/10",
                                         column.align === "right" && "text-right",
                                       )}
                                       style={{
-                                        width: column.key === "name" || column.key === "producer" ? "16rem" :
-                                          column.key === "style" ? "11rem" :
-                                          column.key === "vintage" || column.key === "quantity" ? "7rem" : undefined,
+                                        width: column.key === "name" ? "20rem" :
+                                          column.key === "producer" ? "14rem" :
+                                          column.key === "style" ? "10rem" :
+                                          column.key === "vintage" || column.key === "quantity" ? "6.5rem" : undefined,
                                       }}
                                     >
-                                      {column.label}
+                                      {column.label}{!column.optional ? <span className="text-[#7B1E2B] ml-0.5">*</span> : null}
                                     </th>
                                   ))}
+                                  <th className="sticky top-0 z-20 w-12 px-2 py-3 text-center font-semibold text-black/40 border-b border-black/10">
+                                    
+                                  </th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {draftWines.map((w, i) => {
                                   const rowHasError = !!rowErrors[i];
-                                  const rowClass =
-                                    rowHasError
-                                      ? "border-l-4 border-l-[#D88C7A]"
-                                      : w.confidence >= 0.78
-                                        ? "border-l-4 border-l-emerald-400"
-                                        : w.confidence >= 0.55
-                                          ? "border-l-4 border-l-amber-400"
-                                          : "border-l-4 border-l-rose-300";
+                                  const accent = accentForRow(w);
                                   return (
                                     <tr
                                       key={`row-${i}`}
                             className={cn(
-                              "border-t border-black/5 transition hover:bg-black/[0.02]",
-                              rowClass,
-                              selectedSet.has(i) && "bg-[#7B1E2B]/4",
-                              rowHasError && "bg-transparent",
+                              "transition hover:bg-[#FAF8F4] group",
+                              selectedSet.has(i) && "bg-[#7B1E2B]/[0.03]",
                             )}
+                            style={{ borderLeft: `4px solid ${rowHasError ? "#D88C7A" : accent.bar}` }}
                           >
-                            <td className="px-3 py-2 align-top">
-                              <div className="flex flex-col items-center gap-2">
+                            <td className="px-3 py-2 align-top border-b border-black/5">
+                              <div className="flex flex-col items-center gap-2 pt-1">
                                 <Checkbox checked={selectedSet.has(i)} onCheckedChange={() => toggleRowSelection(i)} />
+                                <span className="inline-block h-2 w-2 rounded-full" style={{ background: accent.dot }} title={w.type || w.style || "Tipo n/i"} />
                                 <span
                                   className={cn(
                                     "inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em]",
@@ -1611,11 +1709,31 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                               </div>
                             </td>
                             {visibleColumns.map((column) => renderEditableCell(w, i, column))}
+                            <td className="px-2 py-2 align-top text-center border-b border-black/5">
+                              <button
+                                type="button"
+                                onClick={() => removeRow(i)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 inline-flex items-center justify-center rounded-full text-[#A39A90] hover:bg-rose-50 hover:text-rose-600"
+                                title="Remover linha"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </td>
                           </tr>
                         );
                       })}
                               </tbody>
                             </table>
+                            <div className="px-3 py-3 border-t border-black/5 bg-[#FBFAF7]">
+                              <button
+                                type="button"
+                                onClick={addBlankRow}
+                                disabled={!editMode}
+                                className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-medium text-[#5F5F5F] hover:bg-white hover:text-[#7B1E2B] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                <span className="text-[16px] leading-none">+</span> Adicionar linha em branco
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}
