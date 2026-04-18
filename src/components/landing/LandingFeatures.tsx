@@ -122,21 +122,6 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
             </motion.div>
           ))}
         </div>
-
-        {/* Inline CTA */}
-        <motion.div
-          className="mt-8 text-center"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={5}
-        >
-          <Button
-            variant="ghost"
-            className="text-[13px] font-semibold text-wine hover:text-wine-vivid group"
-            onClick={onSignup}
-          >
-            Começar grátis agora
-            <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </motion.div>
       </div>
     </section>
   );
