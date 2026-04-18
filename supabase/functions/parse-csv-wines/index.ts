@@ -291,13 +291,14 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
       },
     };
 
-    async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    async function callAiOnce(chunkText: string, model: string): Promise<{ result?: any; errorStatus?: number; transientError?: boolean }> {
       const requestId = crypto.randomUUID();
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 60_000);
-
       try {
-        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=lovable model=${AI_MODEL}`);
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=lovable model=${model}`);
         const response = await fetch("https://ai.lovable.dev/v1/chat/completions", {
           method: "POST",
           signal: controller.signal,
@@ -306,7 +307,7 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: AI_MODEL,
+            model,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
@@ -316,13 +317,12 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
             temperature: 0.4,
           }),
         });
-
         if (!response.ok) {
           const errText = await response.text().catch(() => "");
           console.log(`[${FUNCTION_NAME}] request_id=${requestId} status=${response.status} error=${errText.slice(0, 300)}`);
-          return { errorStatus: response.status };
+          const transient = response.status >= 500 || response.status === 408 || response.status === 425;
+          return { errorStatus: response.status, transientError: transient };
         }
-
         const data = await response.json();
         const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
         const argsRaw = toolCall?.function?.arguments;
@@ -341,11 +341,29 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
       } catch (err) {
         const message = err instanceof Error ? err.message : "unknown";
         const isAbort = message.toLowerCase().includes("abort");
+        const isNetwork = /dns|network|fetch|connect|lookup/i.test(message);
         console.log(`[${FUNCTION_NAME}] request_id=${requestId} error=${message}`);
-        return { errorStatus: isAbort ? 504 : 500 };
+        return { errorStatus: isAbort ? 504 : 500, transientError: isAbort || isNetwork };
       } finally {
         clearTimeout(timeout);
       }
+    }
+
+    async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
+      // Try primary model with retries on transient errors (network/DNS/5xx)
+      const models = [AI_MODEL, "google/gemini-2.5-flash"];
+      let lastStatus: number | undefined;
+      for (let m = 0; m < models.length; m++) {
+        const model = models[m];
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const res = await callAiOnce(chunkText, model);
+          if (res.result) return res;
+          lastStatus = res.errorStatus;
+          if (!res.transientError) break; // Non-transient (e.g. 401/402/422/429): stop with this model
+          await sleep(500 * Math.pow(2, attempt)); // 500ms, 1s, 2s
+        }
+      }
+      return { errorStatus: lastStatus ?? 500 };
     }
 
     // ── PARALLEL chunk processing for speed ──
