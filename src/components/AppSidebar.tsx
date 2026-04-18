@@ -160,7 +160,7 @@ export function AppSidebar() {
 
         <SidebarContent className="px-3 pt-1 gap-0">
           <SidebarGroup className="py-0">
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.12em] font-bold mb-1 mt-1 px-3 text-neutral-600">
+            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-bold mb-2 mt-3 px-3 text-neutral-600">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
