@@ -217,22 +217,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         <SidebarFooter>
-              <div className="px-3 pt-4 pb-[calc(14px+env(safe-area-inset-bottom))]">
-            <div className="flex items-center gap-2.5 px-2 mb-3">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--forest-light)))",
-                  color: "#F7F4EE",
-                }}
-              >
-                {initials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold truncate text-neutral-900">{user?.user_metadata?.full_name || "Usuário"}</p>
-                <p className="text-[11px] truncate text-neutral-600">{user?.email}</p>
-              </div>
-            </div>
+          <div className="px-3 pt-2 pb-[calc(10px+env(safe-area-inset-bottom))]">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
