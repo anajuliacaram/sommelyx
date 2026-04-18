@@ -17,6 +17,7 @@ import { LocationFields } from "@/components/LocationFields";
 import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/edge-invoke";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -370,6 +371,15 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         } catch (locErr) {
           console.warn("Location save failed (wine was saved):", locErr);
         }
+      }
+
+      // Se não enviou foto, dispara resolver de imagem em background (busca rótulo na internet)
+      if (inserted?.id && !imageUrl) {
+        void invokeEdgeFunction(
+          "wine-image-resolver",
+          { wineId: inserted.id },
+          { timeoutMs: 30_000, retries: 0 },
+        ).catch((err) => console.warn("wine-image-resolver background failed:", err));
       }
 
       // Lembrete sobre campos opcionais não preenchidos
