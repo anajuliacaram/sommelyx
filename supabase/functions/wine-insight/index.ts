@@ -116,7 +116,7 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
         required: ["insight", "recommendation"],
         additionalProperties: false,
       },
-      maxOutputTokens: 300,
+      maxOutputTokens: 600,
     });
 
     if (!result.ok) {
