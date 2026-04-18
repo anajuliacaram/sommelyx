@@ -88,7 +88,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
 
   const resetCurrentItem = () => {
     setWineId(""); setQuantity("1"); setNotes(""); setSearchText("");
-    setShowFilters(false); setSelectedCountries([]); setSelectedGrapes([]);
+    setShowFilters(false); setSelectedCountries([]); setSelectedGrapes([]); setStyleFilter("all");
     setExtWineName(""); setExtProducer(""); setExtCountry(""); setExtRegion("");
     setExtGrape(""); setExtStyle(""); setExtVintage(""); setExtLocation("");
     setRating(0);
