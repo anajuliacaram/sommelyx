@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, Wine, Sparkles, TrendingUp, Clock, AlertTriangle, ChefHat, Star } from "@/icons/lucide";
+import { BrandName } from "@/components/BrandName";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,

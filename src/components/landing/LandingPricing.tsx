@@ -71,7 +71,7 @@ const faqs: { q: string; a: string; cat: FaqCategory }[] = [
   { cat: "planos", q: "Como cancelo minha assinatura?", a: "A qualquer momento, em dois cliques nas configurações da conta. Sem perguntas, sem multa." },
 
   // Funcionalidades
-  { cat: "funcionalidades", q: "Consigo importar minha planilha?", a: "Sim. Importe CSV, Excel e PDF. O Sommelyx mapeia as colunas automaticamente e você confirma antes de salvar." },
+  { cat: "funcionalidades", q: "Consigo importar minha planilha?", a: "Sim. Importe CSV, Excel e PDF. Mapeamos as colunas automaticamente e você confirma antes de salvar." },
   { cat: "funcionalidades", q: "Posso cadastrar vinhos por foto do rótulo?", a: "Sim. Envie uma foto nítida do rótulo e nossa inteligência extrai produtor, safra, país, região e estilo para preencher o cadastro." },
   { cat: "funcionalidades", q: "Os dados são preenchidos automaticamente?", a: "Sim. Em importações e na wishlist, identificamos rótulo, produtor, safra, região e mais para acelerar seu cadastro." },
   { cat: "funcionalidades", q: "A inteligência harmoniza pratos com meus vinhos?", a: "Sim. Informe o prato e a Inteligência Sommelyx sugere os melhores vinhos da SUA adega, com justificativa enológica." },
