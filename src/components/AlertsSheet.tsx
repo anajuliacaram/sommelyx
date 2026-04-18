@@ -8,6 +8,9 @@ import { getWineInsight, type WineInsight } from "@/lib/sommelier-ai";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { getStyleColor, getStyleFamily } from "@/components/editorial/EditorialPrimitives";
+
+const STYLE_LABELS: Record<string, string> = { tinto: "Tinto", branco: "Branco", "rosé": "Rosé", espumante: "Espumante", sobremesa: "Sobremesa" };
 
 const currentYear = new Date().getFullYear();
 
@@ -161,17 +164,40 @@ export function AlertsSheet({ open, onOpenChange, profileType }: AlertsSheetProp
                     <SectionIcon className="h-3 w-3 text-muted-foreground/50" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{labels[key]} · {items.length}</span>
                   </div>
-                  {items.map((a) => (
-                    <div key={a.id} className="rounded-xl border border-border/30 bg-card/60 overflow-hidden">
+                  {items.map((a) => {
+                    const wineColor = getStyleColor(a.style);
+                    const familyLabel = STYLE_LABELS[getStyleFamily(a.style)] || "Tinto";
+                    return (
+                    <div key={a.id} className="rounded-xl border border-border/30 bg-card/60 overflow-hidden relative">
+                      {/* Barra lateral colorida por tipo de vinho */}
+                      <span
+                        aria-hidden
+                        className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-[2px]"
+                        style={{ background: wineColor, boxShadow: `0 0 6px ${wineColor}40` }}
+                      />
                       <div
-                        className="p-3 flex items-center gap-2.5 cursor-pointer active:bg-muted/10 transition-colors"
+                        className="p-3 pl-4 flex items-center gap-2.5 cursor-pointer active:bg-muted/10 transition-colors"
                         onClick={() => { onOpenChange(false); navigate("/dashboard/cellar"); }}
                       >
-                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", a.bg)}>
-                          <a.icon className={cn("h-3 w-3", a.tone)} />
-                        </div>
+                        {/* Bolinha colorida tipo de vinho */}
+                        <span
+                          aria-hidden
+                          className="h-2.5 w-2.5 rounded-full shrink-0 ring-1 ring-black/5"
+                          style={{ background: wineColor }}
+                        />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-semibold truncate text-foreground">{a.wineName}</p>
+                          <div className="flex items-center gap-1.5 leading-none">
+                            <span
+                              className="text-[10px] font-semibold uppercase"
+                              style={{ letterSpacing: "0.12em", color: wineColor }}
+                            >
+                              {familyLabel}
+                            </span>
+                            {a.vintage && (
+                              <span className="text-[10px] font-medium text-muted-foreground/60">· {a.vintage}</span>
+                            )}
+                          </div>
+                          <p className="text-[13px] font-semibold truncate text-foreground mt-0.5">{a.wineName}</p>
                           <p className="text-[10px] text-muted-foreground">{a.desc}</p>
                         </div>
 
@@ -234,7 +260,7 @@ export function AlertsSheet({ open, onOpenChange, profileType }: AlertsSheetProp
                         )}
                       </AnimatePresence>
                     </div>
-                  ))}
+                  );})}
                 </div>
               );
             })
