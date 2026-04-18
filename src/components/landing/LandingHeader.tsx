@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { Logo } from "@/components/Logo";
+import { BrandName } from "@/components/BrandName";
 import { Instagram, Linkedin } from "lucide-react";
 
 interface LandingHeaderProps {
@@ -39,9 +40,8 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             variant="navbar"
             className="h-10 sm:h-12 md:h-14 drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]"
           />
-          <span className="font-serif text-[22px] sm:text-[26px] md:text-[32px] tracking-[-0.01em] font-extrabold" style={{ color: "#1A1A1A" }}>
-            Sommelyx
-          </span>
+          <BrandName className="text-[22px] sm:text-[26px] md:text-[32px]" />
+
         </a>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <a

@@ -1,5 +1,6 @@
 import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings, Plus, Wine, Camera, PenLine, AlertTriangle, ClipboardList, UtensilsCrossed, Sparkles } from "@/icons/lucide";
 import { NavLink } from "@/components/NavLink";
+import { BrandName } from "@/components/BrandName";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -106,12 +107,7 @@ export function AppSidebar() {
               <img src="/logo-sommelyx-mark.png" className="w-20 h-20 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] px-0 ml-0 text-left" alt="Sommelyx" />
 
               <div className="flex flex-col text-left -ml-3">
-                <span
-                  className="text-[22px] font-bold tracking-tight text-white leading-none"
-                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
-                >
-                  Sommelyx
-                </span>
+                <BrandName tone="light" className="text-[22px] leading-none" />
 
                 <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] py-[3px] rounded-full bg-white/12 text-white/80 backdrop-blur-sm w-fit px-0">
                   {isCommercial ? "COMERCIAL" : "PESSOAL"}

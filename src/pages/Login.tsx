@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
+import { BrandName } from "@/components/BrandName";
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Erro desconhecido.");
 
@@ -102,7 +103,7 @@ export default function Login() {
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
               <Logo variant="navbar" className="h-10 sm:h-11 w-auto drop-shadow-[0_4px_12px_rgba(44,20,31,0.10)]" />
-              <span className="font-serif text-[26px] font-black tracking-tight text-wine">Sommelyx</span>
+              <BrandName className="text-[26px]" />
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BrandName } from "@/components/BrandName";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wine, BarChart3, ArrowRight, Check, Sparkles, Mail } from "@/icons/lucide";
 import { useNavigate, Navigate } from "react-router-dom";
@@ -140,7 +141,7 @@ export default function SelectProfile() {
                   className="text-[26px] sm:text-[34px] font-serif font-semibold tracking-tight text-foreground leading-[1.1]"
                 >
                   Como você quer usar o{" "}
-                  <span className="italic text-gold">Sommelyx</span>?
+                  <BrandName className="text-[26px] sm:text-[34px]" />?
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 8 }}

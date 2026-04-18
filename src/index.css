@@ -47,6 +47,10 @@
 
     --radius: 0.75rem;
 
+    /* Brand — usado pelo componente <BrandName /> */
+    --brand-primary: #7B1E2B;
+    --brand-accent: #C8A96A;
+
     /* Sidebar — Translucent Forest */
     --sidebar-background: 140 22% 14%;
     --sidebar-foreground: 33 10% 96%;

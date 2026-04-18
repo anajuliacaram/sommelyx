@@ -9,6 +9,7 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { supabase } from "@/integrations/supabase/client";
 import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
+import { BrandName } from "@/components/BrandName";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -50,7 +51,7 @@ export default function ForgotPassword() {
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
               <Logo variant="compact" className="h-11 w-auto drop-shadow-[0_4px_12px_rgba(140,32,68,0.10)]" />
-              <span className="font-sans text-[24px] font-black tracking-tight text-foreground">Sommelyx</span>
+              <BrandName className="text-[24px]" />
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">
