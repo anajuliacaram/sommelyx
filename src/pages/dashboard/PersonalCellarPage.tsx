@@ -196,8 +196,7 @@ export default function PersonalCellarPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="grid gap-3"
-            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}
+            className="grid gap-3 grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
           >
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
