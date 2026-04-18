@@ -88,13 +88,14 @@ const baseColumns: ColumnDef[] = [
   { key: "vintage", label: "Safra", kind: "number", placeholder: "2020", optional: true },
   { key: "style", label: "Estilo", kind: "select", placeholder: "Selecionar", optional: true },
   { key: "quantity", label: "Quantidade", kind: "number", align: "right", placeholder: "1" },
-  { key: "purchase_price", label: "Preço", kind: "number", align: "right", placeholder: "0,00", optional: true },
+  { key: "purchase_price", label: "Varejo R$", kind: "number", align: "right", placeholder: "0,00", optional: true },
+  { key: "current_value", label: "Gôndola R$", kind: "number", align: "right", placeholder: "0,00", optional: true },
 ];
 
 const advancedColumns: ColumnDef[] = [
   { key: "country", label: "País", kind: "text", placeholder: "País", optional: true },
   { key: "region", label: "Região", kind: "text", placeholder: "Região", optional: true },
-  { key: "grape", label: "Uva", kind: "text", placeholder: "Uva", optional: true },
+  { key: "grape", label: "Uva/Blend", kind: "text", placeholder: "Uva", optional: true },
   { key: "cellar_location", label: "Localização", kind: "text", placeholder: "Adega", optional: true },
   { key: "drink_from", label: "Beber de", kind: "number", placeholder: "2025", optional: true },
   { key: "drink_until", label: "Beber até", kind: "number", placeholder: "2030", optional: true },
