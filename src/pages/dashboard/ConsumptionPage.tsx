@@ -99,15 +99,76 @@ export default function ConsumptionPage() {
   }, [entries, period, source]);
 
   const months = useMemo(() => buildMonthWindow(6), []);
-  const monthly = useMemo(() => {
+  // Buckets reativos ao filtro de Período + Origem
+  const chart = useMemo(() => {
+    const now = new Date();
+    const isInSource = (entry: typeof entries[number]) => {
+      const isCellar = !!entry.wine_id || entry.source === "cellar";
+      if (source === "cellar") return isCellar;
+      if (source === "external") return !isCellar;
+      return true;
+    };
+
+    if (period === "week") {
+      // Últimos 7 dias
+      const buckets: Array<{ key: string; label: string }> = [];
+      const cursor = new Date(now);
+      cursor.setHours(0, 0, 0, 0);
+      cursor.setDate(cursor.getDate() - 6);
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(cursor);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        const label = d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "").slice(0, 3).toLowerCase();
+        buckets.push({ key, label });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      const map: Record<string, number> = {};
+      entries.filter(isInSource).forEach((c) => {
+        const d = new Date(c.consumed_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        map[key] = (map[key] || 0) + 1;
+      });
+      return {
+        title: "Últimos 7 dias",
+        data: buckets.map((b) => ({ label: b.label, value: map[b.key] || 0 })),
+      };
+    }
+
+    if (period === "year") {
+      // 12 meses do ano atual
+      const buckets = Array.from({ length: 12 }, (_, i) => {
+        const d = new Date(now.getFullYear(), i, 1);
+        return {
+          key: `${d.getFullYear()}-${String(i + 1).padStart(2, "0")}`,
+          label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").slice(0, 3).toLowerCase(),
+        };
+      });
+      const map: Record<string, number> = {};
+      entries.filter(isInSource).forEach((c) => {
+        const d = new Date(c.consumed_at);
+        if (d.getFullYear() !== now.getFullYear()) return;
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        map[key] = (map[key] || 0) + 1;
+      });
+      return {
+        title: `Ano de ${now.getFullYear()}`,
+        data: buckets.map((b) => ({ label: b.label, value: map[b.key] || 0 })),
+      };
+    }
+
+    // month → últimos 6 meses (default)
+    const buckets = months;
     const map: Record<string, number> = {};
-    entries.forEach((c) => {
+    entries.filter(isInSource).forEach((c) => {
       const d = new Date(c.consumed_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       map[key] = (map[key] || 0) + 1;
     });
-    return months.map((m) => ({ label: m.label, value: map[m.key] || 0 }));
-  }, [entries, months]);
+    return {
+      title: "Últimos 6 meses",
+      data: buckets.map((m) => ({ label: m.label, value: map[m.key] || 0 })),
+    };
+  }, [entries, period, source, months]);
 
   const total = entries.length;
   const avgPerMonth = total > 0 ? (total / 6).toFixed(1).replace(".", ",") : "0";
@@ -200,13 +261,16 @@ export default function ConsumptionPage() {
 
       {/* Monthly chart */}
       <EditorialCard>
-        <div className="mb-4 flex items-baseline justify-between">
+        <div className="mb-3 flex items-baseline justify-between">
           <div>
             <Kicker>Ritmo de consumo</Kicker>
-            <h2 className="editorial-h2 mt-1">Últimos 6 meses</h2>
+            <h2 className="editorial-h2 mt-1">{chart.title}</h2>
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[rgba(58,51,39,0.5)]">
+            garrafas / {period === "week" ? "dia" : "mês"}
+          </span>
         </div>
-        <Sparkbar data={monthly} accent="#7B1E2B" height={140} />
+        <Sparkbar data={chart.data} accent="#7B1E2B" height={110} barWidth={period === "year" ? 8 : 12} />
       </EditorialCard>
 
       {/* Filtros inteligentes */}
