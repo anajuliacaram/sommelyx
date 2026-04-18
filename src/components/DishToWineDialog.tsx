@@ -71,6 +71,7 @@ type Step =
   | "source"
   | "sub-mode"
   | "dish"
+  | "intent"
   | "select-wine"
   | "results"
   | "wine-results"
