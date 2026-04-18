@@ -192,11 +192,10 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[wishlist-wine-assistant] openai_key=${maskSecret(openaiKey)} lovable_key=${maskSecret(apiKey)} model=${openaiModel}`);
-    if (!apiKey && !openaiKey) {
+    console.log(`[wishlist-wine-assistant] openai_key=${maskSecret(openaiKey)} model=${openaiModel}`);
+    if (!openaiKey) {
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
