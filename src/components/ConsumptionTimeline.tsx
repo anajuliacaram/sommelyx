@@ -93,7 +93,7 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       style={{
                         borderBottom:
                           index < month.events.length - 1
-                            ? "1px solid rgba(95,111,82,0.08)"
+                            ? "1px solid rgba(0,0,0,0.05)"
                             : "none",
                       }}
                     >
@@ -107,15 +107,20 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       </div>
 
                       <div
-                        className="w-[3px] shrink-0 rounded-full self-stretch"
-                        style={{ background: color, minHeight: 32, opacity: 0.85 }}
+                        className="w-[3px] shrink-0 self-stretch rounded-[2px]"
+                        style={{ background: color, minHeight: 32 }}
                       />
 
                       <div className="min-w-0 flex-1">
-                        <div className="font-serif text-[15px] font-semibold tracking-[-0.01em] text-[#1A1713]">
-                          {entry.wine_name}
+                        <div className="flex items-center gap-1.5 font-sans text-[14px] font-semibold tracking-[-0.005em] text-[#1A1713]">
+                          <span
+                            aria-hidden
+                            className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                            style={{ background: color }}
+                          />
+                          <span className="truncate">{entry.wine_name}</span>
                         </div>
-                        <div className="mt-0.5 text-[12px] text-[#7A746B]">
+                        <div className="mt-0.5 text-[12px] text-[rgba(26,23,19,0.55)]">
                           {entry.location || entry.tasting_notes || "—"}
                         </div>
                       </div>
