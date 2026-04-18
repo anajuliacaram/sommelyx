@@ -178,6 +178,32 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Inteligência Sommelyx — destaque sob os 3 mini cards */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            custom={6}
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-3 sm:mt-3.5 rounded-2xl p-4 max-w-xl"
+            style={{
+              ...glassCard,
+              background: "linear-gradient(160deg, rgba(55,30,36,0.96) 0%, rgba(28,15,20,1) 100%)",
+              border: "1px solid rgba(198,167,104,0.22)",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.18)", border: "1px solid rgba(198,167,104,0.28)" }}>
+                <Sparkles className="h-3.5 w-3.5 text-[#C6A768]" />
+              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[#C6A768]">Inteligência Sommelyx</p>
+            </div>
+            <p className="text-[12px] leading-relaxed font-medium text-[#F8F6F3]">
+              "Seu Brunello 2018 está na <span className="text-[#C6A768]">janela ideal</span>. Considere abrir nos próximos 60 dias."
+            </p>
+          </motion.div>
         </div>
 
         {/* Right: Organized grid of dashboard cards */}
