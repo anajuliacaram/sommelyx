@@ -36,7 +36,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
   };
 
   return (
-    <section className="relative z-10 px-4 sm:px-8 pt-16 sm:pt-20 lg:pt-24 pb-6 sm:pb-8">
+    <section className="relative z-10 px-5 sm:px-8 pt-12 sm:pt-20 lg:pt-24 pb-6 sm:pb-8">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
         {/* Left */}
         <div className="text-left">
@@ -45,7 +45,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={0}
-            className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-5"
+            className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-4 sm:mb-5"
             style={{
               background: "rgba(123,30,43,0.06)",
               border: "1px solid rgba(123,30,43,0.14)",
@@ -62,11 +62,11 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="max-w-[36rem] text-[2.25rem] sm:text-5xl font-semibold leading-[1.05] tracking-[-0.02em]"
+            className="max-w-[36rem] text-[1.75rem] sm:text-5xl font-semibold leading-[1.08] sm:leading-[1.05] tracking-[-0.02em]"
             style={{ color: "#1A1A1A" }}
           >
             Gestão inteligente da sua adega, com clareza de{" "}
-            <span className="whitespace-nowrap text-[#7B1E2B]">estoque, valor e giro.</span>
+            <span className="text-[#7B1E2B] sm:whitespace-nowrap">estoque, valor e giro.</span>
           </motion.h1>
 
           <motion.p
@@ -74,7 +74,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={2}
-            className="mt-4 max-w-lg text-[15px] sm:text-base leading-relaxed text-[#5F5F5F]"
+            className="mt-3 sm:mt-4 max-w-lg text-[14px] sm:text-base leading-relaxed text-[#5F5F5F]"
           >
             Controle total, decisões rápidas e insights reais — sem planilhas.
           </motion.p>
@@ -84,12 +84,12 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={3}
-            className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center"
+            className="mt-5 sm:mt-6 flex flex-col gap-2.5 sm:gap-3 sm:flex-row sm:items-center"
           >
             <MagneticButton>
               <Button
                 variant="primary"
-                className="group h-12 rounded-2xl px-7 text-[14px] font-semibold shadow-[0_18px_44px_-22px_rgba(110,30,42,0.55)]"
+                className="group h-11 sm:h-12 w-full sm:w-auto rounded-2xl px-6 sm:px-7 text-[14px] font-semibold shadow-[0_18px_44px_-22px_rgba(110,30,42,0.55)]"
                 onClick={onSignup}
               >
                 Começar grátis
@@ -99,7 +99,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             <Button
               variant="outline"
               onClick={scrollToFeatures}
-              className="h-12 rounded-2xl px-6 text-[14px] font-semibold bg-white/70 backdrop-blur-sm border-black/8 hover:bg-white"
+              className="h-11 sm:h-12 w-full sm:w-auto rounded-2xl px-6 text-[14px] font-semibold bg-white/70 backdrop-blur-sm border-black/8 hover:bg-white"
             >
               Ver como funciona
             </Button>
@@ -110,7 +110,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={4}
-            className="mt-4 flex items-center gap-4 text-[12px] font-medium text-[#5F5F5F]"
+            className="mt-3.5 sm:mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] font-medium text-[#5F5F5F]"
           >
             <span className="inline-flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-[#2E5E3E]" strokeWidth={3} />
