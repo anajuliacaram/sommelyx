@@ -341,6 +341,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const startTime = Date.now();
+  const requestId = crypto.randomUUID();
   let userId = "unknown";
 
   try {
