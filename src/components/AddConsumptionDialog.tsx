@@ -179,19 +179,78 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
             </div>
           </div>
 
-          {source === "cellar" && wines && wines.length > 0 && (
-            <div className="space-y-1.5">
-              <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Selecionar vinho</Label>
-              <Select value={selectedWineId} onValueChange={handleSelectWine}>
-                <SelectTrigger className="rounded-xl"><SelectValue placeholder="Escolha um vinho da adega" /></SelectTrigger>
-                <SelectContent>
-                  {wines.filter(w => w.quantity > 0).map((w) => (
-                    <SelectItem key={w.id} value={w.id}>
-                      {w.name} {w.vintage ? `(${w.vintage})` : ""} — {w.quantity} garrafa{w.quantity !== 1 ? "s" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {source === "cellar" && cellarWines.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs tracking-[0.12em] uppercase text-black/50">Selecionar vinho</Label>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/40" />
+                <Input
+                  value={wineSearch}
+                  onChange={(e) => setWineSearch(e.target.value)}
+                  placeholder="Buscar por nome, produtor, uva, safra…"
+                  className="pl-9 rounded-xl"
+                />
+              </div>
+
+              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+                {TYPE_FILTERS.map((f) => {
+                  const active = typeFilter === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setTypeFilter(f.id)}
+                      className={cn(
+                        "shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-all duration-200",
+                        f.pill,
+                        active ? "scale-[1.05] shadow-sm ring-1 ring-black/10" : "opacity-80 hover:opacity-100",
+                      )}
+                    >
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                className="max-h-[260px] overflow-y-auto rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm divide-y divide-black/5"
+                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(0,0,0,0.15) transparent" }}
+              >
+                {filteredWines.length === 0 ? (
+                  <div className="px-4 py-8 text-center">
+                    <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado</p>
+                    <p className="text-xs text-black/50 mt-1">Use a busca ou ajuste os filtros</p>
+                  </div>
+                ) : (
+                  filteredWines.map((w) => {
+                    const selected = selectedWineId === w.id;
+                    return (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => handleSelectWine(w.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all",
+                          "hover:bg-[#F6F4F1] active:scale-[0.99]",
+                          selected && "bg-[#F6F4F1]",
+                        )}
+                      >
+                        <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", dotForWine(w.style))} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13.5px] font-semibold text-[#1C1C1C] truncate">{w.name}</p>
+                          <p className="text-[11.5px] text-black/55 truncate">
+                            {[w.grape, w.vintage, w.country].filter(Boolean).join(" · ") || w.producer || "—"}
+                          </p>
+                        </div>
+                        <span className="text-[11.5px] font-medium text-black/60 shrink-0">
+                          {w.quantity} gf{w.quantity !== 1 ? "s" : ""}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
             </div>
           )}
 
