@@ -210,20 +210,33 @@ export function Sparkbar({
   data,
   height = 80,
   accent = "#7B1E2B",
+  showValues = true,
+  barWidth = 10,
 }: {
   data: { label: string; value: number }[];
   height?: number;
   accent?: string;
+  showValues?: boolean;
+  barWidth?: number;
 }) {
   const max = Math.max(...data.map((d) => d.value), 1);
   return (
-    <div className="flex items-end gap-1.5" style={{ height }}>
+    <div className="flex items-end gap-2" style={{ height }}>
       {data.map((d, i) => (
-        <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
-          <div className="relative flex w-full items-end" style={{ height: height - 14 }}>
+        <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+          {showValues && (
+            <span
+              className="text-[10px] font-semibold tabular-nums leading-none"
+              style={{ color: d.value > 0 ? accent : "rgba(58,51,39,0.35)" }}
+            >
+              {d.value}
+            </span>
+          )}
+          <div className="relative flex w-full items-end justify-center" style={{ height: height - (showValues ? 26 : 14) }}>
             <div
-              className="w-full rounded-t-[4px] transition-all"
+              className="rounded-t-[3px] transition-all"
               style={{
+                width: barWidth,
                 height: `${Math.max(4, (d.value / max) * 100)}%`,
                 background: d.value > 0 ? accent : "rgba(95,111,82,0.14)",
                 opacity: d.value > 0 ? 0.92 : 1,
