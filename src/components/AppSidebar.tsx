@@ -103,7 +103,7 @@ export function AppSidebar() {
             }}
           >
             <div className="flex items-center gap-2">
-              <img src="/logo-sommelyx-mark.png" className="w-20 h-20 -ml-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]" alt="Sommelyx" />
+              <img src="/logo-sommelyx-mark.png" className="w-20 h-20 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] px-0 ml-0 text-left" alt="Sommelyx" />
 
               <div className="flex flex-col -ml-1">
                 <span
@@ -113,7 +113,7 @@ export function AppSidebar() {
                   Sommelyx
                 </span>
 
-                <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] px-2 py-[3px] rounded-full bg-white/12 text-white/80 backdrop-blur-sm w-fit">
+                <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] py-[3px] rounded-full bg-white/12 text-white/80 backdrop-blur-sm w-fit px-0">
                   {isCommercial ? "COMERCIAL" : "PESSOAL"}
                 </span>
               </div>
