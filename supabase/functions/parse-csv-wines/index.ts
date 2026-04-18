@@ -112,7 +112,7 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")?.trim() || "";
-    const AI_MODEL = Deno.env.get("AI_MODEL")?.trim() || "google/gemini-2.5-flash";
+    const AI_MODEL = Deno.env.get("AI_MODEL")?.trim() || "google/gemini-2.5-pro";
     console.log(`[parse-csv-wines] lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${AI_MODEL}`);
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
@@ -313,7 +313,7 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
             ],
             tools: [toolDef],
             tool_choice: { type: "function", function: { name: "extract_wines" } },
-            temperature: 0.1,
+            temperature: 0.4,
           }),
         });
 
