@@ -68,14 +68,14 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <motion.div
-          className="text-center mx-auto max-w-2xl mb-8 sm:mb-10"
+          className="text-center mx-auto max-w-2xl mb-8 sm:mb-10 my-0 py-0 pb-0"
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
         >
           <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.14em] text-wine mb-3">
             O que você ganha
           </span>
           <h2 className="text-[26px] sm:text-[34px] font-semibold tracking-[-0.02em] text-[#1A1A1A] leading-[1.1]">
-            Quatro pilares para uma adega no controle
+            Os 4 pilares para uma adega no controle
           </h2>
           <p className="mt-3 text-[14px] sm:text-[15px] leading-relaxed text-[#5F5F5F]">
             Da garrafa esquecida ao relatório de giro — tudo em uma experiência premium.
