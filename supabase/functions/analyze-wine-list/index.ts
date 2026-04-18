@@ -722,13 +722,14 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     console.log(`Calling AI gateway for ${isMenuMode ? "menu" : "wine list"} analysis...`);
 
     // ── Retry loop with anti-genericity validation ──
-    const MAX_ATTEMPTS = 2;
+    // Keep total runtime under edge function/client timeout (~60s).
+    const MAX_ATTEMPTS = 1;
     let lastParsed: any = null;
     let validationResult: { passed: boolean; failures: string[] } = { passed: false, failures: [] };
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 90_000);
+      const timeout = setTimeout(() => controller.abort(), 45_000);
 
       const retryHint = attempt > 0
         ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre cada rótulo. Cite nomes dos vinhos, mencione produtores/regiões/posicionamento. Mesmo com leitura parcial, devolva a melhor análise possível mantendo a estrutura.`
