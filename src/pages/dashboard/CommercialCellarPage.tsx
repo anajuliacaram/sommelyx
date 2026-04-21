@@ -660,6 +660,7 @@ function toggleInArray(arr: string[], val: string): string[] {
 
 export default function CellarPage() {
   const { data: wines, isLoading } = useWines();
+  useAutoResolveWineImages(wines);
   const deleteWine = useDeleteWine();
   const wineEvent = useWineEvent();
   const { toast } = useToast();
