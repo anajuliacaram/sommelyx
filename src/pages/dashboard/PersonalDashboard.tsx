@@ -682,7 +682,14 @@ export default function PersonalDashboard() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
-      <DishToWineDialog open={dishToWineOpen} onOpenChange={setDishToWineOpen} />
+      <DishToWineDialog
+        open={dishToWineOpen}
+        onOpenChange={(v) => {
+          setDishToWineOpen(v);
+          if (!v) setInsightPairingWineId(null);
+        }}
+        initialWineId={insightPairingWineId}
+      />
       <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
       <AddConsumptionDialog
         open={consumptionOpen}
