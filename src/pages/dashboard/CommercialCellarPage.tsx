@@ -14,6 +14,7 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter,
 } from "@/components/ui/drawer";
 import { useWines, useDeleteWine, useWineEvent, type Wine as WineType } from "@/hooks/useWines";
+import { useAutoResolveWineImages } from "@/hooks/useAutoResolveWineImage";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
