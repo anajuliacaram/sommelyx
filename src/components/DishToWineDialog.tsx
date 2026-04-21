@@ -64,6 +64,8 @@ function getStyleTint(style?: string | null): string {
 interface DishToWineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When provided, opens directly into the wine→food pairing flow for this cellar wine. */
+  initialWineId?: string | null;
 }
 
 type Source = null | "cellar" | "external";
