@@ -388,7 +388,7 @@ async function callAI(
       },
     ],
     schema,
-    maxOutputTokens: 2_500,
+    maxOutputTokens: 8_000,
   });
 
   if (result.ok) {
