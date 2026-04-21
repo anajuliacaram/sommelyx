@@ -718,15 +718,9 @@ export async function getWinePairings(wine: {
     if (data && Array.isArray(data.pairings) && data.pairings.length > 0) {
       return data;
     }
-    const pairingContext = {
-      wineName: wine.name,
-      producer: wine.producer ?? null,
-      region: wine.region ?? null,
-      country: wine.country ?? null,
-      style: wine.style ?? null,
-      vintage: wine.vintage ?? null,
-      grape: wine.grape ?? null,
-    };
+    if (data && typeof (data as any).message === "string" && Array.isArray((data as any).pairings)) {
+      throw new Error((data as any).message);
+    }
     if (isValidPairings(data)) {
       return data;
     }
@@ -737,6 +731,9 @@ export async function getWinePairings(wine: {
     }
     if (retryData && Array.isArray(retryData.pairings) && retryData.pairings.length > 0) {
       return retryData;
+    }
+    if (retryData && typeof (retryData as any).message === "string" && Array.isArray((retryData as any).pairings)) {
+      throw new Error((retryData as any).message);
     }
     if (retryData && isValidPairings(retryData)) {
       return retryData;
