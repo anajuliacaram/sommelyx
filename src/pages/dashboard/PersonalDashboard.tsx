@@ -85,7 +85,6 @@ export default function PersonalDashboard() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [dishToWineOpen, setDishToWineOpen] = useState(false);
-  const [insightPairingWineId, setInsightPairingWineId] = useState<string | null>(null);
   const [wineListScanOpen, setWineListScanOpen] = useState(false);
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<{
@@ -346,10 +345,7 @@ export default function PersonalDashboard() {
                 <button
                   type="button"
                   className="editorial-btn-copper shrink-0"
-                  onClick={() => {
-                    setInsightPairingWineId(insightWine.id);
-                    setDishToWineOpen(true);
-                  }}
+                  onClick={() => setDishToWineOpen(true)}
                 >
                   Ver harmonizações <ArrowRight className="h-3.5 w-3.5" />
                 </button>
@@ -682,14 +678,7 @@ export default function PersonalDashboard() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
-      <DishToWineDialog
-        open={dishToWineOpen}
-        onOpenChange={(v) => {
-          setDishToWineOpen(v);
-          if (!v) setInsightPairingWineId(null);
-        }}
-        initialWineId={insightPairingWineId}
-      />
+      <DishToWineDialog open={dishToWineOpen} onOpenChange={setDishToWineOpen} />
       <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
       <AddConsumptionDialog
         open={consumptionOpen}

@@ -11,7 +11,7 @@ const corsHeaders = {
 const BUCKET = "wine-label-images";
 const SEARCH_TIMEOUT_MS = 12_000;
 const DOWNLOAD_TIMEOUT_MS = 15_000;
-const MIN_IMAGE_BYTES = 6_000; // descarta favicons/sprites/placeholders pequenos
+const MIN_IMAGE_BYTES = 6_000;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 type WineRow = {
@@ -76,7 +76,6 @@ function buildSvgFallback(row: WineRow) {
       <circle cx="450" cy="275" r="188" fill="url(#glow)" />
       <circle cx="450" cy="275" r="126" fill="rgba(255,255,255,0.32)" />
       <circle cx="450" cy="275" r="82" fill="rgba(255,255,255,0.52)" />
-      <path d="M450 214c-16 0-30 14-30 30v56c0 18 10 34 26 42v86h-4c-8 0-14 6-14 14v10h20v18h20v-18h20v-10c0-8-6-14-14-14h-4v-86c16-8 26-24 26-42v-56c0-16-14-30-30-30Z" fill="${tone.b}" fill-opacity="0.84" />
       <text x="450" y="552" text-anchor="middle" font-size="28" font-family="Inter, Arial, sans-serif" letter-spacing="0.28em" fill="rgba(53,36,42,0.58)">SOMMELYX</text>
       <text x="450" y="642" text-anchor="middle" font-size="54" font-weight="700" font-family="Georgia, 'Times New Roman', serif" fill="#1B1417">${name}</text>
       <text x="450" y="714" text-anchor="middle" font-size="32" font-family="Inter, Arial, sans-serif" fill="rgba(27,20,23,0.72)">${producer}</text>
@@ -268,8 +267,7 @@ serve(async (req) => {
 
     const row = wine as WineRow;
 
-    // Considera "imagem real" apenas o que está no nosso bucket (upload manual ou IA),
-    // ignorando SVG ilustrativo, placeholders quebrados (wine-searcher alert.jpg, etc.) e fontes externas não confiáveis.
+    // Considera "imagem real" apenas o que está no nosso bucket privado.
     const url = row.image_url || "";
     const isOurBucket = url.includes("/storage/v1/object/public/wine-label-images/")
       || url.includes("/storage/v1/object/sign/wine-label-images/");
@@ -321,7 +319,7 @@ serve(async (req) => {
       console.warn("wine-image-resolver web search failed:", found.error);
     }
 
-    // Fallback final: SVG ilustrativo (sem IA generativa)
+    // Fallback final: SVG ilustrativo (sem geração via IA)
     const fallback = buildSvgFallback(row);
     await adminClient
       .from("wines")

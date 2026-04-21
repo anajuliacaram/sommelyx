@@ -14,7 +14,6 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter,
 } from "@/components/ui/drawer";
 import { useWines, useDeleteWine, useWineEvent, type Wine as WineType } from "@/hooks/useWines";
-import { useAutoResolveWineImages } from "@/hooks/useAutoResolveWineImage";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -660,7 +659,6 @@ function toggleInArray(arr: string[], val: string): string[] {
 
 export default function CellarPage() {
   const { data: wines, isLoading } = useWines();
-  useAutoResolveWineImages(wines);
   const deleteWine = useDeleteWine();
   const wineEvent = useWineEvent();
   const { toast } = useToast();
