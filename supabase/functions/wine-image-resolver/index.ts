@@ -280,17 +280,17 @@ serve(async (req) => {
       return jsonResponse({ ok: true, image_url: row.image_url, source: "cached" });
     }
 
-    // Tenta gerar via IA (Nano Banana) e fazer upload no bucket
-    const aiResult = await generateBottleImage(row);
-    if (aiResult.ok) {
-      const ext = aiResult.mime === "image/jpeg" ? "jpg" : aiResult.mime === "image/webp" ? "webp" : "png";
-      const path = `${row.user_id}/ai/${row.id}-${Date.now()}.${ext}`;
+    // Busca imagem REAL do rótulo na web (Google CSE → DuckDuckGo)
+    const found = await findRealLabelImage(row);
+    if (found.ok) {
+      const ext = found.mime.includes("jpeg") ? "jpg" : found.mime.includes("webp") ? "webp" : "png";
+      const path = `${row.user_id}/web/${row.id}-${Date.now()}.${ext}`;
       const { error: uploadError } = await adminClient.storage
         .from(BUCKET)
-        .upload(path, aiResult.bytes, {
+        .upload(path, found.bytes, {
           cacheControl: "31536000",
           upsert: true,
-          contentType: aiResult.mime,
+          contentType: found.mime,
         });
 
       if (!uploadError) {
@@ -308,19 +308,20 @@ serve(async (req) => {
           return jsonResponse({
             ok: true,
             image_url: finalUrl,
-            source: "ai-generated",
+            source: "web-search",
+            source_url: found.sourceUrl,
             duration_ms: Date.now() - startTime,
           });
         }
         console.warn("wine-image-resolver sign failed:", signErr?.message);
+      } else {
+        console.warn("wine-image-resolver upload failed:", uploadError.message);
       }
-
-      console.warn("wine-image-resolver upload failed:", uploadError.message);
     } else {
-      console.warn("wine-image-resolver AI failed:", aiResult.error);
+      console.warn("wine-image-resolver web search failed:", found.error);
     }
 
-    // Fallback final: SVG ilustrativo
+    // Fallback final: SVG ilustrativo (sem IA generativa)
     const fallback = buildSvgFallback(row);
     await adminClient
       .from("wines")
@@ -331,7 +332,7 @@ serve(async (req) => {
     return jsonResponse({
       ok: true,
       image_url: fallback,
-      source: "generated",
+      source: "fallback-svg",
       duration_ms: Date.now() - startTime,
     });
   } catch (error) {
