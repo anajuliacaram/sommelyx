@@ -1647,6 +1647,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
           </ModalBase>
         </Dialog>
       )}
+
+      <AddConsumptionDialog
+        open={!!consumeWine}
+        onOpenChange={(v) => { if (!v) setConsumeWine(null); }}
+        preSelectedWine={consumeWine}
+      />
     </Sheet>
   );
 }
