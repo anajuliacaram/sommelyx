@@ -278,7 +278,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("wine-image-resolver error:", error);
     return jsonResponse({
-      error: error instanceof Error ? error.message : "Falha ao resolver imagem.",
+      error: "Não foi possível resolver a imagem do vinho. Tente novamente em instantes.",
     }, 500);
   }
 });
