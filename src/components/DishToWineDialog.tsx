@@ -230,6 +230,46 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     }
   }, [selectedWineId, wines]);
 
+  // Auto-launch wine→food pairing flow when opened with a specific wine
+  const autoStartedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!open) {
+      autoStartedRef.current = null;
+      return;
+    }
+    if (!initialWineId) return;
+    if (autoStartedRef.current === initialWineId) return;
+    if (!wines || wines.length === 0) return;
+    const wine = wines.find((w) => w.id === initialWineId);
+    if (!wine) return;
+    autoStartedRef.current = initialWineId;
+    setSource("cellar");
+    setSubMode("by-wine");
+    setSelectedWineId(initialWineId);
+    setStep("wine-results");
+    setLoading(true);
+    setError(null);
+    setPairingLogic(null);
+    getWinePairings({
+      name: wine.name,
+      style: wine.style,
+      grape: wine.grape,
+      region: wine.region,
+      producer: wine.producer,
+      vintage: wine.vintage,
+      country: wine.country,
+    })
+      .then((result) => {
+        setPairings(result.pairings);
+        setWineProfile(result.wineProfile || null);
+        setPairingLogic(result.pairingLogic || null);
+      })
+      .catch((err: any) => {
+        setError(err?.message || "Não foi possível buscar sugestões");
+      })
+      .finally(() => setLoading(false));
+  }, [open, initialWineId, wines]);
+
   const handleSearchExternal = useCallback(async (dishName?: string) => {
     const query = dishName || dish.trim();
     if (!query) return;
