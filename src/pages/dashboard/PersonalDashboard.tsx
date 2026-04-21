@@ -85,6 +85,7 @@ export default function PersonalDashboard() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [dishToWineOpen, setDishToWineOpen] = useState(false);
+  const [insightPairingWineId, setInsightPairingWineId] = useState<string | null>(null);
   const [wineListScanOpen, setWineListScanOpen] = useState(false);
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<{
