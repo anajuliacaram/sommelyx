@@ -218,7 +218,8 @@ serve(async (req) => {
     // Considera "imagem real" apenas o que está no nosso bucket (upload manual ou IA),
     // ignorando SVG ilustrativo, placeholders quebrados (wine-searcher alert.jpg, etc.) e fontes externas não confiáveis.
     const url = row.image_url || "";
-    const isOurBucket = url.includes("/storage/v1/object/public/wine-label-images/");
+    const isOurBucket = url.includes("/storage/v1/object/public/wine-label-images/")
+      || url.includes("/storage/v1/object/sign/wine-label-images/");
     const isBadPlaceholder = /alert\.jpg|placeholder|notfound|not[-_]?found|404\.|missing/i.test(url);
     const isSvgFallback = url.startsWith("data:image/svg+xml");
     const hasRealImage = !!url && isOurBucket && !isBadPlaceholder && !isSvgFallback;
@@ -240,20 +241,25 @@ serve(async (req) => {
         });
 
       if (!uploadError) {
-        const { data: pub } = adminClient.storage.from(BUCKET).getPublicUrl(path);
-        const publicUrl = pub.publicUrl;
-        await adminClient
-          .from("wines")
-          .update({ image_url: publicUrl })
-          .eq("id", row.id)
-          .eq("user_id", user.id);
+        const { data: signed, error: signErr } = await adminClient.storage
+          .from(BUCKET)
+          .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+        const finalUrl = signed?.signedUrl;
+        if (finalUrl) {
+          await adminClient
+            .from("wines")
+            .update({ image_url: finalUrl })
+            .eq("id", row.id)
+            .eq("user_id", user.id);
 
-        return jsonResponse({
-          ok: true,
-          image_url: publicUrl,
-          source: "ai-generated",
-          duration_ms: Date.now() - startTime,
-        });
+          return jsonResponse({
+            ok: true,
+            image_url: finalUrl,
+            source: "ai-generated",
+            duration_ms: Date.now() - startTime,
+          });
+        }
+        console.warn("wine-image-resolver sign failed:", signErr?.message);
       }
 
       console.warn("wine-image-resolver upload failed:", uploadError.message);

@@ -307,8 +307,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
             contentType: "image/jpeg",
           });
           if (!error) {
-            const { data } = supabase.storage.from("wine-label-images").getPublicUrl(path);
-            imageUrl = data.publicUrl;
+            const { data: signed } = await supabase.storage
+              .from("wine-label-images")
+              .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+            if (signed?.signedUrl) imageUrl = signed.signedUrl;
           }
         } catch (uploadError) {
           console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);
@@ -323,8 +325,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
             contentType: labelImageFile.type,
           });
           if (!error) {
-            const { data } = supabase.storage.from("wine-label-images").getPublicUrl(path);
-            imageUrl = data.publicUrl;
+            const { data: signed } = await supabase.storage
+              .from("wine-label-images")
+              .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+            if (signed?.signedUrl) imageUrl = signed.signedUrl;
           }
         } catch (uploadError) {
           console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);
