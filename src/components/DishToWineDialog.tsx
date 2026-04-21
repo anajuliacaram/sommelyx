@@ -124,6 +124,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante">("all");
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const [intent, setIntent] = useState<PairingIntent>("everyday");
+  const [consumeWine, setConsumeWine] = useState<{ id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null>(null);
   const reset = () => {
     setSource(null);
     setSubMode(null);
