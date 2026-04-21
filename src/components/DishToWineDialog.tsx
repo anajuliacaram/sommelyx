@@ -95,7 +95,7 @@ const popularDishes = [
   "Cordeiro assado",
 ];
 
-export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) {
+export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWineDialogProps) {
   const { data: wines } = useWines();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
