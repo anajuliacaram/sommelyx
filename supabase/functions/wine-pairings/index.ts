@@ -617,7 +617,7 @@ INSTRUÇÕES:
               },
               pairings: {
                 type: "array",
-                  minItems: 5,
+                  minItems: 3,
                   maxItems: 5,
                 items: {
                   type: "object",
@@ -685,7 +685,7 @@ INSTRUÇÕES:
               },
               suggestions: {
                 type: "array",
-              minItems: 5,
+              minItems: 3,
               maxItems: 5,
                 items: {
                   type: "object",
