@@ -355,7 +355,12 @@ function hasDishContext(text: string, dish?: string | null) {
 }
 
 function isUserFacingAnalysisError(message: string) {
-  return message.startsWith(ANALYSIS_FALLBACK_MESSAGE);
+  if (!message) return false;
+  if (message.startsWith(ANALYSIS_FALLBACK_MESSAGE)) return true;
+  // Mensagens consultivas vindas do backend (degradação elegante).
+  return /Não conseguimos sugerir (pratos|vinhos)/i.test(message)
+    || /Tente reformular o prato/i.test(message)
+    || /informe um vinho com mais detalhes/i.test(message);
 }
 
 function isValidLenientMenu(data: any, wineName: string): boolean {
