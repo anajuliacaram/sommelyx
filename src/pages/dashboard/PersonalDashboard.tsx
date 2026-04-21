@@ -346,7 +346,10 @@ export default function PersonalDashboard() {
                 <button
                   type="button"
                   className="editorial-btn-copper shrink-0"
-                  onClick={() => setDishToWineOpen(true)}
+                  onClick={() => {
+                    setInsightPairingWineId(insightWine.id);
+                    setDishToWineOpen(true);
+                  }}
                 >
                   Ver harmonizações <ArrowRight className="h-3.5 w-3.5" />
                 </button>
