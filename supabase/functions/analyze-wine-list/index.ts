@@ -749,7 +749,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         functionName: "analyze-wine-list",
         requestId: crypto.randomUUID(),
         apiKey: "",
-        model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash-lite",
+        model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash",
         timeoutMs: 40_000,
         temperature: 0.2,
         instructions: systemPrompt,
@@ -764,7 +764,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
             : [{ type: "input_text" as const, text: String(message.content || "") }],
         })),
         schema: (tools[0] as any)?.function?.parameters || {},
-        maxOutputTokens: 4_000,
+        maxOutputTokens: 8_000,
       });
 
       if (!openaiResult.ok) {
