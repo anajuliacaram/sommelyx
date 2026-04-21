@@ -764,7 +764,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
             : [{ type: "input_text" as const, text: String(message.content || "") }],
         })),
         schema: (tools[0] as any)?.function?.parameters || {},
-        maxOutputTokens: 4_000,
+        maxOutputTokens: 8_000,
       });
 
       if (!openaiResult.ok) {
