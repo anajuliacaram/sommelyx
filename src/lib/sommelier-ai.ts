@@ -783,6 +783,9 @@ export async function getDishWineSuggestions(
     if (isValidSuggestions(data)) {
       return data;
     }
+    if (data && typeof (data as any).message === "string" && Array.isArray((data as any).suggestions)) {
+      throw new Error((data as any).message);
+    }
 
     const retryData = await request().catch(() => null);
     if (retryData && (retryData as any).fallback === true) {
@@ -790,6 +793,9 @@ export async function getDishWineSuggestions(
     }
     if (retryData && isValidSuggestions(retryData)) {
       return retryData;
+    }
+    if (retryData && typeof (retryData as any).message === "string" && Array.isArray((retryData as any).suggestions)) {
+      throw new Error((retryData as any).message);
     }
 
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
