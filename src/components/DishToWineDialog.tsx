@@ -32,6 +32,7 @@ import {
   matchDotColor,
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
+import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 
 // Compat helpers kept locally for result rendering
 const matchDot: Record<string, string> = matchDotColor;
