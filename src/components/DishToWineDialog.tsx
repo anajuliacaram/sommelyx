@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
@@ -64,6 +64,8 @@ function getStyleTint(style?: string | null): string {
 interface DishToWineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When provided, opens directly into the wine→food pairing flow for this cellar wine. */
+  initialWineId?: string | null;
 }
 
 type Source = null | "cellar" | "external";
@@ -93,7 +95,7 @@ const popularDishes = [
   "Cordeiro assado",
 ];
 
-export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) {
+export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWineDialogProps) {
   const { data: wines } = useWines();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -227,6 +229,46 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
       setLoading(false);
     }
   }, [selectedWineId, wines]);
+
+  // Auto-launch wine→food pairing flow when opened with a specific wine
+  const autoStartedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!open) {
+      autoStartedRef.current = null;
+      return;
+    }
+    if (!initialWineId) return;
+    if (autoStartedRef.current === initialWineId) return;
+    if (!wines || wines.length === 0) return;
+    const wine = wines.find((w) => w.id === initialWineId);
+    if (!wine) return;
+    autoStartedRef.current = initialWineId;
+    setSource("cellar");
+    setSubMode("by-wine");
+    setSelectedWineId(initialWineId);
+    setStep("wine-results");
+    setLoading(true);
+    setError(null);
+    setPairingLogic(null);
+    getWinePairings({
+      name: wine.name,
+      style: wine.style,
+      grape: wine.grape,
+      region: wine.region,
+      producer: wine.producer,
+      vintage: wine.vintage,
+      country: wine.country,
+    })
+      .then((result) => {
+        setPairings(result.pairings);
+        setWineProfile(result.wineProfile || null);
+        setPairingLogic(result.pairingLogic || null);
+      })
+      .catch((err: any) => {
+        setError(err?.message || "Não foi possível buscar sugestões");
+      })
+      .finally(() => setLoading(false));
+  }, [open, initialWineId, wines]);
 
   const handleSearchExternal = useCallback(async (dishName?: string) => {
     const query = dishName || dish.trim();
