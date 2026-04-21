@@ -27,6 +27,7 @@ const currentYear = new Date().getFullYear();
 
 export default function PersonalCellarPage() {
   const { data: wines = [], isLoading } = useWines();
+  useAutoResolveWineImages(wines);
   const wineEvent = useWineEvent();
   const { toast } = useToast();
 
