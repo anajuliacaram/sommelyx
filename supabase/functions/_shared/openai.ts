@@ -87,90 +87,115 @@ export async function callOpenAIResponses<T>({
 }: CallOptions<Record<string, unknown>>): Promise<{ ok: true; parsed: T; raw: any } | { ok: false; status: number; error: string; raw?: any }> {
   const lovableKey = Deno.env.get("LOVABLE_API_KEY")?.trim() || "";
   // Default to Gemini Flash (project standard) — overridable via env
-  const resolvedModel = model && !/^gpt-/i.test(model)
+  const primaryModel = model && !/^gpt-/i.test(model)
     ? model
     : (Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash");
 
-  console.log(`[${functionName}] request_id=${requestId} provider=lovable model=${resolvedModel} key=${maskSecret(lovableKey)} timeout_ms=${timeoutMs}`);
+  // Fallback ladder: if primary returns empty parsed output, try a more reliable model
+  const fallbackModels = primaryModel === "google/gemini-2.5-pro"
+    ? ["google/gemini-2.5-flash"]
+    : primaryModel === "google/gemini-2.5-flash"
+      ? ["google/gemini-2.5-pro"]
+      : ["google/gemini-2.5-flash", "google/gemini-2.5-pro"];
+  const modelChain = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];
+
+  console.log(`[${functionName}] request_id=${requestId} provider=lovable models=${modelChain.join("|")} key=${maskSecret(lovableKey)} timeout_ms=${timeoutMs}`);
 
   if (!lovableKey) {
     return { ok: false, status: 500, error: "LOVABLE_API_KEY ausente. Habilite Lovable AI." };
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const messages = toChatMessages(instructions, input);
+  const toolName = functionName.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 60) || "respond";
 
-  try {
-    const messages = toChatMessages(instructions, input);
+  let lastRaw: any = null;
+  let lastStatus = 500;
+  let lastError = "Lovable AI request failed";
 
-    // Use tool calling for structured output (more reliable than json_schema across providers)
-    const toolName = functionName.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 60) || "respond";
-    const body: Record<string, unknown> = {
-      model: resolvedModel,
-      messages,
-      temperature,
-      max_tokens: maxOutputTokens,
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: toolName,
-            description: "Return the structured response",
-            parameters: schema,
+  for (let attempt = 0; attempt < modelChain.length; attempt++) {
+    const currentModel = modelChain[attempt];
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const body: Record<string, unknown> = {
+        model: currentModel,
+        messages,
+        temperature,
+        max_tokens: maxOutputTokens,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: toolName,
+              description: "Return the structured response",
+              parameters: schema,
+            },
           },
+        ],
+        tool_choice: { type: "function", function: { name: toolName } },
+      };
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${lovableKey}`,
+          "Content-Type": "application/json",
         },
-      ],
-      tool_choice: { type: "function", function: { name: toolName } },
-    };
+        body: JSON.stringify(body),
+      });
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${lovableKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+      const raw = await response.json().catch(async () => ({ error: await response.text().catch(() => "") }));
+      lastRaw = raw;
 
-    const raw = await response.json().catch(async () => ({ error: await response.text().catch(() => "") }));
+      if (!response.ok) {
+        const message = typeof raw?.error?.message === "string"
+          ? raw.error.message
+          : typeof raw?.error === "string"
+            ? raw.error
+            : `Lovable AI request failed with status ${response.status}`;
+        console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} status=${response.status} error=${String(message).slice(0, 300)}`);
+        lastStatus = response.status;
+        lastError = String(message);
+        // 429/402 are user-facing — return immediately, no fallback
+        if (response.status === 429 || response.status === 402) {
+          return { ok: false, status: response.status, error: lastError, raw };
+        }
+        // Other upstream errors: try next model
+        continue;
+      }
 
-    if (!response.ok) {
-      const message = typeof raw?.error?.message === "string"
-        ? raw.error.message
-        : typeof raw?.error === "string"
-          ? raw.error
-          : `Lovable AI request failed with status ${response.status}`;
-      console.log(`[${functionName}] request_id=${requestId} provider=lovable status=${response.status} error=${String(message).slice(0, 300)}`);
-      // Surface specific upstream codes (rate-limit / payment) explicitly
-      const status = response.status === 429 || response.status === 402 ? response.status : response.status;
-      return { ok: false, status, error: String(message), raw };
+      const choice = raw?.choices?.[0];
+      const toolCall = choice?.message?.tool_calls?.[0];
+      let parsed: any = null;
+      if (toolCall?.function?.arguments) {
+        parsed = parseJsonLoose(toolCall.function.arguments);
+      }
+      if (!parsed) {
+        const text = typeof choice?.message?.content === "string" ? choice.message.content : "";
+        parsed = parseJsonLoose(text);
+      }
+
+      if (parsed && typeof parsed === "object") {
+        console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} status=${response.status} parsed=ok`);
+        return { ok: true, parsed: parsed as T, raw };
+      }
+
+      console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} status=${response.status} parsed=empty — trying fallback`);
+      lastStatus = 422;
+      lastError = "Lovable AI retornou resposta vazia ou inválida.";
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Lovable AI request failed";
+      const isAbort = message.toLowerCase().includes("abort");
+      console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} error=${message}`);
+      lastStatus = isAbort ? 504 : 500;
+      lastError = isAbort ? "TIMEOUT" : message;
+      if (isAbort) break; // don't retry on timeout
+    } finally {
+      clearTimeout(timeout);
     }
-
-    const choice = raw?.choices?.[0];
-    const toolCall = choice?.message?.tool_calls?.[0];
-    let parsed: any = null;
-    if (toolCall?.function?.arguments) {
-      parsed = parseJsonLoose(toolCall.function.arguments);
-    }
-    if (!parsed) {
-      const text = typeof choice?.message?.content === "string" ? choice.message.content : "";
-      parsed = parseJsonLoose(text);
-    }
-
-    console.log(`[${functionName}] request_id=${requestId} provider=lovable status=${response.status} parsed=${parsed ? "ok" : "empty"}`);
-
-    if (!parsed || typeof parsed !== "object") {
-      return { ok: false, status: 422, error: "Lovable AI retornou resposta vazia ou inválida.", raw };
-    }
-
-    return { ok: true, parsed: parsed as T, raw };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Lovable AI request failed";
-    const isAbort = message.toLowerCase().includes("abort");
-    console.log(`[${functionName}] request_id=${requestId} provider=lovable error=${message}`);
-    return { ok: false, status: isAbort ? 504 : 500, error: isAbort ? "TIMEOUT" : message };
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return { ok: false, status: lastStatus, error: lastError, raw: lastRaw };
 }
