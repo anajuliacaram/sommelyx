@@ -9,8 +9,10 @@ const corsHeaders = {
 };
 
 const BUCKET = "wine-label-images";
-const AI_TIMEOUT_MS = 45_000;
-const AI_MODEL = "google/gemini-2.5-flash-image";
+const SEARCH_TIMEOUT_MS = 12_000;
+const DOWNLOAD_TIMEOUT_MS = 15_000;
+const MIN_IMAGE_BYTES = 6_000; // descarta favicons/sprites/placeholders pequenos
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 type WineRow = {
   id: string;
