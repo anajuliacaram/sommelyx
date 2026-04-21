@@ -750,7 +750,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         requestId: crypto.randomUUID(),
         apiKey: "",
         model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash",
-        timeoutMs: 40_000,
+        timeoutMs: 90_000,
         temperature: 0.2,
         instructions: systemPrompt,
         input: messagesForAI.map((message) => ({
