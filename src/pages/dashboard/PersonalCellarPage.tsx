@@ -21,6 +21,7 @@ import {
 } from "@/components/editorial/EditorialPrimitives";
 import { useToast } from "@/hooks/use-toast";
 import { useWineEvent, useWines, type Wine } from "@/hooks/useWines";
+import { useAutoResolveWineImages } from "@/hooks/useAutoResolveWineImage";
 
 const currentYear = new Date().getFullYear();
 
