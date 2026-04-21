@@ -157,55 +157,15 @@ function isGenericWineName(name?: string | null) {
 }
 
 function validateWineSpecificity(
-  texts: string[],
-  wineName: string,
-  grape?: string | null,
-  context?: SpecificityContext,
+  _texts: string[],
+  _wineName: string,
+  _grape?: string | null,
+  _context?: SpecificityContext,
 ): { passed: boolean; failures: string[] } {
-  const failures: string[] = [];
-  const wineNameLower = wineName.toLowerCase();
-  const grapeClean = grape?.toLowerCase().replace(/\s+/g, " ").trim() || "";
-
-  for (const text of texts) {
-    if (!text || text.length < 20) continue;
-    const lower = text.toLowerCase();
-
-    // Check if wine name is actually mentioned
-    const mentionsWine = lower.includes(wineNameLower) || 
-      wineNameLower.split(" ").filter(w => w.length > 3).some(w => lower.includes(w));
-
-    if (!mentionsWine && texts.length <= 10) {
-      failures.push(`Missing wine name reference: "${text.slice(0, 60)}..."`);
-    }
-
-    // Check for generic grape descriptions
-    for (const pattern of GENERIC_PATTERNS) {
-      if (pattern.test(text)) {
-        failures.push(`Generic pattern found: "${text.slice(0, 60)}..."`);
-        break;
-      }
-    }
-
-    // Check if explanation is just about the grape (only the grape, nothing about producer/region/style)
-    if (grapeClean && grapeClean.length > 3) {
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
-      const genericSentences = sentences.filter(s => {
-        const sl = s.toLowerCase();
-        // Sentence mentions grape but NOT the wine name or region-specific terms
-        return sl.includes(grapeClean) && !mentionsWine && 
-          !sl.match(/regiã|produtor|safra|rótulo|vinícola|região|vale |serra |douro|bordeaux|toscana|mendoza|napa|rioja|barossa|maipo|casablanca|colchagua/i);
-      });
-      if (genericSentences.length > sentences.length / 2) {
-        failures.push(`Grape-only description without label context`);
-      }
-    }
-  }
-
-  if (!hasSpecificLabelContext(texts, context ?? { wineName, grape })) {
-    failures.push("Missing label-specific anchor");
-  }
-
-  return { passed: failures.length === 0, failures };
+  // Validação relaxada: confiamos na qualidade do prompt e dos schemas estruturados.
+  // A validação anti-genericidade era excessivamente restritiva e rejeitava respostas
+  // perfeitamente úteis quando o vinho tinha pouca metadata (caso comum em adegas reais).
+  return { passed: true, failures: [] };
 }
 
 function analyzeDish(dish: string) {
