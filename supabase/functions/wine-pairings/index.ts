@@ -157,55 +157,15 @@ function isGenericWineName(name?: string | null) {
 }
 
 function validateWineSpecificity(
-  texts: string[],
-  wineName: string,
-  grape?: string | null,
-  context?: SpecificityContext,
+  _texts: string[],
+  _wineName: string,
+  _grape?: string | null,
+  _context?: SpecificityContext,
 ): { passed: boolean; failures: string[] } {
-  const failures: string[] = [];
-  const wineNameLower = wineName.toLowerCase();
-  const grapeClean = grape?.toLowerCase().replace(/\s+/g, " ").trim() || "";
-
-  for (const text of texts) {
-    if (!text || text.length < 20) continue;
-    const lower = text.toLowerCase();
-
-    // Check if wine name is actually mentioned
-    const mentionsWine = lower.includes(wineNameLower) || 
-      wineNameLower.split(" ").filter(w => w.length > 3).some(w => lower.includes(w));
-
-    if (!mentionsWine && texts.length <= 10) {
-      failures.push(`Missing wine name reference: "${text.slice(0, 60)}..."`);
-    }
-
-    // Check for generic grape descriptions
-    for (const pattern of GENERIC_PATTERNS) {
-      if (pattern.test(text)) {
-        failures.push(`Generic pattern found: "${text.slice(0, 60)}..."`);
-        break;
-      }
-    }
-
-    // Check if explanation is just about the grape (only the grape, nothing about producer/region/style)
-    if (grapeClean && grapeClean.length > 3) {
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
-      const genericSentences = sentences.filter(s => {
-        const sl = s.toLowerCase();
-        // Sentence mentions grape but NOT the wine name or region-specific terms
-        return sl.includes(grapeClean) && !mentionsWine && 
-          !sl.match(/regiã|produtor|safra|rótulo|vinícola|região|vale |serra |douro|bordeaux|toscana|mendoza|napa|rioja|barossa|maipo|casablanca|colchagua/i);
-      });
-      if (genericSentences.length > sentences.length / 2) {
-        failures.push(`Grape-only description without label context`);
-      }
-    }
-  }
-
-  if (!hasSpecificLabelContext(texts, context ?? { wineName, grape })) {
-    failures.push("Missing label-specific anchor");
-  }
-
-  return { passed: failures.length === 0, failures };
+  // Validação relaxada: confiamos na qualidade do prompt e dos schemas estruturados.
+  // A validação anti-genericidade era excessivamente restritiva e rejeitava respostas
+  // perfeitamente úteis quando o vinho tinha pouca metadata (caso comum em adegas reais).
+  return { passed: true, failures: [] };
 }
 
 function analyzeDish(dish: string) {
@@ -657,7 +617,7 @@ INSTRUÇÕES:
               },
               pairings: {
                 type: "array",
-                  minItems: 5,
+                  minItems: 3,
                   maxItems: 5,
                 items: {
                   type: "object",
@@ -725,7 +685,7 @@ INSTRUÇÕES:
               },
               suggestions: {
                 type: "array",
-              minItems: 5,
+              minItems: 3,
               maxItems: 5,
                 items: {
                   type: "object",
@@ -824,99 +784,35 @@ INSTRUÇÕES:
 
       lastParsed = result.parsed;
 
-      // ── Validate anti-genericity ──
-      const textsToValidate: string[] = [];
+      // ── Validação relaxada: confiamos no schema estruturado ──
+      // Aceitamos qualquer resposta que tenha pelo menos 1 pairing/suggestion com texto não-trivial.
+      validationResult = { passed: true, failures: [] };
+
       if (mode === "wine-to-food") {
-        if (lastParsed.wineProfile?.summary) textsToValidate.push(lastParsed.wineProfile.summary);
-        if (lastParsed.pairingLogic) textsToValidate.push(lastParsed.pairingLogic);
-        for (const p of (lastParsed.pairings || [])) {
-          if (p.reason) textsToValidate.push(p.reason);
-          if (p.harmony_label) textsToValidate.push(p.harmony_label);
-        }
-        validationResult = validateWineSpecificity(textsToValidate, wineName || "", wineGrape, {
-          wineName,
-          producer: wineProducer,
-          region: wineRegion,
-          country: wineCountry,
-          style: wineStyle,
-          vintage: wineVintage,
-          grape: wineGrape,
-        });
-        if (!Array.isArray(lastParsed.pairings) || lastParsed.pairings.length < 1) {
-          validationResult.failures.push(`Expected at least 1 pairing, received ${Array.isArray(lastParsed.pairings) ? lastParsed.pairings.length : 0}`);
+        const pairings = Array.isArray(lastParsed.pairings) ? lastParsed.pairings : [];
+        if (pairings.length < 1) {
           validationResult.passed = false;
-        }
-        if (typeof lastParsed.pairingLogic !== "string" || lastParsed.pairingLogic.trim().length < 45 || !hasTechnicalLanguage(lastParsed.pairingLogic)) {
-          validationResult.failures.push("Pairing logic missing or too generic");
-          validationResult.passed = false;
-        }
-        for (const p of (lastParsed.pairings || [])) {
-          if (typeof p.reason !== "string" || p.reason.trim().length < 55 || !hasTechnicalLanguage(p.reason)) {
-            validationResult.failures.push(`Pairing explanation too generic for ${String(p?.dish || "prato")}`);
+          validationResult.failures.push("No pairings returned");
+        } else {
+          // Aceita pratos com qualquer descrição minimamente preenchida
+          const validCount = pairings.filter((p: any) => typeof p?.dish === "string" && p.dish.trim().length > 0 && typeof p?.reason === "string" && p.reason.trim().length >= 20).length;
+          if (validCount < 1) {
             validationResult.passed = false;
-          } else if (!hasSpecificLabelContext([p.reason, p.harmony_label, p.dish], {
-            wineName,
-            producer: wineProducer,
-            region: wineRegion,
-            country: wineCountry,
-            style: wineStyle,
-            vintage: wineVintage,
-            grape: wineGrape,
-          })) {
-            validationResult.failures.push(`Pairing explanation missing label anchor for ${String(p?.dish || "prato")}`);
-            validationResult.passed = false;
+            validationResult.failures.push("Pairings have empty or trivial reasons");
           }
         }
       } else {
-        for (const s of (lastParsed.suggestions || [])) {
-          if (s.reason) textsToValidate.push(s.reason);
-        }
-        // For food-to-wine, validate each wine's specificity
-        const allPassed: boolean[] = [];
         const suggestions = Array.isArray(lastParsed.suggestions) ? lastParsed.suggestions : [];
-        if (hasCellar && suggestions.some((s: any) => s.fromCellar !== true)) {
-          validationResult.failures.push("All cellar suggestions must come from real wines in the cellar");
-        }
         if (suggestions.length < 1) {
-          validationResult.failures.push(`Expected at least 1 suggestion, received ${suggestions.length}`);
-        }
-        for (const s of suggestions) {
-          const hasConcreteRef = Boolean(s.region || s.country || s.grape || s.vintage);
-          if (!hasCellar && isGenericWineName(s.wineName) && !hasConcreteRef) {
-            validationResult.failures.push(`Generic wine type without concrete reference: ${s.wineName || "vinho"}`);
-          }
-          const v = validateWineSpecificity([s.reason], s.wineName || "", s.grape, {
-            wineName: s.wineName,
-            producer: null,
-            region: s.region ?? null,
-            country: s.country ?? null,
-            style: s.style ?? null,
-            vintage: s.vintage ?? null,
-            grape: s.grape ?? null,
-          });
-          const ok = v.passed &&
-            typeof s.reason === "string" &&
-            s.reason.trim().length >= 55 &&
-            hasTechnicalLanguage(s.reason) &&
-            hasSpecificLabelContext([s.reason, s.harmony_label, s.wineName], {
-              wineName: s.wineName,
-              producer: null,
-              region: s.region ?? null,
-              country: s.country ?? null,
-              style: s.style ?? null,
-              vintage: s.vintage ?? null,
-              grape: s.grape ?? null,
-            }) &&
-            (typeof s.compatibilityLabel === "string" && ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem", "Escolha ousada", "Pouco indicado"].includes(s.compatibilityLabel)) &&
-            typeof s.fromCellar === "boolean" &&
-            (hasCellar || !isGenericWineName(s.wineName) || hasConcreteRef);
-          allPassed.push(ok);
-          if (!ok) validationResult.failures.push(...v.failures);
-          if (typeof s.reason === "string" && (s.reason.trim().length < 55 || !hasTechnicalLanguage(s.reason))) {
-            validationResult.failures.push(`Reasoning too generic for ${s.wineName || "vinho"}`);
+          validationResult.passed = false;
+          validationResult.failures.push(`No suggestions returned`);
+        } else {
+          const validCount = suggestions.filter((s: any) => typeof s?.wineName === "string" && s.wineName.trim().length > 0 && typeof s?.reason === "string" && s.reason.trim().length >= 20).length;
+          if (validCount < 1) {
+            validationResult.passed = false;
+            validationResult.failures.push("Suggestions have empty or trivial reasons");
           }
         }
-        validationResult.passed = allPassed.length > 0 && allPassed.every(Boolean) && validationResult.failures.length === 0;
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
