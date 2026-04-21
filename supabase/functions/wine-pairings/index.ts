@@ -944,16 +944,20 @@ INSTRUÇÕES:
     }
 
     if (!validationResult.passed) {
-      // Mensagem consultiva e específica por modo, com motivo + ação.
+      // Última tentativa: mesmo sem dados validados, devolver o que temos (ou estrutura vazia)
+      // para que o cliente possa exibir uma mensagem amigável em vez de erro genérico.
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "degraded_no_results", Date.now() - startTime, {
+        mode,
+        reason: "no_valid_results",
+        validation_failures: validationResult.failures.slice(0, 12),
+      });
       const friendlyMessage = mode === "wine-to-food"
         ? "Não conseguimos sugerir pratos confiáveis para este vinho agora. Tente novamente em instantes ou informe um vinho com mais detalhes (uva, região, safra)."
         : "Não conseguimos sugerir vinhos para este prato agora. Tente reformular o prato (ex: 'risoto de funghi com parmesão') ou tente novamente em instantes.";
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 422, "validation_error", Date.now() - startTime, {
-        mode,
-        reason: friendlyMessage,
-        validation_failures: validationResult.failures.slice(0, 12),
-      });
-      return jsonResponse({ error: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
+      const emptyPayload = mode === "wine-to-food"
+        ? { pairings: [], pairingLogic: null, wineProfile: null, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" }
+        : { suggestions: [], dishProfile: null, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" };
+      return jsonResponse(emptyPayload);
     }
 
     await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success", Date.now() - startTime, {
