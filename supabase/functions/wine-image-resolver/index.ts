@@ -9,8 +9,10 @@ const corsHeaders = {
 };
 
 const BUCKET = "wine-label-images";
-const AI_TIMEOUT_MS = 45_000;
-const AI_MODEL = "google/gemini-2.5-flash-image";
+const SEARCH_TIMEOUT_MS = 12_000;
+const DOWNLOAD_TIMEOUT_MS = 15_000;
+const MIN_IMAGE_BYTES = 6_000; // descarta favicons/sprites/placeholders pequenos
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 type WineRow = {
   id: string;
@@ -89,79 +91,130 @@ function buildSvgFallback(row: WineRow) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-function buildImagePrompt(row: WineRow) {
-  const parts: string[] = [];
-  parts.push(
-    "Editorial product photography of a single full wine bottle standing upright, centered, hero shot, studio lighting, soft warm key light, gentle vignette, ultra-realistic, 4k, no text overlay, no watermark, no logos other than the wine label itself, photorealistic, premium magazine style, neutral elegant background (soft gradient: warm cream to deep wine).",
-  );
-  const wineDescriptor: string[] = [];
-  if (row.producer) wineDescriptor.push(`producer: ${row.producer}`);
-  if (row.name) wineDescriptor.push(`wine name: ${row.name}`);
-  if (row.vintage) wineDescriptor.push(`vintage: ${row.vintage}`);
-  if (row.style) wineDescriptor.push(`style: ${row.style}`);
-  if (row.country) wineDescriptor.push(`country: ${row.country}`);
-  if (row.region) wineDescriptor.push(`region: ${row.region}`);
-  if (row.grape) wineDescriptor.push(`grape: ${row.grape}`);
-  parts.push(`The bottle should look like a real ${row.style || "wine"} bottle from a real producer with this identity — ${wineDescriptor.join(", ")}.`);
-  parts.push(
-    "Render the actual front label legibly with the producer name and the wine name typed elegantly — but do NOT invent extra disclaimers. Bottle glass color must match the style (dark green/black for tinto, clear for branco/espumante, light pink for rosé, dark amber for fortificado). Foil capsule must look premium. Composition: 3:4 portrait, bottle filling 70% of the frame, centered, slightly tilted shadow on the surface.",
-  );
-  return parts.join("\n");
-}
-
-function decodeBase64(b64: string): Uint8Array {
-  const clean = b64.replace(/\s/g, "");
-  const binary = atob(clean);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
-async function generateBottleImage(row: WineRow): Promise<{ ok: true; bytes: Uint8Array; mime: string } | { ok: false; error: string }> {
-  const apiKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
-  if (!apiKey) return { ok: false, error: "LOVABLE_API_KEY missing" };
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
-  try {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        modalities: ["image", "text"],
-        messages: [
-          { role: "user", content: buildImagePrompt(row) },
-        ],
-      }),
-    });
-
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => "");
-      return { ok: false, error: `AI image gen status ${resp.status}: ${text.slice(0, 240)}` };
+function buildSearchQuery(row: WineRow): string {
+  const parts = [
+    normalizeText(row.producer),
+    normalizeText(row.name),
+    row.vintage ? String(row.vintage) : "",
+    "wine bottle label",
+  ].filter(Boolean);
+  const seen = new Set<string>();
+  const dedup: string[] = [];
+  for (const p of parts) {
+    const k = p.toLowerCase();
+    if (!seen.has(k)) {
+      seen.add(k);
+      dedup.push(p);
     }
-
-    const json = await resp.json().catch(() => null) as any;
-    const dataUrl: string | undefined = json?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    if (!dataUrl || typeof dataUrl !== "string") {
-      return { ok: false, error: "AI returned no image" };
-    }
-
-    const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-    if (!match) return { ok: false, error: "Invalid image data url" };
-    const mime = match[1];
-    const bytes = decodeBase64(match[2]);
-    if (!bytes.length) return { ok: false, error: "Decoded image empty" };
-    return { ok: true, bytes, mime };
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : "AI fetch failed" };
-  } finally {
-    clearTimeout(timeout);
   }
+  return dedup.join(" ");
+}
+
+const BLOCKED_HOST_PATTERNS = [/wine-searcher\.com/i, /\.gif($|\?)/i];
+const ACCEPTED_MIME = /^image\/(jpeg|jpg|png|webp)$/i;
+
+function isLikelyValidImageUrl(u: string): boolean {
+  if (!u || !/^https?:\/\//i.test(u)) return false;
+  if (BLOCKED_HOST_PATTERNS.some((rx) => rx.test(u))) return false;
+  if (/alert\.jpg|placeholder|notfound|not[-_]?found|404\.|missing|sprite|favicon/i.test(u)) return false;
+  return true;
+}
+
+async function searchWithGoogleCSE(query: string): Promise<string[]> {
+  const key = Deno.env.get("GOOGLE_CSE_API_KEY")?.trim();
+  const cx = Deno.env.get("GOOGLE_CSE_ID")?.trim();
+  if (!key || !cx) return [];
+  const url = new URL("https://www.googleapis.com/customsearch/v1");
+  url.searchParams.set("key", key);
+  url.searchParams.set("cx", cx);
+  url.searchParams.set("q", query);
+  url.searchParams.set("searchType", "image");
+  url.searchParams.set("num", "10");
+  url.searchParams.set("safe", "active");
+  url.searchParams.set("imgType", "photo");
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), SEARCH_TIMEOUT_MS);
+  try {
+    const resp = await fetch(url.toString(), { signal: ctrl.signal });
+    if (!resp.ok) return [];
+    const json = await resp.json().catch(() => null) as any;
+    const items: any[] = Array.isArray(json?.items) ? json.items : [];
+    return items.map((it) => typeof it?.link === "string" ? it.link : "").filter(isLikelyValidImageUrl);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function searchWithDuckDuckGo(query: string): Promise<string[]> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), SEARCH_TIMEOUT_MS);
+  try {
+    const tokenResp = await fetch(`https://duckduckgo.com/?q=${encodeURIComponent(query)}&iax=images&ia=images`, {
+      signal: ctrl.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" },
+    });
+    const html = await tokenResp.text();
+    const vqdMatch = html.match(/vqd=['"]([^'"]+)['"]/) || html.match(/vqd=([\d-]+)&/);
+    const vqd = vqdMatch?.[1];
+    if (!vqd) return [];
+    const apiUrl = `https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${encodeURIComponent(vqd)}&f=,,,,,&p=1`;
+    const resp = await fetch(apiUrl, {
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Referer": "https://duckduckgo.com/",
+      },
+    });
+    if (!resp.ok) return [];
+    const json = await resp.json().catch(() => null) as any;
+    const results: any[] = Array.isArray(json?.results) ? json.results : [];
+    return results.map((r) => typeof r?.image === "string" ? r.image : "").filter(isLikelyValidImageUrl).slice(0, 15);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function downloadImage(url: string): Promise<{ ok: true; bytes: Uint8Array; mime: string } | { ok: false; error: string }> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), DOWNLOAD_TIMEOUT_MS);
+  try {
+    const resp = await fetch(url, {
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+      },
+      redirect: "follow",
+    });
+    if (!resp.ok) return { ok: false, error: `download status ${resp.status}` };
+    const ct = (resp.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+    if (!ACCEPTED_MIME.test(ct)) return { ok: false, error: `bad mime: ${ct}` };
+    const buf = new Uint8Array(await resp.arrayBuffer());
+    if (buf.length < MIN_IMAGE_BYTES) return { ok: false, error: `too small (${buf.length}b)` };
+    if (buf.length > MAX_IMAGE_BYTES) return { ok: false, error: `too large (${buf.length}b)` };
+    return { ok: true, bytes: buf, mime: ct };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "download failed" };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function findRealLabelImage(row: WineRow): Promise<{ ok: true; bytes: Uint8Array; mime: string; sourceUrl: string } | { ok: false; error: string }> {
+  const query = buildSearchQuery(row);
+  if (!query) return { ok: false, error: "empty query" };
+  let candidates = await searchWithGoogleCSE(query);
+  if (candidates.length === 0) candidates = await searchWithDuckDuckGo(query);
+  if (candidates.length === 0) return { ok: false, error: "no search results" };
+  for (const url of candidates.slice(0, 5)) {
+    const dl = await downloadImage(url);
+    if (dl.ok) return { ok: true, bytes: dl.bytes, mime: dl.mime, sourceUrl: url };
+  }
+  return { ok: false, error: "all candidates failed" };
 }
 
 function jsonResponse(payload: unknown, status = 200) {
@@ -227,17 +280,17 @@ serve(async (req) => {
       return jsonResponse({ ok: true, image_url: row.image_url, source: "cached" });
     }
 
-    // Tenta gerar via IA (Nano Banana) e fazer upload no bucket
-    const aiResult = await generateBottleImage(row);
-    if (aiResult.ok) {
-      const ext = aiResult.mime === "image/jpeg" ? "jpg" : aiResult.mime === "image/webp" ? "webp" : "png";
-      const path = `${row.user_id}/ai/${row.id}-${Date.now()}.${ext}`;
+    // Busca imagem REAL do rótulo na web (Google CSE → DuckDuckGo)
+    const found = await findRealLabelImage(row);
+    if (found.ok) {
+      const ext = found.mime.includes("jpeg") ? "jpg" : found.mime.includes("webp") ? "webp" : "png";
+      const path = `${row.user_id}/web/${row.id}-${Date.now()}.${ext}`;
       const { error: uploadError } = await adminClient.storage
         .from(BUCKET)
-        .upload(path, aiResult.bytes, {
+        .upload(path, found.bytes, {
           cacheControl: "31536000",
           upsert: true,
-          contentType: aiResult.mime,
+          contentType: found.mime,
         });
 
       if (!uploadError) {
@@ -255,19 +308,20 @@ serve(async (req) => {
           return jsonResponse({
             ok: true,
             image_url: finalUrl,
-            source: "ai-generated",
+            source: "web-search",
+            source_url: found.sourceUrl,
             duration_ms: Date.now() - startTime,
           });
         }
         console.warn("wine-image-resolver sign failed:", signErr?.message);
+      } else {
+        console.warn("wine-image-resolver upload failed:", uploadError.message);
       }
-
-      console.warn("wine-image-resolver upload failed:", uploadError.message);
     } else {
-      console.warn("wine-image-resolver AI failed:", aiResult.error);
+      console.warn("wine-image-resolver web search failed:", found.error);
     }
 
-    // Fallback final: SVG ilustrativo
+    // Fallback final: SVG ilustrativo (sem IA generativa)
     const fallback = buildSvgFallback(row);
     await adminClient
       .from("wines")
@@ -278,7 +332,7 @@ serve(async (req) => {
     return jsonResponse({
       ok: true,
       image_url: fallback,
-      source: "generated",
+      source: "fallback-svg",
       duration_ms: Date.now() - startTime,
     });
   } catch (error) {
