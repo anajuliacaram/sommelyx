@@ -32,6 +32,7 @@ import {
   matchDotColor,
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
+import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 
 // Compat helpers kept locally for result rendering
 const matchDot: Record<string, string> = matchDotColor;
@@ -123,6 +124,7 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
   const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante">("all");
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const [intent, setIntent] = useState<PairingIntent>("everyday");
+  const [consumeWine, setConsumeWine] = useState<{ id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null>(null);
   const reset = () => {
     setSource(null);
     setSubMode(null);
@@ -1320,6 +1322,28 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
                               </span>
                             )}
                           </div>
+
+                          {s.fromCellar && matchedWine && (
+                            <div className="pl-[18px] pt-1">
+                              <Button
+                                size="sm"
+                                onClick={() => setConsumeWine({
+                                  id: matchedWine.id,
+                                  name: matchedWine.name,
+                                  producer: matchedWine.producer,
+                                  country: matchedWine.country,
+                                  region: matchedWine.region,
+                                  grape: matchedWine.grape,
+                                  style: matchedWine.style,
+                                  vintage: matchedWine.vintage,
+                                })}
+                                className="h-8 rounded-full bg-primary px-4 text-[11.5px] font-semibold tracking-wide text-primary-foreground shadow-[0_2px_8px_-2px_rgba(123,30,43,0.35)] hover:bg-primary/90 hover:shadow-[0_4px_12px_-2px_rgba(123,30,43,0.45)] transition-all"
+                              >
+                                <Check className="mr-1.5 h-3.5 w-3.5" />
+                                Escolher este
+                              </Button>
+                            </div>
+                          )}
                         </motion.li>
                       );
                     })}
@@ -1623,6 +1647,12 @@ export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) 
           </ModalBase>
         </Dialog>
       )}
+
+      <AddConsumptionDialog
+        open={!!consumeWine}
+        onOpenChange={(v) => { if (!v) setConsumeWine(null); }}
+        preSelectedWine={consumeWine}
+      />
     </Sheet>
   );
 }
