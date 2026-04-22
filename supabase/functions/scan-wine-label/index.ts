@@ -6,6 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const FUNCTION_NAME = "scan-wine-label";
@@ -229,7 +230,7 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
-    console.log(`[${FUNCTION_NAME}] request_received request_id=${requestId} has_auth=${Boolean(authHeader)}`);
+    console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
 
     if (!authHeader?.startsWith("Bearer ")) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {

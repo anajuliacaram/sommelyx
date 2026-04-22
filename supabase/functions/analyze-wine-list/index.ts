@@ -9,6 +9,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+const FUNCTION_NAME = "analyze-wine-list";
 const UserProfileSchema = z.object({
   topStyles: z.array(z.string()).optional(),
   topGrapes: z.array(z.string()).optional(),
@@ -447,9 +448,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
+    const requestId = crypto.randomUUID();
+    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
+    console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
     if (!authHeader?.startsWith("Bearer ")) {
-      return jsonResponse({ error: "Autenticação necessária" }, 401);
+      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_REQUIRED", requestId }, 401);
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
@@ -459,8 +462,9 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(user)}`);
     if (userError || !user) {
-      return jsonResponse({ error: "Sessão inválida" }, 401);
+      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_INVALID", requestId }, 401);
     }
 
 
