@@ -170,9 +170,18 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
             />
           </div>
           <div className="flex items-center justify-between text-[11.5px] font-semibold text-[#6F665C]">
-            <span>{wine.drink_from ?? "—"}</span>
-            <span>{wine.drink_until ?? "—"}</span>
+            <span className={drinkWindow.isEstimated ? "italic text-[#8A8276]" : undefined}>
+              {drinkWindow.from}
+            </span>
+            <span className={drinkWindow.isEstimated ? "italic text-[#8A8276]" : undefined}>
+              {drinkWindow.until}
+            </span>
           </div>
+          {drinkWindow.isEstimated ? (
+            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#A39885]">
+              Janela sugerida
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-5">
