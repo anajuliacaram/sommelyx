@@ -328,8 +328,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     if (!file) return;
 
     setStep("scanning");
+    const reqId = nextRequestId();
     setLoading(true);
     setError(null);
+    setScanResults(null);
     try {
       const prepared = await prepareAiAnalysisAttachment(file);
       const payload: AiAnalysisAttachmentPayload = {
@@ -342,30 +344,39 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       setLastWineListAttachment(payload);
       lastRetryRef.current = async () => {
         setStep("scanning");
+        const retryId = nextRequestId();
         setLoading(true);
         setError(null);
+        setScanResults(null);
         try {
           const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
           const result = await analyzeWineList(payload, profile);
+          if (!isLatest(retryId)) return;
+          setError(null);
           setScanResults(result);
           setStep("scan-results");
         } catch (err: any) {
+          if (!isLatest(retryId)) return;
           setError(err.message || "Erro ao analisar a carta");
           setStep("photo");
         } finally {
-          setLoading(false);
+          if (isLatest(retryId)) setLoading(false);
         }
       };
 
       const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
       const result = await analyzeWineList(payload, profile);
+      if (!isLatest(reqId)) return;
+      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine-list" });
+      setError(null);
       setScanResults(result);
       setStep("scan-results");
     } catch (err: any) {
+      if (!isLatest(reqId)) return;
       setError(err.message || "Erro ao analisar a carta");
       setStep("photo");
     } finally {
-      setLoading(false);
+      if (isLatest(reqId)) setLoading(false);
     }
     e.target.value = "";
   };
@@ -375,8 +386,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     if (!file) return;
 
     setStep("ext-menu-scanning");
+    const reqId = nextRequestId();
     setLoading(true);
     setError(null);
+    setMenuResults(null);
     try {
       const prepared = await prepareAiAnalysisAttachment(file);
       const payload: AiAnalysisAttachmentPayload = {
@@ -389,30 +402,39 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       setLastMenuAttachment(payload);
       lastRetryRef.current = async () => {
         setStep("ext-menu-scanning");
+        const retryId = nextRequestId();
         setLoading(true);
         setError(null);
+        setMenuResults(null);
         try {
           const result = await analyzeMenuForWine(payload, extWineName);
+          if (!isLatest(retryId)) return;
+          setError(null);
           setMenuResults(result);
           setWineProfile(result.wineProfile || null);
           setStep("ext-menu-results");
         } catch (err: any) {
+          if (!isLatest(retryId)) return;
           setError(err.message || "Erro ao analisar o cardápio");
           setStep("ext-menu-photo");
         } finally {
-          setLoading(false);
+          if (isLatest(retryId)) setLoading(false);
         }
       };
 
       const result = await analyzeMenuForWine(payload, extWineName);
+      if (!isLatest(reqId)) return;
+      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "menu" });
+      setError(null);
       setMenuResults(result);
       setWineProfile(result.wineProfile || null);
       setStep("ext-menu-results");
     } catch (err: any) {
+      if (!isLatest(reqId)) return;
       setError(err.message || "Erro ao analisar o cardápio");
       setStep("ext-menu-photo");
     } finally {
-      setLoading(false);
+      if (isLatest(reqId)) setLoading(false);
     }
     e.target.value = "";
   };
