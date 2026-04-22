@@ -186,8 +186,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setEstimating(true);
     setEstimateConfidence(null);
     try {
-      const { data, error } = await supabase.functions.invoke("estimate-wine-price", {
-        body: {
+      const data = await invokeEdgeFunction<{ estimated_price?: number; confidence?: string | null }>(
+        "estimate-wine-price",
+        {
           name: n.trim(),
           producer: p || null,
           vintage: v ? parseInt(v) : null,
@@ -196,8 +197,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
           region: r || null,
           grape: g || null,
         },
-      });
-      if (!error && data?.estimated_price) {
+      );
+      if (data?.estimated_price) {
         if (isCommercial || !currentValueTouched) {
           setCurrentValue(String(data.estimated_price));
         }
