@@ -247,7 +247,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     setSubMode("by-wine");
     setSelectedWineId(initialWineId);
     // Dispara a busca diretamente
-    (async () => {
+    const runDeepLink = async () => {
+      lastRetryRef.current = () => { runDeepLink(); };
       setLoading(true);
       setError(null);
       setPairingLogic(null);
@@ -266,12 +267,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         setPairingLogic(result.pairingLogic || null);
         setStep("wine-results");
       } catch (err: any) {
-        setError(err.message || "Não foi possível buscar sugestões");
-        setStep("select-wine");
+        console.error("[DishToWineDialog] deep-link pairings failed:", err);
+        setError(err?.message || "Não foi possível buscar sugestões");
+        setStep("wine-results");
       } finally {
         setLoading(false);
       }
-    })();
+    };
+    runDeepLink();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialWineId, wines]);
 
