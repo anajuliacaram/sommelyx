@@ -64,6 +64,7 @@ function getStyleTint(style?: string | null): string {
 interface DishToWineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialWineId?: string | null;
 }
 
 type Source = null | "cellar" | "external";
@@ -93,7 +94,7 @@ const popularDishes = [
   "Cordeiro assado",
 ];
 
-export function DishToWineDialog({ open, onOpenChange }: DishToWineDialogProps) {
+export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWineDialogProps) {
   const { data: wines } = useWines();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
