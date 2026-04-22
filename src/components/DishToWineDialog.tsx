@@ -1416,6 +1416,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
             )}
 
             {/* ── Wine Results (wine → food suggestions) ── */}
+            {step === "wine-results" && error && !pairings && (
+              <PairingErrorState
+                key="wine-results-error"
+                message={error}
+                onRetry={runRetry}
+                onClose={() => handleClose(false)}
+              />
+            )}
+
             {step === "wine-results" && pairings && (
               <motion.div
                 key="wine-results"
