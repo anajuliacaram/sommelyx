@@ -140,6 +140,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     if (fn) fn();
   }, []);
   const reset = () => {
+    requestSeqRef.current += 1; // invalidate any in-flight requests
     setSource(null);
     setSubMode(null);
     setStep("source");
