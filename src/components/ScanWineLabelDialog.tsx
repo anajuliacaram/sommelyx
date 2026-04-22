@@ -110,15 +110,15 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setSupportCode(null);
 
     try {
-      const data = await invokeEdgeFunction<any>(
+      const data = await invokeEdgeFunction<{ wine: ScannedWineData }>(
         "scan-wine-label",
         { imageBase64: base64 },
-        { timeoutMs: 60_000, retries: 2 },
+        { timeoutMs: 90_000, retries: 2 },
       );
 
       if (!data?.wine) throw new Error("Nenhum dado encontrado");
 
-      setScannedData(data.wine as ScannedWineData);
+      setScannedData(data.wine);
       setStep("preview");
     } catch (err: unknown) {
       console.error("Scan error:", err);
@@ -135,12 +135,14 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         msg = "Sua sessão expirou. Faça login novamente para continuar.";
       } else if (code === "IMAGE_TOO_LARGE") {
         msg = "A imagem está muito grande. Tente uma foto mais leve.";
+      } else if (code === "FILE_INVALID") {
+        msg = "Arquivo inválido. Envie uma foto legível do rótulo.";
       } else if (code === "LABEL_NOT_IDENTIFIED") {
         msg = "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
       } else if (code === "CONFIG_ERROR") {
         msg = "O scanner está temporariamente indisponível. Tente novamente em instantes.";
       } else if (code === "AI_TIMEOUT") {
-        msg = "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.";
+        msg = "Tempo de resposta excedido. Tente novamente com uma foto mais nítida.";
       } else if (code === "AI_UNAVAILABLE" || code === "AI_RATE_LIMIT") {
         msg = "A análise não pôde ser concluída agora. Tente novamente em instantes.";
       }
