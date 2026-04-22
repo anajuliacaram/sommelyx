@@ -149,12 +149,20 @@ export default function PersonalDashboard() {
     ? Math.max(0, Math.round((Date.now() - new Date(lastOpened.consumed_at).getTime()) / 86_400_000))
     : null;
 
-  // Insight do dia: vinho com janela mais próxima de fechar
+  // Insight do dia: vinho com janela mais próxima de fechar.
+  // Fallback: se não houver janela definida, sugere qualquer vinho com estoque
+  // (prioriza maior valor para destacar o "vinho do dia").
   const insightWine = useMemo(() => {
-    const candidates = wines
-      .filter((w) => w.quantity > 0 && w.drink_until && currentYear <= w.drink_until)
+    const inStock = wines.filter((w) => w.quantity > 0);
+    if (inStock.length === 0) return null;
+    const withWindow = inStock
+      .filter((w) => w.drink_until && currentYear <= w.drink_until)
       .sort((a, b) => (a.drink_until ?? 9999) - (b.drink_until ?? 9999));
-    return candidates[0] ?? null;
+    if (withWindow[0]) return withWindow[0];
+    const fallback = [...inStock].sort(
+      (a, b) => (b.current_value ?? b.purchase_price ?? 0) - (a.current_value ?? a.purchase_price ?? 0),
+    );
+    return fallback[0] ?? null;
   }, [wines, currentYear]);
 
   const handleOpenBottle = (wineId: string, _wineName: string) => {
