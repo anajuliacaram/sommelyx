@@ -190,8 +190,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     const query = dish.trim();
     if (!query) return;
     lastRetryRef.current = () => { handleSearchCellar(chosenIntent); };
+    const reqId = nextRequestId();
     setLoading(true);
     setError(null);
+    setSuggestions(null);
     try {
       const cellarWines = wines?.filter((w) => w.quantity > 0)?.map((w) => ({
         name: w.name,
@@ -205,25 +207,31 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         current_value: w.current_value ?? null,
       }));
       const result = await getDishWineSuggestions(query, cellarWines, chosenIntent ?? intent);
+      if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
+      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar" });
+      setError(null);
       setSuggestions(result.suggestions);
       setDishProfile(result.dishProfile || null);
       setStep("results");
     } catch (err: any) {
+      if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] cellar search failed:", err);
       setError(err?.message || "Não foi possível buscar sugestões");
     } finally {
-      setLoading(false);
+      if (isLatest(reqId)) setLoading(false);
     }
-  }, [dish, wines, intent]);
+  }, [dish, wines, intent, nextRequestId]);
 
   // Search food pairings for a selected wine
   const handleSearchWinePairings = useCallback(async () => {
     const wine = wines?.find((w) => w.id === selectedWineId);
     if (!wine) return;
     lastRetryRef.current = () => { handleSearchWinePairings(); };
+    const reqId = nextRequestId();
     setLoading(true);
     setError(null);
     setPairingLogic(null);
+    setPairings(null);
     try {
       const result = await getWinePairings({
         name: wine.name,
