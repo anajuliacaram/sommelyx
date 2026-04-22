@@ -18,6 +18,7 @@ import {
   STYLE_COLORS,
   StyleBadge,
   getStyleFamily,
+  resolveSuggestedDrinkWindow,
 } from "@/components/editorial/EditorialPrimitives";
 import { useToast } from "@/hooks/use-toast";
 import { useWineEvent, useWines, type Wine } from "@/hooks/useWines";
@@ -203,9 +204,9 @@ export default function PersonalCellarPage() {
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
-              const inWindow =
-                w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until;
-              const past = w.drink_until && currentYear > w.drink_until;
+              const dw = resolveSuggestedDrinkWindow(w);
+              const inWindow = currentYear >= dw.from && currentYear <= dw.until;
+              const past = currentYear > dw.until;
               return (
                 <EditorialCard key={w.id} style={{ padding: 18, cursor: "pointer" }}>
                   <div onClick={() => setEditWine(w)}>
@@ -292,11 +293,9 @@ export default function PersonalCellarPage() {
                     >
                       {[w.vintage, w.region, w.country].filter(Boolean).join(" · ")}
                     </p>
-                    {w.drink_from && w.drink_until && (
-                      <div className="mt-3">
-                        <DrinkWindow from={w.drink_from} until={w.drink_until} current={currentYear} />
-                      </div>
-                    )}
+                    <div className="mt-3">
+                      <DrinkWindow from={dw.from} until={dw.until} current={currentYear} estimated={dw.estimated} />
+                    </div>
                   </div>
                   <div
                     className="mt-3 flex items-center justify-between border-t pt-3"
@@ -348,8 +347,8 @@ export default function PersonalCellarPage() {
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
-              const inWindow =
-                w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until;
+              const dwRow = resolveSuggestedDrinkWindow(w);
+              const inWindow = currentYear >= dwRow.from && currentYear <= dwRow.until;
               return (
                 <div key={w.id} className="editorial-row" onClick={() => setEditWine(w)}>
                   {showLabels && w.image_url ? (
@@ -400,10 +399,8 @@ export default function PersonalCellarPage() {
                         className="text-[10px] font-semibold"
                         style={{ color: "rgba(58,51,39,0.5)" }}
                       >
-                        {w.quantity} un.
-                        {w.drink_from && w.drink_until
-                          ? ` · janela ${w.drink_from}–${w.drink_until}`
-                          : ""}
+                        {w.quantity} un. · janela {dwRow.from}–{dwRow.until}
+                        {dwRow.estimated ? " (sugerida)" : ""}
                       </span>
                     </div>
                   </div>

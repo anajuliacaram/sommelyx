@@ -188,36 +188,40 @@ export function DrinkWindow({
   from,
   until,
   current = new Date().getFullYear(),
+  estimated = false,
 }: {
   from: number;
   until: number;
   current?: number;
+  estimated?: boolean;
 }) {
   const min = from - 2;
   const max = until + 2;
   const range = Math.max(1, max - min);
-  const pct = (y: number) => `${((y - min) / range) * 100}%`;
+  const pct = (y: number) => `${Math.max(0, Math.min(100, ((y - min) / range) * 100))}%`;
   const inWindow = current >= from && current <= until;
+  const clampedCurrent = Math.max(min, Math.min(max, current));
 
   return (
-    <div className="relative h-6 w-full">
+    <div className="relative h-7 w-full">
       <div
-        className="absolute inset-x-0 top-[11px] h-[2px] rounded-full"
-        style={{ background: "rgba(95,111,82,0.12)" }}
+        className="absolute inset-x-0 top-[12px] h-[2px] rounded-full"
+        style={{ background: "rgba(95,111,82,0.14)" }}
       />
       <div
-        className="absolute top-[9px] h-[6px] rounded-full"
+        className="absolute top-[10px] h-[6px] rounded-full"
         style={{
           left: pct(from),
           width: `calc(${pct(until)} - ${pct(from)})`,
-          background:
-            "linear-gradient(90deg, rgba(95,111,82,0.3), rgba(95,111,82,0.6), rgba(95,111,82,0.3))",
+          background: estimated
+            ? "linear-gradient(90deg, rgba(180,140,58,0.25), rgba(180,140,58,0.55), rgba(180,140,58,0.25))"
+            : "linear-gradient(90deg, rgba(95,111,82,0.3), rgba(95,111,82,0.6), rgba(95,111,82,0.3))",
         }}
       />
       <div
-        className="absolute top-[5px] flex h-[14px] w-[14px] -translate-x-1/2 items-center justify-center rounded-full border-[2px]"
+        className="absolute top-[6px] flex h-[14px] w-[14px] -translate-x-1/2 items-center justify-center rounded-full border-[2px]"
         style={{
-          left: pct(current),
+          left: pct(clampedCurrent),
           borderColor: inWindow ? "#5F7F52" : "rgba(160,100,80,0.85)",
           background: "#fff",
           boxShadow: "0 1px 3px rgba(58,51,39,0.18)",
@@ -228,14 +232,47 @@ export function DrinkWindow({
           style={{ background: inWindow ? "#5F7F52" : "rgba(160,100,80,0.9)" }}
         />
       </div>
-      <div className="absolute -bottom-[1px] left-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
+      <div className="absolute bottom-0 left-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
         {min}
       </div>
-      <div className="absolute -bottom-[1px] right-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
+      {estimated && (
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8.5px] font-semibold uppercase tracking-[0.1em] text-[rgba(180,140,58,0.85)]">
+          Janela sugerida
+        </div>
+      )}
+      <div className="absolute bottom-0 right-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
         {max}
       </div>
     </div>
   );
+}
+
+/* ── Estimativa de janela de consumo (fallback inteligente) ──
+   Usa estilo + safra para estimar uma janela conservadora quando
+   o cliente não preencheu drink_from / drink_until. */
+export function resolveSuggestedDrinkWindow(wine: {
+  style?: string | null;
+  vintage?: number | null;
+  drink_from?: number | null;
+  drink_until?: number | null;
+}): { from: number; until: number; estimated: boolean } {
+  if (wine.drink_from && wine.drink_until && wine.drink_until > wine.drink_from) {
+    return { from: wine.drink_from, until: wine.drink_until, estimated: false };
+  }
+  const s = (wine.style || "").toLowerCase();
+  const base = wine.vintage ?? new Date().getFullYear() - 1;
+  let openIn = 1;
+  let span = 5;
+  if (s.includes("espum")) { openIn = 0; span = 3; }
+  else if (s.includes("rose") || s.includes("rosé")) { openIn = 0; span = 2; }
+  else if (s.includes("branco")) { openIn = 1; span = 4; }
+  else if (s.includes("sobrem") || s.includes("fortif") || s.includes("porto") || s.includes("madeira")) { openIn = 2; span = 20; }
+  else if (s.includes("chianti") || s.includes("sangiovese")) { openIn = 2; span = 8; }
+  else if (s.includes("tinto")) { openIn = 2; span = 8; }
+  else { openIn = 1; span = 5; }
+  const from = wine.drink_from ?? base + openIn;
+  const until = wine.drink_until ?? base + openIn + span;
+  return { from, until: until > from ? until : from + span, estimated: true };
 }
 
 /* ── Sparkbar ────────────────────────────────────────── */
