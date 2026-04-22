@@ -196,7 +196,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const [bodyPreference, setBodyPreference] = useState<BodyPreference>("all");
   const [priceRange, setPriceRange] = useState<PriceRange>("all");
   const [selectedWineName, setSelectedWineName] = useState<string | null>(null);
-  const [savedWines, setSavedWines] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -211,7 +210,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     setBodyPreference("all");
     setPriceRange("all");
     setSelectedWineName(null);
-    setSavedWines(new Set());
   };
 
   const handleClose = (v: boolean) => {
@@ -265,15 +263,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     }
   }, [runScan, toast]);
 
-  const toggleSave = (wineName: string) => {
-    setSavedWines(prev => {
-      const next = new Set(prev);
-      if (next.has(wineName)) next.delete(wineName);
-      else next.add(wineName);
-      return next;
-    });
-    toast({ title: savedWines.has(wineName) ? "Removido dos favoritos" : "Salvo nos favoritos ✓" });
-  };
+
 
   const filteredWines = useMemo(() => {
     if (!results) return [];
@@ -584,10 +574,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     index={i}
                     isTopPick={wine.name === results.topPick}
                     isBestValue={wine.name === results.bestValue}
-                    isSaved={savedWines.has(wine.name)}
                     isSelected={selectedWineName === wine.name}
                     onChooseWine={() => setSelectedWineName(wine.name)}
-                    onToggleSave={() => toggleSave(wine.name)}
                   />
                 ))}
               </ul>
@@ -607,15 +595,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   );
 }
 
-function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected, onChooseWine, onToggleSave }: {
+function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChooseWine }: {
   wine: WineListItem;
   index: number;
   isTopPick: boolean;
   isBestValue: boolean;
-  isSaved: boolean;
   isSelected: boolean;
   onChooseWine: () => void;
-  onToggleSave: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -822,7 +808,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <Button
             type="button"
             variant="primary"
@@ -846,14 +832,6 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
             onClick={() => setExpanded((current) => !current)}
           >
             {expanded ? "Ocultar harmonização" : "Harmonizar com prato"}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-8 justify-center rounded-xl border border-border/50 bg-background/55 px-2.5 text-[10px] font-semibold"
-            onClick={onToggleSave}
-          >
-            {isSaved ? "Salvo" : "Salvar"}
           </Button>
         </div>
 
