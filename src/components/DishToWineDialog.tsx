@@ -264,17 +264,19 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     if (!open || !initialWineId || !wines?.length) return;
     const wine = wines.find((w) => w.id === initialWineId);
     if (!wine) return;
+    // Define o contexto e vai DIRETO para a tela de resultados (com loading interno)
     setSource("cellar");
     setSubMode("by-wine");
     setSelectedWineId(initialWineId);
-    // Dispara a busca diretamente
+    setPairings(null);
+    setWineProfile(null);
+    setPairingLogic(null);
+    setError(null);
+    setStep("wine-results");
     const runDeepLink = async () => {
       lastRetryRef.current = () => { runDeepLink(); };
       const reqId = nextRequestId();
       setLoading(true);
-      setError(null);
-      setPairingLogic(null);
-      setPairings(null);
       try {
         const result = await getWinePairings({
           name: wine.name,
@@ -291,12 +293,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         setPairings(result.pairings);
         setWineProfile(result.wineProfile || null);
         setPairingLogic(result.pairingLogic || null);
-        setStep("wine-results");
       } catch (err: any) {
         if (!isLatest(reqId)) return;
         console.error("[DishToWineDialog] deep-link pairings failed:", err);
         setError(err?.message || "Não foi possível buscar sugestões");
-        setStep("wine-results");
       } finally {
         if (isLatest(reqId)) setLoading(false);
       }
