@@ -21,6 +21,7 @@ import {
 } from "@/components/editorial/EditorialPrimitives";
 import { useToast } from "@/hooks/use-toast";
 import { useWineEvent, useWines, type Wine } from "@/hooks/useWines";
+import { useResolveWineImages } from "@/hooks/useResolveWineImages";
 
 const currentYear = new Date().getFullYear();
 
@@ -28,6 +29,7 @@ export default function PersonalCellarPage() {
   const { data: wines = [], isLoading } = useWines();
   const wineEvent = useWineEvent();
   const { toast } = useToast();
+  useResolveWineImages(wines);
 
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
