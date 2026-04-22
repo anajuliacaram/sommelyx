@@ -293,11 +293,9 @@ export default function PersonalCellarPage() {
                     >
                       {[w.vintage, w.region, w.country].filter(Boolean).join(" · ")}
                     </p>
-                    {w.drink_from && w.drink_until && (
-                      <div className="mt-3">
-                        <DrinkWindow from={w.drink_from} until={w.drink_until} current={currentYear} />
-                      </div>
-                    )}
+                    <div className="mt-3">
+                      <DrinkWindow from={dw.from} until={dw.until} current={currentYear} estimated={dw.estimated} />
+                    </div>
                   </div>
                   <div
                     className="mt-3 flex items-center justify-between border-t pt-3"
