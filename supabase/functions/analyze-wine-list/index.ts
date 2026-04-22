@@ -455,20 +455,22 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
     console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
     if (!authHeader?.startsWith("Bearer ")) {
+      console.error("TOKEN RECEIVED:", "NO");
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header" });
       return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_REQUIRED", requestId }, 401);
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+    console.error("TOKEN RECEIVED:", token ? "YES" : "NO");
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
     );
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     const validatedUserId = user?.id;
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
     if (userError || !validatedUserId) {
+      console.error("AUTH ERROR:", userError);
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
       return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_INVALID", requestId }, 401);
     }
