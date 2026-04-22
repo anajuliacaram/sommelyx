@@ -126,6 +126,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const [intent, setIntent] = useState<PairingIntent>("everyday");
   const [consumeWine, setConsumeWine] = useState<{ id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null>(null);
+  const lastRetryRef = useRef<(() => void) | null>(null);
+  const runRetry = useCallback(() => {
+    const fn = lastRetryRef.current;
+    if (fn) fn();
+  }, []);
   const reset = () => {
     setSource(null);
     setSubMode(null);
@@ -176,6 +181,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
   const handleSearchCellar = useCallback(async (chosenIntent?: PairingIntent) => {
     const query = dish.trim();
     if (!query) return;
+    lastRetryRef.current = () => { handleSearchCellar(chosenIntent); };
     setLoading(true);
     setError(null);
     try {
@@ -195,7 +201,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       setDishProfile(result.dishProfile || null);
       setStep("results");
     } catch (err: any) {
-      setError(err.message || "Não foi possível buscar sugestões");
+      console.error("[DishToWineDialog] cellar search failed:", err);
+      setError(err?.message || "Não foi possível buscar sugestões");
     } finally {
       setLoading(false);
     }
@@ -205,6 +212,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
   const handleSearchWinePairings = useCallback(async () => {
     const wine = wines?.find((w) => w.id === selectedWineId);
     if (!wine) return;
+    lastRetryRef.current = () => { handleSearchWinePairings(); };
     setLoading(true);
     setError(null);
     setPairingLogic(null);
@@ -223,7 +231,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       setPairingLogic(result.pairingLogic || null);
       setStep("wine-results");
     } catch (err: any) {
-      setError(err.message || "Não foi possível buscar sugestões");
+      console.error("[DishToWineDialog] wine pairings failed:", err);
+      setError(err?.message || "Não foi possível buscar sugestões");
     } finally {
       setLoading(false);
     }
@@ -238,7 +247,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     setSubMode("by-wine");
     setSelectedWineId(initialWineId);
     // Dispara a busca diretamente
-    (async () => {
+    const runDeepLink = async () => {
+      lastRetryRef.current = () => { runDeepLink(); };
       setLoading(true);
       setError(null);
       setPairingLogic(null);
@@ -257,12 +267,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         setPairingLogic(result.pairingLogic || null);
         setStep("wine-results");
       } catch (err: any) {
-        setError(err.message || "Não foi possível buscar sugestões");
-        setStep("select-wine");
+        console.error("[DishToWineDialog] deep-link pairings failed:", err);
+        setError(err?.message || "Não foi possível buscar sugestões");
+        setStep("wine-results");
       } finally {
         setLoading(false);
       }
-    })();
+    };
+    runDeepLink();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialWineId, wines]);
 
@@ -1404,6 +1416,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
             )}
 
             {/* ── Wine Results (wine → food suggestions) ── */}
+            {step === "wine-results" && error && !pairings && (
+              <PairingErrorState
+                key="wine-results-error"
+                message={error}
+                onRetry={runRetry}
+                onClose={() => handleClose(false)}
+              />
+            )}
+
             {step === "wine-results" && pairings && (
               <motion.div
                 key="wine-results"
