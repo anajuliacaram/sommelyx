@@ -78,7 +78,8 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
   };
   const coverImageUrl = wine.image_url ?? wine.entries?.find((entry) => entry.image_url)?.image_url ?? null;
   const coverIsGenerated = !!coverImageUrl?.startsWith("data:image/svg+xml");
-  const indicator = getDrinkWindowIndicator(wine);
+  const drinkWindow = resolveDrinkWindow(wine);
+  const indicator = getDrinkWindowIndicator(drinkWindow.from, drinkWindow.until);
   const priceLabel = formatMoney(wine.displayPurchasePrice);
   const ratingLabel = typeof wine.rating === "number" ? wine.rating.toFixed(1) : "—";
 
