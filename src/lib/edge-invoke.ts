@@ -153,6 +153,7 @@ export async function invokeEdgeFunction<T>(
   while (true) {
     try {
       const accessToken = await resolveAccessToken(explicitAccessToken, forceTokenRefresh);
+      console.log("Sending token:", Boolean(accessToken), { function: name, requestId, attempt });
       if (!accessToken) {
         console.warn("[edge-invoke] auth_missing", { function: name, requestId });
         throw new EdgeFunctionError("Sua sessão expirou. Faça login novamente.", {
