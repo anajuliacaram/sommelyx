@@ -37,8 +37,9 @@ setInterval(() => {
 }, 120_000);
 
 type FailPayload = {
-  ok: false;
-  error: string;
+  success: false;
+  message: string;
+  error?: string;
   code: string;
   requestId: string;
   retryable?: boolean;
@@ -49,6 +50,10 @@ function jsonResponse(status: number, body: Record<string, unknown>) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+function ok<T extends Record<string, unknown>>(data: T, requestId: string) {
+  return jsonResponse(200, { success: true, data, requestId });
 }
 
 function fail(status: number, payload: FailPayload) {
@@ -224,15 +229,17 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
+    console.log(`[${FUNCTION_NAME}] request_received request_id=${requestId} has_auth=${Boolean(authHeader)}`);
+
     if (!authHeader?.startsWith("Bearer ")) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "missing_or_invalid_authorization_header",
       });
       return fail(401, {
-        ok: false,
+        success: false,
         code: "AUTH_REQUIRED",
-        error: "Sua sessão expirou. Faça login novamente para continuar.",
+        message: "Sua sessão expirou. Faça login novamente para continuar.",
         requestId,
         retryable: false,
       });
@@ -246,15 +253,16 @@ serve(async (req) => {
     );
 
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(user)}`);
     if (userError || !user) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "invalid_token",
       });
       return fail(401, {
-        ok: false,
+        success: false,
         code: "AUTH_INVALID",
-        error: "Sua sessão não é válida. Faça login novamente para continuar.",
+        message: "Sua sessão não é válida. Faça login novamente para continuar.",
         requestId,
         retryable: false,
       });
@@ -265,9 +273,9 @@ serve(async (req) => {
     if (!checkRateLimit(userId)) {
       await logAudit(userId, 429, "rate_limited", Date.now() - startTime, { request_id: requestId });
       return fail(429, {
-        ok: false,
-        code: "RATE_LIMITED",
-        error: "Muitas tentativas em pouco tempo. Tente novamente em instantes.",
+        success: false,
+        code: "AI_RATE_LIMIT",
+        message: "Muitas tentativas em pouco tempo. Tente novamente em instantes.",
         requestId,
         retryable: true,
       });
@@ -276,12 +284,13 @@ serve(async (req) => {
     let payload: { imageBase64?: unknown } = {};
     try {
       payload = await req.json();
-    } catch {
+    } catch (parseError) {
+      console.error(`[${FUNCTION_NAME}] request_json_error request_id=${requestId}`, parseError);
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "invalid_json" });
       return fail(400, {
-        ok: false,
+        success: false,
         code: "INVALID_REQUEST",
-        error: "Não foi possível ler sua solicitação. Tente novamente.",
+        message: "Não foi possível ler sua solicitação. Tente novamente.",
         requestId,
         retryable: true,
       });
@@ -291,9 +300,9 @@ serve(async (req) => {
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "missing_image" });
       return fail(400, {
-        ok: false,
-        code: "MISSING_IMAGE",
-        error: "Envie uma foto do rótulo para analisar.",
+        success: false,
+        code: "FILE_INVALID",
+        message: "Envie uma foto do rótulo para analisar.",
         requestId,
         retryable: false,
       });
@@ -302,23 +311,42 @@ serve(async (req) => {
     const parsedImage = parseImageDataUrl(imageBase64Raw);
     const imageMime = parsedImage.mime;
     const imageBase64 = normalizeBase64(parsedImage.base64);
-    if (imageBase64.length > MAX_IMAGE_SIZE) {
+    const base64Regex = /^[A-Za-z0-9+/=\s]+$/;
+    const sizeBytes = Math.floor((imageBase64.length * 3) / 4);
+    console.log(`[${FUNCTION_NAME}] payload_parsed request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length} size_bytes=${sizeBytes}`);
+
+    if (!imageMime.startsWith("image/") || !base64Regex.test(imageBase64)) {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        request_id: requestId,
+        reason: "invalid_image_payload",
+        image_mime: imageMime,
+      });
+      return fail(400, {
+        success: false,
+        code: "FILE_INVALID",
+        message: "Arquivo inválido. Envie uma imagem legível do rótulo.",
+        requestId,
+        retryable: false,
+      });
+    }
+
+    if (sizeBytes > MAX_IMAGE_SIZE) {
       await logAudit(userId, 413, "validation_error", Date.now() - startTime, {
         request_id: requestId,
         reason: "image_too_large",
-        size_bytes: imageBase64.length,
+        size_bytes: sizeBytes,
       });
       return fail(413, {
-        ok: false,
+        success: false,
         code: "IMAGE_TOO_LARGE",
-        error: "A imagem está muito grande. Tente novamente com uma foto mais leve.",
+        message: "A imagem está muito grande. Tente novamente com uma foto mais leve.",
         requestId,
         retryable: false,
       });
     }
 
     const AI_MODEL = Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview";
-    console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=lovable model=${AI_MODEL}`);
+    console.log(`[${FUNCTION_NAME}] ai_request_sent request_id=${requestId} model=${AI_MODEL}`);
 
     const systemPrompt =
       `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia SOMENTE informações que estejam EXPLICITAMENTE VISÍVEIS no rótulo.\n\n` +
@@ -356,8 +384,6 @@ serve(async (req) => {
       `  }\n` +
       `}`;
 
-    let durationMs = 0;
-    let responseStatus = 200;
     let parsedArgs: Record<string, unknown> | null = null;
     let responsePreview: string | null = null;
 
@@ -408,80 +434,57 @@ serve(async (req) => {
       maxOutputTokens: 1_200,
     });
 
+    const durationMs = Date.now() - startTime;
+
     if (!openaiResult.ok) {
       responsePreview = openaiResult.error;
       const status = openaiResult.status;
-      console.log({
-        input: { requestId, imageMime, imageBytes: imageBase64.length },
-        response: { ok: false, status, body: responsePreview ? String(responsePreview).slice(0, 240) : null },
-        parsed: null,
-        error: responsePreview,
-      });
+      console.error(`[${FUNCTION_NAME}] ai_response_error request_id=${requestId} status=${status} body=${String(responsePreview || "").slice(0, 240)}`);
 
       if (status === 429) {
         await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
         return fail(429, {
-          ok: false,
+          success: false,
           code: "AI_RATE_LIMIT",
-          error: "Muitas requisições agora. Tente novamente em instantes.",
+          message: "Muitas requisições agora. Tente novamente em instantes.",
           requestId,
           retryable: true,
         });
       }
 
-      await logAudit(userId, 502, "ai_error", durationMs, {
+      await logAudit(userId, status === 504 ? 408 : 502, "ai_error", durationMs, {
         request_id: requestId,
         ai_status: status,
         ai_body_preview: String(responsePreview || "").slice(0, 400),
       });
-      return fail(502, {
-        ok: false,
-        code: "AI_UNAVAILABLE",
-        error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+      return fail(status === 504 ? 408 : 502, {
+        success: false,
+        code: status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
+        message: status === 504
+          ? "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida."
+          : "A análise não pôde ser concluída agora. Tente novamente em instantes.",
         requestId,
         retryable: true,
       });
     }
 
     parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
-    responseStatus = 200;
-    console.log({
-      input: { requestId, imageMime, imageBytes: imageBase64.length },
-      response: { ok: true, status: 200, body: null },
-      parsed: parsedArgs,
-      error: null,
-    });
-
-    durationMs = Date.now() - startTime;
-
-    console.log({
-      input: {
-        requestId,
-        imageMime,
-        imageBytes: imageBase64.length,
-      },
-      response: {
-        ok: true,
-        status: responseStatus,
-        body: null,
-      },
-      parsed: parsedArgs,
-      error: null,
-    });
+    console.log(`[${FUNCTION_NAME}] ai_response_received request_id=${requestId} parsed=${Boolean(parsedArgs)}`);
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
-      await logAudit(userId, 422, "ai_error", durationMs, { request_id: requestId, reason: "no_structured_output" });
+      await logAudit(userId, 422, "parse_error", durationMs, { request_id: requestId, reason: "no_structured_output" });
       return fail(422, {
-        ok: false,
-        code: "LABEL_NOT_IDENTIFIED",
-        error: "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.",
+        success: false,
+        code: "PARSE_ERROR",
+        message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
         requestId,
-        retryable: false,
+        retryable: true,
       });
     }
 
     const parsed = parsedArgs as Record<string, unknown>;
     const wine = (parsed?.wine ?? parsed) as Record<string, unknown>;
+    console.log(`[${FUNCTION_NAME}] parsing_step request_id=${requestId} fields=${Object.keys(wine).join(",")}`);
 
     const normalizedWine = {
       name: typeof wine.name === "string" ? wine.name.trim() : null,
@@ -526,35 +529,25 @@ serve(async (req) => {
         region_explicitly_invalid: regionExplicitlyInvalid,
       });
       return fail(422, {
-        ok: false,
+        success: false,
         code: "LABEL_NOT_IDENTIFIED",
-        error: "Não foi possível identificar o rótulo com confiança. Tente outra foto, com o rótulo mais centralizado e sem elementos da interface na imagem.",
+        message: "Não foi possível identificar o rótulo com confiança. Tente outra foto, com o rótulo mais centralizado e sem elementos da interface na imagem.",
         requestId,
         retryable: false,
       });
     }
 
-    if (regionMissingButAllowed) {
-      await logAudit(userId, 200, "success", durationMs, {
-        request_id: requestId,
-        wine_name: normalizedWine.name || "unknown",
-        region_missing_but_allowed: true,
-        strong_anchors: strongAnchors,
-        weak_anchors: weakAnchors,
-      });
-      return jsonResponse(200, { ok: true, wine: normalizedWine, requestId });
-    }
-
+    console.log(`[${FUNCTION_NAME}] final_output request_id=${requestId} wine_name=${normalizedWine.name}`);
     await logAudit(userId, 200, "success", durationMs, {
       request_id: requestId,
       wine_name: normalizedWine.name || "unknown",
       strong_anchors: strongAnchors,
       weak_anchors: weakAnchors,
-      region_missing_but_allowed: false,
+      region_missing_but_allowed: regionMissingButAllowed,
       region_explicitly_invalid: regionExplicitlyInvalid,
     });
 
-    return jsonResponse(200, { ok: true, wine: normalizedWine, requestId });
+    return ok({ wine: normalizedWine }, requestId);
   } catch (error) {
     const durationMs = Date.now() - startTime;
     const errMsg = error instanceof Error ? error.message : "unknown";
@@ -565,19 +558,19 @@ serve(async (req) => {
       errMsg.toLowerCase().includes("structured") ||
       errMsg.toLowerCase().includes("confidence");
 
-    console.error(`[${FUNCTION_NAME}] request_id=${requestId} user_id=${userId} error=${errMsg}`);
+    console.error(`[${FUNCTION_NAME}] request_id=${requestId} user_id=${userId} error=${errMsg}`, error);
 
-    await logAudit(userId, isAbort ? 504 : 500, "internal_error", durationMs, {
+    await logAudit(userId, isAbort ? 408 : 500, "internal_error", durationMs, {
       request_id: requestId,
       error: errMsg,
       aborted: isAbort,
     });
 
     if (isAbort) {
-      return fail(504, {
-        ok: false,
+      return fail(408, {
+        success: false,
         code: "AI_TIMEOUT",
-        error: "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.",
+        message: "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.",
         requestId,
         retryable: true,
       });
@@ -585,18 +578,18 @@ serve(async (req) => {
 
     if (isParseOrInferenceIssue) {
       return fail(422, {
-        ok: false,
-        code: "LABEL_NOT_IDENTIFIED",
-        error: "Não foi possível identificar o rótulo com confiança. Tente outra foto, com o rótulo mais centralizado e sem elementos da interface na imagem.",
+        success: false,
+        code: "PARSE_ERROR",
+        message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
         requestId,
-        retryable: false,
+        retryable: true,
       });
     }
 
     return fail(500, {
-      ok: false,
+      success: false,
       code: "INTERNAL_ERROR",
-      error: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+      message: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
       requestId,
       retryable: true,
     });

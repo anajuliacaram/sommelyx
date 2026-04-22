@@ -314,6 +314,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       };
       setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
       setLastWineListAttachment(payload);
+      lastRetryRef.current = async () => {
+        setStep("scanning");
+        setLoading(true);
+        setError(null);
+        try {
+          const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
+          const result = await analyzeWineList(payload, profile);
+          setScanResults(result);
+          setStep("scan-results");
+        } catch (err: any) {
+          setError(err.message || "Erro ao analisar a carta");
+          setStep("photo");
+        } finally {
+          setLoading(false);
+        }
+      };
 
       const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
       const result = await analyzeWineList(payload, profile);
@@ -345,6 +361,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       };
       setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
       setLastMenuAttachment(payload);
+      lastRetryRef.current = async () => {
+        setStep("ext-menu-scanning");
+        setLoading(true);
+        setError(null);
+        try {
+          const result = await analyzeMenuForWine(payload, extWineName);
+          setMenuResults(result);
+          setWineProfile(result.wineProfile || null);
+          setStep("ext-menu-results");
+        } catch (err: any) {
+          setError(err.message || "Erro ao analisar o cardápio");
+          setStep("ext-menu-photo");
+        } finally {
+          setLoading(false);
+        }
+      };
 
       const result = await analyzeMenuForWine(payload, extWineName);
       setMenuResults(result);
@@ -565,33 +597,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                   </div>
                 )}
 
-                {error && (
-                  <div className="space-y-2">
-                    <p className="text-[12px] text-destructive/80 text-center">{error}</p>
-                    {lastMenuAttachment && (
-                      <Button type="button" variant="secondary" onClick={() => {
-                        lastRetryRef.current = async () => {
-                          setLoading(true);
-                          setError(null);
-                          setStep("ext-menu-scanning");
-                          try {
-                            const result = await analyzeMenuForWine(lastMenuAttachment, extWineName);
-                            setMenuResults(result);
-                            setWineProfile(result.wineProfile || null);
-                            setStep("ext-menu-results");
-                          } catch (err: any) {
-                            setError(err.message || "Erro ao analisar o cardápio");
-                            setStep("ext-menu-photo");
-                          } finally {
-                            setLoading(false);
-                          }
-                        };
-                        runRetry();
-                      }} className="w-full h-10 text-[13px] font-medium">
-                        Tentar novamente
-                      </Button>
-                    )}
-                  </div>
+                {error && lastMenuAttachment && (
+                  <PairingErrorState
+                    message={error}
+                    onRetry={runRetry}
+                    onClose={() => setStep("ext-menu-photo")}
+                  />
                 )}
               </motion.div>
             )}
@@ -646,33 +657,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                   </div>
                 )}
 
-                {error && (
-                  <div className="space-y-2">
-                    <p className="text-[12px] text-destructive/80 text-center">{error}</p>
-                    {lastWineListAttachment && (
-                      <Button type="button" variant="secondary" onClick={() => {
-                        lastRetryRef.current = async () => {
-                          setLoading(true);
-                          setError(null);
-                          setStep("scanning");
-                          try {
-                            const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
-                            const result = await analyzeWineList(lastWineListAttachment, profile);
-                            setScanResults(result);
-                            setStep("scan-results");
-                          } catch (err: any) {
-                            setError(err.message || "Erro ao analisar a carta");
-                            setStep("photo");
-                          } finally {
-                            setLoading(false);
-                          }
-                        };
-                        runRetry();
-                      }} className="w-full h-10 text-[13px] font-medium">
-                        Tentar novamente
-                      </Button>
-                    )}
-                  </div>
+                {error && lastWineListAttachment && (
+                  <PairingErrorState
+                    message={error}
+                    onRetry={runRetry}
+                    onClose={() => setStep("photo")}
+                  />
                 )}
               </motion.div>
             )}
@@ -966,7 +956,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                 </Button>
 
                 {error && (
-                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                  <PairingErrorState message={error} onRetry={runRetry} onClose={() => setStep("select-wine")} />
                 )}
               </motion.div>
               );
@@ -1067,8 +1057,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                   </div>
                 </div>
 
-                {error && (
-                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                {error && lastMenuAttachment && (
+                  <PairingErrorState message={error} onRetry={runRetry} onClose={() => setStep("ext-wine-input")} />
                 )}
               </motion.div>
             )}
@@ -1264,8 +1254,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                   </div>
                 </div>
 
-                {error && (
-                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                {error && lastWineListAttachment && (
+                  <PairingErrorState message={error} onRetry={runRetry} onClose={() => setStep("dish")} />
                 )}
               </motion.div>
             )}

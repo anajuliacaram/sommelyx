@@ -175,7 +175,7 @@ export interface WineInsight {
 
 // ── Error Classification ──
 
-export type AiErrorType = "network" | "timeout" | "auth" | "ai_fail" | "empty" | "unknown";
+export type AiErrorType = "network" | "timeout" | "auth" | "invalid_file" | "ai_fail" | "empty" | "unknown";
 
 export interface ClassifiedError {
   type: AiErrorType;
@@ -186,15 +186,17 @@ export interface ClassifiedError {
 function classifyError(err: unknown): ClassifiedError {
   const msg = err instanceof Error ? err.message : String(err);
   const lower = msg.toLowerCase();
+  const code = err instanceof EdgeFunctionError ? err.code : undefined;
+  const status = err instanceof EdgeFunctionError ? err.status : undefined;
 
-  if (err instanceof EdgeFunctionError && err.status === 401) {
+  if (status === 401 || code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
     return { type: "auth", message: "Sessão expirada. Faça login novamente." };
   }
-  if (err instanceof EdgeFunctionError && err.code === "AUTH_REQUIRED") {
-    return { type: "auth", message: "Sessão expirada. Faça login novamente." };
+  if (status === 408 || code === "AI_TIMEOUT" || lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
+    return { type: "timeout", message: "Tempo de resposta excedido. Tente novamente." };
   }
-  if (lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
-    return { type: "timeout", message: "A busca demorou mais que o esperado. Tente novamente." };
+  if (code === "FILE_INVALID" || code === "IMAGE_TOO_LARGE" || lower.includes("arquivo inválido") || lower.includes("imagem está muito grande")) {
+    return { type: "invalid_file", message: code === "IMAGE_TOO_LARGE" ? "A imagem está muito grande. Tente uma foto mais leve." : "Arquivo inválido. Envie uma imagem ou PDF legível." };
   }
   if (
     lower.includes("failed to fetch") ||

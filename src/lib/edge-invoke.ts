@@ -6,6 +6,21 @@ type InvokeOptions = {
   accessToken?: string | null;
 };
 
+type EdgeEnvelopeSuccess<T> = {
+  success: true;
+  data: T;
+  requestId?: string;
+};
+
+type EdgeEnvelopeError = {
+  success: false;
+  code?: string;
+  message?: string;
+  error?: string;
+  requestId?: string;
+  retryable?: boolean;
+};
+
 export class EdgeFunctionError extends Error {
   status?: number;
   code?: string;
@@ -27,7 +42,7 @@ function sleep(ms: number) {
 }
 
 function isRetriable(status?: number) {
-  return status === 429 || status === 502 || status === 503 || status === 504;
+  return status === 408 || status === 429 || status === 502 || status === 503 || status === 504;
 }
 
 function isTransportErrorMessage(message: string) {
@@ -53,9 +68,12 @@ function isAbortErrorMessage(message: string) {
   );
 }
 
-function classifyEdgeError(message: string, status?: number): string {
-  if (status === 401) return "Sua sessão expirou. Faça login novamente.";
-   if (status === 408) return "Tempo de resposta excedido. Tente novamente.";
+function classifyEdgeError(message: string, status?: number, code?: string): string {
+  if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID" || status === 401) return "Sessão expirada. Faça login novamente.";
+  if (code === "AI_TIMEOUT" || status === 408) return "Tempo de resposta excedido. Tente novamente.";
+  if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
+  if (code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
+  if (code === "LABEL_NOT_IDENTIFIED") return "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
   if (isTransportErrorMessage(message)) {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       return "Sem conexão. Verifique sua internet.";
@@ -74,6 +92,41 @@ function classifyEdgeError(message: string, status?: number): string {
 function toErrorMessage(err: unknown) {
   if (err instanceof Error) return err.message;
   return "Falha ao executar a ação. Tente novamente.";
+}
+
+function isEdgeEnvelopeSuccess<T>(value: unknown): value is EdgeEnvelopeSuccess<T> {
+  return Boolean(value) && typeof value === "object" && (value as Record<string, unknown>).success === true && "data" in (value as Record<string, unknown>);
+}
+
+function isEdgeEnvelopeError(value: unknown): value is EdgeEnvelopeError {
+  return Boolean(value) && typeof value === "object" && (value as Record<string, unknown>).success === false;
+}
+
+function unwrapResponseData<T>(data: unknown): T {
+  if (isEdgeEnvelopeSuccess<T>(data)) {
+    return data.data;
+  }
+  return data as T;
+}
+
+function parseErrorBody(body: any, fallbackStatus?: number) {
+  const status = typeof body?.status === "number" ? body.status : fallbackStatus;
+  const code = body?.code ? String(body.code) : undefined;
+  const requestId = body?.requestId ? String(body.requestId) : body?.request_id ? String(body.request_id) : undefined;
+  const retryable = typeof body?.retryable === "boolean" ? body.retryable : undefined;
+  const rawMessage = typeof body?.message === "string"
+    ? body.message
+    : typeof body?.error === "string"
+      ? body.error
+      : "Não foi possível completar a solicitação.";
+
+  return {
+    status,
+    code,
+    requestId,
+    retryable,
+    message: classifyEdgeError(rawMessage, status, code),
+  };
 }
 
 async function resolveAccessToken(preferredToken?: string | null, forceRefresh = false): Promise<string | null> {
@@ -96,20 +149,28 @@ export async function invokeEdgeFunction<T>(
 ): Promise<T> {
   let attempt = 0;
   let forceTokenRefresh = false;
+
   while (true) {
     try {
       const accessToken = await resolveAccessToken(explicitAccessToken, forceTokenRefresh);
-      
-      // If no token at all, throw auth error immediately
       if (!accessToken) {
-        throw new EdgeFunctionError("Sessão expirada. Faça login novamente.", { status: 401, code: "AUTH_REQUIRED", retryable: false });
+        throw new EdgeFunctionError("Sessão expirada. Faça login novamente.", {
+          status: 401,
+          code: "AUTH_REQUIRED",
+          retryable: false,
+        });
       }
 
-      console.log("payload", { function: name, body });
+      console.log("[edge-invoke] request", {
+        function: name,
+        payloadKeys: Object.keys(body),
+        hasAuthToken: Boolean(accessToken),
+      });
+
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-      let data: T | null = null;
+      let data: unknown = null;
       let error: unknown = null;
       try {
         const result = await supabase.functions.invoke(name, {
@@ -126,73 +187,65 @@ export async function invokeEdgeFunction<T>(
 
       if (error) {
         const status = typeof (error as any)?.status === "number" ? (error as any).status : undefined;
-        let message = "Não foi possível completar a solicitação.";
-        let code: string | undefined;
-        let requestId: string | undefined;
-        let retryable: boolean | undefined;
+        let parsed = parseErrorBody({}, status);
 
         try {
           if (typeof (error as any)?.context?.json === "function") {
-            const body = await (error as any).context.json();
-            if (body?.error) message = String(body.error);
-            else if (body?.message) message = String(body.message);
-            if (body?.code) code = String(body.code);
-            if (body?.requestId) requestId = String(body.requestId);
-            if (body?.request_id) requestId = String(body.request_id);
-            if (typeof body?.retryable === "boolean") retryable = body.retryable;
+            const errorBody = await (error as any).context.json();
+            parsed = parseErrorBody(errorBody, status);
           } else if ((error as any)?.message && !(error as any).message.includes("non-2xx")) {
-            message = (error as any).message;
+            parsed = parseErrorBody({ message: (error as any).message }, status);
           }
-        } catch { /* ignore parse errors */ }
+        } catch {
+          // ignore parse errors
+        }
 
-        // Classify the error for user-friendly message
-        message = classifyEdgeError(message, status);
-
-        if (status === 401) {
-          code = code || "AUTH_REQUIRED";
-          retryable = false;
+        if (parsed.status === 401) {
           if (attempt < retries) {
             forceTokenRefresh = true;
             attempt++;
             await sleep(600 * Math.pow(2, attempt));
             continue;
           }
+          parsed.retryable = false;
         }
 
-        if (attempt < retries && (retryable ?? isRetriable(status))) {
+        if (attempt < retries && (parsed.retryable ?? isRetriable(parsed.status))) {
           attempt++;
           await sleep(600 * Math.pow(2, attempt));
           continue;
         }
 
-        throw new EdgeFunctionError(message, { status, code, requestId, retryable });
+        throw new EdgeFunctionError(parsed.message, {
+          status: parsed.status,
+          code: parsed.code,
+          requestId: parsed.requestId,
+          retryable: parsed.retryable,
+        });
       }
 
-      if (data && typeof data === "object") {
-        const rec = data as Record<string, unknown>;
-        if (rec.ok === false) {
-          const msg = classifyEdgeError(
-            String(rec.error || rec.message || ""),
-            typeof rec.status === "number" ? (rec.status as number) : undefined,
-          );
-          throw new EdgeFunctionError(msg, {
-            status: typeof rec.status === "number" ? (rec.status as number) : undefined,
-            code: rec.code ? String(rec.code) : undefined,
-            requestId: rec.requestId ? String(rec.requestId) : undefined,
-            retryable: typeof rec.retryable === "boolean" ? (rec.retryable as boolean) : undefined,
-          });
+      if (isEdgeEnvelopeError(data)) {
+        const parsed = parseErrorBody(data);
+        if (parsed.status === 401 && attempt < retries) {
+          forceTokenRefresh = true;
+          attempt++;
+          await sleep(600 * Math.pow(2, attempt));
+          continue;
         }
-        if ("error" in rec && rec.error) {
-          throw new EdgeFunctionError(classifyEdgeError(String(rec.error)), {
-            code: rec.code ? String(rec.code) : undefined,
-            requestId: rec.requestId ? String(rec.requestId) : undefined,
-            retryable: typeof rec.retryable === "boolean" ? (rec.retryable as boolean) : undefined,
-          });
-        }
+        throw new EdgeFunctionError(parsed.message, {
+          status: parsed.status,
+          code: parsed.code,
+          requestId: parsed.requestId,
+          retryable: parsed.retryable,
+        });
       }
 
-      console.log("response", { function: name, data });
-      return data as T;
+      const unwrapped = unwrapResponseData<T>(data);
+      console.log("[edge-invoke] response", {
+        function: name,
+        wrapped: isEdgeEnvelopeSuccess<T>(data),
+      });
+      return unwrapped;
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : "";
       const retryable =
