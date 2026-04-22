@@ -253,9 +253,10 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(user)}`);
-    if (userError || !user) {
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const validatedUserId = claimsData?.claims?.sub;
+    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
+    if (claimsError || !validatedUserId) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "invalid_token",
@@ -263,13 +264,13 @@ serve(async (req) => {
       return fail(401, {
         success: false,
         code: "AUTH_INVALID",
-        message: "Sua sessão não é válida. Faça login novamente para continuar.",
+        message: "Sua sessão expirou. Faça login novamente para continuar.",
         requestId,
         retryable: false,
       });
     }
 
-    userId = user.id;
+    userId = validatedUserId;
 
     if (!checkRateLimit(userId)) {
       await logAudit(userId, 429, "rate_limited", Date.now() - startTime, { request_id: requestId });
