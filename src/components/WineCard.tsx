@@ -50,6 +50,7 @@ function estimateDrinkWindow(style?: string | null, vintage?: number | null): { 
   else if (s.includes("rose")) { openIn = 0; span = 2; }
   else if (s.includes("branco")) { openIn = 1; span = 4; }
   else if (s.includes("sobrem") || s.includes("fortif") || s.includes("porto") || s.includes("madeira")) { openIn = 2; span = 20; }
+  else if (s.includes("chianti") || s.includes("sangiovese")) { openIn = 2; span = 8; }
   else if (s.includes("tinto")) { openIn = 2; span = 8; }
   else { openIn = 1; span = 5; }
   return { from: base + openIn, until: base + openIn + span };
@@ -59,16 +60,20 @@ function resolveDrinkWindow(wine: Pick<WineType, "drink_from" | "drink_until" | 
   const estimated = estimateDrinkWindow(wine.style, wine.vintage);
   let from = wine.drink_from ?? estimated.from;
   let until = wine.drink_until ?? estimated.until;
+  if (!Number.isFinite(from) || from <= 0) from = estimated.from;
+  if (!Number.isFinite(until) || until <= 0) until = estimated.until;
   if (until <= from) until = from + Math.max(2, estimated.until - estimated.from);
   return { from, until, isEstimated: wine.drink_from == null || wine.drink_until == null };
 }
 
+// Posição do indicador na barra (0-100). Garante valor sempre visível,
+// mesmo quando o ano atual está antes ou depois da janela.
 function getDrinkWindowIndicator(from: number, until: number) {
   const currentYear = new Date().getFullYear();
   const span = until - from;
-  if (span <= 0) return 50;
+  if (!Number.isFinite(span) || span <= 0) return 50;
   const raw = ((currentYear - from) / span) * 100;
-  return Math.max(4, Math.min(96, raw));
+  return Math.max(6, Math.min(94, raw));
 }
 
 export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
@@ -159,10 +164,10 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
         </div>
 
         <div className="mt-5 space-y-2">
-          <div className="relative h-px rounded-full bg-[#E7DED3]">
+          <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#E7DED3]">
             <div
-              className="absolute left-0 top-0 h-full rounded-full bg-[#D7C29C]"
-              style={{ width: `${indicator}%` }}
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#E5D2A6] via-[#D7C29C] to-[#C8A95B]"
+              style={{ width: `${Math.max(indicator, 8)}%` }}
             />
             <span
               className="absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#C8A95B] shadow-[0_0_0_3px_rgba(255,255,255,0.86)]"
@@ -177,11 +182,9 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
               {drinkWindow.until}
             </span>
           </div>
-          {drinkWindow.isEstimated ? (
-            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#A39885]">
-              Janela sugerida
-            </p>
-          ) : null}
+          <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#A39885]">
+            {drinkWindow.isEstimated ? "Janela sugerida" : "Janela de consumo"}
+          </p>
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-5">
