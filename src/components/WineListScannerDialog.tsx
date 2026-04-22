@@ -263,15 +263,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     }
   }, [runScan, toast]);
 
-  const toggleSave = (wineName: string) => {
-    setSavedWines(prev => {
-      const next = new Set(prev);
-      if (next.has(wineName)) next.delete(wineName);
-      else next.add(wineName);
-      return next;
-    });
-    toast({ title: savedWines.has(wineName) ? "Removido dos favoritos" : "Salvo nos favoritos ✓" });
-  };
+
 
   const filteredWines = useMemo(() => {
     if (!results) return [];
