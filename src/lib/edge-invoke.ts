@@ -158,7 +158,7 @@ export async function invokeEdgeFunction<T>(
 ): Promise<T> {
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
-  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? (supabase as { supabaseUrl?: string }).supabaseUrl ?? "").replace(/\/$/, "");
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
