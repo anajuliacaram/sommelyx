@@ -924,7 +924,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       const friendlyMessage = isMenuMode
         ? "Não conseguimos analisar este cardápio agora. Tente uma foto com melhor iluminação e foco nos pratos, ou tente novamente em instantes."
         : "Não conseguimos analisar esta carta de vinhos agora. Tente uma foto mais nítida da carta ou tente novamente em instantes.";
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", user.id, "analyze-wine-list", 422, "validation_error", 0, {
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 422, "validation_error", 0, {
         reason: friendlyMessage,
         validation_failures: validationResult.failures.slice(0, 12),
         mode,
