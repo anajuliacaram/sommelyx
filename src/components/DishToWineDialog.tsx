@@ -127,6 +127,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
   const [intent, setIntent] = useState<PairingIntent>("everyday");
   const [consumeWine, setConsumeWine] = useState<{ id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null>(null);
   const lastRetryRef = useRef<(() => void) | null>(null);
+  const requestSeqRef = useRef(0);
+  const nextRequestId = useCallback(() => {
+    requestSeqRef.current += 1;
+    const id = requestSeqRef.current;
+    console.info("[DishToWineDialog] request:start", { id, t: Date.now() });
+    return id;
+  }, []);
+  const isLatest = (id: number) => id === requestSeqRef.current;
   const runRetry = useCallback(() => {
     const fn = lastRetryRef.current;
     if (fn) fn();
