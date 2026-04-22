@@ -381,9 +381,15 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
     console.error("TOKEN RECEIVED:", token ? "YES" : "NO");
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     const validatedUserId = user?.id;
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
     if (userError || !validatedUserId) {
