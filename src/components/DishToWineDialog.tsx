@@ -269,9 +269,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     // Dispara a busca diretamente
     const runDeepLink = async () => {
       lastRetryRef.current = () => { runDeepLink(); };
+      const reqId = nextRequestId();
       setLoading(true);
       setError(null);
       setPairingLogic(null);
+      setPairings(null);
       try {
         const result = await getWinePairings({
           name: wine.name,
@@ -282,16 +284,20 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
           vintage: wine.vintage,
           country: wine.country,
         });
+        if (!isLatest(reqId)) return;
+        console.info("[DishToWineDialog] request:success", { id: reqId, kind: "deep-link" });
+        setError(null);
         setPairings(result.pairings);
         setWineProfile(result.wineProfile || null);
         setPairingLogic(result.pairingLogic || null);
         setStep("wine-results");
       } catch (err: any) {
+        if (!isLatest(reqId)) return;
         console.error("[DishToWineDialog] deep-link pairings failed:", err);
         setError(err?.message || "Não foi possível buscar sugestões");
         setStep("wine-results");
       } finally {
-        setLoading(false);
+        if (isLatest(reqId)) setLoading(false);
       }
     };
     runDeepLink();
