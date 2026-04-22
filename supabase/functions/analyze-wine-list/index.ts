@@ -465,10 +465,10 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    const validatedUserId = claimsData?.claims?.sub;
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    const validatedUserId = user?.id;
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
-    if (claimsError || !validatedUserId) {
+    if (userError || !validatedUserId) {
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
       return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_INVALID", requestId }, 401);
     }
