@@ -399,10 +399,8 @@ export default function PersonalCellarPage() {
                         className="text-[10px] font-semibold"
                         style={{ color: "rgba(58,51,39,0.5)" }}
                       >
-                        {w.quantity} un.
-                        {w.drink_from && w.drink_until
-                          ? ` · janela ${w.drink_from}–${w.drink_until}`
-                          : ""}
+                        {w.quantity} un. · janela {dwRow.from}–{dwRow.until}
+                        {dwRow.estimated ? " (sugerida)" : ""}
                       </span>
                     </div>
                   </div>
