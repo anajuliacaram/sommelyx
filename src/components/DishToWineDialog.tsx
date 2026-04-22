@@ -212,6 +212,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
   const handleSearchWinePairings = useCallback(async () => {
     const wine = wines?.find((w) => w.id === selectedWineId);
     if (!wine) return;
+    lastRetryRef.current = () => { handleSearchWinePairings(); };
     setLoading(true);
     setError(null);
     setPairingLogic(null);
@@ -230,7 +231,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       setPairingLogic(result.pairingLogic || null);
       setStep("wine-results");
     } catch (err: any) {
-      setError(err.message || "Não foi possível buscar sugestões");
+      console.error("[DishToWineDialog] wine pairings failed:", err);
+      setError(err?.message || "Não foi possível buscar sugestões");
     } finally {
       setLoading(false);
     }
