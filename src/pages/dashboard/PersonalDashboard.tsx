@@ -85,6 +85,7 @@ export default function PersonalDashboard() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [dishToWineOpen, setDishToWineOpen] = useState(false);
+  const [pairingInitialWineId, setPairingInitialWineId] = useState<string | null>(null);
   const [wineListScanOpen, setWineListScanOpen] = useState(false);
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<{
@@ -149,12 +150,20 @@ export default function PersonalDashboard() {
     ? Math.max(0, Math.round((Date.now() - new Date(lastOpened.consumed_at).getTime()) / 86_400_000))
     : null;
 
-  // Insight do dia: vinho com janela mais próxima de fechar
+  // Insight do dia: vinho com janela mais próxima de fechar.
+  // Fallback: se não houver janela definida, sugere qualquer vinho com estoque
+  // (prioriza maior valor para destacar o "vinho do dia").
   const insightWine = useMemo(() => {
-    const candidates = wines
-      .filter((w) => w.quantity > 0 && w.drink_until && currentYear <= w.drink_until)
+    const inStock = wines.filter((w) => w.quantity > 0);
+    if (inStock.length === 0) return null;
+    const withWindow = inStock
+      .filter((w) => w.drink_until && currentYear <= w.drink_until)
       .sort((a, b) => (a.drink_until ?? 9999) - (b.drink_until ?? 9999));
-    return candidates[0] ?? null;
+    if (withWindow[0]) return withWindow[0];
+    const fallback = [...inStock].sort(
+      (a, b) => (b.current_value ?? b.purchase_price ?? 0) - (a.current_value ?? a.purchase_price ?? 0),
+    );
+    return fallback[0] ?? null;
   }, [wines, currentYear]);
 
   const handleOpenBottle = (wineId: string, _wineName: string) => {
@@ -335,7 +344,9 @@ export default function PersonalDashboard() {
                       O <b style={{ fontWeight: 700 }}>{insightWine.name}</b>{" "}
                       {insightWine.drink_until && insightWine.drink_until - currentYear <= 1
                         ? "entra na última janela ideal"
-                        : `está dentro da janela ideal (até ${insightWine.drink_until})`}
+                        : insightWine.drink_until
+                          ? `está dentro da janela ideal (até ${insightWine.drink_until})`
+                          : "é o destaque da sua adega hoje"}
                       . {insightWine.quantity}{" "}
                       {insightWine.quantity === 1 ? "garrafa" : "garrafas"} — considere abrir nos
                       próximos jantares.
@@ -345,7 +356,10 @@ export default function PersonalDashboard() {
                 <button
                   type="button"
                   className="editorial-btn-copper shrink-0"
-                  onClick={() => setDishToWineOpen(true)}
+                  onClick={() => {
+                    setPairingInitialWineId(insightWine.id);
+                    setDishToWineOpen(true);
+                  }}
                 >
                   Ver harmonizações <ArrowRight className="h-3.5 w-3.5" />
                 </button>
@@ -678,7 +692,14 @@ export default function PersonalDashboard() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
-      <DishToWineDialog open={dishToWineOpen} onOpenChange={setDishToWineOpen} />
+      <DishToWineDialog
+        open={dishToWineOpen}
+        onOpenChange={(v) => {
+          setDishToWineOpen(v);
+          if (!v) setPairingInitialWineId(null);
+        }}
+        initialWineId={pairingInitialWineId}
+      />
       <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
       <AddConsumptionDialog
         open={consumptionOpen}
