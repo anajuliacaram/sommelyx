@@ -574,10 +574,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     index={i}
                     isTopPick={wine.name === results.topPick}
                     isBestValue={wine.name === results.bestValue}
-                    isSaved={savedWines.has(wine.name)}
                     isSelected={selectedWineName === wine.name}
                     onChooseWine={() => setSelectedWineName(wine.name)}
-                    onToggleSave={() => toggleSave(wine.name)}
                   />
                 ))}
               </ul>
