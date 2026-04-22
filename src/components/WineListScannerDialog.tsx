@@ -822,7 +822,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <Button
             type="button"
             variant="primary"
@@ -846,14 +846,6 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected
             onClick={() => setExpanded((current) => !current)}
           >
             {expanded ? "Ocultar harmonização" : "Harmonizar com prato"}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-8 justify-center rounded-xl border border-border/50 bg-background/55 px-2.5 text-[10px] font-semibold"
-            onClick={onToggleSave}
-          >
-            {isSaved ? "Salvo" : "Salvar"}
           </Button>
         </div>
 
