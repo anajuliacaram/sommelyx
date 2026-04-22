@@ -170,23 +170,58 @@ export async function invokeEdgeFunction<T>(
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
+      // Use direct fetch to guarantee the user's Authorization header is sent.
+      // The Supabase SDK's functions.invoke can override Authorization with the anon key
+      // in certain environments, causing 401s on JWT-validating edge functions.
+      const supabaseUrl = (supabase as any).supabaseUrl
+        || (supabase as any).functionsUrl?.replace(/\/functions\/v1\/?$/, "")
+        || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
+      const apikey = (supabase as any).supabaseKey
+        || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+        || "";
+      const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
+
       let data: unknown = null;
       let error: unknown = null;
+      let responseStatus: number | undefined = undefined;
       try {
-        const result = await supabase.functions.invoke(name, {
-          body,
-          headers: { Authorization: `Bearer ${accessToken}` },
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`,
+            "apikey": apikey,
+            "x-client-info": "supabase-js-web/edge-invoke",
+          },
+          body: JSON.stringify(body),
           signal: controller.signal,
-          timeout: timeoutMs,
         });
-        data = result.data;
-        error = result.error;
+        responseStatus = response.status;
+        const text = await response.text();
+        let parsedBody: any = null;
+        try {
+          parsedBody = text ? JSON.parse(text) : null;
+        } catch {
+          parsedBody = text;
+        }
+
+        if (!response.ok) {
+          error = {
+            status: response.status,
+            message: parsedBody?.message || parsedBody?.error || `Request failed with status ${response.status}`,
+            context: { json: async () => parsedBody },
+          };
+        } else {
+          data = parsedBody;
+        }
+      } catch (fetchErr) {
+        error = fetchErr;
       } finally {
         clearTimeout(timeout);
       }
 
       if (error) {
-        const status = typeof (error as any)?.status === "number" ? (error as any).status : undefined;
+        const status = typeof (error as any)?.status === "number" ? (error as any).status : responseStatus;
         let parsed = parseErrorBody({}, status);
 
         try {
