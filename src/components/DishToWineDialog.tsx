@@ -181,6 +181,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
   const handleSearchCellar = useCallback(async (chosenIntent?: PairingIntent) => {
     const query = dish.trim();
     if (!query) return;
+    lastRetryRef.current = () => { handleSearchCellar(chosenIntent); };
     setLoading(true);
     setError(null);
     try {
@@ -200,7 +201,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       setDishProfile(result.dishProfile || null);
       setStep("results");
     } catch (err: any) {
-      setError(err.message || "Não foi possível buscar sugestões");
+      console.error("[DishToWineDialog] cellar search failed:", err);
+      setError(err?.message || "Não foi possível buscar sugestões");
     } finally {
       setLoading(false);
     }
