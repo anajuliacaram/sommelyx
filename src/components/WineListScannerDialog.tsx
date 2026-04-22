@@ -210,7 +210,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     setBodyPreference("all");
     setPriceRange("all");
     setSelectedWineName(null);
-    setSavedWines(new Set());
   };
 
   const handleClose = (v: boolean) => {
