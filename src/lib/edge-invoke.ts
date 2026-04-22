@@ -164,6 +164,7 @@ export async function invokeEdgeFunction<T>(
     try {
       const session = await resolveSession(attempt > 0);
       console.log("Sending token:", !!session?.access_token);
+      console.log(`CALLING ${name} WITH TOKEN:`, !!session?.access_token);
 
       if (!session?.access_token) {
         console.error("NO TOKEN");
@@ -241,10 +242,17 @@ export async function invokeEdgeFunction<T>(
       }
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : "";
+      // Do NOT retry transport errors (Failed to fetch / abort) for long-running calls:
+      // the request likely already reached the function and is processing server-side.
+      // Retrying duplicates expensive AI work and stacks load.
+      const isTransportFailure = isTransportErrorMessage(rawMessage) || isAbortErrorMessage(rawMessage);
+      const isLongRunning = timeoutMs >= 60_000;
       const retryable =
         err instanceof EdgeFunctionError
           ? (err.retryable ?? isRetriable(err.status))
-          : rawMessage.includes("demorou") || isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage) || isAbortErrorMessage(rawMessage);
+          : (isTransportFailure && isLongRunning)
+            ? false
+            : rawMessage.includes("demorou") || isTransportFailure || isSdkRelayError(rawMessage);
 
       if (attempt < retries && retryable) {
         console.warn("[edge-invoke] retry", {
