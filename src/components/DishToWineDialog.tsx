@@ -569,9 +569,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                   <div className="space-y-2">
                     <p className="text-[12px] text-destructive/80 text-center">{error}</p>
                     {lastMenuAttachment && (
-                      <Button type="button" variant="secondary" onClick={() => void handleMenuFileChange({ target: { files: [] }, currentTarget: { value: "" } } as React.ChangeEvent<HTMLInputElement>)} className="hidden" />
-                    )}
-                    {lastMenuAttachment && (
                       <Button type="button" variant="secondary" onClick={() => {
                         lastRetryRef.current = async () => {
                           setLoading(true);
