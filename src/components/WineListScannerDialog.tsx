@@ -196,7 +196,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const [bodyPreference, setBodyPreference] = useState<BodyPreference>("all");
   const [priceRange, setPriceRange] = useState<PriceRange>("all");
   const [selectedWineName, setSelectedWineName] = useState<string | null>(null);
-  const [savedWines, setSavedWines] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
