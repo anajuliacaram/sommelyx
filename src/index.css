@@ -147,6 +147,7 @@
 
   html {
     overflow-x: hidden;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -157,6 +158,7 @@
     letter-spacing: -0.01em;
     line-height: 1.6;
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -203,6 +205,12 @@
   h1 { font-size: 2rem; }
   h2 { font-size: 1.45rem; }
   h3 { font-size: 1.15rem; }
+
+  button {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
 }
 
 @layer base {
@@ -380,14 +388,17 @@
      ────────────────────────────────────────── */
   .t-title {
     font-family: 'Libre Baskerville', Georgia, serif;
-    font-size: 30px;
+    font-size: 20px;
     line-height: 1.1;
     font-weight: 600;
     letter-spacing: -0.025em;
     color: hsl(var(--foreground-strong));
   }
   @media (max-width: 640px) {
-    .t-title { font-size: 26px; }
+    .t-title { font-size: 20px; }
+  }
+  @media (min-width: 641px) {
+    .t-title { font-size: 30px; }
   }
 
   .t-subtitle {
@@ -399,19 +410,19 @@
   }
 
   .t-body {
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.55;
     color: hsl(var(--foreground));
   }
 
   .t-meta {
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.4;
     color: hsl(var(--muted-foreground));
   }
 
   .t-eyebrow {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.16em;
@@ -422,9 +433,9 @@
   .type-heading-xl { @apply text-2xl font-semibold tracking-tight text-foreground; }
   .type-heading-lg { @apply text-xl font-semibold tracking-tight text-foreground; }
   .type-heading-md { @apply text-lg font-medium tracking-tight text-foreground; }
-  .type-body { @apply text-base text-foreground; }
-  .type-body-muted { @apply text-sm text-muted-foreground; }
-  .type-label { @apply text-xs uppercase tracking-wide text-muted-foreground; }
+  .type-body { @apply text-[15px] text-foreground; }
+  .type-body-muted { @apply text-[15px] text-muted-foreground; }
+  .type-label { @apply text-[13px] uppercase tracking-wide text-muted-foreground; }
 
   /* ── Sommelyx Spacing Scale (oficial) ──
      Section 28 / Card 20 / Title→Content 12

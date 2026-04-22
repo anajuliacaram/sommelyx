@@ -138,33 +138,31 @@ serve(async (req) => {
   let userId = "anonymous";
 
   try {
-    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      console.error("TOKEN RECEIVED:", "NO");
+    const authorization = req.headers.get("Authorization");
+    console.log("AUTH HEADER:", !!authorization);
+    if (!authorization) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      return new Response(JSON.stringify({ error: "AUTH_REQUIRED" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    console.error("TOKEN RECEIVED:", token ? "YES" : "NO");
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       {
         global: {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: req.headers.get("Authorization")!,
           },
         },
       },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("AUTH ERROR:", userError);
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      console.error("AUTH ERROR:", error);
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -202,7 +200,7 @@ serve(async (req) => {
     }
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
-    const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
+    const openaiModel = "gpt-4o-mini";
     console.log(`[wishlist-wine-assistant] openai_key=${maskSecret(openaiKey)} model=${openaiModel}`);
     if (!openaiKey) {
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
@@ -265,7 +263,6 @@ Regras:
       const result = await callOpenAIResponses<any>({
         functionName: FUNCTION_NAME,
         requestId: crypto.randomUUID(),
-        apiKey: openaiKey,
         model: openaiModel,
         timeoutMs: 60_000,
         temperature: 0.2,
@@ -298,7 +295,18 @@ Regras:
                 ai_summary: { type: "string" },
                 notes: { type: "string" },
               },
-              required: ["wine_name"],
+              required: [
+                "wine_name",
+                "producer",
+                "vintage",
+                "style",
+                "country",
+                "region",
+                "grape",
+                "target_price",
+                "ai_summary",
+                "notes",
+              ],
               additionalProperties: false,
             },
           },
@@ -314,6 +322,13 @@ Regras:
           return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
             status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+          });
+        }
+        if (result.status === 422) {
+          await logAudit(userId, 422, "ai_error", Date.now() - startTime, { ai_status: result.status, reason: "invalid_ai_response" });
+          return new Response(JSON.stringify({ error: "INVALID_AI_RESPONSE" }), {
+            status: 422,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: result.status });

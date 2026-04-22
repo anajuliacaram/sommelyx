@@ -6,7 +6,7 @@ import { Loader2 } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px active:scale-[0.97] font-medium tracking-tight",
+  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px active:scale-[0.98] font-medium tracking-tight",
   {
     variants: {
       variant: {
@@ -40,7 +40,7 @@ const buttonVariants = cva(
         default: "h-12 px-4 text-[15px]",
         sm: "h-11 px-4 text-[14px]",
         lg: "h-12 px-5 text-[15px]",
-        icon: "h-11 w-11 p-0",
+        icon: "min-h-11 min-w-11 h-11 w-11 p-0",
       },
     },
     defaultVariants: {

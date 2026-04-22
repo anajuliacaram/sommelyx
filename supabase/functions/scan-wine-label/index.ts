@@ -61,10 +61,6 @@ function fail(status: number, payload: FailPayload) {
   return jsonResponse(status, payload);
 }
 
-function getBearerToken(authHeader: string) {
-  return authHeader.replace(/^Bearer\s+/i, "").trim();
-}
-
 function normalizeBase64(input: string) {
   const trimmed = input.trim();
   const idx = trimmed.indexOf("base64,");
@@ -229,11 +225,9 @@ serve(async (req) => {
   const requestId = crypto.randomUUID();
 
   try {
-    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
-    console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
-
-    if (!authHeader?.startsWith("Bearer ")) {
-      console.error("TOKEN RECEIVED:", "NO");
+    const authorization = req.headers.get("Authorization");
+    console.log("AUTH HEADER:", !!authorization);
+    if (!authorization) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "missing_or_invalid_authorization_header",
@@ -247,25 +241,23 @@ serve(async (req) => {
       });
     }
 
-    const token = getBearerToken(authHeader);
-    console.error("TOKEN RECEIVED:", token ? "YES" : "NO");
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       {
         global: {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: req.headers.get("Authorization")!,
           },
         },
       },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
     const validatedUserId = user?.id;
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
-    if (userError || !validatedUserId) {
-      console.error("AUTH ERROR:", userError);
+    if (error || !validatedUserId) {
+      console.error("AUTH ERROR:", error);
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "invalid_token",
@@ -356,7 +348,7 @@ serve(async (req) => {
       });
     }
 
-    const AI_MODEL = Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview";
+    const AI_MODEL = "gpt-4o-mini";
     console.log(`[${FUNCTION_NAME}] ai_request_sent request_id=${requestId} model=${AI_MODEL}`);
 
     const systemPrompt =
@@ -401,7 +393,6 @@ serve(async (req) => {
     const openaiResult = await callOpenAIResponses<{ wine: Record<string, unknown> }>({
       functionName: FUNCTION_NAME,
       requestId,
-      apiKey: "",
       model: AI_MODEL,
       timeoutMs: AI_TIMEOUT_MS,
       temperature: 0.1,
@@ -435,7 +426,21 @@ serve(async (req) => {
               drink_from: { type: ["number", "null"] },
               drink_until: { type: ["number", "null"] },
             },
-            required: ["name"],
+            required: [
+              "name",
+              "producer",
+              "vintage",
+              "style",
+              "country",
+              "region",
+              "grape",
+              "food_pairing",
+              "tasting_notes",
+              "cellar_location",
+              "purchase_price",
+              "drink_from",
+              "drink_until",
+            ],
             additionalProperties: true,
           },
         },
@@ -468,10 +473,12 @@ serve(async (req) => {
         ai_status: status,
         ai_body_preview: String(responsePreview || "").slice(0, 400),
       });
-      return fail(status === 504 ? 408 : 502, {
+      return fail(status === 422 ? 422 : status === 504 ? 408 : 502, {
         success: false,
-        code: status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
-        message: status === 504
+        code: status === 422 ? "INVALID_AI_RESPONSE" : status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
+        message: status === 422
+          ? "INVALID_AI_RESPONSE"
+          : status === 504
           ? "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida."
           : "A análise não pôde ser concluída agora. Tente novamente em instantes.",
         requestId,

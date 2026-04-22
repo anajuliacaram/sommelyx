@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STOCK_AUDIT_REASONS, normalizeAuditName, normalizeAuditText } from "@/lib/stock-audit";
 import { useAuth } from "@/contexts/AuthContext";
+import { normalizeWineSearchText } from "@/lib/wine-normalization";
 
 interface BreakageDialogProps {
   open: boolean;
@@ -46,13 +47,13 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
 
   const filteredWines = useMemo(() => {
     if (!searchText) return winesInStock;
-    const q = searchText.toLowerCase();
+    const q = normalizeWineSearchText(searchText);
     return winesInStock.filter(w =>
-      w.name.toLowerCase().includes(q) ||
-      w.producer?.toLowerCase().includes(q) ||
-      w.grape?.toLowerCase().includes(q) ||
-      w.country?.toLowerCase().includes(q) ||
-      String(w.vintage).includes(q)
+      normalizeWineSearchText(w.name).includes(q) ||
+      normalizeWineSearchText(w.producer).includes(q) ||
+      normalizeWineSearchText(w.grape).includes(q) ||
+      normalizeWineSearchText(w.country).includes(q) ||
+      String(w.vintage ?? "").includes(q)
     );
   }, [winesInStock, searchText]);
 

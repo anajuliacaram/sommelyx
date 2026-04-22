@@ -17,7 +17,7 @@ export type OpenAIMessageInput = {
 type CallOptions<TSchema extends Record<string, unknown>> = {
   functionName: string;
   requestId: string;
-  apiKey: string; // legacy/ignored — kept for signature compatibility
+  apiKey?: string;
   model?: string;
   timeoutMs?: number;
   temperature?: number;
@@ -34,49 +34,41 @@ export function maskSecret(value?: string | null) {
   return `${trimmed.slice(0, 6)}…`;
 }
 
-function parseJsonLoose(text: string) {
-  const trimmed = (text || "").trim();
-  if (!trimmed) return null;
-  // strip ```json fences if present
-  const fenced = trimmed.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "");
-  try {
-    return JSON.parse(fenced);
-  } catch {
-    const start = fenced.indexOf("{");
-    const end = fenced.lastIndexOf("}");
-    if (start !== -1 && end > start) {
-      try { return JSON.parse(fenced.slice(start, end + 1)); } catch { return null; }
-    }
-    return null;
-  }
-}
+export async function callOpenAI(prompt: string) {
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      input: prompt,
+    }),
+  });
 
-// Map legacy OpenAI Responses input → Chat Completions messages
-function toChatMessages(instructions: string, input: OpenAIMessageInput[]) {
-  const messages: Array<{ role: string; content: any }> = [
-    { role: "system", content: instructions },
-  ];
-  for (const item of input) {
-    const role = item.role === "developer" ? "system" : item.role;
-    const parts = (item.content || []).map((c) => {
-      if (c.type === "input_text") return { type: "text", text: c.text };
-      if (c.type === "input_image") return { type: "image_url", image_url: { url: c.image_url } };
-      return null;
-    }).filter(Boolean) as any[];
-    // If only text, collapse into string for broader model compatibility
-    if (parts.length === 1 && parts[0].type === "text") {
-      messages.push({ role, content: parts[0].text });
-    } else {
-      messages.push({ role, content: parts });
-    }
+  const json = await res.json();
+
+  console.log("RAW OPENAI RESPONSE:", JSON.stringify(json));
+
+  const text = json.output?.[0]?.content?.[0]?.text;
+
+  if (!text) {
+    throw new Error("Empty AI response");
   }
-  return messages;
+
+  try {
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (err) {
+    console.error("PARSE ERROR:", text);
+    throw new Error("Invalid AI JSON format");
+  }
 }
 
 export async function callOpenAIResponses<T>({
   functionName,
   requestId,
-  apiKey: _legacyApiKey,
   model,
   timeoutMs = 60_000,
   temperature = 0.2,
@@ -85,117 +77,90 @@ export async function callOpenAIResponses<T>({
   schema,
   maxOutputTokens = 4_000,
 }: CallOptions<Record<string, unknown>>): Promise<{ ok: true; parsed: T; raw: any } | { ok: false; status: number; error: string; raw?: any }> {
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY")?.trim() || "";
-  // Default to Gemini Flash (project standard) — overridable via env
-  const primaryModel = model && !/^gpt-/i.test(model)
-    ? model
-    : (Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash");
+  const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+  const resolvedModel = model?.trim() || "gpt-4o-mini";
 
-  // Fallback ladder: if primary returns empty parsed output, try a more reliable model
-  const fallbackModels = primaryModel === "google/gemini-2.5-pro"
-    ? ["google/gemini-2.5-flash"]
-    : primaryModel === "google/gemini-2.5-flash"
-      ? ["google/gemini-2.5-pro"]
-      : ["google/gemini-2.5-flash", "google/gemini-2.5-pro"];
-  const modelChain = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];
+  console.log(`[${functionName}] request_id=${requestId} provider=openai model=${resolvedModel} key=${maskSecret(openaiKey)} timeout_ms=${timeoutMs}`);
 
-  console.log(`[${functionName}] request_id=${requestId} provider=lovable models=${modelChain.join("|")} key=${maskSecret(lovableKey)} timeout_ms=${timeoutMs}`);
-
-  if (!lovableKey) {
-    return { ok: false, status: 500, error: "LOVABLE_API_KEY ausente. Habilite Lovable AI." };
+  if (!openaiKey) {
+    return { ok: false, status: 500, error: "OPENAI_API_KEY ausente." };
   }
 
-  const messages = toChatMessages(instructions, input);
-  const toolName = functionName.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 60) || "respond";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  let lastRaw: any = null;
-  let lastStatus = 500;
-  let lastError = "Lovable AI request failed";
-
-  for (let attempt = 0; attempt < modelChain.length; attempt++) {
-    const currentModel = modelChain[attempt];
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-    try {
-      const body: Record<string, unknown> = {
-        model: currentModel,
-        messages,
-        temperature,
-        max_tokens: maxOutputTokens,
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: toolName,
-              description: "Return the structured response",
-              parameters: schema,
-            },
-          },
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${openaiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: resolvedModel,
+        input: [
+          { role: "system", content: [{ type: "input_text", text: instructions }] },
+          ...input,
         ],
-        tool_choice: { type: "function", function: { name: toolName } },
-      };
-
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${lovableKey}`,
-          "Content-Type": "application/json",
+        temperature,
+        max_output_tokens: maxOutputTokens,
+        text: {
+          format: {
+            type: "json_schema",
+            name: functionName.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 60) || "respond",
+            schema,
+            strict: true,
+          },
         },
-        body: JSON.stringify(body),
-      });
+      }),
+    });
 
-      const raw = await response.json().catch(async () => ({ error: await response.text().catch(() => "") }));
-      lastRaw = raw;
+    const json = await response.json();
+    console.log("RAW OPENAI RESPONSE:", JSON.stringify(json));
 
-      if (!response.ok) {
-        const message = typeof raw?.error?.message === "string"
-          ? raw.error.message
-          : typeof raw?.error === "string"
-            ? raw.error
-            : `Lovable AI request failed with status ${response.status}`;
-        console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} status=${response.status} error=${String(message).slice(0, 300)}`);
-        lastStatus = response.status;
-        lastError = String(message);
-        // 429/402 are user-facing — return immediately, no fallback
-        if (response.status === 429 || response.status === 402) {
-          return { ok: false, status: response.status, error: lastError, raw };
-        }
-        // Other upstream errors: try next model
-        continue;
-      }
-
-      const choice = raw?.choices?.[0];
-      const toolCall = choice?.message?.tool_calls?.[0];
-      let parsed: any = null;
-      if (toolCall?.function?.arguments) {
-        parsed = parseJsonLoose(toolCall.function.arguments);
-      }
-      if (!parsed) {
-        const text = typeof choice?.message?.content === "string" ? choice.message.content : "";
-        parsed = parseJsonLoose(text);
-      }
-
-      if (parsed && typeof parsed === "object") {
-        console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} status=${response.status} parsed=ok`);
-        return { ok: true, parsed: parsed as T, raw };
-      }
-
-      console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} status=${response.status} parsed=empty — trying fallback`);
-      lastStatus = 422;
-      lastError = "Lovable AI retornou resposta vazia ou inválida.";
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Lovable AI request failed";
-      const isAbort = message.toLowerCase().includes("abort");
-      console.log(`[${functionName}] request_id=${requestId} attempt=${attempt + 1}/${modelChain.length} model=${currentModel} error=${message}`);
-      lastStatus = isAbort ? 504 : 500;
-      lastError = isAbort ? "TIMEOUT" : message;
-      if (isAbort) break; // don't retry on timeout
-    } finally {
-      clearTimeout(timeout);
+    if (!response.ok) {
+      const message = typeof json?.error?.message === "string"
+        ? json.error.message
+        : typeof json?.error === "string"
+          ? json.error
+          : `OpenAI request failed with status ${response.status}`;
+      console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} error=${String(message).slice(0, 300)}`);
+      return { ok: false, status: response.status, error: String(message), raw: json };
     }
-  }
 
-  return { ok: false, status: lastStatus, error: lastError, raw: lastRaw };
+    const text =
+      json.output?.[0]?.content?.[0]?.text ||
+      json.output_text ||
+      json.output?.map((o: any) =>
+        o.content?.map((c: any) => c.text).join("")
+      ).join("") ||
+      null;
+
+    if (!text || !text.trim()) {
+      console.error("EMPTY AI RESPONSE:", json);
+      return { ok: false, status: 422, error: "EMPTY_AI_RESPONSE", raw: json };
+    }
+
+    console.log("FINAL TEXT:", text);
+
+    let parsed: T;
+    try {
+      parsed = JSON.parse(String(text));
+    } catch (error) {
+      console.error("Failed to parse AI response:", text);
+      return { ok: false, status: 422, error: "INVALID_AI_RESPONSE", raw: json };
+    }
+
+    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} parsed=ok`);
+    console.log("FINAL RESPONSE:", parsed);
+    return { ok: true, parsed, raw: json };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "OpenAI request failed";
+    const isAbort = message.toLowerCase().includes("abort");
+    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} error=${message}`);
+    return { ok: false, status: isAbort ? 504 : 500, error: isAbort ? "TIMEOUT" : message };
+  } finally {
+    clearTimeout(timeout);
+  }
 }

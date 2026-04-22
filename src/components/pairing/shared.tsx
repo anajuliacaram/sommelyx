@@ -456,8 +456,13 @@ export function PairingErrorState({
 
 export function RecipeButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button type="button" onClick={onClick} variant="ghost" size="sm" className="h-8 px-3 text-[11px]">
-      <BookOpen className="h-3.5 w-3.5" />
+    <Button
+      type="button"
+      onClick={onClick}
+      variant="ghost"
+      className="recipe-button min-h-10 h-auto px-4 py-2.5 rounded-full bg-[rgba(160,60,60,0.08)] text-[#7a2e2e] border border-[rgba(122,46,46,0.10)] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424] hover:-translate-y-[1px] transition-all duration-200 shadow-[0_8px_20px_-16px_rgba(122,46,46,0.35)]"
+    >
+      <BookOpen className="h-4 w-4" />
       Ver receita
     </Button>
   );

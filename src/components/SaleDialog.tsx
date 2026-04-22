@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { STOCK_AUDIT_REASONS, normalizeAuditName, normalizeAuditText } from "@/lib/stock-audit";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWineLocations } from "@/hooks/useWineLocations";
+import { normalizeWineSearchText } from "@/lib/wine-normalization";
 
 interface SaleItem {
   id: string;
@@ -65,13 +66,13 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
 
   const filteredWines = useMemo(() => {
     if (!searchText) return winesInStock;
-    const q = searchText.toLowerCase();
+    const q = normalizeWineSearchText(searchText);
     return winesInStock.filter(w =>
-      w.name.toLowerCase().includes(q) ||
-      w.producer?.toLowerCase().includes(q) ||
-      w.grape?.toLowerCase().includes(q) ||
-      w.country?.toLowerCase().includes(q) ||
-      String(w.vintage).includes(q)
+      normalizeWineSearchText(w.name).includes(q) ||
+      normalizeWineSearchText(w.producer).includes(q) ||
+      normalizeWineSearchText(w.grape).includes(q) ||
+      normalizeWineSearchText(w.country).includes(q) ||
+      String(w.vintage ?? "").includes(q)
     );
   }, [winesInStock, searchText]);
 

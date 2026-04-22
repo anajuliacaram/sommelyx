@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
+import { prepareAiAnalysisAttachment } from "@/lib/ai-attachments";
+import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -38,11 +40,32 @@ interface DraftWine extends ParsedWine {
   type?: string;
   price?: number;
   confidence: number;
+  fieldConfidence?: {
+    name_confidence: number;
+    producer_confidence: number;
+    grape_confidence: number;
+    vintage_confidence: number;
+    country_confidence: number;
+    region_confidence: number;
+    style_confidence: number;
+  };
   errors: string[];
   image_url?: string | null;
   duplicateWarning?: string | null;
   duplicateGroupKey?: string | null;
   duplicateIndexes?: number[];
+}
+
+interface ImportSourceRow {
+  index: number;
+  values: Record<string, string>;
+}
+
+interface ImportSummary {
+  headerDetected: boolean;
+  headerRowIndex?: number;
+  priceColumn?: string;
+  ignoredRows: number;
 }
 
 type EditableField =
@@ -116,9 +139,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [editMode, setEditMode] = useState(true);
   const [showAdvancedColumns, setShowAdvancedColumns] = useState(true);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
   const [bulkProducer, setBulkProducer] = useState("");
   const [bulkVintage, setBulkVintage] = useState("");
+  const [bulkGrape, setBulkGrape] = useState("");
   const [enriching, setEnriching] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [processingRows, setProcessingRows] = useState(0);
+  const [processingTotal, setProcessingTotal] = useState(0);
+  const [autoMergedDuplicates, setAutoMergedDuplicates] = useState(0);
+  const [previewLimit, setPreviewLimit] = useState(50);
+  const [importSourceRows, setImportSourceRows] = useState<ImportSourceRow[]>([]);
+  const [importSourceHeaders, setImportSourceHeaders] = useState<string[]>([]);
+  const [importSourceConfidence, setImportSourceConfidence] = useState(1);
+  const [importSummary, setImportSummary] = useState<ImportSummary>({ headerDetected: false, ignoredRows: 0 });
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: cellarWines } = useWines();
@@ -230,6 +264,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return Math.max(0, Math.min(1, Number(score.toFixed(2))));
   };
 
+  const fieldConfidence = (value: unknown, inferred = false) => {
+    if (value === undefined || value === null || value === "") return 0.08;
+    return inferred ? 0.72 : 0.96;
+  };
+
   const draftToParsed = (row: DraftWine): ParsedWine => ({
     name: row.name,
     producer: row.producer,
@@ -295,6 +334,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       type,
       price: row.purchase_price,
       confidence,
+      fieldConfidence: {
+        name_confidence: fieldConfidence(row.name),
+        producer_confidence: fieldConfidence(row.producer),
+        grape_confidence: fieldConfidence(row.grape),
+        vintage_confidence: fieldConfidence(row.vintage),
+        country_confidence: fieldConfidence(row.country),
+        region_confidence: fieldConfidence(row.region),
+        style_confidence: fieldConfidence(type || row.style),
+      },
       errors,
       image_url: cellarDuplicate?.image_url || buildGeneratedThumbnail({ ...row, style: type }),
       duplicateWarning: shouldCheckDuplicates && (duplicates.length > 0 || cellarDuplicate) ? `Possível duplicado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""} detectado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""}` : null,
@@ -323,6 +371,71 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const rebuildDraftRows = (rows: ParsedWine[]) => {
     setDraftWines(normalizeDraftRows(rows));
   };
+
+  const dedupeImportedRows = (rows: ParsedWine[]) => {
+    const normalized = rows.map((row) => normalizeWineData({
+      ...row,
+      name: row.name,
+      producer: row.producer ?? null,
+      grape: row.grape ?? null,
+      country: row.country ?? null,
+      region: row.region ?? null,
+    }, { log: false }));
+    const merged: ParsedWine[] = [];
+    let duplicateCount = 0;
+
+    for (const row of normalized) {
+      const key = normalizeSearchText(`${row.name}|${row.producer || ""}|${row.vintage || ""}`);
+      const existingIndex = merged.findIndex((candidate) =>
+        normalizeSearchText(`${candidate.name}|${candidate.producer || ""}|${candidate.vintage || ""}`) === key ||
+        (similarityScore(candidate.name, row.name) > 0.92 && similarityScore(candidate.producer, row.producer) > 0.7)
+      );
+      if (existingIndex >= 0) {
+        duplicateCount++;
+        merged[existingIndex] = {
+          ...merged[existingIndex],
+          producer: merged[existingIndex].producer || row.producer,
+          vintage: merged[existingIndex].vintage ?? row.vintage,
+          style: merged[existingIndex].style || row.style,
+          country: merged[existingIndex].country || row.country,
+          region: merged[existingIndex].region || row.region,
+          grape: merged[existingIndex].grape || row.grape,
+          quantity: (merged[existingIndex].quantity || 1) + (row.quantity || 1),
+          purchase_price: merged[existingIndex].purchase_price ?? row.purchase_price,
+          cellar_location: merged[existingIndex].cellar_location || row.cellar_location,
+          drink_from: merged[existingIndex].drink_from ?? row.drink_from,
+          drink_until: merged[existingIndex].drink_until ?? row.drink_until,
+        };
+      } else {
+        merged.push(row);
+      }
+    }
+
+    return { rows: merged.map((row) => normalizeWineData(row)), duplicateCount };
+  };
+
+  const normalizeImportedWines = (rows: any[] = []) =>
+    rows.map((w) => {
+      const parsed = normalizeWineData({
+        name: normalizeText(w?.name || w?.wine_name || "") || "",
+        producer: normalizeText(w?.producer || w?.winery || ""),
+        vintage: parseYear(w?.vintage || w?.year),
+        style: normalizeStyle(w?.style || w?.type),
+        country: normalizeText(w?.country),
+        region: normalizeText(w?.region),
+        grape: normalizeText(w?.grape || w?.varietal),
+        quantity: parseQuantity(w?.quantity),
+        purchase_price: parsePrice(w?.purchase_price ?? w?.price),
+        cellar_location: normalizeText(w?.cellar_location),
+        drink_from: parseYear(w?.drink_from || w?.drinkFrom),
+        drink_until: parseYear(w?.drink_until || w?.drinkUntil),
+        image_url: w?.image_url ?? w?.imageUrl ?? null,
+      } as ParsedWine, { log: false });
+      return {
+        ...parsed,
+        name: smartNormalizeImportedName(parsed.name, parsed.country),
+      };
+    });
 
   const buildGeneratedThumbnail = (row: Pick<DraftWine, "name" | "producer" | "vintage" | "country" | "region" | "grape" | "style" | "type">) => {
     const style = normalizeSearchText(row.type || row.style);
@@ -386,14 +499,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return bestScore >= 0.48 ? { wine: best, score: bestScore } : null;
   };
 
-  const enrichDraftRows = async () => {
+  const enrichDraftRows = async (sourceRows: DraftWine[] = draftWines) => {
     setEnriching(true);
     try {
       // Show advanced columns so the user sees enriched fields
       setShowAdvancedColumns(true);
 
       // Identify rows that need enrichment (missing producer/country/region/grape/style)
-      const rowsNeedingEnrichment = draftWines
+      const rowsNeedingEnrichment = sourceRows
         .map((row, index) => ({ row, index }))
         .filter(({ row }) =>
           row.name?.trim() && (!row.producer || !row.country || !row.region || !row.grape || !row.style),
@@ -403,6 +516,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       // This is dramatically faster than 1 call per row.
       const BATCH_SIZE = 30;
       const aiResultsByName = new Map<string, any>();
+
+      setProcessingTotal(rowsNeedingEnrichment.length || sourceRows.length);
+      setProcessingRows(0);
 
       for (let i = 0; i < rowsNeedingEnrichment.length; i += BATCH_SIZE) {
         const batch = rowsNeedingEnrichment.slice(i, i + BATCH_SIZE);
@@ -425,14 +541,16 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           }
         } catch (batchErr) {
           console.warn("Enrichment batch failed", batchErr);
+        } finally {
+          setProcessingRows(Math.min(rowsNeedingEnrichment.length || sourceRows.length, i + batch.length));
         }
       }
 
       // Apply AI enrichment + price estimation per row (in parallel for prices, capped)
       const PRICE_CONCURRENCY = 5;
       const enriched: DraftWine[] = [];
-      for (let i = 0; i < draftWines.length; i += PRICE_CONCURRENCY) {
-        const slice = draftWines.slice(i, i + PRICE_CONCURRENCY);
+      for (let i = 0; i < sourceRows.length; i += PRICE_CONCURRENCY) {
+        const slice = sourceRows.slice(i, i + PRICE_CONCURRENCY);
         const settled = await Promise.all(
           slice.map(async (row) => {
             const match = findBestCellarMatch(row);
@@ -506,6 +624,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }
 
       setDraftWines(enriched);
+      setProcessingRows(sourceRows.length);
       toast({
         title: "Dados enriquecidos",
         description: `Produtor, região, uva, tipo e preço completados em ${enriched.length} vinho(s).`,
@@ -519,6 +638,29 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       });
     } finally {
       setEnriching(false);
+      setProcessingRows(0);
+      setProcessingTotal(0);
+    }
+  };
+
+  const autoFixImportedRows = async () => {
+    if (draftWines.length === 0) return;
+    try {
+      const parsedRows = draftWines.map((row) => draftToParsed(row));
+      const deduped = dedupeImportedRows(parsedRows);
+      setAutoMergedDuplicates(deduped.duplicateCount);
+      const normalized = normalizeDraftRows(deduped.rows);
+      setDraftWines(normalized);
+      setSelectedRows([]);
+      setShowAdvancedColumns(true);
+      await enrichDraftRows(normalized);
+    } catch (error) {
+      console.error("Auto-fix error:", error);
+      toast({
+        title: "Não foi possível corrigir automaticamente",
+        description: "Revise os dados manualmente e tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -815,46 +957,162 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return undefined;
   };
 
-  const parseCsvLocally = (text: string): { wines: ParsedWine[]; mapping: Record<string, string> } => {
-    if (!text || !text.trim()) return { wines: [], mapping: {} };
-    const delimiter = detectDelimiter(text);
-    const lines = text.replace(/\r\n/g, "\n").split("\n").filter((l) => l.trim().length > 0);
-    if (lines.length < 2) return { wines: [], mapping: {} };
+  const isUnnamedHeader = (header: string) => {
+    const norm = normalizeHeader(header);
+    return !norm || /^unnamed/i.test(norm) || /^col(una)?\s*\d+$/i.test(norm);
+  };
 
-    const headerCells = splitCsvLine(lines[0], delimiter);
-    const fieldByCol: (EditableField | undefined)[] = headerCells.map(mapHeaderToField);
-    const mapping: Record<string, string> = {};
-    headerCells.forEach((h, i) => {
-      if (fieldByCol[i]) mapping[h] = fieldByCol[i] as string;
-    });
+  const scoreHeaderRow = (cells: string[]) => {
+    const normalized = cells.map((cell) => normalizeHeader(cell));
+    let score = 0;
+    for (const cell of normalized) {
+      if (!cell) continue;
+      if (cell.includes("descricao") || cell.includes("descrição")) score += 4;
+      if (cell.includes("ean")) score += 3;
+      if (cell.includes("preco") || cell.includes("preço") || cell.includes("price")) score += 4;
+      if (cell.includes("produto")) score += 3;
+      if (cell.includes("distribuidor") || cell.includes("distribuidora")) score += 2;
+      if (cell.includes("valor") || cell.includes("custo")) score += 1.5;
+      if (cell.includes("unnamed")) score -= 1;
+    }
+    return score;
+  };
 
-    // Need at least the name column to be useful
-    const hasName = fieldByCol.includes("name");
-    if (!hasName) return { wines: [], mapping };
+  const findHeaderRowIndex = (lines: string[], delimiter: string) => {
+    let bestIndex = 0;
+    let bestScore = -1;
+    const limit = Math.min(lines.length, 20);
+    for (let i = 0; i < limit; i++) {
+      const cells = splitCsvLine(lines[i], delimiter);
+      const score = scoreHeaderRow(cells);
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
+    return { headerRowIndex: bestIndex, headerScore: bestScore };
+  };
 
-    const wines: ParsedWine[] = [];
-    for (let r = 1; r < lines.length; r++) {
-      const cells = splitCsvLine(lines[r], delimiter);
-      const row: Partial<ParsedWine> = {};
-      cells.forEach((value, colIndex) => {
-        const field = fieldByCol[colIndex];
-        if (!field || !value) return;
-        if (field === "vintage" || field === "drink_from" || field === "drink_until") {
-          row[field] = parseYear(value);
-        } else if (field === "quantity") {
-          row.quantity = parseQuantity(value);
-        } else if (field === "purchase_price") {
-          row.purchase_price = parsePrice(value);
-        } else if (field === "style") {
-          row.style = normalizeStyle(value);
-        } else {
-          (row as any)[field] = normalizeText(value);
-        }
-      });
-      const name = (row.name || "").trim();
-      if (name.length >= 2 && name.length <= 120) {
-        wines.push({
-          name,
+  const extractWineFieldsFromDescription = (description: string) => {
+    const cleaned = normalizeText(description) || "";
+    const countryKeywords = [
+      "Argentina",
+      "Chile",
+      "Brasil",
+      "Portugal",
+      "França",
+      "France",
+      "Itália",
+      "Italy",
+      "Espanha",
+      "Spain",
+      "Uruguai",
+      "Uruguay",
+      "Alemanha",
+      "Germany",
+      "África do Sul",
+      "South Africa",
+      "Estados Unidos",
+      "USA",
+    ];
+    const yearMatch = cleaned.match(/\b(19|20)\d{2}\b/);
+    const countryMatch = countryKeywords.find((keyword) => normalizeSearchText(cleaned).includes(normalizeSearchText(keyword)));
+    const pieces = cleaned
+      .replace(/\s+\|\s+/g, " - ")
+      .replace(/\s{2,}/g, " ")
+      .split(/[-–—|]+/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    let producer: string | undefined;
+    let name: string | undefined;
+    if (pieces.length >= 2) {
+      producer = normalizeWineText(pieces[0]) || undefined;
+      name = normalizeWineText(pieces.slice(1).join(" ")) || undefined;
+    }
+
+    if (!name) {
+      const withoutYear = cleaned.replace(/\b(19|20)\d{2}\b/g, "").trim();
+      const tokens = withoutYear.split(/\s+/).filter(Boolean);
+      if (tokens.length >= 2) {
+        producer = producer || normalizeWineText(tokens.slice(0, Math.min(2, tokens.length - 1)).join(" ")) || undefined;
+        name = normalizeWineText(tokens.slice(Math.min(2, tokens.length - 1)).join(" ")) || normalizeWineText(withoutYear) || undefined;
+      } else {
+        name = normalizeWineText(withoutYear) || undefined;
+      }
+    }
+
+    if (name && producer && name.toLowerCase().startsWith(producer.toLowerCase())) {
+      name = normalizeWineText(name.replace(new RegExp(`^${producer}\\s*[-–—:]?\\s*`, "i"), "")) || name;
+    }
+
+    return {
+      name: name || normalizeWineText(cleaned) || "",
+      producer,
+      vintage: yearMatch ? Number.parseInt(yearMatch[0], 10) : undefined,
+      country: countryMatch ? normalizeWineText(countryMatch) : undefined,
+    };
+  };
+
+  const parseDistributorPrice = (rowCells: string[], headerCells: string[]) => {
+    const headerIndexes = headerCells
+      .map((header, index) => ({ header: normalizeHeader(header), index }))
+      .filter(({ header }) => header.length > 0);
+    const preferredIndex = headerIndexes.find(({ header }) =>
+      header.includes("distribuidor 4") ||
+      header.includes("distribuidora 4") ||
+      header.includes("4%") ||
+      header.includes("distribuidor") && header.includes("4"),
+    )?.index;
+    const explicitIndex = headerIndexes.find(({ header }) =>
+      header.includes("preco") ||
+      header.includes("preço") ||
+      header.includes("price") ||
+      header.includes("valor") ||
+      header.includes("custo"),
+    )?.index;
+    const candidateIndexes = [preferredIndex, explicitIndex].filter((value): value is number => typeof value === "number");
+    for (const index of candidateIndexes) {
+      const parsed = parsePrice(rowCells[index]);
+      if (parsed !== undefined) return parsed;
+    }
+    for (let i = 0; i < rowCells.length; i++) {
+      const parsed = parsePrice(rowCells[i]);
+      if (parsed !== undefined) return parsed;
+    }
+    return undefined;
+  };
+
+  const mapSourceRowsToWines = (sourceRows: ImportSourceRow[], mapping: Record<string, string>): ParsedWine[] => {
+    return sourceRows
+      .map((sourceRow) => {
+        const row: Partial<ParsedWine> = {};
+        Object.entries(mapping).forEach(([sourceHeader, field]) => {
+          const value = sourceRow.values[sourceHeader];
+          if (!field || value === undefined || value === null || String(value).trim() === "") return;
+          if (field === "vintage" || field === "drink_from" || field === "drink_until") {
+            row[field] = parseYear(value);
+          } else if (field === "quantity") {
+            row.quantity = parseQuantity(value);
+          } else if (field === "purchase_price") {
+            row.purchase_price = parsePrice(value);
+          } else if (field === "style") {
+            row.style = normalizeStyle(value);
+          } else {
+            (row as any)[field] = normalizeText(value);
+          }
+        });
+
+        const normalized = normalizeWineData({
+          name: row.name || "",
+          producer: row.producer ?? null,
+          grape: row.grape ?? null,
+          country: row.country ?? null,
+          region: row.region ?? null,
+        }, { log: false });
+
+        return {
+          name: normalized.name || "",
           producer: row.producer,
           vintage: row.vintage,
           style: row.style,
@@ -866,10 +1124,139 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           cellar_location: row.cellar_location,
           drink_from: row.drink_from,
           drink_until: row.drink_until,
-        });
-      }
+        };
+      })
+      .filter((row) => row.name.trim().length >= 2);
+  };
+
+  const parseCsvLocally = (text: string): {
+    wines: ParsedWine[];
+    mapping: Record<string, string>;
+    headers: string[];
+    sourceRows: ImportSourceRow[];
+    confidence: number;
+    successRate: number;
+    manualMappingRequired: boolean;
+    headerRowIndex: number;
+    priceColumn?: string;
+    ignoredRows: number;
+  } => {
+    if (!text || !text.trim()) return { wines: [], mapping: {}, headers: [], sourceRows: [], confidence: 0, successRate: 0, manualMappingRequired: true, headerRowIndex: 0, priceColumn: undefined, ignoredRows: 0 };
+    const delimiter = detectDelimiter(text);
+    const lines = text.replace(/\r\n/g, "\n").split("\n").filter((l) => l.trim().length > 0);
+    if (lines.length < 2) return { wines: [], mapping: {}, headers: [], sourceRows: [], confidence: 0, successRate: 0, manualMappingRequired: true, headerRowIndex: 0, priceColumn: undefined, ignoredRows: 0 };
+
+    const { headerRowIndex, headerScore } = findHeaderRowIndex(lines, delimiter);
+    const headerCellsRaw = splitCsvLine(lines[headerRowIndex], delimiter);
+    const headerCells = headerCellsRaw.map((cell, index) => (isUnnamedHeader(cell) ? `Coluna ${index + 1}` : cell));
+    const fieldByCol: (EditableField | undefined)[] = headerCellsRaw.map(mapHeaderToField);
+    const mapping: Record<string, string> = {};
+    headerCellsRaw.forEach((h, i) => {
+      if (fieldByCol[i]) mapping[h] = fieldByCol[i] as string;
+    });
+
+    const sourceRows: ImportSourceRow[] = [];
+    for (let r = headerRowIndex + 1; r < lines.length; r++) {
+      const cells = splitCsvLine(lines[r], delimiter);
+      if (cells.every((cell) => !normalizeText(cell))) continue;
+      const values: Record<string, string> = {};
+      headerCellsRaw.forEach((header, index) => {
+        if (isUnnamedHeader(header)) return;
+        values[header] = cells[index] || "";
+      });
+      sourceRows.push({ index: r - headerRowIndex - 1, values });
     }
-    return { wines, mapping };
+
+    const hasName = fieldByCol.includes("name");
+    const wines: ParsedWine[] = [];
+    let successfulRows = 0;
+    let candidateRows = 0;
+    let ignoredRows = 0;
+    const priceColumn = headerCellsRaw.find((header) => {
+      const norm = normalizeHeader(header);
+      return norm.includes("distribuidor 4") || norm.includes("distribuidora 4") || norm.includes("4%") || norm.includes("preco") || norm.includes("preço") || norm.includes("price");
+    });
+
+    for (let r = headerRowIndex + 1; r < lines.length; r++) {
+      const cells = splitCsvLine(lines[r], delimiter);
+      if (cells.every((cell) => !normalizeText(cell))) continue;
+      const descriptionIndex =
+        headerCellsRaw.findIndex((header, index) => {
+          const norm = normalizeHeader(header);
+          return fieldByCol[index] === "name" || norm.includes("descricao") || norm.includes("descrição") || norm.includes("produto");
+        });
+      const description = descriptionIndex >= 0 ? cells[descriptionIndex] : cells.find((cell) => cell.trim().length > 0) || "";
+      if (!description) continue;
+      const isCategoryRow = /^[A-Z0-9\s&./-]{4,}$/.test(description.trim()) && !/\b(19|20)\d{2}\b/.test(description);
+      const price = parseDistributorPrice(cells, headerCellsRaw);
+      candidateRows++;
+      if (isCategoryRow && price === undefined) {
+        ignoredRows++;
+        continue;
+      }
+      if (!/\S/.test(description) || price === undefined) {
+        ignoredRows++;
+        continue;
+      }
+
+      const extracted = extractWineFieldsFromDescription(description);
+      const producerIndex = headerCellsRaw.findIndex((header, index) => {
+        const norm = normalizeHeader(header);
+        return fieldByCol[index] === "producer" || norm.includes("produtor") || norm.includes("vinicola") || norm.includes("vinícola") || norm.includes("marca") || norm.includes("producer") || norm.includes("winery");
+      });
+      const countryIndex = headerCellsRaw.findIndex((header, index) => {
+        const norm = normalizeHeader(header);
+        return fieldByCol[index] === "country" || norm.includes("pais") || norm.includes("país") || norm.includes("country") || norm.includes("origem");
+      });
+      const vintageIndex = headerCellsRaw.findIndex((header, index) => {
+        const norm = normalizeHeader(header);
+        return fieldByCol[index] === "vintage" || norm.includes("safra") || norm.includes("ano") || norm.includes("year") || norm.includes("vintage");
+      });
+
+      const explicitProducer = producerIndex >= 0 ? normalizeText(cells[producerIndex]) : undefined;
+      const explicitCountry = countryIndex >= 0 ? normalizeText(cells[countryIndex]) : undefined;
+      const explicitVintage = vintageIndex >= 0 ? parseYear(cells[vintageIndex]) : undefined;
+      const inferredStyle = normalizeStyle(description) || normalizeStyle([explicitProducer, description].filter(Boolean).join(" "));
+
+      const wineName = normalizeWineData({ name: extracted.name, producer: explicitProducer || extracted.producer || null }, { log: false }).name || extracted.name;
+      if (!wineName || wineName.trim().length < 2) continue;
+
+      wines.push({
+        name: wineName,
+        producer: explicitProducer || extracted.producer,
+        vintage: explicitVintage ?? extracted.vintage,
+        style: inferredStyle,
+        country: explicitCountry || extracted.country,
+        region: undefined,
+        grape: undefined,
+        quantity: 1,
+        purchase_price: price,
+        cellar_location: undefined,
+        drink_from: undefined,
+        drink_until: undefined,
+      });
+      successfulRows++;
+    }
+
+    const mappedCount = headerCellsRaw.filter((header) => !!mapping[header]).length;
+    const successRate = candidateRows > 0 ? successfulRows / candidateRows : 0;
+    const confidenceBase = headerScore > 0 ? Math.min(1, headerScore / 16) : 0;
+    const confidence = wines.length > 0
+      ? Math.min(1, (successRate * 0.6) + (mappedCount > 0 ? Math.min(0.3, mappedCount / Math.max(headerCellsRaw.length, 1)) : 0) + confidenceBase * 0.2)
+      : confidenceBase * 0.5;
+
+    return {
+      wines,
+      mapping,
+      headers: headerCellsRaw.filter((header) => !isUnnamedHeader(header)),
+      sourceRows,
+      confidence: Number(confidence.toFixed(2)),
+      successRate: Number(successRate.toFixed(2)),
+      manualMappingRequired: successRate < 0.5 || (wines.length === 0 && candidateRows > 0),
+      headerRowIndex,
+      priceColumn,
+      ignoredRows,
+    };
   };
 
   const reset = () => {
@@ -885,9 +1272,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setEditMode(true);
     setShowAdvancedColumns(false);
     setSelectedRows([]);
+    setEditingRowIndex(null);
     setBulkProducer("");
     setBulkVintage("");
+    setBulkGrape("");
     setEnriching(false);
+    setLoading(false);
+    setProcessingRows(0);
+    setProcessingTotal(0);
+    setAutoMergedDuplicates(0);
+    setPreviewLimit(50);
+    setImportSourceRows([]);
+    setImportSourceHeaders([]);
+    setImportSourceConfidence(1);
+    setImportSummary({ headerDetected: false, ignoredRows: 0 });
   };
 
   const updateWineRow = (index: number, field: EditableField, value: string | number | undefined) => {
@@ -927,19 +1325,76 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     syncRows((current) => current.map((row) => ({ ...row, vintage: value })));
   };
 
+  const getRowStatus = (row: DraftWine) => {
+    const hasName = !!row.name?.trim();
+    const hasPrice = row.purchase_price != null || row.price != null;
+    const missingSecondary = !row.producer?.trim() || !row.vintage || !row.country?.trim();
+    if (!hasName || !hasPrice) return "error";
+    if (missingSecondary) return "review";
+    return "ok";
+  };
+
+  const smartNormalizeImportedName = (name?: string, country?: string | null) => {
+    const cleaned = normalizeText(name) || "";
+    if (!cleaned) return "";
+    const tokens = cleaned.split(/\s+/).filter(Boolean);
+    const trailingCountry = tokens.length > 1 ? tokens[tokens.length - 1] : "";
+    const countryKey = normalizeSearchText(country);
+    const knownCountry = [
+      "Argentina",
+      "Chile",
+      "Brasil",
+      "Portugal",
+      "França",
+      "France",
+      "Itália",
+      "Italy",
+      "Espanha",
+      "Spain",
+      "Uruguai",
+      "Uruguay",
+      "Alemanha",
+      "Germany",
+      "África do Sul",
+      "South Africa",
+      "Estados Unidos",
+      "USA",
+    ].find((keyword) => normalizeSearchText(keyword) === normalizeSearchText(trailingCountry));
+    const looksLikeCountry = !!countryKey && normalizeSearchText(trailingCountry) === countryKey;
+    const maybeCountry = looksLikeCountry ? trailingCountry : knownCountry;
+    const core = tokens
+      .filter((token, index) => {
+        if ((looksLikeCountry || knownCountry) && index === tokens.length - 1) return false;
+        return true;
+      })
+      .join(" ");
+    const title = normalizeWineText(core) || normalizeWineText(cleaned) || cleaned;
+    const suffix = normalizeWineText(country || maybeCountry) || undefined;
+    return suffix ? `${title} · ${suffix}` : title;
+  };
+
   const applyBulkAll = () => {
     const producer = bulkProducer.trim();
     const vintage = Number.parseInt(bulkVintage, 10);
+    const grape = bulkGrape.trim();
     const hasProducer = producer.length > 0;
     const hasVintage = Number.isFinite(vintage);
-    if (!hasProducer && !hasVintage) return;
+    const hasGrape = grape.length > 0;
+    if (!hasProducer && !hasVintage && !hasGrape) return;
     syncRows((current) =>
       current.map((row) => ({
         ...row,
         producer: hasProducer ? producer : row.producer,
         vintage: hasVintage ? vintage : row.vintage,
+        grape: hasGrape ? grape : row.grape,
       })),
     );
+  };
+
+  const applyBulkGrape = () => {
+    const value = bulkGrape.trim();
+    if (!value) return;
+    syncRows((current) => current.map((row) => ({ ...row, grape: value })));
   };
 
   const selectedSet = new Set(selectedRows);
@@ -969,6 +1424,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (!Number.isFinite(value) || selectedRows.length === 0) return;
     syncRows((current) =>
       current.map((row, index) => (selectedSet.has(index) ? { ...row, vintage: value } : row)),
+    );
+  };
+
+  const applyGrapeToSelected = () => {
+    const value = bulkGrape.trim();
+    if (!value || selectedRows.length === 0) return;
+    syncRows((current) =>
+      current.map((row, index) => (selectedSet.has(index) ? { ...row, grape: value } : row)),
     );
   };
 
@@ -1044,11 +1507,174 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     }
   };
 
+  const commitImportedRows = (
+    rows: ParsedWine[],
+    options?: {
+      mapping?: Record<string, string>;
+      notes?: string;
+      parseErrors?: string[];
+      duplicateCount?: number;
+    },
+  ) => {
+    const deduped = dedupeImportedRows(rows);
+    setAutoMergedDuplicates(deduped.duplicateCount + (options?.duplicateCount ?? 0));
+    rebuildDraftRows(deduped.rows);
+    setColumnMapping(options?.mapping || {});
+    setAiNotes(options?.notes || "");
+    setParseErrors(options?.parseErrors || []);
+    setEditMode(true);
+    setShowAdvancedColumns(false);
+    setSelectedRows([]);
+    setEditingRowIndex(null);
+    setBulkProducer("");
+    setBulkVintage("");
+    setBulkGrape("");
+    setPreviewLimit(50);
+    setStep("preview");
+    return deduped.rows;
+  };
+
+  const buildWinesFromMapping = (sourceRows: ImportSourceRow[], mapping: Record<string, string>) => {
+    return mapSourceRowsToWines(sourceRows, mapping);
+  };
+
+  const getRenderableRows = (rows: DraftWine[]) =>
+    rows.map((row, index) => ({ row, index }));
+
+  const getDuplicateIndexes = (rows: DraftWine[]) => {
+    const seen = new Map<string, number>();
+    const duplicates = new Set<number>();
+    rows.forEach((row, index) => {
+      const key = normalizeSearchText(`${row.name}|${row.producer || ""}`);
+      if (!key) return;
+      if (seen.has(key)) {
+        duplicates.add(index);
+      } else {
+        seen.set(key, index);
+      }
+    });
+    return duplicates;
+  };
+
+  const getRowClassifications = (rows: DraftWine[]) => {
+    const duplicateIndexes = getDuplicateIndexes(rows);
+    const completed: number[] = [];
+    const errors: number[] = [];
+    const duplicates: number[] = [];
+    const lowConfidence: number[] = [];
+
+    rows.forEach((row, index) => {
+      const hasValidName = !!row.name && row.name.trim().length >= 2;
+      const hasAttribute =
+        !!row.producer?.trim() ||
+        !!row.grape?.trim() ||
+        !!row.region?.trim() ||
+        !!row.country?.trim() ||
+        !!row.vintage ||
+        !!row.style?.trim() ||
+        !!row.type?.trim();
+      const missingRequired = !hasValidName || !row.type?.trim() || !row.quantity || row.quantity <= 0;
+
+      if (duplicateIndexes.has(index)) {
+        duplicates.push(index);
+        return;
+      }
+      if (missingRequired || !hasAttribute) {
+        errors.push(index);
+        return;
+      }
+      if (row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7)) {
+        lowConfidence.push(index);
+        return;
+      }
+      completed.push(index);
+    });
+
+    return { completed, errors, duplicates, lowConfidence };
+  };
+
+  const getImportStatus = (row: DraftWine) => {
+    const hasName = !!row.name?.trim();
+    const hasPrice = row.purchase_price != null || row.price != null;
+    const hasRequiredMissing = !hasName || !hasPrice;
+    if (hasRequiredMissing) return "error" as const;
+    const hasSecondaryMissing = !row.producer?.trim() || !row.vintage || !row.country?.trim();
+    const lowConfidence = row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7);
+    if (hasSecondaryMissing || lowConfidence) return "review" as const;
+    return "ok" as const;
+  };
+
+  const applyManualMapping = () => {
+    if (importSourceRows.length === 0 || importSourceHeaders.length === 0) return;
+    const remapped = buildWinesFromMapping(importSourceRows, columnMapping);
+    if (remapped.length === 0) {
+      setParseErrors(["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."]);
+      return;
+    }
+    const normalized = normalizeImportedWines(remapped);
+    commitImportedRows(normalized, {
+      mapping: columnMapping,
+      notes: "Mapeamento manual aplicado. Revise os vinhos antes de importar.",
+      parseErrors: [],
+    });
+    setImportSourceConfidence(1);
+  };
+
+  const applyDefaultPrice = () => {
+    const defaultPrice = 89;
+    syncRows((current) =>
+      current.map((row) =>
+        row.purchase_price == null && row.price == null
+          ? { ...row, purchase_price: defaultPrice, price: defaultPrice }
+          : row,
+      ),
+    );
+  };
+
+  const removeInvalidRows = () => {
+    syncRows((current) =>
+      current.filter((row) => {
+        const hasValidName = !!row.name && row.name.trim().length >= 2;
+        const hasPrice = row.purchase_price != null || row.price != null;
+        const hasAttribute =
+          !!row.producer?.trim() ||
+          !!row.grape?.trim() ||
+          !!row.region?.trim() ||
+          !!row.country?.trim() ||
+          !!row.vintage ||
+          !!row.style?.trim() ||
+          !!row.type?.trim();
+        return hasValidName && hasAttribute && hasPrice;
+      }),
+    );
+  };
+
   const handleFile = async (file: File) => {
     setFileName(file.name);
     setStep("analyzing");
+    setLoading(true);
 
     try {
+      const isImageFile = file.type.startsWith("image/");
+      if (isImageFile) {
+        const prepared = await prepareAiAnalysisAttachment(file);
+        const scanResult = await invokeEdgeFunction<any>(
+          "scan-wine-label",
+          { imageBase64: prepared.imageBase64 },
+          { timeoutMs: 60_000, retries: 1 },
+        );
+        const winePayload = scanResult?.wine ?? scanResult?.data?.wine ?? scanResult;
+        const imported = normalizeImportedWines([winePayload].filter(Boolean));
+        commitImportedRows(imported, {
+          notes: "Imagem do rótulo convertida em uma linha revisável.",
+          parseErrors: imported.length > 0 ? [] : ["Não conseguimos identificar um vinho confiável nesta imagem."],
+        });
+        setImportSourceRows([]);
+        setImportSourceHeaders([]);
+        setImportSourceConfidence(imported.length > 0 ? 1 : 0);
+        return;
+      }
+
       const raw = await fileToCsvLikeText(file);
       if (!raw || !raw.trim()) {
         setParseErrors(["Não conseguimos ler o conteúdo do arquivo. Verifique se ele contém dados de vinhos."]);
@@ -1060,6 +1686,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
       // ── 1) FAST PATH: local deterministic parser for CSV/TSV/spreadsheet exports ──
       const local = parseCsvLocally(csvContent);
+      setImportSourceRows(local.sourceRows);
+      setImportSourceHeaders(local.headers);
+      setImportSourceConfidence(Math.min(local.confidence, local.successRate));
+      setImportSummary({
+        headerDetected: local.headerRowIndex >= 0,
+        headerRowIndex: local.headerRowIndex,
+        priceColumn: local.priceColumn,
+        ignoredRows: local.ignoredRows,
+      });
       const ext = file.name.split(".").pop()?.toLowerCase() || "";
       const isStructured = ["csv", "tsv", "txt", "xlsx", "xls", "ods"].includes(ext);
 
@@ -1070,17 +1705,34 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           }, 0) / local.wines.length
         : 0;
 
-      if (isStructured && local.wines.length >= 1 && avgFieldsPerRow >= 4) {
-        rebuildDraftRows(local.wines);
+      if (local.manualMappingRequired && local.wines.length > 0) {
+        const normalized = normalizeImportedWines(local.wines);
+        commitImportedRows(normalized, {
+          mapping: local.mapping,
+          notes: "Identificamos parte da estrutura do arquivo. Ajuste as colunas manualmente para finalizar.",
+          parseErrors: ["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."],
+        });
+        setImportSourceConfidence(local.successRate);
+        return;
+      }
+
+      if (local.manualMappingRequired && local.sourceRows.length > 0 && local.wines.length === 0) {
+        setDraftWines([]);
         setColumnMapping(local.mapping);
-        setAiNotes(`Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.`);
-        setParseErrors([]);
-        setEditMode(true);
-        setShowAdvancedColumns(false);
-        setSelectedRows([]);
-        setBulkProducer("");
-        setBulkVintage("");
+        setAiNotes("Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
+        setParseErrors(["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."]);
         setStep("preview");
+        setImportSourceConfidence(local.successRate);
+        return;
+      }
+
+      if (isStructured && local.wines.length >= 1 && avgFieldsPerRow >= 4) {
+        const normalized = normalizeImportedWines(local.wines);
+        commitImportedRows(normalized, {
+          mapping: local.mapping,
+          notes: `Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.`,
+        });
+        setImportSourceConfidence(Math.max(local.confidence, local.successRate));
         return;
       }
 
@@ -1095,11 +1747,21 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       } catch (aiErr: any) {
         // If we have ANY local rows, use them as fallback even if AI fails
         if (local.wines.length > 0) {
-          rebuildDraftRows(local.wines);
+          const normalized = normalizeImportedWines(local.wines);
+          commitImportedRows(normalized, {
+            mapping: local.mapping,
+            notes: "Importação automática (sem IA). Revise os campos antes de confirmar.",
+          });
+          setImportSourceConfidence(Math.max(local.confidence, local.successRate));
+          return;
+        }
+        if (local.manualMappingRequired && local.sourceRows.length > 0) {
+          setDraftWines([]);
           setColumnMapping(local.mapping);
-          setAiNotes("Importação automática (sem IA). Revise os campos antes de confirmar.");
-          setParseErrors([]);
+          setAiNotes("Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
+          setParseErrors(["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."]);
           setStep("preview");
+          setImportSourceConfidence(local.successRate);
           return;
         }
         throw aiErr;
@@ -1107,11 +1769,21 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
       if (data?.error) {
         if (local.wines.length > 0) {
-          rebuildDraftRows(local.wines);
+          const normalized = normalizeImportedWines(local.wines);
+          commitImportedRows(normalized, {
+            mapping: local.mapping,
+            parseErrors: [`A análise inteligente falhou (${data.error}). Mostrando dados extraídos localmente para você revisar.`],
+          });
+          setImportSourceConfidence(Math.max(local.confidence, local.successRate));
+          return;
+        }
+        if (local.manualMappingRequired && local.sourceRows.length > 0) {
+          setDraftWines([]);
           setColumnMapping(local.mapping);
-          setAiNotes("");
-          setParseErrors([`A análise inteligente falhou (${data.error}). Mostrando dados extraídos localmente para você revisar.`]);
+          setAiNotes("Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
+          setParseErrors(["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."]);
           setStep("preview");
+          setImportSourceConfidence(local.successRate);
           return;
         }
         setParseErrors([
@@ -1124,39 +1796,23 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         return;
       }
 
-      const wines: ParsedWine[] = (data?.wines || []).map((w: any) => ({
-        name: normalizeText(w.name) || "",
-        producer: normalizeText(w.producer),
-        vintage: parseYear(w.vintage),
-        style: normalizeStyle(w.style),
-        country: normalizeText(w.country),
-        region: normalizeText(w.region),
-        grape: normalizeText(w.grape),
-        quantity: parseQuantity(w.quantity),
-        purchase_price: parsePrice(w.purchase_price),
-        cellar_location: normalizeText(w.cellar_location),
-        drink_from: parseYear(w.drink_from),
-        drink_until: parseYear(w.drink_until),
-      }));
-
+      const wines = normalizeImportedWines(data?.wines || []);
       const validWines = wines.filter((w) => w.name.length >= 2 && w.name.length <= 120);
       // Merge AI + local results when both produced rows
       const merged = validWines.length > 0 ? validWines : local.wines;
-      rebuildDraftRows(merged);
-      setColumnMapping({ ...(local.mapping || {}), ...(data?.column_mapping || {}) });
-      setAiNotes(data?.notes || "");
-      setParseErrors([]);
-      setEditMode(true);
-      setShowAdvancedColumns(false);
-      setSelectedRows([]);
-      setBulkProducer("");
-      setBulkVintage("");
-      setStep("preview");
+      commitImportedRows(merged, {
+        mapping: { ...(local.mapping || {}), ...(data?.column_mapping || {}) },
+        notes: data?.notes || "",
+        parseErrors: merged.length === 0
+          ? [
+              "Não encontramos linhas válidas de vinho neste arquivo.",
+              "Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.",
+            ]
+          : [],
+      });
+      setImportSourceConfidence(validWines.length > 0 ? 1 : Math.max(local.confidence, local.successRate));
       if (merged.length === 0) {
-        setParseErrors([
-          "Não encontramos linhas válidas de vinho neste arquivo.",
-          "Dica: para CSV/Excel, inclua um cabeçalho com 'Nome', 'Produtor', 'Safra', 'Tipo', 'Quantidade'.",
-        ]);
+        // handled above
       }
 
       if (raw.length > MAX_CLIENT_INPUT_CHARS) {
@@ -1179,6 +1835,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setParseErrors([friendly, "Se persistir, tente exportar o arquivo como CSV ou Excel (.xlsx) com colunas: Nome, Produtor, Safra, Tipo, Quantidade, Preço."]);
       setDraftWines([]);
       setStep("preview");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1276,9 +1934,16 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const mappingEntries = Object.entries(columnMapping);
   const visibleColumns = getVisibleColumns();
-  const hasValidationErrors = Object.keys(rowErrors).length > 0;
-  const canImport = draftWines.length > 0 && !hasValidationErrors;
+  const classifications = getRowClassifications(draftWines);
+  const renderableRows = getRenderableRows(draftWines);
+  const visibleDraftWines = renderableRows.slice(0, previewLimit);
+  const isTruncatedPreview = renderableRows.length > visibleDraftWines.length;
   const allFieldsVisible = showAdvancedColumns;
+  const rowStatuses = draftWines.map((row) => getImportStatus(row));
+  const completeRowsCount = rowStatuses.filter((status) => status === "ok").length;
+  const reviewRowsCount = rowStatuses.filter((status) => status === "review").length;
+  const duplicateRowsCount = classifications.duplicates.length;
+  const canImport = completeRowsCount > 0;
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
     return Array.from(new Set(all.map((wine) => wine.producer).filter((value): value is string => !!value && value.trim().length > 1)))
@@ -1442,16 +2107,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className="left-1/2 top-1/2 right-auto bottom-auto h-[85vh] w-[90vw] max-w-[1300px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border-0 p-0 gap-0 overflow-hidden"
+        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[min(1100px,calc(100vw-1rem))] -translate-x-1/2 -translate-y-1/2 rounded-[28px] border-0 p-0 gap-0 overflow-hidden"
         style={{
           left: "50%",
           top: "50%",
           right: "auto",
           bottom: "auto",
           transform: "translate(-50%, -50%)",
-          width: "90vw",
-          maxWidth: "1300px",
-          height: "85vh",
+          width: "min(1100px, calc(100vw - 1rem))",
+          maxWidth: "1100px",
+          maxHeight: "90vh",
+          height: "90vh",
           background: "#FFFFFF",
           backdropFilter: "none",
           WebkitBackdropFilter: "none",
@@ -1503,15 +2169,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => void enrichDraftRows()}
-                className="h-9 text-[12px] px-3"
-                disabled={enriching || draftWines.length === 0}
-              >
-                {enriching ? "Completando..." : "✨ Completar com IA"}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
                 onClick={addBlankRow}
                 className="h-9 text-[12px] px-3"
                 disabled={!editMode}
@@ -1544,14 +2201,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
           <div className="flex-1 min-h-0 overflow-hidden px-6 pb-6">
             <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-black/5 bg-white">
-              <div className="flex-1 min-h-0 overflow-auto">
+              <div className="flex-1 min-h-0 overflow-hidden">
                 <AnimatePresence mode="wait">
                   {step === "upload" && (
                     <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0 flex-col overflow-y-auto px-6 py-6">
                       <div
-                        className="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors hover:border-primary/30"
+                        className={cn(
+                          "border-2 border-dashed rounded-xl p-10 text-center transition-colors",
+                          loading ? "cursor-wait opacity-80" : "cursor-pointer hover:border-primary/30",
+                        )}
                         style={{ borderColor: "rgba(143,45,86,0.15)" }}
-                        onClick={() => fileRef.current?.click()}
+                        onClick={() => { if (!loading) fileRef.current?.click(); }}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleDrop}
                       >
@@ -1566,9 +2226,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       <input
                         ref={fileRef}
                         type="file"
-                        accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,.doc,.docx,.rtf,text/plain,text/csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,.doc,.docx,.rtf,image/*,text/plain,text/csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         className="hidden"
-                        onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
+                        onChange={(e) => { if (e.target.files?.[0]) void handleFile(e.target.files[0]); }}
                       />
 
                       <div className="mt-5 rounded-xl border border-black/5 bg-white p-4" style={{ background: "rgba(143,45,86,0.04)" }}>
@@ -1610,12 +2270,89 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                             Revise e complete os dados antes de importar
                           </p>
                           <p className="mt-1 text-xs text-black/50">
-                    {draftWines.length} vinho(s) pronto(s) para revisão
+                            {draftWines.length} vinho(s) pronto(s) para revisão
                           </p>
                         </div>
                       </div>
 
-                      <div className="grid gap-3 shrink-0 lg:grid-cols-[1fr_1fr_auto]">
+                      <div className="grid gap-3 shrink-0 sm:grid-cols-3">
+                        {[
+                          { label: "Vinhos identificados", value: completeRowsCount, tone: "from-emerald-50 to-emerald-100 text-emerald-800" },
+                          { label: "Precisam de revisão", value: reviewRowsCount, tone: "from-amber-50 to-amber-100 text-amber-800" },
+                          { label: "Duplicados", value: duplicateRowsCount, tone: "from-rose-50 to-rose-100 text-rose-700" },
+                        ].map((card) => (
+                          <div key={card.label} className={cn("rounded-2xl border border-black/5 bg-gradient-to-br p-3 shadow-sm", card.tone)}>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] opacity-70">{card.label}</p>
+                            <p className="mt-1 text-2xl font-semibold tracking-tight">{card.value}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="rounded-2xl border border-black/5 bg-[#FBFAF7] px-4 py-3 text-[13px] text-[#4A4338]">
+                        <p>✔ Cabeçalho detectado automaticamente{importSummary.headerDetected && typeof importSummary.headerRowIndex === "number" ? ` na linha ${importSummary.headerRowIndex + 1}` : ""}</p>
+                        <p>✔ Coluna de preço usada: {importSummary.priceColumn || "não identificada"}</p>
+                        <p>✔ {importSummary.ignoredRows} linha(s) ignorada(s) por categoria ou vazio</p>
+                        <p>✔ {completeRowsCount} vinhos prontos para importar</p>
+                        <p>⚠️ {reviewRowsCount} vinhos precisam de revisão</p>
+                        {duplicateRowsCount + autoMergedDuplicates > 0 ? (
+                          <p>🔁 {duplicateRowsCount + autoMergedDuplicates} duplicado(s) combinados ou sinalizados</p>
+                        ) : null}
+                      </div>
+
+                      {(enriching || processingTotal > 0) && (
+                        <div className="rounded-2xl border border-black/5 bg-[#FBFAF7] p-3 text-[12px] text-[#5F5F5F]">
+                          <div className="mb-2 flex items-center justify-between gap-3">
+                            <span className="font-medium">
+                              {enriching ? "Corrigindo automaticamente..." : "Processando importação"}
+                            </span>
+                            {processingTotal > 0 ? (
+                              <span className="font-semibold text-[#7B1E2B]">
+                                Processando {processingRows}/{processingTotal}
+                              </span>
+                            ) : null}
+                          </div>
+                          {processingTotal > 0 ? (
+                            <div className="h-2 overflow-hidden rounded-full bg-black/5">
+                              <div
+                                className="h-full rounded-full gradient-wine transition-all"
+                                style={{ width: `${Math.min(100, Math.round((processingRows / Math.max(processingTotal, 1)) * 100))}%` }}
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap gap-2 shrink-0">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => void autoFixImportedRows()}
+                          className="h-9 text-[12px] px-3"
+                          disabled={enriching || draftWines.length === 0}
+                        >
+                          ✨ Corrigir automaticamente
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={applyDefaultPrice}
+                          className="h-9 text-[12px] px-3"
+                          disabled={draftWines.length === 0}
+                        >
+                          Aplicar preço padrão
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={removeInvalidRows}
+                          className="h-9 text-[12px] px-3 text-rose-700 hover:bg-rose-50"
+                          disabled={draftWines.length === 0}
+                        >
+                          Remover inválidos
+                        </Button>
+                      </div>
+
+                      <div className="grid gap-3 shrink-0 lg:grid-cols-[1fr_1fr_1fr_auto]">
                         <div className="flex items-center gap-2">
                           <Input
                             value={bulkProducer}
@@ -1639,12 +2376,26 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                             Aplicar safra
                           </Button>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={bulkGrape}
+                            onChange={(e) => setBulkGrape(e.target.value)}
+                            placeholder="Uva em massa"
+                            disabled={!editMode}
+                          />
+                          <Button variant="secondary" size="sm" onClick={applyBulkGrape} disabled={!editMode || !bulkGrape.trim()}>
+                            Aplicar uva
+                          </Button>
+                        </div>
                         <div className="flex items-center gap-2 justify-start lg:justify-end">
                           <Button variant="secondary" size="sm" onClick={applyProducerToSelected} disabled={!editMode || !bulkProducer.trim() || selectedRows.length === 0}>
                             Produtor aos selecionados
                           </Button>
                           <Button variant="secondary" size="sm" onClick={applyVintageToSelected} disabled={!editMode || !bulkVintage.trim() || selectedRows.length === 0}>
                             Safra aos selecionados
+                          </Button>
+                          <Button variant="secondary" size="sm" onClick={applyGrapeToSelected} disabled={!editMode || !bulkGrape.trim() || selectedRows.length === 0}>
+                            Uva aos selecionados
                           </Button>
                         </div>
                       </div>
@@ -1696,97 +2447,194 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         </div>
                       )}
 
-              {draftWines.length > 0 && (
-                        <div className="flex-1 min-h-0 overflow-hidden rounded-2xl border border-black/5 bg-white">
-                          <div className="h-full overflow-auto">
-                            <table className="min-w-full border-separate border-spacing-0 text-[12px]">
-                              <thead className="sticky top-0 z-10 bg-white">
-                                <tr className="text-xs uppercase tracking-wide" style={{ background: "linear-gradient(180deg, #F8F6F2 0%, #F2EFE9 100%)" }}>
-                                  <th className="sticky top-0 z-20 w-12 px-3 py-3 text-left font-semibold text-black/50 border-b border-black/10">
-                                    <Checkbox checked={allRowsSelected} onCheckedChange={toggleAllRows} />
-                                  </th>
-                                  {visibleColumns.map((column) => (
-                                    <th
-                                      key={column.key}
-                                      className={cn(
-                                        "sticky top-0 z-20 px-3 py-3 text-left font-semibold text-[#5F5F5F] text-[10.5px] tracking-[0.08em] border-b border-black/10",
-                                        column.align === "right" && "text-right",
-                                      )}
-                                      style={{
-                                        width: column.key === "name" ? "20rem" :
-                                          column.key === "producer" ? "14rem" :
-                                          column.key === "style" ? "10rem" :
-                                          column.key === "vintage" || column.key === "quantity" ? "6.5rem" : undefined,
-                                      }}
-                                    >
-                                      {column.label}{!column.optional ? <span className="text-[#7B1E2B] ml-0.5">*</span> : null}
-                                    </th>
-                                  ))}
-                                  <th className="sticky top-0 z-20 w-12 px-2 py-3 text-center font-semibold text-black/40 border-b border-black/10">
-                                    
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {draftWines.map((w, i) => {
-                                  const rowHasError = !!rowErrors[i];
-                                  const accent = accentForRow(w);
-                                  return (
-                                    <tr
-                                      key={`row-${i}`}
-                            className={cn(
-                              "transition hover:bg-[#FAF8F4] group",
-                              selectedSet.has(i) && "bg-[#7B1E2B]/[0.03]",
-                            )}
-                            style={{ borderLeft: `4px solid ${rowHasError ? "#D88C7A" : accent.bar}` }}
-                          >
-                            <td className="px-3 py-2 align-top border-b border-black/5">
-                              <div className="flex flex-col items-center gap-2 pt-1">
-                                <Checkbox checked={selectedSet.has(i)} onCheckedChange={() => toggleRowSelection(i)} />
-                                <span className="inline-block h-2 w-2 rounded-full" style={{ background: accent.dot }} title={w.type || w.style || "Tipo n/i"} />
-                                <span
-                                  className={cn(
-                                    "inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em]",
-                                    rowHasError
-                                      ? "bg-rose-100 text-rose-700"
-                                      : w.confidence >= 0.78
-                                        ? "bg-emerald-100 text-emerald-700"
-                                        : w.confidence >= 0.55
-                                          ? "bg-amber-100 text-amber-700"
-                                          : "bg-rose-50 text-rose-600",
-                                  )}
+                      {importSourceConfidence < 0.7 && importSourceHeaders.length > 0 ? (
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <p className="text-[14px] font-semibold text-amber-900">
+                                Precisamos de mapeamento manual
+                              </p>
+                              <p className="text-[13px] text-amber-800">
+                                A confiança da leitura ficou baixa. Selecione as colunas manualmente para continuar.
+                              </p>
+                            </div>
+                            <Button variant="secondary" size="sm" onClick={applyManualMapping} disabled={importSourceHeaders.length === 0}>
+                              Aplicar mapeamento
+                            </Button>
+                          </div>
+                          <div className="mt-4 grid gap-3 md:grid-cols-2">
+                            {importSourceHeaders.map((header) => (
+                              <div key={header} className="flex flex-col gap-2 rounded-xl border border-black/5 bg-white p-3">
+                                <p className="truncate text-[12px] font-semibold text-[#1A1A1A]">{header}</p>
+                                <Select
+                                  value={columnMapping[header] || "ignore"}
+                                  onValueChange={(value) =>
+                                    setColumnMapping((current) => ({
+                                      ...current,
+                                      [header]: value === "ignore" ? "" : value,
+                                    }))
+                                  }
                                 >
-                                  {rowHasError ? "Crítico" : w.confidence >= 0.78 ? "Completo" : w.confidence >= 0.55 ? "Parcial" : "Revisar"}
-                                </span>
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Selecionar coluna" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="ignore">Ignorar coluna</SelectItem>
+                                    <SelectItem value="name">Nome do vinho</SelectItem>
+                                    <SelectItem value="producer">Produtor</SelectItem>
+                                    <SelectItem value="vintage">Safra</SelectItem>
+                                    <SelectItem value="style">Tipo</SelectItem>
+                                    <SelectItem value="country">País</SelectItem>
+                                    <SelectItem value="region">Região</SelectItem>
+                                    <SelectItem value="grape">Uva</SelectItem>
+                                    <SelectItem value="quantity">Quantidade</SelectItem>
+                                    <SelectItem value="purchase_price">Preço</SelectItem>
+                                    <SelectItem value="cellar_location">Localização</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </div>
-                            </td>
-                            {visibleColumns.map((column) => renderEditableCell(w, i, column))}
-                            <td className="px-2 py-2 align-top text-center border-b border-black/5">
-                              <button
-                                type="button"
-                                onClick={() => removeRow(i)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 inline-flex items-center justify-center rounded-full text-[#A39A90] hover:bg-rose-50 hover:text-rose-600"
-                                title="Remover linha"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                              </tbody>
-                            </table>
-                            <div className="px-3 py-3 border-t border-black/5 bg-[#FBFAF7]">
-                              <button
-                                type="button"
-                                onClick={addBlankRow}
-                                disabled={!editMode}
-                                className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-medium text-[#5F5F5F] hover:bg-white hover:text-[#7B1E2B] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                <span className="text-[16px] leading-none">+</span> Adicionar linha em branco
-                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {renderableRows.length > 0 ? (
+                        <div className="flex-1 min-h-[320px] overflow-hidden rounded-2xl border border-black/5 bg-white">
+                          <div className="flex items-center justify-between gap-3 border-b border-black/5 px-4 py-3">
+                            <div>
+                              <p className="text-[14px] font-semibold text-[#1A1A1A]">Pré-visualização dos vinhos</p>
+                              <p className="text-[12px] text-black/50">
+                                Nome | Produtor | Safra | Tipo | Confiança
+                              </p>
+                            </div>
+                            {renderableRows.length > visibleDraftWines.length ? (
+                              <Button variant="secondary" size="sm" onClick={() => setPreviewLimit((current) => current + 50)}>
+                                Mostrar mais
+                              </Button>
+                            ) : null}
+                          </div>
+
+                          <div className="max-h-[420px] overflow-y-auto cellar-scroll">
+                            <div className="min-w-[860px]">
+                              <div className="grid grid-cols-[2fr_1.5fr_0.9fr_1fr_1fr_1fr_auto] gap-3 border-b border-black/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
+                                <span>Nome</span>
+                                <span>Produtor</span>
+                                <span>Safra</span>
+                                <span>País</span>
+                                <span>Preço</span>
+                                <span>Status</span>
+                                <span className="text-right">Ações</span>
+                              </div>
+                              {visibleDraftWines.map(({ row: wine, index }) => {
+                                const rowStatus = getImportStatus(wine as DraftWine);
+                                const rowHasError = rowStatus === "error" || !!rowErrors[index];
+                                const rowMissingPrice = wine.purchase_price == null && (wine as DraftWine).price == null;
+                                const accent = accentForRow(wine as DraftWine);
+                                const confidence = (wine as DraftWine).confidence;
+                                return (
+                                  <div
+                                    key={`row-${index}`}
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => setEditingRowIndex(index)}
+                                    className={cn(
+                                      "grid grid-cols-[2fr_1.5fr_0.9fr_1fr_1fr_1fr_auto] gap-3 border-b border-black/5 px-4 py-3 transition-colors hover:bg-[#FBFAF7] cursor-pointer",
+                                      selectedSet.has(index) && "bg-[#7B1E2B]/[0.04]",
+                                      editingRowIndex === index && "ring-1 ring-inset ring-[#7B1E2B]/15",
+                                      rowHasError && "bg-rose-50/60",
+                                      !rowHasError && rowMissingPrice && "bg-amber-50/60",
+                                      !rowHasError && !rowMissingPrice && confidence < 0.7 && "bg-amber-50/60",
+                                    )}
+                                    style={{ borderLeft: `4px solid ${rowHasError ? "#D88C7A" : accent.bar}` }}
+                                  >
+                                    <div className="min-w-0">
+                                      {editingRowIndex === index && editMode ? (
+                                        <Input
+                                          value={wine.name || ""}
+                                          onChange={(e) => updateWineRow(index, "name", e.target.value)}
+                                          onClick={(e) => e.stopPropagation()}
+                                          className={cn("h-10 text-[14px]", !wine.name?.trim() && "border-rose-300 bg-rose-50")}
+                                        />
+                                      ) : (
+                                        <p className={cn("truncate text-[14px] font-semibold text-[#1A1A1A]", !wine.name?.trim() && "text-rose-700")}>{wine.name}</p>
+                                      )}
+                                      {duplicateRowsCount > 0 && (wine as DraftWine).duplicateWarning ? (
+                                        <p className="mt-0.5 text-[11px] text-amber-700">{(wine as DraftWine).duplicateWarning}</p>
+                                      ) : null}
+                                    </div>
+                                    <div className="min-w-0">
+                                      {editingRowIndex === index && editMode ? (
+                                        <Input
+                                          value={wine.producer || ""}
+                                          onChange={(e) => updateWineRow(index, "producer", e.target.value)}
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="h-10 text-[14px]"
+                                        />
+                                      ) : (
+                                        <span className="truncate text-[13px] text-[#4B4B4B]">{wine.producer || "-"}</span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      {editingRowIndex === index && editMode ? (
+                                        <Input
+                                          value={wine.vintage ? String(wine.vintage) : ""}
+                                          onChange={(e) => updateWineRow(index, "vintage", e.target.value ? Number.parseInt(e.target.value, 10) : undefined)}
+                                          onClick={(e) => e.stopPropagation()}
+                                          type="number"
+                                          className="h-10 text-[14px]"
+                                        />
+                                      ) : (
+                                        <span className="text-[13px] text-[#4B4B4B]">{wine.vintage || "-"}</span>
+                                      )}
+                                    </div>
+                                    <span className="truncate text-[13px] text-[#4B4B4B]">{wine.country || "-"}</span>
+                                    <div>
+                                      {editingRowIndex === index && editMode ? (
+                                        <Input
+                                          value={formatPrice((wine as DraftWine).price ?? wine.purchase_price)}
+                                          onChange={(e) => updateWineRow(index, "purchase_price", e.target.value ? Number.parseFloat(e.target.value) : undefined)}
+                                          onClick={(e) => e.stopPropagation()}
+                                          type="number"
+                                          step="0.01"
+                                          className={cn("h-10 text-[14px]", rowMissingPrice && "border-amber-300 bg-amber-50")}
+                                        />
+                                      ) : (
+                                        <span className={cn("text-[13px] font-medium", rowMissingPrice ? "text-amber-700" : "text-[#4B4B4B]")}>
+                                          {formatPrice((wine as DraftWine).price ?? wine.purchase_price) || "Sem preço"}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className={cn(
+                                      "inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                                      rowStatus === "error"
+                                        ? "bg-rose-100 text-rose-700"
+                                        : rowStatus === "review"
+                                          ? "bg-amber-100 text-amber-700"
+                                          : "bg-emerald-100 text-emerald-700",
+                                    )}>
+                                      {rowStatus === "error" ? "Erro" : rowStatus === "review" ? "Revisar" : "OK"}
+                                    </span>
+                                    <div className="flex justify-end">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleRowSelection(index);
+                                        }}
+                                        className="min-h-10 rounded-full px-3 text-[12px] font-semibold text-[#7B1E2B] transition-colors hover:bg-[#7B1E2B]/[0.08]"
+                                      >
+                                        {selectedSet.has(index) ? "Desmarcar" : "Selecionar"}
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[13px] font-medium text-amber-800">
+                          Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.
                         </div>
                       )}
                     </motion.div>
@@ -1850,6 +2698,18 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
           {step === "preview" ? (
             <div className="sticky bottom-0 z-30 border-t border-black/5 bg-white p-4 flex justify-end shrink-0">
+              <div className="mr-auto flex flex-col gap-1">
+                {isTruncatedPreview ? (
+                  <div className="flex items-center text-[11px] font-medium text-black/50">
+                    Mostrando {visibleDraftWines.length} de {renderableRows.length} vinhos
+                  </div>
+                ) : null}
+                {!canImport ? (
+                  <div className="flex items-center text-[12px] font-medium text-rose-700">
+                    Nenhum vinho válido para importar
+                  </div>
+                ) : null}
+              </div>
               <Button
                 onClick={handleImport}
                 variant="primary"

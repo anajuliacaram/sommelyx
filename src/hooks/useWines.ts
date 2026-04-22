@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSommelyxData } from "@/lib/sommelyx-data";
+import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 
 export interface Wine {
   id: string;
@@ -32,13 +33,13 @@ export type WineInsert = Omit<Wine, "id" | "created_at" | "updated_at">;
 function sanitizeWineInsertPayload(wine: Omit<WineInsert, "user_id">, userId: string) {
   return {
     user_id: userId,
-    name: wine.name?.trim(),
-    producer: wine.producer ?? null,
-    country: wine.country ?? null,
-    region: wine.region ?? null,
-    grape: wine.grape ?? null,
+    name: normalizeWineText(wine.name),
+    producer: normalizeWineText(wine.producer) ?? null,
+    country: normalizeWineText(wine.country) ?? null,
+    region: normalizeWineText(wine.region) ?? null,
+    grape: normalizeWineText(wine.grape) ?? null,
     vintage: wine.vintage ?? null,
-    style: wine.style ?? null,
+    style: typeof wine.style === "string" ? wine.style.trim().toLowerCase() : wine.style ?? null,
     purchase_price: wine.purchase_price ?? null,
     current_value: wine.current_value ?? null,
     quantity: wine.quantity,
@@ -92,11 +93,11 @@ export function useWines() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
         if (error) throw error;
-        return data as Wine[];
+        return (data as Wine[]).map((wine) => normalizeWineData(wine));
       }
       if (sommelyxData?.wines?.length) {
         const now = new Date().toISOString();
-        return sommelyxData.wines.map((wine, index) => ({
+        return sommelyxData.wines.map((wine) => normalizeWineData({
           id: wine.id,
           user_id: "demo",
           name: wine.name,
@@ -209,6 +210,7 @@ export function useAddWine() {
           throw new Error("Safra inválida");
         }
       }
+      console.log("NORMALIZED:", normalizeWineData(wine, { log: false }));
       const payload = sanitizeWineInsertPayload(wine, actorUserId);
 
       const { data, error } = await supabase
@@ -234,10 +236,17 @@ export function useUpdateWine() {
       if (!user) throw new Error("Not authenticated");
       const safeUpdates = { ...updates } as typeof updates;
       if (typeof safeUpdates.name === "string") {
-        const next = safeUpdates.name.trim();
+        const next = normalizeWineText(safeUpdates.name);
         if (!next) throw new Error("Nome do vinho é obrigatório");
         safeUpdates.name = next;
       }
+      if (typeof safeUpdates.producer === "string") safeUpdates.producer = normalizeWineText(safeUpdates.producer) ?? null;
+      if (typeof safeUpdates.country === "string") safeUpdates.country = normalizeWineText(safeUpdates.country) ?? null;
+      if (typeof safeUpdates.region === "string") safeUpdates.region = normalizeWineText(safeUpdates.region) ?? null;
+      if (typeof safeUpdates.grape === "string") safeUpdates.grape = normalizeWineText(safeUpdates.grape) ?? null;
+      if (typeof safeUpdates.cellar_location === "string") safeUpdates.cellar_location = normalizeWineText(safeUpdates.cellar_location) ?? null;
+      if (typeof safeUpdates.food_pairing === "string") safeUpdates.food_pairing = normalizeWineText(safeUpdates.food_pairing) ?? null;
+      if (typeof safeUpdates.tasting_notes === "string") safeUpdates.tasting_notes = normalizeWineText(safeUpdates.tasting_notes) ?? null;
       if (typeof safeUpdates.quantity === "number" && (!Number.isFinite(safeUpdates.quantity) || safeUpdates.quantity < 0)) {
         throw new Error("Quantidade inválida");
       }
@@ -247,6 +256,8 @@ export function useUpdateWine() {
       if (typeof safeUpdates.current_value === "number" && (!Number.isFinite(safeUpdates.current_value) || safeUpdates.current_value < 0)) {
         throw new Error("Valor atual inválido");
       }
+      if (typeof safeUpdates.style === "string") safeUpdates.style = safeUpdates.style.trim().toLowerCase();
+      console.log("NORMALIZED:", normalizeWineData(safeUpdates, { log: false }));
       const payload = sanitizeWineUpdatePayload(safeUpdates);
       const { error } = await supabase.from("wines").update(payload as any).eq("id", id).eq("user_id", user.id);
       if (error) throw error;

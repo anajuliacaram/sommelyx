@@ -17,6 +17,7 @@ import { useCreateWineLocation, useUpdateWineLocation, useWineLocations } from "
 import { LocationAuditDialog } from "@/components/LocationAuditDialog";
 import { TransferLocationDialog } from "@/components/TransferLocationDialog";
 import { CreateLocationDialog } from "@/components/CreateLocationDialog";
+import { normalizeWineData } from "@/lib/wine-normalization";
 
 interface EditWineDialogProps {
   open: boolean;
@@ -147,24 +148,25 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
 
   useEffect(() => {
     if (wine) {
+      const normalizedWine = normalizeWineData(wine, { log: true });
       const primaryLoc = (locations ?? []).find((l) => l.wine_id === wine.id) ?? null;
-      setName(wine.name);
-      setProducer(wine.producer || "");
-      setQuantity(String(wine.quantity));
-      setVintage(wine.vintage ? String(wine.vintage) : "");
-      setStyle(wine.style || "");
-      setCountry(wine.country || "");
-      setRegion(wine.region || "");
-      setGrape(wine.grape || "");
-      setLastPaidSnapshot(wine.purchase_price != null ? String(wine.purchase_price) : "");
+      setName(normalizedWine.name);
+      setProducer(normalizedWine.producer || "");
+      setQuantity(String(normalizedWine.quantity));
+      setVintage(normalizedWine.vintage ? String(normalizedWine.vintage) : "");
+      setStyle(normalizedWine.style || "");
+      setCountry(normalizedWine.country || "");
+      setRegion(normalizedWine.region || "");
+      setGrape(normalizedWine.grape || "");
+      setLastPaidSnapshot(normalizedWine.purchase_price != null ? String(normalizedWine.purchase_price) : "");
       setLastPaidDateSnapshot("");
-      setLastPaid(wine.purchase_price ? String(wine.purchase_price) : "");
-      setPurchasePriceUnknown(!isCommercial && !wine.purchase_price);
+      setLastPaid(normalizedWine.purchase_price ? String(normalizedWine.purchase_price) : "");
+      setPurchasePriceUnknown(!isCommercial && !normalizedWine.purchase_price);
       setLastPaidDate(new Date().toISOString().split("T")[0]);
       setCurrentValue(
-        wine.current_value
-          ? String(wine.current_value)
-          : (!isCommercial ? String(suggestMarketValue(wine)) : "")
+        normalizedWine.current_value
+          ? String(normalizedWine.current_value)
+          : (!isCommercial ? String(suggestMarketValue(normalizedWine)) : "")
       );
       setLocation(
         primaryLoc
@@ -175,13 +177,13 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
               position: primaryLoc.position ?? undefined,
               manualLabel: primaryLoc.manual_label ?? undefined,
             }
-          : (wine.cellar_location ? { manualLabel: wine.cellar_location } : {})
+          : (normalizedWine.cellar_location ? { manualLabel: normalizedWine.cellar_location } : {})
       );
-      setDrinkFrom(wine.drink_from ? String(wine.drink_from) : "");
-      setDrinkUntil(wine.drink_until ? String(wine.drink_until) : "");
-      setFoodPairing(wine.food_pairing || "");
-      setNotes(wine.tasting_notes || "");
-      setRating(wine.rating ? String(wine.rating) : "");
+      setDrinkFrom(normalizedWine.drink_from ? String(normalizedWine.drink_from) : "");
+      setDrinkUntil(normalizedWine.drink_until ? String(normalizedWine.drink_until) : "");
+      setFoodPairing(normalizedWine.food_pairing || "");
+      setNotes(normalizedWine.tasting_notes || "");
+      setRating(normalizedWine.rating ? String(normalizedWine.rating) : "");
       setSuccess(false);
     }
   }, [wine, locations]);

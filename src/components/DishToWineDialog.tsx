@@ -11,6 +11,7 @@ import { ModalBase } from "@/components/ui/ModalBase";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
+import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { useToast } from "@/hooks/use-toast";
 import {
   CompatibilityBadge,
@@ -745,11 +746,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                 .filter((w) => matchesStyle(w.style))
                 .filter((w) => {
                   if (!wineSearch.trim()) return true;
-                  const q = wineSearch.toLowerCase();
+                  const q = normalizeWineSearchText(wineSearch);
                   return (
-                    w.name.toLowerCase().includes(q) ||
-                    (w.producer && w.producer.toLowerCase().includes(q)) ||
-                    (w.grape && w.grape.toLowerCase().includes(q)) ||
+                    normalizeWineSearchText(w.name).includes(q) ||
+                    normalizeWineSearchText(w.producer).includes(q) ||
+                    normalizeWineSearchText(w.grape).includes(q) ||
                     (w.vintage && String(w.vintage).includes(q))
                   );
                 })
@@ -899,7 +900,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                 </div>
 
                 {/* Wine list */}
-                <ScrollArea className="h-[280px] -mx-1 px-1">
+                <ScrollArea className="h-[300px] -mx-1 px-1">
                   <div className="space-y-1.5">
                     {filtered.map((w) => {
                       const isSelected = selectedWineId === w.id;
@@ -909,9 +910,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                           key={w.id}
                           onClick={() => setSelectedWineId(w.id)}
                           className={cn(
-                            "w-full text-left rounded-2xl p-3.5 transition-all duration-[160ms] ease-[cubic-bezier(0.22,1,0.36,1)] group",
+                            "w-full cursor-pointer text-left rounded-2xl p-3.5 transition-all duration-[160ms] ease-[cubic-bezier(0.22,1,0.36,1)] group",
                             isSelected
-                              ? "bg-primary/[0.08] border border-primary/20 shadow-[0_2px_12px_-4px_hsl(var(--primary)/0.12)]"
+                              ? "bg-primary/[0.10] border border-primary/20 shadow-[0_2px_12px_-4px_hsl(var(--primary)/0.12)] ring-1 ring-primary/10"
                               : "bg-background/40 border border-border/25 hover:bg-muted/30 hover:border-border/40 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_-6px_rgba(0,0,0,0.08)] active:scale-[0.99]"
                           )}
                         >
@@ -1212,13 +1213,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                           </p>
                           {/* Recipe button */}
                           {d.recipe && (
-                            <div className="pl-[18px]">
+                            <div className="pl-[18px] pt-1.5">
                               <button
                                 type="button"
                                 onClick={() => setRecipeModal({ recipe: d.recipe!, dish: d.name })}
-                                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                                className="recipe-button inline-flex min-h-11 items-center gap-2 rounded-full border border-[rgba(122,46,46,0.10)] bg-[rgba(160,60,60,0.08)] px-4 py-2.5 text-sm font-medium text-[#7a2e2e] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424]"
                               >
-                                <BookOpen className="h-3 w-3" />
+                                <BookOpen className="h-4 w-4" />
                                 Ver receita
                               </button>
                             </div>
@@ -1582,13 +1583,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                             {p.reason}
                           </p>
                           {p.recipe && (
-                            <div className="pl-[18px]">
+                            <div className="pl-[18px] pt-1.5">
                               <button
                                 type="button"
                                 onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })}
-                                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                                className="recipe-button inline-flex min-h-11 items-center gap-2 rounded-full border border-[rgba(122,46,46,0.10)] bg-[rgba(160,60,60,0.08)] px-4 py-2.5 text-sm font-medium text-[#7a2e2e] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424]"
                               >
-                                <BookOpen className="h-3 w-3" />
+                                <BookOpen className="h-4 w-4" />
                                 Ver receita
                               </button>
                             </div>

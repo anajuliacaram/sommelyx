@@ -34,8 +34,8 @@ serve(async (req) => {
       });
     }
 
-    const AI_MODEL = Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview";
-    console.log(`[wine-insight] provider=lovable model=${AI_MODEL}`);
+    const AI_MODEL = "gpt-4o-mini";
+    console.log(`[wine-insight] provider=openai model=${AI_MODEL}`);
 
     const body = await req.json();
     const { alertType, wineName, style, grape, region, country, vintage, drinkFrom, drinkUntil } = body;
@@ -127,7 +127,16 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`OpenAI error: ${result.status} - ${result.error}`);
+      if (result.status === 422) {
+        return new Response(JSON.stringify({ error: "INVALID_AI_RESPONSE" }), {
+          status: 422,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ error: "Não foi possível gerar a análise agora." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const parsed = result.parsed;

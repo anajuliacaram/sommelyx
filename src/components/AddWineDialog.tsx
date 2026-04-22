@@ -18,6 +18,7 @@ import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
+import { normalizeWineData } from "@/lib/wine-normalization";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -254,37 +255,38 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   };
 
   const handleScanComplete = (data: any) => {
-    if (data.name) setName(data.name);
-    if (data.producer) setProducer(data.producer);
-    if (data.vintage) setVintage(String(data.vintage));
-    if (data.style) setStyle(data.style);
-    if (data.country) setCountry(data.country);
-    if (data.region) setRegion(data.region);
-    if (data.grape) setGrape(data.grape);
-    if (data.food_pairing) setFoodPairing(data.food_pairing);
-    if (data.tasting_notes) setNotes(data.tasting_notes);
-    if (data.drink_from) setDrinkFrom(String(data.drink_from));
-    if (data.drink_until) setDrinkUntil(String(data.drink_until));
-    if (data.purchase_price) setLastPaid(String(data.purchase_price));
-    if (data.current_value) {
-      setCurrentValue(String(data.current_value));
+    const normalized = normalizeWineData(data, { log: true });
+    if (normalized.name) setName(normalized.name);
+    if (normalized.producer) setProducer(normalized.producer);
+    if (normalized.vintage) setVintage(String(normalized.vintage));
+    if (normalized.style) setStyle(normalized.style);
+    if (normalized.country) setCountry(normalized.country);
+    if (normalized.region) setRegion(normalized.region);
+    if (normalized.grape) setGrape(normalized.grape);
+    if (normalized.food_pairing) setFoodPairing(normalized.food_pairing);
+    if (normalized.tasting_notes) setNotes(normalized.tasting_notes);
+    if (normalized.drink_from) setDrinkFrom(String(normalized.drink_from));
+    if (normalized.drink_until) setDrinkUntil(String(normalized.drink_until));
+    if (normalized.purchase_price) setLastPaid(String(normalized.purchase_price));
+    if (normalized.current_value) {
+      setCurrentValue(String(normalized.current_value));
       setCurrentValueTouched(false);
     } else if (!isCommercial) {
-      setCurrentValue(String(suggestPurchasePrice(data)));
+      setCurrentValue(String(suggestPurchasePrice(normalized)));
       setCurrentValueTouched(false);
     }
-    if (data.cellar_location) setLocation({ manualLabel: String(data.cellar_location) });
-    if (data.labelImagePreview) setLabelImagePreview(String(data.labelImagePreview));
-    if (data.labelImageFile) setLabelImageFile(data.labelImageFile);
-    if (data.labelImageBase64) setLabelImageBase64(String(data.labelImageBase64));
-    if (!data.purchase_price && !isCommercial) setNoPriceInfo(true);
+    if (normalized.cellar_location) setLocation({ manualLabel: String(normalized.cellar_location) });
+    if (normalized.labelImagePreview) setLabelImagePreview(String(normalized.labelImagePreview));
+    if (normalized.labelImageFile) setLabelImageFile(normalized.labelImageFile);
+    if (normalized.labelImageBase64) setLabelImageBase64(String(normalized.labelImageBase64));
+    if (!normalized.purchase_price && !isCommercial) setNoPriceInfo(true);
 
     // Only set drink window if AI returned them from the label
     // Do NOT use heuristic fallbacks — better to leave blank than fill wrong data
 
     if (
-      data.country || data.region || data.grape || data.food_pairing || data.tasting_notes ||
-      data.drink_from || data.drink_until
+      normalized.country || normalized.region || normalized.grape || normalized.food_pairing || normalized.tasting_notes ||
+      normalized.drink_from || normalized.drink_until
     ) {
       setMoreOpen(true);
     }
@@ -337,15 +339,34 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       }
 
       const formattedLocation = formatLocationLabel(location) || null;
-      const inserted = await addWine.mutateAsync({
-        name: name.trim(),
-        producer: producer || null,
+      const normalizedPayload = normalizeWineData({
+        name,
+        producer,
         quantity: parseInt(quantity) || 1,
         vintage: vintage ? parseInt(vintage) : null,
-        style: style || null,
-        country: country || null,
-        region: region || null,
-        grape: grape || null,
+        style,
+        country,
+        region,
+        grape,
+        purchase_price: lastPaid ? parseFloat(lastPaid) : null,
+        current_value: currentValue ? parseFloat(currentValue) : null,
+        cellar_location: formattedLocation,
+        drink_from: drinkFrom ? parseInt(drinkFrom) : null,
+        drink_until: drinkUntil ? parseInt(drinkUntil) : null,
+        food_pairing: foodPairing || null,
+        tasting_notes: notes || null,
+        rating: null,
+        image_url: imageUrl,
+      }, { log: true });
+      const inserted = await addWine.mutateAsync({
+        name: normalizedPayload.name || name.trim(),
+        producer: normalizedPayload.producer || null,
+        quantity: parseInt(quantity) || 1,
+        vintage: vintage ? parseInt(vintage) : null,
+        style: normalizedPayload.style || style || null,
+        country: normalizedPayload.country || null,
+        region: normalizedPayload.region || null,
+        grape: normalizedPayload.grape || null,
         purchase_price: lastPaid ? parseFloat(lastPaid) : null,
         current_value: currentValue ? parseFloat(currentValue) : null,
         cellar_location: formattedLocation,

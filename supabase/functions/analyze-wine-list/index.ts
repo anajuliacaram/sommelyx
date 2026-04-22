@@ -301,21 +301,6 @@ function isLenientWineListAnalysis(data: any): boolean {
   });
 }
 
-function extractToolArguments(aiData: any) {
-  const toolCallArgs = aiData?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-  if (typeof toolCallArgs === "string" && toolCallArgs.trim()) return JSON.parse(toolCallArgs);
-
-  const content = aiData?.choices?.[0]?.message?.content || "";
-  const jsonStart = content.indexOf("{");
-  const jsonEnd = content.lastIndexOf("}");
-  if (jsonStart !== -1 && jsonEnd > jsonStart) {
-    return JSON.parse(content.slice(jsonStart, jsonEnd + 1));
-  }
-
-  if (typeof content === "string" && content.trim()) return JSON.parse(content);
-  return null;
-}
-
 function normalizeWineListPayload(payload: any) {
   const rawWines = Array.isArray(payload?.wines) ? payload.wines : [];
   const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"];
@@ -452,34 +437,31 @@ serve(async (req) => {
 
   try {
     const requestId = crypto.randomUUID();
-    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
-    console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
-    if (!authHeader?.startsWith("Bearer ")) {
-      console.error("TOKEN RECEIVED:", "NO");
+    const authorization = req.headers.get("Authorization");
+    console.log("AUTH HEADER:", !!authorization);
+    if (!authorization) {
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header" });
-      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_REQUIRED", requestId }, 401);
+      return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
     }
 
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    console.error("TOKEN RECEIVED:", token ? "YES" : "NO");
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       {
         global: {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: req.headers.get("Authorization")!,
           },
         },
       },
     );
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
     const validatedUserId = user?.id;
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
-    if (userError || !validatedUserId) {
-      console.error("AUTH ERROR:", userError);
+    if (error || !validatedUserId) {
+      console.error("AUTH ERROR:", error);
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
-      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_INVALID", requestId }, 401);
+      return jsonResponse({ error: "AUTH_INVALID" }, 401);
     }
     userId = validatedUserId;
 
@@ -554,7 +536,7 @@ Use apenas pratos LEGÍVEIS no cardápio. Não invente itens.`;
                   complexity: { type: "string", enum: ["simples", "moderado", "complexo"] },
                   summary: { type: "string", description: "2-3 frases sobre o perfil ESPECÍFICO deste rótulo" },
                 },
-                required: ["body", "acidity", "tannin", "summary"],
+                required: ["body", "acidity", "tannin", "style", "complexity", "summary"],
                 additionalProperties: false,
               },
               dishes: {
@@ -592,7 +574,7 @@ Use apenas pratos LEGÍVEIS no cardápio. Não invente itens.`;
                       additionalProperties: false,
                     },
                   },
-                  required: ["name", "match", "reason", "compatibilityLabel", "harmony_type", "harmony_label", "dish_profile", "recipe"],
+                  required: ["name", "price", "match", "reason", "highlight", "compatibilityLabel", "harmony_type", "harmony_label", "dish_profile", "recipe"],
                   additionalProperties: false,
                 },
               },
@@ -706,14 +688,14 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
                       description: "Labels comparativas derivadas do conjunto analisado",
                     },
                   },
-                  required: ["name", "rating", "verdict", "compatibilityLabel", "description", "reasoning", "pairings"],
+                  required: ["name", "producer", "vintage", "style", "grape", "region", "price", "rating", "body", "acidity", "tannin", "occasion", "description", "reasoning", "pairings", "verdict", "compatibilityLabel", "highlight", "comparativeLabels"],
                   additionalProperties: false,
                 },
               },
               topPick: { type: "string" },
               bestValue: { type: "string" },
             },
-            required: ["wines"],
+            required: ["wines", "topPick", "bestValue"],
             additionalProperties: false,
           },
         },
@@ -755,12 +737,9 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre cada rótulo. Cite nomes dos vinhos, mencione produtores/regiões/posicionamento. Mesmo com leitura parcial, devolva a melhor análise possível mantendo a estrutura.`
         : "";
 
-      const messagesForAI = [
-        { role: "system" as const, content: systemPrompt },
-        { role: "user" as const, content: retryHint
-          ? [...userContent, { type: "text" as const, text: retryHint }]
-          : userContent },
-      ];
+      const userMessageContent = retryHint
+        ? [...userContent, { type: "text" as const, text: retryHint }]
+        : userContent;
       let parsed: any = null;
       let responseStatus = 200;
       let responseBodyPreview: string | null = null;
@@ -768,21 +747,20 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       const openaiResult = await callOpenAIResponses<any>({
         functionName: "analyze-wine-list",
         requestId: crypto.randomUUID(),
-        apiKey: "",
-        model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         timeoutMs: 90_000,
         temperature: 0.2,
         instructions: systemPrompt,
-        input: messagesForAI.map((message) => ({
-          role: message.role,
-          content: Array.isArray(message.content)
-            ? message.content.map((part: any) => {
+        input: [{
+          role: "user" as const,
+          content: Array.isArray(userMessageContent)
+            ? userMessageContent.map((part: any) => {
               if (part.type === "text") return { type: "input_text" as const, text: String(part.text || "") };
               if (part.type === "image_url") return { type: "input_image" as const, image_url: String(part.image_url?.url || ""), detail: "high" as const };
               return { type: "input_text" as const, text: "" };
             }).filter((part: any) => part.type === "input_text" ? part.text.trim().length > 0 : Boolean(part.image_url))
-            : [{ type: "input_text" as const, text: String(message.content || "") }],
-        })),
+            : [{ type: "input_text" as const, text: String(userMessageContent || "") }],
+        }],
         schema: (tools[0] as any)?.function?.parameters || {},
         maxOutputTokens: 8_000,
       });
@@ -812,7 +790,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
         }
         if (responseStatus === 422) {
-          return jsonResponse({ error: "A análise retornou um formato inválido. Tente novamente em instantes." }, 422);
+          return jsonResponse({ error: "INVALID_AI_RESPONSE" }, 422);
         }
         throw new Error(`AI error: ${responseStatus} - ${responseBodyPreview || ""}`);
       }

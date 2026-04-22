@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
+import { normalizeWineSearchText } from "@/lib/wine-normalization";
 
 interface ManageBottleDialogProps {
   open: boolean;
@@ -223,17 +224,17 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   const filteredWines = useMemo(() => {
     return baseWines.filter(w => {
       if (searchText) {
-        const q = searchText.toLowerCase();
-        const match = w.name.toLowerCase().includes(q) ||
-          w.producer?.toLowerCase().includes(q) ||
-          w.grape?.toLowerCase().includes(q) ||
-          w.country?.toLowerCase().includes(q) ||
-          String(w.vintage).includes(q);
+        const q = normalizeWineSearchText(searchText);
+        const match = normalizeWineSearchText(w.name).includes(q) ||
+          normalizeWineSearchText(w.producer).includes(q) ||
+          normalizeWineSearchText(w.grape).includes(q) ||
+          normalizeWineSearchText(w.country).includes(q) ||
+          String(w.vintage ?? "").includes(q);
         if (!match) return false;
       }
       if (!matchesStyleFilter(w.style, styleFilter)) return false;
-      if (selectedCountries.length > 0 && (!w.country || !selectedCountries.includes(w.country))) return false;
-      if (selectedGrapes.length > 0 && (!w.grape || !selectedGrapes.includes(w.grape))) return false;
+      if (selectedCountries.length > 0 && (!w.country || !selectedCountries.map((value) => normalizeWineSearchText(value)).includes(normalizeWineSearchText(w.country)))) return false;
+      if (selectedGrapes.length > 0 && (!w.grape || !selectedGrapes.map((value) => normalizeWineSearchText(value)).includes(normalizeWineSearchText(w.grape)))) return false;
       return true;
     });
   }, [baseWines, searchText, selectedCountries, selectedGrapes, styleFilter]);

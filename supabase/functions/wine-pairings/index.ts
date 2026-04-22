@@ -338,8 +338,7 @@ async function callAI(
   const result = await callOpenAIResponses<any>({
     functionName: "wine-pairings",
     requestId: crypto.randomUUID(),
-    apiKey: "",
-    model: Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-2.5-flash",
+    model: "gpt-4o-mini",
     timeoutMs: 45_000,
     temperature: 0.35,
     instructions: systemPrompt,
@@ -368,34 +367,32 @@ serve(async (req) => {
   let userId = "unknown";
 
   try {
-    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
-    console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
-    if (!authHeader?.startsWith("Bearer ")) {
-      console.error("TOKEN RECEIVED:", "NO");
-      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_REQUIRED", requestId }, 401);
+    const authorization = req.headers.get("Authorization");
+    console.log("AUTH HEADER:", !!authorization);
+    if (!authorization) {
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header" });
+      return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
     }
 
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-    console.error("TOKEN RECEIVED:", token ? "YES" : "NO");
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: req.headers.get("Authorization")!,
         },
       },
     });
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
     const validatedUserId = user?.id;
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
-    if (userError || !validatedUserId) {
-      console.error("AUTH ERROR:", userError);
+    if (error || !validatedUserId) {
+      console.error("AUTH ERROR:", error);
       await logToDb(supabaseUrl, serviceKey, "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
-      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_INVALID", requestId }, 401);
+      return jsonResponse({ error: "AUTH_INVALID" }, 401);
     }
     userId = validatedUserId;
 
@@ -624,7 +621,7 @@ INSTRUÇÕES:
                   complexity: { type: "string", enum: ["simples", "moderado", "complexo"] },
                   summary: { type: "string", description: "2-3 frases ESPECÍFICAS sobre ESTE rótulo, começando com o nome do vinho. Deve diferenciar de outros da mesma uva." },
                 },
-                required: ["body", "acidity", "tannin", "style", "summary"],
+                required: ["body", "acidity", "tannin", "style", "complexity", "summary"],
                 additionalProperties: false,
               },
               pairings: {
@@ -727,7 +724,7 @@ INSTRUÇÕES:
                       additionalProperties: false,
                     },
                   },
-                  required: ["wineName", "style", "reason", "fromCellar", "match", "harmony_type", "harmony_label", "compatibilityLabel", "wineProfile"],
+                  required: ["wineName", "style", "grape", "vintage", "region", "country", "reason", "fromCellar", "match", "harmony_type", "harmony_label", "compatibilityLabel", "wineProfile"],
                   additionalProperties: false,
                 },
               },
@@ -783,7 +780,7 @@ INSTRUÇÕES:
       if (!result.ok) {
         if (result.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
         if (result.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
-        if (result.status === 422) return jsonResponse({ error: "A análise retornou um formato inválido. Tente novamente em instantes." }, 422);
+        if (result.status === 422) return jsonResponse({ error: "INVALID_AI_RESPONSE" }, 422);
         if (result.status === 504) return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
         console.error("AI gateway error:", result.status, result.errText);
         return jsonResponse({ error: result.errText || "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);

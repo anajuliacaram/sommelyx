@@ -1,12 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
-
-function maskSecret(value?: string | null) {
-  if (!value) return "missing";
-  const trimmed = value.trim();
-  if (trimmed.length <= 6) return `${trimmed.slice(0, 2)}…`;
-  return `${trimmed.slice(0, 6)}…`;
-}
+import { callOpenAIResponses } from "../_shared/openai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -108,18 +102,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
-      });
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")?.trim() || "";
-    const AI_MODEL = Deno.env.get("AI_MODEL")?.trim() || "google/gemini-2.5-pro";
-    console.log(`[parse-csv-wines] lovable_key=${maskSecret(LOVABLE_API_KEY)} model=${AI_MODEL}`);
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
-      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -282,7 +264,20 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
                   drink_from: { type: "number" },
                   drink_until: { type: "number" },
                 },
-                required: ["name"],
+                required: [
+                  "name",
+                  "producer",
+                  "vintage",
+                  "style",
+                  "country",
+                  "region",
+                  "grape",
+                  "quantity",
+                  "purchase_price",
+                  "cellar_location",
+                  "drink_from",
+                  "drink_until",
+                ],
               },
             },
             column_mapping: {
@@ -292,82 +287,61 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
             },
             notes: { type: "string" },
           },
-          required: ["wines"],
+          required: ["wines", "column_mapping", "notes"],
         },
       },
     };
 
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-    async function callAiOnce(chunkText: string, model: string): Promise<{ result?: any; errorStatus?: number; transientError?: boolean }> {
+    async function callAiOnce(chunkText: string): Promise<{ result?: any; errorStatus?: number; transientError?: boolean }> {
       const requestId = crypto.randomUUID();
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60_000);
       try {
-        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=lovable model=${model}`);
-        const response = await fetch("https://ai.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}` },
-            ],
-            tools: [toolDef],
-            tool_choice: { type: "function", function: { name: "extract_wines" } },
-            temperature: 0.4,
-          }),
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=openai model=gpt-4o-mini`);
+        const result = await callOpenAIResponses<any>({
+          functionName: FUNCTION_NAME,
+          requestId,
+          model: "gpt-4o-mini",
+          timeoutMs: 60_000,
+          temperature: 0.4,
+          instructions: systemPrompt,
+          input: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "input_text",
+                  text: `Analise o conteúdo abaixo e extraia os dados de vinhos.\n\n${chunkText}`,
+                },
+              ],
+            },
+          ],
+          schema: toolDef.function.parameters,
+          maxOutputTokens: 4_000,
         });
-        if (!response.ok) {
-          const errText = await response.text().catch(() => "");
-          console.log(`[${FUNCTION_NAME}] request_id=${requestId} status=${response.status} error=${errText.slice(0, 300)}`);
-          const transient = response.status >= 500 || response.status === 408 || response.status === 425;
-          return { errorStatus: response.status, transientError: transient };
+
+        if (!result.ok) {
+          const transient = result.status >= 500 || result.status === 408 || result.status === 425;
+          return { errorStatus: result.status, transientError: transient };
         }
-        const data = await response.json();
-        const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
-        const argsRaw = toolCall?.function?.arguments;
-        if (!argsRaw) {
-          console.log(`[${FUNCTION_NAME}] request_id=${requestId} no_tool_call`);
-          return { errorStatus: 422 };
-        }
-        let parsed: any;
-        try {
-          parsed = typeof argsRaw === "string" ? JSON.parse(argsRaw) : argsRaw;
-        } catch (e) {
-          console.log(`[${FUNCTION_NAME}] request_id=${requestId} parse_error=${e instanceof Error ? e.message : "unknown"}`);
-          return { errorStatus: 422 };
-        }
-        return { result: parsed };
+
+        return { result: result.parsed };
       } catch (err) {
         const message = err instanceof Error ? err.message : "unknown";
         const isAbort = message.toLowerCase().includes("abort");
-        const isNetwork = /dns|network|fetch|connect|lookup/i.test(message);
         console.log(`[${FUNCTION_NAME}] request_id=${requestId} error=${message}`);
-        return { errorStatus: isAbort ? 504 : 500, transientError: isAbort || isNetwork };
-      } finally {
-        clearTimeout(timeout);
+        return { errorStatus: isAbort ? 504 : 500, transientError: isAbort };
       }
     }
 
     async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
-      // Try primary model with retries on transient errors (network/DNS/5xx)
-      const models = [AI_MODEL, "google/gemini-2.5-flash"];
       let lastStatus: number | undefined;
-      for (let m = 0; m < models.length; m++) {
-        const model = models[m];
-        for (let attempt = 0; attempt < 3; attempt++) {
-          const res = await callAiOnce(chunkText, model);
-          if (res.result) return res;
-          lastStatus = res.errorStatus;
-          if (!res.transientError) break; // Non-transient (e.g. 401/402/422/429): stop with this model
-          await sleep(500 * Math.pow(2, attempt)); // 500ms, 1s, 2s
-        }
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await callAiOnce(chunkText);
+        if (res.result) return res;
+        lastStatus = res.errorStatus;
+        if (!res.transientError) break;
+        await sleep(500 * Math.pow(2, attempt));
       }
       return { errorStatus: lastStatus ?? 500 };
     }
@@ -406,7 +380,7 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
       const message =
         status === 429 ? "Muitas requisições. Tente novamente em alguns segundos."
           : status === 402 ? "Créditos de IA esgotados. Adicione créditos em Configurações > Workspace > Uso."
-          : "Não foi possível extrair dados do arquivo.";
+          : failures.includes(422) ? "INVALID_AI_RESPONSE" : "Não foi possível extrair dados do arquivo.";
       await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length });
       return new Response(JSON.stringify({ error: message }), {
         status,

@@ -34,8 +34,8 @@ serve(async (req) => {
       });
     }
 
-    const AI_MODEL = Deno.env.get("LOVABLE_AI_MODEL")?.trim() || "google/gemini-3-flash-preview";
-    console.log(`[taste-compatibility] provider=lovable model=${AI_MODEL}`);
+    const AI_MODEL = "gpt-4o-mini";
+    console.log(`[taste-compatibility] provider=openai model=${AI_MODEL}`);
 
     const body = await req.json();
     const { targetWine, userCellar } = body;
@@ -125,7 +125,16 @@ Vinho a avaliar:
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`OpenAI error: ${result.status} - ${result.error}`);
+      if (result.status === 422) {
+        return new Response(JSON.stringify({ error: "INVALID_AI_RESPONSE" }), {
+          status: 422,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ error: "Não foi possível calcular a compatibilidade agora." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const parsed = result.parsed;

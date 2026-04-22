@@ -347,6 +347,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     return [...filteredWines].sort((a, b) => scoreWine(b) - scoreWine(a));
   }, [filteredWines, mealQuery, bodyPreference, priceRange, results?.bestValue, results?.topPick, selectedWineName]);
 
+  const displayWines = refinedWines.slice(0, 100);
+  const isTruncated = refinedWines.length > displayWines.length;
+
   const availableTypes = results ? [...new Set(results.wines.map(w => detectWineType(w.style)).filter(t => t !== "unknown"))] : [];
 
   return (
@@ -566,8 +569,15 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </div>
               </div>
 
-              <ul className="space-y-3">
-                {refinedWines.map((wine, i) => (
+              {results && results.wines.length > 0 && refinedWines.length === 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[13px] font-medium text-amber-800">
+                  Os dados foram importados, mas não puderam ser exibidos. Atualize a página.
+                </div>
+              ) : null}
+
+              <div className="max-h-[400px] overflow-y-auto pr-1 cellar-scroll">
+                <ul className="space-y-3">
+                  {displayWines.map((wine, i) => (
                   <WineListCard
                     key={`${wine.name}-${i}`}
                     wine={wine}
@@ -577,8 +587,15 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     isSelected={selectedWineName === wine.name}
                     onChooseWine={() => setSelectedWineName(wine.name)}
                   />
-                ))}
-              </ul>
+                  ))}
+                </ul>
+              </div>
+
+              {isTruncated && (
+                <p className="text-[11px] font-medium text-muted-foreground">
+                  Mostrando 100 de {refinedWines.length} vinhos
+                </p>
+              )}
             </motion.div>
           )}
 

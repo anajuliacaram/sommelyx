@@ -98,7 +98,18 @@ REGRAS:
       },
       maxOutputTokens: 300,
     });
-    if (!result.ok) throw new Error(`OpenAI error: ${result.status} - ${result.error}`);
+    if (!result.ok) {
+      if (result.status === 422) {
+        return new Response(
+          JSON.stringify({ error: "INVALID_AI_RESPONSE" }),
+          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ error: "Erro ao estimar preço." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const parsed = result.parsed;
     const price = Number(parsed.estimated_price);
 

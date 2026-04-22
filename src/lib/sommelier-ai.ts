@@ -1,5 +1,6 @@
 import { invokeEdgeFunction, EdgeFunctionError } from "@/lib/edge-invoke";
 import type { AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
+import { normalizeWineData } from "@/lib/wine-normalization";
 
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes.";
 
@@ -215,6 +216,9 @@ function classifyError(err: unknown): ClassifiedError {
   }
   if (lower.includes("failed to send")) {
     return { type: "ai_fail", message: "A solicitação não pôde ser enviada. Tente novamente." };
+  }
+  if (lower.includes("invalid_ai_response") || lower.includes("empty_ai_response")) {
+    return { type: "ai_fail", message: ANALYSIS_FALLBACK_MESSAGE };
   }
   if (lower.includes("créditos") || lower.includes("esgotados") || lower.includes("ai gateway error") || lower.includes("não conseguimos")) {
     return { type: "ai_fail", message: ANALYSIS_FALLBACK_MESSAGE };
@@ -836,17 +840,17 @@ export async function analyzeWineList(
       return data;
     }
     if (data && Array.isArray(data.wines) && data.wines.length > 0) {
-      return data;
+      return { ...data, wines: data.wines.map((wine) => normalizeWineData(wine, { log: false })) };
     }
     const retryData = await request().catch(() => null);
     if (retryData && (retryData as any).fallback === true) {
       return retryData;
     }
     if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0) {
-      return retryData;
+      return { ...retryData, wines: retryData.wines.map((wine) => normalizeWineData(wine, { log: false })) };
     }
-    if (data && isValidLenientWineList(data)) return data;
-    if (retryData && isValidLenientWineList(retryData)) return retryData;
+    if (data && isValidLenientWineList(data)) return { ...data, wines: (data.wines || []).map((wine) => normalizeWineData(wine, { log: false })) };
+    if (retryData && isValidLenientWineList(retryData)) return { ...retryData, wines: (retryData.wines || []).map((wine) => normalizeWineData(wine, { log: false })) };
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {

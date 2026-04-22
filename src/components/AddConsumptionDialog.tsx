@@ -9,6 +9,7 @@ import { useWines, Wine } from "@/hooks/useWines";
 import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star, Search } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
+import { normalizeWineSearchText } from "@/lib/wine-normalization";
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
 
@@ -63,6 +64,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [consumedAt, setConsumedAt] = useState(new Date().toISOString().split("T")[0]);
   const [wineSearch, setWineSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<WineTypeFilter>("all");
+  const [showWinePicker, setShowWinePicker] = useState(false);
 
   useEffect(() => {
     if (open && preSelectedWine) {
@@ -75,6 +77,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
       setGrape(preSelectedWine.grape || "");
       setStyle(preSelectedWine.style || "");
       setVintage(preSelectedWine.vintage?.toString() || "");
+      setShowWinePicker(false);
     }
   }, [open, preSelectedWine]);
 
@@ -94,15 +97,16 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
     setConsumedAt(new Date().toISOString().split("T")[0]);
     setWineSearch("");
     setTypeFilter("all");
+    setShowWinePicker(false);
   };
 
   const cellarWines = useMemo(() => (wines || []).filter((w) => w.quantity > 0), [wines]);
   const filteredWines = useMemo(() => {
-    const q = wineSearch.trim().toLowerCase();
+    const q = normalizeWineSearchText(wineSearch);
     return cellarWines.filter((w) => {
       if (typeFilter !== "all" && classifyWineType(w.style) !== typeFilter) return false;
       if (!q) return true;
-      const hay = `${w.name} ${w.producer || ""} ${w.grape || ""} ${w.country || ""} ${w.region || ""} ${w.vintage || ""}`.toLowerCase();
+      const hay = normalizeWineSearchText(`${w.name} ${w.producer || ""} ${w.grape || ""} ${w.country || ""} ${w.region || ""} ${w.vintage || ""}`);
       return hay.includes(q);
     });
   }, [cellarWines, wineSearch, typeFilter]);
@@ -119,7 +123,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
       setStyle(wine.style || "");
       setVintage(wine.vintage?.toString() || "");
     }
+    setShowWinePicker(false);
   };
+
+  const selectedWine = wines?.find((w) => w.id === selectedWineId) ?? null;
 
   const handleSubmit = async () => {
     if (!wineName.trim()) {
@@ -153,7 +160,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="overflow-hidden">
         <DialogHeader>
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
@@ -166,20 +173,20 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex max-h-[calc(90vh-6rem)] flex-col gap-5 overflow-y-auto pr-1">
           <div className="space-y-1.5">
             <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Origem</Label>
             <div className="flex gap-1.5">
-              <Button type="button" variant={source === "cellar" ? "primary" : "secondary"} className="flex-1" onClick={() => { setSource("cellar"); setSelectedWineId(""); }}>
+              <Button type="button" variant={source === "cellar" ? "primary" : "secondary"} className="flex-1" onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}>
                 Da minha adega
               </Button>
-              <Button type="button" variant={source === "external" ? "primary" : "secondary"} className="flex-1" onClick={() => { setSource("external"); setSelectedWineId(""); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}>
+              <Button type="button" variant={source === "external" ? "primary" : "secondary"} className="flex-1" onClick={() => { setSource("external"); setSelectedWineId(""); setShowWinePicker(false); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}>
                 Consumo externo
               </Button>
             </div>
           </div>
 
-          {source === "cellar" && cellarWines.length > 0 && (
+          {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
             <div className="space-y-2">
               <Label className="text-xs tracking-[0.12em] uppercase text-black/50">Selecionar vinho</Label>
 
@@ -214,7 +221,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </div>
 
               <div
-                className="max-h-[260px] overflow-y-scroll rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm divide-y divide-black/5 cellar-scroll"
+                className="max-h-[300px] overflow-y-auto pr-1 rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm divide-y divide-black/5 cellar-scroll"
                 style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
               >
                 {filteredWines.length > 4 && (
@@ -236,9 +243,9 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                         type="button"
                         onClick={() => handleSelectWine(w.id)}
                         className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all",
-                          "hover:bg-[#F6F4F1] active:scale-[0.99]",
-                          selected && "bg-[#F6F4F1]",
+                          "w-full flex items-center gap-3 px-3 py-2.5 text-left cursor-pointer transition-all duration-150",
+                          "hover:bg-muted/40 active:scale-[0.99]",
+                          selected && "bg-olive/10 border-l-2 border-olive/30",
                         )}
                       >
                         <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", dotForWine(w.style))} />
@@ -255,6 +262,27 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     );
                   })
                 )}
+              </div>
+            </div>
+          )}
+
+          {source === "cellar" && selectedWine && !showWinePicker && (
+            <div className="rounded-2xl border border-black/10 bg-[rgba(123,30,43,0.04)] px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-semibold text-[#1C1C1C] truncate">{selectedWine.name}</p>
+                  <p className="text-[11.5px] text-black/55 truncate">
+                    {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-8 px-3 text-[11px] font-semibold text-[#7B1E2B]"
+                  onClick={() => setShowWinePicker(true)}
+                >
+                  Trocar vinho
+                </Button>
               </div>
             </div>
           )}
