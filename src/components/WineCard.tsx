@@ -38,29 +38,37 @@ function getWineTone(style?: string | null) {
   return "bg-[#C5BAAA]";
 }
 
-function getDrinkWindowIndicator(wine: Pick<WineType, "drink_from" | "drink_until" | "vintage">) {
+// Estima janela de consumo a partir do estilo + safra quando o cliente não preencheu.
+// Faixas conservadoras baseadas em práticas enológicas comuns.
+function estimateDrinkWindow(style?: string | null, vintage?: number | null): { from: number; until: number } {
+  const s = (style || "").toLowerCase();
+  const base = vintage ?? new Date().getFullYear() - 1;
+  // [anos até abrir, anos de guarda total]
+  let openIn = 1;
+  let span = 5;
+  if (s.includes("espum")) { openIn = 0; span = 3; }
+  else if (s.includes("rose")) { openIn = 0; span = 2; }
+  else if (s.includes("branco")) { openIn = 1; span = 4; }
+  else if (s.includes("sobrem") || s.includes("fortif") || s.includes("porto") || s.includes("madeira")) { openIn = 2; span = 20; }
+  else if (s.includes("tinto")) { openIn = 2; span = 8; }
+  else { openIn = 1; span = 5; }
+  return { from: base + openIn, until: base + openIn + span };
+}
+
+function resolveDrinkWindow(wine: Pick<WineType, "drink_from" | "drink_until" | "vintage" | "style">) {
+  const estimated = estimateDrinkWindow(wine.style, wine.vintage);
+  let from = wine.drink_from ?? estimated.from;
+  let until = wine.drink_until ?? estimated.until;
+  if (until <= from) until = from + Math.max(2, estimated.until - estimated.from);
+  return { from, until, isEstimated: wine.drink_from == null || wine.drink_until == null };
+}
+
+function getDrinkWindowIndicator(from: number, until: number) {
   const currentYear = new Date().getFullYear();
-
-  if (wine.drink_from != null && wine.drink_until != null && wine.drink_until > wine.drink_from) {
-    const span = wine.drink_until - wine.drink_from;
-    const raw = ((currentYear - wine.drink_from) / span) * 100;
-    return Math.max(6, Math.min(94, raw));
-  }
-
-  if (wine.drink_from != null && wine.drink_until == null) {
-    return currentYear <= wine.drink_from ? 20 : 78;
-  }
-
-  if (wine.drink_until != null && wine.drink_from == null) {
-    return currentYear > wine.drink_until ? 84 : 56;
-  }
-
-  if (wine.vintage != null) {
-    const age = currentYear - wine.vintage;
-    return Math.max(16, Math.min(84, 28 + age * 4));
-  }
-
-  return 50;
+  const span = until - from;
+  if (span <= 0) return 50;
+  const raw = ((currentYear - from) / span) * 100;
+  return Math.max(4, Math.min(96, raw));
 }
 
 export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
@@ -70,7 +78,8 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
   };
   const coverImageUrl = wine.image_url ?? wine.entries?.find((entry) => entry.image_url)?.image_url ?? null;
   const coverIsGenerated = !!coverImageUrl?.startsWith("data:image/svg+xml");
-  const indicator = getDrinkWindowIndicator(wine);
+  const drinkWindow = resolveDrinkWindow(wine);
+  const indicator = getDrinkWindowIndicator(drinkWindow.from, drinkWindow.until);
   const priceLabel = formatMoney(wine.displayPurchasePrice);
   const ratingLabel = typeof wine.rating === "number" ? wine.rating.toFixed(1) : "—";
 
@@ -161,9 +170,18 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
             />
           </div>
           <div className="flex items-center justify-between text-[11.5px] font-semibold text-[#6F665C]">
-            <span>{wine.drink_from ?? "—"}</span>
-            <span>{wine.drink_until ?? "—"}</span>
+            <span className={drinkWindow.isEstimated ? "italic text-[#8A8276]" : undefined}>
+              {drinkWindow.from}
+            </span>
+            <span className={drinkWindow.isEstimated ? "italic text-[#8A8276]" : undefined}>
+              {drinkWindow.until}
+            </span>
           </div>
+          {drinkWindow.isEstimated ? (
+            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#A39885]">
+              Janela sugerida
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-5">
