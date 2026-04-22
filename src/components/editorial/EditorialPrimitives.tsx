@@ -183,7 +183,14 @@ export function EditorialKpiCard({
   );
 }
 
-/* ── DrinkWindow timeline ────────────────────────────── */
+/* ── DrinkWindow timeline ──────────────────────────────
+   Padronizado: sempre exibe a mesma estrutura visual.
+   - Trilha cinza fina (sempre visível)
+   - Faixa colorida da janela (verde = ideal | dourado = sugerida)
+   - Indicador (bolinha) sempre visível, com clamp interno (4%-96%)
+   - Rótulo central inferior sempre presente:
+       "Janela ideal" (manual)  ou  "Janela sugerida" (estimada)
+   - Anos extremos (min/max) sempre nas pontas */
 export function DrinkWindow({
   from,
   until,
@@ -195,51 +202,70 @@ export function DrinkWindow({
   current?: number;
   estimated?: boolean;
 }) {
-  const min = from - 2;
-  const max = until + 2;
+  // Garante intervalo válido
+  const safeFrom = Number.isFinite(from) && from > 0 ? from : new Date().getFullYear();
+  const safeUntil = Number.isFinite(until) && until > safeFrom ? until : safeFrom + 5;
+  const min = safeFrom - 2;
+  const max = safeUntil + 2;
   const range = Math.max(1, max - min);
-  const pct = (y: number) => `${Math.max(0, Math.min(100, ((y - min) / range) * 100))}%`;
-  const inWindow = current >= from && current <= until;
+  // Clamp interno (4%-96%) para que a bolinha NUNCA fique colada na borda
+  const pct = (y: number) => {
+    const raw = ((y - min) / range) * 100;
+    return `${Math.max(0, Math.min(100, raw))}%`;
+  };
+  const pctClamped = (y: number) => {
+    const raw = ((y - min) / range) * 100;
+    return `${Math.max(4, Math.min(96, raw))}%`;
+  };
+  const inWindow = current >= safeFrom && current <= safeUntil;
   const clampedCurrent = Math.max(min, Math.min(max, current));
+  const trackColor = estimated ? "rgba(180,140,58,0.85)" : "#5F7F52";
+  const dotBorder = inWindow ? trackColor : "rgba(160,100,80,0.85)";
+  const dotInner = inWindow ? trackColor : "rgba(160,100,80,0.9)";
 
   return (
-    <div className="relative h-7 w-full">
+    <div className="relative h-8 w-full">
+      {/* Trilha base */}
       <div
         className="absolute inset-x-0 top-[12px] h-[2px] rounded-full"
         style={{ background: "rgba(95,111,82,0.14)" }}
       />
+      {/* Faixa da janela */}
       <div
         className="absolute top-[10px] h-[6px] rounded-full"
         style={{
-          left: pct(from),
-          width: `calc(${pct(until)} - ${pct(from)})`,
+          left: pct(safeFrom),
+          width: `calc(${pct(safeUntil)} - ${pct(safeFrom)})`,
           background: estimated
             ? "linear-gradient(90deg, rgba(180,140,58,0.25), rgba(180,140,58,0.55), rgba(180,140,58,0.25))"
             : "linear-gradient(90deg, rgba(95,111,82,0.3), rgba(95,111,82,0.6), rgba(95,111,82,0.3))",
         }}
       />
+      {/* Indicador (bolinha) — clamp interno para não colar na borda */}
       <div
         className="absolute top-[6px] flex h-[14px] w-[14px] -translate-x-1/2 items-center justify-center rounded-full border-[2px]"
         style={{
-          left: pct(clampedCurrent),
-          borderColor: inWindow ? "#5F7F52" : "rgba(160,100,80,0.85)",
+          left: pctClamped(clampedCurrent),
+          borderColor: dotBorder,
           background: "#fff",
           boxShadow: "0 1px 3px rgba(58,51,39,0.18)",
         }}
       >
         <div
           className="h-[6px] w-[6px] rounded-full"
-          style={{ background: inWindow ? "#5F7F52" : "rgba(160,100,80,0.9)" }}
+          style={{ background: dotInner }}
         />
       </div>
+      {/* Rodapé padronizado: ano min · rótulo central · ano max */}
       <div className="absolute bottom-0 left-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
         {min}
       </div>
-      {estimated && (
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8.5px] font-semibold uppercase tracking-[0.1em] text-[rgba(180,140,58,0.85)]">
-          Janela sugerida
-        </div>
-      )}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8.5px] font-semibold uppercase tracking-[0.1em]"
+        style={{ color: estimated ? "rgba(180,140,58,0.85)" : "rgba(95,111,82,0.75)" }}
+      >
+        {estimated ? "Janela sugerida" : "Janela ideal"}
+      </div>
       <div className="absolute bottom-0 right-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
         {max}
       </div>
