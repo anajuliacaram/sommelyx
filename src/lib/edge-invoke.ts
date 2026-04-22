@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 type InvokeOptions = {
   timeoutMs?: number;
   retries?: number;
-  accessToken?: string | null;
 };
 
 type EdgeEnvelopeSuccess<T> = {
@@ -129,32 +128,45 @@ function parseErrorBody(body: any, fallbackStatus?: number) {
   };
 }
 
-async function resolveAccessToken(preferredToken?: string | null, forceRefresh = false): Promise<string | null> {
-  if (!forceRefresh && preferredToken) return preferredToken;
+async function resolveSession(forceRefresh = false) {
+  if (forceRefresh) {
+    try {
+      await supabase.auth.refreshSession();
+    } catch (error) {
+      console.warn("[edge-invoke] refresh failed", error);
+    }
+  }
 
-  const { data: { session } } = await supabase.auth.getSession();
-  const currentToken = session?.access_token ?? null;
-  if (currentToken || !forceRefresh) return currentToken;
+  const { data } = await supabase.auth.getSession();
+  const session = data?.session ?? null;
+  console.log("SESSION:", session);
+  return session;
+}
 
-  const { data: refreshed } = await supabase.auth.refreshSession();
-  return refreshed.session?.access_token ?? null;
+function parseTextResponse(text: string) {
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return text;
+  }
 }
 
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
-  { timeoutMs = 45_000, retries = 2, accessToken: explicitAccessToken }: InvokeOptions = {},
+  { timeoutMs = 45_000, retries = 2 }: InvokeOptions = {},
 ): Promise<T> {
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
-  let attempt = 0;
-  let forceTokenRefresh = false;
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? (supabase as { supabaseUrl?: string }).supabaseUrl ?? "").replace(/\/$/, "");
 
-  while (true) {
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
-      const accessToken = await resolveAccessToken(explicitAccessToken, forceTokenRefresh);
-      console.log("Sending token:", Boolean(accessToken), { function: name, requestId, attempt });
-      if (!accessToken) {
+      const session = await resolveSession(attempt > 0);
+      console.log("Sending token:", !!session?.access_token);
+
+      if (!session?.access_token) {
+        console.error("NO TOKEN");
         console.warn("[edge-invoke] auth_missing", { function: name, requestId });
         throw new EdgeFunctionError("Sua sessão expirou. Faça login novamente.", {
           status: 401,
@@ -168,125 +180,65 @@ export async function invokeEdgeFunction<T>(
         requestId,
         attempt,
         payloadKeys: Object.keys(body),
-        hasAuthToken: Boolean(accessToken),
+        hasAuthToken: Boolean(session.access_token),
       });
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-      // Use direct fetch to guarantee the user's Authorization header is sent.
-      // The Supabase SDK's functions.invoke can override Authorization with the anon key
-      // in certain environments, causing 401s on JWT-validating edge functions.
-      const supabaseUrl = (supabase as any).supabaseUrl
-        || (supabase as any).functionsUrl?.replace(/\/functions\/v1\/?$/, "")
-        || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
-      const apikey = (supabase as any).supabaseKey
-        || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-        || "";
       const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
 
-      let data: unknown = null;
-      let error: unknown = null;
-      let responseStatus: number | undefined = undefined;
       try {
         const response = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`,
-            "apikey": apikey,
-            "x-client-info": "supabase-js-web/edge-invoke",
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify(body),
           signal: controller.signal,
         });
-        responseStatus = response.status;
+        console.log("EDGE STATUS:", response.status);
+
         const text = await response.text();
-        let parsedBody: any = null;
-        try {
-          parsedBody = text ? JSON.parse(text) : null;
-        } catch {
-          parsedBody = text;
-        }
+        const parsedBody = parseTextResponse(text);
 
         if (!response.ok) {
-          error = {
-            status: response.status,
-            message: parsedBody?.message || parsedBody?.error || `Request failed with status ${response.status}`,
-            context: { json: async () => parsedBody },
-          };
-        } else {
-          data = parsedBody;
+          console.error("EDGE ERROR:", text);
+          const parsed = parseErrorBody(parsedBody, response.status);
+
+          if (response.status === 401 && attempt < retries) {
+            continue;
+          }
+
+          throw new EdgeFunctionError(parsed.message, {
+            status: parsed.status ?? response.status,
+            code: parsed.code ?? (response.status === 401 ? "AUTH_INVALID" : "EDGE_FAILED"),
+            requestId: parsed.requestId,
+            retryable: parsed.retryable ?? isRetriable(response.status),
+          });
         }
-      } catch (fetchErr) {
-        error = fetchErr;
+
+        if (isEdgeEnvelopeError(parsedBody)) {
+          const parsed = parseErrorBody(parsedBody);
+          throw new EdgeFunctionError(parsed.message, {
+            status: parsed.status,
+            code: parsed.code,
+            requestId: parsed.requestId,
+            retryable: parsed.retryable,
+          });
+        }
+
+        const unwrapped = unwrapResponseData<T>(parsedBody);
+        console.log("[edge-invoke] response", {
+          function: name,
+          requestId,
+          durationMs: Date.now() - startedAt,
+          wrapped: isEdgeEnvelopeSuccess<T>(parsedBody),
+        });
+        return unwrapped;
       } finally {
         clearTimeout(timeout);
       }
-
-      if (error) {
-        const status = typeof (error as any)?.status === "number" ? (error as any).status : responseStatus;
-        let parsed = parseErrorBody({}, status);
-
-        try {
-          if (typeof (error as any)?.context?.json === "function") {
-            const errorBody = await (error as any).context.json();
-            parsed = parseErrorBody(errorBody, status);
-          } else if ((error as any)?.message && !(error as any).message.includes("non-2xx")) {
-            parsed = parseErrorBody({ message: (error as any).message }, status);
-          }
-        } catch {
-          // ignore parse errors
-        }
-
-        if (parsed.status === 401) {
-          if (attempt < retries) {
-            forceTokenRefresh = true;
-            attempt++;
-            await sleep(600 * Math.pow(2, attempt));
-            continue;
-          }
-          parsed.retryable = false;
-        }
-
-        if (attempt < retries && (parsed.retryable ?? isRetriable(parsed.status))) {
-          attempt++;
-          await sleep(600 * Math.pow(2, attempt));
-          continue;
-        }
-
-        throw new EdgeFunctionError(parsed.message, {
-          status: parsed.status,
-          code: parsed.code,
-          requestId: parsed.requestId,
-          retryable: parsed.retryable,
-        });
-      }
-
-      if (isEdgeEnvelopeError(data)) {
-        const parsed = parseErrorBody(data);
-        if (parsed.status === 401 && attempt < retries) {
-          forceTokenRefresh = true;
-          attempt++;
-          await sleep(600 * Math.pow(2, attempt));
-          continue;
-        }
-        throw new EdgeFunctionError(parsed.message, {
-          status: parsed.status,
-          code: parsed.code,
-          requestId: parsed.requestId,
-          retryable: parsed.retryable,
-        });
-      }
-
-      const unwrapped = unwrapResponseData<T>(data);
-      console.log("[edge-invoke] response", {
-        function: name,
-        requestId,
-        durationMs: Date.now() - startedAt,
-        wrapped: isEdgeEnvelopeSuccess<T>(data),
-      });
-      return unwrapped;
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : "";
       const retryable =
@@ -317,4 +269,6 @@ export async function invokeEdgeFunction<T>(
       throw new EdgeFunctionError(classifyEdgeError(toErrorMessage(err)));
     }
   }
+
+  throw new EdgeFunctionError("Não foi possível completar a solicitação.");
 }
