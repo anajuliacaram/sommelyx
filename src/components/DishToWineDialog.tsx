@@ -329,6 +329,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.info("[DishToWineDialog] upload_received", { step: "wine-list", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
     setStep("scanning");
     const reqId = nextRequestId();
     setLoading(true);
@@ -336,6 +337,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     setScanResults(null);
     try {
       const prepared = await prepareAiAnalysisAttachment(file);
+      console.info("[DishToWineDialog] file_validated", { step: "wine-list", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, extractedTextLength: prepared.extractedText?.length || 0, imageBase64Length: prepared.imageBase64?.length || 0 });
       const payload: AiAnalysisAttachmentPayload = {
         imageBase64: prepared.imageBase64,
         extractedText: prepared.extractedText,
@@ -351,14 +353,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         setError(null);
         setScanResults(null);
         try {
+          console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", retry: true, fileName: prepared.fileName, sourceType: prepared.sourceType });
           const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
           const result = await analyzeWineList(payload, profile);
           if (!isLatest(retryId)) return;
+          console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", retry: true, wines: result.wines?.length || 0 });
           setError(null);
           setScanResults(result);
           setStep("scan-results");
         } catch (err: any) {
           if (!isLatest(retryId)) return;
+          console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", retry: true, error: err?.message, code: err?.code, requestId: err?.requestId });
           setError(err.message || "Erro ao analisar a carta");
           setStep("photo");
         } finally {
@@ -367,14 +372,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
       };
 
       const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
+      console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", fileName: prepared.fileName, sourceType: prepared.sourceType });
       const result = await analyzeWineList(payload, profile);
       if (!isLatest(reqId)) return;
-      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine-list" });
+      console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", id: reqId, wines: result.wines?.length || 0 });
       setError(null);
       setScanResults(result);
       setStep("scan-results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
+      console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", id: reqId, error: err?.message, code: err?.code, requestId: err?.requestId });
       setError(err.message || "Erro ao analisar a carta");
       setStep("photo");
     } finally {
@@ -387,6 +394,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.info("[DishToWineDialog] upload_received", { step: "menu", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
     setStep("ext-menu-scanning");
     const reqId = nextRequestId();
     setLoading(true);
@@ -394,6 +402,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     setMenuResults(null);
     try {
       const prepared = await prepareAiAnalysisAttachment(file);
+      console.info("[DishToWineDialog] file_validated", { step: "menu", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, extractedTextLength: prepared.extractedText?.length || 0, imageBase64Length: prepared.imageBase64?.length || 0 });
       const payload: AiAnalysisAttachmentPayload = {
         imageBase64: prepared.imageBase64,
         extractedText: prepared.extractedText,
@@ -409,14 +418,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         setError(null);
         setMenuResults(null);
         try {
+          console.info("[DishToWineDialog] pairing_request_started", { step: "menu", retry: true, wineName: extWineName, sourceType: prepared.sourceType });
           const result = await analyzeMenuForWine(payload, extWineName);
           if (!isLatest(retryId)) return;
+          console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, dishes: result.dishes?.length || 0 });
           setError(null);
           setMenuResults(result);
           setWineProfile(result.wineProfile || null);
           setStep("ext-menu-results");
         } catch (err: any) {
           if (!isLatest(retryId)) return;
+          console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", retry: true, error: err?.message, code: err?.code, requestId: err?.requestId });
           setError(err.message || "Erro ao analisar o cardápio");
           setStep("ext-menu-photo");
         } finally {
@@ -424,15 +436,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         }
       };
 
+      console.info("[DishToWineDialog] pairing_request_started", { step: "menu", wineName: extWineName, sourceType: prepared.sourceType });
       const result = await analyzeMenuForWine(payload, extWineName);
       if (!isLatest(reqId)) return;
-      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "menu" });
+      console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, dishes: result.dishes?.length || 0 });
       setError(null);
       setMenuResults(result);
       setWineProfile(result.wineProfile || null);
       setStep("ext-menu-results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
+      console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", id: reqId, error: err?.message, code: err?.code, requestId: err?.requestId });
       setError(err.message || "Erro ao analisar o cardápio");
       setStep("ext-menu-photo");
     } finally {
@@ -1463,27 +1477,25 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                             )}
                           </div>
 
-                          {s.fromCellar && matchedWine && (
-                            <div className="pl-[18px] pt-1">
-                              <Button
-                                size="sm"
-                                onClick={() => setConsumeWine({
-                                  id: matchedWine.id,
-                                  name: matchedWine.name,
-                                  producer: matchedWine.producer,
-                                  country: matchedWine.country,
-                                  region: matchedWine.region,
-                                  grape: matchedWine.grape,
-                                  style: matchedWine.style,
-                                  vintage: matchedWine.vintage,
-                                })}
-                                className="h-8 rounded-full bg-primary px-4 text-[11.5px] font-semibold tracking-wide text-primary-foreground shadow-[0_2px_8px_-2px_rgba(123,30,43,0.35)] hover:bg-primary/90 hover:shadow-[0_4px_12px_-2px_rgba(123,30,43,0.45)] transition-all"
-                              >
-                                <Check className="mr-1.5 h-3.5 w-3.5" />
-                                Escolher este
-                              </Button>
-                            </div>
-                          )}
+                          <div className="pl-[18px] pt-1">
+                            <Button
+                              size="sm"
+                              onClick={() => setConsumeWine({
+                                id: matchedWine?.id || `${s.wineName}-${i}`,
+                                name: matchedWine?.name || s.wineName,
+                                producer: matchedWine?.producer || null,
+                                country: matchedWine?.country || null,
+                                region: matchedWine?.region || null,
+                                grape: matchedWine?.grape || null,
+                                style: matchedWine?.style || null,
+                                vintage: matchedWine?.vintage || null,
+                              })}
+                              className="h-8 rounded-full bg-primary px-4 text-[11.5px] font-semibold tracking-wide text-primary-foreground shadow-[0_2px_8px_-2px_rgba(123,30,43,0.35)] hover:bg-primary/90 hover:shadow-[0_4px_12px_-2px_rgba(123,30,43,0.45)] transition-all"
+                            >
+                              <Check className="mr-1.5 h-3.5 w-3.5" />
+                              Escolher este
+                            </Button>
+                          </div>
                         </motion.li>
                       );
                     })}

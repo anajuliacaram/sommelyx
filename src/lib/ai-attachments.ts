@@ -32,6 +32,7 @@ export interface PreparedSmartPdfImportAttachment {
 const MAX_IMAGE_DIMENSION = 1280;
 const MAX_IMAGE_QUALITY = 0.78;
 const MAX_IMAGE_BASE64_LENGTH = 1_800_000;
+const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 const MAX_PDF_PAGES_FOR_TEXT = 10;
 const MAX_PDF_PAGES_FOR_RENDER = 2;
 const MIN_PDF_TEXT_LENGTH = 120;
@@ -51,6 +52,10 @@ function inferMimeType(file: File) {
   if (file.type) return file.type;
   if (file.name.toLowerCase().endsWith(".pdf")) return "application/pdf";
   return "image/jpeg";
+}
+
+function trace(stage: string, metadata?: Record<string, unknown>) {
+  console.info(`[ai-attachments] ${stage}`, metadata || {});
 }
 
 function dataUrlToBase64(dataUrl: string) {
@@ -123,6 +128,13 @@ async function fileToDataUrl(file: File) {
 }
 
 async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
+  trace("upload_received", { fileName: file.name, mimeType: file.type || "unknown", sizeBytes: file.size });
+  if (!file.type.startsWith("image/")) {
+    throw Object.assign(new Error("Tipo de arquivo inválido."), { code: "INVALID_FILE_TYPE" });
+  }
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    throw Object.assign(new Error("Arquivo muito grande."), { code: "FILE_TOO_LARGE" });
+  }
   const dataUrl = await fileToDataUrl(file);
 
   const optimized = await new Promise<{ previewUrl: string; imageBase64: string }>((resolve, reject) => {
@@ -134,7 +146,7 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        reject(new Error("Não foi possível processar a imagem."));
+        reject(Object.assign(new Error("Não foi possível processar a imagem."), { code: "OCR_FAILED" }));
         return;
       }
 
@@ -143,8 +155,14 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       resolve(exportOptimizedJpeg(canvas));
     };
-    img.onerror = () => reject(new Error("Não foi possível carregar a imagem."));
+    img.onerror = () => reject(Object.assign(new Error("Não foi possível carregar a imagem."), { code: "OCR_FAILED" }));
     img.src = dataUrl;
+  });
+
+  trace("image_preprocessed", {
+    fileName: file.name,
+    imageBase64Length: optimized.imageBase64.length,
+    previewLength: optimized.previewUrl.length,
   });
 
   return {
@@ -157,26 +175,37 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
 }
 
 async function extractPdfText(file: File) {
-  const pdfjs = await getPdfJs();
-  const buffer = await file.arrayBuffer();
-  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
+  trace("pdf_text_extraction_started", { fileName: file.name, sizeBytes: file.size });
+  try {
+    const pdfjs = await getPdfJs();
+    const buffer = await file.arrayBuffer();
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
 
-  const pages: string[] = [];
-  for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
-    const page = await doc.getPage(pageNumber);
-    const content = await page.getTextContent();
-    const line = (content.items || [])
-      .map((item: any) => String(item.str || "").trim())
-      .filter(Boolean)
-      .join(" ");
+    const pages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
+      const page = await doc.getPage(pageNumber);
+      const content = await page.getTextContent();
+      const line = (content.items || [])
+        .map((item: any) => String(item.str || "").trim())
+        .filter(Boolean)
+        .join(" ");
 
-    if (line) pages.push(line);
+      if (line) pages.push(line);
+    }
+
+    const extracted = pages.join("\n").replace(/\s+/g, " ").trim().slice(0, MAX_EXTRACTED_TEXT_LENGTH);
+    trace("pdf_text_extracted", { fileName: file.name, textLength: extracted.length, pages: Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT) });
+    return extracted;
+  } catch (error) {
+    const err: any = error instanceof Error ? error : new Error("PDF_PARSE_FAILED");
+    err.code = err.code || "PDF_PARSE_FAILED";
+    trace("pdf_extraction_failed", { fileName: file.name, error: err.code || err.message });
+    throw err;
   }
-
-  return pages.join("\n").replace(/\s+/g, " ").trim().slice(0, MAX_EXTRACTED_TEXT_LENGTH);
 }
 
 async function extractPdfTextBlocks(file: File) {
+  trace("pdf_blocks_extraction_started", { fileName: file.name, sizeBytes: file.size });
   const pdfjs = await getPdfJs();
   const buffer = await file.arrayBuffer();
   const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
@@ -235,52 +264,60 @@ async function extractPdfTextBlocks(file: File) {
 }
 
 async function renderPdfAsImage(file: File) {
-  const pdfjs = await getPdfJs();
-  const buffer = await file.arrayBuffer();
-  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
-  const renderedPages: HTMLCanvasElement[] = [];
+  trace("pdf_render_started", { fileName: file.name, sizeBytes: file.size });
+  try {
+    const pdfjs = await getPdfJs();
+    const buffer = await file.arrayBuffer();
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
+    const renderedPages: HTMLCanvasElement[] = [];
 
-  for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_RENDER); pageNumber++) {
-    const page = await doc.getPage(pageNumber);
-    const viewport = page.getViewport({ scale: 1.05 });
-    const pageCanvas = document.createElement("canvas");
-    pageCanvas.width = Math.round(viewport.width);
-    pageCanvas.height = Math.round(viewport.height);
+    for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_RENDER); pageNumber++) {
+      const page = await doc.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: 1.05 });
+      const pageCanvas = document.createElement("canvas");
+      pageCanvas.width = Math.round(viewport.width);
+      pageCanvas.height = Math.round(viewport.height);
 
-    const ctx = pageCanvas.getContext("2d");
-    if (!ctx) throw new Error("Não foi possível processar o PDF.");
+      const ctx = pageCanvas.getContext("2d");
+      if (!ctx) throw new Error("INVALID_PDF");
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
 
-    await page.render({ canvasContext: ctx, viewport, canvas: pageCanvas }).promise;
-    renderedPages.push(pageCanvas);
+      await page.render({ canvasContext: ctx, viewport, canvas: pageCanvas }).promise;
+      renderedPages.push(pageCanvas);
+    }
+
+    if (renderedPages.length === 0) throw new Error("INVALID_PDF");
+
+    const gap = 16;
+    const combined = document.createElement("canvas");
+    combined.width = Math.max(...renderedPages.map((canvas) => canvas.width));
+    combined.height = renderedPages.reduce((sum, canvas) => sum + canvas.height, 0) + gap * (renderedPages.length - 1);
+
+    const combinedCtx = combined.getContext("2d");
+    if (!combinedCtx) throw new Error("INVALID_PDF");
+
+    combinedCtx.fillStyle = "#ffffff";
+    combinedCtx.fillRect(0, 0, combined.width, combined.height);
+
+    let y = 0;
+    for (const pageCanvas of renderedPages) {
+      combinedCtx.drawImage(pageCanvas, 0, y);
+      y += pageCanvas.height + gap;
+    }
+
+    return exportOptimizedJpeg(combined, {
+      maxWidth: 1200,
+      maxHeight: 1700,
+      baseQuality: 0.74,
+    });
+  } catch (error) {
+    const err: any = error instanceof Error ? error : new Error("INVALID_PDF");
+    err.code = err.code || (String(err.message || "").includes("INVALID_PDF") ? "INVALID_PDF" : "PDF_PARSE_FAILED");
+    trace("pdf_render_failed", { fileName: file.name, error: err.code || err.message });
+    throw err;
   }
-
-  if (renderedPages.length === 0) throw new Error("O PDF não possui páginas legíveis.");
-
-  const gap = 16;
-  const combined = document.createElement("canvas");
-  combined.width = Math.max(...renderedPages.map((canvas) => canvas.width));
-  combined.height = renderedPages.reduce((sum, canvas) => sum + canvas.height, 0) + gap * (renderedPages.length - 1);
-
-  const combinedCtx = combined.getContext("2d");
-  if (!combinedCtx) throw new Error("Não foi possível processar o PDF.");
-
-  combinedCtx.fillStyle = "#ffffff";
-  combinedCtx.fillRect(0, 0, combined.width, combined.height);
-
-  let y = 0;
-  for (const pageCanvas of renderedPages) {
-    combinedCtx.drawImage(pageCanvas, 0, y);
-    y += pageCanvas.height + gap;
-  }
-
-  return exportOptimizedJpeg(combined, {
-    maxWidth: 1200,
-    maxHeight: 1700,
-    baseQuality: 0.74,
-  });
 }
 
 function normalizeOcrText(text: string) {
@@ -295,6 +332,7 @@ function normalizeOcrText(text: string) {
 }
 
 async function extractPdfOcrText(file: File) {
+  trace("ocr_started", { fileName: file.name, sizeBytes: file.size });
   const pdfBase64 = dataUrlToBase64(await fileToDataUrl(file));
   const { data, error } = await supabase.functions.invoke("parse-pdf-ocr", {
     body: {
@@ -305,17 +343,30 @@ async function extractPdfOcrText(file: File) {
   });
 
   if (error) {
-    throw new Error(error.message || "Não conseguimos aplicar OCR neste PDF.");
+    const err: any = new Error(error.message || "Não conseguimos aplicar OCR neste PDF.");
+    err.code = error.code || "OCR_FAILED";
+    throw err;
   }
 
-  return normalizeOcrText(String(data?.text ?? data?.extractedText ?? ""));
+  const text = normalizeOcrText(String(data?.text ?? data?.extractedText ?? ""));
+  trace("ocr_completed", { fileName: file.name, textLength: text.length });
+  return text;
 }
 
 export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
   const mimeType = inferMimeType(file);
+  trace("file_validated", { fileName: file.name, mimeType, sizeBytes: file.size });
 
   if (mimeType === "application/pdf") {
-    const extractedText = await extractPdfText(file).catch(() => "");
+    let extractedText = "";
+    try {
+      extractedText = await extractPdfText(file);
+    } catch (error: any) {
+      if (error?.code === "INVALID_PDF" || error?.code === "PDF_PARSE_FAILED") {
+        throw error;
+      }
+      extractedText = "";
+    }
 
     if (extractedText.length >= MIN_PDF_TEXT_LENGTH) {
       return {
@@ -326,13 +377,20 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
       };
     }
 
-    const rendered = await renderPdfAsImage(file);
-    return {
-      ...rendered,
-      mimeType,
-      fileName: file.name,
-      sourceType: "pdf-image",
-    };
+    try {
+      const rendered = await renderPdfAsImage(file);
+      return {
+        ...rendered,
+        mimeType,
+        fileName: file.name,
+        sourceType: "pdf-image",
+      };
+    } catch (error: any) {
+      if (error?.code === "INVALID_PDF" || error?.code === "PDF_PARSE_FAILED") {
+        throw error;
+      }
+      throw Object.assign(new Error("Não foi possível processar o PDF."), { code: "PDF_PARSE_FAILED" });
+    }
   }
 
   return await prepareImageAttachment(file);

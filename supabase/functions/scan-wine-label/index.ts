@@ -10,8 +10,9 @@ const corsHeaders = {
 };
 
 const FUNCTION_NAME = "scan-wine-label";
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 1 * 1024 * 1024;
 const AI_TIMEOUT_MS = 15_000;
+const DEBUG_MODE = Deno.env.get("SCAN_WINE_LABEL_DEBUG") === "true";
 
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -61,11 +62,38 @@ function fail(status: number, payload: FailPayload) {
   return jsonResponse(status, payload);
 }
 
+async function logStep(
+  userId: string,
+  statusCode: number,
+  outcome: string,
+  durationMs: number,
+  requestId: string,
+  metadata?: Record<string, unknown>,
+) {
+  await logAudit(userId, statusCode, outcome, durationMs, {
+    request_id: requestId,
+    step: outcome,
+    ...(metadata || {}),
+  });
+}
+
 function normalizeBase64(input: string) {
   const trimmed = input.trim();
   const idx = trimmed.indexOf("base64,");
   if (idx !== -1) return trimmed.slice(idx + "base64,".length).trim();
   return trimmed;
+}
+
+function isValidBase64(input: string) {
+  const cleaned = input.replace(/\s+/g, "");
+  if (!cleaned || cleaned.length % 4 !== 0) return false;
+  if (!/^[A-Za-z0-9+/=]+$/.test(cleaned)) return false;
+  try {
+    atob(cleaned);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function parseImageDataUrl(input: string): { mime: string; base64: string } {
@@ -76,6 +104,15 @@ function parseImageDataUrl(input: string): { mime: string; base64: string } {
     return { mime, base64 };
   }
   return { mime: "image/jpeg", base64: trimmed };
+}
+
+function sanitizePreview(value: unknown) {
+  if (typeof value === "string") return value.slice(0, 500);
+  try {
+    return JSON.stringify(value).slice(0, 500);
+  } catch {
+    return String(value).slice(0, 500);
+  }
 }
 
 function extractJsonFromText(text: string) {
@@ -226,7 +263,6 @@ serve(async (req) => {
 
   try {
     const authorization = req.headers.get("Authorization");
-    console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
@@ -255,12 +291,12 @@ serve(async (req) => {
 
     const { data: { user }, error } = await supabase.auth.getUser();
     const validatedUserId = user?.id;
-    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
     if (error || !validatedUserId) {
-      console.error("AUTH ERROR:", error);
+      console.error(`[${FUNCTION_NAME}] step: auth_failed request_id=${requestId}`, error);
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "invalid_token",
+        auth_error: sanitizePreview(error),
       });
       return fail(401, {
         success: false,
@@ -272,6 +308,7 @@ serve(async (req) => {
     }
 
     userId = validatedUserId;
+    console.log(`[${FUNCTION_NAME}] step: auth_ok request_id=${requestId} user_id=${userId}`);
 
     if (!checkRateLimit(userId)) {
       await logAudit(userId, 429, "rate_limited", Date.now() - startTime, { request_id: requestId });
@@ -288,8 +325,11 @@ serve(async (req) => {
     try {
       payload = await req.json();
     } catch (parseError) {
-      console.error(`[${FUNCTION_NAME}] request_json_error request_id=${requestId}`, parseError);
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "invalid_json" });
+      console.error(`[${FUNCTION_NAME}] step: request_json_failed request_id=${requestId}`, parseError);
+      await logStep(userId, 400, "request_json_failed", Date.now() - startTime, requestId, {
+        reason: "invalid_json",
+        error: sanitizePreview(parseError),
+      });
       return fail(400, {
         success: false,
         code: "INVALID_REQUEST",
@@ -301,10 +341,10 @@ serve(async (req) => {
 
     const imageBase64Raw = payload?.imageBase64;
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { request_id: requestId, reason: "missing_image" });
+      await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, { reason: "missing_image" });
       return fail(400, {
         success: false,
-        code: "FILE_INVALID",
+        code: "INVALID_IMAGE",
         message: "Envie uma foto do rótulo para analisar.",
         requestId,
         retryable: false,
@@ -314,19 +354,22 @@ serve(async (req) => {
     const parsedImage = parseImageDataUrl(imageBase64Raw);
     const imageMime = parsedImage.mime;
     const imageBase64 = normalizeBase64(parsedImage.base64);
+    console.log(`[${FUNCTION_NAME}] step: image_normalized request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
     const base64Regex = /^[A-Za-z0-9+/=\s]+$/;
     const sizeBytes = Math.floor((imageBase64.length * 3) / 4);
-    console.log(`[${FUNCTION_NAME}] payload_parsed request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length} size_bytes=${sizeBytes}`);
+    console.log(`[${FUNCTION_NAME}] step: image_size_checked request_id=${requestId} size_bytes=${sizeBytes}`);
 
-    if (!imageMime.startsWith("image/") || !base64Regex.test(imageBase64)) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+    if (!imageMime.startsWith("image/") || !base64Regex.test(imageBase64) || !isValidBase64(imageBase64)) {
+      console.error(`[${FUNCTION_NAME}] step: image_invalid request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
+      await logStep(userId, 400, "image_invalid", Date.now() - startTime, requestId, {
         request_id: requestId,
         reason: "invalid_image_payload",
         image_mime: imageMime,
+        base64_length: imageBase64.length,
       });
       return fail(400, {
         success: false,
-        code: "FILE_INVALID",
+        code: "INVALID_IMAGE",
         message: "Arquivo inválido. Envie uma imagem legível do rótulo.",
         requestId,
         retryable: false,
@@ -334,8 +377,8 @@ serve(async (req) => {
     }
 
     if (sizeBytes > MAX_IMAGE_SIZE) {
-      await logAudit(userId, 413, "validation_error", Date.now() - startTime, {
-        request_id: requestId,
+      console.error(`[${FUNCTION_NAME}] step: image_too_large request_id=${requestId} size_bytes=${sizeBytes}`);
+      await logStep(userId, 413, "image_too_large", Date.now() - startTime, requestId, {
         reason: "image_too_large",
         size_bytes: sizeBytes,
       });
@@ -348,8 +391,24 @@ serve(async (req) => {
       });
     }
 
-    const AI_MODEL = "gpt-4o-mini";
-    console.log(`[${FUNCTION_NAME}] ai_request_sent request_id=${requestId} model=${AI_MODEL}`);
+    const AI_MODEL = Deno.env.get("SCAN_WINE_LABEL_MODEL")?.trim() || "gpt-4o-mini";
+    const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+    if (!openaiKey) {
+      console.error(`[${FUNCTION_NAME}] step: ai_config_missing request_id=${requestId} missing=OPENAI_API_KEY`);
+      await logStep(userId, 500, "ai_config_missing", Date.now() - startTime, requestId, {
+        reason: "missing_openai_api_key",
+        model: AI_MODEL,
+      });
+      return fail(502, {
+        success: false,
+        code: "AI_UNAVAILABLE",
+        message: "Service temporarily unavailable",
+        requestId,
+        retryable: true,
+      });
+    }
+
+    console.log(`[${FUNCTION_NAME}] step: ai_request_started request_id=${requestId} model=${AI_MODEL} image_size_bytes=${sizeBytes}`);
 
     const systemPrompt =
       `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia SOMENTE informações que estejam EXPLICITAMENTE VISÍVEIS no rótulo.\n\n` +
@@ -453,47 +512,60 @@ serve(async (req) => {
     const durationMs = Date.now() - startTime;
 
     if (!openaiResult.ok) {
-      responsePreview = openaiResult.error;
+      responsePreview = sanitizePreview(openaiResult.raw || openaiResult.error);
       const status = openaiResult.status;
-      console.error(`[${FUNCTION_NAME}] ai_response_error request_id=${requestId} status=${status} body=${String(responsePreview || "").slice(0, 240)}`);
-
-      if (status === 429) {
-        await logAudit(userId, 429, "ai_error", durationMs, { request_id: requestId, reason: "ai_rate_limit" });
-        return fail(429, {
-          success: false,
-          code: "AI_RATE_LIMIT",
-          message: "Muitas requisições agora. Tente novamente em instantes.",
-          requestId,
-          retryable: true,
-        });
-      }
-
-      await logAudit(userId, status === 504 ? 408 : 502, "ai_error", durationMs, {
-        request_id: requestId,
+      const timedOut = status === 504 || String(openaiResult.error).toLowerCase().includes("timeout");
+      const parseFailed = status === 422 || openaiResult.error === "INVALID_AI_RESPONSE" || openaiResult.error === "EMPTY_AI_RESPONSE";
+      const code = timedOut ? "AI_TIMEOUT" : parseFailed ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE";
+      const message = timedOut
+        ? "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida."
+        : "Service temporarily unavailable";
+      console.error(`[${FUNCTION_NAME}] step: ai_failed request_id=${requestId} status=${status} code=${code} preview=${responsePreview}`);
+      await logStep(userId, timedOut ? 408 : 502, "ai_failed", durationMs, requestId, {
         ai_status: status,
-        ai_body_preview: String(responsePreview || "").slice(0, 400),
+        ai_error: sanitizePreview(openaiResult.error),
+        ai_response_preview: responsePreview,
+        timed_out: timedOut,
+        parse_failed: parseFailed,
       });
-      return fail(status === 422 ? 422 : status === 504 ? 408 : 502, {
+      return fail(timedOut ? 408 : 502, {
         success: false,
-        code: status === 422 ? "INVALID_AI_RESPONSE" : status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
-        message: status === 422
-          ? "INVALID_AI_RESPONSE"
-          : status === 504
-          ? "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida."
-          : "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+        code,
+        message,
         requestId,
         retryable: true,
       });
     }
 
-    parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
-    console.log(`[${FUNCTION_NAME}] ai_response_received request_id=${requestId} parsed=${Boolean(parsedArgs)}`);
+    console.log(`[${FUNCTION_NAME}] step: ai_response_received request_id=${requestId} raw=${DEBUG_MODE ? sanitizePreview(openaiResult.raw) : "hidden"}`);
 
-    if (!parsedArgs || typeof parsedArgs !== "object") {
-      await logAudit(userId, 422, "parse_error", durationMs, { request_id: requestId, reason: "no_structured_output" });
+    try {
+      parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
+    } catch (parseError) {
+      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId}`, parseError);
+      await logStep(userId, 422, "parse_failed", durationMs, requestId, {
+        reason: "structured_parse_failed",
+        error: sanitizePreview(parseError),
+        raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
+      });
       return fail(422, {
         success: false,
-        code: "PARSE_ERROR",
+        code: "AI_PARSE_ERROR",
+        message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
+        requestId,
+        retryable: true,
+      });
+    }
+
+    if (!parsedArgs || typeof parsedArgs !== "object") {
+      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=no_structured_output`);
+      await logStep(userId, 422, "parse_failed", durationMs, requestId, {
+        reason: "no_structured_output",
+        raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
+      });
+      return fail(422, {
+        success: false,
+        code: "AI_PARSE_ERROR",
         message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
         requestId,
         retryable: true,
@@ -502,7 +574,7 @@ serve(async (req) => {
 
     const parsed = parsedArgs as Record<string, unknown>;
     const wine = (parsed?.wine ?? parsed) as Record<string, unknown>;
-    console.log(`[${FUNCTION_NAME}] parsing_step request_id=${requestId} fields=${Object.keys(wine).join(",")}`);
+    console.log(`[${FUNCTION_NAME}] step: parse_started request_id=${requestId} fields=${Object.keys(wine).join(",")} parsed_preview=${DEBUG_MODE ? sanitizePreview(parsed) : "hidden"}`);
 
     const normalizedWine = {
       name: typeof wine.name === "string" ? wine.name.trim() : null,
@@ -536,8 +608,8 @@ serve(async (req) => {
       !hasAnyWineContext ||
       regionExplicitlyInvalid
     ) {
-      await logAudit(userId, 422, "ai_error", durationMs, {
-        request_id: requestId,
+      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=insufficient_or_suspicious_label`);
+      await logStep(userId, 422, "parse_failed", durationMs, requestId, {
         reason: "insufficient_or_suspicious_label",
         suspicious_name: suspiciousName,
         suspicious_producer: suspiciousProducer,
@@ -556,8 +628,7 @@ serve(async (req) => {
     }
 
     console.log(`[${FUNCTION_NAME}] final_output request_id=${requestId} wine_name=${normalizedWine.name}`);
-    await logAudit(userId, 200, "success", durationMs, {
-      request_id: requestId,
+    await logStep(userId, 200, "success", durationMs, requestId, {
       wine_name: normalizedWine.name || "unknown",
       strong_anchors: strongAnchors,
       weak_anchors: weakAnchors,
@@ -569,19 +640,19 @@ serve(async (req) => {
   } catch (error) {
     const durationMs = Date.now() - startTime;
     const errMsg = error instanceof Error ? error.message : "unknown";
-    const isAbort = errMsg.toLowerCase().includes("aborted") || errMsg.toLowerCase().includes("abort");
-    const isParseOrInferenceIssue =
-      errMsg.toLowerCase().includes("json") ||
-      errMsg.toLowerCase().includes("parse") ||
-      errMsg.toLowerCase().includes("structured") ||
-      errMsg.toLowerCase().includes("confidence");
+    const stack = error instanceof Error ? error.stack : undefined;
+    const lower = errMsg.toLowerCase();
+    const isAbort = lower.includes("aborted") || lower.includes("abort") || lower.includes("timeout");
+    const isParseOrInferenceIssue = lower.includes("json") || lower.includes("parse") || lower.includes("structured") || lower.includes("confidence");
+    const code = isAbort ? "AI_TIMEOUT" : isParseOrInferenceIssue ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE";
 
-    console.error(`[${FUNCTION_NAME}] request_id=${requestId} user_id=${userId} error=${errMsg}`, error);
+    console.error(`[${FUNCTION_NAME}] step: fatal_error request_id=${requestId} user_id=${userId} code=${code} error=${errMsg}`, error);
 
-    await logAudit(userId, isAbort ? 408 : 500, "internal_error", durationMs, {
-      request_id: requestId,
-      error: errMsg,
+    await logStep(userId, isAbort ? 408 : 500, "fatal_error", durationMs, requestId, {
+      error: sanitizePreview(errMsg),
+      stack: DEBUG_MODE ? sanitizePreview(stack) : undefined,
       aborted: isAbort,
+      parse_or_inference_issue: isParseOrInferenceIssue,
     });
 
     if (isAbort) {
@@ -597,17 +668,17 @@ serve(async (req) => {
     if (isParseOrInferenceIssue) {
       return fail(422, {
         success: false,
-        code: "PARSE_ERROR",
+        code: "AI_PARSE_ERROR",
         message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
         requestId,
         retryable: true,
       });
     }
 
-    return fail(500, {
+    return fail(502, {
       success: false,
-      code: "INTERNAL_ERROR",
-      message: "A análise não pôde ser concluída agora. Tente novamente em instantes.",
+      code: "AI_UNAVAILABLE",
+      message: "Service temporarily unavailable",
       requestId,
       retryable: true,
     });

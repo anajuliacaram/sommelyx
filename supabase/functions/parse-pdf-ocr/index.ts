@@ -12,6 +12,7 @@ const FUNCTION_NAME = "parse-pdf-ocr";
 const MAX_TEXT_PAGES = 12;
 const MAX_OCR_PAGES = 8;
 const MIN_TEXT_LENGTH_FOR_OCR_SKIP = 1000;
+const MAX_PDF_BYTES = 20 * 1024 * 1024;
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -150,10 +151,13 @@ serve(async (req) => {
     const mimeType = String(body?.mimeType || "application/pdf").trim();
 
     if (!pdfBase64) {
-      return jsonResponse({ error: "pdfBase64 is required" }, 400);
+      return jsonResponse({ success: false, code: "INVALID_FILE_TYPE", message: "pdfBase64 is required" }, 400);
     }
 
     const bytes = base64ToBytes(pdfBase64);
+    if (bytes.length > MAX_PDF_BYTES) {
+      return jsonResponse({ success: false, code: "FILE_TOO_LARGE", message: "PDF file is too large" }, 413);
+    }
     console.log(`[${FUNCTION_NAME}] file=${fileName} mime=${mimeType} bytes=${bytes.length}`);
 
     const extracted = await extractTextFromPdf(bytes);
@@ -169,6 +173,10 @@ serve(async (req) => {
     console.log("FINAL_TEXT_SAMPLE:", finalText.slice(0, 1000));
     console.log(`[${FUNCTION_NAME}] duration_ms=${Date.now() - startedAt} ocr_used=${ocrUsed}`);
 
+    if (!finalText || finalText.length < 20) {
+      return jsonResponse({ success: false, code: "EMPTY_EXTRACTION", message: "No readable text found in PDF" }, 422);
+    }
+
     return jsonResponse({
       text: finalText,
       extractedText: finalText,
@@ -179,6 +187,8 @@ serve(async (req) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Falha ao processar PDF.";
     console.error(`[${FUNCTION_NAME}] error:`, message);
-    return jsonResponse({ error: "OCR_FAILED", message }, 500);
+    const lower = message.toLowerCase();
+    const code = lower.includes("invalid") ? "INVALID_FILE_TYPE" : lower.includes("ocr") ? "OCR_FAILED" : lower.includes("pdf") ? "PDF_PARSE_FAILED" : "OCR_FAILED";
+    return jsonResponse({ success: false, code, message }, code === "FILE_TOO_LARGE" ? 413 : 500);
   }
 });

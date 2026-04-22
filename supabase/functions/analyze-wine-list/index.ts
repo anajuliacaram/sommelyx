@@ -10,6 +10,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const FUNCTION_NAME = "analyze-wine-list";
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
 const UserProfileSchema = z.object({
   topStyles: z.array(z.string()).optional(),
   topGrapes: z.array(z.string()).optional(),
@@ -38,6 +39,10 @@ function jsonResponse(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+function trace(stage: string, metadata?: Record<string, unknown>) {
+  console.info(`[${FUNCTION_NAME}] step: ${stage}`, metadata || {});
 }
 
 async function logToDb(
@@ -434,9 +439,9 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let userId = "unknown";
+  const requestId = crypto.randomUUID();
 
   try {
-    const requestId = crypto.randomUUID();
     const authorization = req.headers.get("Authorization");
     console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
@@ -464,20 +469,55 @@ serve(async (req) => {
       return jsonResponse({ error: "AUTH_INVALID" }, 401);
     }
     userId = validatedUserId;
+    trace("auth_ok", { request_id: requestId, user_id: userId });
 
 
-    const parsedBody = BodySchema.safeParse(await req.json());
+    const rawBody = await req.json().catch(() => null);
+    trace("upload_received", {
+      request_id: requestId,
+      mimeType: rawBody?.mimeType,
+      fileName: rawBody?.fileName,
+      hasImageBase64: Boolean(rawBody?.imageBase64),
+      hasExtractedText: Boolean(rawBody?.extractedText),
+    });
+
+    if (rawBody?.mimeType && typeof rawBody.mimeType === "string") {
+      const mime = rawBody.mimeType as string;
+      const validMime = mime.startsWith("image/") || mime === "application/pdf";
+      trace("file_type_detected", { request_id: requestId, mimeType: mime, validMime });
+      if (!validMime) {
+        return jsonResponse({ success: false, code: "INVALID_FILE_TYPE", message: "Unsupported file type", requestId, retryable: false }, 400);
+      }
+    }
+
+    if (typeof rawBody?.imageBase64 === "string") {
+      const clean = rawBody.imageBase64.includes(",") ? rawBody.imageBase64.split(",").pop() || "" : rawBody.imageBase64;
+      trace("image_validated", { request_id: requestId, imageBase64Length: clean.length });
+      if (clean.length > MAX_IMAGE_SIZE * 2) {
+        return jsonResponse({ success: false, code: "FILE_TOO_LARGE", message: "Image too large", requestId, retryable: false }, 413);
+      }
+    }
+
+    const parsedBody = BodySchema.safeParse(rawBody);
     if (!parsedBody.success) {
-      return jsonResponse({ error: parsedBody.error.flatten().fieldErrors }, 400);
+      return jsonResponse({ success: false, code: "INVALID_REQUEST", message: "Invalid request payload", requestId, retryable: false }, 400);
     }
 
     const { imageBase64, extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
+    trace("request_parsed", { request_id: requestId, mimeType, fileName, mode, wineName, extractedTextLength: extractedText?.length || 0 });
 
     const cleanBase64 = imageBase64?.includes(",")
       ? imageBase64.split(",")[1].replace(/\s/g, "")
       : imageBase64?.replace(/\s/g, "");
 
     const isMenuMode = mode === "menu-for-wine";
+    const externalPayloadShape = {
+      hasImageBase64: Boolean(cleanBase64),
+      hasExtractedText: Boolean(extractedText),
+      mimeType,
+      fileName,
+    };
+    trace("pairing_payload_shape", { request_id: requestId, externalPayloadShape, mode: isMenuMode ? "menu" : "wine-list" });
     const inputSummary = [
       fileName ? `Arquivo: ${fileName}` : null,
       mimeType ? `Tipo: ${mimeType}` : null,
@@ -708,6 +748,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     ];
 
     if (extractedText) {
+      trace("pdf_text_extracted", { request_id: requestId, length: extractedText.length });
       userContent.push({
         type: "text",
         text: `Texto extraído do anexo:\n${extractedText}`,
@@ -715,13 +756,20 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     }
 
     if (cleanBase64) {
+      trace("ocr_started", { request_id: requestId, imageBase64Length: cleanBase64.length });
       userContent.push({
         type: "image_url",
         image_url: { url: `data:image/jpeg;base64,${cleanBase64}` },
       });
     }
 
-    console.log(`Calling AI gateway for ${isMenuMode ? "menu" : "wine list"} analysis...`);
+    trace("pairing_request_started", {
+      request_id: requestId,
+      mode: isMenuMode ? "menu" : "wine-list",
+      hasText: Boolean(extractedText),
+      hasImage: Boolean(cleanBase64),
+      imageLength: cleanBase64?.length || 0,
+    });
 
     // ── Retry loop with anti-genericity validation ──
     // Keep total runtime under edge function/client timeout (~60s).
@@ -768,31 +816,23 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       if (!openaiResult.ok) {
         responseStatus = openaiResult.status;
         responseBodyPreview = openaiResult.error;
-        console.log({
-          input: {
-            mode: isMenuMode ? "menu-for-wine" : "wine-list",
-            wineName: isMenuMode ? wineName : null,
-            attempt: attempt + 1,
-          },
-          response: {
-            ok: false,
-            status: responseStatus,
-            body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
-          },
-          parsed: null,
-          error: responseBodyPreview,
+        trace("pairing_request_failed", {
+          request_id: requestId,
+          mode: isMenuMode ? "menu" : "wine-list",
+          status: responseStatus,
+          body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
         });
 
         if (responseStatus === 429) {
-          return jsonResponse({ error: "Muitas requisições. Tente novamente em instantes." }, 429);
+          return jsonResponse({ success: false, code: "AI_RATE_LIMIT", message: "Muitas requisições. Tente novamente em instantes.", requestId, retryable: true }, 429);
         }
         if (responseStatus === 402) {
-          return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+          return jsonResponse({ success: false, code: "AI_UNAVAILABLE", message: "Service temporarily unavailable", requestId, retryable: true }, 502);
         }
         if (responseStatus === 422) {
-          return jsonResponse({ error: "INVALID_AI_RESPONSE" }, 422);
+          return jsonResponse({ success: false, code: "AI_PARSE_ERROR", message: "AI response could not be parsed", requestId, retryable: true }, 422);
         }
-        throw new Error(`AI error: ${responseStatus} - ${responseBodyPreview || ""}`);
+        return jsonResponse({ success: false, code: responseStatus === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", message: responseStatus === 504 ? "A análise demorou mais que o esperado. Tente novamente em instantes." : "Service temporarily unavailable", requestId, retryable: true }, responseStatus === 504 ? 408 : 502);
       }
 
       parsed = openaiResult.parsed;
@@ -802,10 +842,13 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
 
       if (!parsed) {
         console.error("AI parse error on attempt", attempt);
+        trace("parse_failed", { request_id: requestId, reason: "empty_parsed_output" });
         continue;
       }
 
       lastParsed = parsed;
+      trace("ai_response_received", { request_id: requestId, rawPreview: String(openaiResult.raw ? JSON.stringify(openaiResult.raw).slice(0, 500) : "").slice(0, 500) });
+      trace("parse_started", { request_id: requestId });
 
       // ── Validate anti-genericity ──
       const textsToValidate: string[] = [];
@@ -896,7 +939,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     }
 
     if (!lastParsed) {
-      throw new Error("Não foi possível interpretar a resposta da IA.");
+      trace("parse_failed", { request_id: requestId, reason: "no_parsed_output" });
+      return jsonResponse({ success: false, code: "AI_PARSE_ERROR", message: "AI response could not be parsed", requestId, retryable: true }, 422);
     }
 
     const parsedCount = isMenuMode
@@ -904,10 +948,14 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       : Array.isArray(lastParsed.wines) ? lastParsed.wines.length : 0;
 
     if (!validationResult.passed && parsedCount > 0) {
-      return jsonResponse(isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed));
+      trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: true });
+      const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
+      trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
+      return jsonResponse(normalized);
     }
 
     if (!validationResult.passed) {
+      trace("parse_failed", { request_id: requestId, reason: "empty_or_invalid_extraction", failures: validationResult.failures.slice(0, 12) });
       const friendlyMessage = isMenuMode
         ? "Não conseguimos analisar este cardápio agora. Tente uma foto com melhor iluminação e foco nos pratos, ou tente novamente em instantes."
         : "Não conseguimos analisar esta carta de vinhos agora. Tente uma foto mais nítida da carta ou tente novamente em instantes.";
@@ -916,17 +964,20 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         validation_failures: validationResult.failures.slice(0, 12),
         mode,
       });
-      return jsonResponse({ error: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" }, 422);
+      return jsonResponse({ success: false, code: "EMPTY_EXTRACTION", message: friendlyMessage, requestId, retryable: true }, 422);
     }
 
-    return jsonResponse(isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed));
+    trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: false });
+    const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
+    trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
+    return jsonResponse(normalized);
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "Erro interno";
     const isAbort = errMsg.toLowerCase().includes("abort");
     console.error("analyze-wine-list error:", errMsg);
     if (isAbort) {
-      return jsonResponse({ error: "A análise demorou mais que o esperado. Tente novamente em instantes." }, 504);
+      return jsonResponse({ success: false, code: "AI_TIMEOUT", message: "A análise demorou mais que o esperado. Tente novamente em instantes.", requestId, retryable: true }, 504);
     }
-    return jsonResponse({ error: "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente." }, 500);
+    return jsonResponse({ success: false, code: "AI_UNAVAILABLE", message: "Service temporarily unavailable", requestId, retryable: true }, 502);
   }
 });

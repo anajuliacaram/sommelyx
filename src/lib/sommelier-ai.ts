@@ -196,8 +196,20 @@ function classifyError(err: unknown): ClassifiedError {
   if (status === 408 || code === "AI_TIMEOUT" || lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
     return { type: "timeout", message: "Tempo de resposta excedido. Tente novamente." };
   }
-  if (code === "FILE_INVALID" || code === "IMAGE_TOO_LARGE" || lower.includes("arquivo inválido") || lower.includes("imagem está muito grande")) {
+  if (code === "INVALID_FILE_TYPE" || code === "FILE_INVALID" || lower.includes("tipo de arquivo inválido")) {
+    return { type: "invalid_file", message: "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível." };
+  }
+  if (code === "FILE_TOO_LARGE" || code === "IMAGE_TOO_LARGE" || lower.includes("arquivo muito grande") || lower.includes("imagem está muito grande")) {
     return { type: "invalid_file", message: code === "IMAGE_TOO_LARGE" ? "A imagem está muito grande. Tente uma foto mais leve." : "Arquivo inválido. Envie uma imagem ou PDF legível." };
+  }
+  if (code === "EMPTY_EXTRACTION") {
+    return { type: "empty", message: "Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível." };
+  }
+  if (code === "OCR_FAILED" || code === "PDF_PARSE_FAILED") {
+    return { type: "ai_fail", message: "Não foi possível ler o PDF. Tente um arquivo mais nítido ou uma imagem da carta." };
+  }
+  if (code === "AI_PARSE_ERROR" || code === "ANALYSIS_NOT_SPECIFIC") {
+    return { type: "ai_fail", message: "A resposta da IA veio em um formato inválido. Tente novamente em instantes." };
   }
   if (
     lower.includes("failed to fetch") ||
@@ -708,6 +720,15 @@ export async function getWinePairings(wine: {
   country?: string | null;
 }): Promise<PairingResponse> {
   try {
+    console.info("[sommelier-ai] pairing_request_started", {
+      mode: "wine-to-food",
+      source: "cellar",
+      wineName: wine.name,
+      hasProducer: Boolean(wine.producer),
+      hasRegion: Boolean(wine.region),
+      hasCountry: Boolean(wine.country),
+      hasVintage: wine.vintage != null,
+    });
     const request = () => invokeEdgeFunction<{ pairings: PairingResult[] }>(
       "wine-pairings",
       {
@@ -767,6 +788,13 @@ export async function getDishWineSuggestions(
   intent?: PairingIntent,
 ): Promise<SuggestionResponse> {
   try {
+    console.info("[sommelier-ai] pairing_request_started", {
+      mode: "food-to-wine",
+      source: "cellar",
+      dish,
+      userWineCount: userWines?.length || 0,
+      intent: intent ?? "everyday",
+    });
     const request = () => invokeEdgeFunction<{ suggestions: WineSuggestion[] }>(
       "wine-pairings",
       {
@@ -830,6 +858,15 @@ export async function analyzeWineList(
   },
 ): Promise<WineListAnalysis> {
   try {
+    console.info("[sommelier-ai] pairing_request_started", {
+      mode: "external-wine-list",
+      hasImageBase64: Boolean(attachment.imageBase64),
+      hasExtractedText: Boolean(attachment.extractedText),
+      mimeType: attachment.mimeType,
+      fileName: attachment.fileName,
+      extractedTextLength: attachment.extractedText?.length || 0,
+      imageBase64Length: attachment.imageBase64?.length || 0,
+    });
     const request = () => invokeEdgeFunction<WineListAnalysis>(
       "analyze-wine-list",
       { ...attachment, userProfile },
@@ -867,6 +904,16 @@ export async function analyzeMenuForWine(
   wineName: string,
 ): Promise<MenuAnalysis> {
   try {
+    console.info("[sommelier-ai] pairing_request_started", {
+      mode: "external-menu",
+      wineName,
+      hasImageBase64: Boolean(attachment.imageBase64),
+      hasExtractedText: Boolean(attachment.extractedText),
+      mimeType: attachment.mimeType,
+      fileName: attachment.fileName,
+      extractedTextLength: attachment.extractedText?.length || 0,
+      imageBase64Length: attachment.imageBase64?.length || 0,
+    });
     const request = () => invokeEdgeFunction<MenuAnalysis>(
       "analyze-wine-list",
       { ...attachment, mode: "menu-for-wine", wineName },

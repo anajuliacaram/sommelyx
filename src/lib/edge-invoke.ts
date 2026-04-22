@@ -118,8 +118,9 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
   if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID" || status === 401) return "Sua sessão expirou. Faça login novamente.";
   if (code === "AI_TIMEOUT" || status === 408) return "Tempo de resposta excedido. Tente novamente.";
   if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
+  if (code === "INVALID_IMAGE") return "Imagem inválida. Envie uma foto legível do rótulo.";
   if (code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
-  if (code === "INVALID_AI_RESPONSE" || message.includes("INVALID_AI_RESPONSE") || message.includes("EMPTY_AI_RESPONSE")) {
+  if (code === "AI_PARSE_ERROR" || code === "INVALID_AI_RESPONSE" || message.includes("INVALID_AI_RESPONSE") || message.includes("EMPTY_AI_RESPONSE")) {
     return "A resposta da IA veio em um formato inválido. Tente novamente em instantes.";
   }
   if (code === "LABEL_NOT_IDENTIFIED") return "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";

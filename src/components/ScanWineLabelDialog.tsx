@@ -125,25 +125,36 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
       const e = err as any;
       const code = e?.code as string | undefined;
+      const requestId = e?.requestId as string | undefined;
 
-      let msg = e?.message || "Não foi possível analisar o rótulo";
+      if (requestId) {
+        console.log("[scan-wine-label] requestId", requestId);
+      }
+
+      let msg = "Não foi possível analisar o rótulo. Tente novamente.";
       if (err instanceof EdgeFunctionError) {
         setSupportCode(err.requestId ?? null);
       }
 
       if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
         msg = "Sua sessão expirou. Faça login novamente para continuar.";
+      } else if (code === "INVALID_IMAGE") {
+        msg = "Imagem inválida. Envie uma foto legível do rótulo.";
       } else if (code === "IMAGE_TOO_LARGE") {
         msg = "A imagem está muito grande. Tente uma foto mais leve.";
-      } else if (code === "FILE_INVALID") {
+      } else if (code === "FILE_INVALID" || code === "INVALID_IMAGE_BASE64") {
         msg = "Arquivo inválido. Envie uma foto legível do rótulo.";
       } else if (code === "LABEL_NOT_IDENTIFIED") {
         msg = "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
-      } else if (code === "CONFIG_ERROR") {
-        msg = "O scanner está temporariamente indisponível. Tente novamente em instantes.";
+      } else if (code === "AI_PARSE_ERROR") {
+        msg = "A resposta da análise veio em formato inválido. Tente novamente em instantes.";
       } else if (code === "AI_TIMEOUT") {
         msg = "Tempo de resposta excedido. Tente novamente com uma foto mais nítida.";
-      } else if (code === "AI_UNAVAILABLE" || code === "AI_RATE_LIMIT") {
+      } else if (code === "AI_UNAVAILABLE") {
+        msg = "Serviço temporariamente indisponível. Tente novamente em instantes.";
+      } else if (code === "CONFIG_ERROR") {
+        msg = "O scanner está temporariamente indisponível. Tente novamente em instantes.";
+      } else if (code === "AI_RATE_LIMIT") {
         msg = "A análise não pôde ser concluída agora. Tente novamente em instantes.";
       }
 
@@ -391,7 +402,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <p className="text-sm font-medium text-foreground mb-1">Não foi possível analisar</p>
                 <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
                 {supportCode && (
-                  <p className="text-[10px] text-muted-foreground mt-2">Código do suporte: {supportCode}</p>
+                  <p className="text-[10px] text-muted-foreground mt-2">Código do suporte / Request ID: {supportCode}</p>
                 )}
               </div>
               <div className="flex flex-col gap-2 w-full">
