@@ -662,6 +662,7 @@ export default function CellarPage() {
   const { data: wines, isLoading } = useWines();
   const deleteWine = useDeleteWine();
   const wineEvent = useWineEvent();
+  useResolveWineImages(wines);
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("drink");
