@@ -85,6 +85,7 @@ export default function PersonalDashboard() {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [dishToWineOpen, setDishToWineOpen] = useState(false);
+  const [pairingInitialWineId, setPairingInitialWineId] = useState<string | null>(null);
   const [wineListScanOpen, setWineListScanOpen] = useState(false);
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<{
@@ -343,7 +344,9 @@ export default function PersonalDashboard() {
                       O <b style={{ fontWeight: 700 }}>{insightWine.name}</b>{" "}
                       {insightWine.drink_until && insightWine.drink_until - currentYear <= 1
                         ? "entra na última janela ideal"
-                        : `está dentro da janela ideal (até ${insightWine.drink_until})`}
+                        : insightWine.drink_until
+                          ? `está dentro da janela ideal (até ${insightWine.drink_until})`
+                          : "é o destaque da sua adega hoje"}
                       . {insightWine.quantity}{" "}
                       {insightWine.quantity === 1 ? "garrafa" : "garrafas"} — considere abrir nos
                       próximos jantares.
@@ -353,7 +356,10 @@ export default function PersonalDashboard() {
                 <button
                   type="button"
                   className="editorial-btn-copper shrink-0"
-                  onClick={() => setDishToWineOpen(true)}
+                  onClick={() => {
+                    setPairingInitialWineId(insightWine.id);
+                    setDishToWineOpen(true);
+                  }}
                 >
                   Ver harmonizações <ArrowRight className="h-3.5 w-3.5" />
                 </button>
@@ -686,7 +692,14 @@ export default function PersonalDashboard() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
-      <DishToWineDialog open={dishToWineOpen} onOpenChange={setDishToWineOpen} />
+      <DishToWineDialog
+        open={dishToWineOpen}
+        onOpenChange={(v) => {
+          setDishToWineOpen(v);
+          if (!v) setPairingInitialWineId(null);
+        }}
+        initialWineId={pairingInitialWineId}
+      />
       <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
       <AddConsumptionDialog
         open={consumptionOpen}
