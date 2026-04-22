@@ -101,7 +101,7 @@ Vinho a avaliar:
       requestId: crypto.randomUUID(),
       apiKey: "",
       model: AI_MODEL,
-      timeoutMs: 30_000,
+      timeoutMs: 10_000,
       temperature: 0.2,
       instructions: systemPrompt,
       input: [{ role: "user", content: [{ type: "input_text", text: userPrompt }] }],
@@ -115,7 +115,7 @@ Vinho a avaliar:
         required: ["compatibility", "label", "reason"],
         additionalProperties: false,
       },
-      maxOutputTokens: 300,
+      maxOutputTokens: 200,
     });
 
     if (!result.ok) {

@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface AiAnalysisAttachmentPayload {
   imageBase64?: string;
   extractedText?: string;
@@ -8,6 +10,23 @@ export interface AiAnalysisAttachmentPayload {
 export interface PreparedAiAnalysisAttachment extends AiAnalysisAttachmentPayload {
   previewUrl?: string;
   sourceType: "image" | "pdf-text" | "pdf-image";
+}
+
+export interface PdfTextBlock {
+  pageNumber: number;
+  lineNumber: number;
+  text: string;
+  x: number;
+  y: number;
+}
+
+export interface PreparedSmartPdfImportAttachment {
+  extractedText: string;
+  textBlocks: PdfTextBlock[];
+  mimeType: string;
+  fileName?: string;
+  sourceType: "pdf-smart";
+  ocrUsed: boolean;
 }
 
 const MAX_IMAGE_DIMENSION = 1280;
@@ -22,13 +41,7 @@ let pdfJsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
 
 async function getPdfJs() {
   if (!pdfJsPromise) {
-    pdfJsPromise = import("pdfjs-dist").then((pdfjs) => {
-      pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-        "pdfjs-dist/build/pdf.worker.min.mjs",
-        import.meta.url,
-      ).toString();
-      return pdfjs;
-    });
+    pdfJsPromise = import("pdfjs-dist");
   }
 
   return pdfJsPromise;
@@ -146,7 +159,7 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
 async function extractPdfText(file: File) {
   const pdfjs = await getPdfJs();
   const buffer = await file.arrayBuffer();
-  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
 
   const pages: string[] = [];
   for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
@@ -163,10 +176,68 @@ async function extractPdfText(file: File) {
   return pages.join("\n").replace(/\s+/g, " ").trim().slice(0, MAX_EXTRACTED_TEXT_LENGTH);
 }
 
+async function extractPdfTextBlocks(file: File) {
+  const pdfjs = await getPdfJs();
+  const buffer = await file.arrayBuffer();
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
+  const blocks: PdfTextBlock[] = [];
+
+  for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
+    const page = await doc.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const items = (content.items || [])
+      .map((item: any) => ({
+        text: String(item.str || "").trim(),
+        x: Number(item.transform?.[4] ?? item.x ?? 0),
+        y: Number(item.transform?.[5] ?? item.y ?? 0),
+      }))
+      .filter((item) => item.text.length > 0);
+
+    if (items.length === 0) continue;
+
+    const lineBuckets = new Map<string, { y: number; items: typeof items }>();
+    for (const item of items) {
+      const yKey = Math.round(item.y / 4) * 4;
+      const key = `${pageNumber}:${yKey}`;
+      const existing = lineBuckets.get(key);
+      if (existing) {
+        existing.items.push(item);
+      } else {
+        lineBuckets.set(key, { y: item.y, items: [item] });
+      }
+    }
+
+    const lines = Array.from(lineBuckets.entries())
+      .sort((a, b) => b[1].y - a[1].y)
+      .map(([, bucket], lineIndex) => ({
+        pageNumber,
+        lineNumber: lineIndex + 1,
+        text: bucket.items
+          .sort((a, b) => a.x - b.x)
+          .map((item) => item.text)
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim(),
+        x: Math.min(...bucket.items.map((item) => item.x)),
+        y: bucket.y,
+      }))
+      .filter((line) => line.text.length > 0);
+
+    blocks.push(...lines);
+  }
+
+  const extractedText = blocks
+    .map((block) => `[p${block.pageNumber} l${block.lineNumber} x=${Math.round(block.x)} y=${Math.round(block.y)}] ${block.text}`)
+    .join("\n")
+    .slice(0, MAX_EXTRACTED_TEXT_LENGTH * 2);
+
+  return { blocks, extractedText };
+}
+
 async function renderPdfAsImage(file: File) {
   const pdfjs = await getPdfJs();
   const buffer = await file.arrayBuffer();
-  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
   const renderedPages: HTMLCanvasElement[] = [];
 
   for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_RENDER); pageNumber++) {
@@ -212,6 +283,34 @@ async function renderPdfAsImage(file: File) {
   });
 }
 
+function normalizeOcrText(text: string) {
+  return text
+    .replace(/\r/g, "\n")
+    .replace(/-\n\s*/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\n\s+/g, "\n")
+    .replace(/\s+\n/g, "\n")
+    .trim();
+}
+
+async function extractPdfOcrText(file: File) {
+  const pdfBase64 = dataUrlToBase64(await fileToDataUrl(file));
+  const { data, error } = await supabase.functions.invoke("parse-pdf-ocr", {
+    body: {
+      pdfBase64,
+      fileName: file.name,
+      mimeType: inferMimeType(file),
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message || "Não conseguimos aplicar OCR neste PDF.");
+  }
+
+  return normalizeOcrText(String(data?.text ?? data?.extractedText ?? ""));
+}
+
 export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
   const mimeType = inferMimeType(file);
 
@@ -237,4 +336,57 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
   }
 
   return await prepareImageAttachment(file);
+}
+
+export async function prepareSmartPdfImportAttachment(file: File): Promise<PreparedSmartPdfImportAttachment> {
+  const mimeType = inferMimeType(file);
+  if (mimeType !== "application/pdf") {
+    throw new Error("O modo de importação inteligente é exclusivo para PDFs.");
+  }
+
+  const { blocks, extractedText } = await extractPdfTextBlocks(file).catch(async () => {
+    const fallbackText = await extractPdfText(file).catch(() => "");
+    return { blocks: [] as PdfTextBlock[], extractedText: fallbackText };
+  });
+
+  console.log("PDF_TEXT_LENGTH:", extractedText.length);
+  console.log("PDF_TEXT_SAMPLE:", extractedText.slice(0, 1000));
+
+  let finalText = extractedText;
+  let ocrUsed = false;
+  let ocrText: string | null = null;
+
+  if (!finalText || finalText.length < 1000) {
+    ocrUsed = true;
+    ocrText = await extractPdfOcrText(file).catch(() => "");
+    finalText = ocrText || "";
+  }
+
+  console.log("OCR_USED:", ocrUsed);
+  console.log("OCR_TEXT_LENGTH:", ocrText?.length);
+  console.log("OCR_SAMPLE:", ocrText?.slice(0, 1000));
+  console.log("FINAL_TEXT_LENGTH:", finalText.length);
+  console.log("FINAL_TEXT_SAMPLE:", finalText.slice(0, 1000));
+
+  if (!finalText || finalText.length < 1000) {
+    const rendered = await renderPdfAsImage(file);
+    return {
+      ...rendered,
+      extractedText: finalText || "",
+      textBlocks: blocks,
+      mimeType,
+      fileName: file.name,
+      sourceType: "pdf-smart",
+      ocrUsed,
+    };
+  }
+
+  return {
+    extractedText: finalText,
+    textBlocks: blocks,
+    mimeType,
+    fileName: file.name,
+    sourceType: "pdf-smart",
+    ocrUsed,
+  };
 }

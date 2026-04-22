@@ -75,10 +75,11 @@ export async function callOpenAIResponses<T>({
   instructions,
   input,
   schema,
-  maxOutputTokens = 4_000,
+  maxOutputTokens = 800,
 }: CallOptions<Record<string, unknown>>): Promise<{ ok: true; parsed: T; raw: any } | { ok: false; status: number; error: string; raw?: any }> {
   const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
   const resolvedModel = model?.trim() || "gpt-4o-mini";
+  const startedAt = Date.now();
 
   console.log(`[${functionName}] request_id=${requestId} provider=openai model=${resolvedModel} key=${maskSecret(openaiKey)} timeout_ms=${timeoutMs}`);
 
@@ -125,7 +126,7 @@ export async function callOpenAIResponses<T>({
         : typeof json?.error === "string"
           ? json.error
           : `OpenAI request failed with status ${response.status}`;
-      console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} error=${String(message).slice(0, 300)}`);
+      console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} duration_ms=${Date.now() - startedAt} error=${String(message).slice(0, 300)}`);
       return { ok: false, status: response.status, error: String(message), raw: json };
     }
 
@@ -152,13 +153,14 @@ export async function callOpenAIResponses<T>({
       return { ok: false, status: 422, error: "INVALID_AI_RESPONSE", raw: json };
     }
 
-    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} parsed=ok`);
+    const usage = json?.usage || {};
+    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} duration_ms=${Date.now() - startedAt} input_tokens=${usage?.input_tokens ?? usage?.prompt_tokens ?? "n/a"} output_tokens=${usage?.output_tokens ?? usage?.completion_tokens ?? "n/a"} parsed=ok`);
     console.log("FINAL RESPONSE:", parsed);
     return { ok: true, parsed, raw: json };
   } catch (error) {
     const message = error instanceof Error ? error.message : "OpenAI request failed";
     const isAbort = message.toLowerCase().includes("abort");
-    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} error=${message}`);
+    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} duration_ms=${Date.now() - startedAt} error=${message}`);
     return { ok: false, status: isAbort ? 504 : 500, error: isAbort ? "TIMEOUT" : message };
   } finally {
     clearTimeout(timeout);

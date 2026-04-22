@@ -720,7 +720,7 @@ export async function getWinePairings(wine: {
         wineVintage: wine.vintage,
         wineCountry: wine.country,
       },
-      { timeoutMs: 90_000, retries: 1 },
+      { timeoutMs: 30_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
@@ -785,7 +785,7 @@ export async function getDishWineSuggestions(
           current_value: w.current_value ?? null,
         })),
       },
-      { timeoutMs: 90_000, retries: 1 },
+      { timeoutMs: 30_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
@@ -833,7 +833,7 @@ export async function analyzeWineList(
     const request = () => invokeEdgeFunction<WineListAnalysis>(
       "analyze-wine-list",
       { ...attachment, userProfile },
-      { timeoutMs: 95_000, retries: 1 },
+      { timeoutMs: 20_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
@@ -870,7 +870,7 @@ export async function analyzeMenuForWine(
     const request = () => invokeEdgeFunction<MenuAnalysis>(
       "analyze-wine-list",
       { ...attachment, mode: "menu-for-wine", wineName },
-      { timeoutMs: 95_000, retries: 1 },
+      { timeoutMs: 20_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
@@ -924,7 +924,7 @@ export async function getTasteCompatibility(
           quantity: w.quantity,
         })),
       },
-      { timeoutMs: 8_000, retries: 1 },
+      { timeoutMs: 4_000, retries: 1 },
     );
     if (data && (data as any).fallback === true) {
       return data;
@@ -965,7 +965,7 @@ export async function getWineInsight(wine: {
         drinkFrom: wine.drinkFrom,
         drinkUntil: wine.drinkUntil,
       },
-      { timeoutMs: 8_000, retries: 1 },
+      { timeoutMs: 4_000, retries: 1 },
     );
     const data = await request();
     if (data && validateWineSpecificity(data, "insight")) {

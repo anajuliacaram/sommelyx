@@ -82,7 +82,7 @@ REGRAS:
       requestId: crypto.randomUUID(),
       apiKey: openaiKey,
       model: openaiModel,
-      timeoutMs: 30_000,
+      timeoutMs: 10_000,
       temperature: 0.3,
       instructions: systemPrompt,
       input: [{ role: "user", content: [{ type: "input_text", text: `Estime o preço de mercado no Brasil para este vinho:\n\n${wineDesc}` }] }],
@@ -96,7 +96,7 @@ REGRAS:
         required: ["estimated_price", "confidence", "reasoning"],
         additionalProperties: false,
       },
-      maxOutputTokens: 300,
+      maxOutputTokens: 200,
     });
     if (!result.ok) {
       if (result.status === 422) {

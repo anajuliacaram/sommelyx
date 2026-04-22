@@ -5,6 +5,14 @@ type InvokeOptions = {
   retries?: number;
 };
 
+type CacheEntry = {
+  expiresAt: number;
+  value: unknown;
+};
+
+const EDGE_CACHE_TTL_MS = 5 * 60 * 1000;
+const edgeResponseCache = new Map<string, CacheEntry>();
+
 type EdgeEnvelopeSuccess<T> = {
   success: true;
   data: T;
@@ -38,6 +46,45 @@ export class EdgeFunctionError extends Error {
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function stableSerialize(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "undefined";
+  if (Array.isArray(value)) return `[${value.map((item) => stableSerialize(item)).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  return `{${Object.keys(obj).sort().map((key) => `${JSON.stringify(key)}:${stableSerialize(obj[key])}`).join(",")}}`;
+}
+
+function getCacheKey(name: string, body: Record<string, unknown>) {
+  return `${name}:${stableSerialize(body)}`;
+}
+
+function readEdgeCache<T>(cacheKey: string): T | null {
+  const entry = edgeResponseCache.get(cacheKey);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    edgeResponseCache.delete(cacheKey);
+    return null;
+  }
+  try {
+    return structuredClone(entry.value) as T;
+  } catch {
+    return JSON.parse(JSON.stringify(entry.value)) as T;
+  }
+}
+
+function writeEdgeCache(cacheKey: string, value: unknown) {
+  try {
+    edgeResponseCache.set(cacheKey, {
+      expiresAt: Date.now() + EDGE_CACHE_TTL_MS,
+      value: structuredClone(value),
+    });
+  } catch {
+    edgeResponseCache.set(cacheKey, {
+      expiresAt: Date.now() + EDGE_CACHE_TTL_MS,
+      value: JSON.parse(JSON.stringify(value)),
+    });
+  }
 }
 
 function isRetriable(status?: number) {
@@ -162,6 +209,16 @@ export async function invokeEdgeFunction<T>(
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
+  const cacheKey = getCacheKey(name, body);
+  const cached = readEdgeCache<T>(cacheKey);
+  if (cached !== null) {
+    console.log("[edge-invoke] cache_hit", {
+      function: name,
+      requestId,
+      durationMs: 0,
+    });
+    return cached;
+  }
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
@@ -233,6 +290,7 @@ export async function invokeEdgeFunction<T>(
         }
 
         const unwrapped = unwrapResponseData<T>(parsedBody);
+        writeEdgeCache(cacheKey, unwrapped);
         console.log("[edge-invoke] response", {
           function: name,
           requestId,

@@ -104,7 +104,7 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
       requestId: crypto.randomUUID(),
       apiKey: "",
       model: AI_MODEL,
-      timeoutMs: 35_000,
+      timeoutMs: 10_000,
       temperature: 0.75,
       instructions: systemPrompt,
       input: [{ role: "user", content: [{ type: "input_text", text: userPrompt }] }],
@@ -117,7 +117,7 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
         required: ["insight", "recommendation"],
         additionalProperties: false,
       },
-      maxOutputTokens: 600,
+      maxOutputTokens: 200,
     });
 
     if (!result.ok) {

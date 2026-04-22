@@ -11,7 +11,7 @@ const corsHeaders = {
 
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const AI_TIMEOUT_MS = 60_000;
+const AI_TIMEOUT_MS = 15_000;
 
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -447,7 +447,7 @@ serve(async (req) => {
         required: ["wine"],
         additionalProperties: true,
       },
-      maxOutputTokens: 1_200,
+      maxOutputTokens: 400,
     });
 
     const durationMs = Date.now() - startTime;

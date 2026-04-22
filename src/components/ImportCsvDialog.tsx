@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
-import { prepareAiAnalysisAttachment } from "@/lib/ai-attachments";
+import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/lib/ai-attachments";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 
 interface ImportCsvDialogProps {
@@ -153,6 +153,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [importSourceHeaders, setImportSourceHeaders] = useState<string[]>([]);
   const [importSourceConfidence, setImportSourceConfidence] = useState(1);
   const [importSummary, setImportSummary] = useState<ImportSummary>({ headerDetected: false, ignoredRows: 0 });
+  const [importMode, setImportMode] = useState<"standard" | "smart-pdf" | "image">("standard");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: cellarWines } = useWines();
@@ -824,11 +825,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const buffer = await file.arrayBuffer();
     const pdfjsModule = await import("pdfjs-dist");
     const pdfjs = pdfjsModule.default || pdfjsModule;
-    if (pdfjs.GlobalWorkerOptions) {
-      pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
-    }
 
-    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
     const maxPages = Math.min(doc.numPages, 12);
     const pages: string[] = [];
     for (let p = 1; p <= maxPages; p++) {
@@ -1140,122 +1138,364 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     headerRowIndex: number;
     priceColumn?: string;
     ignoredRows: number;
+    failureReason?: string;
+    totalRows: number;
+    cleanedRows: number;
+    confidenceDistribution: { high: number; medium: number; low: number };
   } => {
-    if (!text || !text.trim()) return { wines: [], mapping: {}, headers: [], sourceRows: [], confidence: 0, successRate: 0, manualMappingRequired: true, headerRowIndex: 0, priceColumn: undefined, ignoredRows: 0 };
-    const delimiter = detectDelimiter(text);
-    const lines = text.replace(/\r\n/g, "\n").split("\n").filter((l) => l.trim().length > 0);
-    if (lines.length < 2) return { wines: [], mapping: {}, headers: [], sourceRows: [], confidence: 0, successRate: 0, manualMappingRequired: true, headerRowIndex: 0, priceColumn: undefined, ignoredRows: 0 };
+    const empty = {
+      wines: [],
+      mapping: {},
+      headers: [],
+      sourceRows: [],
+      confidence: 0,
+      successRate: 0,
+      manualMappingRequired: true,
+      headerRowIndex: 0,
+      priceColumn: undefined,
+      ignoredRows: 0,
+      failureReason: "Arquivo não contém estrutura reconhecível",
+      totalRows: 0,
+      cleanedRows: 0,
+      confidenceDistribution: { high: 0, medium: 0, low: 0 },
+    };
+    if (!text || !text.trim()) return empty;
 
-    const { headerRowIndex, headerScore } = findHeaderRowIndex(lines, delimiter);
-    const headerCellsRaw = splitCsvLine(lines[headerRowIndex], delimiter);
-    const headerCells = headerCellsRaw.map((cell, index) => (isUnnamedHeader(cell) ? `Coluna ${index + 1}` : cell));
-    const fieldByCol: (EditableField | undefined)[] = headerCellsRaw.map(mapHeaderToField);
+    const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    const allLines = normalized.split("\n");
+    const cleanedLines = allLines.map((line) => line.trim()).filter((line) => line.length > 0 && !/^[-=*_•·\s|]+$/.test(line));
+    console.log("LINES_COUNT:", cleanedLines.length);
+    console.log("LINES_SAMPLE:", cleanedLines.slice(0, 20));
+    if (cleanedLines.length === 0) return { ...empty, totalRows: allLines.length, cleanedRows: 0 };
+
+    const priceRegex = /R\$?\s?(\d+[.,]\d{2})/i;
+    const moneyRegex = /(?:R\$|[$€£])\s?(\d+[.,]\d{2})/i;
+    const yearRegex = /\b(19|20)\d{2}\b/;
+    const countryCodes = new Set(["FRA", "ARG", "ITA", "POR", "ESP", "CHI", "CHL", "USA", "AUS", "NZL", "DEU", "GER", "PRT"]);
+    const countryWords = ["França", "France", "Argentina", "Chile", "Itália", "Italy", "Portugal", "Espanha", "Spain", "Brasil", "Brazil", "Estados Unidos", "USA", "Austrália", "Australia", "Nova Zelândia", "New Zealand", "Alemanha", "Germany", "África do Sul", "South Africa"];
+
+    const stripPrefixes = (value: string) =>
+      value
+        .replace(/^\s*VINHO\s+(FRA|ARG|ITA|POR|ESP|CHI|CHL|USA|AUS|NZL|DEU|GER|PRT)\s+/i, "")
+        .replace(/^\s*VINHO\s+/i, "")
+        .replace(/\b(EXCLUSIVO|CATÁLOGO|CATALOGO|PROMOÇÃO|PROMOCAO|OFERTA|NOVO|NOVIDADE)\b/gi, " ")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+
+    const extractPrice = (textValue: string) => {
+      const match = textValue.match(priceRegex) || textValue.match(moneyRegex);
+      if (match?.[1]) return parsePrice(match[1]);
+      const candidates = textValue.match(/\b\d+[.,]\d{2}\b/g) || [];
+      for (const candidate of candidates) {
+        const parsed = parsePrice(candidate);
+        if (parsed !== undefined) return parsed;
+      }
+      return undefined;
+    };
+
+    const normalizeCountryToken = (value: string) => {
+      const cleaned = normalizeText(value);
+      if (!cleaned) return undefined;
+      const upper = cleaned.toUpperCase();
+      if (countryCodes.has(upper)) {
+        const map: Record<string, string> = {
+          FRA: "França",
+          ARG: "Argentina",
+          ITA: "Itália",
+          POR: "Portugal",
+          ESP: "Espanha",
+          CHI: "Chile",
+          CHL: "Chile",
+          USA: "Estados Unidos",
+          AUS: "Austrália",
+          NZL: "Nova Zelândia",
+          DEU: "Alemanha",
+          GER: "Alemanha",
+          PRT: "Portugal",
+        };
+        return map[upper];
+      }
+      const lower = normalizeSearchText(cleaned);
+      const match = countryWords.find((word) => normalizeSearchText(word) === lower || normalizeSearchText(word).includes(lower) || lower.includes(normalizeSearchText(word)));
+      return match ? normalizeWineText(match) || cleaned : undefined;
+    };
+
+    const scoreHeaderRow = (cells: string[]) => {
+      const normalizedCells = cells.map((cell) => normalizeSearchText(cell));
+      let score = 0;
+      for (const cell of normalizedCells) {
+        if (!cell) continue;
+        if (cell.includes("descricao") || cell.includes("descrição")) score += 5;
+        if (cell.includes("produto")) score += 4;
+        if (cell.includes("vinho")) score += 4;
+        if (cell.includes("nome")) score += 3;
+        if (cell.includes("preco") || cell.includes("preço") || cell.includes("valor") || cell.includes("custo")) score += 4;
+        if (cell.includes("distribuidor")) score += 3;
+        if (cell.includes("ean")) score += 2;
+      }
+      return score;
+    };
+
+    const scanWindow = cleanedLines.slice(0, 30);
+    const headerRowIndex = (() => {
+      let bestIndex = 0;
+      let bestScore = -1;
+      for (let i = 0; i < scanWindow.length; i++) {
+        const cells = scanWindow[i].includes(",") || scanWindow[i].includes(";") || scanWindow[i].includes("\t") || scanWindow[i].includes("|")
+          ? splitCsvLine(scanWindow[i], detectDelimiter(scanWindow[i]))
+          : scanWindow[i].split(/\s{2,}/).map((part) => part.trim()).filter(Boolean);
+        const score = scoreHeaderRow(cells);
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = i;
+        }
+      }
+      return bestIndex;
+    })();
+
+    const headerLine = scanWindow[headerRowIndex] || "";
+    const delimiter = detectDelimiter(headerLine || cleanedLines[0] || ",");
+    const structured = (headerLine.split(delimiter).length >= 2 || cleanedLines.some((line) => line.split(delimiter).length >= 2));
+    const headerCellsRaw = structured ? splitCsvLine(headerLine, delimiter) : [];
+    const headers = structured ? headerCellsRaw.filter((header) => !isUnnamedHeader(header)) : ["raw_line", "name", "producer", "price", "vintage", "country", "type"];
     const mapping: Record<string, string> = {};
-    headerCellsRaw.forEach((h, i) => {
-      if (fieldByCol[i]) mapping[h] = fieldByCol[i] as string;
-    });
-
     const sourceRows: ImportSourceRow[] = [];
-    for (let r = headerRowIndex + 1; r < lines.length; r++) {
-      const cells = splitCsvLine(lines[r], delimiter);
-      if (cells.every((cell) => !normalizeText(cell))) continue;
-      const values: Record<string, string> = {};
-      headerCellsRaw.forEach((header, index) => {
-        if (isUnnamedHeader(header)) return;
-        values[header] = cells[index] || "";
-      });
-      sourceRows.push({ index: r - headerRowIndex - 1, values });
-    }
-
-    const hasName = fieldByCol.includes("name");
     const wines: ParsedWine[] = [];
-    let successfulRows = 0;
-    let candidateRows = 0;
+    const confidenceDistribution = { high: 0, medium: 0, low: 0 };
     let ignoredRows = 0;
-    const priceColumn = headerCellsRaw.find((header) => {
-      const norm = normalizeHeader(header);
-      return norm.includes("distribuidor 4") || norm.includes("distribuidora 4") || norm.includes("4%") || norm.includes("preco") || norm.includes("preço") || norm.includes("price");
-    });
+    let cleanedRowCount = 0;
+    let currentProducer: string | undefined;
 
-    for (let r = headerRowIndex + 1; r < lines.length; r++) {
-      const cells = splitCsvLine(lines[r], delimiter);
-      if (cells.every((cell) => !normalizeText(cell))) continue;
-      const descriptionIndex =
-        headerCellsRaw.findIndex((header, index) => {
-          const norm = normalizeHeader(header);
-          return fieldByCol[index] === "name" || norm.includes("descricao") || norm.includes("descrição") || norm.includes("produto");
-        });
-      const description = descriptionIndex >= 0 ? cells[descriptionIndex] : cells.find((cell) => cell.trim().length > 0) || "";
-      if (!description) continue;
-      const isCategoryRow = /^[A-Z0-9\s&./-]{4,}$/.test(description.trim()) && !/\b(19|20)\d{2}\b/.test(description);
-      const price = parseDistributorPrice(cells, headerCellsRaw);
-      candidateRows++;
-      if (isCategoryRow && price === undefined) {
-        ignoredRows++;
-        continue;
-      }
-      if (!/\S/.test(description) || price === undefined) {
-        ignoredRows++;
-        continue;
-      }
+    const scoreWine = (row: ParsedWine) => {
+      let score = 0;
+      if (row.name?.trim()) score += 0.35;
+      if (row.purchase_price != null) score += 0.35;
+      if (row.producer?.trim()) score += 0.15;
+      if (row.vintage) score += 0.1;
+      if (row.country?.trim()) score += 0.05;
+      return Number(Math.min(1, score).toFixed(2));
+    };
 
-      const extracted = extractWineFieldsFromDescription(description);
-      const producerIndex = headerCellsRaw.findIndex((header, index) => {
-        const norm = normalizeHeader(header);
-        return fieldByCol[index] === "producer" || norm.includes("produtor") || norm.includes("vinicola") || norm.includes("vinícola") || norm.includes("marca") || norm.includes("producer") || norm.includes("winery");
-      });
-      const countryIndex = headerCellsRaw.findIndex((header, index) => {
-        const norm = normalizeHeader(header);
-        return fieldByCol[index] === "country" || norm.includes("pais") || norm.includes("país") || norm.includes("country") || norm.includes("origem");
-      });
-      const vintageIndex = headerCellsRaw.findIndex((header, index) => {
-        const norm = normalizeHeader(header);
-        return fieldByCol[index] === "vintage" || norm.includes("safra") || norm.includes("ano") || norm.includes("year") || norm.includes("vintage");
-      });
-
-      const explicitProducer = producerIndex >= 0 ? normalizeText(cells[producerIndex]) : undefined;
-      const explicitCountry = countryIndex >= 0 ? normalizeText(cells[countryIndex]) : undefined;
-      const explicitVintage = vintageIndex >= 0 ? parseYear(cells[vintageIndex]) : undefined;
-      const inferredStyle = normalizeStyle(description) || normalizeStyle([explicitProducer, description].filter(Boolean).join(" "));
-
-      const wineName = normalizeWineData({ name: extracted.name, producer: explicitProducer || extracted.producer || null }, { log: false }).name || extracted.name;
-      if (!wineName || wineName.trim().length < 2) continue;
-
-      wines.push({
-        name: wineName,
-        producer: explicitProducer || extracted.producer,
-        vintage: explicitVintage ?? extracted.vintage,
-        style: inferredStyle,
-        country: explicitCountry || extracted.country,
-        region: undefined,
-        grape: undefined,
-        quantity: 1,
+    const registerWine = (row: ParsedWine, rawValues: Record<string, string>) => {
+      const normalizedName = normalizeWineData({
+        name: stripPrefixes(row.name || ""),
+        producer: row.producer ?? null,
+        grape: row.grape ?? null,
+        country: row.country ?? null,
+        region: row.region ?? null,
+      }, { log: false }).name;
+      if (!normalizedName || normalizedName.trim().length < 2) return false;
+      const price = typeof row.purchase_price === "number" ? row.purchase_price : undefined;
+      if (price === undefined) return false;
+      const parsedRow: ParsedWine = {
+        name: normalizedName,
+        producer: row.producer?.trim() || undefined,
+        vintage: row.vintage,
+        style: row.style,
+        country: row.country?.trim() || undefined,
+        region: row.region?.trim() || undefined,
+        grape: row.grape?.trim() || undefined,
+        quantity: row.quantity ?? 1,
         purchase_price: price,
-        cellar_location: undefined,
-        drink_from: undefined,
-        drink_until: undefined,
+        cellar_location: row.cellar_location?.trim() || undefined,
+        drink_from: row.drink_from,
+        drink_until: row.drink_until,
+      };
+      const confidence = scoreWine(parsedRow);
+      if (confidence >= 0.8) confidenceDistribution.high++;
+      else if (confidence >= 0.55) confidenceDistribution.medium++;
+      else confidenceDistribution.low++;
+      wines.push(parsedRow);
+      return true;
+    };
+
+    const inferTypeFromRow = (textValue: string) => {
+      const inferred = inferTypeFromText(textValue) || normalizeStyle(textValue);
+      return inferred;
+    };
+
+    const parseDelimitedRows = () => {
+      const dataStart = headerRowIndex + 1;
+      const headerFieldMap = headerCellsRaw.map((header) => mapHeaderToField(header));
+      const priceHeaderIndex = headerCellsRaw.findIndex((header) => {
+        const norm = normalizeSearchText(header);
+        return norm.includes("preco") || norm.includes("preço") || norm.includes("valor") || norm.includes("custo") || norm.includes("price") || norm.includes("4%");
       });
-      successfulRows++;
+      const nameHeaderIndex = headerCellsRaw.findIndex((header) => {
+        const norm = normalizeSearchText(header);
+        return norm.includes("descricao") || norm.includes("descrição") || norm.includes("produto") || norm.includes("vinho") || norm.includes("nome") || norm.includes("item");
+      });
+      const producerHeaderIndex = headerCellsRaw.findIndex((header) => {
+        const norm = normalizeSearchText(header);
+        return norm.includes("produtor") || norm.includes("vinicola") || norm.includes("vinícola") || norm.includes("producer") || norm.includes("winery") || norm.includes("marca");
+      });
+      const vintageHeaderIndex = headerCellsRaw.findIndex((header) => {
+        const norm = normalizeSearchText(header);
+        return norm.includes("safra") || norm.includes("vintage") || norm.includes("ano") || norm.includes("year");
+      });
+      const countryHeaderIndex = headerCellsRaw.findIndex((header) => {
+        const norm = normalizeSearchText(header);
+        return norm.includes("pais") || norm.includes("país") || norm.includes("country") || norm.includes("origem");
+      });
+
+      headerCellsRaw.forEach((header, index) => {
+        const mapped = headerFieldMap[index];
+        if (mapped) mapping[header] = mapped;
+      });
+
+      for (let rowIndex = dataStart; rowIndex < cleanedLines.length; rowIndex++) {
+        const line = cleanedLines[rowIndex];
+        if (!line || /^[-=*_•·\s|]+$/.test(line)) continue;
+        const cells = splitCsvLine(line, delimiter);
+        const rowText = cells.join(" ").replace(/\s+/g, " ").trim();
+        if (!rowText) continue;
+        cleanedRowCount++;
+        const rawValues: Record<string, string> = {};
+        headerCellsRaw.forEach((header, index) => {
+          rawValues[header] = cells[index] || "";
+        });
+        sourceRows.push({ index: sourceRows.length, values: rawValues });
+
+        const price = extractPrice(rowText) ?? (priceHeaderIndex >= 0 ? parsePrice(cells[priceHeaderIndex]) : undefined);
+        if (price === undefined) {
+          ignoredRows++;
+          continue;
+        }
+
+        const description = nameHeaderIndex >= 0 ? (cells[nameHeaderIndex] || rowText) : rowText;
+        const extracted = extractWineFieldsFromDescription(stripPrefixes(description));
+        const producer = (producerHeaderIndex >= 0 ? normalizeText(cells[producerHeaderIndex]) : undefined) || extracted.producer || currentProducer;
+        const country = (countryHeaderIndex >= 0 ? normalizeCountryToken(cells[countryHeaderIndex] || "") : undefined) || normalizeCountryToken(rowText) || extracted.country;
+        const vintage = (vintageHeaderIndex >= 0 ? parseYear(cells[vintageHeaderIndex]) : undefined) ?? extracted.vintage ?? parseYear(rowText);
+        const type = inferTypeFromRow(rowText) || inferTypeFromRow(description) || extracted.name && inferTypeFromRow(extracted.name);
+        const name = normalizeWineData({
+          name: stripPrefixes(extracted.name || description),
+          producer: producer || null,
+          country: country || null,
+        }, { log: false }).name;
+        if (!name || name.trim().length < 2) {
+          ignoredRows++;
+          continue;
+        }
+        registerWine({
+          name,
+          producer,
+          vintage,
+          style: type,
+          country,
+          region: undefined,
+          grape: undefined,
+          quantity: 1,
+          purchase_price: price,
+          cellar_location: undefined,
+          drink_from: undefined,
+          drink_until: undefined,
+        }, rawValues);
+      }
+    };
+
+    const parseLineBlocks = () => {
+      for (let rowIndex = 0; rowIndex < cleanedLines.length; rowIndex++) {
+        const line = cleanedLines[rowIndex];
+        if (!line || /^[-=*_•·\s|]+$/.test(line)) continue;
+        const price = extractPrice(line);
+        const upperLine = normalizeText(line)?.toUpperCase() || "";
+        const isProducerBlock = !!upperLine && upperLine === line.toUpperCase() && !price && upperLine.length >= 4 && !/\b(19|20)\d{2}\b/.test(line);
+        if (isProducerBlock) {
+          const extractedBlock = stripPrefixes(normalizeWineText(line) || line);
+          currentProducer = normalizeWineText(extractedBlock || line) || currentProducer;
+          continue;
+        }
+        if (price === undefined) {
+          ignoredRows++;
+          continue;
+        }
+
+        const withoutPrice = line.replace(priceRegex, "").replace(moneyRegex, "").replace(/\s{2,}/g, " ").trim();
+        const extracted = extractWineFieldsFromDescription(stripPrefixes(withoutPrice));
+        const name = normalizeWineData({
+          name: stripPrefixes(extracted.name || withoutPrice),
+          producer: currentProducer || extracted.producer || null,
+          country: extracted.country || normalizeCountryToken(withoutPrice) || null,
+        }, { log: false }).name;
+        const rowType = inferTypeFromRow(withoutPrice) || inferTypeFromRow(line);
+        const rowCountry = extracted.country || normalizeCountryToken(withoutPrice);
+        sourceRows.push({
+          index: sourceRows.length,
+          values: {
+            raw_line: line,
+            name,
+            producer: currentProducer || extracted.producer || "",
+            price: String(price),
+            vintage: extracted.vintage ? String(extracted.vintage) : "",
+            country: rowCountry || "",
+            type: rowType || "",
+          },
+        });
+        if (!name || name.trim().length < 2) {
+          ignoredRows++;
+          continue;
+        }
+        registerWine({
+          name,
+          producer: currentProducer || extracted.producer,
+          vintage: extracted.vintage ?? parseYear(withoutPrice),
+          style: rowType,
+          country: rowCountry,
+          region: undefined,
+          grape: undefined,
+          quantity: 1,
+          purchase_price: price,
+          cellar_location: undefined,
+          drink_from: undefined,
+          drink_until: undefined,
+        }, rawValues);
+      }
+    };
+
+    const priceMatches = cleanedLines.filter((line) => /R\$?\s?\d+[.,]\d{2}/.test(line));
+    console.log("PRICE_LINES:", priceMatches.length);
+    console.log("PRICE_SAMPLE:", priceMatches.slice(0, 10));
+
+    if (structured) {
+      parseDelimitedRows();
+    } else {
+      parseLineBlocks();
     }
 
-    const mappedCount = headerCellsRaw.filter((header) => !!mapping[header]).length;
-    const successRate = candidateRows > 0 ? successfulRows / candidateRows : 0;
-    const confidenceBase = headerScore > 0 ? Math.min(1, headerScore / 16) : 0;
+    console.log("WINES_EXTRACTED:", wines.length);
+    console.log("WINES_SAMPLE:", wines.slice(0, 5));
+
+    const successRate = cleanedRowCount > 0 ? wines.length / cleanedRowCount : 0;
     const confidence = wines.length > 0
-      ? Math.min(1, (successRate * 0.6) + (mappedCount > 0 ? Math.min(0.3, mappedCount / Math.max(headerCellsRaw.length, 1)) : 0) + confidenceBase * 0.2)
-      : confidenceBase * 0.5;
+      ? Math.min(1, 0.2 + confidenceDistribution.high * 0.12 + confidenceDistribution.medium * 0.08 + (successRate * 0.5))
+      : 0;
+    const priceColumn = structured
+      ? headerCellsRaw.find((header) => {
+          const norm = normalizeSearchText(header);
+          return norm.includes("preco") || norm.includes("preço") || norm.includes("valor") || norm.includes("custo") || norm.includes("price") || norm.includes("4%");
+        })
+      : "R$ / numérico";
+    const failureReason =
+      wines.length === 0
+        ? (cleanedRowCount > 0 && priceColumn ? "Arquivo não contém estrutura reconhecível" : "Não encontramos coluna de preço")
+        : undefined;
 
     return {
       wines,
       mapping,
-      headers: headerCellsRaw.filter((header) => !isUnnamedHeader(header)),
+      headers,
       sourceRows,
       confidence: Number(confidence.toFixed(2)),
       successRate: Number(successRate.toFixed(2)),
-      manualMappingRequired: successRate < 0.5 || (wines.length === 0 && candidateRows > 0),
-      headerRowIndex,
+      manualMappingRequired: successRate < 0.5 || wines.length === 0,
+      headerRowIndex: structured ? headerRowIndex : -1,
       priceColumn,
       ignoredRows,
+      failureReason,
+      totalRows: allLines.length,
+      cleanedRows: cleanedRowCount,
+      confidenceDistribution,
     };
   };
 
@@ -1286,6 +1526,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setImportSourceHeaders([]);
     setImportSourceConfidence(1);
     setImportSummary({ headerDetected: false, ignoredRows: 0 });
+    setImportMode("standard");
   };
 
   const updateWineRow = (index: number, field: EditableField, value: string | number | undefined) => {
@@ -1653,10 +1894,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setFileName(file.name);
     setStep("analyzing");
     setLoading(true);
+    setImportMode("standard");
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const isPdfFile = file.type === "application/pdf" || ext === "pdf";
 
     try {
       const isImageFile = file.type.startsWith("image/");
       if (isImageFile) {
+        setImportMode("image");
         const prepared = await prepareAiAnalysisAttachment(file);
         const scanResult = await invokeEdgeFunction<any>(
           "scan-wine-label",
@@ -1672,6 +1917,89 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         setImportSourceRows([]);
         setImportSourceHeaders([]);
         setImportSourceConfidence(imported.length > 0 ? 1 : 0);
+        return;
+      }
+
+      if (isPdfFile) {
+        setImportMode("smart-pdf");
+        const pdfPayload = await prepareSmartPdfImportAttachment(file);
+        const smartContent = [
+          `SMART PDF IMPORT MODE`,
+          `FILE: ${pdfPayload.fileName || file.name}`,
+          `SOURCE: catalog/distributor PDF`,
+          `OCR USED: ${pdfPayload.ocrUsed ? "true" : "false"}`,
+          `PAGE BLOCKS: ${pdfPayload.textBlocks.length}`,
+          `RAW BLOCKS:`,
+          pdfPayload.extractedText || "",
+        ].join("\n");
+
+        console.log("SMART PDF EXTRACTED:", {
+          fileName: file.name,
+          extractedChars: pdfPayload.extractedText.length,
+          blocks: pdfPayload.textBlocks.length,
+          ocrUsed: pdfPayload.ocrUsed,
+          totalLines: pdfPayload.extractedText ? pdfPayload.extractedText.split("\n").filter((line) => line.trim().length > 0).length : 0,
+        });
+
+        if (!pdfPayload.extractedText || pdfPayload.extractedText.trim().length === 0) {
+          setParseErrors([
+            "Não conseguimos interpretar totalmente o PDF.",
+            "Selecione manualmente as colunas para continuar.",
+          ]);
+          setDraftWines([]);
+          setImportSourceRows([]);
+          setImportSourceHeaders([]);
+          setImportSourceConfidence(0);
+          setImportSummary({ headerDetected: false, ignoredRows: 0 });
+          setStep("preview");
+          return;
+        }
+        if (pdfPayload.ocrUsed) {
+          setAiNotes("Detectamos um catálogo visual. Aplicando leitura inteligente (OCR)...");
+          setParseErrors(["Detectamos um catálogo visual. Aplicando leitura inteligente (OCR)..."]);
+        }
+
+        const local = parseCsvLocally(smartContent);
+        setImportSourceRows(local.sourceRows);
+        setImportSourceHeaders(local.headers);
+        setImportSourceConfidence(Math.min(local.confidence, local.successRate));
+        setImportSummary({
+          headerDetected: local.headerRowIndex >= 0,
+          headerRowIndex: local.headerRowIndex,
+          priceColumn: local.priceColumn,
+          ignoredRows: local.ignoredRows,
+        });
+
+        console.log("SMART PDF PARSED:", {
+          extractedChars: pdfPayload.extractedText.length,
+          ocrUsed: pdfPayload.ocrUsed,
+          totalLines: pdfPayload.extractedText.split("\n").filter((line) => line.trim().length > 0).length,
+          winesDetected: local.wines.length,
+          rejectedRows: local.ignoredRows,
+          confidenceDistribution: local.confidenceDistribution,
+        });
+
+        if (local.wines.length > 0) {
+          const normalized = normalizeImportedWines(local.wines);
+          commitImportedRows(normalized, {
+            mapping: local.mapping,
+            notes: "Catálogo PDF interpretado automaticamente. Revise os itens antes de importar.",
+            parseErrors: local.manualMappingRequired ? [local.failureReason || "Selecione manualmente as colunas para continuar."] : [],
+          });
+          if (local.manualMappingRequired) {
+            setColumnMapping(local.mapping);
+          }
+          return;
+        }
+
+        setDraftWines([]);
+        setColumnMapping(local.mapping);
+        setAiNotes(local.failureReason || "Não conseguimos interpretar totalmente o PDF. Selecione manualmente as colunas para continuar.");
+        setParseErrors([
+          local.failureReason || "Não conseguimos interpretar totalmente o PDF.",
+          "Selecione manualmente as colunas para continuar.",
+        ]);
+        setStep("preview");
         return;
       }
 
@@ -1695,132 +2023,64 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         priceColumn: local.priceColumn,
         ignoredRows: local.ignoredRows,
       });
-      const ext = file.name.split(".").pop()?.toLowerCase() || "";
-      const isStructured = ["csv", "tsv", "txt", "xlsx", "xls", "ods"].includes(ext);
+      const shouldUseManualMapping = local.manualMappingRequired || local.successRate < 0.5;
 
-      // Only use the fast path if the local parse extracted RICH data (avg ≥4 fields per row).
-      const avgFieldsPerRow = local.wines.length > 0
-        ? local.wines.reduce((sum, w) => {
-            return sum + Object.values(w).filter((v) => v !== undefined && v !== null && v !== "").length;
-          }, 0) / local.wines.length
-        : 0;
+      console.log("UNIVERSAL IMPORT DEBUG:", {
+        totalRows: local.totalRows,
+        cleanedRows: local.cleanedRows,
+        winesDetected: local.wines.length,
+        rejectedRows: local.ignoredRows,
+        confidenceDistribution: local.confidenceDistribution,
+        headerDetected: local.headerRowIndex >= 0,
+        priceColumn: local.priceColumn,
+        successRate: local.successRate,
+        manualMappingRequired: shouldUseManualMapping,
+      });
 
-      if (local.manualMappingRequired && local.wines.length > 0) {
+      if (local.wines.length > 0) {
         const normalized = normalizeImportedWines(local.wines);
+        const reviewNotes = shouldUseManualMapping
+          ? ["Não conseguimos interpretar totalmente a estrutura. Selecione manualmente as colunas para continuar."]
+          : [];
         commitImportedRows(normalized, {
           mapping: local.mapping,
-          notes: "Identificamos parte da estrutura do arquivo. Ajuste as colunas manualmente para finalizar.",
-          parseErrors: ["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."],
-        });
-        setImportSourceConfidence(local.successRate);
-        return;
-      }
-
-      if (local.manualMappingRequired && local.sourceRows.length > 0 && local.wines.length === 0) {
-        setDraftWines([]);
-        setColumnMapping(local.mapping);
-        setAiNotes("Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
-        setParseErrors(["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."]);
-        setStep("preview");
-        setImportSourceConfidence(local.successRate);
-        return;
-      }
-
-      if (isStructured && local.wines.length >= 1 && avgFieldsPerRow >= 4) {
-        const normalized = normalizeImportedWines(local.wines);
-        commitImportedRows(normalized, {
-          mapping: local.mapping,
-          notes: `Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.`,
+          notes: shouldUseManualMapping ? "A leitura automática identificou parte da estrutura. Revise os itens destacados." : `Identificamos ${local.wines.length} vinho(s) automaticamente. Revise antes de importar.`,
+          parseErrors: reviewNotes,
         });
         setImportSourceConfidence(Math.max(local.confidence, local.successRate));
+        if (shouldUseManualMapping) {
+          setColumnMapping(local.mapping);
+        }
+        if (raw.length > MAX_CLIENT_INPUT_CHARS) {
+          toast({
+            title: "Arquivo muito grande",
+            description: "Importamos uma amostra do arquivo para manter a qualidade da análise. Se precisar, importe em partes.",
+          });
+        }
         return;
       }
 
-      // ── 2) AI FALLBACK: PDFs, Word, or CSVs without recognizable headers ──
-      let data: any = null;
-      try {
-        data = await invokeEdgeFunction<any>(
-          "parse-csv-wines",
-          { csvContent, fileName: file.name, fileType: file.type || null },
-          { timeoutMs: 60_000, retries: 1 },
-        );
-      } catch (aiErr: any) {
-        // If we have ANY local rows, use them as fallback even if AI fails
-        if (local.wines.length > 0) {
-          const normalized = normalizeImportedWines(local.wines);
-          commitImportedRows(normalized, {
-            mapping: local.mapping,
-            notes: "Importação automática (sem IA). Revise os campos antes de confirmar.",
-          });
-          setImportSourceConfidence(Math.max(local.confidence, local.successRate));
-          return;
-        }
-        if (local.manualMappingRequired && local.sourceRows.length > 0) {
-          setDraftWines([]);
-          setColumnMapping(local.mapping);
-          setAiNotes("Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
-          setParseErrors(["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."]);
-          setStep("preview");
-          setImportSourceConfidence(local.successRate);
-          return;
-        }
-        throw aiErr;
-      }
-
-      if (data?.error) {
-        if (local.wines.length > 0) {
-          const normalized = normalizeImportedWines(local.wines);
-          commitImportedRows(normalized, {
-            mapping: local.mapping,
-            parseErrors: [`A análise inteligente falhou (${data.error}). Mostrando dados extraídos localmente para você revisar.`],
-          });
-          setImportSourceConfidence(Math.max(local.confidence, local.successRate));
-          return;
-        }
-        if (local.manualMappingRequired && local.sourceRows.length > 0) {
-          setDraftWines([]);
-          setColumnMapping(local.mapping);
-          setAiNotes("Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
-          setParseErrors(["Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."]);
-          setStep("preview");
-          setImportSourceConfidence(local.successRate);
-          return;
-        }
-        setParseErrors([
-          String(data.error),
-          "Nossa inteligência está instável agora. Tente novamente em alguns instantes ou divida o arquivo em partes menores.",
-          "Para CSV/Excel, garanta uma linha de cabeçalho com colunas como 'Nome', 'Produtor', 'Safra', 'Tipo', 'Quantidade', 'Preço'.",
-        ]);
+      if (local.sourceRows.length > 0) {
         setDraftWines([]);
+        setColumnMapping(local.mapping);
+        setAiNotes(local.failureReason || "Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
+        setParseErrors([
+          local.failureReason || "Arquivo não contém estrutura reconhecível",
+          "Selecione manualmente as colunas para continuar.",
+        ]);
         setStep("preview");
+        setImportSourceConfidence(local.successRate);
         return;
       }
 
-      const wines = normalizeImportedWines(data?.wines || []);
-      const validWines = wines.filter((w) => w.name.length >= 2 && w.name.length <= 120);
-      // Merge AI + local results when both produced rows
-      const merged = validWines.length > 0 ? validWines : local.wines;
-      commitImportedRows(merged, {
-        mapping: { ...(local.mapping || {}), ...(data?.column_mapping || {}) },
-        notes: data?.notes || "",
-        parseErrors: merged.length === 0
-          ? [
-              "Não encontramos linhas válidas de vinho neste arquivo.",
-              "Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.",
-            ]
-          : [],
-      });
-      setImportSourceConfidence(validWines.length > 0 ? 1 : Math.max(local.confidence, local.successRate));
-      if (merged.length === 0) {
-        // handled above
-      }
-
-      if (raw.length > MAX_CLIENT_INPUT_CHARS) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "Importamos uma amostra do arquivo para manter a qualidade da análise. Se precisar, importe em partes.",
-        });
-      }
+      setParseErrors([
+        local.failureReason || "Arquivo não contém estrutura reconhecível",
+        "Se persistir, tente exportar o arquivo como CSV ou Excel (.xlsx) com cabeçalho.",
+      ]);
+      setDraftWines([]);
+      setStep("preview");
+      setImportSourceConfidence(local.successRate);
+      return;
     } catch (err: any) {
       console.error("Import parse error:", err);
       const msg = String(err?.message || "");
@@ -1943,6 +2203,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const completeRowsCount = rowStatuses.filter((status) => status === "ok").length;
   const reviewRowsCount = rowStatuses.filter((status) => status === "review").length;
   const duplicateRowsCount = classifications.duplicates.length;
+  const identifiedRowsCount = completeRowsCount + reviewRowsCount;
   const canImport = completeRowsCount > 0;
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
@@ -2253,11 +2514,28 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                           <Loader2 className="h-7 w-7 animate-spin" style={{ color: "#8F2D56" }} />
                         </div>
                       </div>
+                      <div className="mx-auto mb-4 h-2 w-full max-w-md overflow-hidden rounded-full bg-black/5">
+                        <motion.div
+                          className="h-full w-1/3 rounded-full gradient-wine"
+                          animate={{ x: ["-20%", "220%"] }}
+                          transition={{ duration: 1.25, repeat: Infinity, ease: "linear" }}
+                        />
+                      </div>
                       <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
-                        Sommelyx está analisando…
+                        {importMode === "smart-pdf" ? "Detectamos um catálogo complexo" : "Sommelyx está analisando…"}
                       </p>
                       <p className="mt-1.5 text-xs" style={{ color: "#9CA3AF" }}>
-                        Identificando colunas e organizando os dados de <strong>{fileName}</strong>
+                        {importMode === "smart-pdf"
+                          ? (
+                            <>
+                              Usando inteligência Sommelyx para interpretar o catálogo de <strong>{fileName}</strong>
+                            </>
+                          )
+                          : (
+                            <>
+                              Identificando colunas e organizando os dados de <strong>{fileName}</strong>
+                            </>
+                          )}
                       </p>
                     </motion.div>
                   )}
@@ -2275,9 +2553,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         </div>
                       </div>
 
+                      {importMode === "smart-pdf" ? (
+                        <div className="rounded-2xl border border-sky-200 bg-sky-50/80 px-4 py-3 text-[13px] text-sky-900">
+                          <p className="font-semibold">✔ Detectamos um catálogo complexo</p>
+                          <p>✔ Usando inteligência Sommelyx para interpretar produtores, vinhos e preços</p>
+                          <p>✔ Você pode revisar e editar cada linha antes de importar</p>
+                        </div>
+                      ) : null}
+
                       <div className="grid gap-3 shrink-0 sm:grid-cols-3">
                         {[
-                          { label: "Vinhos identificados", value: completeRowsCount, tone: "from-emerald-50 to-emerald-100 text-emerald-800" },
+                          { label: "Vinhos identificados", value: identifiedRowsCount, tone: "from-emerald-50 to-emerald-100 text-emerald-800" },
                           { label: "Precisam de revisão", value: reviewRowsCount, tone: "from-amber-50 to-amber-100 text-amber-800" },
                           { label: "Duplicados", value: duplicateRowsCount, tone: "from-rose-50 to-rose-100 text-rose-700" },
                         ].map((card) => (
@@ -2290,9 +2576,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
                       <div className="rounded-2xl border border-black/5 bg-[#FBFAF7] px-4 py-3 text-[13px] text-[#4A4338]">
                         <p>✔ Cabeçalho detectado automaticamente{importSummary.headerDetected && typeof importSummary.headerRowIndex === "number" ? ` na linha ${importSummary.headerRowIndex + 1}` : ""}</p>
-                        <p>✔ Coluna de preço usada: {importSummary.priceColumn || "não identificada"}</p>
+                        <p>✔ Coluna de preço detectada: {importSummary.priceColumn || "não identificada"}</p>
                         <p>✔ {importSummary.ignoredRows} linha(s) ignorada(s) por categoria ou vazio</p>
-                        <p>✔ {completeRowsCount} vinhos prontos para importar</p>
+                        <p>✔ {identifiedRowsCount} vinhos identificados</p>
                         <p>⚠️ {reviewRowsCount} vinhos precisam de revisão</p>
                         {duplicateRowsCount + autoMergedDuplicates > 0 ? (
                           <p>🔁 {duplicateRowsCount + autoMergedDuplicates} duplicado(s) combinados ou sinalizados</p>
@@ -2634,7 +2920,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         </div>
                       ) : (
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[13px] font-medium text-amber-800">
-                          Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.
+                          {importMode === "smart-pdf"
+                            ? "Não conseguimos interpretar totalmente o catálogo PDF. Selecione manualmente as colunas para continuar."
+                            : "Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."}
                         </div>
                       )}
                     </motion.div>

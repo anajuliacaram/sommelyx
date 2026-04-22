@@ -731,7 +731,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 45_000);
+      const timeout = setTimeout(() => controller.abort(), 25_000);
 
       const retryHint = attempt > 0
         ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre cada rótulo. Cite nomes dos vinhos, mencione produtores/regiões/posicionamento. Mesmo com leitura parcial, devolva a melhor análise possível mantendo a estrutura.`
@@ -748,7 +748,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         functionName: "analyze-wine-list",
         requestId: crypto.randomUUID(),
         model: "gpt-4o-mini",
-        timeoutMs: 90_000,
+        timeoutMs: 25_000,
         temperature: 0.2,
         instructions: systemPrompt,
         input: [{
@@ -762,7 +762,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
             : [{ type: "input_text" as const, text: String(userMessageContent || "") }],
         }],
         schema: (tools[0] as any)?.function?.parameters || {},
-        maxOutputTokens: 8_000,
+        maxOutputTokens: 800,
       });
 
       if (!openaiResult.ok) {

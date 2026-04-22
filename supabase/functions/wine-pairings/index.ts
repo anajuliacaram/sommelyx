@@ -339,7 +339,7 @@ async function callAI(
     functionName: "wine-pairings",
     requestId: crypto.randomUUID(),
     model: "gpt-4o-mini",
-    timeoutMs: 45_000,
+    timeoutMs: 25_000,
     temperature: 0.35,
     instructions: systemPrompt,
     input: [
@@ -349,7 +349,7 @@ async function callAI(
       },
     ],
     schema,
-    maxOutputTokens: 8_000,
+    maxOutputTokens: 800,
   });
 
   if (result.ok) {

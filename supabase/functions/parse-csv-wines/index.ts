@@ -105,7 +105,7 @@ serve(async (req) => {
       });
     }
 
-    const { csvContent, fileName, fileType } = await req.json();
+    const { csvContent, fileName, fileType, parseMode, textBlocks, ocrUsed } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
       return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
         status: 400,
@@ -122,26 +122,44 @@ serve(async (req) => {
 
     const normalized = csvContent.replace(/\r\n/g, "\n").trim();
     const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
-
-    const header = lines[0] || "";
-    const dataLines = lines.slice(1);
-    const CHUNK_SIZE = 120;
-    const MAX_CHUNKS = 25;
+    const isSmartPdf = parseMode === "smart-pdf" || fileType === "application/pdf";
+    console.log(`[${FUNCTION_NAME}] mode=${isSmartPdf ? "smart-pdf" : "structured"} input_chars=${normalized.length} input_lines=${lines.length} ocr_used=${ocrUsed ? "true" : "false"}`);
 
     const chunks: string[] = [];
-    if (lines.length <= CHUNK_SIZE + 1) {
-      chunks.push(normalized);
+    const CHUNK_CHAR_LIMIT = isSmartPdf ? 12_000 : 8_500;
+    const MAX_CHUNKS = isSmartPdf ? 30 : 25;
+
+    if (isSmartPdf) {
+      const source = normalized.length > 0 ? normalized : Array.isArray(textBlocks) ? JSON.stringify(textBlocks) : "";
+      if (source.length <= CHUNK_CHAR_LIMIT) {
+        chunks.push(source);
+      } else {
+        for (let i = 0; i < MAX_CHUNKS; i++) {
+          const start = i * CHUNK_CHAR_LIMIT;
+          const slice = source.slice(start, start + CHUNK_CHAR_LIMIT);
+          if (!slice) break;
+          chunks.push(slice);
+        }
+      }
     } else {
-      for (let i = 0; i < MAX_CHUNKS; i++) {
-        const slice = dataLines.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        if (slice.length === 0) break;
-        chunks.push([header, ...slice].join("\n"));
+      const header = lines[0] || "";
+      const dataLines = lines.slice(1);
+      const CHUNK_SIZE = 120;
+
+      if (lines.length <= CHUNK_SIZE + 1) {
+        chunks.push(normalized);
+      } else {
+        for (let i = 0; i < MAX_CHUNKS; i++) {
+          const slice = dataLines.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+          if (slice.length === 0) break;
+          chunks.push([header, ...slice].join("\n"));
+        }
       }
     }
 
-    const wasTruncated = dataLines.length > chunks.length * CHUNK_SIZE;
+    const wasTruncated = isSmartPdf ? normalized.length > chunks.length * CHUNK_CHAR_LIMIT : lines.slice(1).length > chunks.length * 120;
 
-    const systemPrompt = `Você é um SOMMELIER-DATA-SCIENTIST de elite. Receba conteúdo bruto de arquivo (CSV/TSV, planilha, PDF, Word ou texto) e extraia TODOS os dados de vinhos, MESMO quando o arquivo é desorganizado, sem cabeçalhos claros, ou misturado com texto livre.
+    const baseSystemPrompt = `Você é um SOMMELIER-DATA-SCIENTIST de elite. Receba conteúdo bruto de arquivo (CSV/TSV, planilha, PDF, Word ou texto) e extraia TODOS os dados de vinhos, MESMO quando o arquivo é desorganizado, sem cabeçalhos claros, ou misturado com texto livre.
 
 Campos a extrair POR LINHA:
 - name (OBRIGATÓRIO, string) — nome do rótulo (ex: "Don Perignon Vintage")
@@ -203,6 +221,22 @@ REGRAS DE EXTRAÇÃO AGRESSIVA (CRÍTICAS — não retornar só o nome!):
 15. **Sempre retorne os 12 campos** (deixe undefined apenas se realmente impossível inferir).
 
 Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`;
+
+    const smartPdfSystemPrompt = `Você está interpretando um CATÁLOGO PDF de distribuidor de vinhos com layout não tabular, blocos por produtor e preços em coluna separada.
+
+REGRAS ESPECÍFICAS DO PDF:
+- Detecte blocos de produtor quando encontrar linhas em caixa alta isoladas.
+- Associe os vinhos imediatamente abaixo do bloco de produtor.
+- Use a coluna ou valores alinhados à direita como preço.
+- Ignore títulos repetidos, seções, totalizadores, palavras como EXCLUSIVO e linhas de navegação.
+- Preserve apenas itens de vinho, espumante, fortificado e sobremesa.
+- Extraia name, producer, country, type, vintage e price.
+- Normalize casing em Title Case.
+- Retorne apenas vinhos válidos com name e price.
+
+Você ainda deve seguir todas as demais regras de extração, normalização e deduplicação do prompt base.`;
+
+    const systemPrompt = isSmartPdf ? `${smartPdfSystemPrompt}\n\n${baseSystemPrompt}` : baseSystemPrompt;
 
     function normalizeStyle(value: unknown) {
       const v = typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -302,7 +336,7 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
           functionName: FUNCTION_NAME,
           requestId,
           model: "gpt-4o-mini",
-          timeoutMs: 60_000,
+          timeoutMs: 20_000,
           temperature: 0.4,
           instructions: systemPrompt,
           input: [
@@ -317,7 +351,7 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
             },
           ],
           schema: toolDef.function.parameters,
-          maxOutputTokens: 4_000,
+          maxOutputTokens: 800,
         });
 
         if (!result.ok) {
@@ -431,10 +465,15 @@ Sua reputação depende de devolver dados RICOS e COMPLETOS, não apenas nomes.`
       metadata: {
         fileName: typeof fileName === "string" ? fileName : null,
         fileType: typeof fileType === "string" ? fileType : null,
+        parseMode: isSmartPdf ? "smart-pdf" : "structured",
+        ocrUsed: !!ocrUsed,
         chunks: chunks.length,
         truncated: wasTruncated,
       },
     };
+
+    const rejectedRows = Math.max(0, allWines.length - result.wines.length);
+    console.log(`[${FUNCTION_NAME}] parsed_wines=${result.wines.length} rejected_rows=${rejectedRows} chunks=${chunks.length}`);
 
     await logAudit(userId, 200, "success", Date.now() - startTime, {
       wines_extracted: result.wines.length,

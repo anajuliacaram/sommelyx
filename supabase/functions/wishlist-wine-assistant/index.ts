@@ -264,7 +264,7 @@ Regras:
         functionName: FUNCTION_NAME,
         requestId: crypto.randomUUID(),
         model: openaiModel,
-        timeoutMs: 60_000,
+        timeoutMs: 15_000,
         temperature: 0.2,
         instructions: String(messages[0].content),
         input: [
@@ -313,7 +313,7 @@ Regras:
           required: ["suggestion"],
           additionalProperties: false,
         },
-        maxOutputTokens: 700,
+        maxOutputTokens: 500,
       });
 
       if (!result.ok) {
