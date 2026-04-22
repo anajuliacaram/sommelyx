@@ -43,14 +43,26 @@ function isSdkRelayError(message: string) {
   return message.toLowerCase().includes("failed to send a request to the edge function");
 }
 
+function isAbortErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("abort") ||
+    normalized.includes("aborted") ||
+    normalized.includes("aborterror") ||
+    normalized.includes("signal is aborted")
+  );
+}
+
 function classifyEdgeError(message: string, status?: number): string {
   if (status === 401) return "Sua sessão expirou. Faça login novamente.";
+   if (status === 408) return "Tempo de resposta excedido. Tente novamente.";
   if (isTransportErrorMessage(message)) {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       return "Sem conexão. Verifique sua internet.";
     }
     return "O serviço está temporariamente indisponível. Tente novamente em instantes.";
   }
+  if (isAbortErrorMessage(message)) return "Tempo de resposta excedido. Tente novamente.";
   if (isSdkRelayError(message)) return "A solicitação não pôde ser enviada. Tente novamente.";
   if (message.toLowerCase().includes("tempo limite")) return "Demorou mais que o esperado. Tente novamente.";
   if (status === 429) return "Muitas requisições. Aguarde um momento e tente novamente.";
@@ -186,7 +198,7 @@ export async function invokeEdgeFunction<T>(
       const retryable =
         err instanceof EdgeFunctionError
           ? (err.retryable ?? isRetriable(err.status))
-          : rawMessage.includes("demorou") || isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage);
+          : rawMessage.includes("demorou") || isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage) || isAbortErrorMessage(rawMessage);
 
       if (attempt < retries && retryable) {
         attempt++;

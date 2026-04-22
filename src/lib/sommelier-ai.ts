@@ -193,7 +193,7 @@ function classifyError(err: unknown): ClassifiedError {
   if (err instanceof EdgeFunctionError && err.code === "AUTH_REQUIRED") {
     return { type: "auth", message: "Sessão expirada. Faça login novamente." };
   }
-  if (lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais")) {
+  if (lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
     return { type: "timeout", message: "A busca demorou mais que o esperado. Tente novamente." };
   }
   if (
@@ -827,7 +827,7 @@ export async function analyzeWineList(
     const request = () => invokeEdgeFunction<WineListAnalysis>(
       "analyze-wine-list",
       { ...attachment, userProfile },
-      { timeoutMs: 60_000, retries: 1 },
+      { timeoutMs: 95_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
@@ -864,7 +864,7 @@ export async function analyzeMenuForWine(
     const request = () => invokeEdgeFunction<MenuAnalysis>(
       "analyze-wine-list",
       { ...attachment, mode: "menu-for-wine", wineName },
-      { timeoutMs: 60_000, retries: 1 },
+      { timeoutMs: 95_000, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
