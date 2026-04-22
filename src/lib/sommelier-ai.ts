@@ -190,7 +190,7 @@ function classifyError(err: unknown): ClassifiedError {
   const status = err instanceof EdgeFunctionError ? err.status : undefined;
 
   if (status === 401 || code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
-    return { type: "auth", message: "Sessão expirada. Faça login novamente." };
+    return { type: "auth", message: "Sua sessão expirou. Faça login novamente." };
   }
   if (status === 408 || code === "AI_TIMEOUT" || lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
     return { type: "timeout", message: "Tempo de resposta excedido. Tente novamente." };

@@ -9,6 +9,8 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const FUNCTION_NAME = "wine-pairings";
+
 
 
 function jsonResponse(body: unknown, status = 200) {
@@ -366,9 +368,10 @@ serve(async (req) => {
   let userId = "unknown";
 
   try {
-    const authHeader = req.headers.get("Authorization");
+    const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
+    console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
     if (!authHeader?.startsWith("Bearer ")) {
-      return jsonResponse({ error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
+      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_REQUIRED", requestId }, 401);
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
@@ -380,12 +383,14 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
-      await logToDb(supabaseUrl, serviceKey, "unknown", "wine-pairings", 401, "unauthorized", Date.now() - startTime);
-      return jsonResponse({ error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const validatedUserId = claimsData?.claims?.sub;
+    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
+    if (claimsError || !validatedUserId) {
+      await logToDb(supabaseUrl, serviceKey, "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
+      return jsonResponse({ error: "Sua sessão expirou. Faça login novamente.", code: "AUTH_INVALID", requestId }, 401);
     }
-    userId = user.id;
+    userId = validatedUserId;
 
 
     let body: Record<string, unknown>;

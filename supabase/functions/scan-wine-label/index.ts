@@ -6,6 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const FUNCTION_NAME = "scan-wine-label";
@@ -229,7 +230,7 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") ?? req.headers.get("authorization");
-    console.log(`[${FUNCTION_NAME}] request_received request_id=${requestId} has_auth=${Boolean(authHeader)}`);
+    console.log(`[${FUNCTION_NAME}] auth_header request_id=${requestId} has_auth=${Boolean(authHeader)}`);
 
     if (!authHeader?.startsWith("Bearer ")) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
@@ -252,9 +253,10 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(user)}`);
-    if (userError || !user) {
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const validatedUserId = claimsData?.claims?.sub;
+    console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
+    if (claimsError || !validatedUserId) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "invalid_token",
@@ -262,13 +264,13 @@ serve(async (req) => {
       return fail(401, {
         success: false,
         code: "AUTH_INVALID",
-        message: "Sua sessão não é válida. Faça login novamente para continuar.",
+        message: "Sua sessão expirou. Faça login novamente para continuar.",
         requestId,
         retryable: false,
       });
     }
 
-    userId = user.id;
+    userId = validatedUserId;
 
     if (!checkRateLimit(userId)) {
       await logAudit(userId, 429, "rate_limited", Date.now() - startTime, { request_id: requestId });
