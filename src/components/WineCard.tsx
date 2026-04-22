@@ -164,10 +164,10 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
         </div>
 
         <div className="mt-5 space-y-2">
-          <div className="relative h-px rounded-full bg-[#E7DED3]">
+          <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#E7DED3]">
             <div
-              className="absolute left-0 top-0 h-full rounded-full bg-[#D7C29C]"
-              style={{ width: `${indicator}%` }}
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#E5D2A6] via-[#D7C29C] to-[#C8A95B]"
+              style={{ width: `${Math.max(indicator, 8)}%` }}
             />
             <span
               className="absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-[#C8A95B] shadow-[0_0_0_3px_rgba(255,255,255,0.86)]"
@@ -182,11 +182,9 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
               {drinkWindow.until}
             </span>
           </div>
-          {drinkWindow.isEstimated ? (
-            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#A39885]">
-              Janela sugerida
-            </p>
-          ) : null}
+          <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#A39885]">
+            {drinkWindow.isEstimated ? "Janela sugerida" : "Janela de consumo"}
+          </p>
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-5">
