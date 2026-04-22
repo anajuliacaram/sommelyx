@@ -69,7 +69,7 @@ function isAbortErrorMessage(message: string) {
 }
 
 function classifyEdgeError(message: string, status?: number, code?: string): string {
-  if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID" || status === 401) return "Sessão expirada. Faça login novamente.";
+  if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID" || status === 401) return "Sua sessão expirou. Faça login novamente.";
   if (code === "AI_TIMEOUT" || status === 408) return "Tempo de resposta excedido. Tente novamente.";
   if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
   if (code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
@@ -132,11 +132,9 @@ function parseErrorBody(body: any, fallbackStatus?: number) {
 async function resolveAccessToken(preferredToken?: string | null, forceRefresh = false): Promise<string | null> {
   if (!forceRefresh && preferredToken) return preferredToken;
 
-  if (!forceRefresh) {
-    const { data: { session } } = await supabase.auth.getSession();
-    const currentToken = session?.access_token ?? null;
-    if (currentToken) return currentToken;
-  }
+  const { data: { session } } = await supabase.auth.getSession();
+  const currentToken = session?.access_token ?? null;
+  if (currentToken || !forceRefresh) return currentToken;
 
   const { data: refreshed } = await supabase.auth.refreshSession();
   return refreshed.session?.access_token ?? null;
@@ -147,6 +145,8 @@ export async function invokeEdgeFunction<T>(
   body: Record<string, unknown>,
   { timeoutMs = 45_000, retries = 2, accessToken: explicitAccessToken }: InvokeOptions = {},
 ): Promise<T> {
+  const requestId = crypto.randomUUID();
+  const startedAt = Date.now();
   let attempt = 0;
   let forceTokenRefresh = false;
 
@@ -154,7 +154,8 @@ export async function invokeEdgeFunction<T>(
     try {
       const accessToken = await resolveAccessToken(explicitAccessToken, forceTokenRefresh);
       if (!accessToken) {
-        throw new EdgeFunctionError("Sessão expirada. Faça login novamente.", {
+        console.warn("[edge-invoke] auth_missing", { function: name, requestId });
+        throw new EdgeFunctionError("Sua sessão expirou. Faça login novamente.", {
           status: 401,
           code: "AUTH_REQUIRED",
           retryable: false,
@@ -163,6 +164,8 @@ export async function invokeEdgeFunction<T>(
 
       console.log("[edge-invoke] request", {
         function: name,
+        requestId,
+        attempt,
         payloadKeys: Object.keys(body),
         hasAuthToken: Boolean(accessToken),
       });
@@ -278,6 +281,8 @@ export async function invokeEdgeFunction<T>(
       const unwrapped = unwrapResponseData<T>(data);
       console.log("[edge-invoke] response", {
         function: name,
+        requestId,
+        durationMs: Date.now() - startedAt,
         wrapped: isEdgeEnvelopeSuccess<T>(data),
       });
       return unwrapped;
@@ -289,11 +294,24 @@ export async function invokeEdgeFunction<T>(
           : rawMessage.includes("demorou") || isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage) || isAbortErrorMessage(rawMessage);
 
       if (attempt < retries && retryable) {
+        console.warn("[edge-invoke] retry", {
+          function: name,
+          requestId,
+          attempt,
+          retryable,
+          message: rawMessage,
+        });
         attempt++;
         await sleep(600 * Math.pow(2, attempt));
         continue;
       }
 
+      console.error("[edge-invoke] failure", {
+        function: name,
+        requestId,
+        durationMs: Date.now() - startedAt,
+        message: rawMessage || toErrorMessage(err),
+      });
       if (err instanceof EdgeFunctionError) throw err;
       throw new EdgeFunctionError(classifyEdgeError(toErrorMessage(err)));
     }
