@@ -566,7 +566,35 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                 )}
 
                 {error && (
-                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                  <div className="space-y-2">
+                    <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                    {lastMenuAttachment && (
+                      <Button type="button" variant="secondary" onClick={() => void handleMenuFileChange({ target: { files: [] }, currentTarget: { value: "" } } as React.ChangeEvent<HTMLInputElement>)} className="hidden" />
+                    )}
+                    {lastMenuAttachment && (
+                      <Button type="button" variant="secondary" onClick={() => {
+                        lastRetryRef.current = async () => {
+                          setLoading(true);
+                          setError(null);
+                          setStep("ext-menu-scanning");
+                          try {
+                            const result = await analyzeMenuForWine(lastMenuAttachment, extWineName);
+                            setMenuResults(result);
+                            setWineProfile(result.wineProfile || null);
+                            setStep("ext-menu-results");
+                          } catch (err: any) {
+                            setError(err.message || "Erro ao analisar o cardápio");
+                            setStep("ext-menu-photo");
+                          } finally {
+                            setLoading(false);
+                          }
+                        };
+                        runRetry();
+                      }} className="w-full h-10 text-[13px] font-medium">
+                        Tentar novamente
+                      </Button>
+                    )}
+                  </div>
                 )}
               </motion.div>
             )}
@@ -622,7 +650,32 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                 )}
 
                 {error && (
-                  <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                  <div className="space-y-2">
+                    <p className="text-[12px] text-destructive/80 text-center">{error}</p>
+                    {lastWineListAttachment && (
+                      <Button type="button" variant="secondary" onClick={() => {
+                        lastRetryRef.current = async () => {
+                          setLoading(true);
+                          setError(null);
+                          setStep("scanning");
+                          try {
+                            const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
+                            const result = await analyzeWineList(lastWineListAttachment, profile);
+                            setScanResults(result);
+                            setStep("scan-results");
+                          } catch (err: any) {
+                            setError(err.message || "Erro ao analisar a carta");
+                            setStep("photo");
+                          } finally {
+                            setLoading(false);
+                          }
+                        };
+                        runRetry();
+                      }} className="w-full h-10 text-[13px] font-medium">
+                        Tentar novamente
+                      </Button>
+                    )}
+                  </div>
                 )}
               </motion.div>
             )}
