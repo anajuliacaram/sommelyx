@@ -347,8 +347,8 @@ export default function PersonalCellarPage() {
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
-              const inWindow =
-                w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until;
+              const dwRow = resolveSuggestedDrinkWindow(w);
+              const inWindow = currentYear >= dwRow.from && currentYear <= dwRow.until;
               return (
                 <div key={w.id} className="editorial-row" onClick={() => setEditWine(w)}>
                   {showLabels && w.image_url ? (
