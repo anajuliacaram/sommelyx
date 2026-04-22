@@ -50,6 +50,7 @@ function estimateDrinkWindow(style?: string | null, vintage?: number | null): { 
   else if (s.includes("rose")) { openIn = 0; span = 2; }
   else if (s.includes("branco")) { openIn = 1; span = 4; }
   else if (s.includes("sobrem") || s.includes("fortif") || s.includes("porto") || s.includes("madeira")) { openIn = 2; span = 20; }
+  else if (s.includes("chianti") || s.includes("sangiovese")) { openIn = 2; span = 8; }
   else if (s.includes("tinto")) { openIn = 2; span = 8; }
   else { openIn = 1; span = 5; }
   return { from: base + openIn, until: base + openIn + span };
@@ -59,16 +60,20 @@ function resolveDrinkWindow(wine: Pick<WineType, "drink_from" | "drink_until" | 
   const estimated = estimateDrinkWindow(wine.style, wine.vintage);
   let from = wine.drink_from ?? estimated.from;
   let until = wine.drink_until ?? estimated.until;
+  if (!Number.isFinite(from) || from <= 0) from = estimated.from;
+  if (!Number.isFinite(until) || until <= 0) until = estimated.until;
   if (until <= from) until = from + Math.max(2, estimated.until - estimated.from);
   return { from, until, isEstimated: wine.drink_from == null || wine.drink_until == null };
 }
 
+// Posição do indicador na barra (0-100). Garante valor sempre visível,
+// mesmo quando o ano atual está antes ou depois da janela.
 function getDrinkWindowIndicator(from: number, until: number) {
   const currentYear = new Date().getFullYear();
   const span = until - from;
-  if (span <= 0) return 50;
+  if (!Number.isFinite(span) || span <= 0) return 50;
   const raw = ((currentYear - from) / span) * 100;
-  return Math.max(4, Math.min(96, raw));
+  return Math.max(6, Math.min(94, raw));
 }
 
 export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
