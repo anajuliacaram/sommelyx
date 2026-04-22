@@ -595,15 +595,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   );
 }
 
-function WineListCard({ wine, index, isTopPick, isBestValue, isSaved, isSelected, onChooseWine, onToggleSave }: {
+function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChooseWine }: {
   wine: WineListItem;
   index: number;
   isTopPick: boolean;
   isBestValue: boolean;
-  isSaved: boolean;
   isSelected: boolean;
   onChooseWine: () => void;
-  onToggleSave: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
