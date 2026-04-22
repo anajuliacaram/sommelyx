@@ -242,17 +242,21 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
         vintage: wine.vintage,
         country: wine.country,
       });
+      if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:wine", { id: reqId }); return; }
+      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine" });
+      setError(null);
       setPairings(result.pairings);
       setWineProfile(result.wineProfile || null);
       setPairingLogic(result.pairingLogic || null);
       setStep("wine-results");
     } catch (err: any) {
+      if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] wine pairings failed:", err);
       setError(err?.message || "Não foi possível buscar sugestões");
     } finally {
-      setLoading(false);
+      if (isLatest(reqId)) setLoading(false);
     }
-  }, [selectedWineId, wines]);
+  }, [selectedWineId, wines, nextRequestId]);
 
   // Deep-link: ao abrir com initialWineId, ir direto para resultados de harmonização
   useEffect(() => {
