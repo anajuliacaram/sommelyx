@@ -241,7 +241,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       console.error("[WineListScannerDialog] fatal_error", {
         error: err?.message,
         code: err?.code,
+        status: err?.status,
         requestId: err?.requestId,
+        functionName: err?.functionName,
+        rawBody: err?.rawBody,
       });
       if (err?.requestId) {
         console.log("[WineListScannerDialog] requestId", err.requestId);

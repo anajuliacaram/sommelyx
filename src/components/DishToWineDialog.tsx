@@ -411,7 +411,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setStep("scan-results");
         } catch (err: any) {
           if (!isLatest(retryId)) return;
-          console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", retry: true, error: err?.message, code: err?.code, requestId: err?.requestId });
+          console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", retry: true, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
           setError(err.message || "Erro ao analisar a carta");
           setStep("photo");
         } finally {
@@ -429,7 +429,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setStep("scan-results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
-      console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", id: reqId, error: err?.message, code: err?.code, requestId: err?.requestId });
+      console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
       setError(err.message || "Erro ao analisar a carta");
       setStep("photo");
     } finally {
@@ -476,7 +476,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setStep("ext-menu-results");
         } catch (err: any) {
           if (!isLatest(retryId)) return;
-          console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", retry: true, error: err?.message, code: err?.code, requestId: err?.requestId });
+          console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", retry: true, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
           setError(err.message || "Erro ao analisar o cardápio");
           setStep("ext-menu-photo");
         } finally {
@@ -494,7 +494,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setStep("ext-menu-results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
-      console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", id: reqId, error: err?.message, code: err?.code, requestId: err?.requestId });
+      console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
       setError(err.message || "Erro ao analisar o cardápio");
       setStep("ext-menu-photo");
     } finally {

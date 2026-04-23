@@ -3,6 +3,7 @@ import type { AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { normalizeWineData } from "@/lib/wine-normalization";
 
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes.";
+const ANALYZE_WINE_LIST_TIMEOUT_MS = 65_000;
 
 // ── Types ──
 
@@ -943,7 +944,7 @@ export async function analyzeWineList(
     const request = () => invokeEdgeFunction<WineListAnalysis>(
       "analyze-wine-list",
       { ...attachment, userProfile },
-      { timeoutMs: 20_000, retries: 1 },
+      { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {
@@ -994,7 +995,7 @@ export async function analyzeMenuForWine(
     const request = () => invokeEdgeFunction<MenuAnalysis>(
       "analyze-wine-list",
       { ...attachment, mode: "menu-for-wine", wineName },
-      { timeoutMs: 20_000, retries: 1 },
+      { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
     );
     const data = await request();
     if (data && (data as any).fallback === true) {

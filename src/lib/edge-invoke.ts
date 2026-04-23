@@ -33,14 +33,18 @@ export class EdgeFunctionError extends Error {
   code?: string;
   requestId?: string;
   retryable?: boolean;
+  rawBody?: unknown;
+  functionName?: string;
 
-  constructor(message: string, opts?: { status?: number; code?: string; requestId?: string; retryable?: boolean }) {
+  constructor(message: string, opts?: { status?: number; code?: string; requestId?: string; retryable?: boolean; rawBody?: unknown; functionName?: string }) {
     super(message);
     this.name = "EdgeFunctionError";
     this.status = opts?.status;
     this.code = opts?.code;
     this.requestId = opts?.requestId;
     this.retryable = opts?.retryable;
+    this.rawBody = opts?.rawBody;
+    this.functionName = opts?.functionName;
   }
 }
 
@@ -180,6 +184,8 @@ function parseErrorBody(body: any, fallbackStatus?: number) {
     code,
     requestId,
     retryable,
+    rawBody: body,
+    rawMessage,
     message: classifyEdgeError(rawMessage, status, code),
   };
 }
@@ -207,6 +213,38 @@ function parseTextResponse(text: string) {
   }
 }
 
+function sanitizeForLog(value: unknown): unknown {
+  if (value == null) return value;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return value;
+    if (trimmed.startsWith("data:")) {
+      const [prefix, data = ""] = trimmed.split(",", 2);
+      return `${prefix},[base64:${data.length}]`;
+    }
+    if (/^[A-Za-z0-9+/=\s]+$/.test(trimmed) && trimmed.length > 120) {
+      return `[base64:${trimmed.length}]`;
+    }
+    if (trimmed.length > 300) {
+      return `${trimmed.slice(0, 300)}… [len=${trimmed.length}]`;
+    }
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.slice(0, 10).map((item) => sanitizeForLog(item));
+  }
+
+  if (typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [key, sanitizeForLog(nested)]),
+    );
+  }
+
+  return value;
+}
+
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
@@ -231,6 +269,7 @@ export async function invokeEdgeFunction<T>(
       const session = await resolveSession(attempt > 0);
       console.log("Sending token:", !!session?.access_token);
       console.log(`CALLING ${name} WITH TOKEN:`, !!session?.access_token);
+      const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
 
       if (!session?.access_token) {
         console.error("NO TOKEN");
@@ -239,20 +278,25 @@ export async function invokeEdgeFunction<T>(
           status: 401,
           code: "AUTH_REQUIRED",
           retryable: false,
+          functionName: name,
         });
       }
 
       console.log("[edge-invoke] request", {
         function: name,
+        url,
         requestId,
         attempt,
-        payloadKeys: Object.keys(body),
+        payload: sanitizeForLog(body),
         hasAuthToken: Boolean(session.access_token),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token ? "[present]" : "[missing]"}`,
+        },
       });
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
-      const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
 
       try {
         const response = await fetch(url, {
@@ -268,6 +312,12 @@ export async function invokeEdgeFunction<T>(
 
         const text = await response.text();
         const parsedBody = parseTextResponse(text);
+        console.log("[edge-invoke] response_body", {
+          function: name,
+          requestId,
+          status: response.status,
+          body: sanitizeForLog(parsedBody),
+        });
 
         if (!response.ok) {
           console.error("EDGE ERROR:", text);
@@ -282,6 +332,8 @@ export async function invokeEdgeFunction<T>(
             code: parsed.code ?? (response.status === 401 ? "AUTH_INVALID" : "EDGE_FAILED"),
             requestId: parsed.requestId,
             retryable: parsed.retryable ?? isRetriable(response.status),
+            rawBody: parsed.rawBody ?? parsedBody,
+            functionName: name,
           });
         }
 
@@ -292,6 +344,8 @@ export async function invokeEdgeFunction<T>(
             code: parsed.code,
             requestId: parsed.requestId,
             retryable: parsed.retryable,
+            rawBody: parsed.rawBody ?? parsedBody,
+            functionName: name,
           });
         }
 
@@ -338,10 +392,21 @@ export async function invokeEdgeFunction<T>(
         function: name,
         requestId,
         durationMs: Date.now() - startedAt,
+        code: err instanceof EdgeFunctionError ? err.code : undefined,
+        status: err instanceof EdgeFunctionError ? err.status : undefined,
+        rawBody: err instanceof EdgeFunctionError ? sanitizeForLog(err.rawBody) : undefined,
         message: rawMessage || toErrorMessage(err),
       });
       if (err instanceof EdgeFunctionError) throw err;
-      throw new EdgeFunctionError(classifyEdgeError(toErrorMessage(err)));
+      const isAbort = isAbortErrorMessage(rawMessage);
+      const isTransport = isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage);
+      throw new EdgeFunctionError(classifyEdgeError(toErrorMessage(err)), {
+        status: isAbort ? 408 : undefined,
+        code: isAbort ? "AI_TIMEOUT" : isTransport ? "AI_UNAVAILABLE" : undefined,
+        retryable: isAbort || isTransport,
+        rawBody: rawMessage || toErrorMessage(err),
+        functionName: name,
+      });
     }
   }
 
