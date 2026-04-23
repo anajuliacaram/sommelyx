@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { BrandName } from "@/components/BrandName";
@@ -11,8 +11,15 @@ interface LegalLayoutProps {
 }
 
 export default function LegalLayout({ title, description, children }: LegalLayoutProps) {
+  useEffect(() => {
+    document.body.classList.add("legal-page");
+    return () => {
+      document.body.classList.remove("legal-page");
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#F4F1EC] text-[#1C1C1C]">
+    <div className="min-h-[100dvh] bg-[#F4F1EC] text-[#1C1C1C]">
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
         <div
           className="rounded-[28px] border border-black/5 bg-white/88 p-5 shadow-[0_18px_60px_-34px_rgba(20,18,16,0.28)] backdrop-blur-sm sm:p-8"
