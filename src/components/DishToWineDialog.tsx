@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine as WineIcon, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -592,7 +592,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <div className="space-y-2.5">
                   <PremiumChoiceCard
                     index={0}
-                    icon={Wine}
+                    icon={WineIcon}
                     title="Da minha adega"
                     description="Harmonize com vinhos que você já tem"
                     onClick={() => handleSelectSource("cellar")}
@@ -634,7 +634,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   />
                   <PremiumChoiceCard
                     index={1}
-                    icon={Wine}
+                    icon={WineIcon}
                     title="Tenho um vinho em mente"
                     description={source === "cellar"
                       ? "O Sommelyx sugere pratos ideais para o vinho escolhido"
@@ -987,7 +987,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                               {isSelected ? (
                                 <Check className="h-4 w-4 text-primary" />
                               ) : (
-                                <Wine className="h-4 w-4 text-muted-foreground/50" />
+                                <WineIcon className="h-4 w-4 text-muted-foreground/50" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -1028,7 +1028,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
                     {availableWines.length === 0 && (
                       <div className="text-center py-10 space-y-2">
-                        <Wine className="h-7 w-7 text-muted-foreground/30 mx-auto" />
+                        <WineIcon className="h-7 w-7 text-muted-foreground/30 mx-auto" />
                         <p className="text-[13px] font-medium text-muted-foreground/70">
                           Sua adega está vazia no momento
                         </p>
@@ -1089,7 +1089,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     Qual vinho você quer harmonizar?
                   </p>
                   <div className="relative">
-                    <Wine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+                    <WineIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
                     <Input
                       value={extWineName}
                       onChange={(e) => setExtWineName(e.target.value)}
@@ -1461,7 +1461,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             <div className="shrink-0 flex flex-col items-end gap-1">
                               {s.fromCellar && (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                                  <Wine className="h-3 w-3" />
+                                  <WineIcon className="h-3 w-3" />
                                   Na adega
                                 </span>
                               )}

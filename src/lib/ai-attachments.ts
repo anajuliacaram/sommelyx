@@ -207,7 +207,7 @@ async function extractPdfText(file: File) {
   try {
     const pdfjs = await getPdfJs();
     const buffer = await file.arrayBuffer();
-    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
 
     const pages: string[] = [];
     for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
@@ -236,7 +236,7 @@ async function extractPdfTextBlocks(file: File) {
   trace("pdf_blocks_extraction_started", { fileName: file.name, sizeBytes: file.size });
   const pdfjs = await getPdfJs();
   const buffer = await file.arrayBuffer();
-  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
   const blocks: PdfTextBlock[] = [];
 
   for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
@@ -297,7 +297,7 @@ async function renderPdfAsImage(file: File) {
   try {
     const pdfjs = await getPdfJs();
     const buffer = await file.arrayBuffer();
-    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
     const renderedPages: HTMLCanvasElement[] = [];
 
     for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_RENDER); pageNumber++) {
