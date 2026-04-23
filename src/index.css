@@ -173,6 +173,10 @@
     color: #1C1C1C;
   }
 
+  body.landing-page {
+    overscroll-behavior-y: auto;
+  }
+
   @media (max-width: 768px) {
     body {
       background-attachment: scroll;
@@ -1525,6 +1529,14 @@
     cursor: pointer;
     transition: all 170ms cubic-bezier(0.22, 1, 0.36, 1);
     white-space: nowrap;
+  }
+  @media (max-width: 640px) {
+    .editorial-btn-open {
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
   }
   .editorial-btn-open:hover {
     background: #5F7F52;

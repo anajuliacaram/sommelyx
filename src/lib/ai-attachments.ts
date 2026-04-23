@@ -29,9 +29,9 @@ export interface PreparedSmartPdfImportAttachment {
   ocrUsed: boolean;
 }
 
-const MAX_IMAGE_DIMENSION = 1280;
-const MAX_IMAGE_QUALITY = 0.78;
-const MAX_IMAGE_BASE64_LENGTH = 1_800_000;
+const MAX_IMAGE_DIMENSION = 1120;
+const MAX_IMAGE_QUALITY = 0.74;
+const MAX_IMAGE_BASE64_LENGTH = 1_500_000;
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 const MAX_PDF_PAGES_FOR_TEXT = 10;
 const MAX_PDF_PAGES_FOR_RENDER = 2;
@@ -39,6 +39,7 @@ const MIN_PDF_TEXT_LENGTH = 120;
 const MAX_EXTRACTED_TEXT_LENGTH = 12000;
 
 let pdfJsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
+const attachmentPreparationCache = new Map<string, Promise<PreparedAiAnalysisAttachment>>();
 
 async function getPdfJs() {
   if (!pdfJsPromise) {
@@ -56,6 +57,17 @@ function inferMimeType(file: File) {
 
 function trace(stage: string, metadata?: Record<string, unknown>) {
   console.info(`[ai-attachments] ${stage}`, metadata || {});
+}
+
+function nowMs() {
+  if (typeof performance !== "undefined" && typeof performance.now === "function") {
+    return performance.now();
+  }
+  return Date.now();
+}
+
+function fileCacheKey(file: File) {
+  return `${file.name}:${file.size}:${file.lastModified}:${inferMimeType(file)}`;
 }
 
 function dataUrlToBase64(dataUrl: string) {
@@ -128,6 +140,7 @@ async function fileToDataUrl(file: File) {
 }
 
 async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
+  const startedAt = nowMs();
   trace("upload_received", { fileName: file.name, mimeType: file.type || "unknown", sizeBytes: file.size });
   if (!file.type.startsWith("image/")) {
     throw Object.assign(new Error("Tipo de arquivo inválido."), { code: "INVALID_FILE_TYPE" });
@@ -135,8 +148,15 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
   if (file.size > MAX_FILE_SIZE_BYTES) {
     throw Object.assign(new Error("Arquivo muito grande."), { code: "FILE_TOO_LARGE" });
   }
+  const readStartedAt = nowMs();
   const dataUrl = await fileToDataUrl(file);
+  trace("attachment_timing", {
+    stage: "image_read",
+    fileName: file.name,
+    durationMs: Math.round(nowMs() - readStartedAt),
+  });
 
+  const preprocessStartedAt = nowMs();
   const optimized = await new Promise<{ previewUrl: string; imageBase64: string }>((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -163,6 +183,13 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
     fileName: file.name,
     imageBase64Length: optimized.imageBase64.length,
     previewLength: optimized.previewUrl.length,
+    durationMs: Math.round(nowMs() - preprocessStartedAt),
+  });
+
+  trace("attachment_timing", {
+    stage: "image_total",
+    fileName: file.name,
+    durationMs: Math.round(nowMs() - startedAt),
   });
 
   return {
@@ -176,6 +203,7 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
 
 async function extractPdfText(file: File) {
   trace("pdf_text_extraction_started", { fileName: file.name, sizeBytes: file.size });
+  const startedAt = nowMs();
   try {
     const pdfjs = await getPdfJs();
     const buffer = await file.arrayBuffer();
@@ -194,7 +222,7 @@ async function extractPdfText(file: File) {
     }
 
     const extracted = pages.join("\n").replace(/\s+/g, " ").trim().slice(0, MAX_EXTRACTED_TEXT_LENGTH);
-    trace("pdf_text_extracted", { fileName: file.name, textLength: extracted.length, pages: Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT) });
+    trace("pdf_text_extracted", { fileName: file.name, textLength: extracted.length, pages: Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT), durationMs: Math.round(nowMs() - startedAt) });
     return extracted;
   } catch (error) {
     const err: any = error instanceof Error ? error : new Error("PDF_PARSE_FAILED");
@@ -265,6 +293,7 @@ async function extractPdfTextBlocks(file: File) {
 
 async function renderPdfAsImage(file: File) {
   trace("pdf_render_started", { fileName: file.name, sizeBytes: file.size });
+  const startedAt = nowMs();
   try {
     const pdfjs = await getPdfJs();
     const buffer = await file.arrayBuffer();
@@ -307,11 +336,18 @@ async function renderPdfAsImage(file: File) {
       y += pageCanvas.height + gap;
     }
 
-    return exportOptimizedJpeg(combined, {
+    const rendered = exportOptimizedJpeg(combined, {
       maxWidth: 1200,
       maxHeight: 1700,
       baseQuality: 0.74,
     });
+    trace("attachment_timing", {
+      stage: "pdf_render_to_image",
+      fileName: file.name,
+      durationMs: Math.round(nowMs() - startedAt),
+      imageBase64Length: rendered.imageBase64.length,
+    });
+    return rendered;
   } catch (error) {
     const err: any = error instanceof Error ? error : new Error("INVALID_PDF");
     err.code = err.code || (String(err.message || "").includes("INVALID_PDF") ? "INVALID_PDF" : "PDF_PARSE_FAILED");
@@ -356,46 +392,83 @@ async function extractPdfOcrText(file: File) {
 }
 
 export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
-  const mimeType = inferMimeType(file);
-  trace("file_validated", { fileName: file.name, mimeType, sizeBytes: file.size });
-
-  if (mimeType === "application/pdf") {
-    let extractedText = "";
-    try {
-      extractedText = await extractPdfText(file);
-    } catch (error: any) {
-      if (error?.code === "INVALID_PDF" || error?.code === "PDF_PARSE_FAILED") {
-        throw error;
-      }
-      extractedText = "";
-    }
-
-    if (extractedText.length >= MIN_PDF_TEXT_LENGTH) {
-      return {
-        extractedText,
-        mimeType,
-        fileName: file.name,
-        sourceType: "pdf-text",
-      };
-    }
-
-    try {
-      const rendered = await renderPdfAsImage(file);
-      return {
-        ...rendered,
-        mimeType,
-        fileName: file.name,
-        sourceType: "pdf-image",
-      };
-    } catch (error: any) {
-      if (error?.code === "INVALID_PDF" || error?.code === "PDF_PARSE_FAILED") {
-        throw error;
-      }
-      throw Object.assign(new Error("Não foi possível processar o PDF."), { code: "PDF_PARSE_FAILED" });
-    }
+  const cacheKey = fileCacheKey(file);
+  const cached = attachmentPreparationCache.get(cacheKey);
+  if (cached) {
+    trace("attachment_cache_hit", { fileName: file.name, cacheKey });
+    return cached;
   }
 
-  return await prepareImageAttachment(file);
+  const pending = (async () => {
+    const startedAt = nowMs();
+    const mimeType = inferMimeType(file);
+    trace("file_validated", { fileName: file.name, mimeType, sizeBytes: file.size });
+
+    if (mimeType === "application/pdf") {
+      let extractedText = "";
+      try {
+        extractedText = await extractPdfText(file);
+      } catch (error: any) {
+        if (error?.code === "INVALID_PDF" || error?.code === "PDF_PARSE_FAILED") {
+          throw error;
+        }
+        extractedText = "";
+      }
+
+      if (extractedText.length >= MIN_PDF_TEXT_LENGTH) {
+        trace("attachment_timing", {
+          stage: "prepare_attachment_total",
+          fileName: file.name,
+          sourceType: "pdf-text",
+          durationMs: Math.round(nowMs() - startedAt),
+        });
+        return {
+          extractedText,
+          mimeType,
+          fileName: file.name,
+          sourceType: "pdf-text" as const,
+        };
+      }
+
+      try {
+        const rendered = await renderPdfAsImage(file);
+        trace("attachment_timing", {
+          stage: "prepare_attachment_total",
+          fileName: file.name,
+          sourceType: "pdf-image",
+          durationMs: Math.round(nowMs() - startedAt),
+        });
+        return {
+          ...rendered,
+          mimeType,
+          fileName: file.name,
+          sourceType: "pdf-image" as const,
+        };
+      } catch (error: any) {
+        if (error?.code === "INVALID_PDF" || error?.code === "PDF_PARSE_FAILED") {
+          throw error;
+        }
+        throw Object.assign(new Error("Não foi possível processar o PDF."), { code: "PDF_PARSE_FAILED" });
+      }
+    }
+
+    const prepared = await prepareImageAttachment(file);
+    trace("attachment_timing", {
+      stage: "prepare_attachment_total",
+      fileName: file.name,
+      sourceType: prepared.sourceType,
+      durationMs: Math.round(nowMs() - startedAt),
+    });
+    return prepared;
+  })();
+
+  attachmentPreparationCache.set(cacheKey, pending);
+  try {
+    return await pending;
+  } catch (error) {
+    attachmentPreparationCache.delete(cacheKey);
+    throw error;
+  }
 }
 
 export async function prepareSmartPdfImportAttachment(file: File): Promise<PreparedSmartPdfImportAttachment> {

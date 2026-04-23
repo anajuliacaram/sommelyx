@@ -5,6 +5,22 @@ import { normalizeWineData } from "@/lib/wine-normalization";
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes.";
 const ANALYZE_WINE_LIST_TIMEOUT_MS = 65_000;
 
+function nowMs() {
+  if (typeof performance !== "undefined" && typeof performance.now === "function") {
+    return performance.now();
+  }
+  return Date.now();
+}
+
+function logTiming(flow: string, stage: string, startedAt: number, metadata?: Record<string, unknown>) {
+  console.info("[sommelier-ai] timing", {
+    flow,
+    stage,
+    durationMs: Math.round(nowMs() - startedAt),
+    ...(metadata || {}),
+  });
+}
+
 // ── Types ──
 
 export interface WineTechnicalProfile {
@@ -793,6 +809,7 @@ export async function getWinePairings(wine: {
   vintage?: number | null;
   country?: string | null;
 }): Promise<PairingResponse> {
+  const totalStartedAt = nowMs();
   try {
     console.info("[sommelier-ai] pairing_request_started", {
       mode: "wine-to-food",
@@ -817,32 +834,27 @@ export async function getWinePairings(wine: {
       },
       { timeoutMs: 30_000, retries: 1 },
     );
+    const requestStartedAt = nowMs();
     const data = await request();
+    logTiming("wine-to-food", "edge_request", requestStartedAt, {
+      wineName: wine.name,
+      pairings: Array.isArray((data as any)?.pairings) ? (data as any).pairings.length : 0,
+      fallback: Boolean((data as any)?.fallback),
+    });
     if (data && (data as any).fallback === true) {
+      logTiming("wine-to-food", "total", totalStartedAt, { wineName: wine.name, outcome: "fallback" });
       return data;
     }
     if (data && Array.isArray(data.pairings) && data.pairings.length > 0) {
+      logTiming("wine-to-food", "total", totalStartedAt, { wineName: wine.name, outcome: "success", pairings: data.pairings.length });
       return data;
     }
     if (data && typeof (data as any).message === "string" && Array.isArray((data as any).pairings)) {
       throw new Error((data as any).message);
     }
     if (isValidPairings(data)) {
+      logTiming("wine-to-food", "total", totalStartedAt, { wineName: wine.name, outcome: "lenient_success", pairings: data.pairings.length });
       return data;
-    }
-
-    const retryData = await request().catch(() => null);
-    if (retryData && (retryData as any).fallback === true) {
-      return retryData;
-    }
-    if (retryData && Array.isArray(retryData.pairings) && retryData.pairings.length > 0) {
-      return retryData;
-    }
-    if (retryData && typeof (retryData as any).message === "string" && Array.isArray((retryData as any).pairings)) {
-      throw new Error((retryData as any).message);
-    }
-    if (retryData && isValidPairings(retryData)) {
-      return retryData;
     }
 
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
@@ -852,6 +864,12 @@ export async function getWinePairings(wine: {
     }
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getWinePairings error:", classified.type, classified.message);
+    logTiming("wine-to-food", "total", totalStartedAt, {
+      wineName: wine.name,
+      outcome: "error",
+      code: classified.code,
+      type: classified.type,
+    });
     throw new Error(classified.message);
   }
 }
@@ -861,6 +879,7 @@ export async function getDishWineSuggestions(
   userWines?: WineSummary[],
   intent?: PairingIntent,
 ): Promise<SuggestionResponse> {
+  const totalStartedAt = nowMs();
   try {
     console.info("[sommelier-ai] pairing_request_started", {
       mode: "food-to-wine",
@@ -889,26 +908,23 @@ export async function getDishWineSuggestions(
       },
       { timeoutMs: 30_000, retries: 1 },
     );
+    const requestStartedAt = nowMs();
     const data = await request();
+    logTiming("food-to-wine", "edge_request", requestStartedAt, {
+      dish,
+      suggestions: Array.isArray((data as any)?.suggestions) ? (data as any).suggestions.length : 0,
+      fallback: Boolean((data as any)?.fallback),
+    });
     if (data && (data as any).fallback === true) {
+      logTiming("food-to-wine", "total", totalStartedAt, { dish, outcome: "fallback" });
       return data;
     }
     if (isValidSuggestions(data)) {
+      logTiming("food-to-wine", "total", totalStartedAt, { dish, outcome: "success", suggestions: data.suggestions.length });
       return data;
     }
     if (data && typeof (data as any).message === "string" && Array.isArray((data as any).suggestions)) {
       throw new Error((data as any).message);
-    }
-
-    const retryData = await request().catch(() => null);
-    if (retryData && (retryData as any).fallback === true) {
-      return retryData;
-    }
-    if (retryData && isValidSuggestions(retryData)) {
-      return retryData;
-    }
-    if (retryData && typeof (retryData as any).message === "string" && Array.isArray((retryData as any).suggestions)) {
-      throw new Error((retryData as any).message);
     }
 
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
@@ -918,6 +934,12 @@ export async function getDishWineSuggestions(
     }
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getDishWineSuggestions error:", classified.type, classified.message);
+    logTiming("food-to-wine", "total", totalStartedAt, {
+      dish,
+      outcome: "error",
+      code: classified.code,
+      type: classified.type,
+    });
     throw new Error(classified.message);
   }
 }
@@ -931,6 +953,7 @@ export async function analyzeWineList(
     avgPrice?: number;
   },
 ): Promise<WineListAnalysis> {
+  const totalStartedAt = nowMs();
   try {
     console.info("[sommelier-ai] pairing_request_started", {
       mode: "external-wine-list",
@@ -946,25 +969,32 @@ export async function analyzeWineList(
       { ...attachment, userProfile },
       { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
     );
+    const requestStartedAt = nowMs();
     const data = await request();
+    logTiming("analyze-wine-list", "edge_request", requestStartedAt, {
+      fileName: attachment.fileName,
+      hasImageBase64: Boolean(attachment.imageBase64),
+      hasExtractedText: Boolean(attachment.extractedText),
+      wineCount: Array.isArray((data as any)?.wines) ? (data as any).wines.length : 0,
+      fallback: Boolean((data as any)?.fallback),
+    });
     if (data && (data as any).fallback === true) {
+      logTiming("analyze-wine-list", "total", totalStartedAt, { fileName: attachment.fileName, outcome: "fallback" });
       return data;
     }
     if (data && Array.isArray(data.wines) && data.wines.length > 0) {
-      return { ...data, wines: data.wines.map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
-    }
-    const retryData = await request().catch(() => null);
-    if (retryData && (retryData as any).fallback === true) {
-      return retryData;
-    }
-    if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0) {
-      return { ...retryData, wines: retryData.wines.map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
+      const normalizeStartedAt = nowMs();
+      const normalized = { ...data, wines: data.wines.map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
+      logTiming("analyze-wine-list", "normalization", normalizeStartedAt, { fileName: attachment.fileName, wineCount: normalized.wines.length });
+      logTiming("analyze-wine-list", "total", totalStartedAt, { fileName: attachment.fileName, outcome: "success", wineCount: normalized.wines.length });
+      return normalized;
     }
     if (data && isValidLenientWineList(data)) {
-      return { ...data, wines: (data.wines || []).map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
-    }
-    if (retryData && isValidLenientWineList(retryData)) {
-      return { ...retryData, wines: (retryData.wines || []).map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
+      const normalizeStartedAt = nowMs();
+      const normalized = { ...data, wines: (data.wines || []).map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
+      logTiming("analyze-wine-list", "normalization", normalizeStartedAt, { fileName: attachment.fileName, wineCount: normalized.wines.length, lenient: true });
+      logTiming("analyze-wine-list", "total", totalStartedAt, { fileName: attachment.fileName, outcome: "lenient_success", wineCount: normalized.wines.length });
+      return normalized;
     }
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
@@ -972,6 +1002,12 @@ export async function analyzeWineList(
       throw err;
     }
     const classified = classifyError(err);
+    logTiming("analyze-wine-list", "total", totalStartedAt, {
+      fileName: attachment.fileName,
+      outcome: "error",
+      code: classified.code,
+      type: classified.type,
+    });
     if (classified.type === "auth") throw createClassifiedError(classified, "AUTH_INVALID");
     throw createClassifiedError(classified);
   }
@@ -981,6 +1017,7 @@ export async function analyzeMenuForWine(
   attachment: AiAnalysisAttachmentPayload,
   wineName: string,
 ): Promise<MenuAnalysis> {
+  const totalStartedAt = nowMs();
   try {
     console.info("[sommelier-ai] pairing_request_started", {
       mode: "external-menu",
@@ -997,28 +1034,41 @@ export async function analyzeMenuForWine(
       { ...attachment, mode: "menu-for-wine", wineName },
       { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
     );
+    const requestStartedAt = nowMs();
     const data = await request();
+    logTiming("analyze-menu-for-wine", "edge_request", requestStartedAt, {
+      fileName: attachment.fileName,
+      wineName,
+      hasImageBase64: Boolean(attachment.imageBase64),
+      hasExtractedText: Boolean(attachment.extractedText),
+      dishCount: Array.isArray((data as any)?.dishes) ? (data as any).dishes.length : 0,
+      fallback: Boolean((data as any)?.fallback),
+    });
     if (data && (data as any).fallback === true) {
+      logTiming("analyze-menu-for-wine", "total", totalStartedAt, { fileName: attachment.fileName, wineName, outcome: "fallback" });
       return data;
     }
     if (data && Array.isArray(data.dishes) && data.dishes.length > 0) {
+      logTiming("analyze-menu-for-wine", "total", totalStartedAt, { fileName: attachment.fileName, wineName, outcome: "success", dishCount: data.dishes.length });
       return data;
     }
-    const retryData = await request().catch(() => null);
-    if (retryData && (retryData as any).fallback === true) {
-      return retryData;
+    if (data && isValidLenientMenu(data, wineName)) {
+      logTiming("analyze-menu-for-wine", "total", totalStartedAt, { fileName: attachment.fileName, wineName, outcome: "lenient_success", dishCount: data.dishes?.length || 0 });
+      return data;
     }
-    if (retryData && Array.isArray(retryData.dishes) && retryData.dishes.length > 0) {
-      return retryData;
-    }
-    if (data && isValidLenientMenu(data, wineName)) return data;
-    if (retryData && isValidLenientMenu(retryData, wineName)) return retryData;
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
       throw err;
     }
     const classified = classifyError(err);
+    logTiming("analyze-menu-for-wine", "total", totalStartedAt, {
+      fileName: attachment.fileName,
+      wineName,
+      outcome: "error",
+      code: classified.code,
+      type: classified.type,
+    });
     if (classified.type === "auth") throw createClassifiedError(classified, "AUTH_INVALID");
     throw createClassifiedError(classified);
   }
@@ -1076,6 +1126,7 @@ export async function getWineInsight(wine: {
   drinkFrom?: number | null;
   drinkUntil?: number | null;
 }): Promise<WineInsight> {
+  const totalStartedAt = nowMs();
   try {
     const request = () => invokeEdgeFunction<WineInsight>(
       "wine-insight",
@@ -1092,14 +1143,17 @@ export async function getWineInsight(wine: {
       },
       { timeoutMs: 4_000, retries: 1 },
     );
+    const requestStartedAt = nowMs();
     const data = await request();
+    logTiming("wine-insight", "edge_request", requestStartedAt, {
+      wineName: wine.name,
+      alertType: wine.alertType,
+    });
     if (data && validateWineSpecificity(data, "insight")) {
+      logTiming("wine-insight", "total", totalStartedAt, { wineName: wine.name, outcome: "success" });
       return data;
     }
-    const retryData = await request().catch(() => null);
-    if (retryData && validateWineSpecificity(retryData, "insight")) {
-      return retryData;
-    }
+    logTiming("wine-insight", "total", totalStartedAt, { wineName: wine.name, outcome: "fallback-local" });
     return {
       insight: wine.alertType === "drink_now"
         ? "Este vinho está em sua janela ideal de consumo."
@@ -1109,6 +1163,12 @@ export async function getWineInsight(wine: {
   } catch (err) {
     const classified = classifyError(err);
     if (classified.type === "auth") throw new Error(classified.message);
+    logTiming("wine-insight", "total", totalStartedAt, {
+      wineName: wine.name,
+      outcome: "error_fallback",
+      code: classified.code,
+      type: classified.type,
+    });
     return {
       insight: wine.alertType === "drink_now"
         ? "Este vinho está em sua janela ideal de consumo."

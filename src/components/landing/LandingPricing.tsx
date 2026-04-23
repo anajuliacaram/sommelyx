@@ -365,7 +365,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
           </div>
 
           {/* Category tabs */}
-          <div className="flex justify-center mb-5 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+          <div className="flex justify-center mb-5 -mx-4 px-4 overflow-x-auto md:overflow-visible scrollbar-hide">
             <div className="inline-flex gap-1.5 p-1 rounded-2xl bg-white/70 backdrop-blur-md border border-black/[0.06] shadow-sm">
               {categories.map((c) => {
                 const isActive = c.key === activeCat;
@@ -455,4 +455,3 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
     </section>
   );
 }
-

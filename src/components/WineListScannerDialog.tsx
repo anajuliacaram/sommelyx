@@ -416,6 +416,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           icon="sparkles"
           title="Analisar Carta"
           subtitle="Envie a carta de vinhos e descubra as melhores escolhas para você"
+          compact
         />
 
         <AnimatePresence mode="wait">
@@ -520,7 +521,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-3 pt-3"
+              className="space-y-2.5 pt-1.5"
             >
               <div className="flex items-center justify-between">
                 <SectionHeader icon="wine" label={`${filteredWines.length} vinho${filteredWines.length !== 1 ? "s" : ""}${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
@@ -531,7 +532,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
               {/* Filter pills */}
               {availableTypes.length > 1 && (
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => setFilterMode("all")}
                     className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
@@ -560,7 +561,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </div>
               )}
 
-              <div className="rounded-2xl border border-border/30 bg-background/50 p-3.5 space-y-3">
+              <div className="rounded-2xl border border-border/30 bg-background/50 px-3.5 py-3 space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Refinar a leitura
@@ -577,7 +578,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   placeholder="O que você vai comer?"
                   className="rounded-xl"
                 />
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Corpo</p>
                   <div className="flex flex-wrap gap-1.5">
                     {[
@@ -600,7 +601,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     ))}
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Preço</p>
                   <div className="flex flex-wrap gap-1.5">
                     {[

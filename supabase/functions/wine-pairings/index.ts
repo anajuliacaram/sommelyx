@@ -334,6 +334,7 @@ async function callAI(
   tools: unknown[],
 ) {
   const schema = (tools?.[0] as any)?.function?.parameters || {};
+  const startedAt = Date.now();
 
   const result = await callOpenAIResponses<any>({
     functionName: "wine-pairings",
@@ -349,7 +350,14 @@ async function callAI(
       },
     ],
     schema,
-    maxOutputTokens: 800,
+    maxOutputTokens: 650,
+  });
+
+  console.log("[wine-pairings] stage_timing", {
+    stage: "openai_call",
+    durationMs: Date.now() - startedAt,
+    ok: result.ok,
+    status: result.ok ? 200 : result.status,
   });
 
   if (result.ok) {
@@ -741,11 +749,12 @@ INSTRUÇÕES:
       : { type: "function" as const, function: { name: "return_suggestions" } };
 
     // ── Retry loop with anti-genericity validation ──
-    const MAX_ATTEMPTS = 2;
+    const MAX_ATTEMPTS = 1;
     let lastParsed: any = null;
     let validationResult: { passed: boolean; failures: string[] } = { passed: false, failures: [] };
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      const aiAttemptStartedAt = Date.now();
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 90_000);
 
@@ -775,6 +784,13 @@ INSTRUÇÕES:
         },
         parsed: result.parsed,
         error: result.ok ? null : result.errText,
+      });
+      console.log("[wine-pairings] stage_timing", {
+        stage: "pairing_generation_attempt",
+        mode,
+        attempt: attempt + 1,
+        durationMs: Date.now() - aiAttemptStartedAt,
+        ok: result.ok,
       });
 
       if (!result.ok) {

@@ -160,9 +160,9 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="overflow-hidden">
+      <DialogContent className="items-end p-0 sm:items-center sm:p-4">
         <DialogHeader>
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3.5 px-4 pt-4 sm:gap-4 sm:px-0 sm:pt-0">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
               <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
             </div>
@@ -173,14 +173,15 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           </div>
         </DialogHeader>
 
-        <div className="flex max-h-[calc(90vh-6rem)] flex-col gap-5 overflow-y-auto pr-1">
-          <div className="space-y-1.5">
+        <div className="flex max-h-[calc(100dvh-5.5rem)] min-h-0 flex-col sm:max-h-[calc(90vh-6rem)]">
+          <div className="flex-1 space-y-5 overflow-y-auto px-4 pb-4 pr-4 sm:px-0 sm:pb-0 sm:pr-1">
+          <div className="space-y-2">
             <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Origem</Label>
-            <div className="flex gap-1.5">
-              <Button type="button" variant={source === "cellar" ? "primary" : "secondary"} className="flex-1" onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1.5">
+              <Button type="button" variant={source === "cellar" ? "primary" : "secondary"} className="h-11 justify-center text-[13px] sm:flex-1" onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}>
                 Da minha adega
               </Button>
-              <Button type="button" variant={source === "external" ? "primary" : "secondary"} className="flex-1" onClick={() => { setSource("external"); setSelectedWineId(""); setShowWinePicker(false); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}>
+              <Button type="button" variant={source === "external" ? "primary" : "secondary"} className="h-11 justify-center text-[13px] sm:flex-1" onClick={() => { setSource("external"); setSelectedWineId(""); setShowWinePicker(false); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}>
                 Consumo externo
               </Button>
             </div>
@@ -288,46 +289,46 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           )}
 
           <div className="space-y-3">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Nome do vinho <span className="text-primary">*</span></Label>
-              <Input value={wineName} onChange={(e) => setWineName(e.target.value)} placeholder="Ex: Château Margaux" disabled={source === "cellar" && !!selectedWineId} />
+              <Input className="h-11 text-[14px]" value={wineName} onChange={(e) => setWineName(e.target.value)} placeholder="Ex: Château Margaux" disabled={source === "cellar" && !!selectedWineId} />
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1.5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-2">
+              <div className="space-y-2">
                 <Label>Produtor</Label>
-                <Input value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
+                <Input className="h-11 text-[14px]" value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label>Safra</Label>
-                <Input value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
+                <Input className="h-11 text-[14px]" value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label>País</Label>
-                <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
+                <Input className="h-11 text-[14px]" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label>Região</Label>
-                <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
+                <Input className="h-11 text-[14px]" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
               </div>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Uva / Blend</Label>
-              <Input value={grape} onChange={(e) => setGrape(e.target.value)} placeholder="Ex: Cabernet Sauvignon, Merlot" disabled={source === "cellar" && !!selectedWineId} />
+              <Input className="h-11 text-[14px]" value={grape} onChange={(e) => setGrape(e.target.value)} placeholder="Ex: Cabernet Sauvignon, Merlot" disabled={source === "cellar" && !!selectedWineId} />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
               <Label className="flex items-center gap-1"><MapPin className="h-4 w-4 text-muted-foreground" />Local</Label>
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
+              <Input className="h-11 text-[14px]" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Data</Label>
-              <Input type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
+              <Input className="h-11 text-[14px]" type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label className="flex items-center gap-1"><Star className="h-4 w-4 text-muted-foreground" />Avaliação</Label>
             <div className="flex gap-1.5 flex-wrap">
               {([
@@ -341,7 +342,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   key={opt.value}
                   type="button"
                   className={cn(
-                    "px-3.5 py-2 rounded-xl border text-[13px] font-medium transition-all duration-200",
+                    "min-h-11 rounded-xl border px-3.5 py-2 text-[13px] font-medium transition-all duration-200",
                     rating === opt.value
                       ? "bg-[#7B1E2B] text-white border-[#7B1E2B] shadow-[0_8px_24px_rgba(123,30,43,0.18)]"
                       : "bg-white text-[#333] border-black/10 hover:bg-[#F8F8F8]",
@@ -354,14 +355,17 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label>Notas de degustação</Label>
-            <Textarea value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} placeholder="Aromas, sabor, impressões..." rows={2} />
+            <Textarea className="min-h-[104px] text-[14px]" value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} placeholder="Aromas, sabor, impressões..." rows={3} />
+          </div>
           </div>
 
-          <Button onClick={handleSubmit} disabled={addConsumption.isPending} variant="primary" className="w-full">
-            {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
-          </Button>
+          <div className="sticky bottom-0 border-t border-black/5 bg-[#F4F1EC]/96 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md sm:px-0 sm:pb-0">
+            <Button onClick={handleSubmit} disabled={addConsumption.isPending} variant="primary" className="h-12 w-full text-[14px] font-semibold">
+              {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

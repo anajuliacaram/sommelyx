@@ -17,6 +17,13 @@ export default function Landing() {
     analytics.trackOncePerSession("landing_page_view", "landing");
   }, []);
 
+  useEffect(() => {
+    document.body.classList.add("landing-page");
+    return () => {
+      document.body.classList.remove("landing-page");
+    };
+  }, []);
+
   const handleStartFreeClick = () => {
     analytics.track("landing_cta_start_free_click");
     navigate("/signup");

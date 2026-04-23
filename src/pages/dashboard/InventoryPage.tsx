@@ -295,6 +295,81 @@ export default function InventoryPage() {
       tagFilters.length +
       (statusFilter !== "all" ? 1 : 0);
 
+    const quickStatusTabs = [
+        { id: "all" as const, label: "Todos", count: wines.length },
+        {
+            id: "low" as const,
+            label: "Baixo estoque",
+            count: wines.filter((wine) => wine.quantity > 0 && wine.quantity <= 2).length,
+        },
+        {
+            id: "out" as const,
+            label: "Sem estoque",
+            count: wines.filter((wine) => wine.quantity === 0).length,
+        },
+    ];
+
+    const desktopFilterGroups = [
+        {
+            title: "Região",
+            options: dynamicOptions.regions,
+            selected: regionFilters,
+            param: "region",
+            placeholder: "Buscar região...",
+        },
+        {
+            title: "Setor",
+            options: dynamicOptions.sectors ?? [],
+            selected: sectorFilters,
+            param: "sector",
+            placeholder: "Buscar setor...",
+        },
+        {
+            title: "Gôndola",
+            options: dynamicOptions.zones ?? [],
+            selected: zoneFilters,
+            param: "zone",
+            placeholder: "Buscar gôndola...",
+        },
+        {
+            title: "Linha",
+            options: dynamicOptions.levels ?? [],
+            selected: levelFilters,
+            param: "level",
+            placeholder: "Buscar linha...",
+        },
+        {
+            title: "País",
+            options: dynamicOptions.countries,
+            selected: countryFilters,
+            param: "country",
+            placeholder: "Buscar país...",
+        },
+        {
+            title: "Status",
+            options: dynamicOptions.statusOptions,
+            selected: statusFilter === "all" ? [] : [statusFilter],
+            param: "status",
+            placeholder: undefined,
+            multi: false,
+        },
+        {
+            title: "Safra",
+            options: dynamicOptions.vintages,
+            selected: vintageFilters,
+            param: "vintage",
+            placeholder: "Buscar safra...",
+        },
+    ] as const;
+
+    const sortOptions = [
+        { key: "name", label: "Nome" },
+        { key: "quantity", label: "Estoque" },
+        { key: "price", label: "Preço" },
+        { key: "region", label: "Região" },
+        { key: "vintage", label: "Safra" },
+    ];
+
     // --- Handlers ---
     const toggleSelectAll = () => {
         if (selectedIds.length === filteredWines.length) setSelectedIds([]);
@@ -401,7 +476,7 @@ export default function InventoryPage() {
     // MultiSelectDropdown handles its own UI now, so we remove QuickFilterDropdown
 
     return (
-        <div className="space-y-7 max-w-[1440px] pb-[calc(72px+env(safe-area-inset-bottom))] relative">
+        <div className="relative max-w-[1440px] space-y-5 pb-[calc(72px+env(safe-area-inset-bottom))]">
             <StockAuditDialog
                 open={auditOpen}
                 onOpenChange={(v) => { setAuditOpen(v); if (!v) setAuditPayload(null); }}
@@ -460,247 +535,228 @@ export default function InventoryPage() {
                 }}
             />
 
-            {/* --- HEADER --- */}
-            <div className="section-surface section-surface--full flex flex-col md:flex-row md:items-end justify-between gap-3">
-                <div>
-                    <h1 className="t-title">Estoque</h1>
-                    <p className="t-subtitle mt-1.5">Disponibilidade e valor da operação em tempo real</p>
-                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                        <span className="t-meta font-semibold tabular-nums">{summary.labels} rótulos</span>
-                        <span className="text-muted-foreground/40">·</span>
-                        <span className="t-meta font-semibold tabular-nums">{summary.bottles} garrafas</span>
-                        <span className="text-muted-foreground/40">·</span>
-                        <span className="t-meta font-semibold tabular-nums">R$ {summary.totalValue.toLocaleString("pt-BR")}</span>
+            <section className="space-y-4">
+                <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+                    <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/55">
+                            Operação comercial
+                        </p>
+                        <h1 className="mt-1 text-[30px] font-black tracking-[-0.05em] text-foreground">
+                            Estoque
+                        </h1>
+                        <p className="mt-1.5 max-w-[720px] text-[13px] font-medium text-muted-foreground/78">
+                            Controle de disponibilidade, valor imobilizado e movimentação dos rótulos em uma visão operacional única.
+                        </p>
                     </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                    <div className="hidden sm:flex border border-border/70 rounded-2xl bg-background/50 backdrop-blur-md p-1">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-pressed={viewMode === "table"}
-                            className={cn("h-8 w-8 rounded-xl", viewMode === "table" && "bg-background shadow-sm text-primary")}
-                            onClick={() => setViewMode("table")}
-                        >
-                            <ListIcon className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-pressed={viewMode === "grid"}
-                            className={cn("h-8 w-8 rounded-xl", viewMode === "grid" && "bg-background shadow-sm text-primary")}
-                            onClick={() => setViewMode("grid")}
-                        >
-                            <LayoutGrid className="h-4 w-4" />
-                        </Button>
-                    </div>
-                    <MagneticButton>
-                        <Button variant="primary" className="h-12 px-5 rounded-[18px] shadow-[0_16px_30px_-20px_hsl(var(--primary)/0.28)] font-bold text-[12px] uppercase tracking-[0.12em]" onClick={() => setAddWineOpen(true)}>
-                            <Plus className="h-3.5 w-3.5 mr-1.5" /> Cadastrar produto
-                        </Button>
-                    </MagneticButton>
-                </div>
-            </div>
-
-            {/* --- SUMMARY METRICS --- */}
-            <div className="grid grid-cols-3 gap-2 md:gap-3">
-                <PremiumKpiCard className="p-3 md:p-4">
-                    <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Rótulos Cadastrados</p>
-                    <p className="text-lg md:text-xl font-black text-foreground">{summary.labels}</p>
-                </PremiumKpiCard>
-                <PremiumKpiCard className="p-3 md:p-4">
-                    <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Garrafas em Estoque</p>
-                    <p className="text-lg md:text-xl font-black text-foreground">{summary.bottles}</p>
-                </PremiumKpiCard>
-                <PremiumKpiCard className="p-3 md:p-4">
-                    <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Valor Total</p>
-                    <p className="text-lg md:text-xl font-black text-foreground">R$ {summary.totalValue.toLocaleString("pt-BR")}</p>
-                </PremiumKpiCard>
-            </div>
-
-            {/* --- QUICK ACTIONS & FILTERS --- */}
-            <div className="glass-card p-2.5 md:p-3 border-white/40 space-y-2">
-                <div className="flex flex-col lg:flex-row gap-3">
-                <div className="relative flex-1 min-w-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
-                    <Input
-                        placeholder="Pesquisar vinho, produtor, região, safra ou uva..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        className="pl-9 h-10 rounded-xl border-border/40 bg-background/60 backdrop-blur-md shadow-sm focus:ring-primary/10 focus:border-primary/20 transition-all font-medium text-[13px]"
-                    />
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                    {/* Mobile-first: reduzir altura do topo e evitar wrap infinito */}
-                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 sm:mx-0 sm:px-0 sm:overflow-visible">
-                        {/* Quick Toggles for Stock */}
-                        <div className="shrink-0 flex border border-white/14 rounded-[12px] bg-white/35 backdrop-blur-sm p-[3px]">
-                            {[
-                                { id: "all", label: "Todos" },
-                                { id: "low", label: "Baixo estoque" },
-                                { id: "out", label: "Sem estoque" },
-                            ].map((t) => (
-                                <Button
-                                    key={t.id}
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => updateParam("status", t.id === "all" ? null : t.id)}
-                                    className={cn(
-                                        "h-8 px-3 text-[11px] font-bold rounded-[10px] whitespace-nowrap",
-                                        statusFilter === t.id || (t.id === "all" && statusFilter === "all")
-                                            ? "bg-background shadow-sm text-primary hover:bg-background"
-                                            : "text-muted-foreground hover:text-foreground",
-                                    )}
-                                >
-                                    {t.label}
-                                </Button>
-                            ))}
-                        </div>
-
-                        {/* Desktop/tablet quick filters */}
-                        <div className="hidden md:flex items-center gap-2">
-                            <div className="w-[1px] h-6 bg-border mx-1" />
-                            <MultiSelectDropdown
-                                title="Região"
-                                options={dynamicOptions.regions}
-                                selected={regionFilters}
-                                onChange={(val) => updateParam("region", val, true)}
-                                onClear={() => updateParam("region", null, true)}
-                                searchPlaceholder="Buscar região..."
-                                searchable
-                            />
-                            <MultiSelectDropdown
-                                title="Setor"
-                                options={dynamicOptions.sectors ?? []}
-                                selected={sectorFilters}
-                                onChange={(val) => updateParam("sector", val, true)}
-                                onClear={() => updateParam("sector", null, true)}
-                                searchPlaceholder="Buscar setor..."
-                                searchable
-                            />
-                            <MultiSelectDropdown
-                                title="Gôndola"
-                                options={dynamicOptions.zones ?? []}
-                                selected={zoneFilters}
-                                onChange={(val) => updateParam("zone", val, true)}
-                                onClear={() => updateParam("zone", null, true)}
-                                searchPlaceholder="Buscar gôndola..."
-                                searchable
-                            />
-                            <MultiSelectDropdown
-                                title="Linha"
-                                options={dynamicOptions.levels ?? []}
-                                selected={levelFilters}
-                                onChange={(val) => updateParam("level", val, true)}
-                                onClear={() => updateParam("level", null, true)}
-                                searchPlaceholder="Buscar linha..."
-                                searchable
-                            />
-                            <MultiSelectDropdown
-                                title="País"
-                                options={dynamicOptions.countries}
-                                selected={countryFilters}
-                                onChange={(val) => updateParam("country", val, true)}
-                                onClear={() => updateParam("country", null, true)}
-                                searchPlaceholder="Buscar país..."
-                                searchable
-                            />
-                            <MultiSelectDropdown
-                                title="Status"
-                                options={dynamicOptions.statusOptions}
-                                selected={statusFilter === "all" ? [] : [statusFilter]}
-                                onChange={(val) => updateParam("status", val)}
-                                onClear={() => updateParam("status", null)}
-                            />
-                            <MultiSelectDropdown
-                                title="Safra"
-                                options={dynamicOptions.vintages}
-                                selected={vintageFilters}
-                                onChange={(val) => updateParam("vintage", val, true)}
-                                onClear={() => updateParam("vintage", null, true)}
-                                searchPlaceholder="Buscar safra..."
-                                searchable
-                            />
-
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="hidden sm:flex items-center rounded-[16px] border border-border/60 bg-white/70 p-1 shadow-[0_10px_28px_-24px_rgba(44,20,31,0.18)] backdrop-blur-md">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="relative h-10 w-10 rounded-[12px] border border-border/70 bg-background/50 hover:bg-background"
-                                onClick={() => setFilterOpen(true)}
-                                aria-label="Abrir filtros avançados"
+                                aria-pressed={viewMode === "table"}
+                                className={cn("h-9 w-9 rounded-[12px]", viewMode === "table" && "bg-background shadow-sm text-primary")}
+                                onClick={() => setViewMode("table")}
                             >
-                                <SlidersHorizontal className="h-4 w-4 opacity-70" />
-                                {activeFilterCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[8px] font-black rounded-full flex items-center justify-center border-2 border-background shadow-sm">
-                                        {activeFilterCount}
-                                    </span>
-                                )}
+                                <ListIcon className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-pressed={viewMode === "grid"}
+                                className={cn("h-9 w-9 rounded-[12px]", viewMode === "grid" && "bg-background shadow-sm text-primary")}
+                                onClick={() => setViewMode("grid")}
+                            >
+                                <LayoutGrid className="h-4 w-4" />
                             </Button>
                         </div>
+                        <MagneticButton>
+                            <Button
+                                variant="primary"
+                                className="h-11 rounded-[16px] px-5 text-[12px] font-bold uppercase tracking-[0.12em] shadow-[0_18px_34px_-24px_hsl(var(--primary)/0.35)]"
+                                onClick={() => setAddWineOpen(true)}
+                            >
+                                <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar produto
+                            </Button>
+                        </MagneticButton>
                     </div>
+                </div>
 
-                    {/* Mobile actions */}
-                    <div className="flex items-center gap-2 md:hidden">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="h-10 rounded-2xl text-[12px] font-bold flex-1 justify-center"
-                            onClick={() => setFilterOpen(true)}
-                        >
-                            <SlidersHorizontal className="h-4 w-4 mr-2 opacity-80" />
-                            Filtros
-                            {activeFilterCount > 0 ? (
-                                <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-black px-1.5">
-                                    {activeFilterCount}
-                                </span>
-                            ) : null}
-                        </Button>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <PremiumKpiCard className="min-h-[122px] rounded-[22px] px-4 py-4 md:px-5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/58">
+                            Rótulos cadastrados
+                        </p>
+                        <div className="mt-4 flex items-end justify-between gap-3">
+                            <p className="text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">{summary.labels}</p>
+                            <Tag className="h-5 w-5 text-primary/48" />
+                        </div>
+                    </PremiumKpiCard>
+                    <PremiumKpiCard className="min-h-[122px] rounded-[22px] px-4 py-4 md:px-5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/58">
+                            Garrafas em estoque
+                        </p>
+                        <div className="mt-4 flex items-end justify-between gap-3">
+                            <p className="text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">{summary.bottles}</p>
+                            <Package className="h-5 w-5 text-primary/48" />
+                        </div>
+                    </PremiumKpiCard>
+                    <PremiumKpiCard className="min-h-[122px] rounded-[22px] px-4 py-4 md:px-5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/58">
+                            Valor total
+                        </p>
+                        <div className="mt-4 flex items-end justify-between gap-3">
+                            <p className="text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">
+                                R$ {summary.totalValue.toLocaleString("pt-BR")}
+                            </p>
+                            <Star className="h-5 w-5 text-primary/48" />
+                        </div>
+                    </PremiumKpiCard>
+                </div>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                <div className="rounded-[26px] border border-black/[0.05] bg-[rgba(255,255,255,0.76)] px-3 py-3 shadow-[0_18px_40px_-28px_rgba(44,20,31,0.18)] backdrop-blur-xl md:px-4">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center">
+                            <div className="relative min-w-0 flex-1">
+                                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/45" />
+                                <Input
+                                    placeholder="Pesquisar por rótulo, produtor, região, safra, uva ou localização..."
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    className="h-11 rounded-[16px] border-border/40 bg-white/76 pl-9 text-[13px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-md transition-all focus:border-primary/20 focus:ring-primary/10"
+                                />
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                                <div className="hidden md:flex items-center rounded-[16px] border border-border/55 bg-white/68 p-1 shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]">
+                                    {quickStatusTabs.map((tab) => (
+                                        <Button
+                                            key={tab.id}
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => updateParam("status", tab.id === "all" ? null : tab.id)}
+                                            className={cn(
+                                                "h-8 gap-1.5 rounded-[12px] px-3 text-[11px] font-bold",
+                                                statusFilter === tab.id || (tab.id === "all" && statusFilter === "all")
+                                                    ? "bg-background text-primary shadow-sm"
+                                                    : "text-muted-foreground hover:text-foreground"
+                                            )}
+                                        >
+                                            {tab.label}
+                                            <span className="rounded-full bg-black/5 px-1.5 py-0.5 text-[9px] font-black tabular-nums text-inherit">
+                                                {tab.count}
+                                            </span>
+                                        </Button>
+                                    ))}
+                                </div>
+
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="h-11 rounded-[16px] border-border/55 bg-white/68 px-3.5 text-[12px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]"
+                                        >
+                                            <ArrowUpDown className="mr-2 h-4 w-4 opacity-75" />
+                                            {sortOptions.find((option) => option.key === sortKey)?.label || "Nome"}
+                                            <ChevronDown className="ml-2 h-4 w-4 opacity-55" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-56 rounded-2xl">
+                                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
+                                            Ordenar
+                                        </DropdownMenuLabel>
+                                        {sortOptions.map((opt) => (
+                                            <DropdownMenuItem key={opt.key} variant="neutral" onClick={() => handleSort(opt.key)}>
+                                                {opt.label} {sortKey === opt.key ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="h-10 rounded-2xl px-3"
-                                    aria-label="Ordenar lista"
+                                    className="h-11 rounded-[16px] border-border/55 bg-white/68 px-3.5 text-[12px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]"
+                                    onClick={() => setFilterOpen(true)}
                                 >
-                                    <ArrowUpDown className="h-4 w-4 opacity-80" />
+                                    <SlidersHorizontal className="mr-2 h-4 w-4 opacity-75" />
+                                    Filtros
+                                    {activeFilterCount > 0 ? (
+                                        <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-black text-primary-foreground">
+                                            {activeFilterCount}
+                                        </span>
+                                    ) : null}
                                 </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 rounded-2xl">
-                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground">
-                                    Ordenar
-                                </DropdownMenuLabel>
-                                {[
-                                    { key: "name", label: "Nome" },
-                                    { key: "quantity", label: "Estoque" },
-                                    { key: "price", label: "Preço" },
-                                    { key: "region", label: "Região" },
-                                    { key: "vintage", label: "Safra" },
-                                ].map((opt) => (
-                                    <DropdownMenuItem
-                                        key={opt.key}
-                                        variant="neutral"
-                                        onClick={() => handleSort(opt.key)}
-                                    >
-                                        {opt.label} {sortKey === opt.key ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                                    </DropdownMenuItem>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-start xl:justify-between">
+                            <div className="hidden md:flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
+                                {desktopFilterGroups.map((group) => (
+                                    <div key={group.title} className="min-w-[126px] max-w-[170px] flex-1">
+                                        <MultiSelectDropdown
+                                            title={group.title}
+                                            options={group.options}
+                                            selected={group.selected}
+                                            onChange={(val) => updateParam(group.param, val, group.multi ?? true)}
+                                            onClear={() => updateParam(group.param, null, group.multi ?? true)}
+                                            searchPlaceholder={group.placeholder}
+                                            searchable={Boolean(group.placeholder)}
+                                        />
+                                    </div>
                                 ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                            </div>
+
+                            <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+                                {quickStatusTabs.map((tab) => (
+                                    <Button
+                                        key={tab.id}
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => updateParam("status", tab.id === "all" ? null : tab.id)}
+                                        className={cn(
+                                            "h-9 shrink-0 gap-1.5 rounded-[14px] border px-3 text-[11px] font-bold",
+                                            statusFilter === tab.id || (tab.id === "all" && statusFilter === "all")
+                                                ? "border-primary/18 bg-primary/8 text-primary"
+                                                : "border-border/55 bg-white/66 text-muted-foreground"
+                                        )}
+                                    >
+                                        {tab.label}
+                                        <span className="rounded-full bg-black/5 px-1.5 py-0.5 text-[9px] font-black tabular-nums text-inherit">
+                                            {tab.count}
+                                        </span>
+                                    </Button>
+                                ))}
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.05] pt-2.5 xl:min-w-[260px] xl:max-w-[320px] xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
+                                <p className="text-[11px] font-medium text-foreground/68">
+                                    {formatListCount(filteredWines.length, "item exibido", "itens exibidos")} •{" "}
+                                    {formatListCount(selectedIds.length, "selecionado", "selecionados")}
+                                </p>
+                                {activeFilterCount > 0 ? (
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-primary"
+                                        onClick={clearAllFilters}
+                                    >
+                                        Limpar filtros
+                                    </Button>
+                                ) : (
+                                    <p className="text-[11px] font-medium text-foreground/50">
+                                        Operação filtrável por localização, origem e status
+                                    </p>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="section-surface flex items-center justify-between gap-3 text-[11px] px-0.5 py-0.5">
-                <p className="text-foreground/72">
-                    {formatListCount(filteredWines.length, "item exibido", "itens exibidos")} •{" "}
-                    {formatListCount(selectedIds.length, "selecionado", "selecionados")}
-                </p>
-                    <p className="hidden md:block text-foreground/60">Filtros rápidos para operação comercial</p>
-                </div>
-                </div>
-            </div>
+            </section>
 
             {/* --- SELECTED CHIPS --- */}
             <AnimatePresence>
@@ -709,36 +765,38 @@ export default function InventoryPage() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex flex-nowrap md:flex-wrap gap-2 items-center px-1 overflow-x-auto md:overflow-visible scrollbar-hide"
+                        className="flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible"
                     >
-                        <span className="chip-surface chip-surface--soft shrink-0 mr-1">Filtros ativos:</span>
+                        <span className="shrink-0 rounded-full border border-black/[0.05] bg-white/65 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/75">
+                            Filtros ativos
+                        </span>
                         {styleFilters.map(s => (
-                            <Badge key={s} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
+                            <Badge key={s} variant="secondary" className="shrink-0 whitespace-nowrap rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-[11px] font-medium text-primary shadow-none">
                                 {s} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("style", s, true)} />
                             </Badge>
                         ))}
                         {countryFilters.map(c => (
-                            <Badge key={c} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
+                            <Badge key={c} variant="secondary" className="shrink-0 whitespace-nowrap rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-[11px] font-medium text-primary shadow-none">
                                 {c} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("country", c, true)} />
                             </Badge>
                         ))}
                         {regionFilters.map(r => (
-                            <Badge key={r} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
+                            <Badge key={r} variant="secondary" className="shrink-0 whitespace-nowrap rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-[11px] font-medium text-primary shadow-none">
                                 {r} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("region", r, true)} />
                             </Badge>
                         ))}
                         {grapeFilters.map(g => (
-                            <Badge key={g} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
+                            <Badge key={g} variant="secondary" className="shrink-0 whitespace-nowrap rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-[11px] font-medium text-primary shadow-none">
                                 {g} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("grape", g, true)} />
                             </Badge>
                         ))}
                         {vintageFilters.map(v => (
-                            <Badge key={v} variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
+                            <Badge key={v} variant="secondary" className="shrink-0 whitespace-nowrap rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-[11px] font-medium text-primary shadow-none">
                                 Safra {v} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("vintage", v, true)} />
                             </Badge>
                         ))}
                         {statusFilter !== "all" && (
-                            <Badge variant="secondary" className="chip-surface chip-surface--active shrink-0 whitespace-nowrap">
+                            <Badge variant="secondary" className="shrink-0 whitespace-nowrap rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-[11px] font-medium text-primary shadow-none">
                                 {statusFilter === "low" ? "Baixo estoque" : statusFilter === "out" ? "Sem estoque" : "Em estoque"} <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" onClick={() => updateParam("status", null)} />
                             </Badge>
                         )}
@@ -746,7 +804,7 @@ export default function InventoryPage() {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="chip-surface chip-surface--danger h-6 px-2 ml-1 rounded-full"
+                            className="ml-1 h-7 rounded-full border border-destructive/15 bg-destructive/5 px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-destructive"
                             onClick={clearAllFilters}
                         >
                             Limpar tudo
@@ -756,7 +814,7 @@ export default function InventoryPage() {
             </AnimatePresence>
 
             {/* --- DATA VIEW --- */}
-            <div className="glass-card overflow-hidden border-white/30 ring-1 ring-black/[0.02]">
+            <div className="overflow-hidden rounded-[28px] border border-black/[0.05] bg-[rgba(255,255,255,0.82)] shadow-[0_18px_46px_-30px_rgba(44,20,31,0.20)] backdrop-blur-xl">
                 {isLoading ? (
                     <div className="p-8 space-y-4">
                         {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 w-full" />)}
@@ -944,44 +1002,53 @@ export default function InventoryPage() {
                     </div>
                 ) : viewMode === "table" ? (
                     <div className="overflow-x-auto">
-                        <table className="table-premium">
+                        <table className="table-premium min-w-[1140px] table-fixed">
+                            <colgroup>
+                                <col className="w-12" />
+                                <col className="w-[32%]" />
+                                <col className="w-[23%]" />
+                                <col className="w-[12%]" />
+                                <col className="w-[12%]" />
+                                <col className="w-[13%]" />
+                                <col className="w-[168px]" />
+                            </colgroup>
                             <thead>
                                 <tr>
                                     <th className="w-10"><Checkbox checked={selectedIds.length === filteredWines.length && filteredWines.length > 0} onCheckedChange={toggleSelectAll} /></th>
                                     <th className="text-left cursor-pointer hover:bg-black/5" onClick={() => handleSort("name")}>
-                                        <div className="flex items-center gap-1">RÓTULO {sortKey === "name" && <ArrowUpDown className="h-3 w-3" />}</div>
+                                        <div className="flex items-center gap-1">Rótulo {sortKey === "name" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
-                                    <th className="text-left hidden lg:table-cell cursor-pointer hover:bg-black/5" onClick={() => handleSort("region")}>
-                                        <div className="flex items-center gap-1">REGIÃO / SAFRA {sortKey === "region" && <ArrowUpDown className="h-3 w-3" />}</div>
+                                    <th className="text-left cursor-pointer hover:bg-black/5" onClick={() => handleSort("region")}>
+                                        <div className="flex items-center gap-1">Região / safra {sortKey === "region" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
                                     <th className="text-left cursor-pointer hover:bg-black/5" onClick={() => handleSort("quantity")}>
-                                        <div className="flex items-center gap-1">ESTOQUE {sortKey === "quantity" && <ArrowUpDown className="h-3 w-3" />}</div>
+                                        <div className="flex items-center gap-1">Estoque {sortKey === "quantity" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
-                                    <th className="text-right hidden sm:table-cell cursor-pointer hover:bg-black/5" onClick={() => handleSort("price")}>
-                                        <div className="flex items-center justify-end gap-1">PREÇO {sortKey === "price" && <ArrowUpDown className="h-3 w-3" />}</div>
+                                    <th className="text-right cursor-pointer hover:bg-black/5" onClick={() => handleSort("price")}>
+                                        <div className="flex items-center justify-end gap-1">Preço {sortKey === "price" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
-                                    <th className="text-right hidden xl:table-cell">TOTAL</th>
-                                    <th className="w-48 text-right pr-4">AÇÕES</th>
+                                    <th className="text-right">Total</th>
+                                    <th className="w-48 text-right pr-4">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredWines.map(wine => (
                                     <tr key={wine.id} className={cn(selectedIds.includes(wine.id) && "selected", "group hover:bg-muted/5 transition-colors cursor-default")} onClick={() => toggleSelect(wine.id)}>
                                         <td onClick={e => e.stopPropagation()}><Checkbox checked={selectedIds.includes(wine.id)} onCheckedChange={() => toggleSelect(wine.id)} /></td>
-                                        <td>
+                                        <td className="align-middle">
                                             <div className="flex items-center gap-2.5">
                                                 <div className="w-9 h-12 rounded-lg bg-muted/20 flex items-center justify-center shrink-0 border border-black/[0.04] overflow-hidden">
                                                     {wine.image_url ? <img src={wine.image_url} className="w-full h-full object-cover" /> : <Package className="h-4 w-4 text-muted-foreground/40" />}
                                                 </div>
-                                                <div className="min-w-[120px]">
-                                                    <p className="font-bold text-[13px] text-foreground leading-tight truncate">{wine.name}</p>
-                                                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{wine.producer || "—"}</p>
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-[13px] font-extrabold leading-tight text-foreground">{wine.name}</p>
+                                                    <p className="mt-0.5 truncate text-[11px] font-medium text-muted-foreground/75">{wine.producer || "Produtor não informado"}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="hidden lg:table-cell">
-                                            <div className="text-[12px] text-foreground">{wine.region || "—"}</div>
-                                            <div className="text-[11px] text-muted-foreground/70 mt-0.5">{wine.country || "—"} · {wine.vintage || "NV"}</div>
+                                        <td className="align-middle">
+                                            <div className="text-[12px] font-medium text-foreground">{wine.region || "Região não informada"}</div>
+                                            <div className="mt-0.5 text-[11px] text-muted-foreground/70">{wine.country || "País não informado"} · {wine.vintage || "NV"}</div>
                                             {(() => {
                                               const loc = (allLocations ?? [])
                                                 .filter((l) => l.wine_id === wine.id)
@@ -991,32 +1058,32 @@ export default function InventoryPage() {
                                                 })
                                                 .find(Boolean);
                                               return loc ? (
-                                                <div className="mt-0.5">
-                                                  <span className="text-[9px] font-medium text-muted-foreground/70 tracking-wide">
+                                                  <div className="mt-0.5">
+                                                  <span className="text-[9px] font-medium tracking-wide text-muted-foreground/70">
                                                     {loc}
                                                   </span>
                                                 </div>
                                               ) : null;
                                             })()}
                                         </td>
-                                        <td>
+                                        <td className="align-middle">
                                             <div className="flex items-center gap-2.5">
                                                 {renderStockVisual(wine.quantity)}
                                                 {wine.quantity > 0 && wine.quantity <= 2 && (
-                                                    <span className="text-[9px] font-semibold text-destructive/80 uppercase tracking-wider">Baixo</span>
+                                                    <span className="rounded-full bg-destructive/8 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-destructive/80">Baixo</span>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="text-right hidden sm:table-cell">
+                                        <td className="align-middle text-right">
                                             <p className="text-[13px] font-semibold tabular-nums text-foreground">R$ {(wine.current_value || wine.purchase_price || 0).toLocaleString("pt-BR")}</p>
                                         </td>
-                                        <td className="text-right hidden xl:table-cell"><p className="text-[13px] font-bold tabular-nums text-foreground">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
-                                        <td className="text-right pr-4" onClick={e => e.stopPropagation()}>
-                                            <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                        <td className="align-middle text-right"><p className="text-[13px] font-bold tabular-nums text-foreground">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
+                                        <td className="align-middle pr-4 text-right" onClick={e => e.stopPropagation()}>
+                                            <div className="flex justify-end gap-1.5 opacity-100 transition-opacity xl:opacity-0 xl:group-hover:opacity-100">
                                                 <Button
                                                     variant="secondary"
                                                     size="icon"
-                                                    className="h-8 w-8"
+                                                    className="h-8 w-8 shrink-0 rounded-xl"
                                                     title="Registrar entrada"
                                                     disabled={stockBusyWineId === wine.id}
                                                     onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, 1); }}
@@ -1026,7 +1093,7 @@ export default function InventoryPage() {
                                                 <Button
                                                     variant="danger"
                                                     size="icon"
-                                                    className="h-8 w-8"
+                                                    className="h-8 w-8 shrink-0 rounded-xl"
                                                     title="Registrar saída"
                                                     disabled={stockBusyWineId === wine.id}
                                                     onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, -1); }}
@@ -1038,7 +1105,7 @@ export default function InventoryPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8"
+                                                            className="h-8 w-8 shrink-0 rounded-xl"
                                                             title="Mais ações"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >

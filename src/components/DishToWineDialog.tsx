@@ -559,15 +559,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           icon="utensils"
           title="Harmonizar"
           subtitle="Encontre a combinação perfeita entre vinho e gastronomia"
+          compact
         />
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {step !== "source" && (
             <Button
               variant="ghost"
               size="sm"
               onClick={goBack}
-              className="px-2 text-[11px] font-medium text-muted-foreground hover:text-foreground -mt-2"
+              className="-mt-1 px-2 text-[11px] font-medium text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Voltar
@@ -651,7 +652,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
@@ -726,7 +727,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
                 <div className="space-y-1.5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
@@ -897,7 +898,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
@@ -1081,7 +1082,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
@@ -1118,7 +1119,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
                 <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
                   <p className="text-[12px] font-medium text-foreground">
@@ -1315,7 +1316,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
                 <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
                   <p className="text-[12px] font-medium text-foreground">
@@ -1831,8 +1832,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             onClose={() => setRecipeModal(null)}
             className="sm:max-w-md"
           >
-            <ScrollArea className="max-h-[65vh]">
-              <div className="space-y-4 pr-1">
+              <div className="space-y-4">
                 {recipeModal.recipe.description && (
                   <p className="text-sm text-black/70 leading-relaxed italic">{recipeModal.recipe.description}</p>
                 )}
@@ -1868,7 +1868,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <p className="text-sm text-black/70 leading-relaxed">{recipeModal.recipe.wine_reason}</p>
                 </div>
               </div>
-            </ScrollArea>
           </ModalBase>
         </Dialog>
       )}

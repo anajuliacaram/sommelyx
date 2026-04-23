@@ -227,7 +227,7 @@ export function DrinkWindow({
   const dotInner = inWindow ? trackColor : "rgba(160,100,80,0.9)";
 
   return (
-    <div className="relative h-8 w-full">
+    <div className="relative h-9 w-full">
       {/* Trilha base */}
       <div
         className="absolute inset-x-0 top-[12px] h-[2px] rounded-full"
@@ -260,7 +260,7 @@ export function DrinkWindow({
         />
       </div>
       {/* Rodapé padronizado: ano min · rótulo central · ano max */}
-      <div className="absolute bottom-0 left-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
+      <div className="absolute bottom-0 left-0 text-[10px] font-semibold tabular-nums text-[rgba(58,51,39,0.56)] sm:text-[10.5px]">
         {min}
       </div>
       <div
@@ -269,7 +269,7 @@ export function DrinkWindow({
       >
         {classification.label}
       </div>
-      <div className="absolute bottom-0 right-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
+      <div className="absolute bottom-0 right-0 text-[10px] font-semibold tabular-nums text-[rgba(58,51,39,0.56)] sm:text-[10.5px]">
         {max}
       </div>
     </div>
@@ -318,7 +318,7 @@ export function classifyDrinkWindow({
   const toleranceYearBeforeStart = current >= safeFrom - 1 && current < safeFrom;
 
   if (current > safeUntil) {
-    return { status: "past", label: "Passado do auge" };
+    return { status: "past", label: "Após o auge" };
   }
   if (current >= safeFrom && current <= safeUntil) {
     return { status: "now", label: "No auge" };

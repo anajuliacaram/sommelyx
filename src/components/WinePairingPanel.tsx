@@ -4,7 +4,6 @@ import { UtensilsCrossed, Loader2, Sparkles, BookOpen } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { getWinePairings, type PairingResult, type WineProfile, type Recipe } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModalBase } from "@/components/ui/ModalBase";
 import {
   MatchDot,
@@ -36,8 +35,7 @@ function RecipeModal({ recipe, dishName, wineName, open, onOpenChange }: { recip
         onClose={() => onOpenChange(false)}
         className="sm:max-w-md"
       >
-        <ScrollArea className="max-h-[65vh]">
-          <div className="space-y-4 pr-1">
+          <div className="space-y-4">
             {recipe.description && (
               <p className="text-sm text-black/70 leading-relaxed italic">{recipe.description}</p>
             )}
@@ -73,7 +71,6 @@ function RecipeModal({ recipe, dishName, wineName, open, onOpenChange }: { recip
               <p className="text-sm text-black/70 leading-relaxed">{recipe.wine_reason}</p>
             </div>
           </div>
-        </ScrollArea>
       </ModalBase>
     </Dialog>
   );

@@ -361,7 +361,7 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-3 py-1">
+    <div className="flex items-center gap-2.5 py-0.5">
       <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12 flex items-center justify-center">
         <Icon className="h-4 w-4 text-[#7B1E2B]" />
       </div>
@@ -385,7 +385,7 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-5 py-10"
+      className="flex flex-col items-center gap-4 py-8"
     >
       <div
         className="w-20 h-20 rounded-3xl flex items-center justify-center relative"
@@ -421,7 +421,7 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-5 py-12"
+      className="flex flex-col items-center gap-4 py-9"
     >
       <div
         className="w-16 h-16 rounded-2xl flex items-center justify-center"
@@ -432,11 +432,11 @@ export function PairingErrorState({
       >
         <X className="h-7 w-7 text-destructive/60" />
       </div>
-      <div className="text-center space-y-1.5">
+      <div className="space-y-1.5 text-center">
         <p className="text-[15px] font-semibold text-[#1A1A1A]">Não foi possível analisar</p>
         <p className="text-[13px] text-[#888] max-w-[280px] leading-relaxed">{message}</p>
       </div>
-      <div className="flex flex-col gap-2.5 w-full max-w-[280px]">
+      <div className="flex w-full max-w-[280px] flex-col gap-2">
         <Button onClick={onRetry} variant="secondary" className="h-11 text-[13px] font-semibold rounded-xl">
           <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
         </Button>
@@ -476,10 +476,12 @@ export function PairingSheetHero({
   title,
   subtitle,
   icon = "utensils",
+  compact = false,
 }: {
   title: string;
   subtitle: string;
   icon?: "utensils" | "sparkles" | "wine" | "chef";
+  compact?: boolean;
 }) {
   const Icon = icon === "sparkles" ? Sparkles : icon === "wine" ? Wine : icon === "chef" ? ChefHat : UtensilsCrossed;
   return (
@@ -487,10 +489,13 @@ export function PairingSheetHero({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-      className="mb-6 flex items-start gap-4"
+      className={cn("flex items-start", compact ? "mb-3.5 gap-3" : "mb-6 gap-4")}
     >
       <div
-        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px]"
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-[18px]",
+          compact ? "h-12 w-12" : "h-14 w-14",
+        )}
         style={{
           background: "rgba(255,255,255,0.6)",
           backdropFilter: "blur(14px) saturate(1.1)",
@@ -499,16 +504,26 @@ export function PairingSheetHero({
           boxShadow: "0 10px 28px -14px rgba(123,30,43,0.22), inset 0 1px 0 rgba(255,255,255,0.7)",
         }}
       >
-        <Icon className="h-6 w-6 text-[#7B1E2B]" strokeWidth={1.75} />
+        <Icon className={cn("text-[#7B1E2B]", compact ? "h-5.5 w-5.5" : "h-6 w-6")} strokeWidth={1.75} />
       </div>
-      <div className="min-w-0 pt-1">
+      <div className={cn("min-w-0", compact ? "pt-0.5" : "pt-1")}>
         <h2
-          className="text-[28px] font-semibold tracking-[-0.02em] leading-[1.1] text-[#1A1713]"
+          className={cn(
+            "font-semibold tracking-[-0.02em] leading-[1.1] text-[#1A1713]",
+            compact ? "text-[26px]" : "text-[28px]",
+          )}
           style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontWeight: 600 }}
         >
           {title}
         </h2>
-        <p className="mt-1.5 text-[14px] font-medium leading-snug text-[rgba(58,51,39,0.6)]">{subtitle}</p>
+        <p
+          className={cn(
+            "text-[14px] font-medium leading-snug text-[rgba(58,51,39,0.6)]",
+            compact ? "mt-1" : "mt-1.5",
+          )}
+        >
+          {subtitle}
+        </p>
       </div>
     </motion.div>
   );

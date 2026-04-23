@@ -245,31 +245,41 @@ export default function PersonalCellarPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="grid gap-3 grid-cols-2 sm:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
+            className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
           >
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
               const dw = resolveSuggestedDrinkWindow(w);
               const classification = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until });
-              const inWindow = classification.status === "now";
               const past = classification.status === "past";
+              const statusTone = past
+                ? { background: "rgba(201,107,85,0.12)", color: "#B55A43" }
+                : classification.status === "now"
+                  ? { background: "rgba(95,127,82,0.14)", color: "#4C6B43" }
+                  : classification.status === "soon"
+                    ? { background: "rgba(198,167,104,0.16)", color: "#8B6914" }
+                    : { background: "rgba(107,130,152,0.12)", color: "#566C82" };
               return (
-                <EditorialCard key={w.id} style={{ padding: 18, cursor: "pointer" }}>
-                  <div onClick={() => setEditWine(w)}>
+                <EditorialCard
+                  key={w.id}
+                  className="flex h-full flex-col"
+                  style={{ padding: 18, cursor: "pointer" }}
+                >
+                  <div className="flex min-h-0 flex-1 flex-col" onClick={() => setEditWine(w)}>
                     {showLabels && (
                       <WineLabelPreview
                         wine={w}
                         alt={w.name}
-                        className="mb-3 h-[160px]"
-                        imageClassName="h-[160px] w-full object-contain"
+                        className="mb-3.5 h-[176px] sm:h-[168px]"
+                        imageClassName="h-[176px] w-full object-contain sm:h-[168px]"
                         generated={false}
                         compact
                       />
                     )}
-                    <div className="mb-3 flex items-start justify-between">
+                    <div className="mb-3 flex min-h-6 items-start justify-between">
                       <div
-                        className="h-[22px] w-[22px] rounded-full"
+                        className="h-6 w-6 rounded-full"
                         style={{
                           background: `linear-gradient(145deg, ${color}, ${color}cc)`,
                           boxShadow:
@@ -278,18 +288,18 @@ export default function PersonalCellarPage() {
                       />
                       {w.rating != null && (
                         <div
-                          className="flex items-center gap-1 text-[10.5px] font-bold tabular-nums"
+                          className="flex items-center gap-1 text-[12px] font-bold tabular-nums"
                           style={{ color: "#B48C3A" }}
                         >
-                          <Star className="h-3 w-3 fill-current" /> {Number(w.rating).toFixed(1)}
+                          <Star className="h-3.5 w-3.5 fill-current" /> {Number(w.rating).toFixed(1)}
                         </div>
                       )}
                     </div>
                     <h3
-                      className="font-serif"
+                      className="min-h-[46px] font-serif"
                       style={{
                         fontFamily: "'Libre Baskerville', Georgia, serif",
-                        fontSize: 15,
+                        fontSize: 18,
                         fontWeight: 600,
                         letterSpacing: "-0.01em",
                         color: "#1a1713",
@@ -299,52 +309,63 @@ export default function PersonalCellarPage() {
                       {w.name}
                     </h3>
                     <p
-                      className="mt-1 truncate text-[11px]"
+                      className="mt-1.5 min-h-[18px] truncate text-[12.5px]"
                       style={{ color: "rgba(58,51,39,0.6)" }}
                     >
                       {[w.vintage, w.region, w.country].filter(Boolean).join(" · ")}
                     </p>
-                    <div className="mt-3">
+                    <div className="mt-3.5 min-h-[42px]">
                       <DrinkWindow from={dw.from} until={dw.until} current={currentYear} estimated={dw.estimated} />
                     </div>
                   </div>
                   <div
-                    className="mt-3 flex items-center justify-between border-t pt-3"
+                    className="mt-4 border-t pt-4"
                     style={{ borderColor: "rgba(95,111,82,0.1)" }}
                   >
-                    <div>
-                      <StyleBadge style={w.style} />
-                      <div
-                        className="mt-1 text-[10px] font-semibold"
-                        style={{ color: "rgba(58,51,39,0.55)" }}
-                      >
-                        {w.quantity} un.
-                        {w.current_value != null
-                          ? ` · R$ ${Number(w.current_value).toLocaleString("pt-BR")}`
-                          : ""}
+                    <div className="flex min-h-[96px] flex-col gap-3">
+                      <div className="flex min-h-[32px] flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                        <StyleBadge
+                          style={w.style}
+                          className="min-h-[24px] text-[11px] leading-none"
+                        />
+                        <div className="text-right">
+                          {w.current_value != null && (
+                            <div
+                              className="text-[15px] font-bold tracking-[-0.02em]"
+                              style={{ color: "#1a1713" }}
+                            >
+                              R$ {Number(w.current_value).toLocaleString("pt-BR")}
+                            </div>
+                          )}
+                          <div
+                            className="text-[11.5px] font-semibold"
+                            style={{ color: "rgba(58,51,39,0.55)" }}
+                          >
+                            {w.quantity} un.
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex min-h-[42px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <span
+                          className="inline-flex h-8 w-fit items-center rounded-full px-3.5 text-[11px] font-bold tracking-[0.02em] whitespace-nowrap"
+                          style={statusTone}
+                        >
+                          {classification.label}
+                        </span>
+                        <button
+                          type="button"
+                          className="editorial-btn-open w-full sm:w-auto"
+                          style={{ minHeight: 42, padding: "0 16px", fontSize: 13 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenBottle(w);
+                          }}
+                          disabled={wineEvent.isPending}
+                        >
+                          Abrir
+                        </button>
                       </div>
                     </div>
-                    <span
-                      className="rounded-full px-2 py-1 text-[9.5px] font-bold uppercase tracking-[0.1em]"
-                      style={{
-                        background: past ? "rgba(201,107,85,0.12)" : "rgba(107,130,152,0.12)",
-                        color: past ? "#B55A43" : "#566C82",
-                      }}
-                    >
-                      {classification.label}
-                    </span>
-                    <button
-                      type="button"
-                      className="editorial-btn-open"
-                      style={{ height: 30, padding: "0 12px", fontSize: 11 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenBottle(w);
-                      }}
-                      disabled={wineEvent.isPending}
-                    >
-                      Abrir
-                    </button>
                   </div>
                 </EditorialCard>
               );

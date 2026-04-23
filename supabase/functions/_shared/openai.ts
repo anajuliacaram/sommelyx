@@ -34,6 +34,16 @@ export function maskSecret(value?: string | null) {
   return `${trimmed.slice(0, 6)}…`;
 }
 
+function previewJson(value: unknown, maxLength = 600) {
+  try {
+    const serialized = JSON.stringify(value);
+    if (serialized.length <= maxLength) return serialized;
+    return `${serialized.slice(0, maxLength)}… [len=${serialized.length}]`;
+  } catch {
+    return "[unserializable]";
+  }
+}
+
 export async function callOpenAI(prompt: string) {
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
@@ -118,7 +128,7 @@ export async function callOpenAIResponses<T>({
     });
 
     const json = await response.json();
-    console.log("RAW OPENAI RESPONSE:", JSON.stringify(json));
+    console.log("RAW OPENAI RESPONSE:", previewJson(json));
 
     if (!response.ok) {
       const message = typeof json?.error?.message === "string"

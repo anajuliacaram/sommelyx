@@ -45,6 +45,10 @@ function trace(stage: string, metadata?: Record<string, unknown>) {
   console.info(`[${FUNCTION_NAME}] step: ${stage}`, metadata || {});
 }
 
+function elapsed(startedAt: number) {
+  return Date.now() - startedAt;
+}
+
 async function logToDb(
   supabaseUrl: string,
   serviceKey: string,
@@ -778,6 +782,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     let validationResult: { passed: boolean; failures: string[] } = { passed: false, failures: [] };
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      const aiStartedAt = Date.now();
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 25_000);
 
@@ -804,13 +809,13 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           content: Array.isArray(userMessageContent)
             ? userMessageContent.map((part: any) => {
               if (part.type === "text") return { type: "input_text" as const, text: String(part.text || "") };
-              if (part.type === "image_url") return { type: "input_image" as const, image_url: String(part.image_url?.url || ""), detail: "high" as const };
+              if (part.type === "image_url") return { type: "input_image" as const, image_url: String(part.image_url?.url || ""), detail: "auto" as const };
               return { type: "input_text" as const, text: "" };
             }).filter((part: any) => part.type === "input_text" ? part.text.trim().length > 0 : Boolean(part.image_url))
             : [{ type: "input_text" as const, text: String(userMessageContent || "") }],
         }],
         schema: (tools[0] as any)?.function?.parameters || {},
-        maxOutputTokens: 800,
+        maxOutputTokens: 650,
       });
 
       if (!openaiResult.ok) {
@@ -820,6 +825,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           request_id: requestId,
           mode: isMenuMode ? "menu" : "wine-list",
           status: responseStatus,
+          durationMs: elapsed(aiStartedAt),
           body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
         });
 
@@ -847,7 +853,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       }
 
       lastParsed = parsed;
-      trace("ai_response_received", { request_id: requestId, rawPreview: String(openaiResult.raw ? JSON.stringify(openaiResult.raw).slice(0, 500) : "").slice(0, 500) });
+      trace("ai_response_received", { request_id: requestId, durationMs: elapsed(aiStartedAt), rawPreview: String(openaiResult.raw ? JSON.stringify(openaiResult.raw).slice(0, 500) : "").slice(0, 500) });
+      const parseStartedAt = Date.now();
       trace("parse_started", { request_id: requestId });
 
       // ── Validate anti-genericity ──
@@ -930,6 +937,12 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
+      trace("parse_completed", {
+        request_id: requestId,
+        durationMs: elapsed(parseStartedAt),
+        validationPassed: validationResult.passed,
+        failures: validationResult.failures.length,
+      });
 
       if (validationResult.passed) break;
 
