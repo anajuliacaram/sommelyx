@@ -2,8 +2,7 @@ import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Search, ChevronDown, ArrowDownAZ, ArrowDown01 } from "lucide-react"
+import { Search, ChevronDown, ArrowDownAZ, ArrowDown01, Check } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
@@ -78,10 +77,10 @@ export function MultiSelectDropdown({
                     variant="outline"
                     size="sm"
                     className={cn(
-                        "h-10 px-3.5 rounded-full text-[13px] font-medium flex items-center gap-1.5 border transition-all duration-200 ease-out hover:-translate-y-px active:scale-[0.98]",
+                        "h-9 px-3.5 rounded-full text-[12.5px] font-medium flex items-center gap-1.5 border transition-all duration-200 ease-out hover:-translate-y-px active:scale-[0.98]",
                         hasSelection
-                            ? "bg-[rgba(123,30,43,0.08)] text-[#7B1E2B] border-[#7B1E2B] hover:bg-[rgba(123,30,43,0.12)]"
-                            : "bg-[rgba(255,255,255,0.7)] text-[#3A3327] border-[rgba(95,111,82,0.15)] hover:bg-black/[0.04] hover:border-[rgba(95,111,82,0.25)]"
+                            ? "bg-[rgba(123,30,43,0.07)] text-[#7B1E2B] border-[rgba(123,30,43,0.20)] hover:bg-[rgba(123,30,43,0.10)]"
+                            : "bg-[rgba(255,255,255,0.76)] text-[#3A3327] border-[rgba(95,111,82,0.12)] hover:bg-black/[0.03] hover:border-[rgba(95,111,82,0.18)]"
                     )}
                 >
                     <span className="truncate max-w-[120px]">{triggerLabel}</span>
@@ -102,31 +101,31 @@ export function MultiSelectDropdown({
                 align="start"
                 avoidCollisions={false}
                 sideOffset={6}
-                className="w-[92vw] max-w-[280px] sm:w-[260px] p-3 rounded-[18px] shadow-[0_18px_40px_-22px_rgba(58,51,39,0.20)] bg-[rgba(255,255,255,0.96)] border border-[rgba(95,111,82,0.10)] backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1"
+                className="w-[92vw] max-w-[280px] sm:w-[260px] p-2.5 rounded-[18px] shadow-[0_18px_40px_-22px_rgba(58,51,39,0.18)] bg-[rgba(255,255,255,0.97)] border border-[rgba(95,111,82,0.08)] backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1"
             >
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 px-0.5">
+                <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-1.5 px-0.5">
                         {showSearch && (
                             <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-400" />
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[rgba(58,51,39,0.36)]" />
                                 <Input
                                     placeholder={searchPlaceholder}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="h-9 pl-8 rounded-[14px] bg-white border-neutral-200 text-[12px] text-neutral-900 placeholder:text-neutral-400 focus:border-[#6F7F5B] focus:ring-[#6F7F5B]/20 focus:shadow-[0_0_0_3px_rgba(111,127,91,0.08)]"
+                                    className="h-8 rounded-[13px] border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.82)] pl-8 text-[12px] text-[#2A241D] placeholder:text-[rgba(58,51,39,0.38)] focus:border-[rgba(95,111,82,0.16)] focus:ring-[rgba(95,111,82,0.14)] focus:shadow-none"
                                 />
                             </div>
                         )}
                         {!showSearch ? <div className="flex-1" /> : null}
-                        <div className="flex rounded-full bg-white p-0.5 shrink-0 border border-neutral-200 shadow-[0_1px_2px_rgba(0,0,0,0.022)]">
+                        <div className="flex shrink-0 rounded-full border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.82)] p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setSortMode("alpha")}
                                 className={cn(
-                                    "h-6 w-6 rounded-full transition-[transform,background-color,color] duration-150",
-                                    sortMode === "alpha" ? "bg-[#6F7F5B] shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-white" : "text-neutral-500 hover:text-neutral-800"
+                                    "h-6 w-6 rounded-full transition-[background-color,color] duration-150",
+                                    sortMode === "alpha" ? "bg-[rgba(95,111,82,0.14)] text-[#32422B]" : "text-[rgba(58,51,39,0.42)] hover:text-[#2A241D]"
                                 )}
                                 title="Ordem alfabética"
                             >
@@ -139,8 +138,8 @@ export function MultiSelectDropdown({
                                 size="icon"
                                 onClick={() => setSortMode("count")}
                                 className={cn(
-                                    "h-6 w-6 rounded-full transition-[transform,background-color,color] duration-150",
-                                    sortMode === "count" ? "bg-[#6F7F5B] shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-white" : "text-neutral-500 hover:text-neutral-800"
+                                    "h-6 w-6 rounded-full transition-[background-color,color] duration-150",
+                                    sortMode === "count" ? "bg-[rgba(95,111,82,0.14)] text-[#32422B]" : "text-[rgba(58,51,39,0.42)] hover:text-[#2A241D]"
                                 )}
                                 title="Ordenar por quantidade"
                             >
@@ -151,9 +150,9 @@ export function MultiSelectDropdown({
                     </div>
 
                     <ScrollArea className="max-h-[240px]">
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                             {filteredOptions.length === 0 ? (
-                                <div className="p-2 text-center text-[11px] text-muted-foreground/50 font-medium">
+                                <div className="p-2 text-center text-[11px] font-medium text-muted-foreground/50">
                                     Nenhum resultado
                                 </div>
                             ) : (
@@ -162,39 +161,41 @@ export function MultiSelectDropdown({
                                     return (
                                         <div
                                             key={opt.value}
-                                        className={cn(
-                                                "flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] cursor-pointer transition-colors duration-150",
+                                            className={cn(
+                                                "flex items-center gap-2 px-2.5 py-1.5 rounded-[12px] cursor-pointer transition-colors duration-150",
                                                 isChecked
                                                     ? "bg-[rgba(123,30,43,0.06)] text-[#7B1E2B]"
-                                                    : "hover:bg-black/[0.04] text-[#3A3327]"
+                                                    : "text-[#3A3327] hover:bg-black/[0.03]"
                                             )}
                                             onClick={() => onChange(opt.value)}
                                         >
-                                            <Checkbox
-                                                checked={isChecked}
-                                                className={cn(
-                                                    "pointer-events-none rounded h-3.5 w-3.5 transition-colors duration-150",
-                                                    isChecked
-                                                        ? "border-[#7B1E2B] bg-[#7B1E2B] text-white"
-                                                        : "border-neutral-300"
-                                                )}
-                                            />
                                             <span className={cn(
-                                                "text-[12px] leading-normal flex-1 truncate",
+                                                "text-[12.5px] leading-normal flex-1 truncate",
                                                 isChecked ? "font-semibold" : "font-medium"
                                             )}>
                                                 {opt.label}
                                             </span>
                                             {opt.count !== undefined && (
                                                 <span className={cn(
-                                                    "text-[9px] font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
+                                                    "min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[9.5px] font-medium",
                                                     isChecked
                                                         ? "bg-[rgba(123,30,43,0.10)] text-[#7B1E2B]"
-                                                        : "bg-muted/50 text-muted-foreground/60"
+                                                        : "bg-[rgba(95,111,82,0.07)] text-[rgba(58,51,39,0.54)]"
                                                 )}>
                                                     {opt.count}
                                                 </span>
                                             )}
+                                            <span
+                                                className={cn(
+                                                    "flex h-4 w-4 items-center justify-center rounded-full transition-opacity duration-150",
+                                                    isChecked
+                                                        ? "bg-[rgba(123,30,43,0.12)] text-[#7B1E2B] opacity-100"
+                                                        : "opacity-0"
+                                                )}
+                                                aria-hidden="true"
+                                            >
+                                                <Check className="h-3 w-3" strokeWidth={2.5} />
+                                            </span>
                                         </div>
                                     )
                                 })
@@ -203,10 +204,10 @@ export function MultiSelectDropdown({
                     </ScrollArea>
 
                     {hasSelection && (
-                        <div className="pt-1 border-t border-[rgba(95,111,82,0.12)] px-0.5">
+                        <div className="border-t border-[rgba(95,111,82,0.08)] px-0.5 pt-1">
                             <Button
                                 variant="ghost"
-                                className="w-full h-8 text-[11px] font-semibold text-[#7B1E2B] hover:text-[#5A1420] hover:bg-[rgba(123,30,43,0.06)] justify-center rounded-[10px] transition-colors duration-150"
+                                className="h-7 w-full justify-center rounded-[10px] text-[11px] font-semibold text-[#7B1E2B] transition-colors duration-150 hover:bg-[rgba(123,30,43,0.06)] hover:text-[#5A1420]"
                                 onClick={() => {
                                     onClear()
                                     setOpen(false)

@@ -2,17 +2,16 @@ import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Search, Filter, SlidersHorizontal, ArrowUpDown, ChevronDown,
-    MoreHorizontal, Trash2, Tag, Download, Check, X,
+    MoreHorizontal, Trash2, Tag, X,
     Package, AlertTriangle, Clock, History, Star,
-    Smartphone, ChevronRight, LayoutGrid, List as ListIcon, Plus, Minus, Pencil, Loader2
+    LayoutGrid, List as ListIcon, Plus, Minus, Pencil, Loader2
 } from "@/icons/lucide";
 import { useWineMetrics, useDeleteWine, useWineEvent, Wine } from "@/hooks/useWines";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
+import { RangeSliderFilter } from "@/components/RangeSliderFilter";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -65,10 +64,10 @@ export default function InventoryPage() {
     const [search, setSearch] = useState(searchParams.get("q") || "");
     const [debouncedSearch, setDebouncedSearch] = useState(search);
     const [filterOpen, setFilterOpen] = useState(false);
+    const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
     const [addWineOpen, setAddWineOpen] = useState(false);
     const [editWineOpen, setEditWineOpen] = useState(false);
     const [editingWine, setEditingWine] = useState<Wine | null>(null);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
     const [stockBusyWineId, setStockBusyWineId] = useState<string | null>(null);
     const [auditOpen, setAuditOpen] = useState(false);
@@ -346,19 +345,19 @@ export default function InventoryPage() {
             placeholder: "Buscar país...",
         },
         {
+            title: "Safra",
+            options: dynamicOptions.vintages,
+            selected: vintageFilters,
+            param: "vintage",
+            placeholder: "Buscar safra...",
+        },
+        {
             title: "Status",
             options: dynamicOptions.statusOptions,
             selected: statusFilter === "all" ? [] : [statusFilter],
             param: "status",
             placeholder: undefined,
             multi: false,
-        },
-        {
-            title: "Safra",
-            options: dynamicOptions.vintages,
-            selected: vintageFilters,
-            param: "vintage",
-            placeholder: "Buscar safra...",
         },
     ] as const;
 
@@ -371,15 +370,6 @@ export default function InventoryPage() {
     ];
 
     // --- Handlers ---
-    const toggleSelectAll = () => {
-        if (selectedIds.length === filteredWines.length) setSelectedIds([]);
-        else setSelectedIds(filteredWines.map(w => w.id));
-    };
-
-    const toggleSelect = (id: string) => {
-        setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-    };
-
     const updateParam = (key: string, value: string | null, multi = false) => {
         const params = new URLSearchParams(searchParams);
         if (!value) {
@@ -402,17 +392,6 @@ export default function InventoryPage() {
     const clearAllFilters = () => {
         setSearchParams(new URLSearchParams(), { replace: true });
         setSearch("");
-    };
-
-    const handleDeleteSelected = async () => {
-        if (!confirm(`Deseja excluir ${selectedIds.length} vinhos?`)) return;
-        try {
-            await Promise.all(selectedIds.map(id => deleteWine.mutateAsync(id)));
-            toast({ title: `${selectedIds.length} vinhos removidos.` });
-            setSelectedIds([]);
-        } catch {
-            toast({ title: "Não conseguimos remover os vinhos", description: "Verifique sua conexão e tente novamente. Os vinhos permanecem no estoque.", variant: "destructive" });
-        }
     };
 
     const handleQuickStock = async (wineId: string, diff: number) => {
@@ -454,6 +433,21 @@ export default function InventoryPage() {
 
     const formatListCount = (count: number, singular: string, plural: string) =>
         `${count} ${count === 1 ? singular : plural}`;
+
+    const getCommercialPricing = (wine: Wine) => {
+        const salePrice = wine.current_value ?? wine.purchase_price ?? 0;
+        const purchaseCost = wine.purchase_price ?? null;
+        const unitMargin = purchaseCost != null && wine.current_value != null
+            ? wine.current_value - purchaseCost
+            : null;
+        const marginPct = unitMargin != null && purchaseCost && purchaseCost > 0
+            ? (unitMargin / purchaseCost) * 100
+            : null;
+
+        return { salePrice, purchaseCost, unitMargin, marginPct };
+    };
+
+    const lowStockFilteredCount = filteredWines.filter((wine) => wine.quantity > 0 && wine.quantity <= 2).length;
 
     // --- Render Helpers ---
     const renderStockVisual = (qty: number) => {
@@ -679,10 +673,13 @@ export default function InventoryPage() {
                                     type="button"
                                     variant="outline"
                                     className="h-11 rounded-[16px] border-border/55 bg-white/68 px-3.5 text-[12px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]"
-                                    onClick={() => setFilterOpen(true)}
+                                    onClick={() => {
+                                        if (isMobile) setFilterOpen(true);
+                                        else setAdvancedFiltersOpen((open) => !open);
+                                    }}
                                 >
                                     <SlidersHorizontal className="mr-2 h-4 w-4 opacity-75" />
-                                    Filtros
+                                    {isMobile ? "Filtros" : advancedFiltersOpen ? "Ocultar filtros" : "Filtros avançados"}
                                     {activeFilterCount > 0 ? (
                                         <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-black text-primary-foreground">
                                             {activeFilterCount}
@@ -692,23 +689,7 @@ export default function InventoryPage() {
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-start xl:justify-between">
-                            <div className="hidden md:flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
-                                {desktopFilterGroups.map((group) => (
-                                    <div key={group.title} className="min-w-[126px] max-w-[170px] flex-1">
-                                        <MultiSelectDropdown
-                                            title={group.title}
-                                            options={group.options}
-                                            selected={group.selected}
-                                            onChange={(val) => updateParam(group.param, val, group.multi ?? true)}
-                                            onClear={() => updateParam(group.param, null, group.multi ?? true)}
-                                            searchPlaceholder={group.placeholder}
-                                            searchable={Boolean(group.placeholder)}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-
+                        <div className="flex flex-col gap-2.5">
                             <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
                                 {quickStatusTabs.map((tab) => (
                                     <Button
@@ -732,27 +713,67 @@ export default function InventoryPage() {
                                 ))}
                             </div>
 
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.05] pt-2.5 xl:min-w-[260px] xl:max-w-[320px] xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.05] pt-2.5">
                                 <p className="text-[11px] font-medium text-foreground/68">
                                     {formatListCount(filteredWines.length, "item exibido", "itens exibidos")} •{" "}
-                                    {formatListCount(selectedIds.length, "selecionado", "selecionados")}
+                                    {formatListCount(lowStockFilteredCount, "rótulo com baixo estoque", "rótulos com baixo estoque")}
                                 </p>
-                                {activeFilterCount > 0 ? (
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-7 rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-primary"
-                                        onClick={clearAllFilters}
-                                    >
-                                        Limpar filtros
-                                    </Button>
-                                ) : (
-                                    <p className="text-[11px] font-medium text-foreground/50">
-                                        Operação filtrável por localização, origem e status
-                                    </p>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    {activeFilterCount > 0 ? (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-primary"
+                                            onClick={clearAllFilters}
+                                        >
+                                            Limpar filtros
+                                        </Button>
+                                    ) : (
+                                        <p className="hidden md:block text-[11px] font-medium text-foreground/50">
+                                            Filtragem rápida para reposição, ruptura e localização
+                                        </p>
+                                    )}
+                                </div>
                             </div>
+
+                            <AnimatePresence>
+                                {!isMobile && advancedFiltersOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -8, height: 0 }}
+                                        animate={{ opacity: 1, y: 0, height: "auto" }}
+                                        exit={{ opacity: 0, y: -6, height: 0 }}
+                                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="rounded-[20px] border border-black/[0.05] bg-white/58 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                                            <div className="mb-2 flex items-center justify-between gap-2">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/58">
+                                                    Filtros avançados
+                                                </p>
+                                                <p className="text-[11px] font-medium text-foreground/52">
+                                                    Região, localização, origem, safra e status
+                                                </p>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
+                                                {desktopFilterGroups.map((group) => (
+                                                    <div key={group.title} className="min-w-0">
+                                                        <MultiSelectDropdown
+                                                            title={group.title}
+                                                            options={group.options}
+                                                            selected={group.selected}
+                                                            onChange={(val) => updateParam(group.param, val, group.multi ?? true)}
+                                                            onClear={() => updateParam(group.param, null, group.multi ?? true)}
+                                                            searchPlaceholder={group.placeholder}
+                                                            searchable={Boolean(group.placeholder)}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>
@@ -830,23 +851,15 @@ export default function InventoryPage() {
                 ) : isMobile ? (
                     <div className="p-2 space-y-2">
                         {filteredWines.map((wine) => {
-                            const unitPrice = wine.current_value ?? wine.purchase_price ?? 0;
-                            const total = unitPrice * (wine.quantity ?? 0);
-                            const selected = selectedIds.includes(wine.id);
+                            const { salePrice, purchaseCost, unitMargin, marginPct } = getCommercialPricing(wine);
+                            const total = salePrice * (wine.quantity ?? 0);
 
                             return (
                                 <div
                                     key={wine.id}
-                                    className={cn(
-                                        "group rounded-[24px] border border-white/18 bg-white/72 backdrop-blur-md p-4 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]",
-                                        selected && "ring-2 ring-primary/20",
-                                    )}
+                                    className="group rounded-[24px] border border-white/18 bg-white/72 p-4 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]"
                                 >
                                     <div className="flex items-start gap-3.5">
-                                        <div onClick={(e) => e.stopPropagation()}>
-                                            <Checkbox checked={selected} onCheckedChange={() => toggleSelect(wine.id)} />
-                                        </div>
-
                                         <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-2xl border border-white/40 bg-[linear-gradient(145deg,rgba(95,111,82,0.18),rgba(255,255,255,0.86))] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
                                             {wine.image_url ? (
                                                 <img src={wine.image_url} className="h-full w-full object-cover" />
@@ -903,13 +916,33 @@ export default function InventoryPage() {
                                                     ) : null}
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-[12px] font-black tracking-[-0.02em] text-foreground">
-                                                        R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                                                    <p className="text-[13px] font-black tracking-[-0.02em] text-foreground">
+                                                        Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                                                     </p>
-                                                    <p className="text-[10px] font-semibold text-muted-foreground/72">
-                                                        R$ {unitPrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}/un.
+                                                    <p className="text-[10px] font-medium text-muted-foreground/72">
+                                                        {purchaseCost != null
+                                                            ? `Custo R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                                            : "Custo não informado"}
                                                     </p>
                                                 </div>
+                                            </div>
+
+                                            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                    {marginPct != null ? (
+                                                        <Badge className={cn(
+                                                            "h-6 rounded-full border px-2.5 text-[10px] font-bold",
+                                                            unitMargin != null && unitMargin >= 0
+                                                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                                                : "border-amber-200 bg-amber-50 text-amber-700",
+                                                        )}>
+                                                            Margem {marginPct >= 0 ? "+" : ""}{marginPct.toFixed(0)}%
+                                                        </Badge>
+                                                    ) : null}
+                                                </div>
+                                                <p className="text-[10px] font-semibold text-muted-foreground/72">
+                                                    Total venda R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                                                </p>
                                             </div>
                                         </div>
 
@@ -1002,19 +1035,17 @@ export default function InventoryPage() {
                     </div>
                 ) : viewMode === "table" ? (
                     <div className="overflow-x-auto">
-                        <table className="table-premium min-w-[1140px] table-fixed">
+                        <table className="table-premium min-w-[1180px] table-fixed">
                             <colgroup>
-                                <col className="w-12" />
                                 <col className="w-[32%]" />
                                 <col className="w-[23%]" />
                                 <col className="w-[12%]" />
-                                <col className="w-[12%]" />
-                                <col className="w-[13%]" />
-                                <col className="w-[168px]" />
+                                <col className="w-[16%]" />
+                                <col className="w-[14%]" />
+                                <col className="w-[148px]" />
                             </colgroup>
                             <thead>
                                 <tr>
-                                    <th className="w-10"><Checkbox checked={selectedIds.length === filteredWines.length && filteredWines.length > 0} onCheckedChange={toggleSelectAll} /></th>
                                     <th className="text-left cursor-pointer hover:bg-black/5" onClick={() => handleSort("name")}>
                                         <div className="flex items-center gap-1">Rótulo {sortKey === "name" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
@@ -1025,16 +1056,20 @@ export default function InventoryPage() {
                                         <div className="flex items-center gap-1">Estoque {sortKey === "quantity" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
                                     <th className="text-right cursor-pointer hover:bg-black/5" onClick={() => handleSort("price")}>
-                                        <div className="flex items-center justify-end gap-1">Preço {sortKey === "price" && <ArrowUpDown className="h-3 w-3" />}</div>
+                                        <div className="flex items-center justify-end gap-1">Venda / custo {sortKey === "price" && <ArrowUpDown className="h-3 w-3" />}</div>
                                     </th>
-                                    <th className="text-right">Total</th>
-                                    <th className="w-48 text-right pr-4">Ações</th>
+                                    <th className="text-right">Margem / total</th>
+                                    <th className="w-[148px] pr-4 text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredWines.map(wine => (
-                                    <tr key={wine.id} className={cn(selectedIds.includes(wine.id) && "selected", "group hover:bg-muted/5 transition-colors cursor-default")} onClick={() => toggleSelect(wine.id)}>
-                                        <td onClick={e => e.stopPropagation()}><Checkbox checked={selectedIds.includes(wine.id)} onCheckedChange={() => toggleSelect(wine.id)} /></td>
+                                {filteredWines.map(wine => {
+                                    const { salePrice, purchaseCost, unitMargin, marginPct } = getCommercialPricing(wine);
+                                    return (
+                                    <tr key={wine.id} className="group cursor-default transition-colors hover:bg-muted/5" onClick={() => {
+                                        setEditingWine(wine);
+                                        setEditWineOpen(true);
+                                    }}>
                                         <td className="align-middle">
                                             <div className="flex items-center gap-2.5">
                                                 <div className="w-9 h-12 rounded-lg bg-muted/20 flex items-center justify-center shrink-0 border border-black/[0.04] overflow-hidden">
@@ -1075,37 +1110,45 @@ export default function InventoryPage() {
                                             </div>
                                         </td>
                                         <td className="align-middle text-right">
-                                            <p className="text-[13px] font-semibold tabular-nums text-foreground">R$ {(wine.current_value || wine.purchase_price || 0).toLocaleString("pt-BR")}</p>
+                                            <p className="text-[13px] font-bold tabular-nums text-foreground">R$ {salePrice.toLocaleString("pt-BR")}</p>
+                                            <p className="mt-0.5 text-[10px] font-medium text-muted-foreground/70">
+                                                {purchaseCost != null ? `Custo R$ ${purchaseCost.toLocaleString("pt-BR")}` : "Custo não informado"}
+                                            </p>
                                         </td>
-                                        <td className="align-middle text-right"><p className="text-[13px] font-bold tabular-nums text-foreground">R$ {((wine.current_value || wine.purchase_price || 0) * wine.quantity).toLocaleString("pt-BR")}</p></td>
+                                        <td className="align-middle text-right">
+                                            {marginPct != null ? (
+                                                <p className={cn(
+                                                    "text-[12px] font-bold tabular-nums",
+                                                    unitMargin != null && unitMargin >= 0 ? "text-emerald-700" : "text-amber-700",
+                                                )}>
+                                                    {marginPct >= 0 ? "+" : ""}{marginPct.toFixed(0)}%
+                                                </p>
+                                            ) : (
+                                                <p className="text-[11px] font-medium text-muted-foreground/55">Margem n/d</p>
+                                            )}
+                                            <p className="mt-0.5 text-[11px] font-semibold tabular-nums text-foreground/78">
+                                                Total R$ {(salePrice * wine.quantity).toLocaleString("pt-BR")}
+                                            </p>
+                                        </td>
                                         <td className="align-middle pr-4 text-right" onClick={e => e.stopPropagation()}>
-                                            <div className="flex justify-end gap-1.5 opacity-100 transition-opacity xl:opacity-0 xl:group-hover:opacity-100">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <Button
-                                                    variant="secondary"
-                                                    size="icon"
-                                                    className="h-8 w-8 shrink-0 rounded-xl"
-                                                    title="Registrar entrada"
-                                                    disabled={stockBusyWineId === wine.id}
-                                                    onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, 1); }}
+                                                    variant="outline"
+                                                    className="h-8 rounded-xl border-border/60 bg-white/72 px-3 text-[11px] font-semibold shadow-none hover:bg-white"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingWine(wine);
+                                                        setEditWineOpen(true);
+                                                    }}
                                                 >
-                                                    {stockBusyWineId === wine.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                                                </Button>
-                                                <Button
-                                                    variant="danger"
-                                                    size="icon"
-                                                    className="h-8 w-8 shrink-0 rounded-xl"
-                                                    title="Registrar saída"
-                                                    disabled={stockBusyWineId === wine.id}
-                                                    onClick={(e) => { e.stopPropagation(); void handleQuickStock(wine.id, -1); }}
-                                                >
-                                                    {stockBusyWineId === wine.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Minus className="h-4 w-4" />}
+                                                    Editar
                                                 </Button>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 shrink-0 rounded-xl"
+                                                            className="h-8 w-8 shrink-0 rounded-xl border border-border/50 bg-white/60"
                                                             title="Mais ações"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
@@ -1114,17 +1157,6 @@ export default function InventoryPage() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="w-56">
                                                         <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground">Ações</DropdownMenuLabel>
-                                                        <DropdownMenuItem
-                                                            variant="primary"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                setEditingWine(wine);
-                                                                setEditWineOpen(true);
-                                                            }}
-                                                        >
-                                                            <Pencil className="mr-2 h-4 w-4" /> Editar vinho
-                                                        </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             variant="neutral"
                                                             disabled={stockBusyWineId === wine.id}
@@ -1163,7 +1195,7 @@ export default function InventoryPage() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )})}
                             </tbody>
                         </table>
                     </div>
@@ -1171,17 +1203,13 @@ export default function InventoryPage() {
                     <div className="p-3 sm:p-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                             {filteredWines.map((wine) => {
-                                const unitPrice = wine.current_value ?? wine.purchase_price ?? 0;
-                                const total = unitPrice * (wine.quantity ?? 0);
-                                const selected = selectedIds.includes(wine.id);
+                                const { salePrice, purchaseCost, unitMargin, marginPct } = getCommercialPricing(wine);
+                                const total = salePrice * (wine.quantity ?? 0);
 
                                 return (
                                     <div
                                         key={wine.id}
-                                        className={cn(
-                                            "rounded-2xl border border-white/14 bg-white/55 backdrop-blur-md p-4 shadow-sm hover:bg-white/65 transition-colors",
-                                            selected && "ring-2 ring-primary/20",
-                                        )}
+                                        className="rounded-2xl border border-white/14 bg-white/55 p-4 shadow-sm backdrop-blur-md transition-colors hover:bg-white/65"
                                         onClick={() => {
                                             setEditingWine(wine);
                                             setEditWineOpen(true);
@@ -1196,10 +1224,6 @@ export default function InventoryPage() {
                                         }}
                                     >
                                         <div className="flex items-start gap-3">
-                                            <div onClick={(e) => e.stopPropagation()}>
-                                                <Checkbox checked={selected} onCheckedChange={() => toggleSelect(wine.id)} />
-                                            </div>
-
                                             <div className="w-11 h-14 rounded-xl bg-muted/30 flex items-center justify-center shrink-0 border border-black/5 overflow-hidden">
                                                 {wine.image_url ? (
                                                     <img src={wine.image_url} className="w-full h-full object-cover" />
@@ -1218,13 +1242,68 @@ export default function InventoryPage() {
                                                 </p>
                                             </div>
 
+                                        </div>
+
+                                        <div className="mt-3 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                {renderStockVisual(wine.quantity)}
+                                                {wine.quantity > 0 && wine.quantity <= 2 ? (
+                                                    <Badge className="h-6 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-semibold">
+                                                        Baixo estoque
+                                                    </Badge>
+                                                ) : null}
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[13px] font-black text-foreground">
+                                                    Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                                                </p>
+                                                <p className="text-[10px] font-medium text-muted-foreground">
+                                                    {purchaseCost != null
+                                                        ? `Custo R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                                        : "Custo não informado"}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-2 flex items-center justify-between gap-2">
+                                            <div className="flex flex-wrap items-center gap-1.5">
+                                                {marginPct != null ? (
+                                                    <Badge className={cn(
+                                                        "h-6 rounded-full border px-2.5 text-[10px] font-bold",
+                                                        unitMargin != null && unitMargin >= 0
+                                                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                                            : "border-amber-200 bg-amber-50 text-amber-700",
+                                                    )}>
+                                                        Margem {marginPct >= 0 ? "+" : ""}{marginPct.toFixed(0)}%
+                                                    </Badge>
+                                                ) : null}
+                                            </div>
+                                            <p className="text-[10px] font-semibold text-muted-foreground">
+                                                Total venda R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                                            </p>
+                                        </div>
+
+                                        <div className="mt-3 flex items-center justify-between gap-2 border-t border-black/[0.05] pt-3">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="h-9 rounded-[14px] border-border/60 bg-white/72 px-3.5 text-[11px] font-semibold"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setEditingWine(wine);
+                                                    setEditWineOpen(true);
+                                                }}
+                                            >
+                                                <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                                                Editar
+                                            </Button>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-9 w-9 rounded-2xl"
+                                                        className="h-9 w-9 rounded-[14px] border border-border/50 bg-white/60"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         <MoreHorizontal className="h-4 w-4" />
@@ -1234,17 +1313,6 @@ export default function InventoryPage() {
                                                     <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground">
                                                         Ações
                                                     </DropdownMenuLabel>
-                                                    <DropdownMenuItem
-                                                        variant="primary"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            setEditingWine(wine);
-                                                            setEditWineOpen(true);
-                                                        }}
-                                                    >
-                                                        <Pencil className="mr-2 h-4 w-4" /> Editar produto
-                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         variant="neutral"
                                                         disabled={stockBusyWineId === wine.id}
@@ -1278,27 +1346,21 @@ export default function InventoryPage() {
                                                     >
                                                         <History className="mr-2 h-4 w-4" /> Ver histórico
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        variant="danger"
+                                                        onClick={async (e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            if (!confirm("Deseja excluir este produto?")) return;
+                                                            await deleteWine.mutateAsync(wine.id);
+                                                            toast({ title: "Produto removido." });
+                                                        }}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Remover
+                                                    </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
-                                        </div>
-
-                                        <div className="mt-3 flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                {renderStockVisual(wine.quantity)}
-                                                {wine.quantity > 0 && wine.quantity <= 2 ? (
-                                                    <Badge className="h-6 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-semibold">
-                                                        Baixo estoque
-                                                    </Badge>
-                                                ) : null}
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-[12px] font-black text-foreground">
-                                                    R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
-                                                </p>
-                                                <p className="text-[10px] font-semibold text-muted-foreground">
-                                                    R$ {unitPrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}/un.
-                                                </p>
-                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -1380,16 +1442,23 @@ export default function InventoryPage() {
                                 />
                             </div>
 
-                            <div>
-                                <p className="text-xs font-semibold mb-3">Faixa de Safra</p>
-                                <Slider value={vintageRange} min={1980} max={new Date().getFullYear()} step={1} onValueChange={(value) => setVintageRange(value as [number, number])} />
-                                <p className="text-xs mt-2 text-muted-foreground">{vintageRange[0]} — {vintageRange[1]}</p>
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold mb-3">Faixa de Preço (R$)</p>
-                                <Slider value={priceRange} min={0} max={5000} step={50} onValueChange={(value) => setPriceRange(value as [number, number])} />
-                                <p className="text-xs mt-2 text-muted-foreground">R$ {priceRange[0]} — R$ {priceRange[1]}</p>
-                            </div>
+                            <RangeSliderFilter
+                                label="Faixa de safra"
+                                min={1980}
+                                max={new Date().getFullYear()}
+                                step={1}
+                                value={vintageRange}
+                                onChange={(value) => setVintageRange(value)}
+                            />
+                            <RangeSliderFilter
+                                label="Faixa de preço"
+                                min={0}
+                                max={5000}
+                                step={50}
+                                value={priceRange}
+                                onChange={(value) => setPriceRange(value)}
+                                formatValue={(value) => `R$ ${value}`}
+                            />
                         </div>
                     </ScrollArea>
 

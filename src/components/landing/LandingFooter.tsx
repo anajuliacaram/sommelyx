@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { Instagram, Linkedin } from "lucide-react";
+import { legalCompany } from "@/content/legal";
 
 interface LandingFooterProps {
   onLogin: () => void;
@@ -18,7 +20,8 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
         WebkitBackdropFilter: "blur(8px) saturate(1.02)",
       }}
     >
-      <div className="mx-auto max-w-6xl flex flex-col items-center gap-2 sm:gap-3 md:flex-row md:justify-between">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-col items-center gap-2 sm:gap-3 md:flex-row md:justify-between">
         <div className="flex items-center gap-3 min-w-[220px] sm:min-w-[250px]">
           <Logo variant="compact" className="h-12 sm:h-14 w-auto shrink-0 opacity-100 drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]" />
           <div className="flex flex-col leading-none min-w-0">
@@ -75,6 +78,29 @@ export function LandingFooter({ onLogin }: LandingFooterProps) {
         <p className="text-[11px] sm:text-[12px] font-medium text-[#5F5F5F] inline-flex items-center gap-1">
           © {new Date().getFullYear()} <BrandName size="sm" className="text-[12px]" />
         </p>
+        </div>
+
+        <div className="mt-4 border-t border-black/6 pt-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#5F5F5F]">
+              <Link to="/termos-de-uso" className="transition-colors hover:text-[#1A1A1A]">
+                Termos de Uso
+              </Link>
+              <Link to="/politica-de-privacidade" className="transition-colors hover:text-[#1A1A1A]">
+                Política de Privacidade
+              </Link>
+              <Link to="/assinatura-e-cobranca" className="transition-colors hover:text-[#1A1A1A]">
+                Assinatura & Cobrança
+              </Link>
+            </div>
+
+            <div className="text-[11px] leading-5 text-[#5F5F5F] md:text-right">
+              <p className="font-semibold text-[#1A1A1A]">{legalCompany.legalName}</p>
+              <p>CNPJ {legalCompany.cnpj} · {legalCompany.address}</p>
+              <p>{legalCompany.email}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
   );

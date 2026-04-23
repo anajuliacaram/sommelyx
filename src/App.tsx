@@ -18,6 +18,9 @@ import AuthConfirm from "@/pages/AuthConfirm";
 import AuthCallback from "@/pages/AuthCallback";
 import AuthDiagnostics from "@/pages/AuthDiagnostics";
 import SelectProfile from "@/pages/SelectProfile";
+import TermsOfService from "@/pages/legal/TermsOfService";
+import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
+import BillingTerms from "@/pages/legal/BillingTerms";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardIndex from "@/pages/dashboard/DashboardIndex";
 import Plans from "@/pages/dashboard/Plans";
@@ -76,6 +79,9 @@ const AnimatedRoutes = () => {
           <Route path="/auth/confirm" element={<AuthConfirm />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/auth/diagnostics" element={<AuthDiagnostics />} />
+          <Route path="/termos-de-uso" element={<TermsOfService />} />
+          <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
+          <Route path="/assinatura-e-cobranca" element={<BillingTerms />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/select-profile" element={<SelectProfile />} />
           </Route>

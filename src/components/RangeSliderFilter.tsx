@@ -45,14 +45,14 @@ export function RangeSliderFilter({
   );
 
   return (
-    <div className="w-full space-y-1">
+    <div className="w-full rounded-[16px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.72)] px-3 py-2.5 shadow-[0_1px_0_rgba(95,111,82,0.03)]">
       <div className="flex items-center justify-between">
         <span
-          className="font-semibold uppercase tracking-[0.14em] transition-colors text-[10px] text-[#6e6570]"
+          className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.48)] transition-colors"
         >
           {label}
         </span>
-        <span className="font-semibold text-foreground tabular-nums text-[12px] text-[#17131a]">
+        <span className="text-[12px] font-semibold tabular-nums text-[#17131a]">
           {formatValue(displayed[0])} — {formatValue(displayed[1])}
         </span>
       </div>
@@ -64,13 +64,13 @@ export function RangeSliderFilter({
         onValueChange={handleChange}
         onValueCommit={handleCommit}
         onPointerDown={() => setDragging(true)}
-        className="relative flex w-full touch-none select-none items-center group h-3"
+        className="group relative mt-2 flex h-3 w-full touch-none select-none items-center"
       >
-        <SliderPrimitive.Track className="relative h-[3px] w-full grow overflow-hidden rounded-full bg-muted/40">
-          <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-wine to-[hsl(var(--wine-vivid))]" />
+        <SliderPrimitive.Track className="relative h-[4px] w-full grow overflow-hidden rounded-full bg-[rgba(95,111,82,0.10)]">
+          <SliderPrimitive.Range className="absolute h-full bg-[linear-gradient(90deg,rgba(123,30,43,0.92),rgba(95,111,82,0.82))]" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block h-[12px] w-[12px] rounded-full border-2 border-wine bg-background shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-transform duration-150 hover:scale-110 focus-visible:outline-none focus-visible:border-wine/80 cursor-grab active:cursor-grabbing active:scale-105" />
-        <SliderPrimitive.Thumb className="block h-[12px] w-[12px] rounded-full border-2 border-wine bg-background shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-transform duration-150 hover:scale-110 focus-visible:outline-none focus-visible:border-wine/80 cursor-grab active:cursor-grabbing active:scale-105" />
+        <SliderPrimitive.Thumb className="block h-[13px] w-[13px] cursor-grab rounded-full border border-[rgba(123,30,43,0.26)] bg-white shadow-[0_2px_8px_rgba(20,18,16,0.10)] transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(95,111,82,0.16)] active:scale-105 active:cursor-grabbing" />
+        <SliderPrimitive.Thumb className="block h-[13px] w-[13px] cursor-grab rounded-full border border-[rgba(123,30,43,0.26)] bg-white shadow-[0_2px_8px_rgba(20,18,16,0.10)] transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(95,111,82,0.16)] active:scale-105 active:cursor-grabbing" />
       </SliderPrimitive.Root>
     </div>
   );
