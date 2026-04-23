@@ -223,6 +223,7 @@ export function useAddWine() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
+      queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
     },
   });
 }
@@ -264,6 +265,7 @@ export function useUpdateWine() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
+      queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
     },
   });
 }
@@ -280,6 +282,7 @@ export function useDeleteWine() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
+      queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
     },
   });
 }
@@ -322,6 +325,7 @@ export function useWineEvent() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
+      queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
     },
   });
 }

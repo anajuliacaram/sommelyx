@@ -5,15 +5,31 @@ import { isRenderableWineImageUrl, resolveWineCardImageCandidates } from "@/lib/
 
 type WineLabelPreviewProps = {
   wine: {
+    image?: string | null;
     image_url?: string | null;
     imageUrl?: string | null;
+    uploaded_image?: string | null;
+    uploaded_image_url?: string | null;
+    user_image_url?: string | null;
+    photo_url?: string | null;
+    persisted_image_url?: string | null;
     label_image_url?: string | null;
+    label_url?: string | null;
     resolved_image_url?: string | null;
+    fallback_image?: string | null;
     entries?: Array<{
+      image?: string | null;
       image_url?: string | null;
       imageUrl?: string | null;
+      uploaded_image?: string | null;
+      uploaded_image_url?: string | null;
+      user_image_url?: string | null;
+      photo_url?: string | null;
+      persisted_image_url?: string | null;
       label_image_url?: string | null;
+      label_url?: string | null;
       resolved_image_url?: string | null;
+      fallback_image?: string | null;
     }>;
     name: string;
     style?: string | null;
@@ -56,10 +72,18 @@ export function WineLabelPreview({
   useEffect(() => {
     if (import.meta.env.DEV) {
       const fields = {
+        image: wine.image ?? null,
         image_url: wine.image_url ?? null,
         imageUrl: wine.imageUrl ?? null,
+        uploaded_image: wine.uploaded_image ?? null,
+        uploaded_image_url: wine.uploaded_image_url ?? null,
+        user_image_url: wine.user_image_url ?? null,
+        photo_url: wine.photo_url ?? null,
+        persisted_image_url: wine.persisted_image_url ?? null,
         label_image_url: wine.label_image_url ?? null,
+        label_url: wine.label_url ?? null,
         resolved_image_url: wine.resolved_image_url ?? null,
+        fallback_image: wine.fallback_image ?? null,
         entriesCount: Array.isArray(wine.entries) ? wine.entries.length : 0,
         candidateCount: candidates.length,
         activeSrc: activeSrc ? activeSrc.slice(0, 80) : null,
@@ -67,7 +91,7 @@ export function WineLabelPreview({
       };
       console.debug("[WineLabelPreview] image_fields", fields);
     }
-  }, [activeSrc, candidates.length, wine.image_url, wine.imageUrl, wine.label_image_url, wine.resolved_image_url, wine.entries]);
+  }, [activeSrc, candidates.length, wine.image, wine.image_url, wine.imageUrl, wine.uploaded_image, wine.uploaded_image_url, wine.user_image_url, wine.photo_url, wine.persisted_image_url, wine.label_image_url, wine.label_url, wine.resolved_image_url, wine.fallback_image, wine.entries]);
 
   return (
     <div className={cn("relative overflow-hidden bg-[#F7F3EC]", compact ? "rounded-[16px]" : "rounded-[22px]", className)}>

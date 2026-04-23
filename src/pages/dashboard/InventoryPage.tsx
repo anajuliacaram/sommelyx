@@ -42,6 +42,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { StockAuditDialog } from "@/components/StockAuditDialog";
 import { useWineLocations } from "@/hooks/useWineLocations";
+import { useResolveWineImages } from "@/hooks/useResolveWineImages";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
 
 // --- Types & Constants ---
 type StockStatus = "all" | "in-stock" | "low" | "out" | "aging" | "drink-now";
@@ -50,6 +52,7 @@ const STYLES = ["Tinto", "Branco", "Rosé", "Espumante", "Sobremesa", "Fortifica
 
 export default function InventoryPage() {
     const { wines, isLoading } = useWineMetrics();
+    useResolveWineImages(wines);
     const deleteWine = useDeleteWine();
     const wineEvent = useWineEvent();
     const { toast } = useToast();
@@ -860,15 +863,13 @@ export default function InventoryPage() {
                                     className="group rounded-[24px] border border-white/18 bg-white/72 p-4 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]"
                                 >
                                     <div className="flex items-start gap-3.5">
-                                        <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-2xl border border-white/40 bg-[linear-gradient(145deg,rgba(95,111,82,0.18),rgba(255,255,255,0.86))] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
-                                            {wine.image_url ? (
-                                                <img src={wine.image_url} className="h-full w-full object-cover" />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(95,111,82,0.10)_55%,rgba(255,255,255,0.82)_100%)]">
-                                                    <Package className="h-5 w-5 text-primary/70" />
-                                                </div>
-                                            )}
-                                        </div>
+                                        <WineLabelPreview
+                                            wine={wine}
+                                            alt={wine.name}
+                                            compact
+                                            className="h-16 w-12 shrink-0"
+                                            imageClassName="h-full w-full object-cover"
+                                        />
 
                                         <div className="flex-1 min-w-0 space-y-1.5">
                                             <button
@@ -1072,9 +1073,13 @@ export default function InventoryPage() {
                                     }}>
                                         <td className="align-middle">
                                             <div className="flex items-center gap-2.5">
-                                                <div className="w-9 h-12 rounded-lg bg-muted/20 flex items-center justify-center shrink-0 border border-black/[0.04] overflow-hidden">
-                                                    {wine.image_url ? <img src={wine.image_url} className="w-full h-full object-cover" /> : <Package className="h-4 w-4 text-muted-foreground/40" />}
-                                                </div>
+                                                <WineLabelPreview
+                                                    wine={wine}
+                                                    alt={wine.name}
+                                                    compact
+                                                    className="w-9 h-12 shrink-0"
+                                                    imageClassName="w-full h-full object-cover"
+                                                />
                                                 <div className="min-w-0">
                                                     <p className="truncate text-[13px] font-extrabold leading-tight text-foreground">{wine.name}</p>
                                                     <p className="mt-0.5 truncate text-[11px] font-medium text-muted-foreground/75">{wine.producer || "Produtor não informado"}</p>
@@ -1222,13 +1227,13 @@ export default function InventoryPage() {
                                         }}
                                     >
                                         <div className="flex items-start gap-3">
-                                            <div className="w-11 h-14 rounded-xl bg-muted/30 flex items-center justify-center shrink-0 border border-black/5 overflow-hidden">
-                                                {wine.image_url ? (
-                                                    <img src={wine.image_url} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Package className="h-5 w-5 text-muted-foreground/50" />
-                                                )}
-                                            </div>
+                                            <WineLabelPreview
+                                                wine={wine}
+                                                alt={wine.name}
+                                                compact
+                                                className="w-11 h-14 shrink-0"
+                                                imageClassName="w-full h-full object-cover"
+                                            />
 
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-extrabold text-[14px] text-foreground leading-tight truncate">{wine.name}</p>

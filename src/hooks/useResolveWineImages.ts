@@ -21,18 +21,26 @@ export function useResolveWineImages(wines: Wine[] | undefined) {
       if (processed.current.has(w.id)) return false;
       const resolved = resolveWineCardImage(w);
       const renderable = isRenderableWineImageUrl(resolved);
-      if (import.meta.env.DEV) {
-        console.debug("[useResolveWineImages] candidate_check", {
-          wineId: w.id,
-          wineName: w.name,
-          image_url: w.image_url ?? null,
-          imageUrl: (w as any).imageUrl ?? null,
-          label_image_url: (w as any).label_image_url ?? null,
-          resolved_image_url: (w as any).resolved_image_url ?? null,
-          resolvedCandidate: resolved,
-          renderable,
-        });
-      }
+        if (import.meta.env.DEV) {
+          console.debug("[useResolveWineImages] candidate_check", {
+            wineId: w.id,
+            wineName: w.name,
+            image: (w as any).image ?? null,
+            image_url: w.image_url ?? null,
+            imageUrl: (w as any).imageUrl ?? null,
+            uploaded_image: (w as any).uploaded_image ?? null,
+            uploaded_image_url: (w as any).uploaded_image_url ?? null,
+            user_image_url: (w as any).user_image_url ?? null,
+            photo_url: (w as any).photo_url ?? null,
+            persisted_image_url: (w as any).persisted_image_url ?? null,
+            label_image_url: (w as any).label_image_url ?? null,
+            label_url: (w as any).label_url ?? null,
+            resolved_image_url: (w as any).resolved_image_url ?? null,
+            fallback_image: (w as any).fallback_image ?? null,
+            resolvedCandidate: resolved,
+            renderable,
+          });
+        }
       return !renderable;
     });
 
