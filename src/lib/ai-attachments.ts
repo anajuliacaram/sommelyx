@@ -29,10 +29,38 @@ export interface PreparedSmartPdfImportAttachment {
   ocrUsed: boolean;
 }
 
-const MAX_IMAGE_DIMENSION = 1120;
-const MAX_IMAGE_QUALITY = 0.74;
-const MAX_IMAGE_BASE64_LENGTH = 1_500_000;
+export type AttachmentPrepErrorCode =
+  | "INVALID_FILE_TYPE"
+  | "FILE_TOO_LARGE"
+  | "IMAGE_DECODE_FAILED"
+  | "IMAGE_PROCESSING_FAILED"
+  | "IMAGE_TOO_LARGE"
+  | "UNSUPPORTED_IMAGE_FORMAT"
+  | "PDF_PARSE_FAILED"
+  | "PDF_TOO_LARGE"
+  | "OCR_FAILED"
+  | "EMPTY_EXTRACTION";
+
+export class AttachmentPrepError extends Error {
+  code: AttachmentPrepErrorCode;
+  details?: Record<string, unknown>;
+
+  constructor(code: AttachmentPrepErrorCode, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "AttachmentPrepError";
+    this.code = code;
+    this.details = details;
+  }
+}
+
+const MAX_IMAGE_DIMENSION_DESKTOP = 1120;
+const MAX_IMAGE_DIMENSION_MOBILE = 960;
+const MAX_IMAGE_QUALITY_DESKTOP = 0.74;
+const MAX_IMAGE_QUALITY_MOBILE = 0.68;
+const MAX_IMAGE_BASE64_LENGTH_DESKTOP = 1_500_000;
+const MAX_IMAGE_BASE64_LENGTH_MOBILE = 1_050_000;
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+const MAX_PDF_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 const MAX_PDF_PAGES_FOR_TEXT = 10;
 const MAX_PDF_PAGES_FOR_RENDER = 2;
 const MIN_PDF_TEXT_LENGTH = 120;
@@ -50,13 +78,91 @@ async function getPdfJs() {
 }
 
 function inferMimeType(file: File) {
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".pdf")) return "application/pdf";
+  if (name.endsWith(".heic")) return file.type || "image/heic";
+  if (name.endsWith(".heif")) return file.type || "image/heif";
   if (file.type) return file.type;
-  if (file.name.toLowerCase().endsWith(".pdf")) return "application/pdf";
   return "image/jpeg";
 }
 
 function trace(stage: string, metadata?: Record<string, unknown>) {
   console.info(`[ai-attachments] ${stage}`, metadata || {});
+}
+
+function createAttachmentError(code: AttachmentPrepErrorCode, message: string, details?: Record<string, unknown>) {
+  return new AttachmentPrepError(code, message, details);
+}
+
+export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi possível preparar o arquivo."): string {
+  const code = (error as any)?.code as AttachmentPrepErrorCode | undefined;
+  switch (code) {
+    case "INVALID_FILE_TYPE":
+      return "Envie uma imagem ou PDF válido.";
+    case "FILE_TOO_LARGE":
+      return "O arquivo está muito grande para processar no celular. Tente uma imagem/PDF menor.";
+    case "IMAGE_DECODE_FAILED":
+      return "Não conseguimos ler essa imagem no celular. Tente outra foto ou use a câmera.";
+    case "IMAGE_PROCESSING_FAILED":
+      return "Não conseguimos processar essa imagem. Tente outra foto mais nítida.";
+    case "IMAGE_TOO_LARGE":
+      return "A imagem ficou pesada demais depois do preparo. Tente uma foto mais leve.";
+    case "UNSUPPORTED_IMAGE_FORMAT":
+      return "Esse formato de imagem não foi aceito no celular. Tente converter para JPG ou use a câmera.";
+    case "PDF_PARSE_FAILED":
+      return "Não conseguimos ler esse PDF no celular. Tente uma versão menor ou uma foto da carta.";
+    case "PDF_TOO_LARGE":
+      return "O PDF está muito grande para processar no celular. Tente um arquivo menor.";
+    case "OCR_FAILED":
+      return "Não conseguimos extrair o texto desse arquivo. Tente outra foto ou um PDF mais nítido.";
+    case "EMPTY_EXTRACTION":
+      return "Não conseguimos identificar vinhos válidos nesse arquivo.";
+    default:
+      return error instanceof Error && error.message ? error.message : fallback;
+  }
+}
+
+function isLikelyMobileDevice() {
+  if (typeof navigator === "undefined") return false;
+  return navigator.maxTouchPoints > 1 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function isImageBitmapSource(source: CanvasImageSource): source is ImageBitmap {
+  return typeof ImageBitmap !== "undefined" && source instanceof ImageBitmap;
+}
+
+function isProblematicMobileImageFormat(mimeType: string, fileName: string) {
+  const lower = `${mimeType} ${fileName.toLowerCase()}`;
+  return lower.includes("heic") || lower.includes("heif");
+}
+
+function blobToDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(createAttachmentError("IMAGE_PROCESSING_FAILED", "Não conseguimos converter a imagem."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(createAttachmentError("IMAGE_PROCESSING_FAILED", "Não conseguimos otimizar a imagem."));
+          return;
+        }
+        resolve(blob);
+      },
+      "image/jpeg",
+      quality,
+    );
+  });
+}
+
+function estimateBase64Length(blobSize: number) {
+  return Math.ceil((blobSize * 4) / 3);
 }
 
 function nowMs() {
@@ -91,30 +197,35 @@ function downscaleCanvas(canvas: HTMLCanvasElement, maxWidth: number, maxHeight:
   return resized;
 }
 
-function exportOptimizedJpeg(
+async function exportOptimizedJpeg(
   sourceCanvas: HTMLCanvasElement,
   {
-    maxWidth = MAX_IMAGE_DIMENSION,
-    maxHeight = MAX_IMAGE_DIMENSION,
-    baseQuality = MAX_IMAGE_QUALITY,
+    maxWidth = MAX_IMAGE_DIMENSION_DESKTOP,
+    maxHeight = MAX_IMAGE_DIMENSION_DESKTOP,
+    baseQuality = MAX_IMAGE_QUALITY_DESKTOP,
+    maxBase64Length = MAX_IMAGE_BASE64_LENGTH_DESKTOP,
   }: {
     maxWidth?: number;
     maxHeight?: number;
     baseQuality?: number;
+    maxBase64Length?: number;
   } = {},
 ) {
   const qualities = [baseQuality, 0.7, 0.6, 0.52];
   let workingCanvas = downscaleCanvas(sourceCanvas, maxWidth, maxHeight);
-  let fallbackPreviewUrl = workingCanvas.toDataURL("image/jpeg", 0.5);
+  let fallbackBlob: Blob | null = null;
+  let fallbackQuality = baseQuality;
 
   for (let pass = 0; pass < 4; pass++) {
     for (const quality of qualities) {
-      const previewUrl = workingCanvas.toDataURL("image/jpeg", quality);
-      const imageBase64 = dataUrlToBase64(previewUrl);
-      fallbackPreviewUrl = previewUrl;
-
-      if (imageBase64.length <= MAX_IMAGE_BASE64_LENGTH) {
-        return { previewUrl, imageBase64 };
+      const blob = await canvasToBlob(workingCanvas, quality);
+      fallbackBlob = blob;
+      fallbackQuality = quality;
+      const estimatedBase64Length = estimateBase64Length(blob.size);
+      if (estimatedBase64Length <= maxBase64Length) {
+        const previewUrl = await blobToDataUrl(blob);
+        const imageBase64 = dataUrlToBase64(previewUrl);
+        return { previewUrl, imageBase64, width: workingCanvas.width, height: workingCanvas.height, blobSize: blob.size, quality };
       }
     }
 
@@ -124,65 +235,228 @@ function exportOptimizedJpeg(
     workingCanvas = downscaleCanvas(workingCanvas, nextMaxWidth, nextMaxHeight);
   }
 
-  return {
-    previewUrl: fallbackPreviewUrl,
-    imageBase64: dataUrlToBase64(fallbackPreviewUrl),
-  };
+  if (fallbackBlob) {
+    const previewUrl = await blobToDataUrl(fallbackBlob);
+    const imageBase64 = dataUrlToBase64(previewUrl);
+    if (imageBase64.length <= maxBase64Length) {
+      return {
+        previewUrl,
+        imageBase64,
+        width: workingCanvas.width,
+        height: workingCanvas.height,
+        blobSize: fallbackBlob.size,
+        quality: fallbackQuality,
+      };
+    }
+  }
+
+  throw createAttachmentError("IMAGE_TOO_LARGE", "A imagem continua grande demais para envio seguro no celular.");
 }
 
 async function fileToDataUrl(file: File) {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("Não conseguimos ler esse arquivo."));
+    reader.onerror = () => reject(createAttachmentError("IMAGE_PROCESSING_FAILED", "Não conseguimos ler esse arquivo."));
     reader.readAsDataURL(file);
   });
+}
+
+async function fileToArrayBuffer(file: File) {
+  return await file.arrayBuffer();
+}
+
+async function fileToBase64(file: File) {
+  const bytes = new Uint8Array(await fileToArrayBuffer(file));
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+async function loadImageBitmap(file: File) {
+  if (typeof createImageBitmap !== "function") {
+    throw createAttachmentError("IMAGE_DECODE_FAILED", "Seu navegador não suporta a leitura otimizada dessa imagem.", {
+      path: "bitmap_unavailable",
+    });
+  }
+
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" as any });
+    trace("image_decode_success", {
+      fileName: file.name,
+      path: "bitmap",
+      width: bitmap.width,
+      height: bitmap.height,
+    });
+    return bitmap;
+  } catch (error) {
+    trace("image_decode_failed", {
+      fileName: file.name,
+      path: "bitmap",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+}
+
+async function loadHtmlImage(file: File, mode: "object-url" | "data-url") {
+  return await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    let sourceUrl = "";
+
+    const cleanup = () => {
+      if (sourceUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(sourceUrl);
+      }
+    };
+
+    img.onload = () => {
+      trace("image_decode_success", {
+        fileName: file.name,
+        path: mode,
+        width: img.naturalWidth || img.width,
+        height: img.naturalHeight || img.height,
+      });
+      cleanup();
+      resolve(img);
+    };
+    img.onerror = () => {
+      cleanup();
+      trace("image_decode_failed", {
+        fileName: file.name,
+        path: mode,
+      });
+      reject(createAttachmentError(
+        isProblematicMobileImageFormat(file.type || "", file.name) ? "UNSUPPORTED_IMAGE_FORMAT" : "IMAGE_DECODE_FAILED",
+        isProblematicMobileImageFormat(file.type || "", file.name)
+          ? "Esse formato de imagem não foi aceito no celular."
+          : "Não conseguimos ler essa imagem.",
+        { path: mode },
+      ));
+    };
+
+    if (mode === "object-url") {
+      sourceUrl = URL.createObjectURL(file);
+      img.src = sourceUrl;
+    } else {
+      fileToDataUrl(file)
+        .then((dataUrl) => {
+          sourceUrl = dataUrl;
+          img.src = dataUrl;
+        })
+        .catch((error) => {
+          cleanup();
+          reject(error);
+        });
+    }
+  });
+}
+
+async function decodeImageFile(file: File) {
+  const attempts: Array<{ path: string; run: () => Promise<HTMLImageElement | ImageBitmap> }> = [
+    { path: "bitmap", run: () => loadImageBitmap(file) },
+    { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
+    { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
+  ];
+
+  let lastError: unknown = null;
+  for (const attempt of attempts) {
+    try {
+      const source = await attempt.run();
+      return { source, path: attempt.path };
+    } catch (error) {
+      lastError = error;
+      if ((error as any)?.code === "UNSUPPORTED_IMAGE_FORMAT") {
+        break;
+      }
+    }
+  }
+
+  const code = isProblematicMobileImageFormat(file.type || "", file.name) ? "UNSUPPORTED_IMAGE_FORMAT" : "IMAGE_DECODE_FAILED";
+  throw createAttachmentError(
+    code,
+    code === "UNSUPPORTED_IMAGE_FORMAT"
+      ? "Esse formato de imagem não foi aceito no celular. Tente converter para JPG ou use a câmera."
+      : "Não conseguimos ler essa imagem no celular.",
+    {
+      fileName: file.name,
+      mimeType: inferMimeType(file),
+      lastError: lastError instanceof Error ? lastError.message : String(lastError ?? ""),
+    },
+  );
 }
 
 async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
   const startedAt = nowMs();
   trace("upload_received", { fileName: file.name, mimeType: file.type || "unknown", sizeBytes: file.size });
-  if (!file.type.startsWith("image/")) {
-    throw Object.assign(new Error("Tipo de arquivo inválido."), { code: "INVALID_FILE_TYPE" });
+  const mimeType = inferMimeType(file);
+  const mobile = isLikelyMobileDevice();
+  const maxDimension = mobile ? MAX_IMAGE_DIMENSION_MOBILE : MAX_IMAGE_DIMENSION_DESKTOP;
+  const baseQuality = mobile ? MAX_IMAGE_QUALITY_MOBILE : MAX_IMAGE_QUALITY_DESKTOP;
+  const maxBase64Length = mobile ? MAX_IMAGE_BASE64_LENGTH_MOBILE : MAX_IMAGE_BASE64_LENGTH_DESKTOP;
+
+  if (!mimeType.startsWith("image/")) {
+    throw createAttachmentError("INVALID_FILE_TYPE", "Tipo de arquivo inválido.", { mimeType });
   }
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    throw Object.assign(new Error("Arquivo muito grande."), { code: "FILE_TOO_LARGE" });
+    throw createAttachmentError("FILE_TOO_LARGE", "Arquivo muito grande.", { sizeBytes: file.size });
   }
-  const readStartedAt = nowMs();
-  const dataUrl = await fileToDataUrl(file);
+  if (isProblematicMobileImageFormat(mimeType, file.name)) {
+    trace("image_format_detected", { fileName: file.name, mimeType, note: "problematic_mobile_format" });
+  }
+  trace("image_prepare_started", { fileName: file.name, mimeType, sizeBytes: file.size, mobile });
+
+  const decodeStartedAt = nowMs();
+  const decoded = await decodeImageFile(file);
   trace("attachment_timing", {
-    stage: "image_read",
+    stage: "image_decode",
     fileName: file.name,
-    durationMs: Math.round(nowMs() - readStartedAt),
+    durationMs: Math.round(nowMs() - decodeStartedAt),
+    decodePath: decoded.path,
   });
 
   const preprocessStartedAt = nowMs();
-  const optimized = await new Promise<{ previewUrl: string; imageBase64: string }>((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
+  const sourceWidth = isImageBitmapSource(decoded.source) ? decoded.source.width : decoded.source.naturalWidth || decoded.source.width;
+  const sourceHeight = isImageBitmapSource(decoded.source) ? decoded.source.height : decoded.source.naturalHeight || decoded.source.height;
+  const canvas = document.createElement("canvas");
+  canvas.width = sourceWidth;
+  canvas.height = sourceHeight;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    if (isImageBitmapSource(decoded.source)) {
+      decoded.source.close();
+    }
+    throw createAttachmentError("IMAGE_PROCESSING_FAILED", "Não foi possível processar a imagem.", { fileName: file.name });
+  }
 
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        reject(Object.assign(new Error("Não foi possível processar a imagem."), { code: "OCR_FAILED" }));
-        return;
-      }
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(decoded.source as CanvasImageSource, 0, 0, canvas.width, canvas.height);
+  if (isImageBitmapSource(decoded.source)) {
+    decoded.source.close();
+  }
 
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(exportOptimizedJpeg(canvas));
-    };
-    img.onerror = () => reject(Object.assign(new Error("Não foi possível carregar a imagem."), { code: "OCR_FAILED" }));
-    img.src = dataUrl;
+  const optimized = await exportOptimizedJpeg(canvas, {
+    maxWidth: maxDimension,
+    maxHeight: maxDimension,
+    baseQuality,
+    maxBase64Length,
   });
 
   trace("image_preprocessed", {
     fileName: file.name,
     imageBase64Length: optimized.imageBase64.length,
+    estimatedPayloadBytes: Math.round((optimized.imageBase64.length * 3) / 4),
     previewLength: optimized.previewUrl.length,
+    sourceWidth,
+    sourceHeight,
+    resizedWidth: optimized.width,
+    resizedHeight: optimized.height,
+    blobSize: optimized.blobSize,
+    quality: optimized.quality,
     durationMs: Math.round(nowMs() - preprocessStartedAt),
   });
 
@@ -208,9 +482,10 @@ async function extractPdfText(file: File) {
     const pdfjs = await getPdfJs();
     const buffer = await file.arrayBuffer();
     const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
+    const maxPages = isLikelyMobileDevice() ? 6 : MAX_PDF_PAGES_FOR_TEXT;
 
     const pages: string[] = [];
-    for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
+    for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, maxPages); pageNumber++) {
       const page = await doc.getPage(pageNumber);
       const content = await page.getTextContent();
       const line = (content.items || [])
@@ -222,7 +497,7 @@ async function extractPdfText(file: File) {
     }
 
     const extracted = pages.join("\n").replace(/\s+/g, " ").trim().slice(0, MAX_EXTRACTED_TEXT_LENGTH);
-    trace("pdf_text_extracted", { fileName: file.name, textLength: extracted.length, pages: Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT), durationMs: Math.round(nowMs() - startedAt) });
+    trace("pdf_text_extracted", { fileName: file.name, textLength: extracted.length, pages: Math.min(doc.numPages, maxPages), durationMs: Math.round(nowMs() - startedAt) });
     return extracted;
   } catch (error) {
     const err: any = error instanceof Error ? error : new Error("PDF_PARSE_FAILED");
@@ -238,8 +513,9 @@ async function extractPdfTextBlocks(file: File) {
   const buffer = await file.arrayBuffer();
   const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
   const blocks: PdfTextBlock[] = [];
+  const maxPages = isLikelyMobileDevice() ? 6 : MAX_PDF_PAGES_FOR_TEXT;
 
-  for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_TEXT); pageNumber++) {
+  for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, maxPages); pageNumber++) {
     const page = await doc.getPage(pageNumber);
     const content = await page.getTextContent();
     const items = (content.items || [])
@@ -299,10 +575,11 @@ async function renderPdfAsImage(file: File) {
     const buffer = await file.arrayBuffer();
     const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
     const renderedPages: HTMLCanvasElement[] = [];
+    const maxPages = isLikelyMobileDevice() ? 1 : MAX_PDF_PAGES_FOR_RENDER;
 
-    for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, MAX_PDF_PAGES_FOR_RENDER); pageNumber++) {
+    for (let pageNumber = 1; pageNumber <= Math.min(doc.numPages, maxPages); pageNumber++) {
       const page = await doc.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: 1.05 });
+      const viewport = page.getViewport({ scale: isLikelyMobileDevice() ? 0.92 : 1.05 });
       const pageCanvas = document.createElement("canvas");
       pageCanvas.width = Math.round(viewport.width);
       pageCanvas.height = Math.round(viewport.height);
@@ -336,10 +613,11 @@ async function renderPdfAsImage(file: File) {
       y += pageCanvas.height + gap;
     }
 
-    const rendered = exportOptimizedJpeg(combined, {
-      maxWidth: 1200,
-      maxHeight: 1700,
-      baseQuality: 0.74,
+    const rendered = await exportOptimizedJpeg(combined, {
+      maxWidth: isLikelyMobileDevice() ? 1024 : 1200,
+      maxHeight: isLikelyMobileDevice() ? 1440 : 1700,
+      baseQuality: isLikelyMobileDevice() ? 0.66 : 0.74,
+      maxBase64Length: isLikelyMobileDevice() ? MAX_IMAGE_BASE64_LENGTH_MOBILE : MAX_IMAGE_BASE64_LENGTH_DESKTOP,
     });
     trace("attachment_timing", {
       stage: "pdf_render_to_image",
@@ -369,7 +647,8 @@ function normalizeOcrText(text: string) {
 
 async function extractPdfOcrText(file: File) {
   trace("ocr_started", { fileName: file.name, sizeBytes: file.size });
-  const pdfBase64 = dataUrlToBase64(await fileToDataUrl(file));
+  const pdfBase64 = await fileToBase64(file);
+  trace("ocr_payload_ready", { fileName: file.name, base64Length: pdfBase64.length });
   const { data, error } = await supabase.functions.invoke("parse-pdf-ocr", {
     body: {
       pdfBase64,
@@ -379,8 +658,10 @@ async function extractPdfOcrText(file: File) {
   });
 
   if (error) {
-    const err: any = new Error(error.message || "Não conseguimos aplicar OCR neste PDF.");
-    err.code = (error as any).code || (error as any).name || "OCR_FAILED";
+    const err: any = createAttachmentError(
+      ((error as any).code as AttachmentPrepErrorCode) || ((error as any).name as AttachmentPrepErrorCode) || "OCR_FAILED",
+      error.message || "Não conseguimos aplicar OCR neste PDF.",
+    );
     err.status = (error as any).status || (error as any).statusCode;
     err.requestId = (error as any).requestId || (error as any).request_id;
     throw err;
@@ -402,9 +683,15 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
   const pending = (async () => {
     const startedAt = nowMs();
     const mimeType = inferMimeType(file);
-    trace("file_validated", { fileName: file.name, mimeType, sizeBytes: file.size });
+    const mobile = isLikelyMobileDevice();
+    trace("file_validated", { fileName: file.name, mimeType, sizeBytes: file.size, mobile });
 
     if (mimeType === "application/pdf") {
+      if (file.size > MAX_PDF_FILE_SIZE_BYTES) {
+        throw createAttachmentError("PDF_TOO_LARGE", "PDF muito grande para processar com segurança.", {
+          sizeBytes: file.size,
+        });
+      }
       let extractedText = "";
       try {
         extractedText = await extractPdfText(file);
@@ -448,7 +735,13 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
         if (error?.code === "INVALID_PDF" || error?.code === "PDF_PARSE_FAILED") {
           throw error;
         }
-        throw Object.assign(new Error("Não foi possível processar o PDF."), { code: "PDF_PARSE_FAILED" });
+        throw createAttachmentError(
+          error?.code === "FILE_TOO_LARGE" ? "PDF_TOO_LARGE" : "PDF_PARSE_FAILED",
+          error?.code === "FILE_TOO_LARGE"
+            ? "PDF muito grande para processar com segurança."
+            : "Não foi possível processar o PDF.",
+          { fileName: file.name, reason: error?.message || String(error) },
+        );
       }
     }
 
@@ -475,6 +768,11 @@ export async function prepareSmartPdfImportAttachment(file: File): Promise<Prepa
   const mimeType = inferMimeType(file);
   if (mimeType !== "application/pdf") {
     throw new Error("O modo de importação inteligente é exclusivo para PDFs.");
+  }
+  if (file.size > MAX_PDF_FILE_SIZE_BYTES) {
+    throw createAttachmentError("PDF_TOO_LARGE", "PDF muito grande para importar com segurança.", {
+      sizeBytes: file.size,
+    });
   }
 
   const { blocks, extractedText } = await extractPdfTextBlocks(file).catch(async () => {

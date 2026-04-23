@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
+import { getAttachmentErrorMessage, prepareAiAnalysisAttachment } from "@/lib/ai-attachments";
 
 interface ScannedWineData {
   name: string | null;
@@ -110,6 +111,11 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setSupportCode(null);
 
     try {
+      console.info("[ScanWineLabelDialog] backend_called", {
+        function: "scan-wine-label",
+        payloadShape: { hasImageBase64: Boolean(base64) },
+        payloadSizeEstimateBytes: Math.round((base64.length * 3) / 4),
+      });
       const data = await invokeEdgeFunction<{ wine: ScannedWineData }>(
         "scan-wine-label",
         { imageBase64: base64 },
@@ -174,18 +180,33 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     }
     const previewUrl = URL.createObjectURL(file);
     previewUrlRef.current = previewUrl;
-    selectedFileRef.current = file;
     setImagePreview(previewUrl);
+    selectedFileRef.current = file;
     setStep("scanning");
 
     try {
-      const base64 = await compressImage(file);
-      setLastBase64(base64);
-      await runScan(base64);
+      const prepared = await prepareAiAnalysisAttachment(file);
+      console.info("[ScanWineLabelDialog] attachment_prepared", {
+        fileName: prepared.fileName,
+        mimeType: prepared.mimeType,
+        sourceType: prepared.sourceType,
+        imageBase64Length: prepared.imageBase64?.length || 0,
+        estimatedPayloadBytes: prepared.imageBase64 ? Math.round((prepared.imageBase64.length * 3) / 4) : 0,
+      });
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+      setImagePreview(prepared.previewUrl || previewUrl);
+      setLastBase64(prepared.imageBase64 || null);
+      if (!prepared.imageBase64) {
+        throw Object.assign(new Error("Não foi possível preparar a imagem."), { code: "IMAGE_PROCESSING_FAILED" });
+      }
+      await runScan(prepared.imageBase64);
     } catch (err: any) {
       console.error("Image error:", err);
       setSupportCode(null);
-      setErrorMsg("Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo.");
+      setErrorMsg(getAttachmentErrorMessage(err, "Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo."));
       setStep("error");
     }
   }, [compressImage, runScan, toast]);

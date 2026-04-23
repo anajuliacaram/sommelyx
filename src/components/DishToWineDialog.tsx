@@ -34,6 +34,7 @@ import {
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
+import { getAttachmentErrorMessage } from "@/lib/ai-attachments";
 
 // Compat helpers kept locally for result rendering
 const matchDot: Record<string, string> = matchDotColor;
@@ -392,6 +393,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       };
+      console.info("[DishToWineDialog] backend_called", {
+        step: "wine-list",
+        function: "analyze-wine-list",
+        payloadShape: {
+          hasImageBase64: Boolean(payload.imageBase64),
+          hasExtractedText: Boolean(payload.extractedText),
+          mimeType: payload.mimeType,
+          fileName: payload.fileName,
+        },
+        payloadSizeEstimateBytes: payload.imageBase64 ? Math.round((payload.imageBase64.length * 3) / 4) : payload.extractedText?.length || 0,
+      });
       setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
       setLastWineListAttachment(payload);
       lastRetryRef.current = async () => {
@@ -430,7 +442,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-      setError(err.message || "Erro ao analisar a carta");
+      setError(getAttachmentErrorMessage(err, err?.message || "Erro ao analisar a carta"));
       setStep("photo");
     } finally {
       if (isLatest(reqId)) setLoading(false);
@@ -457,6 +469,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       };
+      console.info("[DishToWineDialog] backend_called", {
+        step: "menu",
+        function: "analyze-wine-list",
+        payloadShape: {
+          hasImageBase64: Boolean(payload.imageBase64),
+          hasExtractedText: Boolean(payload.extractedText),
+          mimeType: payload.mimeType,
+          fileName: payload.fileName,
+        },
+        payloadSizeEstimateBytes: payload.imageBase64 ? Math.round((payload.imageBase64.length * 3) / 4) : payload.extractedText?.length || 0,
+      });
       setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
       setLastMenuAttachment(payload);
       lastRetryRef.current = async () => {
@@ -495,7 +518,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-      setError(err.message || "Erro ao analisar o cardápio");
+      setError(getAttachmentErrorMessage(err, err?.message || "Erro ao analisar o cardápio"));
       setStep("ext-menu-photo");
     } finally {
       if (isLatest(reqId)) setLoading(false);

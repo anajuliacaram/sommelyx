@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem } from "@/lib/sommelier-ai";
-import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
+import { getAttachmentErrorMessage, prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -296,6 +296,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           mimeType: payload.mimeType,
           fileName: payload.fileName,
         },
+        payloadSizeEstimateBytes: payload.imageBase64 ? Math.round((payload.imageBase64.length * 3) / 4) : payload.extractedText?.length || 0,
       });
 
       setAttachmentPreview({
@@ -311,7 +312,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         code: (error as any)?.code,
         requestId: (error as any)?.requestId,
       });
-      setErrorMsg(error instanceof Error ? error.message : "Não conseguimos ler esse anexo.");
+      setErrorMsg(getAttachmentErrorMessage(error, "Não conseguimos ler esse anexo."));
       setStep("error");
     }
   }, [runScan, toast]);
