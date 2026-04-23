@@ -68,7 +68,7 @@ export default function LegalLayout({ title, description, children }: LegalLayou
             <p>E-mail: {legalCompany.email}</p>
             <p>Foro: {legalCompany.forum}</p>
           </div>
-        </div>
+        </article>
       </div>
     </div>
   );
