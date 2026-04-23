@@ -94,11 +94,13 @@ export function Chip({
   onClick,
   children,
   tone,
+  className,
 }: {
   active?: boolean;
   onClick?: () => void;
   children: ReactNode;
   tone?: ChipTone;
+  className?: string;
 }) {
   const resolvedTone = tone ?? inferChipTone(children);
   const palette = CHIP_TONES[resolvedTone];
@@ -106,7 +108,10 @@ export function Chip({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.06em] transition-all"
+      className={cn(
+        "inline-flex h-[26px] items-center gap-1.5 rounded-full px-2.5 text-[10.5px] font-semibold uppercase tracking-[0.05em] transition-all",
+        className,
+      )}
       style={{
         background: active ? palette.bg : "rgba(255,255,255,0.76)",
         color: active ? palette.color : "rgba(26,23,21,0.72)",
@@ -213,12 +218,10 @@ export function DrinkWindow({
     const raw = ((y - min) / range) * 100;
     return `${Math.max(0, Math.min(100, raw))}%`;
   };
-  const pctClamped = (y: number) => {
-    const raw = ((y - min) / range) * 100;
-    return `${Math.max(4, Math.min(96, raw))}%`;
-  };
-  const inWindow = current >= safeFrom && current <= safeUntil;
+  const classification = classifyDrinkWindow({ current, from: safeFrom, until: safeUntil });
+  const inWindow = classification.status === "now";
   const clampedCurrent = Math.max(min, Math.min(max, current));
+  const indicatorPct = Math.max(4, Math.min(96, getDrinkWindowIndicatorPosition({ current: clampedCurrent, from: safeFrom, until: safeUntil })));
   const trackColor = estimated ? "rgba(180,140,58,0.85)" : "#5F7F52";
   const dotBorder = inWindow ? trackColor : "rgba(160,100,80,0.85)";
   const dotInner = inWindow ? trackColor : "rgba(160,100,80,0.9)";
@@ -245,7 +248,7 @@ export function DrinkWindow({
       <div
         className="absolute top-[6px] flex h-[14px] w-[14px] -translate-x-1/2 items-center justify-center rounded-full border-[2px]"
         style={{
-          left: pctClamped(clampedCurrent),
+          left: `${indicatorPct}%`,
           borderColor: dotBorder,
           background: "#fff",
           boxShadow: "0 1px 3px rgba(58,51,39,0.18)",
@@ -264,7 +267,7 @@ export function DrinkWindow({
         className="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8.5px] font-semibold uppercase tracking-[0.1em]"
         style={{ color: estimated ? "rgba(180,140,58,0.85)" : "rgba(95,111,82,0.75)" }}
       >
-        {estimated ? "Janela sugerida" : "Janela ideal"}
+        {classification.label}
       </div>
       <div className="absolute bottom-0 right-0 text-[9px] font-semibold tabular-nums text-[rgba(58,51,39,0.5)]">
         {max}
@@ -299,6 +302,47 @@ export function resolveSuggestedDrinkWindow(wine: {
   const from = wine.drink_from ?? base + openIn;
   const until = wine.drink_until ?? base + openIn + span;
   return { from, until: until > from ? until : from + span, estimated: true };
+}
+
+export function classifyDrinkWindow({
+  current = new Date().getFullYear(),
+  from,
+  until,
+}: {
+  current?: number;
+  from: number;
+  until: number;
+}): { status: "guard" | "soon" | "now" | "past"; label: string } {
+  const safeFrom = Number.isFinite(from) && from > 0 ? from : current;
+  const safeUntil = Number.isFinite(until) && until >= safeFrom ? until : safeFrom + 5;
+  const toleranceYearBeforeStart = current >= safeFrom - 1 && current < safeFrom;
+
+  if (current > safeUntil) {
+    return { status: "past", label: "Passado do auge" };
+  }
+  if (current >= safeFrom && current <= safeUntil) {
+    return { status: "now", label: "No auge" };
+  }
+  if (toleranceYearBeforeStart) {
+    return { status: "soon", label: "Beber em breve" };
+  }
+  return { status: "guard", label: "Em guarda" };
+}
+
+export function getDrinkWindowIndicatorPosition({
+  current = new Date().getFullYear(),
+  from,
+  until,
+}: {
+  current?: number;
+  from: number;
+  until: number;
+}): number {
+  const safeFrom = Number.isFinite(from) && from > 0 ? from : current;
+  const safeUntil = Number.isFinite(until) && until > safeFrom ? until : safeFrom + 1;
+  const span = Math.max(1, safeUntil - safeFrom);
+  const raw = ((current - safeFrom) / span) * 100;
+  return Math.max(-8, Math.min(108, raw));
 }
 
 /* ── Sparkbar ────────────────────────────────────────── */

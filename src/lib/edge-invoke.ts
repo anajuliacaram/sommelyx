@@ -118,8 +118,13 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
   if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID" || status === 401) return "Sua sessão expirou. Faça login novamente.";
   if (code === "AI_TIMEOUT" || status === 408) return "Tempo de resposta excedido. Tente novamente.";
   if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
-  if (code === "INVALID_IMAGE") return "Imagem inválida. Envie uma foto legível do rótulo.";
-  if (code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
+  if (code === "INVALID_IMAGE") return "Imagem inválida. Envie uma foto legível da carta.";
+  if (code === "INVALID_FILE_TYPE") return "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível.";
+  if (code === "INVALID_PDF") return "O PDF enviado não pôde ser lido. Tente outro arquivo.";
+  if (code === "FILE_TOO_LARGE" || code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
+  if (code === "PDF_PARSE_FAILED") return "Não foi possível ler o PDF. Tente uma versão mais nítida ou uma imagem da carta.";
+  if (code === "OCR_FAILED") return "Não foi possível aplicar OCR neste arquivo. Tente novamente com outra foto ou PDF.";
+  if (code === "EMPTY_EXTRACTION") return "Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível.";
   if (code === "AI_PARSE_ERROR" || code === "INVALID_AI_RESPONSE" || message.includes("INVALID_AI_RESPONSE") || message.includes("EMPTY_AI_RESPONSE")) {
     return "A resposta da IA veio em um formato inválido. Tente novamente em instantes.";
   }

@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import type { Wine } from "@/hooks/useWines";
+import { isRenderableWineImageUrl, resolveWineCardImage } from "@/lib/wine-images";
 
 /**
  * Em background, dispara `wine-image-resolver` para vinhos sem imagem real.
@@ -8,6 +10,7 @@ import type { Wine } from "@/hooks/useWines";
  * Limita a concorrência e processa apenas uma vez por sessão por vinho.
  */
 export function useResolveWineImages(wines: Wine[] | undefined) {
+  const queryClient = useQueryClient();
   const processed = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -16,10 +19,21 @@ export function useResolveWineImages(wines: Wine[] | undefined) {
     const candidates = wines.filter((w) => {
       if (!w?.id) return false;
       if (processed.current.has(w.id)) return false;
-      const url = w.image_url || "";
-      const noImage = !url;
-      const isSvgFallback = url.startsWith("data:image/svg+xml");
-      return noImage || isSvgFallback;
+      const resolved = resolveWineCardImage(w);
+      const renderable = isRenderableWineImageUrl(resolved);
+      if (import.meta.env.DEV) {
+        console.debug("[useResolveWineImages] candidate_check", {
+          wineId: w.id,
+          wineName: w.name,
+          image_url: w.image_url ?? null,
+          imageUrl: (w as any).imageUrl ?? null,
+          label_image_url: (w as any).label_image_url ?? null,
+          resolved_image_url: (w as any).resolved_image_url ?? null,
+          resolvedCandidate: resolved,
+          renderable,
+        });
+      }
+      return !renderable;
     });
 
     if (candidates.length === 0) return;
@@ -40,6 +54,14 @@ export function useResolveWineImages(wines: Wine[] | undefined) {
           { wineId: wine.id },
           { timeoutMs: 30_000, retries: 0 },
         );
+        if (import.meta.env.DEV) {
+          console.debug("[useResolveWineImages] resolver_success", {
+            wineId: wine.id,
+            wineName: wine.name,
+          });
+        }
+        void queryClient.invalidateQueries({ queryKey: ["wines"] });
+        void queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
       } catch (err) {
         console.warn("[useResolveWineImages] failed:", wine.id, err);
       }
@@ -52,5 +74,5 @@ export function useResolveWineImages(wines: Wine[] | undefined) {
     return () => {
       cancelled = true;
     };
-  }, [wines]);
+  }, [wines, queryClient]);
 }

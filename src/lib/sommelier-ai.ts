@@ -141,6 +141,55 @@ export interface WineListAnalysis {
   fallbackReason?: string | null;
 }
 
+type WineListTagKind = "primary" | "secondary";
+
+function normalizeWineListTag(label?: string | null): { label: string; kind: WineListTagKind } | null {
+  const value = (label || "").trim().toLowerCase();
+  if (!value) return null;
+
+  if (/melhor escolha|excelente escolha|combinação perfeita|alta compatibilidade|top[-\s]?pick/.test(value)) {
+    return { label: "Melhor escolha", kind: "primary" };
+  }
+  if (/melhor custo[-\s]?benef[ií]cio|custo[-\s]?benef[ií]cio|best value/.test(value)) {
+    return { label: "Melhor custo-benefício", kind: "primary" };
+  }
+  if (/mais encorpado|encorpado|corpo maior/.test(value)) return { label: "Mais encorpado", kind: "secondary" };
+  if (/mais leve|leve/.test(value)) return { label: "Mais leve", kind: "secondary" };
+  if (/mais complexo|complexo/.test(value)) return { label: "Mais complexo", kind: "secondary" };
+  if (/mais fácil de beber|facil de beber|fácil de beber/.test(value)) return { label: "Mais fácil de beber", kind: "secondary" };
+  if (/boa opção|funciona bem|harmonização elegante/.test(value)) return { label: "Boa opção", kind: "secondary" };
+  if (/escolha ousada|adventurous|adventure/.test(value)) return { label: "Escolha ousada", kind: "secondary" };
+  return { label: label.trim(), kind: "secondary" };
+}
+
+function normalizeWineListTags<T extends Pick<WineListItem, "comparativeLabels" | "compatibilityLabel">>(item: T): T {
+  const originalComparativeLabels = Array.isArray(item.comparativeLabels) ? item.comparativeLabels.filter((label): label is string => typeof label === "string" && label.trim().length > 0) : [];
+  const normalized = [
+    item.compatibilityLabel,
+    ...originalComparativeLabels,
+  ]
+    .map(normalizeWineListTag)
+    .filter((tag): tag is { label: string; kind: WineListTagKind } => Boolean(tag));
+
+  const seen = new Set<string>();
+  const unique = normalized.filter((tag) => {
+    const key = tag.label.toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const primary = unique.find((tag) => tag.kind === "primary")?.label ?? null;
+  const secondary = unique.find((tag) => tag.kind === "secondary" && tag.label !== primary)?.label ?? null;
+  const cleaned = [primary, secondary].filter((label): label is string => Boolean(label));
+
+  return {
+    ...item,
+    compatibilityLabel: primary ?? item.compatibilityLabel,
+    comparativeLabels: cleaned.length > 0 ? cleaned : originalComparativeLabels,
+  };
+}
+
 export interface MenuDishItem {
   name: string;
   price?: number | null;
@@ -182,6 +231,10 @@ export interface ClassifiedError {
   type: AiErrorType;
   message: string;
   usedFallback?: boolean;
+  code?: string;
+  status?: number;
+  requestId?: string;
+  retryable?: boolean;
 }
 
 function classifyError(err: unknown): ClassifiedError {
@@ -189,27 +242,29 @@ function classifyError(err: unknown): ClassifiedError {
   const lower = msg.toLowerCase();
   const code = err instanceof EdgeFunctionError ? err.code : undefined;
   const status = err instanceof EdgeFunctionError ? err.status : undefined;
+  const requestId = err instanceof EdgeFunctionError ? err.requestId : undefined;
+  const retryable = err instanceof EdgeFunctionError ? err.retryable : undefined;
 
   if (status === 401 || code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
-    return { type: "auth", message: "Sua sessão expirou. Faça login novamente." };
+    return { type: "auth", message: "Sua sessão expirou. Faça login novamente.", code: code ?? "AUTH_INVALID", status, requestId, retryable };
   }
   if (status === 408 || code === "AI_TIMEOUT" || lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
-    return { type: "timeout", message: "Tempo de resposta excedido. Tente novamente." };
+    return { type: "timeout", message: "Tempo de resposta excedido. Tente novamente.", code: code ?? "AI_TIMEOUT", status, requestId, retryable };
   }
   if (code === "INVALID_FILE_TYPE" || code === "FILE_INVALID" || lower.includes("tipo de arquivo inválido")) {
-    return { type: "invalid_file", message: "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível." };
+    return { type: "invalid_file", message: "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível.", code: code ?? "INVALID_FILE_TYPE", status, requestId, retryable };
   }
   if (code === "FILE_TOO_LARGE" || code === "IMAGE_TOO_LARGE" || lower.includes("arquivo muito grande") || lower.includes("imagem está muito grande")) {
-    return { type: "invalid_file", message: code === "IMAGE_TOO_LARGE" ? "A imagem está muito grande. Tente uma foto mais leve." : "Arquivo inválido. Envie uma imagem ou PDF legível." };
+    return { type: "invalid_file", message: code === "IMAGE_TOO_LARGE" ? "A imagem está muito grande. Tente uma foto mais leve." : "Arquivo inválido. Envie uma imagem ou PDF legível.", code: code ?? "FILE_TOO_LARGE", status, requestId, retryable };
   }
   if (code === "EMPTY_EXTRACTION") {
-    return { type: "empty", message: "Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível." };
+    return { type: "empty", message: "Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível.", code, status, requestId, retryable };
   }
   if (code === "OCR_FAILED" || code === "PDF_PARSE_FAILED") {
-    return { type: "ai_fail", message: "Não foi possível ler o PDF. Tente um arquivo mais nítido ou uma imagem da carta." };
+    return { type: "ai_fail", message: "Não foi possível ler o PDF. Tente um arquivo mais nítido ou uma imagem da carta.", code, status, requestId, retryable };
   }
   if (code === "AI_PARSE_ERROR" || code === "ANALYSIS_NOT_SPECIFIC") {
-    return { type: "ai_fail", message: "A resposta da IA veio em um formato inválido. Tente novamente em instantes." };
+    return { type: "ai_fail", message: "A resposta da IA veio em um formato inválido. Tente novamente em instantes.", code, status, requestId, retryable };
   }
   if (
     lower.includes("failed to fetch") ||
@@ -224,18 +279,36 @@ function classifyError(err: unknown): ClassifiedError {
       message: offline
         ? "Sem conexão. Verifique sua internet."
         : "O serviço está temporariamente indisponível. Tente novamente em instantes.",
+      code,
+      status,
+      requestId,
+      retryable,
     };
   }
   if (lower.includes("failed to send")) {
-    return { type: "ai_fail", message: "A solicitação não pôde ser enviada. Tente novamente." };
+    return { type: "ai_fail", message: "A solicitação não pôde ser enviada. Tente novamente.", code, status, requestId, retryable };
   }
   if (lower.includes("invalid_ai_response") || lower.includes("empty_ai_response")) {
-    return { type: "ai_fail", message: ANALYSIS_FALLBACK_MESSAGE };
+    return { type: "ai_fail", message: ANALYSIS_FALLBACK_MESSAGE, code, status, requestId, retryable };
   }
   if (lower.includes("créditos") || lower.includes("esgotados") || lower.includes("ai gateway error") || lower.includes("não conseguimos")) {
-    return { type: "ai_fail", message: ANALYSIS_FALLBACK_MESSAGE };
+    return { type: "ai_fail", message: ANALYSIS_FALLBACK_MESSAGE, code, status, requestId, retryable };
   }
-  return { type: "unknown", message: ANALYSIS_FALLBACK_MESSAGE };
+  return { type: "unknown", message: ANALYSIS_FALLBACK_MESSAGE, code, status, requestId, retryable };
+}
+
+function createClassifiedError(classified: ClassifiedError, fallbackCode = "AI_UNAVAILABLE") {
+  const error = new Error(classified.message) as Error & {
+    code?: string;
+    status?: number;
+    requestId?: string;
+    retryable?: boolean;
+  };
+  error.code = classified.code ?? fallbackCode;
+  error.status = classified.status;
+  error.requestId = classified.requestId;
+  error.retryable = classified.retryable;
+  return error;
 }
 
 const GENERIC_RESPONSE_PHRASES = [
@@ -877,25 +950,29 @@ export async function analyzeWineList(
       return data;
     }
     if (data && Array.isArray(data.wines) && data.wines.length > 0) {
-      return { ...data, wines: data.wines.map((wine) => normalizeWineData(wine, { log: false })) };
+      return { ...data, wines: data.wines.map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
     }
     const retryData = await request().catch(() => null);
     if (retryData && (retryData as any).fallback === true) {
       return retryData;
     }
     if (retryData && Array.isArray(retryData.wines) && retryData.wines.length > 0) {
-      return { ...retryData, wines: retryData.wines.map((wine) => normalizeWineData(wine, { log: false })) };
+      return { ...retryData, wines: retryData.wines.map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
     }
-    if (data && isValidLenientWineList(data)) return { ...data, wines: (data.wines || []).map((wine) => normalizeWineData(wine, { log: false })) };
-    if (retryData && isValidLenientWineList(retryData)) return { ...retryData, wines: (retryData.wines || []).map((wine) => normalizeWineData(wine, { log: false })) };
+    if (data && isValidLenientWineList(data)) {
+      return { ...data, wines: (data.wines || []).map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
+    }
+    if (retryData && isValidLenientWineList(retryData)) {
+      return { ...retryData, wines: (retryData.wines || []).map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
+    }
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
       throw err;
     }
     const classified = classifyError(err);
-    if (classified.type === "auth") throw new Error(classified.message);
-    throw new Error(classified.message);
+    if (classified.type === "auth") throw createClassifiedError(classified, "AUTH_INVALID");
+    throw createClassifiedError(classified);
   }
 }
 
@@ -941,8 +1018,8 @@ export async function analyzeMenuForWine(
       throw err;
     }
     const classified = classifyError(err);
-    if (classified.type === "auth") throw new Error(classified.message);
-    throw new Error(classified.message);
+    if (classified.type === "auth") throw createClassifiedError(classified, "AUTH_INVALID");
+    throw createClassifiedError(classified);
   }
 }
 

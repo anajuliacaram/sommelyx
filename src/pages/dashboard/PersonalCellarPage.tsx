@@ -18,11 +18,14 @@ import {
   STYLE_COLORS,
   StyleBadge,
   getStyleFamily,
+  classifyDrinkWindow,
+  getDrinkWindowIndicatorPosition,
   resolveSuggestedDrinkWindow,
 } from "@/components/editorial/EditorialPrimitives";
 import { useToast } from "@/hooks/use-toast";
 import { useWineEvent, useWines, type Wine } from "@/hooks/useWines";
 import { useResolveWineImages } from "@/hooks/useResolveWineImages";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
 
 const currentYear = new Date().getFullYear();
 
@@ -34,6 +37,7 @@ export default function PersonalCellarPage() {
 
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
+  const [drinkWindowFilter, setDrinkWindowFilter] = useState<"all" | "now" | "guard">("all");
   const [sort, setSort] = useState<
     "recent" | "value_low" | "value" | "vintage_old" | "vintage"
   >("recent");
@@ -55,10 +59,21 @@ export default function PersonalCellarPage() {
   const [editWine, setEditWine] = useState<Wine | null>(null);
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<Wine | null>(null);
+  const controlBase =
+    "inline-flex h-10 items-center rounded-[14px] border px-3 text-[12.5px] font-medium tracking-[-0.01em] transition-all outline-none";
+  const controlSurface = "bg-[rgba(255,255,255,0.78)] border-[rgba(95,111,82,0.12)] text-[#1a1713] shadow-[0_1px_0_rgba(95,111,82,0.04)]";
+  const controlMuted = "bg-[rgba(255,255,255,0.68)] border-[rgba(95,111,82,0.10)] text-[rgba(58,51,39,0.72)]";
+  const sectionLabel = "text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(58,51,39,0.48)]";
 
   const filtered = useMemo(() => {
     let list = wines.filter((w) => {
       if (styleFilter !== "todos" && getStyleFamily(w.style) !== styleFilter) return false;
+      if (drinkWindowFilter !== "all") {
+        const dw = resolveSuggestedDrinkWindow(w);
+        const status = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until }).status;
+        if (drinkWindowFilter === "now" && status !== "now") return false;
+        if (drinkWindowFilter === "guard" && (status === "now")) return false;
+      }
       if (!query) return true;
       const q = query.toLowerCase();
       return (
@@ -75,7 +90,7 @@ export default function PersonalCellarPage() {
     else if (sort === "vintage_old") list = list.slice().sort((a, b) => (a.vintage ?? 9999) - (b.vintage ?? 9999));
     else if (sort === "vintage") list = list.slice().sort((a, b) => (b.vintage ?? 0) - (a.vintage ?? 0));
     return list;
-  }, [wines, query, styleFilter, sort]);
+  }, [wines, query, styleFilter, drinkWindowFilter, sort]);
 
   const handleOpenBottle = (w: Wine) => {
     setPreSelectedWine(w);
@@ -85,88 +100,119 @@ export default function PersonalCellarPage() {
   return (
     <>
       <div className="editorial-page">
-        {/* Unified Header + Controls */}
-        <EditorialCard style={{ padding: "16px 18px" }}>
-          {/* Top row: title + counter + filter chips + add */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex flex-col">
-              <Kicker>Adega</Kicker>
-              <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight">
-                Minha Adega
-              </h1>
-            </div>
-            <div className="text-[12px]" style={{ color: "rgba(58,51,39,0.6)" }}>
-              <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
-            </div>
-            <div className="ml-auto flex flex-wrap items-center gap-1.5">
-              {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
-                <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)}>
-                  {s}
-                </Chip>
-              ))}
-              <button
-                type="button"
-                className="editorial-btn-primary ml-1"
-                onClick={() => setAddOpen(true)}
-              >
-                + Adicionar
-              </button>
-            </div>
-          </div>
+        <EditorialCard style={{ padding: "16px 18px 14px" }}>
+          <div className="flex flex-col gap-3.5">
+            <div className="grid gap-3 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)_auto] lg:items-start lg:gap-3.5">
+              <div className="flex min-w-0 flex-col">
+                  <Kicker>Adega</Kicker>
+                  <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight tracking-[-0.04em]">
+                    Minha Adega
+                  </h1>
+                  <div className="mt-1 text-[12px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
+                    <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
+                  </div>
+                </div>
 
-          {/* Bottom row: search + sort + view + labels */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <div className="editorial-search min-w-[200px] flex-1">
-              <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar por nome, produtor, região…"
-              />
-              {query && (
-                <button type="button" onClick={() => setQuery("")} aria-label="Limpar">
-                  <X className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
+              <div className="editorial-search min-w-0 h-10 rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[rgba(255,255,255,0.82)] px-3 shadow-[0_1px_0_rgba(95,111,82,0.04)]">
+                <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Buscar por nome, produtor, região…"
+                />
+                {query && (
+                  <button type="button" onClick={() => setQuery("")} aria-label="Limpar">
+                    <X className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-end gap-2 lg:justify-end">
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as typeof sort)}
+                  className={`${controlBase} ${controlSurface} pr-9 appearance-none`}
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
+                    backgroundPosition: "calc(100% - 16px) 17px, calc(100% - 11px) 17px",
+                    backgroundSize: "5px 5px, 5px 5px",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                >
+                  <option value="recent">Adicionados mais recentemente</option>
+                  <option value="value_low">Mais baratos</option>
+                  <option value="value">Mais caros</option>
+                  <option value="vintage_old">Safra mais antiga</option>
+                  <option value="vintage">Safra mais nova</option>
+                </select>
+                <div className="editorial-segmented">
+                  <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
+                    Grade
+                  </button>
+                  <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
+                    Lista
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleLabels}
+                  aria-pressed={showLabels}
+                  title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
+                  className={`flex h-10 w-10 items-center justify-center rounded-[14px] border transition-all ${controlMuted}`}
+                  style={{
+                    background: showLabels ? "rgba(95,111,82,0.12)" : "rgba(255,255,255,0.68)",
+                    borderColor: showLabels ? "rgba(95,111,82,0.18)" : "rgba(95,111,82,0.10)",
+                    color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
+                  }}
+                >
+                  {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
                 </button>
-              )}
+                <button
+                  type="button"
+                  className="editorial-btn-primary h-10 rounded-[14px] px-4 text-[12.5px] font-semibold tracking-[-0.01em]"
+                  onClick={() => setAddOpen(true)}
+                >
+                  + Adicionar
+                </button>
+              </div>
             </div>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as typeof sort)}
-              className="h-10 rounded-[14px] px-3 text-[12.5px] font-semibold outline-none"
-              style={{
-                background: "rgba(255,255,255,0.78)",
-                border: "1px solid rgba(95,111,82,0.12)",
-                color: "#1a1713",
-              }}
-            >
-              <option value="recent">Adicionados mais recentemente</option>
-              <option value="value_low">Mais baratos</option>
-              <option value="value">Mais caros</option>
-              <option value="vintage_old">Safra mais antiga</option>
-              <option value="vintage">Safra mais nova</option>
-            </select>
-            <div className="editorial-segmented">
-              <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
-                Grade
-              </button>
-              <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
-                Lista
-              </button>
+
+            <div className="flex flex-col gap-2 rounded-[16px] bg-[rgba(255,255,255,0.32)] px-2.5 py-2.5 shadow-[0_1px_0_rgba(95,111,82,0.04)] sm:px-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={sectionLabel}>Tipo</span>
+                {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                  <Chip
+                    key={s}
+                    active={styleFilter === s}
+                    onClick={() => setStyleFilter(s)}
+                    className="normal-case tracking-[-0.01em]"
+                  >
+                    {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
+                  </Chip>
+                ))}
+              </div>
+
+              <div className="h-px bg-[rgba(95,111,82,0.06)]" />
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={sectionLabel}>Janela</span>
+                {[
+                  { key: "all", label: "Todos" },
+                  { key: "now", label: "Beber agora" },
+                  { key: "guard", label: "Em guarda" },
+                ].map((option) => (
+                  <Chip
+                    key={option.key}
+                    active={drinkWindowFilter === option.key}
+                    onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+                    className="normal-case tracking-[-0.01em]"
+                  >
+                    {option.label}
+                  </Chip>
+                ))}
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={toggleLabels}
-              aria-pressed={showLabels}
-              title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-all"
-              style={{
-                background: showLabels ? "rgba(95,111,82,0.14)" : "rgba(255,255,255,0.78)",
-                border: `1px solid ${showLabels ? "rgba(95,111,82,0.22)" : "rgba(95,111,82,0.12)"}`,
-                color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
-              }}
-            >
-              {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
-            </button>
           </div>
         </EditorialCard>
 
@@ -205,56 +251,21 @@ export default function PersonalCellarPage() {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
               const dw = resolveSuggestedDrinkWindow(w);
-              const inWindow = currentYear >= dw.from && currentYear <= dw.until;
-              const past = currentYear > dw.until;
+              const classification = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until });
+              const inWindow = classification.status === "now";
+              const past = classification.status === "past";
               return (
                 <EditorialCard key={w.id} style={{ padding: 18, cursor: "pointer" }}>
                   <div onClick={() => setEditWine(w)}>
                     {showLabels && (
-                      w.image_url ? (
-                        <div
-                          className="mb-3 flex h-[160px] items-center justify-center overflow-hidden rounded-[16px] transition-all duration-200"
-                          style={{ background: "rgba(95,111,82,0.06)" }}
-                        >
-                          <img
-                            src={w.image_url}
-                            alt={w.name}
-                            loading="lazy"
-                            className="h-full w-auto object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className="mb-3 relative flex h-[160px] items-center justify-center overflow-hidden rounded-[16px] transition-all duration-200"
-                          style={{
-                            background: `linear-gradient(160deg, ${color} 0%, ${color}dd 60%, ${color}88 100%)`,
-                          }}
-                        >
-                          <div
-                            className="rounded-[14px] px-5 py-3 text-center backdrop-blur-md"
-                            style={{
-                              background: "rgba(255,255,255,0.22)",
-                              border: "1px solid rgba(255,255,255,0.30)",
-                            }}
-                          >
-                            <div
-                              className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-full"
-                              style={{ background: "rgba(255,255,255,0.85)" }}
-                            >
-                              <WineIcon className="h-4 w-4" style={{ color }} />
-                            </div>
-                            <p
-                              className="text-[10px] font-bold uppercase"
-                              style={{ letterSpacing: "0.14em", color: "rgba(255,255,255,0.95)" }}
-                            >
-                              Rótulo indisponível
-                            </p>
-                            <p className="mt-0.5 text-[10px]" style={{ color: "rgba(255,255,255,0.78)" }}>
-                              Prévia ilustrativa
-                            </p>
-                          </div>
-                        </div>
-                      )
+                      <WineLabelPreview
+                        wine={w}
+                        alt={w.name}
+                        className="mb-3 h-[160px]"
+                        imageClassName="h-[160px] w-full object-contain"
+                        generated={false}
+                        compact
+                      />
                     )}
                     <div className="mb-3 flex items-start justify-between">
                       <div
@@ -313,30 +324,27 @@ export default function PersonalCellarPage() {
                           : ""}
                       </div>
                     </div>
-                    {inWindow ? (
-                      <button
-                        type="button"
-                        className="editorial-btn-open"
-                        style={{ height: 30, padding: "0 12px", fontSize: 11 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenBottle(w);
-                        }}
-                        disabled={wineEvent.isPending}
-                      >
-                        Abrir
-                      </button>
-                    ) : (
-                      <span
-                        className="rounded-full px-2 py-1 text-[9.5px] font-bold uppercase tracking-[0.1em]"
-                        style={{
-                          background: past ? "rgba(201,107,85,0.12)" : "rgba(107,130,152,0.12)",
-                          color: past ? "#B55A43" : "#566C82",
-                        }}
-                      >
-                        {past ? "Beber em breve" : "Em guarda"}
-                      </span>
-                    )}
+                    <span
+                      className="rounded-full px-2 py-1 text-[9.5px] font-bold uppercase tracking-[0.1em]"
+                      style={{
+                        background: past ? "rgba(201,107,85,0.12)" : "rgba(107,130,152,0.12)",
+                        color: past ? "#B55A43" : "#566C82",
+                      }}
+                    >
+                      {classification.label}
+                    </span>
+                    <button
+                      type="button"
+                      className="editorial-btn-open"
+                      style={{ height: 30, padding: "0 12px", fontSize: 11 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenBottle(w);
+                      }}
+                      disabled={wineEvent.isPending}
+                    >
+                      Abrir
+                    </button>
                   </div>
                 </EditorialCard>
               );
@@ -348,21 +356,18 @@ export default function PersonalCellarPage() {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
               const dwRow = resolveSuggestedDrinkWindow(w);
-              const inWindow = currentYear >= dwRow.from && currentYear <= dwRow.until;
+              const classification = classifyDrinkWindow({ current: currentYear, from: dwRow.from, until: dwRow.until });
               return (
                 <div key={w.id} className="editorial-row" onClick={() => setEditWine(w)}>
-                  {showLabels && w.image_url ? (
-                    <div
+                  {showLabels ? (
+                    <WineLabelPreview
+                      wine={w}
+                      alt={w.name}
                       className="editorial-bottle-icon overflow-hidden"
-                      style={{ background: "rgba(95,111,82,0.06)", padding: 0 }}
-                    >
-                      <img
-                        src={w.image_url}
-                        alt={w.name}
-                        loading="lazy"
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
+                      imageClassName="h-full w-full object-contain"
+                      generated={false}
+                      compact
+                    />
                   ) : (
                     <div
                       className="editorial-bottle-icon"
@@ -400,7 +405,7 @@ export default function PersonalCellarPage() {
                         style={{ color: "rgba(58,51,39,0.5)" }}
                       >
                         {w.quantity} un. · janela {dwRow.from}–{dwRow.until}
-                        {dwRow.estimated ? " (sugerida)" : ""}
+                        {dwRow.estimated ? " (sugerida)" : ""} · {classification.label}
                       </span>
                     </div>
                   </div>
@@ -422,19 +427,17 @@ export default function PersonalCellarPage() {
                       </span>
                     )}
                   </div>
-                  {inWindow && (
-                    <button
-                      type="button"
-                      className="editorial-btn-open shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenBottle(w);
-                      }}
-                      disabled={wineEvent.isPending}
-                    >
-                      Abrir
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="editorial-btn-open shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenBottle(w);
+                    }}
+                    disabled={wineEvent.isPending}
+                  >
+                    Abrir
+                  </button>
                 </div>
               );
             })}

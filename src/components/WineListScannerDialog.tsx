@@ -1,11 +1,10 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, Grape, MapPin, FileText, Wine as WineIcon, ChevronDown, ChevronUp, Zap, Feather, Dumbbell, Brain, Smile, Heart } from "@/icons/lucide";
+import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, ChevronDown, ChevronUp, Zap, Feather, Dumbbell, Brain, Smile, Heart } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem, type WineListPairing } from "@/lib/sommelier-ai";
+import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem } from "@/lib/sommelier-ai";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +14,6 @@ import {
   PairingSheetHero,
   PairingLoadingState,
   PairingErrorState,
-  PremiumResultCard,
   SectionHeader,
 } from "@/components/pairing/shared";
 
@@ -133,15 +131,6 @@ const wineTypeConfig: Record<WineType, {
   },
 };
 
-const compatLabelConfig: Record<string, { color: string; bg: string; border: string }> = {
-  "Excelente escolha": { color: "#047857", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.18)" },
-  "Alta compatibilidade": { color: "#0e7a5a", bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.13)" },
-  "Boa opção": { color: "#b45309", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.15)" },
-  "Funciona bem": { color: "#777", bg: "rgba(0,0,0,0.04)", border: "rgba(0,0,0,0.08)" },
-  "Escolha ousada": { color: "#9333ea", bg: "rgba(147,51,234,0.08)", border: "rgba(147,51,234,0.15)" },
-  "Pouco indicado": { color: "#dc2626", bg: "rgba(220,38,38,0.08)", border: "rgba(220,38,38,0.15)" },
-};
-
 function StarRating({ rating, wineType = "unknown" }: { rating: number; wineType?: WineType }) {
   const full = Math.floor(rating);
   const hasHalf = rating - full >= 0.3;
@@ -223,18 +212,57 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     try {
       const cellarWines = wines?.filter((w) => w.quantity > 0) || [];
       const profile = cellarWines.length >= 3 ? buildUserProfile(cellarWines) : undefined;
+      console.info("[WineListScannerDialog] extraction_started", {
+        hasImageBase64: Boolean(attachment.imageBase64),
+        hasExtractedText: Boolean(attachment.extractedText),
+        mimeType: attachment.mimeType,
+        fileName: attachment.fileName,
+        extractedTextLength: attachment.extractedText?.length || 0,
+        imageBase64Length: attachment.imageBase64?.length || 0,
+      });
       const data = await analyzeWineList(attachment, profile);
-      if (!data.wines?.length) throw new Error("Nenhum vinho identificado na imagem");
+      console.info("[WineListScannerDialog] extraction_completed", {
+        winesExtracted: data.wines?.length || 0,
+        topPick: data.topPick,
+        bestValue: data.bestValue,
+      });
+      if (!data.wines?.length) {
+        const emptyErr: any = new Error("Não conseguimos identificar vinhos válidos nesse arquivo.");
+        emptyErr.code = "EMPTY_EXTRACTION";
+        throw emptyErr;
+      }
       setResults(data);
+      console.info("[WineListScannerDialog] normalized_wines_ready", {
+        normalizedWineCount: data.wines.length,
+        firstWine: data.wines[0]?.name,
+      });
       setStep("results");
     } catch (err: any) {
-      setErrorMsg(err.message || "Não foi possível analisar a carta");
+      console.error("[WineListScannerDialog] fatal_error", {
+        error: err?.message,
+        code: err?.code,
+        requestId: err?.requestId,
+      });
+      if (err?.requestId) {
+        console.log("[WineListScannerDialog] requestId", err.requestId);
+      }
+      if (err?.code === "EMPTY_EXTRACTION") {
+        setErrorMsg("Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível.");
+      } else {
+        setErrorMsg(err.message || "Não foi possível analisar a carta");
+      }
       setStep("error");
     }
   }, [wines]);
 
   const handleFile = useCallback(async (file: File) => {
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    console.info("[WineListScannerDialog] upload_received", {
+      fileName: file.name,
+      mimeType: file.type,
+      sizeBytes: file.size,
+      detectedType: isPdf ? "pdf" : file.type.startsWith("image/") ? "image" : "unsupported",
+    });
     if (!file.type.startsWith("image/") && !isPdf) {
       toast({ title: "Envie uma imagem ou PDF válido", variant: "destructive" });
       return;
@@ -243,12 +271,29 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     setStep("scanning");
     try {
       const prepared = await prepareAiAnalysisAttachment(file);
+      console.info("[WineListScannerDialog] attachment_prepared", {
+        sourceType: prepared.sourceType,
+        fileName: prepared.fileName,
+        mimeType: prepared.mimeType,
+        extractedTextLength: prepared.extractedText?.length || 0,
+        imageBase64Length: prepared.imageBase64?.length || 0,
+        hasPreview: Boolean(prepared.previewUrl),
+      });
       const payload: AiAnalysisAttachmentPayload = {
         imageBase64: prepared.imageBase64,
         extractedText: prepared.extractedText,
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       };
+      console.info("[WineListScannerDialog] backend_called", {
+        function: "analyze-wine-list",
+        payloadShape: {
+          hasImageBase64: Boolean(payload.imageBase64),
+          hasExtractedText: Boolean(payload.extractedText),
+          mimeType: payload.mimeType,
+          fileName: payload.fileName,
+        },
+      });
 
       setAttachmentPreview({
         url: prepared.previewUrl,
@@ -258,6 +303,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       setLastAttachment(payload);
       await runScan(payload);
     } catch (error) {
+      console.error("[WineListScannerDialog] fatal_error", {
+        error: error instanceof Error ? error.message : String(error),
+        code: (error as any)?.code,
+        requestId: (error as any)?.requestId,
+      });
       setErrorMsg(error instanceof Error ? error.message : "Não conseguimos ler esse anexo.");
       setStep("error");
     }
@@ -507,7 +557,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </div>
               )}
 
-              <div className="rounded-2xl border border-border/40 bg-background/55 p-3 space-y-3">
+              <div className="rounded-2xl border border-border/30 bg-background/50 p-3.5 space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Refinar a leitura
@@ -518,16 +568,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     </span>
                   )}
                 </div>
-                <div className="grid gap-2 md:grid-cols-[minmax(0,1.5fr)_auto_auto]">
-                  <Input
-                    value={mealQuery}
-                    onChange={(e) => setMealQuery(e.target.value)}
-                    placeholder="O que você vai comer?"
-                    className="rounded-xl"
-                  />
+                <Input
+                  value={mealQuery}
+                  onChange={(e) => setMealQuery(e.target.value)}
+                  placeholder="O que você vai comer?"
+                  className="rounded-xl"
+                />
+                <div className="space-y-2">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Corpo</p>
                   <div className="flex flex-wrap gap-1.5">
                     {[
-                      { key: "all", label: "Qualquer corpo" },
+                      { key: "all", label: "Todos" },
                       { key: "leve", label: "Leve" },
                       { key: "encorpado", label: "Encorpado" },
                     ].map((option) => (
@@ -536,20 +587,23 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         onClick={() => setBodyPreference(option.key as BodyPreference)}
                         className="h-9 rounded-full px-3 text-[10px] font-semibold transition-all"
                         style={{
-                          background: bodyPreference === option.key ? "rgba(110,30,42,0.10)" : "rgba(0,0,0,0.04)",
+                          background: bodyPreference === option.key ? "rgba(110,30,42,0.10)" : "rgba(0,0,0,0.035)",
                           color: bodyPreference === option.key ? "#5a1528" : "#777",
-                          border: `1px solid ${bodyPreference === option.key ? "rgba(110,30,42,0.18)" : "rgba(0,0,0,0.06)"}`,
+                          border: `1px solid ${bodyPreference === option.key ? "rgba(110,30,42,0.14)" : "rgba(0,0,0,0.05)"}`,
                         }}
                       >
                         {option.label}
                       </button>
                     ))}
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Preço</p>
                   <div className="flex flex-wrap gap-1.5">
                     {[
-                      { key: "all", label: "Todos os preços" },
+                      { key: "all", label: "Todos" },
                       { key: "up-to-250", label: "Até R$250" },
-                      { key: "250-500", label: "R$250-500" },
+                      { key: "250-500", label: "R$250–500" },
                       { key: "500-plus", label: "R$500+" },
                     ].map((option) => (
                       <button
@@ -557,9 +611,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         onClick={() => setPriceRange(option.key as PriceRange)}
                         className="h-9 rounded-full px-3 text-[10px] font-semibold transition-all"
                         style={{
-                          background: priceRange === option.key ? "rgba(198,167,104,0.14)" : "rgba(0,0,0,0.04)",
+                          background: priceRange === option.key ? "rgba(198,167,104,0.14)" : "rgba(0,0,0,0.035)",
                           color: priceRange === option.key ? "#7B6528" : "#777",
-                          border: `1px solid ${priceRange === option.key ? "rgba(198,167,104,0.24)" : "rgba(0,0,0,0.06)"}`,
+                          border: `1px solid ${priceRange === option.key ? "rgba(198,167,104,0.18)" : "rgba(0,0,0,0.05)"}`,
                         }}
                       >
                         {option.label}
@@ -625,7 +679,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
   const HighlightIcon = wine.highlight ? highlightIcon[wine.highlight] || Sparkles : null;
   const wineType = detectWineType(wine.style);
   const config = wineTypeConfig[wineType];
-  const compatStyle = compatLabelConfig[wine.compatibilityLabel] || compatLabelConfig["Boa opção"];
+  const compatStyle = wine.compatibilityLabel ? { color: "#047857", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.18)" } : null;
 
   return (
     <motion.li
@@ -646,8 +700,6 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
           : "0 6px 24px -6px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
     >
-      <div className="h-[2px] w-full" style={{ background: config.accentLine }} />
-
       <div className="p-4 sm:p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-1.5">
@@ -677,9 +729,11 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                 </span>
               )}
             </div>
-            <h4 className="line-clamp-2 text-[15px] font-bold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
-              {wine.name}
-            </h4>
+            <div className="flex items-start justify-between gap-3">
+              <h4 className="line-clamp-2 text-[15px] font-bold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
+                {wine.name}
+              </h4>
+            </div>
 
             <div className="flex items-center gap-1.5 flex-wrap">
               {wine.highlight && HighlightIcon && (
@@ -712,9 +766,9 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                 <span
                   className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold"
                   style={{
-                    background: compatStyle.bg,
-                    color: compatStyle.color,
-                    border: `1px solid ${compatStyle.border}`,
+                    background: compatStyle?.bg ?? "rgba(0,0,0,0.04)",
+                    color: compatStyle?.color ?? "#666",
+                    border: `1px solid ${compatStyle?.border ?? "rgba(0,0,0,0.06)"}`,
                   }}
                 >
                   {wine.compatibilityLabel}
@@ -743,14 +797,13 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
           {wine.vintage && <span className="text-[11px] font-medium">· {wine.vintage}</span>}
           {wine.grape && (
             <span className="text-[11px] font-medium flex items-center gap-0.5">
-              · <Grape className="h-2.5 w-2.5" /> {wine.grape}
+              · {wine.grape}
             </span>
           )}
         </div>
 
         {wine.region && (
           <div className="flex items-center gap-1" style={{ color: "#777" }}>
-            <MapPin className="h-3 w-3" />
             <span className="text-[11px] font-medium">{wine.region}</span>
           </div>
         )}
@@ -767,7 +820,6 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                   border: `1px solid ${config.badgeBorder}`,
                 }}
               >
-                <WineIcon className="h-2.5 w-2.5" />
                 {config.label}
               </span>
             )}
@@ -775,9 +827,9 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
           <span
             className="h-6 whitespace-nowrap rounded-full px-2.5 text-[10px] font-bold"
             style={{
-              background: compatStyle.bg,
-              color: compatStyle.color,
-              border: `1px solid ${compatStyle.border}`,
+              background: "rgba(16,185,129,0.08)",
+              color: "#047857",
+              border: "1px solid rgba(16,185,129,0.18)",
             }}
           >
             {wine.compatibilityLabel}
@@ -825,7 +877,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <Button
             type="button"
             variant="primary"
@@ -853,10 +905,10 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
         </div>
 
         {wine.pairings && wine.pairings.length > 0 && (
-          <div className="pt-2.5 mt-1" style={{ borderTop: `1px solid ${config.accentLine}` }}>
+          <div className="mt-2 rounded-2xl border border-[rgba(0,0,0,0.04)] bg-black/[0.015] p-3">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex w-full items-center gap-1.5 group mb-2"
+              className="flex w-full items-center gap-1.5 group"
             >
               <UtensilsCrossed className="h-3 w-3" style={{ color: config.badgeText }} />
               <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "#888" }}>
@@ -873,7 +925,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-1.5 overflow-hidden"
+                  className="mt-2 space-y-1.5 overflow-hidden"
                 >
                   {wine.pairings.map((p, i) => (
                     <div
@@ -898,7 +950,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
               )}
             </AnimatePresence>
             {!expanded && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="mt-2 flex flex-wrap gap-1.5">
                 {wine.pairings.slice(0, 3).map((p, i) => (
                   <span
                     key={i}

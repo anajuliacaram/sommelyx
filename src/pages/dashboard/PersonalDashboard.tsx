@@ -699,6 +699,7 @@ export default function PersonalDashboard() {
           if (!v) setPairingInitialWineId(null);
         }}
         initialWineId={pairingInitialWineId}
+        initialWine={insightWine}
       />
       <WineListScannerDialog open={wineListScanOpen} onOpenChange={setWineListScanOpen} />
       <AddConsumptionDialog

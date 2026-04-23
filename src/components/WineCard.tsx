@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { Wine as WineIcon } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getStyleColor, styleColor } from "@/lib/sommelyx-data";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
 import type { Wine as WineType } from "@/hooks/useWines";
 
 type WineCardData = WineType & {
@@ -81,8 +81,6 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
     dot: getStyleColor(wine.style) || styleColor.tinto,
     text: getStyleColor(wine.style) || styleColor.tinto,
   };
-  const coverImageUrl = wine.image_url ?? wine.entries?.find((entry) => entry.image_url)?.image_url ?? null;
-  const coverIsGenerated = !!coverImageUrl?.startsWith("data:image/svg+xml");
   const drinkWindow = resolveDrinkWindow(wine);
   const indicator = getDrinkWindowIndicator(drinkWindow.from, drinkWindow.until);
   const priceLabel = formatMoney(wine.displayPurchasePrice);
@@ -97,7 +95,7 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-    >
+      >
       {showLabel ? (
         <div
           className="relative h-[200px] overflow-hidden bg-[rgba(247,243,236,0.85)]"
@@ -105,32 +103,14 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
             background: `linear-gradient(to bottom, ${getStyleColor(wine.style) || styleColor.tinto}26, transparent), rgba(247,243,236,0.85)`,
           }}
         >
-          {coverImageUrl ? (
-            <img
-              src={coverImageUrl}
-              alt={wine.name}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className={cn("flex h-full items-center justify-center", getWineTone(wine.style))}>
-              <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/65 px-4 py-3 text-center shadow-[0_10px_24px_-20px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-[#7B1E2B]">
-                  <WineIcon className="h-4 w-4" />
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#6F6A60]">Rótulo indisponível</p>
-                  <p className="text-[10px] font-medium text-[#8A8276]">Prévia ilustrativa</p>
-                </div>
-              </div>
-            </div>
-          )}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#F4F1EC] via-[#F4F1EC]/75 to-transparent" />
-          {coverIsGenerated ? (
-            <div className="absolute right-3 top-3 rounded-full border border-black/5 bg-white/72 px-2 py-1 text-[9px] font-medium text-[#6F6A60] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-              Imagem ilustrativa
-            </div>
-          ) : null}
+          <WineLabelPreview
+            wine={wine}
+            alt={wine.name}
+            className="h-full"
+            imageClassName="h-full w-full object-cover"
+            generated={false}
+            compact
+          />
         </div>
       ) : null}
 

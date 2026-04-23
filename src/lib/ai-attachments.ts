@@ -344,7 +344,9 @@ async function extractPdfOcrText(file: File) {
 
   if (error) {
     const err: any = new Error(error.message || "Não conseguimos aplicar OCR neste PDF.");
-    err.code = error.code || "OCR_FAILED";
+    err.code = (error as any).code || (error as any).name || "OCR_FAILED";
+    err.status = (error as any).status || (error as any).statusCode;
+    err.requestId = (error as any).requestId || (error as any).request_id;
     throw err;
   }
 

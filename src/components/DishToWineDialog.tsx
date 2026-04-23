@@ -10,7 +10,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
 import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
-import { useWines } from "@/hooks/useWines";
+import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -66,6 +66,7 @@ interface DishToWineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialWineId?: string | null;
+  initialWine?: Wine | null;
 }
 
 type Source = null | "cellar" | "external";
@@ -95,7 +96,7 @@ const popularDishes = [
   "Cordeiro assado",
 ];
 
-export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWineDialogProps) {
+export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWine }: DishToWineDialogProps) {
   const { data: wines } = useWines();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -127,6 +128,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const [intent, setIntent] = useState<PairingIntent>("everyday");
   const [consumeWine, setConsumeWine] = useState<{ id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null>(null);
+  const [deepLinkLoading, setDeepLinkLoading] = useState(false);
+  const [deepLinkError, setDeepLinkError] = useState<string | null>(null);
   const lastRetryRef = useRef<(() => void) | null>(null);
   const requestSeqRef = useRef(0);
   const nextRequestId = useCallback(() => {
@@ -164,6 +167,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     setWineSortState("az");
     setWineStyleFilter("all");
     setIntent("everyday");
+    setDeepLinkLoading(false);
+    setDeepLinkError(null);
   };
 
   const handleClose = (v: boolean) => {
@@ -260,51 +265,94 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
     }
   }, [selectedWineId, wines, nextRequestId]);
 
+  const resolveWineFromInsight = useCallback((wineId?: string | null, wineFallback?: Wine | null) => {
+    const byId = wineId ? wines?.find((w) => w.id === wineId) ?? null : null;
+    if (byId) return byId;
+    if (wineFallback?.id) {
+      const fallbackById = wines?.find((w) => w.id === wineFallback.id) ?? null;
+      if (fallbackById) return fallbackById;
+    }
+    if (wineFallback?.name) {
+      const normalizedFallback = normalizeWineSearchText(wineFallback.name);
+      const byName = wines?.find((w) => normalizeWineSearchText(w.name) === normalizedFallback) ?? null;
+      if (byName) return byName;
+      return wineFallback;
+    }
+    return null;
+  }, [wines]);
+
   // Deep-link: ao abrir com initialWineId, ir direto para resultados de harmonização
   useEffect(() => {
-    if (!open || !initialWineId || !wines?.length) return;
-    const wine = wines.find((w) => w.id === initialWineId);
-    if (!wine) return;
-    // Define o contexto e vai DIRETO para a tela de resultados (com loading interno)
+    if (!open || (!initialWineId && !initialWine)) return;
+
+    const resolvedWine = resolveWineFromInsight(initialWineId, initialWine);
+    if (!resolvedWine) {
+      setSource("cellar");
+      setSubMode("by-wine");
+      setSelectedWineId(initialWineId || initialWine?.id || "");
+      setPairings(null);
+      setWineProfile(null);
+      setPairingLogic(null);
+      setError("Não foi possível carregar este vinho da adega.");
+      setDeepLinkError("Não foi possível carregar este vinho da adega.");
+      setDeepLinkLoading(false);
+      setStep("wine-results");
+      return;
+    }
+
     setSource("cellar");
     setSubMode("by-wine");
-    setSelectedWineId(initialWineId);
+    setSelectedWineId(resolvedWine.id);
     setPairings(null);
     setWineProfile(null);
     setPairingLogic(null);
     setError(null);
+    setDeepLinkError(null);
+    setDeepLinkLoading(true);
     setStep("wine-results");
+
     const runDeepLink = async () => {
       lastRetryRef.current = () => { runDeepLink(); };
       const reqId = nextRequestId();
       setLoading(true);
+      console.info("[DishToWineDialog] deep_link_payload", {
+        id: reqId,
+        wineId: resolvedWine.id,
+        wineName: resolvedWine.name,
+        source: "insight",
+      });
       try {
         const result = await getWinePairings({
-          name: wine.name,
-          style: wine.style,
-          grape: wine.grape,
-          region: wine.region,
-          producer: wine.producer,
-          vintage: wine.vintage,
-          country: wine.country,
+          name: resolvedWine.name,
+          style: resolvedWine.style,
+          grape: resolvedWine.grape,
+          region: resolvedWine.region,
+          producer: resolvedWine.producer,
+          vintage: resolvedWine.vintage,
+          country: resolvedWine.country,
         });
         if (!isLatest(reqId)) return;
-        console.info("[DishToWineDialog] request:success", { id: reqId, kind: "deep-link" });
+        console.info("[DishToWineDialog] request:success", { id: reqId, kind: "deep-link", pairings: result.pairings?.length || 0 });
         setError(null);
+        setDeepLinkError(null);
         setPairings(result.pairings);
         setWineProfile(result.wineProfile || null);
         setPairingLogic(result.pairingLogic || null);
       } catch (err: any) {
         if (!isLatest(reqId)) return;
         console.error("[DishToWineDialog] deep-link pairings failed:", err);
+        setDeepLinkError(err?.message || "Não foi possível buscar sugestões");
         setError(err?.message || "Não foi possível buscar sugestões");
       } finally {
-        if (isLatest(reqId)) setLoading(false);
+        if (isLatest(reqId)) {
+          setLoading(false);
+          setDeepLinkLoading(false);
+        }
       }
     };
     runDeepLink();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialWineId, wines]);
+  }, [open, initialWineId, initialWine, resolveWineFromInsight]);
 
   const handleSearchExternal = useCallback(async (dishName?: string) => {
     const query = dishName || dish.trim();
@@ -1527,6 +1575,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
               />
             )}
 
+            {step === "wine-results" && deepLinkLoading && !pairings && (
+              <PairingLoadingState
+                steps={[
+                  "Carregando o vinho selecionado…",
+                  "Consultando harmonizações…",
+                  "Buscando detalhes e receitas…",
+                ]}
+                subtitle={selectedWine?.name || initialWine?.name || "Vinho selecionado"}
+              />
+            )}
+
             {step === "wine-results" && pairings && (
               <motion.div
                 key="wine-results"
@@ -1542,6 +1601,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId }: DishToWi
                     profile={wineProfile}
                     pairingLogic={pairingLogic}
                   />
+                )}
+                {!selectedWine && deepLinkError && (
+                  <div className="glass-card p-4 rounded-2xl border border-destructive/15 bg-destructive/5 text-sm text-destructive">
+                    Não foi possível carregar os dados completos deste vinho.
+                  </div>
                 )}
 
                 <SectionHeader icon="chef" label="Pratos sugeridos" />

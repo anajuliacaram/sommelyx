@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/drawer";
 import { useWines, useDeleteWine, useWineEvent, type Wine as WineType } from "@/hooks/useWines";
 import { useResolveWineImages } from "@/hooks/useResolveWineImages";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
+import { resolveWineCardImage } from "@/lib/wine-images";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -544,8 +546,6 @@ function EditorialWineCard({
   onOpen: (wine: CellarWineGroup) => void;
 }) {
   const palette = getWineTypePaletteFor(wine.style);
-  const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
-  const coverIsGenerated = !!coverImageUrl?.startsWith("data:image/svg+xml");
   const indicator = getDrinkWindowIndicator(wine);
   const priceLabel = formatMoney(wine.displayPurchasePrice);
   const ratingLabel = typeof wine.rating === "number" ? wine.rating.toFixed(1) : "—";
@@ -558,11 +558,12 @@ function EditorialWineCard({
       transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
     >
       {showLabels ? (
-        <EditorialLabelPreview
-          src={coverImageUrl}
+        <WineLabelPreview
+          wine={wine}
           alt={wine.name}
-          generated={coverIsGenerated}
-          styleTone={getWineTone(wine.style)}
+          className="h-[180px]"
+          imageClassName="h-[180px] w-full object-cover"
+          generated={false}
         />
       ) : null}
 
@@ -1181,7 +1182,7 @@ export default function CellarPage() {
             <tbody>
               {filtered.map((wine) => {
                 const status = drinkStatus(wine);
-                const coverImageUrl = wine.image_url ?? wine.entries.find((entry) => entry.image_url)?.image_url ?? null;
+                const coverImageUrl = resolveWineCardImage(wine);
                 return (
                   <tr
                     key={wine.id}
@@ -1222,11 +1223,9 @@ export default function CellarPage() {
                         <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
                           <UtensilsCrossed className="h-2.75 w-2.75" />
                         </Button>
-                        {status === "now" && (
-                          <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
-                            <GlassWater className="h-2.75 w-2.75" />
-                          </Button>
-                        )}
+                        <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Abrir garrafa" onClick={() => handleOpen(wine)}>
+                          <GlassWater className="h-2.75 w-2.75" />
+                        </Button>
                         <Button size="sm" variant="ghost" className="h-5.5 w-5.5 p-0 text-[#7a6f78]/80 hover:text-[#2f2730] hover:bg-black/[0.05] active:scale-[0.98] transition-[transform,background-color,color,opacity] duration-200 ease-out cursor-pointer" title="Editar" onClick={() => setEditWine(wine)}>
                           <Pencil className="h-2.75 w-2.75" />
                         </Button>
