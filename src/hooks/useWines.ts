@@ -30,6 +30,84 @@ export interface Wine {
 
 export type WineInsert = Omit<Wine, "id" | "created_at" | "updated_at">;
 
+const WINE_LABEL_BUCKET = "wine-label-images";
+
+function extractWineLabelStoragePath(imageUrl?: string | null) {
+  const url = typeof imageUrl === "string" ? imageUrl.trim() : "";
+  if (!url) return null;
+
+  const patterns = [
+    /\/storage\/v1\/object\/sign\/wine-label-images\/([^?]+)/i,
+    /\/storage\/v1\/object\/public\/wine-label-images\/([^?]+)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match?.[1]) {
+      try {
+        return decodeURIComponent(match[1]);
+      } catch {
+        return match[1];
+      }
+    }
+  }
+
+  return null;
+}
+
+async function normalizeWineImageUrl(imageUrl?: string | null) {
+  const url = typeof imageUrl === "string" ? imageUrl.trim() : "";
+  if (!url) return null;
+
+  if (!/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  const storagePath = extractWineLabelStoragePath(url);
+  if (!storagePath) {
+    return url;
+  }
+
+  try {
+    const { data, error } = await supabase.storage.from(WINE_LABEL_BUCKET).createSignedUrl(storagePath, 60 * 60 * 24 * 365 * 10);
+    if (!error && data?.signedUrl) {
+      if (import.meta.env.DEV) {
+        console.debug("[useWines] image_url_refreshed", {
+          storagePath,
+          original: url,
+          refreshed: data.signedUrl,
+        });
+      }
+      return data.signedUrl;
+    }
+    if (import.meta.env.DEV) {
+      console.debug("[useWines] image_url_refresh_failed", {
+        storagePath,
+        original: url,
+        error: error?.message ?? null,
+      });
+    }
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.debug("[useWines] image_url_refresh_threw", {
+        storagePath,
+        original: url,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  return url;
+}
+
+async function normalizeFetchedWine(wine: Wine) {
+  const refreshedImageUrl = await normalizeWineImageUrl(wine.image_url);
+  return normalizeWineData({
+    ...wine,
+    image_url: refreshedImageUrl,
+  });
+}
+
 function sanitizeWineInsertPayload(wine: Omit<WineInsert, "user_id">, userId: string) {
   return {
     user_id: userId,
@@ -93,11 +171,12 @@ export function useWines() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
         if (error) throw error;
-        return (data as Wine[]).map((wine) => normalizeWineData(wine));
+        const normalized = await Promise.all((data as Wine[]).map((wine) => normalizeFetchedWine(wine)));
+        return normalized;
       }
       if (sommelyxData?.wines?.length) {
         const now = new Date().toISOString();
-        return sommelyxData.wines.map((wine) => normalizeWineData({
+        return Promise.all(sommelyxData.wines.map(async (wine) => normalizeWineData({
           id: wine.id,
           user_id: "demo",
           name: wine.name,
@@ -116,10 +195,10 @@ export function useWines() {
           cellar_location: wine.location,
           food_pairing: wine.pairing ?? null,
           tasting_notes: null,
-          image_url: wine.image_url ?? null,
+          image_url: await normalizeWineImageUrl(wine.image_url ?? null),
           created_at: now,
           updated_at: now,
-        })) as Wine[];
+        }))) as Promise<Wine[]>;
       }
       throw new Error("Not authenticated");
     },
