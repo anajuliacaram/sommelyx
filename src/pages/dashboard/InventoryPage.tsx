@@ -565,13 +565,13 @@ export default function InventoryPage() {
                             </Button>
                         </div>
                         <MagneticButton>
-                            <Button
-                                variant="primary"
-                                className="h-11 rounded-[16px] px-5 text-[12px] font-bold uppercase tracking-[0.12em] shadow-[0_18px_34px_-24px_hsl(var(--primary)/0.35)]"
-                                onClick={() => setAddWineOpen(true)}
-                            >
-                                <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar produto
-                            </Button>
+                        <Button
+                            variant="primary"
+                            className="h-11 rounded-[16px] px-5 text-[12px] font-bold uppercase tracking-[0.12em] shadow-[0_18px_34px_-24px_hsl(var(--primary)/0.35)]"
+                            onClick={() => setAddWineOpen(true)}
+                        >
+                            <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar vinho
+                        </Button>
                         </MagneticButton>
                     </div>
                 </div>
@@ -916,15 +916,15 @@ export default function InventoryPage() {
                                                     ) : null}
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-[13px] font-black tracking-[-0.02em] text-foreground">
-                                                        Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
-                                                    </p>
-                                                    <p className="text-[10px] font-medium text-muted-foreground/72">
-                                                        {purchaseCost != null
-                                                            ? `Custo R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                                                            : "Custo não informado"}
-                                                    </p>
-                                                </div>
+                                                <p className="text-[14px] font-black tracking-[-0.02em] text-foreground">
+                                                    Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                                                </p>
+                                                <p className="text-[12px] font-semibold text-foreground/78">
+                                                    {purchaseCost != null
+                                                        ? `Custo: R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                                        : "Custo não informado"}
+                                                </p>
+                                            </div>
                                             </div>
 
                                             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
@@ -969,7 +969,7 @@ export default function InventoryPage() {
                                                         setEditWineOpen(true);
                                                     }}
                                                 >
-                                                    <Pencil className="mr-2 h-4 w-4" /> Editar produto
+                                                    <Pencil className="mr-2 h-4 w-4" /> Editar vinho
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     variant="neutral"
@@ -996,7 +996,7 @@ export default function InventoryPage() {
                                                 <DropdownMenuItem
                                                     variant="danger"
                                                     onClick={async () => {
-                                                        if (!confirm("Deseja excluir este produto?")) return;
+                                                        if (!confirm("Deseja excluir este vinho?")) return;
                                                         await deleteWine.mutateAsync(wine.id);
                                                         toast({ title: "Produto removido." });
                                                     }}
@@ -1110,9 +1110,9 @@ export default function InventoryPage() {
                                             </div>
                                         </td>
                                         <td className="align-middle text-right">
-                                            <p className="text-[13px] font-bold tabular-nums text-foreground">R$ {salePrice.toLocaleString("pt-BR")}</p>
-                                            <p className="mt-0.5 text-[10px] font-medium text-muted-foreground/70">
-                                                {purchaseCost != null ? `Custo R$ ${purchaseCost.toLocaleString("pt-BR")}` : "Custo não informado"}
+                                            <p className="text-[14px] font-black tabular-nums text-foreground">R$ {salePrice.toLocaleString("pt-BR")}</p>
+                                            <p className="mt-0.5 text-[12px] font-semibold text-foreground/76">
+                                                {purchaseCost != null ? `Custo: R$ ${purchaseCost.toLocaleString("pt-BR")}` : "Custo não informado"}
                                             </p>
                                         </td>
                                         <td className="align-middle text-right">
@@ -1123,9 +1123,7 @@ export default function InventoryPage() {
                                                 )}>
                                                     {marginPct >= 0 ? "+" : ""}{marginPct.toFixed(0)}%
                                                 </p>
-                                            ) : (
-                                                <p className="text-[11px] font-medium text-muted-foreground/55">Margem n/d</p>
-                                            )}
+                                            ) : null}
                                             <p className="mt-0.5 text-[11px] font-semibold tabular-nums text-foreground/78">
                                                 Total R$ {(salePrice * wine.quantity).toLocaleString("pt-BR")}
                                             </p>
@@ -1254,15 +1252,15 @@ export default function InventoryPage() {
                                                 ) : null}
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[13px] font-black text-foreground">
-                                                    Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
-                                                </p>
-                                                <p className="text-[10px] font-medium text-muted-foreground">
-                                                    {purchaseCost != null
-                                                        ? `Custo R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                                                        : "Custo não informado"}
-                                                </p>
-                                            </div>
+                                                    <p className="text-[14px] font-black text-foreground">
+                                                        Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                                                    </p>
+                                                    <p className="text-[12px] font-semibold text-foreground/76">
+                                                        {purchaseCost != null
+                                                            ? `Custo: R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                                            : "Custo não informado"}
+                                                    </p>
+                                                </div>
                                         </div>
 
                                         <div className="mt-2 flex items-center justify-between gap-2">
@@ -1352,7 +1350,7 @@ export default function InventoryPage() {
                                                         onClick={async (e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            if (!confirm("Deseja excluir este produto?")) return;
+                                                        if (!confirm("Deseja excluir este vinho?")) return;
                                                             await deleteWine.mutateAsync(wine.id);
                                                             toast({ title: "Produto removido." });
                                                         }}

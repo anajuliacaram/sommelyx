@@ -115,6 +115,16 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
   const [success, setSuccess] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [createLocOpen, setCreateLocOpen] = useState(false);
+  const commercialCost = lastPaid ? Number(lastPaid) : null;
+  const commercialSale = currentValue ? Number(currentValue) : null;
+  const commercialMargin =
+    commercialCost != null && commercialSale != null && Number.isFinite(commercialCost) && Number.isFinite(commercialSale)
+      ? commercialSale - commercialCost
+      : null;
+  const commercialMarginPct =
+    commercialMargin != null && commercialCost != null && commercialCost > 0
+      ? (commercialMargin / commercialCost) * 100
+      : null;
 
   const updateWine = useUpdateWine();
   const wineEvent = useWineEvent();
@@ -283,7 +293,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-card border-border/50">
         <SheetHeader>
-          <SheetTitle className="font-serif text-lg">{isCommercial ? "Editar produto" : "Editar vinho"}</SheetTitle>
+          <SheetTitle className="font-serif text-lg">{isCommercial ? "Editar vinho" : "Editar vinho"}</SheetTitle>
         </SheetHeader>
 
         <StockAuditDialog
@@ -453,7 +463,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 <Label className="text-xs text-muted-foreground">Produtor</Label>
                 <Input value={producer} onChange={e => setProducer(e.target.value)} />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className={isCommercial ? "grid grid-cols-2 gap-3" : "grid grid-cols-3 gap-3"}>
                 <div>
                   <Label className="text-xs text-muted-foreground">Quantidade</Label>
                   <Input
@@ -472,10 +482,12 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                   <Label className="text-xs text-muted-foreground">Safra</Label>
                   <Input type="number" value={vintage} onChange={e => setVintage(e.target.value)} />
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Nota</Label>
-                  <Input type="number" step="0.1" min="0" max="100" value={rating} onChange={e => setRating(e.target.value)} />
-                </div>
+                {!isCommercial && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Nota</Label>
+                    <Input type="number" step="0.1" min="0" max="100" value={rating} onChange={e => setRating(e.target.value)} />
+                  </div>
+                )}
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Estilo</Label>
@@ -500,12 +512,41 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 <Label className="text-xs text-muted-foreground">Uva</Label>
                 <Input value={grape} onChange={e => setGrape(e.target.value)} />
               </div>
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    {isCommercial ? "Último valor pago (R$)" : "Último valor pago (opcional)"}
-                  </Label>
-                  {!isCommercial && (
+              {isCommercial ? (
+                <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Precificação comercial</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Atualize custo e venda com leitura clara para operação.
+                      </p>
+                    </div>
+                    {commercialMarginPct != null ? (
+                      <div className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${commercialMargin != null && commercialMargin >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                        Margem {commercialMargin != null && commercialMargin >= 0 ? "+" : ""}{commercialMarginPct.toFixed(0)}%
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Preço de custo (R$)</Label>
+                      <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Preço de venda (R$)</Label>
+                      <div className="relative">
+                        <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0,00" />
+                        {currentValue ? null : (
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/60">Estimado pela Sommelyx</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Último valor pago (opcional)</Label>
                     <label className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground cursor-pointer select-none">
                       <input
                         type="checkbox"
@@ -521,38 +562,38 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                       />
                       <span>Não fui eu que comprei / não sei o valor</span>
                     </label>
-                  )}
-                  {lastPaidSnapshot && !purchasePriceUnknown && (
-                    <p className="mt-1 mb-2 text-[11px] text-muted-foreground rounded-lg bg-muted/40 px-3 py-2">
-                      Último registro:{" "}
-                      <span className="font-semibold text-foreground">
-                        R$ {Number(lastPaidSnapshot).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      </span>
-                      {lastPaidDateSnapshot && (
-                        <span className="text-muted-foreground"> em {new Date(lastPaidDateSnapshot + "T00:00:00").toLocaleDateString("pt-BR")}</span>
-                      )}
-                    </p>
-                  )}
-                  {!purchasePriceUnknown && (
-                    <>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
-                        <Input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} />
-                      </div>
-                      <p className="mt-1 text-[10px] text-muted-foreground/80">
-                        {isCommercial ? "Atualize o valor e a data da última compra." : "Se não souber o valor, marque a opção acima e seguimos com a estimativa de mercado."}
+                    {lastPaidSnapshot && !purchasePriceUnknown && (
+                      <p className="mt-1 mb-2 text-[11px] text-muted-foreground rounded-lg bg-muted/40 px-3 py-2">
+                        Último registro:{" "}
+                        <span className="font-semibold text-foreground">
+                          R$ {Number(lastPaidSnapshot).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </span>
+                        {lastPaidDateSnapshot && (
+                          <span className="text-muted-foreground"> em {new Date(lastPaidDateSnapshot + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                        )}
                       </p>
-                    </>
-                  )}
+                    )}
+                    {!purchasePriceUnknown && (
+                      <>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" />
+                          <Input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} />
+                        </div>
+                        <p className="mt-1 text-[10px] text-muted-foreground/80">
+                          Se não souber o valor, marque a opção acima e seguimos com a estimativa de mercado.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Valor médio estimado (R$)</Label>
+                    <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
+                    <p className="mt-1 text-[10px] text-muted-foreground/80">
+                      Estimativa automática de mercado, editável a qualquer momento.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">{isCommercial ? "Valor atual (R$)" : "Valor médio estimado (R$)"}</Label>
-                  <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => setCurrentValue(e.target.value)} placeholder="0.00" />
-                  <p className="mt-1 text-[10px] text-muted-foreground/80">
-                    {isCommercial ? "Referência de valor de mercado atual." : "Estimativa automática de mercado, editável a qualquer momento."}
-                  </p>
-                </div>
-              </div>
+              )}
               <div>
                 <LocationFields
                   value={location}
@@ -606,24 +647,28 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                   </div>
                 ) : null}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Beber de</Label>
-                  <Input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} />
+              {!isCommercial && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Beber de</Label>
+                    <Input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Beber até</Label>
+                    <Input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} />
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Beber até</Label>
-                  <Input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} />
-                </div>
-              </div>
+              )}
               <div>
                 <Label className="text-xs text-muted-foreground">Harmonização</Label>
                 <Input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} />
               </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Notas de degustação</Label>
-                <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
-              </div>
+              {!isCommercial && (
+                <div>
+                  <Label className="text-xs text-muted-foreground">Notas de degustação</Label>
+                  <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
+                </div>
+              )}
               <Button variant="primary" type="submit" disabled={!name.trim()} loading={updateWine.isPending} loadingText="Salvando…" className="w-full h-11 text-[13px] font-medium">
                 <Save className="h-4 w-4 mr-1.5" />
                 {updateWine.isPending ? "Salvando..." : "Salvar Alterações"}
