@@ -66,11 +66,10 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 const AnimatedRoutes = () => {
   const location = useLocation();
   const topKey = location.pathname.startsWith("/dashboard") ? "/dashboard" : location.pathname;
+  const isLegalPage = ["/termos-de-uso", "/politica-de-privacidade", "/assinatura-e-cobranca"].includes(location.pathname);
 
-  return (
-    <AnimatePresence mode="wait">
-      <PageTransition key={topKey}>
-        <Routes location={location}>
+  const routes = (
+    <Routes location={location}>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<PublicAuthRoute><Login /></PublicAuthRoute>} />
           <Route path="/signup" element={<PublicAuthRoute><Signup /></PublicAuthRoute>} />
@@ -107,6 +106,16 @@ const AnimatedRoutes = () => {
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+  );
+
+  if (isLegalPage) {
+    return routes;
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      <PageTransition key={topKey}>
+        {routes}
       </PageTransition>
     </AnimatePresence>
   );
