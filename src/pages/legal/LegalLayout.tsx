@@ -1,9 +1,9 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, ChevronLeft, FileText } from "lucide-react";
+import { ChevronLeft, FileText } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { legalCompany } from "@/content/legal";
-import { cn } from "@/lib/utils";
 
 interface LegalLayoutProps {
   title: string;
@@ -15,7 +15,6 @@ interface LegalLayoutProps {
 
 export default function LegalLayout({ title, description, toc, tags = [], children }: LegalLayoutProps) {
   const [activeSection, setActiveSection] = useState("");
-  const [mobileTocOpen, setMobileTocOpen] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("legal-page");
@@ -51,7 +50,23 @@ export default function LegalLayout({ title, description, toc, tags = [], childr
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         <header className="legal-hero rounded-[32px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
           <div className="relative z-10">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-3 rounded-[24px] border border-white/65 bg-white/65 px-4 py-3 shadow-[0_14px_36px_-28px_rgba(20,18,16,0.22)] transition-transform duration-200 hover:-translate-y-[1px] hover:bg-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/15"
+              >
+                <Logo
+                  variant="compact"
+                  className="h-10 w-auto shrink-0 drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]"
+                />
+                <span className="flex min-w-0 flex-col leading-none">
+                  <BrandName className="text-[20px] sm:text-[22px]" />
+                  <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#5F5F5F]">
+                    Documentos oficiais
+                  </span>
+                </span>
+              </Link>
+
               <Link
                 to="/"
                 className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/70 px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#5F5F5F] transition-colors hover:text-[#1C1C1C]"
@@ -59,7 +74,6 @@ export default function LegalLayout({ title, description, toc, tags = [], childr
                 <ChevronLeft className="h-4 w-4" />
                 Voltar
               </Link>
-              <BrandName className="text-[18px] sm:text-[20px]" />
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -108,70 +122,11 @@ export default function LegalLayout({ title, description, toc, tags = [], childr
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12">
           <main className="min-w-0 max-w-3xl">
-            {toc ? (
-              <div className="mb-5 lg:hidden">
-                <button
-                  type="button"
-                  className="legal-index-toggle"
-                  onClick={() => setMobileTocOpen((value) => !value)}
-                >
-                  <span className="flex flex-col items-start gap-0.5">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]">
-                      Índice
-                    </span>
-                    <span className="text-[13px] font-semibold text-[#1C1C1C]">
-                      {mobileTocOpen ? "Ocultar navegação" : "Abrir navegação"}
-                    </span>
-                  </span>
-                  <ChevronDown
-                    className={cn("h-4 w-4 text-[#6B6B6B] transition-transform duration-200", mobileTocOpen && "rotate-180")}
-                  />
-                </button>
-
-                {mobileTocOpen ? (
-                  <nav className="legal-sidebar-card legal-index-panel">
-                    <div className="mb-4 flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#7B1E2B]/8 text-[#7B1E2B]">
-                        <FileText className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]">
-                          Índice da página
-                        </p>
-                        <p className="text-[12px] text-[#5F5F5F]">
-                          Seções e navegação rápida
-                        </p>
-                      </div>
-                    </div>
-                    <ul className="space-y-1.5">
-                      {toc.map((item, index) => (
-                        <li key={item.id}>
-                          <a
-                            href={`#${item.id}`}
-                            data-active={activeSection === item.id}
-                            className="legal-sidebar-link"
-                            onClick={() => setMobileTocOpen(false)}
-                          >
-                            <span className="mt-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-inherit/70">
-                              {String(index + 1).padStart(2, "0")}
-                            </span>
-                            <span className="min-w-0 flex-1 text-[13px] leading-5 font-medium">
-                              {item.title}
-                            </span>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                ) : null}
-              </div>
-            ) : null}
-
             <div className="space-y-6 lg:space-y-7">{children}</div>
           </main>
 
           {toc ? (
-            <aside className="hidden lg:block">
+            <aside className="hidden lg:block lg:self-start">
               <nav className="legal-sidebar-card sticky top-8">
                 <div className="mb-4 flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#7B1E2B]/8 text-[#7B1E2B]">
