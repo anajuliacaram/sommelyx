@@ -180,6 +180,16 @@
   body.legal-page {
     overscroll-behavior-y: auto;
     background-attachment: scroll;
+    /* Natural document scroll — no trapped momentum */
+    scroll-behavior: smooth;
+  }
+  body.legal-page,
+  html:has(body.legal-page) {
+    overscroll-behavior-y: auto;
+  }
+  /* Anchored section offset so headings don't hide under fixed UI */
+  body.legal-page :is(h2, h3) {
+    scroll-margin-top: 24px;
   }
 
   @media (max-width: 768px) {

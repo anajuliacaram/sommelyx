@@ -19,14 +19,10 @@ export default function LegalLayout({ title, description, children }: LegalLayou
   }, []);
 
   return (
-    <div className="min-h-[100dvh] bg-[#F4F1EC] text-[#1C1C1C]">
-      <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
-        <div
-          className="rounded-[28px] border border-black/5 bg-white/88 p-5 shadow-[0_18px_60px_-34px_rgba(20,18,16,0.28)] backdrop-blur-sm sm:p-8"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(250,247,243,0.98) 100%)",
-          }}
+    <div className="bg-[#F4F1EC] text-[#1C1C1C]">
+      <div className="mx-auto max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+        <article
+          className="rounded-[28px] border border-black/5 bg-[#FAF7F3] p-5 shadow-[0_18px_60px_-34px_rgba(20,18,16,0.18)] sm:p-10"
         >
           <div className="flex flex-col gap-5 border-b border-black/6 pb-6">
             <div className="flex items-center justify-between gap-4">
