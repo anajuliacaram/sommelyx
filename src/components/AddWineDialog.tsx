@@ -136,6 +136,19 @@ function suggestDrinkWindow(input: ScanSuggestionInput) {
 export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
+  const commercialCost = lastPaid ? parseFloat(lastPaid) : null;
+  const commercialSale = currentValue ? parseFloat(currentValue) : null;
+  const commercialMargin =
+    isCommercial && commercialCost != null && commercialSale != null
+      ? commercialSale - commercialCost
+      : null;
+  const commercialMarginPct =
+    isCommercial &&
+    commercialMargin != null &&
+    commercialCost != null &&
+    commercialCost > 0
+      ? (commercialMargin / commercialCost) * 100
+      : null;
 
   const [name, setName] = useState("");
   const [producer, setProducer] = useState("");
@@ -410,9 +423,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
       // Lembrete sobre campos opcionais não preenchidos
       const missing: string[] = [];
-      if (!lastPaid && !noPriceInfo) missing.push("último valor pago");
-      if (!drinkFrom && !drinkUntil) missing.push("prazo para beber");
-      if (!currentValue) missing.push("valor atual estimado");
+      if (!lastPaid && !noPriceInfo) missing.push(isCommercial ? "preço de custo" : "último valor pago");
+      if (!isCommercial && !drinkFrom && !drinkUntil) missing.push("prazo para beber");
+      if (!currentValue) missing.push(isCommercial ? "preço de venda" : "valor atual estimado");
       setMissingFields(missing);
 
       setSuccess(true);
@@ -435,7 +448,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                 </div>
                 <div className="min-w-0 flex-1">
                   <SheetTitle className="font-serif text-2xl font-semibold tracking-tight" style={{ color: '#1E1E1E' }}>
-                    {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
+                      {isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
                   </SheetTitle>
                   <p className="mt-1 text-sm font-medium tracking-tight text-[#6B6B6B] leading-relaxed">
                     Complete manualmente ou use rótulo, escaneamento e CSV.
@@ -548,7 +561,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   {/* Essential fields */}
                   <div className="space-y-4 pt-1">
                     <div>
-                      <label htmlFor="name" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>{isCommercial ? "Nome do produto *" : "Nome do vinho *"}</label>
+                      <label htmlFor="name" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
                       <input
                         id="name"
                         value={name}
@@ -633,10 +646,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" />
                       </div>
                         <div>
-                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>
-                            {isCommercial ? "Último valor pago (R$)" : "Último valor pago (opcional)"}
-                          </label>
                           {!isCommercial && (
+                            <>
+                              <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>
+                                Último valor pago (opcional)
+                              </label>
                             <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
                               <input
                                 type="checkbox"
@@ -653,39 +667,93 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                               />
                               <span className="text-[12px]" style={{ color: '#6B6B6B' }}>Não fui eu que comprei / não sei o valor</span>
                             </label>
+                            </>
                           )}
-                          {isCommercial && (
-                            <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
-                              <input
-                                type="checkbox"
-                                checked={noPriceInfo}
-                                onChange={e => {
-                                  setNoPriceInfo(e.target.checked);
-                                  if (e.target.checked) { setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); }
-                                }}
-                                className="w-4 h-4 rounded border accent-[#6F7F5B]"
-                                style={{ borderColor: '#D0CDC6' }}
-                              />
-                              <span className="text-[12px]" style={{ color: '#6B6B6B' }}>Não sei / foi presente / sem informação de valor</span>
-                            </label>
+                          {!isCommercial && !noPriceInfo && (
+                            <div className="grid grid-cols-2 gap-2">
+                              <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="input-premium" />
+                              <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
+                            </div>
                           )}
-                          {!noPriceInfo && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="input-premium" />
-                            <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
-                          </div>
-                        )}
-                        {!noPriceInfo && (
+                        {!isCommercial && !noPriceInfo && (
                           <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
                             Quanto e quando você pagou por último.
                           </p>
                         )}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                        <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>
-                          {isCommercial ? "Valor atual estimado (R$)" : "Valor médio estimado (R$)"}
-                        </label>
+                      {isCommercial ? (
+                        <div className="space-y-3 rounded-2xl border bg-white/72 p-4" style={{ borderColor: '#E5E2DC' }}>
+                          <div className="space-y-1">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: '#6F7F5B' }}>
+                              Precificação comercial
+                            </p>
+                            <p className="text-[12px] leading-relaxed" style={{ color: '#6B6B6B' }}>
+                              Defina separadamente o custo da garrafa e o preço de venda.
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="mb-1.5 block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>
+                                Preço de custo
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={lastPaid}
+                                onChange={e => setLastPaid(e.target.value)}
+                                placeholder="0.00"
+                                className="input-premium"
+                              />
+                            </div>
+                            <div>
+                              <div className="mb-1.5 flex items-center gap-2 flex-wrap">
+                                <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>
+                                  Preço de venda
+                                </label>
+                                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
+                                  <Sparkles className="h-3 w-3" />
+                                  {estimating ? "Estimando..." : "Sugestão IA"}
+                                </span>
+                              </div>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={currentValue}
+                                  onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }}
+                                  placeholder={estimating ? "Calculando..." : "0.00"}
+                                  className="input-premium"
+                                  style={{ opacity: estimating ? 0.6 : 1 }}
+                                />
+                                {estimating && (
+                                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    <div className="w-4 h-4 border-2 border-[#6F7F5B] border-t-transparent rounded-full animate-spin" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          {commercialMargin != null ? (
+                            <div className="flex flex-wrap items-center gap-3 rounded-xl bg-[rgba(95,111,82,0.06)] px-3 py-2.5">
+                              <p className="text-[12px] font-semibold" style={{ color: '#1F1F1F' }}>
+                                Margem estimada: R$ {commercialMargin.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                              {commercialMarginPct != null ? (
+                                <p className="text-[11px] font-medium" style={{ color: commercialMargin >= 0 ? '#3F6A45' : '#9B4444' }}>
+                                  {commercialMarginPct >= 0 ? "+" : ""}{commercialMarginPct.toFixed(1)}%
+                                </p>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>
+                            Valor médio estimado (R$)
+                          </label>
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
                             <Sparkles className="h-3 w-3" />
                             {estimating ? "Estimando..." : "Estimativa Sommelyx"}
@@ -708,18 +776,18 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           )}
                         </div>
                         <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
-                          {isCommercial
-                            ? "Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região."
-                            : "Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região."}
+                          Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região.
                         </p>
                       </div>
+                      )}
                       <div>
                         <LocationFields
                           value={location}
                           onChange={setLocation}
-                          label="Localização na adega"
+                          label={isCommercial ? "Localização operacional" : "Localização na adega"}
                         />
                       </div>
+                      {!isCommercial && (
                       <div>
                         <p className="text-[14px] font-medium mb-1" style={{ color: '#4A4A4A' }}>Janela de consumo sugerida</p>
                         <p className="text-[11px] leading-relaxed mb-3" style={{ color: '#6B6B6B' }}>
@@ -736,6 +804,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           </div>
                         </div>
                       </div>
+                      )}
                       <div>
                         <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Harmonização</label>
                         <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" />
@@ -762,7 +831,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                     className="w-full"
                   >
                     <Plus className="h-4 w-4" />
-                    {isCommercial ? "Cadastrar produto" : "Salvar vinho"}
+                    {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
                   </Button>
 
                   {missingFields.length > 0 && (
