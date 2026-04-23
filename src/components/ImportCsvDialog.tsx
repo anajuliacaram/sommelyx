@@ -1449,7 +1449,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           cellar_location: undefined,
           drink_from: undefined,
           drink_until: undefined,
-        }, rawValues);
+        }, {
+          raw_line: line,
+          name,
+          producer: currentProducer || extracted.producer || "",
+          price: String(price),
+          vintage: extracted.vintage ? String(extracted.vintage) : "",
+          country: rowCountry || "",
+          type: rowType || "",
+        });
       }
     };
 
