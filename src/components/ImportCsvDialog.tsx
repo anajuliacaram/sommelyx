@@ -826,7 +826,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const pdfjsModule = await import("pdfjs-dist");
     const pdfjs = pdfjsModule.default || pdfjsModule;
 
-    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
     const maxPages = Math.min(doc.numPages, 12);
     const pages: string[] = [];
     for (let p = 1; p <= maxPages; p++) {

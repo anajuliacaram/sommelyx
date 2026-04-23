@@ -762,8 +762,8 @@ export default function InventoryPage() {
                                                             title={group.title}
                                                             options={group.options}
                                                             selected={group.selected}
-                                                            onChange={(val) => updateParam(group.param, val, group.multi ?? true)}
-                                                            onClear={() => updateParam(group.param, null, group.multi ?? true)}
+                                                            onChange={(val) => updateParam(group.param, val, (group as any).multi ?? true)}
+                                                            onClear={() => updateParam(group.param, null, (group as any).multi ?? true)}
                                                             searchPlaceholder={group.placeholder}
                                                             searchable={Boolean(group.placeholder)}
                                                         />
