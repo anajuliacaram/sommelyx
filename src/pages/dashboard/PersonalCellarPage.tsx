@@ -100,20 +100,20 @@ export default function PersonalCellarPage() {
   return (
     <>
       <div className="editorial-page">
-        <EditorialCard style={{ padding: "16px 18px 14px" }}>
-          <div className="flex flex-col gap-3.5">
-            <div className="grid gap-3 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)_auto] lg:items-start lg:gap-3.5">
+        <EditorialCard style={{ padding: "14px 16px 12px" }}>
+          <div className="flex flex-col gap-3">
+            <div className="grid gap-2.5 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
               <div className="flex min-w-0 flex-col">
-                  <Kicker>Adega</Kicker>
-                  <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight tracking-[-0.04em]">
-                    Minha Adega
-                  </h1>
-                  <div className="mt-1 text-[12px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
-                    <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
-                  </div>
+                <Kicker>Adega</Kicker>
+                <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight tracking-[-0.04em]">
+                  Minha Adega
+                </h1>
+                <div className="mt-1 text-[12px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
+                  <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
                 </div>
+              </div>
 
-              <div className="editorial-search min-w-0 h-10 rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[rgba(255,255,255,0.82)] px-3 shadow-[0_1px_0_rgba(95,111,82,0.04)]">
+              <div className="editorial-search min-w-0">
                 <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
                 <input
                   value={query}
@@ -131,11 +131,11 @@ export default function PersonalCellarPage() {
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as typeof sort)}
-                  className={`${controlBase} ${controlSurface} pr-9 appearance-none`}
+                  className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[210px]`}
                   style={{
                     backgroundImage:
                       "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
-                    backgroundPosition: "calc(100% - 16px) 17px, calc(100% - 11px) 17px",
+                    backgroundPosition: "calc(100% - 16px) 16px, calc(100% - 11px) 16px",
                     backgroundSize: "5px 5px, 5px 5px",
                     backgroundRepeat: "no-repeat",
                   }}
@@ -178,8 +178,8 @@ export default function PersonalCellarPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 rounded-[16px] bg-[rgba(255,255,255,0.32)] px-2.5 py-2.5 shadow-[0_1px_0_rgba(95,111,82,0.04)] sm:px-3">
-              <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-col gap-2 rounded-[16px] bg-[rgba(255,255,255,0.28)] px-2.5 py-2.25 shadow-[0_1px_0_rgba(95,111,82,0.035)] sm:px-3">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span className={sectionLabel}>Tipo</span>
                 {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
                   <Chip
@@ -193,9 +193,9 @@ export default function PersonalCellarPage() {
                 ))}
               </div>
 
-              <div className="h-px bg-[rgba(95,111,82,0.06)]" />
+              <div className="h-px bg-[rgba(95,111,82,0.055)]" />
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span className={sectionLabel}>Janela</span>
                 {[
                   { key: "all", label: "Todos" },
