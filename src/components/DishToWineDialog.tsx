@@ -592,7 +592,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <div className="space-y-2.5">
                   <PremiumChoiceCard
                     index={0}
-                    icon={Wine}
+                    icon={WineIcon}
                     title="Da minha adega"
                     description="Harmonize com vinhos que você já tem"
                     onClick={() => handleSelectSource("cellar")}
@@ -634,7 +634,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   />
                   <PremiumChoiceCard
                     index={1}
-                    icon={Wine}
+                    icon={WineIcon}
                     title="Tenho um vinho em mente"
                     description={source === "cellar"
                       ? "O Sommelyx sugere pratos ideais para o vinho escolhido"
