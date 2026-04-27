@@ -54,11 +54,11 @@ export class AttachmentPrepError extends Error {
 }
 
 const MAX_IMAGE_DIMENSION_DESKTOP = 1120;
-const MAX_IMAGE_DIMENSION_MOBILE = 960;
+const MAX_IMAGE_DIMENSION_MOBILE = 840;
 const MAX_IMAGE_QUALITY_DESKTOP = 0.74;
-const MAX_IMAGE_QUALITY_MOBILE = 0.68;
+const MAX_IMAGE_QUALITY_MOBILE = 0.64;
 const MAX_IMAGE_BASE64_LENGTH_DESKTOP = 1_500_000;
-const MAX_IMAGE_BASE64_LENGTH_MOBILE = 1_050_000;
+const MAX_IMAGE_BASE64_LENGTH_MOBILE = 900_000;
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 const MAX_PDF_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 const MAX_PDF_PAGES_FOR_TEXT = 10;
@@ -356,10 +356,19 @@ async function loadHtmlImage(file: File, mode: "object-url" | "data-url") {
 }
 
 async function decodeImageFile(file: File) {
+  const mobile = isLikelyMobileDevice();
   const attempts: Array<{ path: string; run: () => Promise<HTMLImageElement | ImageBitmap> }> = [
-    { path: "bitmap", run: () => loadImageBitmap(file) },
-    { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
-    { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
+    ...(mobile
+      ? [
+          { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
+          { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
+          { path: "bitmap", run: () => loadImageBitmap(file) },
+        ]
+      : [
+          { path: "bitmap", run: () => loadImageBitmap(file) },
+          { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
+          { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
+        ]),
   ];
 
   let lastError: unknown = null;

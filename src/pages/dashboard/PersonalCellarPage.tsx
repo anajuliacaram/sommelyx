@@ -2,7 +2,7 @@
 // Design "Editorial" fiel ao design-reference (extras.jsx CellarPage).
 // Dados reais via Supabase.
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Star, Wine as WineIcon, X, ImageOff, Image as ImageIcon } from "@/icons/lucide";
 
@@ -29,11 +29,30 @@ import { WineLabelPreview } from "@/components/WineLabelPreview";
 
 const currentYear = new Date().getFullYear();
 
+const MOBILE_BREAKPOINT = 640;
+
+function useIsSmallScreen() {
+  const [small, setSmall] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < MOBILE_BREAKPOINT;
+  });
+
+  useEffect(() => {
+    const check = () => setSmall(window.innerWidth < MOBILE_BREAKPOINT);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  return small;
+}
+
 export default function PersonalCellarPage() {
   const { data: wines = [], isLoading } = useWines();
   const wineEvent = useWineEvent();
   const { toast } = useToast();
   useResolveWineImages(wines);
+  const isMobile = useIsSmallScreen();
 
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
@@ -64,6 +83,124 @@ export default function PersonalCellarPage() {
   const controlSurface = "bg-[rgba(255,255,255,0.78)] border-[rgba(95,111,82,0.12)] text-[#1a1713] shadow-[0_1px_0_rgba(95,111,82,0.04)]";
   const controlMuted = "bg-[rgba(255,255,255,0.68)] border-[rgba(95,111,82,0.10)] text-[rgba(58,51,39,0.72)]";
   const sectionLabel = "text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(58,51,39,0.48)]";
+
+  const mobileHeader = (filteredCount: number) => (
+    <EditorialCard style={{ padding: "12px 12px 10px" }}>
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <Kicker>Adega</Kicker>
+            <h1 className="editorial-page-h1 mt-0.5 !text-[24px] leading-tight tracking-[-0.04em]">
+              Minha Adega
+            </h1>
+            <div className="mt-1 text-[11px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
+              <b style={{ color: "#1a1713", fontWeight: 700 }}>{filteredCount}</b> / {wines.length} vinhos
+            </div>
+          </div>
+        </div>
+
+        <div className="editorial-search min-w-0 h-10 px-3">
+          <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por nome, produtor, região…"
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery("")} aria-label="Limpar">
+              <X className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2">
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            className={`${controlBase} ${controlSurface} min-w-0 px-2.5 pr-8 text-[11.5px]`}
+            style={{
+              backgroundImage:
+                "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
+              backgroundPosition: "calc(100% - 14px) 15px, calc(100% - 9px) 15px",
+              backgroundSize: "5px 5px, 5px 5px",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
+            <option value="recent">Mais recentes</option>
+            <option value="value_low">Mais baratos</option>
+            <option value="value">Mais caros</option>
+            <option value="vintage_old">Safra antiga</option>
+            <option value="vintage">Safra nova</option>
+          </select>
+          <div className="editorial-segmented shrink-0">
+            <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
+              Grade
+            </button>
+            <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
+              Lista
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={toggleLabels}
+            aria-pressed={showLabels}
+            title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
+            className={`flex h-9 w-9 items-center justify-center rounded-[14px] border transition-all ${controlMuted}`}
+            style={{
+              background: showLabels ? "rgba(95,111,82,0.12)" : "rgba(255,255,255,0.68)",
+              borderColor: showLabels ? "rgba(95,111,82,0.18)" : "rgba(95,111,82,0.10)",
+              color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
+            }}
+          >
+            {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
+          </button>
+          <button
+            type="button"
+            className="editorial-btn-primary h-9 rounded-[14px] px-3 text-[12px] font-semibold tracking-[-0.01em]"
+            onClick={() => setAddOpen(true)}
+          >
+            + Adicionar
+          </button>
+        </div>
+
+        <div className="rounded-[16px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.28)] px-2.5 py-2">
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <span className={sectionLabel}>Tipo</span>
+              {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                <Chip
+                  key={s}
+                  active={styleFilter === s}
+                  onClick={() => setStyleFilter(s)}
+                  className="whitespace-nowrap normal-case tracking-[-0.01em]"
+                >
+                  {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
+                </Chip>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <span className={sectionLabel}>Janela</span>
+              {[
+                { key: "all", label: "Todos" },
+                { key: "now", label: "Beber agora" },
+                { key: "guard", label: "Em guarda" },
+              ].map((option) => (
+                <Chip
+                  key={option.key}
+                  active={drinkWindowFilter === option.key}
+                  onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+                  className="whitespace-nowrap normal-case tracking-[-0.01em]"
+                >
+                  {option.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </EditorialCard>
+  );
 
   const filtered = useMemo(() => {
     let list = wines.filter((w) => {
@@ -100,121 +237,125 @@ export default function PersonalCellarPage() {
   return (
     <>
       <div className="editorial-page">
-        <EditorialCard style={{ padding: "14px 16px 12px" }}>
-          <div className="flex flex-col gap-3">
-            <div className="grid gap-2.5 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
-              <div className="flex min-w-0 flex-col">
-                <Kicker>Adega</Kicker>
-                <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight tracking-[-0.04em]">
-                  Minha Adega
-                </h1>
-                <div className="mt-1 text-[12px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
-                  <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
+        {isMobile ? (
+          mobileHeader(filtered.length)
+        ) : (
+          <EditorialCard style={{ padding: "14px 16px 12px" }}>
+            <div className="flex flex-col gap-3">
+              <div className="grid gap-2.5 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
+                <div className="flex min-w-0 flex-col">
+                  <Kicker>Adega</Kicker>
+                  <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight tracking-[-0.04em]">
+                    Minha Adega
+                  </h1>
+                  <div className="mt-1 text-[12px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
+                    <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
+                  </div>
+                </div>
+
+                <div className="editorial-search min-w-0">
+                  <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Buscar por nome, produtor, região…"
+                  />
+                  {query && (
+                    <button type="button" onClick={() => setQuery("")} aria-label="Limpar">
+                      <X className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-end gap-2 lg:justify-end">
+                  <select
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as typeof sort)}
+                    className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[210px]`}
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
+                      backgroundPosition: "calc(100% - 16px) 16px, calc(100% - 11px) 16px",
+                      backgroundSize: "5px 5px, 5px 5px",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  >
+                    <option value="recent">Adicionados mais recentemente</option>
+                    <option value="value_low">Mais baratos</option>
+                    <option value="value">Mais caros</option>
+                    <option value="vintage_old">Safra mais antiga</option>
+                    <option value="vintage">Safra mais nova</option>
+                  </select>
+                  <div className="editorial-segmented">
+                    <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
+                      Grade
+                    </button>
+                    <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
+                      Lista
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={toggleLabels}
+                    aria-pressed={showLabels}
+                    title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
+                    className={`flex h-10 w-10 items-center justify-center rounded-[14px] border transition-all ${controlMuted}`}
+                    style={{
+                      background: showLabels ? "rgba(95,111,82,0.12)" : "rgba(255,255,255,0.68)",
+                      borderColor: showLabels ? "rgba(95,111,82,0.18)" : "rgba(95,111,82,0.10)",
+                      color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
+                    }}
+                  >
+                    {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    className="editorial-btn-primary h-10 rounded-[14px] px-4 text-[12.5px] font-semibold tracking-[-0.01em]"
+                    onClick={() => setAddOpen(true)}
+                  >
+                    + Adicionar
+                  </button>
                 </div>
               </div>
 
-              <div className="editorial-search min-w-0">
-                <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Buscar por nome, produtor, região…"
-                />
-                {query && (
-                  <button type="button" onClick={() => setQuery("")} aria-label="Limpar">
-                    <X className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center justify-end gap-2 lg:justify-end">
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value as typeof sort)}
-                  className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[210px]`}
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
-                    backgroundPosition: "calc(100% - 16px) 16px, calc(100% - 11px) 16px",
-                    backgroundSize: "5px 5px, 5px 5px",
-                    backgroundRepeat: "no-repeat",
-                  }}
-                >
-                  <option value="recent">Adicionados mais recentemente</option>
-                  <option value="value_low">Mais baratos</option>
-                  <option value="value">Mais caros</option>
-                  <option value="vintage_old">Safra mais antiga</option>
-                  <option value="vintage">Safra mais nova</option>
-                </select>
-                <div className="editorial-segmented">
-                  <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
-                    Grade
-                  </button>
-                  <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
-                    Lista
-                  </button>
+              <div className="flex flex-col gap-2 rounded-[16px] bg-[rgba(255,255,255,0.28)] px-2.5 py-2.25 shadow-[0_1px_0_rgba(95,111,82,0.035)] sm:px-3">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className={sectionLabel}>Tipo</span>
+                  {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                    <Chip
+                      key={s}
+                      active={styleFilter === s}
+                      onClick={() => setStyleFilter(s)}
+                      className="normal-case tracking-[-0.01em]"
+                    >
+                      {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
+                    </Chip>
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={toggleLabels}
-                  aria-pressed={showLabels}
-                  title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
-                  className={`flex h-10 w-10 items-center justify-center rounded-[14px] border transition-all ${controlMuted}`}
-                  style={{
-                    background: showLabels ? "rgba(95,111,82,0.12)" : "rgba(255,255,255,0.68)",
-                    borderColor: showLabels ? "rgba(95,111,82,0.18)" : "rgba(95,111,82,0.10)",
-                    color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
-                  }}
-                >
-                  {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
-                </button>
-                <button
-                  type="button"
-                  className="editorial-btn-primary h-10 rounded-[14px] px-4 text-[12.5px] font-semibold tracking-[-0.01em]"
-                  onClick={() => setAddOpen(true)}
-                >
-                  + Adicionar
-                </button>
+
+                <div className="h-px bg-[rgba(95,111,82,0.055)]" />
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className={sectionLabel}>Janela</span>
+                  {[
+                    { key: "all", label: "Todos" },
+                    { key: "now", label: "Beber agora" },
+                    { key: "guard", label: "Em guarda" },
+                  ].map((option) => (
+                    <Chip
+                      key={option.key}
+                      active={drinkWindowFilter === option.key}
+                      onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+                      className="normal-case tracking-[-0.01em]"
+                    >
+                      {option.label}
+                    </Chip>
+                  ))}
+                </div>
               </div>
             </div>
-
-            <div className="flex flex-col gap-2 rounded-[16px] bg-[rgba(255,255,255,0.28)] px-2.5 py-2.25 shadow-[0_1px_0_rgba(95,111,82,0.035)] sm:px-3">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className={sectionLabel}>Tipo</span>
-                {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
-                  <Chip
-                    key={s}
-                    active={styleFilter === s}
-                    onClick={() => setStyleFilter(s)}
-                    className="normal-case tracking-[-0.01em]"
-                  >
-                    {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
-                  </Chip>
-                ))}
-              </div>
-
-              <div className="h-px bg-[rgba(95,111,82,0.055)]" />
-
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className={sectionLabel}>Janela</span>
-                {[
-                  { key: "all", label: "Todos" },
-                  { key: "now", label: "Beber agora" },
-                  { key: "guard", label: "Em guarda" },
-                ].map((option) => (
-                  <Chip
-                    key={option.key}
-                    active={drinkWindowFilter === option.key}
-                    onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                    className="normal-case tracking-[-0.01em]"
-                  >
-                    {option.label}
-                  </Chip>
-                ))}
-              </div>
-            </div>
-          </div>
-        </EditorialCard>
+          </EditorialCard>
+        )}
 
         {/* Results */}
         {isLoading ? (

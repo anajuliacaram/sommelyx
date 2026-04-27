@@ -76,35 +76,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     onOpenChange(v);
   };
 
-  const compressImage = useCallback(async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX = 1200;
-          let w = img.width, h = img.height;
-          if (w > MAX || h > MAX) {
-            if (w > h) { h = (h * MAX) / w; w = MAX; }
-            else { w = (w * MAX) / h; h = MAX; }
-          }
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext("2d")!;
-          ctx.drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-          const base64 = dataUrl.split(",")[1];
-          resolve(base64);
-        };
-        img.onerror = reject;
-        img.src = e.target?.result as string;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }, []);
-
   const runScan = useCallback(async (base64: string) => {
     setStep("scanning");
     setErrorMsg("");
@@ -157,7 +128,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       } else if (code === "AI_TIMEOUT") {
         msg = "Tempo de resposta excedido. Tente novamente com uma foto mais nítida.";
       } else if (code === "AI_UNAVAILABLE") {
-        msg = "Serviço temporariamente indisponível. Tente novamente em instantes.";
+        msg = "Não conseguimos enviar a foto agora. Verifique a conexão e tente novamente com a mesma imagem.";
       } else if (code === "CONFIG_ERROR") {
         msg = "O scanner está temporariamente indisponível. Tente novamente em instantes.";
       } else if (code === "AI_RATE_LIMIT") {
@@ -174,6 +145,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       toast({ title: "Selecione uma imagem válida", variant: "destructive" });
       return;
     }
+
+    console.info("[ScanWineLabelDialog] file_selected", {
+      fileName: file.name,
+      mimeType: file.type || "unknown",
+      sizeBytes: file.size,
+    });
 
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
@@ -209,7 +186,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setErrorMsg(getAttachmentErrorMessage(err, "Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo."));
       setStep("error");
     }
-  }, [compressImage, runScan, toast]);
+  }, [runScan, toast]);
 
   const handleConfirm = async () => {
     if (!scannedData) return;
@@ -297,7 +274,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={cameraInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 capture="environment"
                 className="hidden"
                 onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
@@ -305,7 +282,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 className="hidden"
                 onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
               />
