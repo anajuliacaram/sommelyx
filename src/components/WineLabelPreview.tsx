@@ -64,12 +64,10 @@ export function WineLabelPreview({
   const queryClient = useQueryClient();
   const candidates = useMemo(() => resolveWineCardImageCandidates(wine), [wine]);
   const [index, setIndex] = useState(0);
-  const [lastEvent, setLastEvent] = useState<"idle" | "load" | "error">("idle");
   const healingUrls = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setIndex(0);
-    setLastEvent("idle");
   }, [candidates.join("|"), wine.name]);
 
   const activeSrc = candidates[index] ?? null;
@@ -169,7 +167,6 @@ export function WineLabelPreview({
           referrerPolicy="no-referrer"
           crossOrigin="anonymous"
           onLoad={() => {
-            setLastEvent("load");
             if (import.meta.env.DEV) {
               console.debug("[WineLabelPreview] img_load", {
                 wineId: wine.id ?? null,
@@ -179,7 +176,6 @@ export function WineLabelPreview({
             }
           }}
           onError={() => {
-            setLastEvent("error");
             if (import.meta.env.DEV) {
               console.debug("[WineLabelPreview] img_error", {
                 wineId: wine.id ?? null,
@@ -212,12 +208,6 @@ export function WineLabelPreview({
       {generated && activeSrc ? (
         <div className="absolute right-3 top-3 rounded-full border border-black/5 bg-white/72 px-2 py-1 text-[9px] font-medium text-[#6F6A60] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.18)] backdrop-blur-sm">
           Imagem ilustrativa
-        </div>
-      ) : null}
-      {import.meta.env.DEV ? (
-        <div className="absolute bottom-2 left-2 right-2 rounded-[10px] bg-black/6 px-2 py-1 text-[9px] leading-tight text-[#6F665C] backdrop-blur-sm">
-          {lastEvent === "load" ? "load:ok" : lastEvent === "error" ? "load:error" : "load:idle"} ·{" "}
-          {activeSrc ? activeSrc.slice(0, 52) : "null"}
         </div>
       ) : null}
     </div>
