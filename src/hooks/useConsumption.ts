@@ -69,6 +69,7 @@ export function useConsumption() {
       throw new Error("Not authenticated");
     },
     enabled: !!user || !!sommelyxData?.consumption?.length,
+    placeholderData: (previousData) => previousData,
   });
 }
 

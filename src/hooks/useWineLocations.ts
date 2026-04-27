@@ -56,6 +56,7 @@ export function useWineLocations(wineId?: string) {
       return (data ?? []) as WineLocation[];
     },
     enabled: !!user,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -78,6 +79,7 @@ export function useWineLocationEvents(wineId?: string) {
       return (data ?? []) as WineLocationEvent[];
     },
     enabled: !!user,
+    placeholderData: (previousData) => previousData,
   });
 }
 

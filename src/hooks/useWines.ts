@@ -204,6 +204,7 @@ export function useWines() {
     },
     enabled: !!user || !!sommelyxData?.wines?.length,
     staleTime: 30_000,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -243,6 +244,7 @@ export function useWineMetrics() {
     },
     enabled: !!user || !!sommelyxData?.wines?.length,
     staleTime: 30_000, // avoid refetch on every mount
+    placeholderData: (previousData) => previousData,
   });
 
   // Full wine list (deferred) — used by secondary sections

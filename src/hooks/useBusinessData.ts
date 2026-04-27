@@ -60,6 +60,7 @@ export function useSales() {
       return (data ?? []) as unknown as SaleRecord[];
     },
     enabled: !!user,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -137,6 +138,7 @@ export function useWishlist() {
       return (data ?? []) as WishlistRecord[];
     },
     enabled: !!user,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -207,6 +209,7 @@ export function useContacts() {
       return (data ?? []) as unknown as ContactRecord[];
     },
     enabled: !!user,
+    placeholderData: (previousData) => previousData,
   });
 }
 

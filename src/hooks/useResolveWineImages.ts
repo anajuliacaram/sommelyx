@@ -57,7 +57,13 @@ export function useResolveWineImages(wines: Wine[] | undefined) {
       const wine = candidates[i];
       processed.current.add(wine.id);
       try {
-        await invokeEdgeFunction(
+        const result = await invokeEdgeFunction<{
+          ok?: boolean;
+          image_url?: string | null;
+          source?: string;
+          source_url?: string | null;
+          duration_ms?: number;
+        }>(
           "wine-image-resolver",
           { wineId: wine.id },
           { timeoutMs: 30_000, retries: 0 },
@@ -68,8 +74,21 @@ export function useResolveWineImages(wines: Wine[] | undefined) {
             wineName: wine.name,
           });
         }
-        void queryClient.invalidateQueries({ queryKey: ["wines"] });
-        void queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
+        if (result?.image_url) {
+          queryClient.setQueriesData<Wine[]>({ queryKey: ["wines"] }, (current) => {
+            if (!current) return current;
+            return current.map((item) =>
+              item.id === wine.id ? { ...item, image_url: result.image_url ?? item.image_url } : item,
+            );
+          });
+        }
+        if (import.meta.env.DEV) {
+          console.debug("[useResolveWineImages] cache_updated", {
+            wineId: wine.id,
+            wineName: wine.name,
+            updatedImageUrl: result?.image_url ?? null,
+          });
+        }
       } catch (err) {
         console.warn("[useResolveWineImages] failed:", wine.id, err);
       }
