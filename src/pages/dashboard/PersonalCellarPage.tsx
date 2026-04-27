@@ -4,7 +4,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Star, Wine as WineIcon, X, ImageOff, Image as ImageIcon } from "@/icons/lucide";
+import { Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -47,6 +47,24 @@ function useIsSmallScreen() {
   return small;
 }
 
+function normalizeCountry(value?: string | null) {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function resolveWineCountry(wine: Pick<Wine, "country" | "region">) {
+  const explicit = (wine.country ?? "").trim();
+  if (explicit) return explicit;
+  const region = normalizeCountry(wine.region);
+  if (!region) return "";
+  if (/(fran[çc]a|france|bourgogne|bordeaux|champagne|loire|rh[oô]ne|alsace|provence)/i.test(region)) return "França";
+  if (/(it[aá]lia|italy|toscana|piemonte|veneto|sic[ií]lia|montalcino|barolo|chianti)/i.test(region)) return "Itália";
+  if (/(espanha|spain|rioja|ribera del duero|priorat|jerez|catalunha)/i.test(region)) return "Espanha";
+  if (/(chile|maipo|colchagua|casablanca|aconcagua)/i.test(region)) return "Chile";
+  if (/(argentina|mendoza|salta|patag[oô]nia)/i.test(region)) return "Argentina";
+  if (/(eua|usa|united states|calif[oó]rnia|napa|sonoma|oregon|washington)/i.test(region)) return "EUA";
+  return "";
+}
+
 export default function PersonalCellarPage() {
   const { data: wines = [], isLoading } = useWines();
   const wineEvent = useWineEvent();
@@ -56,33 +74,63 @@ export default function PersonalCellarPage() {
 
   const [query, setQuery] = useState("");
   const [styleFilter, setStyleFilter] = useState("todos");
+  const [countryFilter, setCountryFilter] = useState("all");
   const [drinkWindowFilter, setDrinkWindowFilter] = useState<"all" | "now" | "guard">("all");
   const [sort, setSort] = useState<
     "recent" | "value_low" | "value" | "vintage_old" | "vintage"
   >("recent");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [showLabels, setShowLabels] = useState<boolean>(() => {
+  const [showLabels] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const v = window.localStorage.getItem("cellar:showLabels");
     return v === null ? true : v === "1";
   });
-  const toggleLabels = () => {
-    setShowLabels((prev) => {
-      const next = !prev;
-      try { window.localStorage.setItem("cellar:showLabels", next ? "1" : "0"); } catch {}
-      return next;
-    });
-  };
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [editWine, setEditWine] = useState<Wine | null>(null);
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<Wine | null>(null);
   const controlBase =
-    "inline-flex h-10 items-center rounded-[14px] border px-3 text-[12.5px] font-medium tracking-[-0.01em] transition-all outline-none";
+    "inline-flex h-9 sm:h-10 items-center rounded-[12px] sm:rounded-[14px] border px-2.5 sm:px-3 text-[11.5px] sm:text-[12.5px] font-medium tracking-[-0.01em] transition-all outline-none";
   const controlSurface = "bg-[rgba(255,255,255,0.78)] border-[rgba(95,111,82,0.12)] text-[#1a1713] shadow-[0_1px_0_rgba(95,111,82,0.04)]";
   const controlMuted = "bg-[rgba(255,255,255,0.68)] border-[rgba(95,111,82,0.10)] text-[rgba(58,51,39,0.72)]";
   const sectionLabel = "text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(58,51,39,0.48)]";
+
+  const styleOptions = useMemo(() => {
+    const styleSet = new Set<string>();
+    wines.forEach((w) => {
+      const family = getStyleFamily(w.style);
+      if (family && family !== "unknown" && family !== "todos") styleSet.add(family);
+    });
+    const sorted = Array.from(styleSet).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    return [{ key: "todos", label: "Todos" }, ...sorted.map((s) => ({ key: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))];
+  }, [wines]);
+
+  const drinkWindowOptions = useMemo(() => {
+    let hasNow = false;
+    let hasGuard = false;
+    wines.forEach((w) => {
+      const dw = resolveSuggestedDrinkWindow(w);
+      const status = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until }).status;
+      if (status === "now") hasNow = true;
+      else hasGuard = true;
+    });
+    const options = [];
+    if (hasNow) options.push({ key: "now", label: "Beber agora" });
+    if (hasGuard) options.push({ key: "guard", label: "Em guarda" });
+    options.sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+    return [{ key: "all", label: "Todos" }, ...options];
+  }, [wines]);
+
+  const countryOptions = useMemo(() => {
+    const dynamic = new Set<string>();
+    wines.forEach((w) => {
+      const resolved = resolveWineCountry(w);
+      if (resolved) dynamic.add(resolved);
+    });
+    const sorted = Array.from(dynamic).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    return [{ key: "all", label: "Todos" }, ...sorted.map((c) => ({ key: c, label: c }))];
+  }, [wines]);
 
   const mobileHeader = (filteredCount: number) => (
     <EditorialCard style={{ padding: "12px 12px 10px" }}>
@@ -113,7 +161,7 @@ export default function PersonalCellarPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] items-center gap-1.5">
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
@@ -132,6 +180,23 @@ export default function PersonalCellarPage() {
             <option value="vintage_old">Safra antiga</option>
             <option value="vintage">Safra nova</option>
           </select>
+          <select
+            value={countryFilter}
+            onChange={(e) => setCountryFilter(e.target.value)}
+            className={`${controlBase} ${controlSurface} min-w-0 px-2.5 pr-8 text-[11.5px]`}
+            style={{
+              backgroundImage:
+                "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
+              backgroundPosition: "calc(100% - 14px) 15px, calc(100% - 9px) 15px",
+              backgroundSize: "5px 5px, 5px 5px",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
+            <option value="all">País: Todos</option>
+            {countryOptions.filter((o) => o.key !== "all").map((option) => (
+              <option key={option.key} value={option.key}>{option.label}</option>
+            ))}
+          </select>
           <div className="editorial-segmented shrink-0">
             <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
               Grade
@@ -142,20 +207,6 @@ export default function PersonalCellarPage() {
           </div>
           <button
             type="button"
-            onClick={toggleLabels}
-            aria-pressed={showLabels}
-            title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
-            className={`flex h-9 w-9 items-center justify-center rounded-[14px] border transition-all ${controlMuted}`}
-            style={{
-              background: showLabels ? "rgba(95,111,82,0.12)" : "rgba(255,255,255,0.68)",
-              borderColor: showLabels ? "rgba(95,111,82,0.18)" : "rgba(95,111,82,0.10)",
-              color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
-            }}
-          >
-            {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
-          </button>
-          <button
-            type="button"
             className="editorial-btn-primary h-9 rounded-[14px] px-3 text-[12px] font-semibold tracking-[-0.01em]"
             onClick={() => setAddOpen(true)}
           >
@@ -163,19 +214,19 @@ export default function PersonalCellarPage() {
           </button>
         </div>
 
-        <div className="rounded-[16px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.28)] px-2.5 py-2">
-          <div className="space-y-2">
-            <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="rounded-[14px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.28)] px-2 py-1.5">
+          <div className="space-y-1.25">
+            <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex min-w-max items-center gap-1.5">
-                <span className={sectionLabel}>Tipo</span>
-                {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Tipo</span>
+                {styleOptions.map((s) => (
                   <Chip
-                    key={s}
-                    active={styleFilter === s}
-                    onClick={() => setStyleFilter(s)}
-                    className="normal-case tracking-[-0.01em]"
+                    key={s.key}
+                    active={styleFilter === s.key}
+                    onClick={() => setStyleFilter(s.key)}
+                    className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em] shrink-0 whitespace-nowrap"
                   >
-                    {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
+                    {s.label}
                   </Chip>
                 ))}
               </div>
@@ -183,17 +234,13 @@ export default function PersonalCellarPage() {
 
             <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex min-w-max items-center gap-1.5">
-                <span className={sectionLabel}>Janela</span>
-                {[
-                  { key: "all", label: "Todos" },
-                  { key: "now", label: "Beber agora" },
-                  { key: "guard", label: "Em guarda" },
-                ].map((option) => (
+                <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Janela</span>
+                {drinkWindowOptions.map((option) => (
                   <Chip
                     key={option.key}
                     active={drinkWindowFilter === option.key}
                     onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                    className="normal-case tracking-[-0.01em]"
+                    className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em] shrink-0 whitespace-nowrap"
                   >
                     {option.label}
                   </Chip>
@@ -209,6 +256,10 @@ export default function PersonalCellarPage() {
   const filtered = useMemo(() => {
     let list = wines.filter((w) => {
       if (styleFilter !== "todos" && getStyleFamily(w.style) !== styleFilter) return false;
+      if (countryFilter !== "all") {
+        const resolvedCountry = resolveWineCountry(w);
+        if (!resolvedCountry || normalizeCountry(resolvedCountry) !== normalizeCountry(countryFilter)) return false;
+      }
       if (drinkWindowFilter !== "all") {
         const dw = resolveSuggestedDrinkWindow(w);
         const status = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until }).status;
@@ -231,7 +282,7 @@ export default function PersonalCellarPage() {
     else if (sort === "vintage_old") list = list.slice().sort((a, b) => (a.vintage ?? 9999) - (b.vintage ?? 9999));
     else if (sort === "vintage") list = list.slice().sort((a, b) => (b.vintage ?? 0) - (a.vintage ?? 0));
     return list;
-  }, [wines, query, styleFilter, drinkWindowFilter, sort]);
+  }, [wines, query, styleFilter, countryFilter, drinkWindowFilter, sort]);
 
   const handleOpenBottle = (w: Wine) => {
     setPreSelectedWine(w);
@@ -244,8 +295,8 @@ export default function PersonalCellarPage() {
         {isMobile ? (
           mobileHeader(filtered.length)
         ) : (
-          <EditorialCard style={{ padding: "14px 16px 12px" }}>
-            <div className="flex flex-col gap-3">
+          <EditorialCard style={{ padding: "12px 14px 10px" }}>
+            <div className="flex flex-col gap-2">
               <div className="grid gap-2.5 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
                 <div className="flex min-w-0 flex-col">
                   <Kicker>Adega</Kicker>
@@ -271,11 +322,11 @@ export default function PersonalCellarPage() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-end gap-2 lg:justify-end">
+                <div className="flex flex-wrap items-center justify-end gap-1.5 lg:justify-end">
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value as typeof sort)}
-                    className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[210px]`}
+                    className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[190px]`}
                     style={{
                       backgroundImage:
                         "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
@@ -290,6 +341,23 @@ export default function PersonalCellarPage() {
                     <option value="vintage_old">Safra mais antiga</option>
                     <option value="vintage">Safra mais nova</option>
                   </select>
+                  <select
+                    value={countryFilter}
+                    onChange={(e) => setCountryFilter(e.target.value)}
+                    className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[150px]`}
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
+                      backgroundPosition: "calc(100% - 16px) 16px, calc(100% - 11px) 16px",
+                      backgroundSize: "5px 5px, 5px 5px",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  >
+                    <option value="all">País: Todos</option>
+                    {countryOptions.filter((o) => o.key !== "all").map((option) => (
+                      <option key={option.key} value={option.key}>{option.label}</option>
+                    ))}
+                  </select>
                   <div className="editorial-segmented">
                     <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
                       Grade
@@ -300,21 +368,7 @@ export default function PersonalCellarPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={toggleLabels}
-                    aria-pressed={showLabels}
-                    title={showLabels ? "Ocultar rótulos" : "Mostrar rótulos"}
-                    className={`flex h-10 w-10 items-center justify-center rounded-[14px] border transition-all ${controlMuted}`}
-                    style={{
-                      background: showLabels ? "rgba(95,111,82,0.12)" : "rgba(255,255,255,0.68)",
-                      borderColor: showLabels ? "rgba(95,111,82,0.18)" : "rgba(95,111,82,0.10)",
-                      color: showLabels ? "#5F7F52" : "rgba(58,51,39,0.55)",
-                    }}
-                  >
-                    {showLabels ? <ImageIcon className="h-4 w-4" /> : <ImageOff className="h-4 w-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    className="editorial-btn-primary h-10 rounded-[14px] px-4 text-[12.5px] font-semibold tracking-[-0.01em]"
+                    className="editorial-btn-primary h-9 sm:h-10 rounded-[12px] sm:rounded-[14px] px-3.5 text-[12px] sm:text-[12.5px] font-semibold tracking-[-0.01em]"
                     onClick={() => setAddOpen(true)}
                   >
                     + Adicionar
@@ -322,35 +376,27 @@ export default function PersonalCellarPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 rounded-[16px] bg-[rgba(255,255,255,0.28)] px-2.5 py-2.25 shadow-[0_1px_0_rgba(95,111,82,0.035)] sm:px-3">
-                <div className="flex flex-wrap items-center gap-1.5">
+              <div className="rounded-[14px] bg-[rgba(255,255,255,0.24)] px-2.5 py-1.5 shadow-[0_1px_0_rgba(95,111,82,0.03)]">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                   <span className={sectionLabel}>Tipo</span>
-                  {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                  {styleOptions.map((s) => (
                     <Chip
-                      key={s}
-                      active={styleFilter === s}
-                      onClick={() => setStyleFilter(s)}
-                      className="normal-case tracking-[-0.01em]"
+                      key={s.key}
+                      active={styleFilter === s.key}
+                      onClick={() => setStyleFilter(s.key)}
+                      className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em]"
                     >
-                      {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
+                      {s.label}
                     </Chip>
                   ))}
-                </div>
-
-                <div className="h-px bg-[rgba(95,111,82,0.055)]" />
-
-                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="mx-1 hidden h-4 w-px bg-[rgba(95,111,82,0.10)] sm:inline-block" />
                   <span className={sectionLabel}>Janela</span>
-                  {[
-                    { key: "all", label: "Todos" },
-                    { key: "now", label: "Beber agora" },
-                    { key: "guard", label: "Em guarda" },
-                  ].map((option) => (
+                  {drinkWindowOptions.map((option) => (
                     <Chip
                       key={option.key}
                       active={drinkWindowFilter === option.key}
                       onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                      className="normal-case tracking-[-0.01em]"
+                      className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em]"
                     >
                       {option.label}
                     </Chip>
