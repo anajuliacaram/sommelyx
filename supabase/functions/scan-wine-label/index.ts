@@ -47,6 +47,12 @@ type FailPayload = {
   retryable?: boolean;
 };
 
+type ScanLabelRequest = {
+  imageBase64?: unknown;
+  mimeType?: unknown;
+  fileName?: unknown;
+};
+
 function jsonResponse(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
     status,
@@ -321,7 +327,7 @@ serve(async (req) => {
       });
     }
 
-    let payload: { imageBase64?: unknown } = {};
+    let payload: ScanLabelRequest = {};
     try {
       payload = await req.json();
     } catch (parseError) {
@@ -340,6 +346,9 @@ serve(async (req) => {
     }
 
     const imageBase64Raw = payload?.imageBase64;
+    const payloadMimeType = typeof payload?.mimeType === "string" ? payload.mimeType.trim() : null;
+    const payloadFileName = typeof payload?.fileName === "string" ? payload.fileName.trim() : null;
+    console.log(`[${FUNCTION_NAME}] step: request_received request_id=${requestId} auth_present=${Boolean(authorization)} mime=${payloadMimeType || "unknown"} file=${payloadFileName || "unknown"} image_base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
       await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, { reason: "missing_image" });
       return fail(400, {
@@ -352,24 +361,43 @@ serve(async (req) => {
     }
 
     const parsedImage = parseImageDataUrl(imageBase64Raw);
-    const imageMime = parsedImage.mime;
+    const imageMime = payloadMimeType || parsedImage.mime;
     const imageBase64 = normalizeBase64(parsedImage.base64);
     console.log(`[${FUNCTION_NAME}] step: image_normalized request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
     const base64Regex = /^[A-Za-z0-9+/=\s]+$/;
     const sizeBytes = Math.floor((imageBase64.length * 3) / 4);
     console.log(`[${FUNCTION_NAME}] step: image_size_checked request_id=${requestId} size_bytes=${sizeBytes}`);
 
-    if (!imageMime.startsWith("image/") || !base64Regex.test(imageBase64) || !isValidBase64(imageBase64)) {
+    if (!imageMime.startsWith("image/")) {
       console.error(`[${FUNCTION_NAME}] step: image_invalid request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
       await logStep(userId, 400, "image_invalid", Date.now() - startTime, requestId, {
         request_id: requestId,
-        reason: "invalid_image_payload",
+        reason: "invalid_image_mime",
         image_mime: imageMime,
         base64_length: imageBase64.length,
+        file_name: payloadFileName,
       });
       return fail(400, {
         success: false,
         code: "INVALID_IMAGE",
+        message: "Arquivo inválido. Envie uma imagem legível do rótulo.",
+        requestId,
+        retryable: false,
+      });
+    }
+
+    if (!base64Regex.test(imageBase64) || !isValidBase64(imageBase64)) {
+      console.error(`[${FUNCTION_NAME}] step: image_base64_invalid request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
+      await logStep(userId, 400, "image_base64_invalid", Date.now() - startTime, requestId, {
+        request_id: requestId,
+        reason: "invalid_image_base64",
+        image_mime: imageMime,
+        base64_length: imageBase64.length,
+        file_name: payloadFileName,
+      });
+      return fail(400, {
+        success: false,
+        code: "INVALID_IMAGE_BASE64",
         message: "Arquivo inválido. Envie uma imagem legível do rótulo.",
         requestId,
         retryable: false,
@@ -381,6 +409,7 @@ serve(async (req) => {
       await logStep(userId, 413, "image_too_large", Date.now() - startTime, requestId, {
         reason: "image_too_large",
         size_bytes: sizeBytes,
+        file_name: payloadFileName,
       });
       return fail(413, {
         success: false,
@@ -461,7 +490,7 @@ serve(async (req) => {
           role: "user",
           content: [
             { type: "input_text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
-            { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}`, detail: "high" },
+            { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}`, detail: "auto" },
           ],
         },
       ],
@@ -506,7 +535,7 @@ serve(async (req) => {
         required: ["wine"],
         additionalProperties: true,
       },
-      maxOutputTokens: 400,
+      maxOutputTokens: 280,
     });
 
     const durationMs = Date.now() - startTime;

@@ -35,6 +35,13 @@ interface ScanWineLabelDialogProps {
 
 type ScanStep = "capture" | "scanning" | "preview" | "error";
 
+function isAcceptedMobileImage(file: File) {
+  const mime = (file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  if (mime.startsWith("image/")) return true;
+  return [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"].some((ext) => name.endsWith(ext));
+}
+
 export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: ScanWineLabelDialogProps) {
   const [step, setStep] = useState<ScanStep>("capture");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -76,7 +83,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     onOpenChange(v);
   };
 
-  const runScan = useCallback(async (base64: string) => {
+  const runScan = useCallback(async (
+    base64: string,
+    metadata?: {
+      mimeType?: string;
+      fileName?: string;
+    },
+  ) => {
     setStep("scanning");
     setErrorMsg("");
     setSupportCode(null);
@@ -84,12 +97,20 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     try {
       console.info("[ScanWineLabelDialog] backend_called", {
         function: "scan-wine-label",
-        payloadShape: { hasImageBase64: Boolean(base64) },
+        payloadShape: {
+          hasImageBase64: Boolean(base64),
+          mimeType: metadata?.mimeType || null,
+          fileName: metadata?.fileName || null,
+        },
         payloadSizeEstimateBytes: Math.round((base64.length * 3) / 4),
       });
       const data = await invokeEdgeFunction<{ wine: ScannedWineData }>(
         "scan-wine-label",
-        { imageBase64: base64 },
+        {
+          imageBase64: base64,
+          mimeType: metadata?.mimeType,
+          fileName: metadata?.fileName,
+        },
         { timeoutMs: 90_000, retries: 2 },
       );
 
@@ -141,7 +162,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   }, []);
 
   const handleFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith("image/")) {
+    if (!isAcceptedMobileImage(file)) {
       toast({ title: "Selecione uma imagem válida", variant: "destructive" });
       return;
     }
@@ -179,9 +200,44 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       if (!prepared.imageBase64) {
         throw Object.assign(new Error("Não foi possível preparar a imagem."), { code: "IMAGE_PROCESSING_FAILED" });
       }
-      await runScan(prepared.imageBase64);
+      await runScan(prepared.imageBase64, {
+        mimeType: prepared.mimeType,
+        fileName: prepared.fileName,
+      });
     } catch (err: any) {
       console.error("Image error:", err);
+      if (err instanceof EdgeFunctionError) {
+        console.error("[ScanWineLabelDialog] backend_failure", {
+          code: err.code,
+          status: err.status,
+          requestId: err.requestId,
+          functionName: err.functionName,
+          rawBody: err.rawBody,
+        });
+        setSupportCode(err.requestId ?? null);
+
+        const code = err.code;
+        let msg = "Não foi possível analisar o rótulo. Tente novamente.";
+        if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
+          msg = "Sua sessão expirou. Faça login novamente para continuar.";
+        } else if (code === "INVALID_IMAGE") {
+          msg = "Imagem inválida. Envie uma foto legível do rótulo.";
+        } else if (code === "INVALID_IMAGE_BASE64") {
+          msg = "A imagem enviada não pôde ser lida corretamente. Tente outra foto ou use a câmera.";
+        } else if (code === "IMAGE_TOO_LARGE" || code === "FILE_TOO_LARGE") {
+          msg = "A imagem está muito grande. Tente uma foto mais leve.";
+        } else if (code === "AI_PARSE_ERROR") {
+          msg = "A leitura do rótulo voltou em formato inválido. Tente novamente com outra foto.";
+        } else if (code === "AI_TIMEOUT") {
+          msg = "Tempo de resposta excedido. Tente novamente com uma foto mais nítida.";
+        } else if (code === "AI_UNAVAILABLE") {
+          msg = "Não conseguimos concluir a leitura agora. Verifique a conexão e tente novamente com a mesma imagem.";
+        }
+        setErrorMsg(msg);
+        setStep("error");
+        return;
+      }
+
       setSupportCode(null);
       setErrorMsg(getAttachmentErrorMessage(err, "Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo."));
       setStep("error");

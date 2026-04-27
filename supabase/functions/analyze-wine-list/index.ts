@@ -11,6 +11,8 @@ const corsHeaders = {
 };
 const FUNCTION_NAME = "analyze-wine-list";
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+const ANALYSIS_CACHE_TTL_MS = 10 * 60_000;
+const analysisCache = new Map<string, { expiresAt: number; payload: unknown }>();
 const UserProfileSchema = z.object({
   topStyles: z.array(z.string()).optional(),
   topGrapes: z.array(z.string()).optional(),
@@ -47,6 +49,38 @@ function trace(stage: string, metadata?: Record<string, unknown>) {
 
 function elapsed(startedAt: number) {
   return Date.now() - startedAt;
+}
+
+function pruneCache(cache: Map<string, { expiresAt: number; payload: unknown }>) {
+  const now = Date.now();
+  for (const [key, value] of cache.entries()) {
+    if (value.expiresAt <= now) cache.delete(key);
+  }
+}
+
+async function sha256Hex(input: string) {
+  const bytes = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(hash)).map((value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+async function buildAnalysisCacheKey(input: {
+  mode?: string;
+  wineName?: string;
+  extractedText?: string;
+  imageBase64?: string;
+  mimeType?: string;
+  fileName?: string;
+}) {
+  const normalized = JSON.stringify({
+    mode: input.mode || "wine-list",
+    wineName: input.wineName || "",
+    mimeType: input.mimeType || "",
+    fileName: input.fileName || "",
+    extractedTextHash: input.extractedText ? await sha256Hex(input.extractedText) : null,
+    imageBase64Hash: input.imageBase64 ? await sha256Hex(input.imageBase64) : null,
+  });
+  return await sha256Hex(normalized);
 }
 
 async function logToDb(
@@ -474,6 +508,7 @@ serve(async (req) => {
     }
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId });
+    trace("auth_timing", { request_id: requestId, durationMs: elapsed(startTime) });
 
 
     const rawBody = await req.json().catch(() => null);
@@ -509,10 +544,36 @@ serve(async (req) => {
 
     const { imageBase64, extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
     trace("request_parsed", { request_id: requestId, mimeType, fileName, mode, wineName, extractedTextLength: extractedText?.length || 0 });
+    trace("payload_validation_timing", {
+      request_id: requestId,
+      durationMs: elapsed(startTime),
+      hasImageBase64: Boolean(imageBase64),
+      hasExtractedText: Boolean(extractedText),
+    });
 
     const cleanBase64 = imageBase64?.includes(",")
       ? imageBase64.split(",")[1].replace(/\s/g, "")
       : imageBase64?.replace(/\s/g, "");
+
+    pruneCache(analysisCache);
+    const cacheKey = await buildAnalysisCacheKey({
+      mode,
+      wineName,
+      extractedText,
+      imageBase64: cleanBase64,
+      mimeType,
+      fileName,
+    });
+    const cached = analysisCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      trace("analysis_cache_hit", {
+        request_id: requestId,
+        cacheKey,
+        durationMs: elapsed(startTime),
+      });
+      return jsonResponse(cached.payload);
+    }
+    trace("analysis_cache_miss", { request_id: requestId, cacheKey });
 
     const isMenuMode = mode === "menu-for-wine";
     const externalPayloadShape = {
@@ -815,7 +876,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
             : [{ type: "input_text" as const, text: String(userMessageContent || "") }],
         }],
         schema: (tools[0] as any)?.function?.parameters || {},
-        maxOutputTokens: 650,
+        maxOutputTokens: 560,
       });
 
       if (!openaiResult.ok) {
@@ -964,6 +1025,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: true });
       const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
       trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
+      analysisCache.set(cacheKey, { expiresAt: Date.now() + ANALYSIS_CACHE_TTL_MS, payload: normalized });
+      trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: true });
       return jsonResponse(normalized);
     }
 
@@ -983,6 +1046,9 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: false });
     const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
     trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
+    analysisCache.set(cacheKey, { expiresAt: Date.now() + ANALYSIS_CACHE_TTL_MS, payload: normalized });
+    trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: false });
+    trace("total_function_duration", { request_id: requestId, durationMs: elapsed(startTime) });
     return jsonResponse(normalized);
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "Erro interno";
