@@ -257,7 +257,7 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
           variant={isLight ? "primary" : "secondary"}
           className={`w-full h-11 rounded-2xl px-6 text-[13px] font-semibold ${
             isLight
-              ? "shadow-[0_18px_44px_-22px_rgba(110,30,42,0.55)]"
+                ? "shadow-[0_18px_44px_-22px_rgba(46,74,47,0.50)]"
               : "bg-[#C6A768] hover:bg-[#B8995A] text-[#1A1A1A] shadow-[0_18px_44px_-22px_rgba(198,167,104,0.45)]"
           }`}
           onClick={onSignup}
@@ -380,7 +380,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
                       <motion.div
                         layoutId="faq-pill"
                         className="absolute inset-0 rounded-xl"
-                        style={{ background: c.accent }}
+                        style={{ background: "linear-gradient(135deg, #3F5E3B, #2E4A2F)" }}
                         transition={{ type: "spring", stiffness: 360, damping: 32 }}
                       />
                     )}

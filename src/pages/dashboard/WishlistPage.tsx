@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
 import { useAddWishlist, useDeleteWishlist, useWishlist } from "@/hooks/useBusinessData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -503,13 +504,17 @@ export default function WishlistPage() {
           {filtered.map((item, index) => (
             <motion.div key={item.id} className="glass-card p-3 sm:p-4 flex gap-3 group" initial="hidden" animate="visible" variants={fadeUp} custom={index + 2}>
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[20px] border border-border/50 bg-primary/5">
-                {item.image_url ? (
-                  <img src={item.image_url} alt={item.wine_name} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Heart className="h-5 w-5 text-primary" />
-                  </div>
-                )}
+                <WineLabelPreview
+                  wine={{
+                    name: item.wine_name,
+                    style: item.style,
+                    image_url: item.image_url,
+                  }}
+                  alt={item.wine_name}
+                  compact
+                  className="h-full w-full rounded-[20px]"
+                  imageClassName="h-full w-full object-cover"
+                />
               </div>
 
               <div className="min-w-0 flex-1">

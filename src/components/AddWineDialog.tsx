@@ -314,16 +314,16 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
           const path = `${user.id}/${Date.now()}-${crypto.randomUUID()}.jpg`;
           const response = await fetch(`data:image/jpeg;base64,${labelImageBase64}`);
           const blob = await response.blob();
-          const { error } = await supabase.storage.from("wine-label-images").upload(path, blob, {
+          const { error } = await supabase.storage.from("wishlist-images").upload(path, blob, {
             cacheControl: "3600",
             upsert: false,
             contentType: "image/jpeg",
           });
           if (!error) {
-            const { data: signed } = await supabase.storage
-              .from("wine-label-images")
-              .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-            if (signed?.signedUrl) imageUrl = signed.signedUrl;
+            const { data: publicUrl } = supabase.storage
+              .from("wishlist-images")
+              .getPublicUrl(path);
+            if (publicUrl?.publicUrl) imageUrl = publicUrl.publicUrl;
           }
         } catch (uploadError) {
           console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);
@@ -332,16 +332,16 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
         try {
           const ext = labelImageFile.name.split(".").pop()?.toLowerCase() || "jpg";
           const path = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
-          const { error } = await supabase.storage.from("wine-label-images").upload(path, labelImageFile, {
+          const { error } = await supabase.storage.from("wishlist-images").upload(path, labelImageFile, {
             cacheControl: "3600",
             upsert: false,
             contentType: labelImageFile.type,
           });
           if (!error) {
-            const { data: signed } = await supabase.storage
-              .from("wine-label-images")
-              .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-            if (signed?.signedUrl) imageUrl = signed.signedUrl;
+            const { data: publicUrl } = supabase.storage
+              .from("wishlist-images")
+              .getPublicUrl(path);
+            if (publicUrl?.publicUrl) imageUrl = publicUrl.publicUrl;
           }
         } catch (uploadError) {
           console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);

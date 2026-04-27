@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
 import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/lib/ai-attachments";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -345,7 +346,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         style_confidence: fieldConfidence(type || row.style),
       },
       errors,
-      image_url: cellarDuplicate?.image_url || buildGeneratedThumbnail({ ...row, style: type }),
+      image_url: cellarDuplicate?.image_url || null,
       duplicateWarning: shouldCheckDuplicates && (duplicates.length > 0 || cellarDuplicate) ? `Possível duplicado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""} detectado${duplicates.length + 1 > 1 || cellarDuplicate ? "s" : ""}` : null,
       duplicateGroupKey,
       duplicateIndexes,
@@ -609,7 +610,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               grape: row.grape || aiEnriched.grape || match?.wine?.grape || undefined,
               price: resolvedPrice,
               purchase_price: resolvedPrice,
-              image_url: row.image_url || match?.wine?.image_url || buildGeneratedThumbnail({ ...row, type: finalStyle }),
+              image_url: row.image_url || match?.wine?.image_url || null,
             };
             const validation = computeRowErrors([nextRow])[0];
             const errors = validation ? (Object.values(validation).filter(Boolean) as string[]) : [];
@@ -2303,19 +2304,19 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           ) : column.key === "name" ? (
             <div className="flex items-stretch gap-2 p-1.5">
               <div className="w-10 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-[#F8F6F2]">
-                <div className="relative h-full w-full">
-                  <img
-                    src={row.image_url || buildGeneratedThumbnail({ ...row, type: row.type || row.style })}
-                    alt=""
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                  {isIllustrativeImage(row.image_url) ? (
-                    <div className="absolute right-1.5 top-1.5 rounded-full border border-white/20 bg-white/72 px-1.5 py-0.5 text-[8px] font-medium text-[#6F6B61] backdrop-blur-sm">
-                      Ilustrativa
-                    </div>
-                  ) : null}
-                </div>
+                <WineLabelPreview
+                  wine={{
+                    name: row.name || "Prévia do vinho",
+                    style: row.type || row.style || null,
+                    image_url: row.image_url || null,
+                    fallback_image: buildGeneratedThumbnail({ ...row, type: row.type || row.style }),
+                  }}
+                  alt={row.name || "Prévia do vinho"}
+                  compact
+                  generated={!row.image_url || isIllustrativeImage(row.image_url)}
+                  className="h-full w-full rounded-xl"
+                  imageClassName="h-full w-full object-cover"
+                />
               </div>
               <Input
                 value={getFieldValue(row, column.key)}

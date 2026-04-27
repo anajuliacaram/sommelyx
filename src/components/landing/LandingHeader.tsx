@@ -87,7 +87,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
               className="px-3.5 sm:px-5 h-8 sm:h-9 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.05em] rounded-xl shadow-float whitespace-nowrap active:scale-100 shadow-md opacity-100"
               onClick={onSignup}
             >
-              Criar conta grátis
+              COMEÇE GRÁTIS
             </Button>
           </MagneticButton>
         </div>

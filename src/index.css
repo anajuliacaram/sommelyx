@@ -177,6 +177,21 @@
     overscroll-behavior-y: auto;
   }
 
+  /* Landing: green premium accents pre-login */
+  body.landing-page .btn-primary-premium {
+    background: linear-gradient(135deg, #3F5E3B 0%, #2E4A2F 100%);
+    box-shadow: 0 10px 24px -10px rgba(46, 74, 47, 0.42);
+  }
+
+  body.landing-page .btn-primary-premium:hover:not(:disabled) {
+    background: linear-gradient(135deg, #466942 0%, #2E4A2F 100%);
+    box-shadow: 0 14px 30px -12px rgba(46, 74, 47, 0.5);
+  }
+
+  body.landing-page .btn-primary-premium:active:not(:disabled) {
+    box-shadow: 0 4px 10px rgba(46, 74, 47, 0.26);
+  }
+
   body.legal-page {
     overscroll-behavior-y: auto;
     background-attachment: scroll;

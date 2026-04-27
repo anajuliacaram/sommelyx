@@ -16,7 +16,6 @@ import {
 import { useWines, useDeleteWine, useWineEvent, type Wine as WineType } from "@/hooks/useWines";
 import { useResolveWineImages } from "@/hooks/useResolveWineImages";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
-import { resolveWineCardImage } from "@/lib/wine-images";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -1182,7 +1181,6 @@ export default function CellarPage() {
             <tbody>
               {filtered.map((wine) => {
                 const status = drinkStatus(wine);
-                const coverImageUrl = resolveWineCardImage(wine);
                 return (
                   <tr
                     key={wine.id}
@@ -1192,11 +1190,13 @@ export default function CellarPage() {
                     <td className="px-3 py-2.25 align-middle">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="h-9 w-7 shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted/20 transition-[filter,transform] duration-200 ease-out group-hover:brightness-[1.03]">
-                          {coverImageUrl ? (
-                            <img src={coverImageUrl} alt={wine.name} className="h-full w-full object-cover" loading="lazy" />
-                          ) : (
-                            <div className={cn("h-full w-full", getWineTone(wine.style))} />
-                          )}
+                          <WineLabelPreview
+                            wine={wine}
+                            alt={wine.name}
+                            compact
+                            className="h-full w-full rounded-lg"
+                            imageClassName="h-full w-full object-cover"
+                          />
                         </div>
                         <div className="min-w-0">
                           <p className="text-[10.75px] font-semibold text-[#18131b] truncate max-w-[200px] tracking-[-0.015em]">{wine.name}</p>

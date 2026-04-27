@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSommelyxData } from "@/lib/sommelyx-data";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
+import { isPlaceholderWineImageUrl } from "@/lib/wine-images";
 
 export interface Wine {
   id: string;
@@ -30,24 +31,28 @@ export interface Wine {
 
 export type WineInsert = Omit<Wine, "id" | "created_at" | "updated_at">;
 
-const WINE_LABEL_BUCKET = "wine-label-images";
-
-function extractWineLabelStoragePath(imageUrl?: string | null) {
+function extractWineLabelStorageRef(imageUrl?: string | null) {
   const url = typeof imageUrl === "string" ? imageUrl.trim() : "";
   if (!url) return null;
+  if (/^(data|blob):/i.test(url)) return null;
+
+  if (!/^https?:\/\//i.test(url)) {
+    return { bucket: "wine-label-images", path: url.replace(/^\/+/, "") };
+  }
 
   const patterns = [
-    /\/storage\/v1\/object\/sign\/wine-label-images\/([^?]+)/i,
-    /\/storage\/v1\/object\/public\/wine-label-images\/([^?]+)/i,
+    /\/storage\/v1\/object\/sign\/(wine-label-images|wishlist-images)\/([^?]+)/i,
+    /\/storage\/v1\/object\/public\/(wine-label-images|wishlist-images)\/([^?]+)/i,
+    /\/storage\/v1\/object\/authenticated\/(wine-label-images|wishlist-images)\/([^?]+)/i,
   ];
 
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match?.[1]) {
+    if (match?.[1] && match?.[2]) {
       try {
-        return decodeURIComponent(match[1]);
+        return { bucket: match[1], path: decodeURIComponent(match[2]) };
       } catch {
-        return match[1];
+        return { bucket: match[1], path: match[2] };
       }
     }
   }
@@ -58,22 +63,33 @@ function extractWineLabelStoragePath(imageUrl?: string | null) {
 async function normalizeWineImageUrl(imageUrl?: string | null) {
   const url = typeof imageUrl === "string" ? imageUrl.trim() : "";
   if (!url) return null;
-
-  if (!/^https?:\/\//i.test(url)) {
-    return url;
+  if (isPlaceholderWineImageUrl(url)) {
+    if (import.meta.env.DEV) {
+      console.debug("[useWines] image_url_placeholder_scrubbed", {
+        original: url.slice(0, 120),
+      });
+    }
+    return null;
   }
+  if (/^(data|blob):/i.test(url)) return url;
 
-  const storagePath = extractWineLabelStoragePath(url);
-  if (!storagePath) {
+  const storageRef = extractWineLabelStorageRef(url);
+  if (!storageRef) {
     return url;
   }
 
   try {
-    const { data, error } = await supabase.storage.from(WINE_LABEL_BUCKET).createSignedUrl(storagePath, 60 * 60 * 24 * 365 * 10);
+    if (storageRef.bucket === "wishlist-images") {
+      const { data } = supabase.storage.from(storageRef.bucket).getPublicUrl(storageRef.path);
+      if (data?.publicUrl) return data.publicUrl;
+      return url;
+    }
+
+    const { data, error } = await supabase.storage.from(storageRef.bucket).createSignedUrl(storageRef.path, 60 * 60 * 24 * 365 * 10);
     if (!error && data?.signedUrl) {
       if (import.meta.env.DEV) {
         console.debug("[useWines] image_url_refreshed", {
-          storagePath,
+          storagePath: storageRef.path,
           original: url,
           refreshed: data.signedUrl,
         });
@@ -82,7 +98,7 @@ async function normalizeWineImageUrl(imageUrl?: string | null) {
     }
     if (import.meta.env.DEV) {
       console.debug("[useWines] image_url_refresh_failed", {
-        storagePath,
+        storagePath: storageRef.path,
         original: url,
         error: error?.message ?? null,
       });
@@ -90,7 +106,7 @@ async function normalizeWineImageUrl(imageUrl?: string | null) {
   } catch (error) {
     if (import.meta.env.DEV) {
       console.debug("[useWines] image_url_refresh_threw", {
-        storagePath,
+        storagePath: storageRef.path,
         original: url,
         error: error instanceof Error ? error.message : String(error),
       });

@@ -40,38 +40,55 @@ function isPlaceholderLike(url: string) {
   );
 }
 
+export function isKnownBrokenWineImageUrl(url?: string | null) {
+  const normalized = normalizeUrl(url);
+  if (!normalized) return false;
+  if (/^https?:\/\/cellar\.db\.wine\/attachments\//i.test(normalized)) return true;
+  return false;
+}
+
+export function isPlaceholderWineImageUrl(url?: string | null) {
+  const normalized = normalizeUrl(url);
+  if (!normalized) return false;
+  return isPlaceholderLike(normalized);
+}
+
 export function isRenderableWineImageUrl(url?: string | null) {
   const normalized = normalizeUrl(url);
   if (!normalized) return false;
-  return /^https?:\/\//i.test(normalized) && !isPlaceholderLike(normalized);
+  if (isPlaceholderLike(normalized)) return false;
+  if (isKnownBrokenWineImageUrl(normalized)) return false;
+  if (/^blob:/i.test(normalized)) return true;
+  if (/^data:image\//i.test(normalized)) return true;
+  return /^https?:\/\//i.test(normalized);
 }
 
 export function resolveWineCardImageCandidates(wine: WineImageLike) {
   const candidates = [
-    wine.image,
-    wine.uploaded_image,
     wine.uploaded_image_url,
     wine.user_image_url,
     wine.photo_url,
+    wine.uploaded_image,
+    wine.image,
     wine.image_url,
     wine.persisted_image_url,
     wine.imageUrl,
-    wine.label_url,
-    wine.label_image_url,
     wine.resolved_image_url,
+    wine.label_image_url,
+    wine.label_url,
     wine.fallback_image,
     ...(wine.entries ?? []).flatMap((entry) => [
-      entry.image,
-      entry.uploaded_image,
       entry.uploaded_image_url,
       entry.user_image_url,
       entry.photo_url,
+      entry.uploaded_image,
+      entry.image,
       entry.image_url,
       entry.persisted_image_url,
       entry.imageUrl,
-      entry.label_url,
-      entry.label_image_url,
       entry.resolved_image_url,
+      entry.label_image_url,
+      entry.label_url,
       entry.fallback_image,
     ]),
   ]

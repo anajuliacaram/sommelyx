@@ -15,9 +15,9 @@ const fadeUp = {
 type TabKey = "dashboard" | "adega" | "harmonizar";
 
 const tabs: { key: TabKey; label: string; icon: typeof LayoutDashboard; accent: string }[] = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, accent: "#7B1E2B" },
-  { key: "adega", label: "Adega", icon: Wine, accent: "#5F6F52" },
-  { key: "harmonizar", label: "Harmonizar", icon: Sparkles, accent: "#B8860B" },
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, accent: "#3F5E3B" },
+  { key: "adega", label: "Adega", icon: Wine, accent: "#3F5E3B" },
+  { key: "harmonizar", label: "Harmonizar", icon: Sparkles, accent: "#3F5E3B" },
 ];
 
 const browserFrame = {

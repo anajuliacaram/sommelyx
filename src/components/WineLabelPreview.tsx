@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Wine as WineIcon } from "@/icons/lucide";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { isRenderableWineImageUrl, resolveWineCardImageCandidates } from "@/lib/wine-images";
 
 type WineLabelPreviewProps = {
   wine: {
+    id?: string;
     image?: string | null;
     image_url?: string | null;
     imageUrl?: string | null;
@@ -58,20 +61,82 @@ export function WineLabelPreview({
   generated = false,
   compact = false,
 }: WineLabelPreviewProps) {
+  const queryClient = useQueryClient();
   const candidates = useMemo(() => resolveWineCardImageCandidates(wine), [wine]);
   const [index, setIndex] = useState(0);
+  const [lastEvent, setLastEvent] = useState<"idle" | "load" | "error">("idle");
+  const healingUrls = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setIndex(0);
+    setLastEvent("idle");
   }, [candidates.join("|"), wine.name]);
 
   const activeSrc = candidates[index] ?? null;
-  const showImage = !!activeSrc;
+  const activeRenderable = isRenderableWineImageUrl(activeSrc);
+  const showImage = activeRenderable;
   const tone = getFallbackTone(wine.style);
+
+  const triggerSelfHeal = async (failedSrc: string) => {
+    if (!wine.id) return;
+    if (!/^https?:\/\//i.test(failedSrc)) return;
+    if (healingUrls.current.has(failedSrc)) return;
+    healingUrls.current.add(failedSrc);
+
+    if (import.meta.env.DEV) {
+      console.debug("[WineLabelPreview] self_heal_start", {
+        wineId: wine.id,
+        wineName: wine.name,
+        failedSrc,
+      });
+    }
+
+    try {
+      const result = await invokeEdgeFunction<{
+        ok?: boolean;
+        image_url?: string | null;
+        source?: string | null;
+      }>(
+        "wine-image-resolver",
+        { wineId: wine.id, force: true, failedUrl: failedSrc },
+        { timeoutMs: 30_000, retries: 0 },
+      );
+
+      const nextUrl = result?.image_url ?? null;
+      if (isRenderableWineImageUrl(nextUrl)) {
+        queryClient.setQueriesData<any[]>({ queryKey: ["wines"] }, (current) => {
+          if (!current) return current;
+          return current.map((item) => (item?.id === wine.id ? { ...item, image_url: nextUrl } : item));
+        });
+      }
+
+      if (import.meta.env.DEV) {
+        console.debug("[WineLabelPreview] self_heal_result", {
+          wineId: wine.id,
+          wineName: wine.name,
+          failedSrc,
+          nextUrl,
+          source: result?.source ?? null,
+          renderable: isRenderableWineImageUrl(nextUrl),
+        });
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.debug("[WineLabelPreview] self_heal_error", {
+          wineId: wine.id,
+          wineName: wine.name,
+          failedSrc,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     if (import.meta.env.DEV) {
       const fields = {
+        id: wine.id ?? null,
+        name: wine.name,
         image: wine.image ?? null,
         image_url: wine.image_url ?? null,
         imageUrl: wine.imageUrl ?? null,
@@ -87,11 +152,11 @@ export function WineLabelPreview({
         entriesCount: Array.isArray(wine.entries) ? wine.entries.length : 0,
         candidateCount: candidates.length,
         activeSrc: activeSrc ? activeSrc.slice(0, 80) : null,
-        activeRenderable: isRenderableWineImageUrl(activeSrc),
+        activeRenderable,
       };
       console.debug("[WineLabelPreview] image_fields", fields);
     }
-  }, [activeSrc, candidates.length, wine.image, wine.image_url, wine.imageUrl, wine.uploaded_image, wine.uploaded_image_url, wine.user_image_url, wine.photo_url, wine.persisted_image_url, wine.label_image_url, wine.label_url, wine.resolved_image_url, wine.fallback_image, wine.entries]);
+  }, [activeRenderable, activeSrc, candidates.length, wine.image, wine.image_url, wine.imageUrl, wine.uploaded_image, wine.uploaded_image_url, wine.user_image_url, wine.photo_url, wine.persisted_image_url, wine.label_image_url, wine.label_url, wine.resolved_image_url, wine.fallback_image, wine.entries]);
 
   return (
     <div className={cn("relative overflow-hidden bg-[#F7F3EC]", compact ? "rounded-[16px]" : "rounded-[22px]", className)}>
@@ -101,21 +166,30 @@ export function WineLabelPreview({
           alt={alt}
           loading="lazy"
           decoding="async"
+          referrerPolicy="no-referrer"
+          crossOrigin="anonymous"
           onLoad={() => {
+            setLastEvent("load");
             if (import.meta.env.DEV) {
               console.debug("[WineLabelPreview] img_load", {
+                wineId: wine.id ?? null,
                 wineName: wine.name,
                 src: activeSrc,
               });
             }
           }}
           onError={() => {
+            setLastEvent("error");
             if (import.meta.env.DEV) {
               console.debug("[WineLabelPreview] img_error", {
+                wineId: wine.id ?? null,
                 wineName: wine.name,
                 failedSrc: activeSrc,
                 nextIndex: Math.min(index + 1, candidates.length),
               });
+            }
+            if (activeSrc) {
+              void triggerSelfHeal(activeSrc);
             }
             setIndex((current) => Math.min(current + 1, candidates.length));
           }}
@@ -138,6 +212,12 @@ export function WineLabelPreview({
       {generated && activeSrc ? (
         <div className="absolute right-3 top-3 rounded-full border border-black/5 bg-white/72 px-2 py-1 text-[9px] font-medium text-[#6F6A60] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.18)] backdrop-blur-sm">
           Imagem ilustrativa
+        </div>
+      ) : null}
+      {import.meta.env.DEV ? (
+        <div className="absolute bottom-2 left-2 right-2 rounded-[10px] bg-black/6 px-2 py-1 text-[9px] leading-tight text-[#6F665C] backdrop-blur-sm">
+          {lastEvent === "load" ? "load:ok" : lastEvent === "error" ? "load:error" : "load:idle"} ·{" "}
+          {activeSrc ? activeSrc.slice(0, 52) : "null"}
         </div>
       ) : null}
     </div>

@@ -89,7 +89,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             <MagneticButton>
               <Button
                 variant="primary"
-                className="group h-11 sm:h-12 w-full sm:w-auto rounded-2xl px-6 sm:px-7 text-[14px] font-semibold shadow-[0_18px_44px_-22px_rgba(110,30,42,0.55)]"
+                className="group h-11 sm:h-12 w-full sm:w-auto rounded-2xl px-6 sm:px-7 text-[14px] font-semibold shadow-[0_18px_44px_-22px_rgba(46,74,47,0.50)]"
                 onClick={onSignup}
               >
                 Começar grátis

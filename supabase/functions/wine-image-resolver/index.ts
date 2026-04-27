@@ -4,11 +4,13 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Max-Age": "86400",
 };
 
-const BUCKET = "wine-label-images";
+const BUCKET = "wishlist-images";
 const SEARCH_TIMEOUT_MS = 12_000;
 const DOWNLOAD_TIMEOUT_MS = 15_000;
 const MIN_IMAGE_BYTES = 6_000;
@@ -109,14 +111,87 @@ function buildSearchQuery(row: WineRow): string {
   return dedup.join(" ");
 }
 
+function buildSearchQueries(row: WineRow): string[] {
+  const producer = normalizeText(row.producer);
+  const name = normalizeText(row.name);
+  const vintage = row.vintage ? String(row.vintage) : "";
+
+  const variants = [
+    [producer, name, vintage, "wine bottle label"].filter(Boolean).join(" "),
+    [producer, name, vintage, "wine"].filter(Boolean).join(" "),
+    [producer, name, "wine label"].filter(Boolean).join(" "),
+    [name, vintage, "wine"].filter(Boolean).join(" "),
+    [name, "wine label"].filter(Boolean).join(" "),
+  ];
+
+  return Array.from(new Set(variants.map((item) => item.trim()).filter(Boolean)));
+}
+
+function buildWineDotComQueries(row: WineRow): string[] {
+  const producer = normalizeText(row.producer);
+  const name = normalizeText(row.name);
+  const vintage = row.vintage ? String(row.vintage) : "";
+
+  const variants = [
+    `site:wine.com/product "${producer} ${name}" ${vintage} wine`,
+    `site:wine.com/product "${name}" ${vintage} wine`,
+    `site:wine.com/product "${producer} ${name}" wine`,
+    `site:wine.com/list/wine "${producer}" "${name}" wine`,
+    `site:wine.com/list/wine "${producer}" wine`,
+    `site:wine.com "${producer} ${name}" ${vintage} "Front Bottle Shot"`,
+    `site:wine.com "${producer} ${name}" ${vintage} "Front Label"`,
+  ];
+
+  return Array.from(new Set(variants.map((item) => item.trim()).filter(Boolean)));
+}
+
 const BLOCKED_HOST_PATTERNS = [/wine-searcher\.com/i, /\.gif($|\?)/i];
-const ACCEPTED_MIME = /^image\/(jpeg|jpg|png|webp)$/i;
+const ACCEPTED_MIME = /^image\/(jpeg|jpg|png|webp|avif)$/i;
+
+function extractStoragePath(value?: string | null) {
+  const url = typeof value === "string" ? value.trim() : "";
+  if (!url || /^(data|blob):/i.test(url)) return null;
+  if (!/^https?:\/\//i.test(url)) return url.replace(/^\/+/, "");
+
+  const patterns = [
+    /\/storage\/v1\/object\/sign\/(?:wine-label-images|wishlist-images)\/([^?]+)/i,
+    /\/storage\/v1\/object\/public\/(?:wine-label-images|wishlist-images)\/([^?]+)/i,
+    /\/storage\/v1\/object\/authenticated\/(?:wine-label-images|wishlist-images)\/([^?]+)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match?.[1]) {
+      try {
+        return decodeURIComponent(match[1]);
+      } catch {
+        return match[1];
+      }
+    }
+  }
+
+  return null;
+}
 
 function isLikelyValidImageUrl(u: string): boolean {
   if (!u || !/^https?:\/\//i.test(u)) return false;
+  if (/^https?:\/\/cellar\.db\.wine\/attachments\//i.test(u)) return false;
   if (BLOCKED_HOST_PATTERNS.some((rx) => rx.test(u))) return false;
   if (/alert\.jpg|placeholder|notfound|not[-_]?found|404\.|missing|sprite|favicon/i.test(u)) return false;
   return true;
+}
+
+async function toClientImageUrl(adminClient: ReturnType<typeof createClient>, value?: string | null) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return null;
+  if (/^data:image\//i.test(raw)) return raw;
+
+  const storagePath = extractStoragePath(raw);
+  if (!storagePath) return raw;
+
+  const { data } = adminClient.storage.from(BUCKET).getPublicUrl(storagePath);
+  if (data?.publicUrl) return data.publicUrl;
+  return raw;
 }
 
 async function searchWithGoogleCSE(query: string): Promise<string[]> {
@@ -177,6 +252,204 @@ async function searchWithDuckDuckGo(query: string): Promise<string[]> {
   }
 }
 
+async function searchWithDuckDuckGoWeb(query: string): Promise<string[]> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), SEARCH_TIMEOUT_MS);
+  try {
+    const resp = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+      redirect: "follow",
+    });
+    if (!resp.ok) return [];
+    const html = await resp.text();
+    const results = new Set<string>();
+    const linkMatches = html.matchAll(/<a[^>]+class="[^"]*result__a[^"]*"[^>]+href="([^"]+)"/gi);
+    for (const match of linkMatches) {
+      const raw = match[1] || "";
+      try {
+        const url = new URL(raw, "https://html.duckduckgo.com");
+        const redirected = url.searchParams.get("uddg");
+        const finalUrl = redirected ? decodeURIComponent(redirected) : url.toString();
+        if (isLikelyValidImageUrl(finalUrl) || /^https?:\/\//i.test(finalUrl)) {
+          results.add(finalUrl);
+        }
+      } catch {
+        continue;
+      }
+      if (results.size >= 8) break;
+    }
+    return Array.from(results);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function decodeHtmlEntity(value: string) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function absolutizeUrl(raw: string, baseUrl: string) {
+  try {
+    return new URL(decodeHtmlEntity(raw.trim()), baseUrl).toString();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeCandidateImageUrl(url: string) {
+  if (!/assets\.wine\.com\/winecom\/image\/upload/i.test(url)) return url;
+
+  return url.replace(
+    /\/w_\d+,h_\d+,c_fit,q_auto:best,fl_progressive\//i,
+    "/w_420,h_840,c_fit,q_auto:best,fl_progressive/",
+  );
+}
+
+function extractUrlsFromJsonLd(value: unknown, baseUrl: string, output: Set<string>) {
+  if (!value) return;
+  if (typeof value === "string") {
+    const abs = absolutizeUrl(value, baseUrl);
+    if (abs && isLikelyValidImageUrl(abs)) output.add(normalizeCandidateImageUrl(abs));
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((entry) => extractUrlsFromJsonLd(entry, baseUrl, output));
+    return;
+  }
+  if (typeof value === "object") {
+    const imageValue = (value as Record<string, unknown>).image;
+    if (imageValue) extractUrlsFromJsonLd(imageValue, baseUrl, output);
+  }
+}
+
+function scoreImageCandidate(url: string) {
+  const lower = url.toLowerCase();
+  let score = 0;
+  if (/front|bottle|label|product|winecom\/image\/upload/.test(lower)) score += 4;
+  if (/front bottle shot|front label/.test(lower)) score += 3;
+  if (/assets\.wine\.com/.test(lower)) score += 4;
+  if (/upload|cdn|assets/.test(lower)) score += 2;
+  if (/icon|logo|sprite|avatar|favicon|app-store|google-play|social/.test(lower)) score -= 5;
+  if (!/\.(jpg|jpeg|png|webp|avif)(\?|$)/.test(lower) && !/image\/upload/.test(lower)) score -= 1;
+  return score;
+}
+
+function extractImageCandidatesFromHtml(html: string, pageUrl: string): string[] {
+  const results = new Set<string>();
+  const metaPatterns = [
+    /<meta[^>]+property=["']og:image(?::secure_url)?["'][^>]+content=["']([^"']+)["']/gi,
+    /<meta[^>]+name=["']twitter:image(?::src)?["'][^>]+content=["']([^"']+)["']/gi,
+    /<meta[^>]+itemprop=["']image["'][^>]+content=["']([^"']+)["']/gi,
+    /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/gi,
+  ];
+
+  for (const pattern of metaPatterns) {
+    for (const match of html.matchAll(pattern)) {
+      const abs = absolutizeUrl(match[1] || "", pageUrl);
+      if (abs && isLikelyValidImageUrl(abs)) {
+        results.add(normalizeCandidateImageUrl(abs));
+      }
+    }
+  }
+
+  const scriptMatches = html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+  for (const match of scriptMatches) {
+    const raw = match[1]?.trim();
+    if (!raw) continue;
+    try {
+      const parsed = JSON.parse(raw);
+      extractUrlsFromJsonLd(parsed, pageUrl, results);
+    } catch {
+      continue;
+    }
+  }
+
+  const attributeMatches = html.matchAll(/(?:src|data-src|data-original|href)=["']([^"']+)["']/gi);
+  for (const match of attributeMatches) {
+    const abs = absolutizeUrl(match[1] || "", pageUrl);
+    if (!abs || !isLikelyValidImageUrl(abs)) continue;
+    if (scoreImageCandidate(abs) <= 0) continue;
+    results.add(normalizeCandidateImageUrl(abs));
+  }
+
+  return Array.from(results).sort((a, b) => scoreImageCandidate(b) - scoreImageCandidate(a));
+}
+
+async function collectImagesFromProductPages(pageUrls: string[]): Promise<string[]> {
+  const images = new Set<string>();
+  for (const pageUrl of pageUrls.slice(0, 5)) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), SEARCH_TIMEOUT_MS);
+    try {
+      const resp = await fetch(pageUrl, {
+        signal: ctrl.signal,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+        redirect: "follow",
+      });
+      if (!resp.ok) continue;
+      const html = await resp.text();
+      const candidates = extractImageCandidatesFromHtml(html, resp.url || pageUrl);
+      for (const candidate of candidates) {
+        images.add(candidate);
+        if (images.size >= 12) break;
+      }
+    } catch {
+      // keep trying other pages
+    } finally {
+      clearTimeout(t);
+    }
+    if (images.size >= 12) break;
+  }
+
+  return Array.from(images);
+}
+
+async function searchViaProductPages(query: string): Promise<string[]> {
+  const pageUrls = await searchWithDuckDuckGoWeb(query);
+  if (pageUrls.length === 0) return [];
+  return collectImagesFromProductPages(pageUrls);
+}
+
+async function searchWineDotComPages(row: WineRow): Promise<string[]> {
+  const queries = buildWineDotComQueries(row);
+  const pageUrls = new Set<string>();
+
+  for (const query of queries) {
+    const urls = await searchWithDuckDuckGoWeb(query);
+    for (const url of urls) {
+      if (/^https?:\/\/www\.wine\.com\/(product|list)\//i.test(url)) {
+        pageUrls.add(url);
+      }
+      if (pageUrls.size >= 8) break;
+    }
+    if (pageUrls.size >= 8) break;
+  }
+
+  if (pageUrls.size === 0) return [];
+
+  console.log("wine-image-resolver wine_dot_com_pages", {
+    wineId: row.id,
+    wineName: row.name,
+    pageUrls: Array.from(pageUrls),
+  });
+
+  return collectImagesFromProductPages(Array.from(pageUrls));
+}
+
 async function downloadImage(url: string): Promise<{ ok: true; bytes: Uint8Array; mime: string } | { ok: false; error: string }> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), DOWNLOAD_TIMEOUT_MS);
@@ -203,17 +476,74 @@ async function downloadImage(url: string): Promise<{ ok: true; bytes: Uint8Array
   }
 }
 
-async function findRealLabelImage(row: WineRow): Promise<{ ok: true; bytes: Uint8Array; mime: string; sourceUrl: string } | { ok: false; error: string }> {
-  const query = buildSearchQuery(row);
-  if (!query) return { ok: false, error: "empty query" };
-  let candidates = await searchWithGoogleCSE(query);
-  if (candidates.length === 0) candidates = await searchWithDuckDuckGo(query);
-  if (candidates.length === 0) return { ok: false, error: "no search results" };
-  for (const url of candidates.slice(0, 5)) {
-    const dl = await downloadImage(url);
-    if (dl.ok) return { ok: true, bytes: dl.bytes, mime: dl.mime, sourceUrl: url };
+async function persistDownloadedImage(
+  adminClient: ReturnType<typeof createClient>,
+  row: WineRow,
+  image: { bytes: Uint8Array; mime: string },
+) {
+  const ext = image.mime.includes("jpeg") ? "jpg" : image.mime.includes("webp") ? "webp" : image.mime.includes("avif") ? "avif" : "png";
+  const path = `${row.user_id}/web/${row.id}-${Date.now()}.${ext}`;
+  const { error: uploadError } = await adminClient.storage
+    .from(BUCKET)
+    .upload(path, new Blob([image.bytes], { type: image.mime }), {
+      cacheControl: "31536000",
+      upsert: true,
+      contentType: image.mime,
+    });
+
+  if (uploadError) {
+    return { ok: false as const, error: `upload_failed:${uploadError.message}` };
   }
-  return { ok: false, error: "all candidates failed" };
+
+  const finalUrl = await toClientImageUrl(adminClient, path);
+  if (!finalUrl) {
+    return { ok: false as const, error: "signed_url_generation_failed" };
+  }
+
+  const { error: persistError } = await adminClient
+    .from("wines")
+    .update({ image_url: finalUrl })
+    .eq("id", row.id)
+    .eq("user_id", row.user_id);
+
+  if (persistError) {
+    return { ok: false as const, error: `persist_failed:${persistError.message}` };
+  }
+
+  return { ok: true as const, path, finalUrl };
+}
+
+async function findRealLabelImage(
+  row: WineRow,
+  options?: { excludeUrls?: string[] },
+): Promise<{ ok: true; bytes: Uint8Array; mime: string; sourceUrl: string } | { ok: false; error: string }> {
+  const queries = buildSearchQueries(row);
+  if (queries.length === 0) return { ok: false, error: "empty query" };
+  const excluded = new Set((options?.excludeUrls ?? []).filter(Boolean).map((value) => value.trim()));
+
+  let lastError = "no search results";
+  for (const query of queries) {
+    let candidates = await searchWineDotComPages(row);
+    if (candidates.length === 0) candidates = await searchWithGoogleCSE(query);
+    if (candidates.length === 0) candidates = await searchWithDuckDuckGo(query);
+    if (candidates.length === 0) candidates = await searchViaProductPages(query);
+    if (candidates.length === 0) {
+      lastError = `no search results for query: ${query}`;
+      continue;
+    }
+
+    for (const url of candidates.slice(0, 8)) {
+      if (excluded.has(url.trim())) {
+        lastError = `${query} -> excluded candidate`;
+        continue;
+      }
+      const dl = await downloadImage(url);
+      if (dl.ok) return { ok: true, bytes: dl.bytes, mime: dl.mime, sourceUrl: url };
+      lastError = `${query} -> ${dl.error}`;
+    }
+  }
+
+  return { ok: false, error: lastError };
 }
 
 function jsonResponse(payload: unknown, status = 200) {
@@ -224,7 +554,12 @@ function jsonResponse(payload: unknown, status = 200) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
 
   const startTime = Date.now();
 
@@ -251,8 +586,17 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const wineId = typeof body?.wineId === "string" ? body.wineId.trim() : "";
+    const failedUrl = typeof body?.failedUrl === "string" ? body.failedUrl.trim() : "";
     const force = body?.force === true || body?.regenerate === true;
     if (!wineId) return jsonResponse({ error: "Wine ID inválido." }, 400);
+
+    console.log("wine-image-resolver request_received", {
+      wineId,
+      force,
+      failedUrl: failedUrl || null,
+      hasAuthHeader: Boolean(authHeader),
+      userId: user.id,
+    });
 
     const { data: wine, error: wineError } = await adminClient
       .from("wines")
@@ -267,70 +611,144 @@ serve(async (req) => {
 
     const row = wine as WineRow;
 
-    // Considera "imagem real" apenas o que está no nosso bucket privado.
     const url = row.image_url || "";
-    const isOurBucket = url.includes("/storage/v1/object/public/wine-label-images/")
-      || url.includes("/storage/v1/object/sign/wine-label-images/");
+    const storagePath = extractStoragePath(url);
     const isBadPlaceholder = /alert\.jpg|placeholder|notfound|not[-_]?found|404\.|missing/i.test(url);
     const isSvgFallback = url.startsWith("data:image/svg+xml");
-    const hasRealImage = !!url && isOurBucket && !isBadPlaceholder && !isSvgFallback;
+    const isRejectedUrl = !!failedUrl && url.trim() === failedUrl;
+    const hasRealImage = !!url && !isBadPlaceholder && !isSvgFallback && !isRejectedUrl && (!!storagePath || isLikelyValidImageUrl(url));
     if (hasRealImage && !force) {
-      return jsonResponse({ ok: true, image_url: row.image_url, source: "cached" });
+      const clientUrl = await toClientImageUrl(adminClient, url);
+      console.log("wine-image-resolver cached_image_reused", {
+        wineId: row.id,
+        imageUrl: row.image_url,
+        clientUrl,
+      });
+      return jsonResponse({ ok: true, image_url: clientUrl, source: "cached" });
     }
 
-    // Busca imagem REAL do rótulo na web (Google CSE → DuckDuckGo)
-    const found = await findRealLabelImage(row);
-    if (found.ok) {
-      const ext = found.mime.includes("jpeg") ? "jpg" : found.mime.includes("webp") ? "webp" : "png";
-      const path = `${row.user_id}/web/${row.id}-${Date.now()}.${ext}`;
-      const { error: uploadError } = await adminClient.storage
-        .from(BUCKET)
-        .upload(path, found.bytes, {
-          cacheControl: "31536000",
-          upsert: true,
-          contentType: found.mime,
-        });
-
-      if (!uploadError) {
-        const { data: signed, error: signErr } = await adminClient.storage
-          .from(BUCKET)
-          .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-        const finalUrl = signed?.signedUrl;
-        if (finalUrl) {
-          await adminClient
-            .from("wines")
-            .update({ image_url: finalUrl })
-            .eq("id", row.id)
-            .eq("user_id", user.id);
+    const proxyCandidateUrl = failedUrl || (storagePath ? "" : url);
+    if (proxyCandidateUrl && isLikelyValidImageUrl(proxyCandidateUrl)) {
+      const proxyDownload = await downloadImage(proxyCandidateUrl);
+      if (proxyDownload.ok) {
+        const persisted = await persistDownloadedImage(adminClient, row, proxyDownload);
+        if (persisted.ok) {
+          console.log("wine-image-resolver proxied_current_image", {
+            wineId: row.id,
+            sourceUrl: proxyCandidateUrl,
+            persistedPath: persisted.path,
+            finalUrl: persisted.finalUrl,
+            durationMs: Date.now() - startTime,
+          });
 
           return jsonResponse({
             ok: true,
-            image_url: finalUrl,
+            image_url: persisted.finalUrl,
+            source: "proxied-current",
+            source_url: proxyCandidateUrl,
+            duration_ms: Date.now() - startTime,
+          });
+        }
+
+        console.warn("wine-image-resolver proxy persist failed:", {
+          wineId: row.id,
+          sourceUrl: proxyCandidateUrl,
+          error: persisted.error,
+        });
+      } else {
+        console.warn("wine-image-resolver proxy download failed:", {
+          wineId: row.id,
+          sourceUrl: proxyCandidateUrl,
+          error: proxyDownload.error,
+        });
+      }
+    }
+
+    // Busca imagem REAL do rótulo na web (Google CSE → DuckDuckGo)
+    const found = await findRealLabelImage(row, { excludeUrls: failedUrl ? [failedUrl] : [] });
+    if (found.ok) {
+      let persistenceError: string | null = null;
+      const persisted = await persistDownloadedImage(adminClient, row, found);
+      if (persisted.ok) {
+          console.log("wine-image-resolver resolved_image_persisted", {
+            wineId: row.id,
+            sourceUrl: found.sourceUrl,
+            persistedPath: persisted.path,
+            finalUrl: persisted.finalUrl,
+            durationMs: Date.now() - startTime,
+          });
+
+          return jsonResponse({
+            ok: true,
+            image_url: persisted.finalUrl,
             source: "web-search",
             source_url: found.sourceUrl,
             duration_ms: Date.now() - startTime,
           });
-        }
-        console.warn("wine-image-resolver sign failed:", signErr?.message);
-      } else {
-        console.warn("wine-image-resolver upload failed:", uploadError.message);
       }
+      persistenceError = persisted.error;
+
+      if (isLikelyValidImageUrl(found.sourceUrl)) {
+        const { error: directPersistError } = await adminClient
+          .from("wines")
+          .update({ image_url: found.sourceUrl })
+          .eq("id", row.id)
+          .eq("user_id", user.id);
+
+        if (!directPersistError) {
+          console.log("wine-image-resolver external_url_persisted", {
+            wineId: row.id,
+            sourceUrl: found.sourceUrl,
+            previousPersistenceError: persistenceError,
+            durationMs: Date.now() - startTime,
+          });
+
+          return jsonResponse({
+            ok: true,
+            image_url: found.sourceUrl,
+            source: "web-search-direct",
+            source_url: found.sourceUrl,
+            debug_reason: persistenceError,
+            duration_ms: Date.now() - startTime,
+          });
+        }
+
+        console.warn("wine-image-resolver direct url persist failed:", directPersistError.message);
+        persistenceError = `${persistenceError ?? "persist_failed"}|direct_persist_failed:${directPersistError.message}`;
+      }
+
+      console.warn("wine-image-resolver found image but could not persist it:", {
+        wineId: row.id,
+        sourceUrl: found.sourceUrl,
+        persistenceError,
+      });
+
+      return jsonResponse({
+        ok: true,
+        image_url: found.sourceUrl,
+        source: "web-search-direct-ephemeral",
+        source_url: found.sourceUrl,
+        debug_reason: persistenceError,
+        duration_ms: Date.now() - startTime,
+      });
     } else {
       console.warn("wine-image-resolver web search failed:", found.error);
     }
 
-    // Fallback final: SVG ilustrativo (sem geração via IA)
+    // Fallback final: SVG ilustrativo transitório.
+    // Não persiste o SVG em image_url para não contaminar o campo com um placeholder.
     const fallback = buildSvgFallback(row);
-    await adminClient
-      .from("wines")
-      .update({ image_url: fallback })
-      .eq("id", row.id)
-      .eq("user_id", user.id);
+    console.log("wine-image-resolver fallback_svg_returned", {
+      wineId: row.id,
+      reason: found.ok ? "sign_or_upload_failed" : found.error,
+      durationMs: Date.now() - startTime,
+    });
 
     return jsonResponse({
       ok: true,
       image_url: fallback,
       source: "fallback-svg",
+      debug_reason: found.ok ? "sign_or_upload_failed" : found.error,
       duration_ms: Date.now() - startTime,
     });
   } catch (error) {

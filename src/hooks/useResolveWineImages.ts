@@ -68,25 +68,39 @@ export function useResolveWineImages(wines: Wine[] | undefined) {
           { wineId: wine.id },
           { timeoutMs: 30_000, retries: 0 },
         );
+        const resolvedImageUrl = result?.image_url ?? null;
+        const resolvedRenderable = isRenderableWineImageUrl(resolvedImageUrl);
+
         if (import.meta.env.DEV) {
           console.debug("[useResolveWineImages] resolver_success", {
             wineId: wine.id,
             wineName: wine.name,
+            source: result?.source ?? null,
+            imageUrl: resolvedImageUrl,
+            renderable: resolvedRenderable,
           });
         }
-        if (result?.image_url) {
+
+        if (resolvedRenderable) {
           queryClient.setQueriesData<Wine[]>({ queryKey: ["wines"] }, (current) => {
             if (!current) return current;
             return current.map((item) =>
-              item.id === wine.id ? { ...item, image_url: result.image_url ?? item.image_url } : item,
+              item.id === wine.id ? { ...item, image_url: resolvedImageUrl ?? item.image_url } : item,
             );
           });
-        }
-        if (import.meta.env.DEV) {
-          console.debug("[useResolveWineImages] cache_updated", {
+          if (import.meta.env.DEV) {
+            console.debug("[useResolveWineImages] cache_updated", {
+              wineId: wine.id,
+              wineName: wine.name,
+              updatedImageUrl: resolvedImageUrl,
+            });
+          }
+        } else if (import.meta.env.DEV) {
+          console.debug("[useResolveWineImages] resolver_fallback_ignored", {
             wineId: wine.id,
             wineName: wine.name,
-            updatedImageUrl: result?.image_url ?? null,
+            source: result?.source ?? null,
+            ignoredImageUrl: resolvedImageUrl,
           });
         }
       } catch (err) {
