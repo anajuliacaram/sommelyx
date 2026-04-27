@@ -165,36 +165,40 @@ export default function PersonalCellarPage() {
 
         <div className="rounded-[16px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.28)] px-2.5 py-2">
           <div className="space-y-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <span className={sectionLabel}>Tipo</span>
-              {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
-                <Chip
-                  key={s}
-                  active={styleFilter === s}
-                  onClick={() => setStyleFilter(s)}
-                  className="whitespace-nowrap normal-case tracking-[-0.01em]"
-                >
-                  {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
-                </Chip>
-              ))}
+            <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex min-w-max items-center gap-1.5">
+                <span className={sectionLabel}>Tipo</span>
+                {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map((s) => (
+                  <Chip
+                    key={s}
+                    active={styleFilter === s}
+                    onClick={() => setStyleFilter(s)}
+                    className="normal-case tracking-[-0.01em]"
+                  >
+                    {s === "todos" ? "Todos" : s.charAt(0).toUpperCase() + s.slice(1)}
+                  </Chip>
+                ))}
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <span className={sectionLabel}>Janela</span>
-              {[
-                { key: "all", label: "Todos" },
-                { key: "now", label: "Beber agora" },
-                { key: "guard", label: "Em guarda" },
-              ].map((option) => (
-                <Chip
-                  key={option.key}
-                  active={drinkWindowFilter === option.key}
-                  onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                  className="whitespace-nowrap normal-case tracking-[-0.01em]"
-                >
-                  {option.label}
-                </Chip>
-              ))}
+            <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex min-w-max items-center gap-1.5">
+                <span className={sectionLabel}>Janela</span>
+                {[
+                  { key: "all", label: "Todos" },
+                  { key: "now", label: "Beber agora" },
+                  { key: "guard", label: "Em guarda" },
+                ].map((option) => (
+                  <Chip
+                    key={option.key}
+                    active={drinkWindowFilter === option.key}
+                    onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+                    className="normal-case tracking-[-0.01em]"
+                  >
+                    {option.label}
+                  </Chip>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -386,7 +390,9 @@ export default function PersonalCellarPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
+            className={isMobile
+              ? "grid grid-cols-2 gap-2"
+              : "grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"}
           >
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
@@ -401,7 +407,101 @@ export default function PersonalCellarPage() {
                   : classification.status === "soon"
                     ? { background: "rgba(198,167,104,0.16)", color: "#8B6914" }
                     : { background: "rgba(107,130,152,0.12)", color: "#566C82" };
-              return (
+              return isMobile ? (
+                <EditorialCard
+                  key={w.id}
+                  className="flex h-full flex-col overflow-hidden"
+                  style={{ padding: 10, cursor: "pointer" }}
+                >
+                  <div className="flex min-h-0 flex-1 flex-col" onClick={() => setEditWine(w)}>
+                    {showLabels && (
+                      <WineLabelPreview
+                        wine={w}
+                        alt={w.name}
+                        className="mb-2.5 h-[98px] overflow-hidden rounded-[16px]"
+                        imageClassName="h-[98px] w-full object-cover"
+                        generated={false}
+                        compact
+                      />
+                    )}
+
+                    <div className="mb-2 flex min-h-5 items-start justify-between gap-2">
+                      <div
+                        className="h-5 w-5 rounded-full"
+                        style={{
+                          background: `linear-gradient(145deg, ${color}, ${color}cc)`,
+                          boxShadow:
+                            "0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3)",
+                        }}
+                      />
+                      {w.rating != null && (
+                        <div
+                          className="flex items-center gap-1 text-[10px] font-bold tabular-nums"
+                          style={{ color: "#B48C3A" }}
+                        >
+                          <Star className="h-3 w-3 fill-current" /> {Number(w.rating).toFixed(1)}
+                        </div>
+                      )}
+                    </div>
+
+                    <h3
+                      className="font-serif text-[13px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#1a1713]"
+                      style={{
+                        fontFamily: "'Libre Baskerville', Georgia, serif",
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        overflow: "hidden",
+                        minHeight: 30,
+                      }}
+                    >
+                      {w.name}
+                    </h3>
+                    <p className="mt-1 truncate text-[10px] font-medium text-[#6F665C]">
+                      {[w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Safra NV · Região n/i"}
+                    </p>
+
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <StyleBadge
+                        style={w.style}
+                        className="min-h-[20px] text-[9px] leading-none"
+                      />
+                      <span
+                        className="text-[10px] font-semibold text-[#6F665C]"
+                      >
+                        {w.quantity} un.
+                      </span>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <span
+                        className="inline-flex h-6 items-center rounded-full px-2.5 text-[9px] font-bold tracking-[0.02em] whitespace-nowrap"
+                        style={statusTone}
+                      >
+                        {classification.label}
+                      </span>
+                      <p className="text-right text-[10px] font-semibold text-[#1a1713]">
+                        {w.current_value != null
+                          ? `R$ ${Number(w.current_value).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                          : "Preço n/i"}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="editorial-btn-open mt-2 h-8 w-full rounded-full px-3 text-[11px]"
+                      style={{ minHeight: 32 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenBottle(w);
+                      }}
+                      disabled={wineEvent.isPending}
+                    >
+                      Abrir
+                    </button>
+                  </div>
+                </EditorialCard>
+              ) : (
                 <EditorialCard
                   key={w.id}
                   className="flex h-full flex-col"

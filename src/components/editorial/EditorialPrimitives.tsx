@@ -109,7 +109,7 @@ export function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex h-[26px] items-center gap-1.5 rounded-full px-2.5 text-[10.5px] font-semibold uppercase tracking-[0.05em] transition-all",
+        "inline-flex h-[26px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[10.5px] font-semibold uppercase leading-none tracking-[0.05em] transition-all",
         className,
       )}
       style={{
