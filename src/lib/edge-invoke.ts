@@ -202,7 +202,6 @@ async function resolveSession(forceRefresh = false) {
 
   const { data } = await supabase.auth.getSession();
   const session = data?.session ?? null;
-  console.log("SESSION:", session);
   return session;
 }
 
@@ -268,12 +267,9 @@ export async function invokeEdgeFunction<T>(
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
       const session = await resolveSession(attempt > 0);
-      console.log("Sending token:", !!session?.access_token);
-      console.log(`CALLING ${name} WITH TOKEN:`, !!session?.access_token);
       const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
 
       if (!session?.access_token) {
-        console.error("NO TOKEN");
         console.warn("[edge-invoke] auth_missing", { function: name, requestId });
         throw new EdgeFunctionError("Sua sessão expirou. Faça login novamente.", {
           status: 401,
@@ -283,18 +279,20 @@ export async function invokeEdgeFunction<T>(
         });
       }
 
-      console.log("[edge-invoke] request", {
-        function: name,
-        url,
-        requestId,
-        attempt,
-        payload: sanitizeForLog(body),
-        hasAuthToken: Boolean(session.access_token),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token ? "[present]" : "[missing]"}`,
-        },
-      });
+      if (import.meta.env.DEV) {
+        console.log("[edge-invoke] request", {
+          function: name,
+          url,
+          requestId,
+          attempt,
+          payload: sanitizeForLog(body),
+          hasAuthToken: Boolean(session.access_token),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token ? "[present]" : "[missing]"}`,
+          },
+        });
+      }
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -309,19 +307,25 @@ export async function invokeEdgeFunction<T>(
           body: JSON.stringify(body),
           signal: controller.signal,
         });
-        console.log("EDGE STATUS:", response.status);
+        if (import.meta.env.DEV) {
+          console.log("EDGE STATUS:", response.status);
+        }
 
         const text = await response.text();
         const parsedBody = parseTextResponse(text);
-        console.log("[edge-invoke] response_body", {
-          function: name,
-          requestId,
-          status: response.status,
-          body: sanitizeForLog(parsedBody),
-        });
+        if (import.meta.env.DEV) {
+          console.log("[edge-invoke] response_body", {
+            function: name,
+            requestId,
+            status: response.status,
+            body: sanitizeForLog(parsedBody),
+          });
+        }
 
         if (!response.ok) {
-          console.error("EDGE ERROR:", text);
+          if (import.meta.env.DEV) {
+            console.error("EDGE ERROR:", text);
+          }
           const parsed = parseErrorBody(parsedBody, response.status);
 
           if (response.status === 401 && attempt < retries) {
@@ -352,12 +356,14 @@ export async function invokeEdgeFunction<T>(
 
         const unwrapped = unwrapResponseData<T>(parsedBody);
         writeEdgeCache(cacheKey, unwrapped);
-        console.log("[edge-invoke] response", {
-          function: name,
-          requestId,
-          durationMs: Date.now() - startedAt,
-          wrapped: isEdgeEnvelopeSuccess<T>(parsedBody),
-        });
+        if (import.meta.env.DEV) {
+          console.log("[edge-invoke] response", {
+            function: name,
+            requestId,
+            durationMs: Date.now() - startedAt,
+            wrapped: isEdgeEnvelopeSuccess<T>(parsedBody),
+          });
+        }
         return unwrapped;
       } finally {
         clearTimeout(timeout);

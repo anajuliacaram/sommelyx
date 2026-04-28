@@ -60,7 +60,7 @@ export function normalizeWineData<T extends WineLike>(wine: T, options?: { log?:
     tasting_notes: normalizeWineText(wine?.tasting_notes || wine?.notes) ?? null,
   } as T;
 
-  if (options?.log) {
+  if (options?.log && import.meta.env.DEV) {
     console.log("NORMALIZED:", normalized);
   }
 

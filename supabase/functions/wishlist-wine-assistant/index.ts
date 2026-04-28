@@ -139,7 +139,7 @@ serve(async (req) => {
 
   try {
     const authorization = req.headers.get("Authorization");
-    console.log("AUTH HEADER:", !!authorization);
+    if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
       return new Response(JSON.stringify({ error: "AUTH_REQUIRED" }), {

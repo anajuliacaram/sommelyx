@@ -866,7 +866,6 @@ export async function prepareSmartPdfImportAttachment(file: File): Promise<Prepa
   });
 
   console.log("PDF_TEXT_LENGTH:", extractedText.length);
-  console.log("PDF_TEXT_SAMPLE:", extractedText.slice(0, 1000));
 
   let finalText = extractedText;
   let ocrUsed = false;
@@ -880,9 +879,7 @@ export async function prepareSmartPdfImportAttachment(file: File): Promise<Prepa
 
   console.log("OCR_USED:", ocrUsed);
   console.log("OCR_TEXT_LENGTH:", ocrText?.length);
-  console.log("OCR_SAMPLE:", ocrText?.slice(0, 1000));
   console.log("FINAL_TEXT_LENGTH:", finalText.length);
-  console.log("FINAL_TEXT_SAMPLE:", finalText.slice(0, 1000));
 
   if (!finalText || finalText.length < 1000) {
     const rendered = await renderPdfAsImage(file);

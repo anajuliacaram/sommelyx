@@ -59,8 +59,6 @@ export async function callOpenAI(prompt: string) {
 
   const json = await res.json();
 
-  console.log("RAW OPENAI RESPONSE:", JSON.stringify(json));
-
   const text = json.output?.[0]?.content?.[0]?.text;
 
   if (!text) {
@@ -128,7 +126,6 @@ export async function callOpenAIResponses<T>({
     });
 
     const json = await response.json();
-    console.log("RAW OPENAI RESPONSE:", previewJson(json));
 
     if (!response.ok) {
       const message = typeof json?.error?.message === "string"
@@ -153,19 +150,15 @@ export async function callOpenAIResponses<T>({
       return { ok: false, status: 422, error: "EMPTY_AI_RESPONSE", raw: json };
     }
 
-    console.log("FINAL TEXT:", text);
-
     let parsed: T;
     try {
       parsed = JSON.parse(String(text));
     } catch (error) {
-      console.error("Failed to parse AI response:", text);
       return { ok: false, status: 422, error: "INVALID_AI_RESPONSE", raw: json };
     }
 
     const usage = json?.usage || {};
     console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} duration_ms=${Date.now() - startedAt} input_tokens=${usage?.input_tokens ?? usage?.prompt_tokens ?? "n/a"} output_tokens=${usage?.output_tokens ?? usage?.completion_tokens ?? "n/a"} parsed=ok`);
-    console.log("FINAL RESPONSE:", parsed);
     return { ok: true, parsed, raw: json };
   } catch (error) {
     const message = error instanceof Error ? error.message : "OpenAI request failed";

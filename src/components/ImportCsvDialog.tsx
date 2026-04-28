@@ -1166,7 +1166,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const allLines = normalized.split("\n");
     const cleanedLines = allLines.map((line) => line.trim()).filter((line) => line.length > 0 && !/^[-=*_•·\s|]+$/.test(line));
     console.log("LINES_COUNT:", cleanedLines.length);
-    console.log("LINES_SAMPLE:", cleanedLines.slice(0, 20));
     if (cleanedLines.length === 0) return { ...empty, totalRows: allLines.length, cleanedRows: 0 };
 
     const priceRegex = /R\$?\s?(\d+[.,]\d{2})/i;
@@ -1464,7 +1463,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
     const priceMatches = cleanedLines.filter((line) => /R\$?\s?\d+[.,]\d{2}/.test(line));
     console.log("PRICE_LINES:", priceMatches.length);
-    console.log("PRICE_SAMPLE:", priceMatches.slice(0, 10));
 
     if (structured) {
       parseDelimitedRows();
@@ -1473,7 +1471,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     }
 
     console.log("WINES_EXTRACTED:", wines.length);
-    console.log("WINES_SAMPLE:", wines.slice(0, 5));
 
     const successRate = cleanedRowCount > 0 ? wines.length / cleanedRowCount : 0;
     const confidence = wines.length > 0
@@ -1942,14 +1939,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           pdfPayload.extractedText || "",
         ].join("\n");
 
-        console.log("SMART PDF EXTRACTED:", {
-          fileName: file.name,
-          extractedChars: pdfPayload.extractedText.length,
-          blocks: pdfPayload.textBlocks.length,
-          ocrUsed: pdfPayload.ocrUsed,
-          totalLines: pdfPayload.extractedText ? pdfPayload.extractedText.split("\n").filter((line) => line.trim().length > 0).length : 0,
-        });
-
         if (!pdfPayload.extractedText || pdfPayload.extractedText.trim().length === 0) {
           setParseErrors([
             "Não conseguimos interpretar totalmente o PDF.",
@@ -1977,15 +1966,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           headerRowIndex: local.headerRowIndex,
           priceColumn: local.priceColumn,
           ignoredRows: local.ignoredRows,
-        });
-
-        console.log("SMART PDF PARSED:", {
-          extractedChars: pdfPayload.extractedText.length,
-          ocrUsed: pdfPayload.ocrUsed,
-          totalLines: pdfPayload.extractedText.split("\n").filter((line) => line.trim().length > 0).length,
-          winesDetected: local.wines.length,
-          rejectedRows: local.ignoredRows,
-          confidenceDistribution: local.confidenceDistribution,
         });
 
         if (local.wines.length > 0) {

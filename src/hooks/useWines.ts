@@ -307,7 +307,6 @@ export function useAddWine() {
           throw new Error("Safra inválida");
         }
       }
-      console.log("NORMALIZED:", normalizeWineData(wine, { log: false }));
       const payload = sanitizeWineInsertPayload(wine, actorUserId);
 
       const { data, error } = await supabase
@@ -355,7 +354,6 @@ export function useUpdateWine() {
         throw new Error("Valor atual inválido");
       }
       if (typeof safeUpdates.style === "string") safeUpdates.style = safeUpdates.style.trim().toLowerCase();
-      console.log("NORMALIZED:", normalizeWineData(safeUpdates, { log: false }));
       const payload = sanitizeWineUpdatePayload(safeUpdates);
       const { error } = await supabase.from("wines").update(payload as any).eq("id", id).eq("user_id", user.id);
       if (error) throw error;

@@ -481,7 +481,7 @@ serve(async (req) => {
 
   try {
     const authorization = req.headers.get("Authorization");
-    console.log("AUTH HEADER:", !!authorization);
+    if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header" });
       return jsonResponse({ error: "AUTH_REQUIRED" }, 401);

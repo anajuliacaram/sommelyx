@@ -67,7 +67,6 @@ async function extractTextFromPdf(bytes: Uint8Array) {
 
   const finalText = normalizeText(pages.join("\n"));
   console.log("PDF_TEXT_LENGTH:", finalText.length);
-  console.log("PDF_TEXT_SAMPLE:", finalText.slice(0, 1000));
   return { text: finalText, pageCount: Math.min(doc.numPages, MAX_TEXT_PAGES) };
 }
 
@@ -110,7 +109,6 @@ async function extractTextByOcr(bytes: Uint8Array) {
   const ocrText = normalizeText(pageTexts.join("\n\n"));
   console.log("OCR_USED:", true);
   console.log("OCR_TEXT_LENGTH:", ocrText.length);
-  console.log("OCR_SAMPLE:", ocrText.slice(0, 1000));
   return ocrText;
 }
 
@@ -118,7 +116,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const authHeader = req.headers.get("Authorization");
-  console.log("AUTH HEADER:", !!authHeader);
+  if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authHeader);
 
   if (!authHeader) {
     return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
@@ -170,7 +168,6 @@ serve(async (req) => {
     }
 
     console.log("FINAL_TEXT_LENGTH:", finalText.length);
-    console.log("FINAL_TEXT_SAMPLE:", finalText.slice(0, 1000));
     console.log(`[${FUNCTION_NAME}] duration_ms=${Date.now() - startedAt} ocr_used=${ocrUsed}`);
 
     if (!finalText || finalText.length < 20) {

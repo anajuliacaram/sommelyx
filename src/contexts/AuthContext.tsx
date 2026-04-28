@@ -111,13 +111,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [fetchProfileType]);
 
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log("loading:", loading);
-      console.log("session:", session);
-    }
-  }, [loading, session]);
-
   const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
       email: normalizeEmail(email),
