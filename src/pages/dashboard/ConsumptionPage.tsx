@@ -1,7 +1,7 @@
 // Meu Consumo — perfil Pessoal
 // Design "Editorial" fiel ao design-reference (extras.jsx ConsumptionPage).
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState, type ReactNode } from "react";
 import { useConsumption } from "@/hooks/useConsumption";
 import { ConsumptionTimeline } from "@/components/ConsumptionTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,10 +11,14 @@ import {
   Kicker,
   Sparkbar,
 } from "@/components/editorial/EditorialPrimitives";
-import { Calendar, GlassWater, Star, TrendingUp } from "@/icons/lucide";
+import { Calendar, Check, ChevronDown, GlassWater, Star, TrendingUp } from "@/icons/lucide";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 type PeriodFilter = "week" | "month" | "year";
-type SourceFilter = "cellar" | "external" | "all";
+type SourceFilter = "cellar" | "external";
 type SortBy = "recent" | "old" | "rating";
 
 const periodOptions: Array<{ value: PeriodFilter; label: string }> = [
@@ -24,7 +28,6 @@ const periodOptions: Array<{ value: PeriodFilter; label: string }> = [
 ];
 
 const sourceOptions: Array<{ value: SourceFilter; label: string }> = [
-  { value: "all", label: "Todas" },
   { value: "cellar", label: "Minha adega" },
   { value: "external", label: "Adega externa" },
 ];
@@ -35,29 +38,81 @@ const sortOptions: Array<{ value: SortBy; label: string }> = [
   { value: "rating", label: "Melhor avaliados" },
 ];
 
-function FilterPill({
+const FilterChoice = memo(function FilterChoice({
   active,
+  label,
   onClick,
-  children,
 }: {
   active: boolean;
+  label: string;
   onClick: () => void;
-  children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="h-8.5 rounded-full px-3.5 text-[11.5px] font-medium tracking-[-0.005em] transition-all duration-150 ease-out whitespace-nowrap hover:-translate-y-px hover:scale-[1.01] active:scale-[0.97]"
-      style={{
-        background: active ? "rgba(123,30,43,0.10)" : "rgba(255,255,255,0.82)",
-        color: active ? "#7B1E2B" : "#6B645C",
-        border: `1px solid ${active ? "rgba(123,30,43,0.16)" : "rgba(95,111,82,0.10)"}`,
-        boxShadow: active ? "0 2px 8px rgba(123,30,43,0.10)" : "none",
-      }}
+      className={cn(
+        "flex w-full items-center justify-between rounded-[14px] px-3 py-2.5 text-left text-[12.5px] font-medium leading-[1.18] transition-all duration-150 ease-out hover:bg-black/5 active:scale-[0.98]",
+        active
+          ? "bg-[rgba(95,127,82,0.12)] text-[#305231]"
+          : "bg-white/0 text-[#2f2a22]",
+      )}
     >
-      {children}
+      <span className="flex min-w-0 items-center gap-2">
+        <span className="min-w-0 truncate">{label}</span>
+      </span>
+      {active ? <Check className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]" /> : null}
     </button>
+  );
+});
+
+function FilterPanel({
+  title,
+  mobileTitle,
+  description,
+  open,
+  onOpenChange,
+  mobile,
+  children,
+}: {
+  title: string;
+  mobileTitle: string;
+  description?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mobile: boolean;
+  children: ReactNode;
+}) {
+  if (mobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="border-t border-white/50 p-4 pt-5">
+          <SheetHeader className="mb-3 flex-col gap-1">
+            <SheetTitle className="text-[17px] font-semibold tracking-tight text-[#1E1E1E]">
+              {mobileTitle}
+            </SheetTitle>
+            {description ? (
+              <p className="text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">{description}</p>
+            ) : null}
+          </SheetHeader>
+          <div className="space-y-2">{children}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverContent align="start" sideOffset={10} className="w-[280px] p-3">
+        <div className="mb-2">
+          <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">{title}</p>
+          {description ? (
+            <p className="mt-1 text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">{description}</p>
+          ) : null}
+        </div>
+        <div className="space-y-1.5">{children}</div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -83,8 +138,32 @@ function buildMonthWindow(size: number) {
 export default function ConsumptionPage() {
   const { data: entries = [], isLoading } = useConsumption();
   const [period, setPeriod] = useState<PeriodFilter>("month");
-  const [source, setSource] = useState<SourceFilter>("all");
+  const [source, setSource] = useState<Array<SourceFilter>>([]);
   const [sortBy, setSortBy] = useState<SortBy>("recent");
+  const [openFilter, setOpenFilter] = useState<"period" | "source" | "sort" | null>(null);
+  const isMobile = useIsMobile();
+
+  const periodValueLabel = periodOptions.find((opt) => opt.value === period)?.label ?? "Mês";
+  const sourceValueLabel = useMemo(() => {
+    if (source.length === 0) return "Todas";
+    return sourceOptions
+      .filter((opt) => source.includes(opt.value))
+      .map((opt) => opt.label)
+      .join(" · ");
+  }, [source]);
+  const sortValueLabel = sortOptions.find((opt) => opt.value === sortBy)?.label ?? "Mais recentes";
+
+  const toggleSource = (value: SourceFilter) => {
+    setSource((current) => {
+      if (current.includes(value)) {
+        const next = current.filter((item) => item !== value);
+        return next;
+      }
+      return [...current, value].sort();
+    });
+  };
+
+  const setAllSources = () => setSource([]);
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
@@ -99,8 +178,9 @@ export default function ConsumptionPage() {
         if (d.getFullYear() !== now.getFullYear()) return false;
       }
       const isCellar = !!entry.wine_id || entry.source === "cellar";
-      if (source === "cellar" && !isCellar) return false;
-      if (source === "external" && isCellar) return false;
+      if (source.length > 0 && !((source.includes("cellar") && isCellar) || (source.includes("external") && !isCellar))) {
+        return false;
+      }
       return true;
     });
 
@@ -121,9 +201,10 @@ export default function ConsumptionPage() {
     const now = new Date();
     const isInSource = (entry: typeof entries[number]) => {
       const isCellar = !!entry.wine_id || entry.source === "cellar";
-      if (source === "cellar") return isCellar;
-      if (source === "external") return !isCellar;
-      return true;
+      if (source.length === 0) return true;
+      if (source.includes("cellar") && isCellar) return true;
+      if (source.includes("external") && !isCellar) return true;
+      return false;
     };
 
     if (period === "week") {
@@ -297,43 +378,132 @@ export default function ConsumptionPage() {
       </EditorialCard>
 
       {/* Filtros inteligentes */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <span className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5F7F52]">
-            Período
-          </span>
-          <div className="flex min-w-max items-center gap-1.25">
-            {periodOptions.map((opt) => (
-              <FilterPill key={opt.value} active={period === opt.value} onClick={() => setPeriod(opt.value)}>
-                {opt.label}
-              </FilterPill>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <span className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5F7F52]">
-            Origem
-          </span>
-          <div className="flex min-w-max items-center gap-1.25">
-            {sourceOptions.map((opt) => (
-              <FilterPill key={opt.value} active={source === opt.value} onClick={() => setSource(opt.value)}>
-                {opt.label}
-              </FilterPill>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <span className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5F7F52]">
-            Ordenar
-          </span>
-          <div className="flex min-w-max items-center gap-1.25">
-            {sortOptions.map((opt) => (
-              <FilterPill key={opt.value} active={sortBy === opt.value} onClick={() => setSortBy(opt.value)}>
-                {opt.label}
-              </FilterPill>
-            ))}
-          </div>
-        </div>
+      <div className="grid gap-2 md:grid-cols-3">
+        {[
+          { kind: "period" as const, title: "Período", value: periodValueLabel },
+          { kind: "source" as const, title: "Origem", value: sourceValueLabel },
+          { kind: "sort" as const, title: "Ordenar", value: sortValueLabel },
+        ].map((box) => {
+          const open = openFilter === box.kind;
+          const options =
+            box.kind === "period"
+              ? periodOptions.map((opt) => (
+                  <FilterChoice
+                    key={opt.value}
+                    active={period === opt.value}
+                    label={opt.label}
+                    onClick={() => {
+                      setPeriod(opt.value);
+                      setOpenFilter(null);
+                    }}
+                  />
+                ))
+              : box.kind === "source"
+                ? [
+                    <FilterChoice
+                      key="all"
+                      active={source.length === 0}
+                      label="Todas"
+                      onClick={() => {
+                        setAllSources();
+                        setOpenFilter(null);
+                      }}
+                    />,
+                    ...sourceOptions.map((opt) => (
+                      <FilterChoice
+                        key={opt.value}
+                        active={source.includes(opt.value)}
+                        label={opt.label}
+                        onClick={() => toggleSource(opt.value)}
+                      />
+                    )),
+                  ]
+                : sortOptions.map((opt) => (
+                    <FilterChoice
+                      key={opt.value}
+                      active={sortBy === opt.value}
+                      label={opt.label}
+                      onClick={() => {
+                        setSortBy(opt.value);
+                        setOpenFilter(null);
+                      }}
+                    />
+                  ));
+
+          const trigger = (
+              <button
+                type="button"
+                onClick={() => setOpenFilter(open ? null : box.kind)}
+                className={cn(
+                "flex min-h-[66px] w-full items-center justify-between rounded-[20px] border px-4 text-left transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-[0_10px_24px_-18px_rgba(95,127,82,0.22)]",
+                open
+                  ? "border-[rgba(95,111,82,0.26)] bg-[rgba(95,111,82,0.08)]"
+                  : "border-[rgba(95,111,82,0.14)] bg-[rgba(255,255,255,0.88)]",
+              )}
+            >
+              <span className="min-w-0">
+                <span className="block text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">
+                  {box.title}
+                </span>
+                <span className="mt-1 block truncate text-[13.5px] font-semibold leading-[1.15] text-[#1E1E1E]">
+                  {box.value}
+                </span>
+              </span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out",
+                  open && "rotate-180",
+                )}
+              />
+            </button>
+          );
+
+          return (
+            <div key={box.kind} className="min-w-0">
+              {isMobile ? (
+                <>
+                  {trigger}
+                  <FilterPanel
+                    title={box.title}
+                    mobileTitle={box.title}
+                    description={
+                      box.kind === "period"
+                        ? "Escolha a janela de análise."
+                        : box.kind === "source"
+                          ? "Selecione uma ou mais origens."
+                          : "Escolha a ordem da lista."
+                    }
+                    open={open}
+                    onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
+                    mobile
+                  >
+                    <div className="space-y-1.5">{options}</div>
+                  </FilterPanel>
+                </>
+              ) : (
+                <Popover open={open} onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}>
+                  <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+                  <FilterPanel
+                    title={box.title}
+                    mobileTitle={box.title}
+                    description={
+                      box.kind === "period"
+                        ? "Escolha a janela de análise."
+                        : box.kind === "source"
+                          ? "Selecione uma ou mais origens."
+                          : "Escolha a ordem da lista."
+                    }
+                    open={open}
+                    onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
+                    mobile={false}
+                  >
+                    <div className="space-y-1.5">{options}</div>
+                  </FilterPanel>
+                </Popover>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Timeline */}
