@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAddConsumption } from "@/hooks/useConsumption";
-import { useWines, Wine } from "@/hooks/useWines";
+import { useWineEvent, useWines, Wine } from "@/hooks/useWines";
 import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star, Search } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,7 @@ interface AddConsumptionDialogProps {
 export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: AddConsumptionDialogProps) {
   const { data: wines } = useWines();
   const addConsumption = useAddConsumption();
+  const wineEvent = useWineEvent();
 
   const [source, setSource] = useState<"cellar" | "external">("external");
   const [selectedWineId, setSelectedWineId] = useState<string>("");
@@ -135,21 +136,51 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
     }
 
     try {
-      await addConsumption.mutateAsync({
-        source,
-        wine_id: source === "cellar" && selectedWineId ? selectedWineId : null,
-        wine_name: wineName.trim(),
-        producer: producer || null,
-        country: country || null,
-        region: region || null,
-        grape: grape || null,
-        style: style || null,
-        vintage: vintage ? parseInt(vintage) : null,
-        location: location || null,
-        tasting_notes: tastingNotes || null,
-        rating: rating > 0 ? rating : null,
-        consumed_at: consumedAt,
-      });
+      const isCellarWine = source === "cellar" && Boolean(selectedWineId);
+      let stockAdjusted = false;
+
+      if (isCellarWine) {
+        await wineEvent.mutateAsync({
+          wineId: selectedWineId,
+          eventType: "open",
+          quantity: 1,
+          notes: tastingNotes || undefined,
+        });
+        stockAdjusted = true;
+      }
+
+      try {
+        await addConsumption.mutateAsync({
+          source,
+          wine_id: isCellarWine ? selectedWineId : null,
+          wine_name: wineName.trim(),
+          producer: producer || null,
+          country: country || null,
+          region: region || null,
+          grape: grape || null,
+          style: style || null,
+          vintage: vintage ? parseInt(vintage) : null,
+          location: location || null,
+          tasting_notes: tastingNotes || null,
+          rating: rating > 0 ? rating : null,
+          consumed_at: consumedAt,
+        });
+      } catch (consumptionError) {
+        if (stockAdjusted) {
+          try {
+            await wineEvent.mutateAsync({
+              wineId: selectedWineId,
+              eventType: "add",
+              quantity: 1,
+              notes: "Reversão automática após falha ao registrar consumo",
+            });
+          } catch (revertError) {
+            console.error("[consumption] stock_revert_failed", revertError);
+          }
+        }
+        throw consumptionError;
+      }
+
       toast.success("Consumo registrado com sucesso!");
       resetForm();
       onOpenChange(false);

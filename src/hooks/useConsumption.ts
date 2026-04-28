@@ -94,8 +94,12 @@ export function useAddConsumption() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["consumption"] });
+      if (variables.wine_id) {
+        queryClient.invalidateQueries({ queryKey: ["wines"] });
+        queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
+      }
     },
   });
 }
