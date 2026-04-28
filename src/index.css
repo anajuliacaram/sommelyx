@@ -45,7 +45,7 @@
     --input: 28 10% 84%;
     --ring: 348 55% 28%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
     /* Brand — usado pelo componente <BrandName /> */
     --brand-primary: #7B1E2B;
@@ -165,9 +165,10 @@
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     background-color: #f4f1ec;
     background-image:
-      radial-gradient(ellipse 85% 60% at 12% 0%, rgba(95, 111, 82, 0.045) 0%, transparent 62%),
-      radial-gradient(ellipse 70% 50% at 88% 14%, rgba(164, 145, 111, 0.06) 0%, transparent 58%),
-      linear-gradient(180deg, #f6f3ef 0%, #f4f1ec 52%, #efe9df 100%);
+      radial-gradient(ellipse 86% 64% at 12% 0%, rgba(95, 111, 82, 0.055) 0%, transparent 64%),
+      radial-gradient(ellipse 72% 52% at 88% 14%, rgba(164, 145, 111, 0.07) 0%, transparent 58%),
+      radial-gradient(ellipse 48% 34% at 50% 100%, rgba(123, 30, 43, 0.03) 0%, transparent 72%),
+      linear-gradient(180deg, #f7f4f0 0%, #f4f1ec 48%, #efe8de 100%);
     background-attachment: scroll;
     min-height: 100vh;
     color: #1C1C1C;
@@ -210,9 +211,10 @@
   body.legal-page {
     background-color: #f4f1ec;
     background-image:
-      radial-gradient(circle at 0% 0%, rgba(123, 30, 43, 0.06) 0%, transparent 32%),
-      radial-gradient(circle at 100% 0%, rgba(200, 169, 106, 0.10) 0%, transparent 28%),
-      linear-gradient(180deg, #f8f5f0 0%, #f4f1ec 44%, #efe9e1 100%);
+      radial-gradient(circle at 0% 0%, rgba(123, 30, 43, 0.07) 0%, transparent 34%),
+      radial-gradient(circle at 100% 0%, rgba(200, 169, 106, 0.12) 0%, transparent 30%),
+      radial-gradient(circle at 50% 100%, rgba(95, 111, 82, 0.04) 0%, transparent 34%),
+      linear-gradient(180deg, #f8f5f0 0%, #f4f1ec 44%, #efe8df 100%);
   }
 
   .legal-shell {
@@ -225,7 +227,7 @@
     border: 1px solid rgba(255, 255, 255, 0.74);
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 247, 243, 0.88) 100%);
-    box-shadow: 0 28px 70px -46px rgba(20, 18, 16, 0.22);
+    box-shadow: 0 24px 58px -40px rgba(20, 18, 16, 0.20), 0 1px 2px rgba(255, 255, 255, 0.35) inset;
     backdrop-filter: blur(18px) saturate(1.05);
     -webkit-backdrop-filter: blur(18px) saturate(1.05);
   }
@@ -274,11 +276,11 @@
   .legal-section-card {
     position: relative;
     overflow: hidden;
-    border-radius: 24px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.8);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.88) 100%);
     padding: 1.75rem;
-    box-shadow: 0 18px 48px -36px rgba(20, 18, 16, 0.22);
+    box-shadow: 0 16px 36px -28px rgba(20, 18, 16, 0.20), 0 1px 2px rgba(255, 255, 255, 0.35) inset;
     backdrop-filter: blur(12px) saturate(1.02);
     -webkit-backdrop-filter: blur(12px) saturate(1.02);
     transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
@@ -296,7 +298,7 @@
   .legal-section-card:hover {
     transform: translateY(-1px);
     border-color: rgba(123, 30, 43, 0.10);
-    box-shadow: 0 22px 56px -38px rgba(20, 18, 16, 0.25);
+    box-shadow: 0 20px 48px -34px rgba(20, 18, 16, 0.24), 0 1px 2px rgba(255, 255, 255, 0.34) inset;
   }
 
   .legal-section-card h2 {
@@ -365,11 +367,11 @@
   }
 
   .legal-sidebar-card {
-    border-radius: 24px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.78);
     background: rgba(255, 255, 255, 0.72);
     padding: 1rem;
-    box-shadow: 0 18px 42px -34px rgba(20, 18, 16, 0.18);
+    box-shadow: 0 16px 36px -28px rgba(20, 18, 16, 0.16), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
     backdrop-filter: blur(16px) saturate(1.04);
     -webkit-backdrop-filter: blur(16px) saturate(1.04);
   }
@@ -753,12 +755,12 @@
 
   /* ── Glass Card — Premium Unified ── */
   .glass-card {
-    border-radius: 1rem;
+    border-radius: 16px;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.022);
+    box-shadow: 0 8px 24px -20px rgba(20, 18, 16, 0.22), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
     transition: background 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -767,8 +769,8 @@
   }
 
   .glass-card:hover {
-    background: rgba(255, 255, 255, 0.86);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.045);
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 12px 28px -22px rgba(20, 18, 16, 0.22), 0 1px 2px rgba(255, 255, 255, 0.32) inset;
     transform: translateY(-1px);
   }
 
@@ -855,18 +857,18 @@
   }
 
   .glass-card-sm {
-    border-radius: 20px;
+    border-radius: 16px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(255, 255, 255, 0.78) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.022);
+    box-shadow: 0 8px 24px -20px rgba(20, 18, 16, 0.18), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
   }
 
   /* ── Wine Card — Glass ── */
   .wine-card-glass {
-    border-radius: 20px;
+    border-radius: 16px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.89) 0%, rgba(255, 255, 255, 0.83) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.022);
+    box-shadow: 0 8px 24px -20px rgba(20, 18, 16, 0.18), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
     transition: background 180ms ease-out,
                 box-shadow 180ms ease-out,
                 transform 180ms ease-out,
@@ -878,7 +880,7 @@
   .wine-card-glass:hover {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.91) 0%, rgba(255, 255, 255, 0.85) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.045);
+    box-shadow: 0 12px 28px -22px rgba(20, 18, 16, 0.22), 0 1px 2px rgba(255, 255, 255, 0.30) inset;
     filter: saturate(1.01);
   }
 
@@ -1047,9 +1049,9 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 14% 10%, rgba(95, 111, 82, 0.045), transparent 30%),
-      radial-gradient(circle at 85% 0%, rgba(164, 145, 111, 0.08), transparent 26%),
-      radial-gradient(circle at 84% 82%, rgba(95, 111, 82, 0.035), transparent 32%);
+      radial-gradient(circle at 14% 10%, rgba(95, 111, 82, 0.055), transparent 30%),
+      radial-gradient(circle at 85% 0%, rgba(164, 145, 111, 0.10), transparent 26%),
+      radial-gradient(circle at 84% 82%, rgba(95, 111, 82, 0.04), transparent 32%);
     mix-blend-mode: normal;
   }
 
@@ -1184,7 +1186,7 @@
     gap: 0.875rem;
     height: 46px;
     padding: 0 1rem;
-    border-radius: 1rem;
+    border-radius: 16px;
     position: relative;
     cursor: pointer;
     outline: none;
@@ -1425,12 +1427,12 @@
   }
 
   .dashboard-shell .card-depth {
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
+    box-shadow: 0 8px 24px -20px rgba(58, 51, 39, 0.22), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
     transition: background 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1438,32 +1440,32 @@
   }
 
   .dashboard-shell .card-depth:hover {
-    background: rgba(255, 255, 255, 0.86);
+    background: rgba(255, 255, 255, 0.88);
     transform: translateY(-1px) scale(1.01);
-    box-shadow: 0 4px 16px -14px rgba(58, 51, 39, 0.16);
+    box-shadow: 0 12px 28px -22px rgba(58, 51, 39, 0.18), 0 1px 2px rgba(255, 255, 255, 0.30) inset;
   }
 
   .dashboard-shell .glass-card,
   .dashboard-shell .glass-card-sm,
   .dashboard-shell .wine-card-glass {
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
+    box-shadow: 0 8px 24px -20px rgba(58, 51, 39, 0.22), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
     transition: background 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dashboard-shell .surface-clarity {
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
+    box-shadow: 0 8px 24px -20px rgba(58, 51, 39, 0.22), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
     transition: background 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -1477,12 +1479,12 @@
     width: fit-content;
     max-width: 100%;
     padding: 1rem 1.1rem;
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.05);
+    box-shadow: 0 8px 24px -20px rgba(58, 51, 39, 0.22), 0 1px 2px rgba(255, 255, 255, 0.28) inset;
   }
 
   .dashboard-shell .section-surface {
@@ -1545,13 +1547,13 @@
   }
 
   .dashboard-shell .chart-surface {
-    border-radius: 24px;
+    border-radius: 16px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(249, 246, 239, 0.90) 100%);
     border: 1px solid rgba(95, 111, 82, 0.08);
     box-shadow:
-      0 16px 36px -28px rgba(58, 51, 39, 0.22),
-      0 1px 2px rgba(58, 51, 39, 0.04);
-    padding: 0.9rem;
+      0 14px 32px -24px rgba(58, 51, 39, 0.20),
+      0 1px 2px rgba(255, 255, 255, 0.30) inset;
+    padding: 0.875rem;
   }
 
   .dashboard-shell .chart-surface-title {
@@ -1623,7 +1625,7 @@
 
   /* ── Editorial Hero Block — Forest deep ── */
   .dashboard-shell .editorial-hero {
-    border-radius: 24px;
+    border-radius: 16px;
     background: linear-gradient(145deg, hsl(var(--forest)), hsl(var(--forest-muted)));
     color: hsl(var(--cream-warm));
     border: 1px solid hsl(0 0% 100% / 0.06);
@@ -1713,22 +1715,22 @@
   }
 
   .editorial-card {
-    border-radius: 24px;
+    border-radius: 16px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(250, 246, 238, 0.92) 100%);
     border: 1px solid rgba(95, 111, 82, 0.10);
-    box-shadow: 0 18px 40px -30px rgba(58, 51, 39, 0.24), 0 1px 2px rgba(58, 51, 39, 0.05);
-    padding: 22px 24px;
+    box-shadow: 0 16px 36px -28px rgba(58, 51, 39, 0.22), 0 1px 2px rgba(255, 255, 255, 0.36) inset;
+    padding: 20px 22px;
     transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 background 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   @media (max-width: 640px) {
-    .editorial-card { padding: 16px 14px; border-radius: 20px; }
+    .editorial-card { padding: 16px 14px; border-radius: 16px; }
   }
 
   .editorial-hero-band {
-    border-radius: 22px;
+    border-radius: 16px;
     background: linear-gradient(145deg, #1c2920 0%, #24322a 100%);
     color: #F7F4EE;
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -1755,8 +1757,8 @@
   .editorial-kpi {
     position: relative;
     padding: 11px 11px 10px;
-    border-radius: 20px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(250, 246, 238, 0.65) 100%);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(250, 246, 238, 0.68) 100%);
     border: 1px solid rgba(95, 111, 82, 0.10);
     transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1764,18 +1766,18 @@
   }
   @media (min-width: 640px) {
     .editorial-kpi {
-      padding: 17px 17px 15px;
+      padding: 16px 16px 14px;
     }
   }
   @media (max-width: 640px) {
     .editorial-kpi {
       padding: 10px 10px 9px;
-      border-radius: 18px;
+      border-radius: 16px;
     }
   }
   .editorial-kpi:hover {
     transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 16px 34px -24px rgba(58, 51, 39, 0.28);
+    box-shadow: 0 14px 30px -22px rgba(58, 51, 39, 0.24), 0 1px 2px rgba(255, 255, 255, 0.32) inset;
   }
 
   .editorial-row {
