@@ -160,15 +160,21 @@ const Sidebar = React.forwardRef<
       <SheetContent
         data-sidebar="sidebar"
         data-mobile="true"
-        className="w-[--sidebar-width] p-0 text-sidebar-foreground [&>button]:hidden !bg-[#F6F4F1] !backdrop-blur-xl !border-r !border-[rgba(95,111,82,0.10)] !shadow-[0_20px_40px_-28px_rgba(0,0,0,0.18)]"
+        className="w-[--sidebar-width] p-0 text-sidebar-foreground [&>button]:hidden !bg-[#F6F4F1] !backdrop-blur-xl !border-r !border-[rgba(95,111,82,0.10)] !shadow-[0_20px_40px_-28px_rgba(0,0,0,0.18)] overflow-hidden"
         style={
           {
             "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
           } as React.CSSProperties
         }
           side={side}
-        >
-          <div className="flex h-full w-full flex-col">{children}</div>
+      >
+          <div className="relative flex h-full w-full flex-col overflow-hidden">
+            <div className="sidebar-mobile-scroll-cue" aria-hidden="true" />
+            <div className="sidebar-mobile-scroll-topfade" aria-hidden="true" />
+            <div className="sidebar-mobile-scroll-bottomfade" aria-hidden="true" />
+            <div className="sidebar-mobile-scrollbar" aria-hidden="true" />
+            <div className="sidebar-mobile-scroll-content">{children}</div>
+          </div>
         </SheetContent>
       </Sheet>
     );
