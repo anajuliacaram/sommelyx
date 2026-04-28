@@ -489,17 +489,17 @@ export default function ConsumptionPage() {
                   aria-label={filter.aria}
                   onClick={() => setOpenFilter(active ? null : filter.kind)}
                   className={cn(
-                    "flex h-9 flex-1 min-w-[96px] items-center justify-between gap-2 rounded-[11px] border border-[rgba(95,127,82,0.16)] bg-[rgba(95,127,82,0.06)] px-2.5 py-1.5 text-[13px] font-medium leading-none transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
+                    "flex h-[34px] flex-1 min-w-[96px] items-center justify-between gap-1.5 rounded-[11px] border px-2.5 py-1 text-[13px] font-medium leading-none transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
                     active
-                      ? "border-[rgba(95,127,82,0.24)] bg-[rgba(95,127,82,0.10)] text-[#305231] shadow-[0_4px_10px_-10px_rgba(95,127,82,0.16)]"
-                      : "text-[#2f2a22]",
+                      ? "border-[rgba(132,168,108,0.34)] bg-[rgba(132,168,108,0.12)] text-[#23402b] shadow-[0_4px_10px_-12px_rgba(95,127,82,0.18)]"
+                      : "border-[rgba(132,168,108,0.24)] bg-[rgba(132,168,108,0.06)] text-[#2f2a22]",
                   )}
                 >
-                  <span className="flex min-w-0 items-center gap-1">
-                    <span className="shrink-0 text-[11px] font-medium tracking-[-0.01em] text-[rgba(95,111,82,0.72)]">
-                      {filter.label}:
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="shrink-0 text-[11px] font-medium tracking-[-0.01em] text-[rgba(95,111,82,0.76)]">
+                      {filter.label}
                     </span>
-                    <span className="min-w-0 truncate text-[13px] font-semibold tracking-[-0.01em]">
+                    <span className="min-w-0 truncate text-[13px] font-semibold tracking-[-0.01em] text-[#213b26]">
                       {filter.value}
                     </span>
                   </span>
