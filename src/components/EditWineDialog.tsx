@@ -513,7 +513,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                 <Input value={grape} onChange={e => setGrape(e.target.value)} />
               </div>
               {isCommercial ? (
-                <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+                <div className="surface-clarity p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Precificação comercial</p>
@@ -601,7 +601,7 @@ export function EditWineDialog({ open, onOpenChange, wine }: EditWineDialogProps
                   label={isCommercial ? "Localização (principal)" : "Localização na adega"}
                 />
                 {isCommercial ? (
-                  <div className="mt-3 rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+                  <div className="mt-3 surface-clarity p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Localizações</p>

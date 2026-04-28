@@ -63,7 +63,7 @@ export function CreateLocationDialog({
         </DialogHeader>
 
         <div className="grid gap-4">
-          <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+          <div className="surface-clarity p-4">
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Vinho</p>
             <p className="mt-1 text-[13px] font-semibold text-foreground truncate">{wineName}</p>
           </div>

@@ -182,7 +182,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                 </div>
 
                 {/* Quantity (ruptura zera o estoque) */}
-                <div className="glass-card p-4">
+                <div className="surface-clarity p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
                     Resumo da ruptura
                   </p>

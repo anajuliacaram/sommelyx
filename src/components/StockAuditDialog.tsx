@@ -95,7 +95,7 @@ export function StockAuditDialog({
         </DialogHeader>
 
         <div className="mt-2 grid gap-4">
-          <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+          <div className="surface-clarity p-4">
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Resumo</p>
             <div className="mt-2 grid grid-cols-12 gap-3 items-start">
               <div className="col-span-12 sm:col-span-7">
@@ -124,7 +124,7 @@ export function StockAuditDialog({
           </div>
 
           {success ? (
-            <div className="rounded-2xl border border-black/5 bg-white p-6 flex items-center gap-3">
+            <div className="surface-clarity p-4 flex items-center gap-3">
               <div className="h-10 w-10 rounded-2xl bg-success/10 text-success flex items-center justify-center ring-1 ring-success/15">
                 <CheckCircle2 className="h-5 w-5" />
               </div>

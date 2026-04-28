@@ -316,7 +316,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             key={item.id}
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-[12px] border border-black/[0.06] bg-white/70"
+                            className="surface-clarity flex items-center gap-2.5 px-3 py-2.5 rounded-[12px]"
                           >
                             <span
                               className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -364,7 +364,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                               "group relative text-left px-3.5 py-3 rounded-[14px] border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
                               active
                                 ? "border-[#7B1E2B] bg-[rgba(123,30,43,0.05)] shadow-[0_4px_14px_-6px_rgba(123,30,43,0.25)]"
-                                : "border-black/[0.08] bg-white/65 hover:bg-white hover:-translate-y-px",
+                                : "border-black/[0.08] bg-white/70 hover:bg-white hover:-translate-y-px",
                             )}
                           >
                             <div className="flex items-center gap-2">
@@ -393,7 +393,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                     <div>
                       <SectionLabel>Vinho</SectionLabel>
                       {selectedWine ? (
-                        <div className="flex items-center gap-3 p-3 rounded-[14px] border border-[#7B1E2B]/25 bg-[rgba(123,30,43,0.04)]">
+                        <div className="surface-clarity flex items-center gap-3 p-3 rounded-[14px] border border-[#7B1E2B]/25 bg-[rgba(123,30,43,0.04)]">
                           <span
                             className="h-2.5 w-2.5 shrink-0 rounded-full"
                             style={{ background: wineTypeColor(selectedWine.style) }}
@@ -452,7 +452,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                               >
-                                <div className="space-y-2.5 p-3 rounded-[14px] border border-black/[0.06] bg-white/60 backdrop-blur-sm">
+                                <div className="surface-clarity space-y-2.5 p-3 rounded-[14px]">
                                   {countries.length > 0 && (
                                     <div>
                                       <p className="text-[10px] font-semibold text-[#3A3327]/55 uppercase tracking-[0.12em] mb-1.5">País</p>
@@ -619,9 +619,9 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                   )}
 
                   {/* Quantidade + Observações — grouped block */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <SectionLabel>Quantidade</SectionLabel>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <SectionLabel>Quantidade</SectionLabel>
                       <Input
                         type="number"
                         min="1"
@@ -686,7 +686,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                     className={cn(
                       "w-full h-11 rounded-[14px] text-[13px] font-semibold inline-flex items-center justify-center gap-1.5 transition-all duration-200",
                       canAddItem
-                        ? "bg-white/70 border border-black/[0.08] text-[#1A1713] hover:bg-white hover:-translate-y-px"
+                        ? "surface-clarity border border-black/[0.08] text-[#1A1713] hover:bg-white hover:-translate-y-px"
                         : "bg-white/40 border border-dashed border-black/[0.10] text-[#3A3327]/40 cursor-not-allowed",
                     )}
                   >

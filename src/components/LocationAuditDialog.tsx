@@ -70,7 +70,7 @@ export function LocationAuditDialog({
         </DialogHeader>
 
         <div className="mt-2 grid gap-4">
-          <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+          <div className="surface-clarity p-4">
             <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Localização</p>
             <div className="mt-2 grid grid-cols-12 gap-3 items-start">
               <div className="col-span-12 sm:col-span-6">

@@ -431,7 +431,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <p className="text-xs font-medium text-success">Rótulo identificado com sucesso</p>
               </div>
 
-              <div className="glass-card p-4 space-y-3">
+              <div className="surface-clarity p-4 space-y-3">
                 {scannedData.name && (
                   <DataRow label="Nome" value={scannedData.name} />
                 )}

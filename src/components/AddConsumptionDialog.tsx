@@ -253,7 +253,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </div>
 
               <div
-                className="max-h-[300px] overflow-y-auto pr-1 rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm divide-y divide-black/5 cellar-scroll"
+                className="max-h-[300px] overflow-y-auto pr-1 rounded-[18px] border border-white/24 bg-white/76 shadow-[0_14px_30px_-26px_rgba(58,51,39,0.18)] backdrop-blur-md divide-y divide-black/5 cellar-scroll"
                 style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
               >
                 {filteredWines.length > 4 && (

@@ -1424,7 +1424,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} />
 
                 {suggestions.length === 0 ? (
-                  <div className="glass-card p-6 text-center space-y-2">
+                  <div className="surface-clarity p-6 text-center space-y-2">
                     <p className="text-sm text-foreground/70 font-medium">
                       Nenhum vinho na sua adega combina com esse prato.
                     </p>
@@ -1627,7 +1627,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   />
                 )}
                 {!selectedWine && deepLinkError && (
-                  <div className="glass-card p-4 rounded-2xl border border-destructive/15 bg-destructive/5 text-sm text-destructive">
+                  <div className="surface-clarity p-4 rounded-2xl border border-destructive/15 bg-destructive/5 text-sm text-destructive">
                     Não foi possível carregar os dados completos deste vinho.
                   </div>
                 )}
@@ -1635,7 +1635,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <SectionHeader icon="chef" label="Pratos sugeridos" />
 
                 {pairings.length === 0 ? (
-                  <div className="glass-card p-6 text-center space-y-2">
+                  <div className="surface-clarity p-6 text-center space-y-2">
                     <p className="text-sm text-foreground/70 font-medium">
                       Nenhuma sugestão encontrada.
                     </p>
@@ -1724,7 +1724,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="glass-card p-4">
+                <div className="surface-clarity p-4">
                   <p className="text-sm font-medium text-foreground">
                     Prato: <span className="font-bold">{dish}</span>
                   </p>
@@ -1738,7 +1738,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 </div>
 
                 {scanResults.wines.length === 0 ? (
-                  <div className="glass-card p-6 text-center space-y-2">
+                  <div className="surface-clarity p-6 text-center space-y-2">
                     <p className="text-sm text-foreground/70 font-medium">
                       Não foi possível identificar vinhos na imagem.
                     </p>

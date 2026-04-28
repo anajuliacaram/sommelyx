@@ -66,7 +66,7 @@ export function TransferLocationDialog({
         </DialogHeader>
 
         <div className="grid gap-3">
-          <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-xl">
+          <div className="surface-clarity p-4">
             <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Vinho</p>
             <p className="mt-1 text-[13px] font-semibold text-foreground truncate">{wineName}</p>
           </div>
