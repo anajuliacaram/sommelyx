@@ -53,7 +53,7 @@ export default function RegistersPage() {
   return (
     <div className="space-y-7 max-w-[900px]">
       <div>
-        <div className="glass-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="surface-clarity p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="t-title">Cadastros</h1>
             <p className="t-subtitle mt-1.5">Clientes e fornecedores da sua operação</p>
@@ -65,7 +65,7 @@ export default function RegistersPage() {
       </div>
 
       {showForm && (
-        <div className="glass-card p-4 space-y-3">
+        <div className="surface-clarity p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input placeholder="Nome *" value={name} onChange={(e) => setName(e.target.value)} className="h-9 text-[12px]" />
             <select
@@ -101,7 +101,7 @@ export default function RegistersPage() {
       {filtered.length > 0 ? (
         <div className="space-y-1.5">
           {filtered.map((c, i) => (
-            <div key={c.id} className="glass-card p-3 flex items-center gap-3 group">
+            <div key={c.id} className="surface-clarity p-3 flex items-center gap-3 group">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${TYPE_COLORS[c.type].bg}`}>
                 <Users className={`h-3.5 w-3.5 ${TYPE_COLORS[c.type].text}`} />
               </div>

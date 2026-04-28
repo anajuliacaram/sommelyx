@@ -45,7 +45,7 @@ export function DashboardExecutiveSummary({
   commandHint,
 }: DashboardExecutiveSummaryProps) {
   return (
-    <section className="glass-card relative p-6 sm:p-8">
+    <section className="card-depth relative p-5 sm:p-6">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-10 top-[-60px] h-32 w-32 rounded-full bg-copper/[0.08] blur-[60px]" />
         <div className="absolute right-[-30px] top-10 h-28 w-28 rounded-full bg-[hsl(0_0%_100%/0.04)] blur-[60px]" />
@@ -71,7 +71,7 @@ export function DashboardExecutiveSummary({
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="inline-flex items-center rounded-md border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.65)] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#6B6B6B] relative z-10"
+                className="inline-flex items-center rounded-md border border-white/30 bg-white/62 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#6B6B6B] relative z-10 backdrop-blur-md shadow-[0_4px_12px_-10px_rgba(58,51,39,0.18)]"
               >
                 {badge}
               </span>
@@ -97,7 +97,7 @@ export function DashboardExecutiveSummary({
         </div>
 
         <div className="grid gap-3">
-          <div className="rounded-[16px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.65)] p-5 text-foreground relative z-10 backdrop-blur-[10px]" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+          <div className="surface-clarity p-4 text-foreground relative z-10">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/80">
@@ -107,7 +107,7 @@ export function DashboardExecutiveSummary({
                   Um painel claro para decidir rápido.
                 </h2>
               </div>
-              <div className="rounded-lg border border-copper/15 bg-copper/[0.08] px-3 py-2 text-right">
+              <div className="rounded-lg border border-copper/15 bg-copper/[0.08] px-3 py-2 text-right shadow-[0_4px_12px_-10px_rgba(58,51,39,0.18)]">
                 <p className="text-[9px] uppercase tracking-[0.10em] text-copper/60">Atalho</p>
                 <p className="text-[11px] font-medium text-copper">{commandHint ?? "Ctrl/Cmd + K"}</p>
               </div>
@@ -123,8 +123,7 @@ export function DashboardExecutiveSummary({
               return (
                 <article
                   key={metric.label}
-                  className="rounded-[16px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.65)] p-4 backdrop-blur-[10px]"
-                  style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
+                  className="surface-clarity p-4"
                 >
                   <div className="flex items-start gap-1.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">

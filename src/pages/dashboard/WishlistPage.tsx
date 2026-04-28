@@ -275,7 +275,7 @@ export default function WishlistPage() {
   return (
     <div className="space-y-7 max-w-[980px]">
       <div>
-        <div className="glass-card p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="surface-clarity p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="t-title">Wishlist inteligente</h1>
             <p className="t-subtitle mt-1.5">
@@ -290,7 +290,7 @@ export default function WishlistPage() {
       </div>
 
       {showForm && (
-        <div className="glass-card p-5 space-y-5">
+        <div className="surface-clarity p-5 space-y-5">
           <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="space-y-4">
               <div className="space-y-2">
@@ -379,7 +379,7 @@ export default function WishlistPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-[24px] border border-white/30 bg-white/70 p-4 shadow-[0_12px_36px_-24px_rgba(45,20,31,0.4)]">
+              <div className="surface-clarity p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8C2044]">Assistente Sommelyx</p>
@@ -501,7 +501,7 @@ export default function WishlistPage() {
       {filtered.length > 0 ? (
         <div className="grid gap-3">
           {filtered.map((item, index) => (
-            <div key={item.id} className="glass-card p-3 sm:p-4 flex gap-3 group">
+            <div key={item.id} className="surface-clarity p-3 sm:p-4 flex gap-3 group">
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[20px] border border-border/50 bg-primary/5">
                 <WineLabelPreview
                   wine={{

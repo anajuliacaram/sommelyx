@@ -116,7 +116,7 @@ export function PersonalizedNotifications({ wines }: Props) {
             exit={{ opacity: 0, x: -20, height: 0 }}
             transition={{ duration: 0.3, delay: i * 0.05 }}
             className={cn(
-              "glass-card p-4 flex items-start gap-3 group relative overflow-hidden border-l-[3px]",
+              "surface-clarity p-4 flex items-start gap-3 group relative overflow-hidden border-l-[3px]",
               tip.tone === "success" && "border-success/40",
               tip.tone === "warning" && "border-warning/40",
               tip.tone === "gold" && "border-gold/45",

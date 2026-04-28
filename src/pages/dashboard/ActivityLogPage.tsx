@@ -158,7 +158,7 @@ export default function ActivityLogPage() {
       </div>
 
       {isCommercial ? (
-        <div className="glass-card p-4">
+        <div className="surface-clarity p-4">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
@@ -216,7 +216,7 @@ export default function ActivityLogPage() {
       ) : null}
 
       {(!filteredEvents || filteredEvents.length === 0) ? (
-        <div className="glass-card p-8 text-center">
+        <div className="surface-clarity p-8 text-center">
           <ClipboardList className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-[12px] text-muted-foreground">Nenhuma atividade registrada ainda.</p>
         </div>
@@ -248,7 +248,7 @@ export default function ActivityLogPage() {
                   const moved = (ev as any).quantity_moved as number | null;
 
                   return (
-                    <div key={ev.id} className="glass-card p-3 flex items-start gap-3">
+                    <div key={ev.id} className="surface-clarity p-3 flex items-start gap-3">
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: cfg.bg }}>
                         <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
                       </div>
