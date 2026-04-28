@@ -355,7 +355,7 @@ export default function PersonalCellarPage() {
         {isMobile ? (
           mobileHeader(filtered.length)
         ) : (
-          <EditorialCard style={{ padding: "12px 14px 10px" }}>
+          <EditorialCard style={{ padding: "10px 12px 10px" }}>
             <div className="flex flex-col gap-2">
               <div className="grid gap-2.5 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
                 <div className="flex min-w-0 flex-col">
@@ -382,43 +382,85 @@ export default function PersonalCellarPage() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-end gap-1.5 lg:justify-end">
-                  <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-                    <SelectTrigger
-                      aria-label="Ordenar vinhos"
-                      className={`${controlBase} ${controlSurface} min-w-[170px] lg:min-w-[190px] px-3 pr-3 text-[11.5px] sm:text-[12px]`}
-                    >
-                      <div className="flex min-w-0 items-center gap-1.5">
-                        <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
-                        <span className="min-w-0 truncate">{sortLabel}</span>
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
-                      <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
-                      <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
-                      <SelectItem value="value">Ordenar: Mais caros</SelectItem>
-                      <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
-                      <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-                    <SelectTrigger
-                      aria-label="Filtrar por país"
-                      className={`${controlBase} ${controlSurface} min-w-[130px] lg:min-w-[150px] px-3 pr-3 text-[11.5px] sm:text-[12px]`}
-                    >
-                      <div className="flex min-w-0 items-center gap-1.5">
-                        <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
-                        <span className="min-w-0 truncate">{countryLabel}</span>
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
-                      <SelectItem value="all">País</SelectItem>
-                      {countryOptions.filter((o) => o.key !== "all").map((option) => (
-                        <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="editorial-segmented">
+                <button
+                  type="button"
+                  className="editorial-btn-primary h-10 rounded-[14px] px-4 text-[12.5px] font-semibold tracking-[-0.01em] whitespace-nowrap"
+                  onClick={() => setAddOpen(true)}
+                >
+                  + Adicionar
+                </button>
+              </div>
+
+              <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex min-w-max items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+                      <SelectTrigger
+                        aria-label="Ordenar vinhos"
+                        className={`${controlBase} ${controlSurface} h-10 min-w-[180px] px-3.5 text-[12px]`}
+                      >
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
+                          <span className="min-w-0 truncate">{sortLabel}</span>
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                        <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
+                        <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
+                        <SelectItem value="value">Ordenar: Mais caros</SelectItem>
+                        <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
+                        <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
+                      <SelectTrigger
+                        aria-label="Filtrar por país"
+                        className={`${controlBase} ${controlSurface} h-10 min-w-[144px] px-3.5 text-[12px]`}
+                      >
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
+                          <span className="min-w-0 truncate">{countryLabel}</span>
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                        <SelectItem value="all">País</SelectItem>
+                        {countryOptions.filter((o) => o.key !== "all").map((option) => (
+                          <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className={sectionLabel}>Tipo</span>
+                    {styleOptions.map((s) => (
+                      <Chip
+                        key={s.key}
+                        active={styleFilter === s.key}
+                        onClick={() => setStyleFilter(s.key)}
+                        className="h-10 px-3 text-[11px] normal-case tracking-[-0.01em]"
+                      >
+                        {s.label}
+                      </Chip>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className={sectionLabel}>Janela</span>
+                    {drinkWindowOptions.map((option) => (
+                      <Chip
+                        key={option.key}
+                        active={drinkWindowFilter === option.key}
+                        onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+                        className="h-10 px-3 text-[11px] normal-case tracking-[-0.01em]"
+                      >
+                        {option.label}
+                      </Chip>
+                    ))}
+                  </div>
+
+                  <div className="editorial-segmented h-10">
                     <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
                       Grade
                     </button>
@@ -426,41 +468,6 @@ export default function PersonalCellarPage() {
                       Lista
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    className="editorial-btn-primary h-9 sm:h-10 rounded-[12px] sm:rounded-[14px] px-3.5 text-[12px] sm:text-[12.5px] font-semibold tracking-[-0.01em]"
-                    onClick={() => setAddOpen(true)}
-                  >
-                    + Adicionar
-                  </button>
-                </div>
-              </div>
-
-              <div className="rounded-[14px] bg-[rgba(255,255,255,0.24)] px-2.5 py-1.5 shadow-[0_1px_0_rgba(95,111,82,0.03)]">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                  <span className={sectionLabel}>Tipo</span>
-                  {styleOptions.map((s) => (
-                    <Chip
-                      key={s.key}
-                      active={styleFilter === s.key}
-                      onClick={() => setStyleFilter(s.key)}
-                      className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em]"
-                    >
-                      {s.label}
-                    </Chip>
-                  ))}
-                  <span className="mx-1 hidden h-4 w-px bg-[rgba(95,111,82,0.10)] sm:inline-block" />
-                  <span className={sectionLabel}>Janela</span>
-                  {drinkWindowOptions.map((option) => (
-                    <Chip
-                      key={option.key}
-                      active={drinkWindowFilter === option.key}
-                      onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                      className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em]"
-                    >
-                      {option.label}
-                    </Chip>
-                  ))}
                 </div>
               </div>
             </div>
