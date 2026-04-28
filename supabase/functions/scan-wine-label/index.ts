@@ -11,7 +11,7 @@ const corsHeaders = {
 
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 1 * 1024 * 1024;
-const AI_TIMEOUT_MS = 15_000;
+const AI_TIMEOUT_MS = 35_000;
 const DEBUG_MODE = Deno.env.get("SCAN_WINE_LABEL_DEBUG") === "true";
 
 
@@ -427,6 +427,13 @@ serve(async (req) => {
       base64_length: imageBase64.length,
       size_bytes: sizeBytes,
     });
+    console.log(`[${FUNCTION_NAME}] step: image_validated request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
+    await logStep(userId, 200, "image_validated", Date.now() - startTime, requestId, {
+      image_mime: imageMime,
+      file_name: payloadFileName,
+      base64_length: imageBase64.length,
+      size_bytes: sizeBytes,
+    });
 
     const AI_MODEL = Deno.env.get("SCAN_WINE_LABEL_MODEL")?.trim() || "gpt-4o-mini";
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
@@ -575,6 +582,7 @@ serve(async (req) => {
     }
 
     console.log(`[${FUNCTION_NAME}] step: ai_response_received request_id=${requestId} raw=${DEBUG_MODE ? sanitizePreview(openaiResult.raw) : "hidden"}`);
+    console.log(`[${FUNCTION_NAME}] step: parse_started request_id=${requestId} awaiting_structured_output`);
 
     try {
       parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
@@ -611,7 +619,10 @@ serve(async (req) => {
 
     const parsed = parsedArgs as Record<string, unknown>;
     const wine = (parsed?.wine ?? parsed) as Record<string, unknown>;
-    console.log(`[${FUNCTION_NAME}] step: parse_started request_id=${requestId} fields=${Object.keys(wine).join(",")} parsed_preview=${DEBUG_MODE ? sanitizePreview(parsed) : "hidden"}`);
+    console.log(`[${FUNCTION_NAME}] step: parse_succeeded request_id=${requestId} fields=${Object.keys(wine).join(",")} parsed_preview=${DEBUG_MODE ? sanitizePreview(parsed) : "hidden"}`);
+    await logStep(userId, 200, "parse_succeeded", durationMs, requestId, {
+      parsed_fields: Object.keys(wine),
+    });
 
     const normalizedWine = {
       name: typeof wine.name === "string" ? wine.name.trim() : null,

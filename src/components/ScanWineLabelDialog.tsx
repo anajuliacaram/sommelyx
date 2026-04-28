@@ -112,7 +112,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           mimeType: metadata?.mimeType,
           fileName: metadata?.fileName,
         },
-        { timeoutMs: 12_000, retries: 1, retryOnAbort: false },
+        { timeoutMs: 40_000, retries: 1, retryOnAbort: false },
       );
 
       if (!data?.wine) throw new Error("Nenhum dado encontrado");
@@ -238,7 +238,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         } else if (code === "AI_TIMEOUT") {
           msg = "Tempo de resposta excedido. Tente novamente com uma foto mais nítida.";
         } else if (code === "AI_UNAVAILABLE") {
-          msg = "Não conseguimos concluir a leitura agora. Verifique a conexão e tente novamente com a mesma imagem.";
+          msg = "Não conseguimos concluir a leitura agora. Tente novamente com outra foto.";
         }
         setErrorMsg(msg);
         setStep("error");
