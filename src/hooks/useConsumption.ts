@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSommelyxData } from "@/lib/sommelyx-data";
+import { safeLogWrappedEvent } from "@/lib/wrapped-events";
 
 export interface ConsumptionEntry {
   id: string;
@@ -100,6 +101,40 @@ export function useAddConsumption() {
         queryClient.invalidateQueries({ queryKey: ["wines"] });
         queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
       }
+      try {
+        safeLogWrappedEvent({
+          userId: user?.id ?? "",
+          mode: variables.source === "cellar" ? "personal" : "personal",
+          eventType: "consumption_logged",
+          entityId: variables.wine_id ?? variables.wine_name,
+          quantity: 1,
+          rating: variables.rating ?? null,
+          context: {
+            source: "useAddConsumption",
+            wine_id: variables.wine_id ?? null,
+            wine_name: variables.wine_name,
+            consumed_at: variables.consumed_at,
+            location: variables.location ?? null,
+          },
+        });
+        if (typeof variables.rating === "number" && variables.rating > 0) {
+          safeLogWrappedEvent({
+            userId: user?.id ?? "",
+            mode: variables.source === "cellar" ? "personal" : "personal",
+            eventType: "wine_rated",
+            entityId: variables.wine_id ?? variables.wine_name,
+            quantity: 1,
+            rating: variables.rating,
+            context: {
+              source: "useAddConsumption",
+              wine_id: variables.wine_id ?? null,
+              wine_name: variables.wine_name,
+            },
+          });
+        }
+      } catch {
+        // noop
+      }
     },
   });
 }
@@ -138,8 +173,26 @@ export function useUpdateConsumption() {
         .eq("user_id", user.id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["consumption"] });
+      try {
+        if (typeof variables.updates.rating === "number" && variables.updates.rating > 0) {
+          safeLogWrappedEvent({
+            userId: user?.id ?? "",
+            mode: "personal",
+            eventType: "wine_rated",
+            entityId: variables.id,
+            quantity: 1,
+            rating: variables.updates.rating,
+            context: {
+              source: "useUpdateConsumption",
+              fields: Object.keys(variables.updates),
+            },
+          });
+        }
+      } catch {
+        // noop
+      }
     },
   });
 }

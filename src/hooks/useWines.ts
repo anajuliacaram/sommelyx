@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getSommelyxData } from "@/lib/sommelyx-data";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { isPlaceholderWineImageUrl } from "@/lib/wine-images";
+import { safeLogWrappedEvent, type WrappedEventType, type WrappedMode } from "@/lib/wrapped-events";
 
 export interface Wine {
   id: string;
@@ -277,7 +278,7 @@ export function useWineMetrics() {
 
 export function useAddWine() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, profileType } = useAuth();
 
   return useMutation({
     mutationFn: async (wine: Omit<WineInsert, "user_id">) => {
@@ -317,16 +318,54 @@ export function useAddWine() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
       queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
+      try {
+        const mode: WrappedMode = profileType === "commercial" ? "commercial" : "personal";
+        if (variables.quantity > 0) {
+          safeLogWrappedEvent({
+            userId: user?.id ?? "",
+            mode,
+            eventType: "added_to_cellar",
+            entityId: String(data?.id ?? crypto.randomUUID()),
+            quantity: variables.quantity,
+            price: variables.current_value ?? variables.purchase_price ?? null,
+            rating: variables.rating ?? null,
+            context: {
+              source: "useAddWine",
+              wine_name: variables.name,
+              style: variables.style ?? null,
+              region: variables.region ?? null,
+              country: variables.country ?? null,
+              vintage: variables.vintage ?? null,
+            },
+          });
+        }
+        if (typeof variables.rating === "number" && variables.rating > 0) {
+          safeLogWrappedEvent({
+            userId: user?.id ?? "",
+            mode,
+            eventType: "wine_rated",
+            entityId: String(data?.id ?? crypto.randomUUID()),
+            quantity: 1,
+            rating: variables.rating,
+            context: {
+              source: "useAddWine",
+              wine_name: variables.name,
+            },
+          });
+        }
+      } catch {
+        // noop
+      }
     },
   });
 }
 
 export function useUpdateWine() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, profileType } = useAuth();
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Wine, "id" | "created_at" | "updated_at" | "user_id">> }) => {
@@ -358,9 +397,27 @@ export function useUpdateWine() {
       const { error } = await supabase.from("wines").update(payload as any).eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
       queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
+      try {
+        if (typeof variables.updates.rating === "number" && variables.updates.rating > 0) {
+          safeLogWrappedEvent({
+            userId: user?.id ?? "",
+            mode: profileType === "commercial" ? "commercial" : "personal",
+            eventType: "wine_rated",
+            entityId: variables.id,
+            quantity: 1,
+            rating: variables.updates.rating,
+            context: {
+              source: "useUpdateWine",
+              fields: Object.keys(variables.updates),
+            },
+          });
+        }
+      } catch {
+        // noop
+      }
     },
   });
 }
@@ -375,7 +432,7 @@ export function useDeleteWine() {
       const { error } = await supabase.from("wines").delete().eq("id", id).eq("user_id", user.id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
       queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
     },
@@ -384,7 +441,7 @@ export function useDeleteWine() {
 
 export function useWineEvent() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, profileType } = useAuth();
 
   return useMutation({
     mutationFn: async ({
@@ -418,9 +475,38 @@ export function useWineEvent() {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wines"] });
       queryClient.invalidateQueries({ queryKey: ["wines-kpi"] });
+      try {
+        const mappedEventType: WrappedEventType | null =
+          variables.eventType === "open"
+            ? "bottle_opened"
+            : variables.eventType === "exit"
+              ? "sale_completed"
+              : variables.eventType === "add" || variables.eventType === "stock_increase" || variables.eventType === "stock_adjustment"
+                ? "stock_added"
+                : null;
+        if (mappedEventType) {
+          safeLogWrappedEvent({
+            userId: user?.id ?? "",
+            mode: profileType === "commercial" || variables.eventType === "exit" ? "commercial" : "personal",
+            eventType: mappedEventType,
+            entityId: variables.wineId,
+            quantity: variables.quantity,
+            context: {
+              source: "useWineEvent",
+              event_type: variables.eventType,
+              notes: variables.notes ?? null,
+              responsible_name: variables.responsibleName ?? null,
+              reason: variables.reason ?? null,
+              location_id: variables.locationId ?? null,
+            },
+          });
+        }
+      } catch {
+        // noop
+      }
     },
   });
 }
