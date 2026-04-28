@@ -165,15 +165,15 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
 }) {
   return (
     <div className="editorial-kpi">
-      <div className="mb-2 flex items-center justify-between gap-2 sm:mb-5">
-        <div className="flex min-w-0 items-center gap-1.5">
+      <div className="mb-2 flex items-start justify-between gap-2 sm:mb-5">
+        <div className="flex min-w-0 items-start gap-1.5">
           <div
             className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[10px] sm:h-9 sm:w-9 sm:rounded-[12px]"
             style={{ color: accent, background: `${accent}14` }}
           >
             {icon}
           </div>
-          <span className="min-w-0 truncate text-[9px] font-bold uppercase tracking-[0.11em] text-[rgba(58,51,39,0.56)] sm:text-[9px] sm:tracking-[0.12em]">
+          <span className="min-h-[2.1em] min-w-0 text-[9px] font-bold uppercase leading-[1.12] tracking-[0.11em] text-[rgba(58,51,39,0.56)] sm:text-[9px] sm:tracking-[0.12em]">
             {label}
           </span>
         </div>

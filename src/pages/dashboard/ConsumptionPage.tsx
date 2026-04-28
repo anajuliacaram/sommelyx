@@ -248,14 +248,14 @@ export default function ConsumptionPage() {
         <EditorialKpiCard
           icon={<GlassWater className="h-4 w-4" />}
           accent="#7B1E2B"
-          label="Abertos · 6 meses"
+          label="Consumo nos últimos 6 meses"
           value={total}
           sub="garrafas"
         />
         <EditorialKpiCard
           icon={<TrendingUp className="h-4 w-4" />}
           accent="#5F7F52"
-          label="Ritmo médio"
+          label="Ritmo médio mensal"
           value={avgPerMonth}
           sub="por mês"
         />
@@ -269,9 +269,9 @@ export default function ConsumptionPage() {
         <EditorialKpiCard
           icon={<Calendar className="h-4 w-4" />}
           accent="#6B8298"
-          label="Última abertura"
+          label="Última garrafa aberta"
           value={lastLabel}
-          sub={lastEntry?.wine_name?.slice(0, 22) || ""}
+          sub={lastEntry?.wine_name || ""}
         />
       </div>
 
@@ -286,7 +286,7 @@ export default function ConsumptionPage() {
             garrafas / {period === "week" ? "dia" : "mês"}
           </span>
         </div>
-        <Sparkbar data={chart.data} accent="#7B1E2B" height={110} barWidth={period === "year" ? 8 : 12} />
+        <Sparkbar data={chart.data} accent="#7B1E2B" height={72} barWidth={period === "year" ? 6 : 10} />
       </EditorialCard>
 
       {/* Filtros inteligentes */}

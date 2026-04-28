@@ -219,13 +219,13 @@ export default function PersonalCellarPage() {
           <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex min-w-max items-center gap-1.5">
               <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-                <SelectTrigger
+              <SelectTrigger
                   aria-label="Ordenar vinhos"
-                  className={`${controlBase} ${controlSurface} h-9 min-w-[118px] px-2.5 text-[11.5px]`}
+                  className={`${controlBase} ${controlSurface} h-9 min-w-[182px] px-2.5 text-[11.5px]`}
                 >
-                  <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
-                    <span className="min-w-0 truncate">{sortLabel}</span>
+                    <span className="min-w-0">{sortLabel}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
@@ -237,13 +237,13 @@ export default function PersonalCellarPage() {
                 </SelectContent>
               </Select>
               <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-                <SelectTrigger
+              <SelectTrigger
                   aria-label="Filtrar por país"
-                  className={`${controlBase} ${controlSurface} h-9 min-w-[104px] px-2.5 text-[11.5px]`}
+                  className={`${controlBase} ${controlSurface} h-9 min-w-[136px] px-2.5 text-[11.5px]`}
                 >
-                  <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
-                    <span className="min-w-0 truncate">{countryLabel}</span>
+                    <span className="min-w-0">{countryLabel}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">

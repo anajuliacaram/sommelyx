@@ -118,15 +118,15 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       />
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 font-sans text-[14px] font-semibold tracking-[-0.005em] text-[#1A1713]">
+                        <div className="flex items-start gap-1.5 font-sans text-[14px] font-semibold tracking-[-0.005em] text-[#1A1713]">
                           <span
                             aria-hidden
                             className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
                             style={{ background: color }}
                           />
-                          <span className="truncate">{entry.wine_name}</span>
+                          <span className="whitespace-normal break-words leading-[1.2]">{entry.wine_name}</span>
                         </div>
-                        <div className="mt-0.5 text-[12px] text-[rgba(26,23,19,0.55)]">
+                        <div className="mt-0.5 whitespace-normal break-words text-[12px] text-[rgba(26,23,19,0.55)]">
                           {entry.location || entry.tasting_notes || "—"}
                         </div>
                       </div>
