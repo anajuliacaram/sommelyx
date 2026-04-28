@@ -420,6 +420,14 @@ serve(async (req) => {
       });
     }
 
+    console.log(`[${FUNCTION_NAME}] step: image_received request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
+    await logStep(userId, 200, "image_received", Date.now() - startTime, requestId, {
+      image_mime: imageMime,
+      file_name: payloadFileName,
+      base64_length: imageBase64.length,
+      size_bytes: sizeBytes,
+    });
+
     const AI_MODEL = Deno.env.get("SCAN_WINE_LABEL_MODEL")?.trim() || "gpt-4o-mini";
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     if (!openaiKey) {

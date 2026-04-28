@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 type InvokeOptions = {
   timeoutMs?: number;
   retries?: number;
+  retryOnAbort?: boolean;
 };
 
 type CacheEntry = {
@@ -248,7 +249,7 @@ function sanitizeForLog(value: unknown): unknown {
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
-  { timeoutMs = 45_000, retries = 2 }: InvokeOptions = {},
+  { timeoutMs = 45_000, retries = 2, retryOnAbort = true }: InvokeOptions = {},
 ): Promise<T> {
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
@@ -367,11 +368,14 @@ export async function invokeEdgeFunction<T>(
       // the request likely already reached the function and is processing server-side.
       // Retrying duplicates expensive AI work and stacks load.
       const isTransportFailure = isTransportErrorMessage(rawMessage) || isAbortErrorMessage(rawMessage);
+      const isAbort = isAbortErrorMessage(rawMessage);
       const isLongRunning = timeoutMs >= 60_000;
       const retryable =
         err instanceof EdgeFunctionError
           ? (err.retryable ?? isRetriable(err.status))
-          : (isTransportFailure && isLongRunning)
+          : isAbort
+            ? retryOnAbort && (isLongRunning ? false : true)
+            : (isTransportFailure && isLongRunning)
             ? false
             : rawMessage.includes("demorou") || isTransportFailure || isSdkRelayError(rawMessage);
 
@@ -398,12 +402,12 @@ export async function invokeEdgeFunction<T>(
         message: rawMessage || toErrorMessage(err),
       });
       if (err instanceof EdgeFunctionError) throw err;
-      const isAbort = isAbortErrorMessage(rawMessage);
+      const abortFailure = isAbortErrorMessage(rawMessage);
       const isTransport = isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage);
       throw new EdgeFunctionError(classifyEdgeError(toErrorMessage(err)), {
-        status: isAbort ? 408 : undefined,
-        code: isAbort ? "AI_TIMEOUT" : isTransport ? "AI_UNAVAILABLE" : undefined,
-        retryable: isAbort || isTransport,
+        status: abortFailure ? 408 : undefined,
+        code: abortFailure ? "AI_TIMEOUT" : isTransport ? "AI_UNAVAILABLE" : undefined,
+        retryable: abortFailure ? retryOnAbort : isTransport,
         rawBody: rawMessage || toErrorMessage(err),
         functionName: name,
       });

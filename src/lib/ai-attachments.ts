@@ -55,10 +55,13 @@ export class AttachmentPrepError extends Error {
 
 const MAX_IMAGE_DIMENSION_DESKTOP = 1120;
 const MAX_IMAGE_DIMENSION_MOBILE = 840;
+const MAX_IMAGE_DIMENSION_SCAN = 1024;
 const MAX_IMAGE_QUALITY_DESKTOP = 0.74;
 const MAX_IMAGE_QUALITY_MOBILE = 0.64;
+const MAX_IMAGE_QUALITY_SCAN = 0.7;
 const MAX_IMAGE_BASE64_LENGTH_DESKTOP = 1_500_000;
 const MAX_IMAGE_BASE64_LENGTH_MOBILE = 900_000;
+const MAX_IMAGE_BASE64_LENGTH_SCAN = 950_000;
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 const MAX_PDF_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 const MAX_PDF_PAGES_FOR_TEXT = 10;
@@ -68,6 +71,13 @@ const MAX_EXTRACTED_TEXT_LENGTH = 12000;
 
 let pdfJsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
 const attachmentPreparationCache = new Map<string, Promise<PreparedAiAnalysisAttachment>>();
+
+type ImageAttachmentPreset = {
+  maxDimension?: number;
+  baseQuality?: number;
+  maxBase64Length?: number;
+  tracePrefix?: string;
+};
 
 async function getPdfJs() {
   if (!pdfJsPromise) {
@@ -398,14 +408,18 @@ async function decodeImageFile(file: File) {
   );
 }
 
-async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
+async function prepareImageAttachment(
+  file: File,
+  preset: ImageAttachmentPreset = {},
+): Promise<PreparedAiAnalysisAttachment> {
   const startedAt = nowMs();
-  trace("upload_received", { fileName: file.name, mimeType: file.type || "unknown", sizeBytes: file.size });
+  const tracePrefix = preset.tracePrefix || "upload";
+  trace(`${tracePrefix}_received`, { fileName: file.name, mimeType: file.type || "unknown", sizeBytes: file.size });
   const mimeType = inferMimeType(file);
   const mobile = isLikelyMobileDevice();
-  const maxDimension = mobile ? MAX_IMAGE_DIMENSION_MOBILE : MAX_IMAGE_DIMENSION_DESKTOP;
-  const baseQuality = mobile ? MAX_IMAGE_QUALITY_MOBILE : MAX_IMAGE_QUALITY_DESKTOP;
-  const maxBase64Length = mobile ? MAX_IMAGE_BASE64_LENGTH_MOBILE : MAX_IMAGE_BASE64_LENGTH_DESKTOP;
+  const maxDimension = preset.maxDimension ?? (mobile ? MAX_IMAGE_DIMENSION_MOBILE : MAX_IMAGE_DIMENSION_DESKTOP);
+  const baseQuality = preset.baseQuality ?? (mobile ? MAX_IMAGE_QUALITY_MOBILE : MAX_IMAGE_QUALITY_DESKTOP);
+  const maxBase64Length = preset.maxBase64Length ?? (mobile ? MAX_IMAGE_BASE64_LENGTH_MOBILE : MAX_IMAGE_BASE64_LENGTH_DESKTOP);
 
   if (!mimeType.startsWith("image/")) {
     throw createAttachmentError("INVALID_FILE_TYPE", "Tipo de arquivo inválido.", { mimeType });
@@ -416,7 +430,15 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
   if (isProblematicMobileImageFormat(mimeType, file.name)) {
     trace("image_format_detected", { fileName: file.name, mimeType, note: "problematic_mobile_format" });
   }
-  trace("image_prepare_started", { fileName: file.name, mimeType, sizeBytes: file.size, mobile });
+  trace("image_prepare_started", {
+    fileName: file.name,
+    mimeType,
+    sizeBytes: file.size,
+    mobile,
+    maxDimension,
+    baseQuality,
+    maxBase64Length,
+  });
 
   const decodeStartedAt = nowMs();
   const decoded = await decodeImageFile(file);
@@ -482,6 +504,15 @@ async function prepareImageAttachment(file: File): Promise<PreparedAiAnalysisAtt
     fileName: file.name,
     sourceType: "image",
   };
+}
+
+async function prepareScanImageAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
+  return await prepareImageAttachment(file, {
+    tracePrefix: "scan_upload",
+    maxDimension: MAX_IMAGE_DIMENSION_SCAN,
+    baseQuality: MAX_IMAGE_QUALITY_SCAN,
+    maxBase64Length: MAX_IMAGE_BASE64_LENGTH_SCAN,
+  });
 }
 
 async function extractPdfText(file: File) {
@@ -755,6 +786,51 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
     }
 
     const prepared = await prepareImageAttachment(file);
+    trace("attachment_timing", {
+      stage: "prepare_attachment_total",
+      fileName: file.name,
+      sourceType: prepared.sourceType,
+      durationMs: Math.round(nowMs() - startedAt),
+    });
+    return prepared;
+  })();
+
+  attachmentPreparationCache.set(cacheKey, pending);
+  try {
+    return await pending;
+  } catch (error) {
+    attachmentPreparationCache.delete(cacheKey);
+    throw error;
+  }
+}
+
+export async function prepareWineLabelScanAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
+  const cacheKey = `scan:${fileCacheKey(file)}`;
+  const cached = attachmentPreparationCache.get(cacheKey);
+  if (cached) {
+    trace("attachment_cache_hit", { fileName: file.name, cacheKey });
+    return cached;
+  }
+
+  const pending = (async () => {
+    const startedAt = nowMs();
+    const mimeType = inferMimeType(file);
+    trace("file_validated", {
+      fileName: file.name,
+      mimeType,
+      sizeBytes: file.size,
+      mobile: isLikelyMobileDevice(),
+      preset: "scan",
+    });
+
+    if (!mimeType.startsWith("image/")) {
+      throw createAttachmentError("INVALID_FILE_TYPE", "Tipo de arquivo inválido.", { mimeType });
+    }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      throw createAttachmentError("FILE_TOO_LARGE", "Arquivo muito grande.", { sizeBytes: file.size });
+    }
+
+    const prepared = await prepareScanImageAttachment(file);
     trace("attachment_timing", {
       stage: "prepare_attachment_total",
       fileName: file.name,

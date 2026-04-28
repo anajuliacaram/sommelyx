@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
@@ -6,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
-import { getAttachmentErrorMessage, prepareAiAnalysisAttachment } from "@/lib/ai-attachments";
+import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib/ai-attachments";
 
 interface ScannedWineData {
   name: string | null;
@@ -111,7 +112,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           mimeType: metadata?.mimeType,
           fileName: metadata?.fileName,
         },
-        { timeoutMs: 90_000, retries: 2 },
+        { timeoutMs: 12_000, retries: 1, retryOnAbort: false },
       );
 
       if (!data?.wine) throw new Error("Nenhum dado encontrado");
@@ -129,7 +130,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         console.log("[scan-wine-label] requestId", requestId);
       }
 
-      let msg = "Não foi possível analisar o rótulo. Tente novamente.";
+      let msg = "Não conseguimos ler o rótulo com clareza.";
       if (err instanceof EdgeFunctionError) {
         setSupportCode(err.requestId ?? null);
       }
@@ -137,23 +138,23 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
         msg = "Sua sessão expirou. Faça login novamente para continuar.";
       } else if (code === "INVALID_IMAGE") {
-        msg = "Imagem inválida. Envie uma foto legível do rótulo.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente uma foto mais nítida.";
       } else if (code === "IMAGE_TOO_LARGE") {
-        msg = "A imagem está muito grande. Tente uma foto mais leve.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente uma foto mais leve.";
       } else if (code === "FILE_INVALID" || code === "INVALID_IMAGE_BASE64") {
-        msg = "Arquivo inválido. Envie uma foto legível do rótulo.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente outra foto ou use a câmera.";
       } else if (code === "LABEL_NOT_IDENTIFIED") {
-        msg = "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente outra foto ou cadastre manualmente.";
       } else if (code === "AI_PARSE_ERROR") {
-        msg = "A resposta da análise veio em formato inválido. Tente novamente em instantes.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente em instantes.";
       } else if (code === "AI_TIMEOUT") {
-        msg = "Tempo de resposta excedido. Tente novamente com uma foto mais nítida.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente outra foto mais nítida.";
       } else if (code === "AI_UNAVAILABLE") {
-        msg = "Não conseguimos enviar a foto agora. Verifique a conexão e tente novamente com a mesma imagem.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente com outra foto.";
       } else if (code === "CONFIG_ERROR") {
-        msg = "O scanner está temporariamente indisponível. Tente novamente em instantes.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente em instantes.";
       } else if (code === "AI_RATE_LIMIT") {
-        msg = "A análise não pôde ser concluída agora. Tente novamente em instantes.";
+        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente em instantes.";
       }
 
       setErrorMsg(msg);
@@ -183,7 +184,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setStep("scanning");
 
     try {
-      const prepared = await prepareAiAnalysisAttachment(file);
+      const prepared = await prepareWineLabelScanAttachment(file);
       console.info("[ScanWineLabelDialog] attachment_prepared", {
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
@@ -200,6 +201,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       if (!prepared.imageBase64) {
         throw Object.assign(new Error("Não foi possível preparar a imagem."), { code: "IMAGE_PROCESSING_FAILED" });
       }
+      console.info("[ScanWineLabelDialog] sending_scan_request", {
+        fileName: prepared.fileName,
+        mimeType: prepared.mimeType,
+        imageBase64Length: prepared.imageBase64.length,
+        estimatedPayloadBytes: Math.round((prepared.imageBase64.length * 3) / 4),
+      });
       await runScan(prepared.imageBase64, {
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
@@ -239,10 +246,22 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       }
 
       setSupportCode(null);
-      setErrorMsg(getAttachmentErrorMessage(err, "Não conseguimos ler essa imagem. Tente novamente com uma foto mais nítida do rótulo."));
+      const fallbackMessage = "Não conseguimos ler o rótulo com clareza. Tente outra foto.";
+      setErrorMsg(getAttachmentErrorMessage(err, fallbackMessage));
       setStep("error");
     }
   }, [runScan, toast]);
+
+  const handleSelectedFile = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (file) {
+        await handleFile(file);
+      }
+    },
+    [handleFile],
+  );
 
   const handleConfirm = async () => {
     if (!scannedData) return;
@@ -333,14 +352,14 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 accept="image/*,.heic,.heif"
                 capture="environment"
                 className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                onChange={handleSelectedFile}
               />
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*,.heic,.heif"
                 className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                onChange={handleSelectedFile}
               />
             </motion.div>
           )}
@@ -453,7 +472,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <X className="h-7 w-7 text-destructive" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-foreground mb-1">Não foi possível analisar</p>
+                <p className="text-sm font-medium text-foreground mb-1">Não conseguimos ler o rótulo com clareza.</p>
                 <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
                 {supportCode && (
                   <p className="text-[10px] text-muted-foreground mt-2">Código do suporte / Request ID: {supportCode}</p>
@@ -461,12 +480,26 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               </div>
               <div className="flex flex-col gap-2 w-full">
                 <Button
-                  onClick={() => (lastBase64 ? runScan(lastBase64) : reset())}
+                  onClick={() => {
+                    if (lastBase64) {
+                      runScan(lastBase64);
+                      return;
+                    }
+                    reset();
+                  }}
                   variant="secondary"
                   className="h-11 px-6 text-[13px]"
                 >
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                   Tentar novamente
+                </Button>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="ghost"
+                  className="h-11 text-[13px] border border-border/70 bg-background/60 hover:bg-background"
+                >
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  Usar outra foto
                 </Button>
                 <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-border/70 bg-background/60 hover:bg-background">
                   Cadastrar manualmente
