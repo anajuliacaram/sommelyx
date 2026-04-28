@@ -114,7 +114,7 @@ export default function ReportsPage() {
   if (isLoading) return <div className="text-muted-foreground text-sm p-8">Carregando…</div>;
 
   return (
-    <div className="space-y-7 max-w-[1200px]">
+    <div className="space-y-5 sm:space-y-7 max-w-[1200px]">
       <div>
         <div className="section-surface">
           <h1 className="t-title">Relatórios</h1>

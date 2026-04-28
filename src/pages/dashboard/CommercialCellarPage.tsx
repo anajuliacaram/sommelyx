@@ -999,9 +999,9 @@ export default function CellarPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F1EC] text-[#1A1A1A]">
-      <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
-        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.78)] px-5 py-5 shadow-[0_12px_28px_-26px_rgba(0,0,0,0.16)]">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-4 px-3 py-4 sm:px-6 lg:px-8 lg:py-8">
+        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.78)] px-4 py-4 sm:px-5 sm:py-5 shadow-[0_12px_28px_-26px_rgba(0,0,0,0.16)]">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0 max-w-3xl space-y-2">
               <p className="t-eyebrow">Adega pessoal</p>
               <h1 className="t-title mt-1.5">Minha adega</h1>
@@ -1015,8 +1015,8 @@ export default function CellarPage() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.72)] p-4 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)]">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.72)] p-3 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)] sm:p-4">
+          <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
             <div className="relative w-full xl:max-w-[460px]">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9C9488]" />
               <Input

@@ -378,10 +378,10 @@ export default function CommercialDashboard() {
         />
       )}
 
-      <div className="max-w-[1280px] space-y-7">
+      <div className="max-w-[1280px] space-y-5 sm:space-y-7">
         {/* ─── Header ─── */}
         <div>
-        <div className="surface-clarity rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="surface-clarity rounded-[24px] px-3 py-3 sm:px-5 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h1 className="t-title">Resumo da operação</h1>
               <p className="t-subtitle mt-1.5">

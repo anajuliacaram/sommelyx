@@ -186,7 +186,7 @@ export default function PersonalCellarPage() {
   }, [countryFilter, countryOptions]);
 
   const mobileHeader = (filteredCount: number) => (
-    <EditorialCard style={{ padding: "12px" }}>
+    <EditorialCard style={{ padding: "10px" }}>
       <div className="flex flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">

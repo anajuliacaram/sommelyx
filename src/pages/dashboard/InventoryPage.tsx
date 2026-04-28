@@ -485,7 +485,7 @@ export default function InventoryPage() {
     // MultiSelectDropdown handles its own UI now, so we remove QuickFilterDropdown
 
     return (
-        <div className="relative max-w-[1440px] space-y-4 pb-[calc(72px+env(safe-area-inset-bottom))] sm:space-y-5">
+        <div className="relative max-w-[1440px] space-y-3.5 pb-[calc(72px+env(safe-area-inset-bottom))] sm:space-y-5">
             <StockAuditDialog
                 open={auditOpen}
                 onOpenChange={(v) => { setAuditOpen(v); if (!v) setAuditPayload(null); }}

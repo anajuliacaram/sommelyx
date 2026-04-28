@@ -73,7 +73,7 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="relative isolate h-16 flex items-center px-5 md:px-7 gap-4 sticky top-0 z-30 overflow-hidden border-b border-[rgba(95,111,82,0.08)] bg-[rgba(248,245,239,0.78)] backdrop-blur-xl shadow-[0_10px_24px_-22px_rgba(58,51,39,0.18)]"
+            className="relative isolate h-16 flex items-center px-3.5 md:px-7 gap-3 sticky top-0 z-30 overflow-hidden border-b border-[rgba(95,111,82,0.08)] bg-[rgba(248,245,239,0.78)] backdrop-blur-xl shadow-[0_10px_24px_-22px_rgba(58,51,39,0.18)]"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
@@ -155,7 +155,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-[calc(18px+env(safe-area-inset-bottom))] md:px-7 md:pt-4 lg:px-10">
+          <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-2.5 pb-[calc(18px+env(safe-area-inset-bottom))] md:px-7 md:pt-4 lg:px-10">
             <AnimatedOutlet />
           </div>
         </main>
