@@ -1000,7 +1000,7 @@ export default function CellarPage() {
   return (
     <div className="min-h-screen bg-[#F4F1EC] text-[#1A1A1A]">
       <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-4 px-3 py-4 sm:px-6 lg:px-8 lg:py-8">
-        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.78)] px-4 py-4 sm:px-5 sm:py-5 shadow-[0_12px_28px_-26px_rgba(0,0,0,0.16)]">
+        <div className="surface-clarity rounded-[24px] px-4 py-4 sm:px-5 sm:py-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0 max-w-3xl space-y-2">
               <p className="t-eyebrow">Adega pessoal</p>
@@ -1015,7 +1015,7 @@ export default function CellarPage() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.72)] p-3 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)] sm:p-4">
+        <div className="chart-surface p-3 sm:p-4">
           <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
             <div className="relative w-full xl:max-w-[460px]">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9C9488]" />
@@ -1093,7 +1093,7 @@ export default function CellarPage() {
           </div>
 
           <div className="mt-4 grid gap-2.5 lg:grid-cols-2">
-            <div className="rounded-[24px] border border-black/5 bg-white/72 p-2.5">
+            <div className="surface-clarity p-2.5">
               <div className="flex flex-wrap items-center gap-1">
                 <MultiSelectDropdown title="Estilo" options={dynamicOptions.styles || styleOptions} selected={selectedStyles} onChange={(v) => { setSelectedStyles(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedStyles([]); setActiveSavedFilter(null); }} />
                 <MultiSelectDropdown title="País" options={dynamicOptions.countries} selected={selectedCountries} onChange={(v) => { setSelectedCountries(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedCountries([]); setActiveSavedFilter(null); }} searchPlaceholder="Buscar país..." />
@@ -1102,11 +1102,11 @@ export default function CellarPage() {
                 <MultiSelectDropdown title="Janela" options={dynamicOptions.drinkWindows || drinkWindowOptions} selected={selectedDrinkWindows} onChange={(v) => { setSelectedDrinkWindows(prev => toggleInArray(prev, v)); setActiveSavedFilter(null); }} onClear={() => { setSelectedDrinkWindows([]); setActiveSavedFilter(null); }} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2.5 rounded-[24px] border border-black/5 bg-white/72 p-2.5">
-              <div className="rounded-[18px] border border-black/5 bg-white/78 px-3 py-2">
+            <div className="surface-clarity grid grid-cols-2 gap-2.5 p-2.5">
+              <div className="surface-clarity rounded-[18px] px-3 py-2">
                 <RangeSliderFilter label="Safra" min={dynamicOptions.minVintage} max={dynamicOptions.maxVintage} step={1} value={vintageRange} onChange={v => { setVintageRange(v); setActiveSavedFilter(null); }} />
               </div>
-              <div className="rounded-[18px] border border-black/5 bg-white/78 px-3 py-2">
+              <div className="surface-clarity rounded-[18px] px-3 py-2">
                 <RangeSliderFilter label="Preço" min={0} max={dynamicOptions.maxPrice} step={10} value={priceRange} onChange={v => { setPriceRange(v); setActiveSavedFilter(null); }} formatValue={v => `R$ ${v}`} />
               </div>
             </div>
@@ -1114,7 +1114,7 @@ export default function CellarPage() {
         </div>
 
         {activeChips.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[24px] border border-black/5 bg-[rgba(255,255,255,0.70)] p-3 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.12)]">
+          <div className="surface-clarity flex flex-wrap items-center gap-1.5 rounded-[20px] p-3">
             <span className="mr-1 text-[8.5px] font-semibold uppercase tracking-[0.12em] text-[#8C8578]">Filtros ativos:</span>
             {activeChips.map((chip, i) => (
               <Badge key={i} variant="secondary" className="group h-[24px] rounded-full border-[hsl(var(--wine)/0.16)] bg-[hsl(var(--wine)/0.08)] pl-3 pr-2 text-[9.5px] font-semibold text-[hsl(var(--wine))] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[filter] duration-200 ease-out hover:brightness-[1.03]">
@@ -1162,7 +1162,7 @@ export default function CellarPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.76)] shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)]">
+        <div className="chart-surface overflow-hidden p-0">
           <table className="w-full">
             <thead>
               <tr className="border-b border-black/5 bg-black/[0.02]">

@@ -166,6 +166,14 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
   layout?: "stacked" | "row";
 }) {
   const isRow = layout === "row";
+  const supportsHexTone = /^#([0-9a-f]{6})$/i.test(accent);
+  const surfaceStyle = supportsHexTone
+    ? {
+        background: `linear-gradient(180deg, rgba(255,255,255,0.96) 0%, ${accent}12 100%)`,
+        borderColor: `${accent}1A`,
+        boxShadow: "0 14px 30px -26px rgba(58,51,39,0.18), 0 1px 2px rgba(255,255,255,0.36) inset",
+      }
+    : undefined;
 
   return (
     <div
@@ -175,6 +183,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
           ? "min-h-[74px] px-3 py-3 sm:min-h-[78px] sm:px-0 sm:py-0"
           : "flex min-h-[92px] flex-col gap-1.5 px-3.5 py-3.5 sm:min-h-[96px] sm:gap-1.5 sm:px-0 sm:py-0",
       )}
+      style={surfaceStyle}
     >
       <div className={cn("flex min-w-0 items-start gap-1.5", isRow && "items-center")}>
         <div

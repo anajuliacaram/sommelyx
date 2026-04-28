@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import {
     Search, Filter, SlidersHorizontal, ArrowUpDown, ChevronDown,
     MoreHorizontal, Trash2, Tag, X,
-    Package, AlertTriangle, Clock, History, Star,
+    Package, AlertTriangle, Clock, History, DollarSign,
     LayoutGrid, List as ListIcon, Plus, Minus, Pencil, Loader2
 } from "@/icons/lucide";
 import { useWineMetrics, useDeleteWine, useWineEvent, Wine } from "@/hooks/useWines";
@@ -32,7 +32,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { MagneticButton } from "@/components/ui/magnetic-button";
-import { PremiumKpiCard } from "@/components/ui/premium-kpi-card";
+import { EditorialKpiCard } from "@/components/editorial/EditorialPrimitives";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddWineDialog } from "@/components/AddWineDialog";
@@ -592,57 +592,36 @@ export default function InventoryPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
-                    <PremiumKpiCard className="min-h-[78px] rounded-[18px] !p-3 md:min-h-[82px] md:rounded-[22px] md:!p-4">
-                        <div className="flex items-start gap-1.5">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.04em] leading-[1.15] text-muted-foreground/72 md:text-[12px]">
-                            Rótulos cadastrados
-                            </p>
-                            <Tag className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/48 md:h-4 md:w-4" />
-                        </div>
-                        <div className="mt-1.5 flex min-w-0 items-baseline gap-2 md:mt-2">
-                            <p className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground tabular-nums md:text-[22px] lg:text-[24px]">
-                                {summary.labels}
-                            </p>
-                            <span className="min-w-0 truncate text-[12px] font-medium leading-[1.2] text-foreground/68 md:text-[13px]">
-                                rótulos
-                            </span>
-                        </div>
-                    </PremiumKpiCard>
-                    <PremiumKpiCard className="min-h-[78px] rounded-[18px] !p-3 md:min-h-[82px] md:rounded-[22px] md:!p-4">
-                        <div className="flex items-start gap-1.5">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.04em] leading-[1.15] text-muted-foreground/72 md:text-[12px]">
-                            Garrafas em estoque
-                            </p>
-                            <Package className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/48 md:h-4 md:w-4" />
-                        </div>
-                        <div className="mt-1.5 flex min-w-0 items-baseline gap-2 md:mt-2">
-                            <p className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground tabular-nums md:text-[22px] lg:text-[24px]">
-                                {summary.bottles}
-                            </p>
-                            <span className="min-w-0 truncate text-[12px] font-medium leading-[1.2] text-foreground/68 md:text-[13px]">
-                                garrafas
-                            </span>
-                        </div>
-                    </PremiumKpiCard>
-                    <PremiumKpiCard className="col-span-2 min-h-[78px] rounded-[18px] !p-3 md:col-span-1 md:min-h-[82px] md:rounded-[22px] md:!p-4">
-                        <div className="flex items-start gap-1.5">
-                            <p className="whitespace-normal text-[11px] font-medium uppercase tracking-[0.04em] leading-[1.15] text-muted-foreground/72 md:text-[12px]">
-                            Valor total
-                            </p>
-                            <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/48 md:h-4 md:w-4" />
-                        </div>
-                        <div className="mt-1.5 flex min-w-0 items-baseline gap-2 md:mt-2">
-                            <p className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground tabular-nums md:text-[22px] lg:text-[24px]">
-                                R$ {summary.totalValue.toLocaleString("pt-BR")}
-                            </p>
-                            <span className="min-w-0 truncate text-[12px] font-medium leading-[1.2] text-foreground/68 md:text-[13px]">
-                                em estoque
-                            </span>
-                        </div>
-                    </PremiumKpiCard>
+                    <EditorialKpiCard
+                        icon={<Tag className="h-3.5 w-3.5" />}
+                        label="Rótulos cadastrados"
+                        value={summary.labels}
+                        sub="rótulos"
+                        accent="#8F2D56"
+                        layout="row"
+                        className="rounded-[18px] !p-3 md:rounded-[20px] md:!p-4"
+                    />
+                    <EditorialKpiCard
+                        icon={<Package className="h-3.5 w-3.5" />}
+                        label="Garrafas em estoque"
+                        value={summary.bottles}
+                        sub="garrafas"
+                        accent="#5F7F52"
+                        layout="row"
+                        className="rounded-[18px] !p-3 md:rounded-[20px] md:!p-4"
+                    />
+                    <EditorialKpiCard
+                        icon={<DollarSign className="h-3.5 w-3.5" />}
+                        label="Valor total"
+                        value={`R$ ${summary.totalValue.toLocaleString("pt-BR")}`}
+                        sub="em estoque"
+                        accent="#C9A86A"
+                        layout="row"
+                        className="col-span-2 rounded-[18px] !p-3 md:col-span-1 md:rounded-[20px] md:!p-4"
+                    />
                 </div>
 
-                <div className="rounded-[24px] border border-black/[0.05] bg-[rgba(255,255,255,0.76)] px-3 py-3 shadow-[0_18px_40px_-28px_rgba(44,20,31,0.18)] backdrop-blur-xl md:px-4">
+                <div className="chart-surface px-3 py-3 md:px-4">
                     <div className="flex flex-col gap-2.5 md:gap-3">
                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
                             <div className="relative min-w-0 flex-1">
@@ -651,12 +630,12 @@ export default function InventoryPage() {
                                     placeholder="Pesquisar por rótulo, produtor, região, safra, uva ou localização..."
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    className="h-10 rounded-[14px] border-border/40 bg-white/76 pl-9 text-[12px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-md transition-all focus:border-primary/20 focus:ring-primary/10 md:h-11 md:rounded-[16px] md:text-[13px]"
+                                    className="h-10 rounded-[14px] border-white/24 bg-white/70 pl-9 text-[12px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-md transition-all focus:border-primary/20 focus:ring-primary/10 md:h-11 md:rounded-[16px] md:text-[13px]"
                                 />
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2">
-                                <div className="hidden md:flex items-center rounded-[16px] border border-border/55 bg-white/68 p-1 shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]">
+                                <div className="hidden md:flex items-center rounded-[16px] border border-white/24 bg-white/64 p-1 shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]">
                                     {quickStatusTabs.map((tab) => (
                                         <Button
                                             key={tab.id}
@@ -684,7 +663,7 @@ export default function InventoryPage() {
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            className="h-10 rounded-[14px] border-border/55 bg-white/68 px-3 text-[11.5px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)] md:h-11 md:rounded-[16px] md:px-3.5 md:text-[12px]"
+                                            className="h-10 rounded-[14px] border-white/24 bg-white/64 px-3 text-[11.5px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)] md:h-11 md:rounded-[16px] md:px-3.5 md:text-[12px]"
                                         >
                                             <ArrowUpDown className="mr-1.5 h-3.5 w-3.5 opacity-75 md:mr-2 md:h-4 md:w-4" />
                                             {sortOptions.find((option) => option.key === sortKey)?.label || "Nome"}
@@ -706,7 +685,7 @@ export default function InventoryPage() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                        className="h-10 rounded-[14px] border-border/55 bg-white/68 px-3 text-[11.5px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)] md:h-11 md:rounded-[16px] md:px-3.5 md:text-[12px]"
+                                    className="h-10 rounded-[14px] border-white/24 bg-white/64 px-3 text-[11.5px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)] md:h-11 md:rounded-[16px] md:px-3.5 md:text-[12px]"
                                         onClick={() => {
                                             if (isMobile) setFilterOpen(true);
                                             else setAdvancedFiltersOpen((open) => !open);
@@ -736,7 +715,7 @@ export default function InventoryPage() {
                                             "h-9 shrink-0 gap-1.5 rounded-[14px] border px-3 text-[11px] font-bold",
                                             statusFilter === tab.id || (tab.id === "all" && statusFilter === "all")
                                                 ? "border-primary/18 bg-primary/8 text-primary"
-                                                : "border-border/55 bg-white/66 text-muted-foreground"
+                                                : "border-white/24 bg-white/66 text-muted-foreground"
                                         )}
                                     >
                                         {tab.label}
@@ -773,7 +752,7 @@ export default function InventoryPage() {
 
                             {!isMobile && advancedFiltersOpen && (
                                 <div className="overflow-hidden">
-                                    <div className="rounded-[20px] border border-black/[0.05] bg-white/58 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                                    <div className="surface-clarity rounded-[20px] p-3">
                                         <div className="mb-2 flex items-center justify-between gap-2">
                                             <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/58">
                                                 Filtros avançados
@@ -857,7 +836,7 @@ export default function InventoryPage() {
             
 
             {/* --- DATA VIEW --- */}
-            <div className="overflow-hidden rounded-[28px] border border-black/[0.05] bg-[rgba(255,255,255,0.82)] shadow-[0_18px_46px_-30px_rgba(44,20,31,0.20)] backdrop-blur-xl">
+            <div className="chart-surface overflow-hidden p-0">
                 {isLoading ? (
                     <div className="p-8 space-y-4">
                         {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 w-full" />)}
@@ -878,7 +857,7 @@ export default function InventoryPage() {
                                 return (
                                     <div
                                         key={wine.id}
-                                        className="group min-w-0 overflow-hidden rounded-[18px] border border-white/18 bg-white/72 p-3 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]"
+                                        className="group surface-clarity min-w-0 overflow-hidden rounded-[18px] p-3 transition-all duration-200 hover:-translate-y-[1px] active:scale-[0.995]"
                                     >
                                         <div className="flex min-w-0 items-start gap-2">
                                             <WineLabelPreview
@@ -1155,7 +1134,7 @@ export default function InventoryPage() {
                                             <div className="flex items-center justify-end gap-2">
                                                 <Button
                                                     variant="outline"
-                                                    className="h-8 rounded-xl border-border/60 bg-white/72 px-3 text-[11px] font-semibold shadow-none hover:bg-white"
+                                                    className="h-8 rounded-xl border-white/24 bg-white/70 px-3 text-[11px] font-semibold shadow-none hover:bg-white"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         setEditingWine(wine);
@@ -1228,7 +1207,7 @@ export default function InventoryPage() {
                             return (
                                     <div
                                         key={wine.id}
-                                        className="rounded-2xl border border-white/14 bg-white/55 p-4 shadow-sm backdrop-blur-md transition-colors hover:bg-white/65"
+                                        className="surface-clarity rounded-2xl p-4 transition-colors"
                                         onClick={() => {
                                             setEditingWine(wine);
                                             setEditWineOpen(true);
@@ -1306,7 +1285,7 @@ export default function InventoryPage() {
                                             <Button
                                                 type="button"
                                                 variant="outline"
-                                                className="h-9 rounded-[14px] border-border/60 bg-white/72 px-3.5 text-[11px] font-semibold"
+                                                className="h-9 rounded-[14px] border-white/24 bg-white/70 px-3.5 text-[11px] font-semibold"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setEditingWine(wine);

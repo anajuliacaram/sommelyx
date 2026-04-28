@@ -559,7 +559,7 @@ export default function CommercialDashboard() {
                     </Button>
                   </div>
 
-                  <div className="overflow-hidden rounded-2xl border border-border/22 bg-white/44 shadow-[0_10px_26px_-22px_rgba(44,20,31,0.18)]">
+                  <div className="chart-surface overflow-hidden p-0">
                     <div className="grid grid-cols-12 gap-2 px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 bg-muted/12 sm:px-5 sm:py-3">
                       <div className="col-span-6">Produto</div>
                       <div className="col-span-2 text-center">Tipo</div>
@@ -620,12 +620,12 @@ export default function CommercialDashboard() {
 
                     <div className="grid gap-2">
                       {lowStockRows.length === 0 ? (
-                        <div className="rounded-2xl border border-border/20 bg-muted/8 py-6 text-center sm:py-8">
+                        <div className="rounded-2xl border border-white/28 bg-white/60 py-6 text-center shadow-[0_10px_20px_-18px_rgba(44,20,31,0.10)] sm:py-8">
                           <p className="text-[13px] text-muted-foreground/40 font-medium">Nenhum vinho com estoque baixo</p>
                         </div>
                       ) : (
                         lowStockRows.map((w) => (
-                          <div key={w.id} className="flex items-center gap-3 rounded-2xl border border-border/20 bg-background/40 px-3 py-2.5 transition-all duration-200 hover:bg-background/60 hover:shadow-sm sm:gap-3.5 sm:px-4 sm:py-3">
+                          <div key={w.id} className="flex items-center gap-3 rounded-2xl border border-white/24 bg-white/62 px-3 py-2.5 shadow-[0_10px_22px_-20px_rgba(58,51,39,0.12)] transition-all duration-200 hover:bg-white/76 hover:shadow-[0_14px_24px_-20px_rgba(58,51,39,0.16)] sm:gap-3.5 sm:px-4 sm:py-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/8 text-primary shrink-0">
                               <ArrowDownRight className="h-3.5 w-3.5" />
                             </div>
@@ -661,7 +661,7 @@ export default function CommercialDashboard() {
                           type="button"
                           variant="ghost"
                           onClick={() => navigate(item.route)}
-                          className="flex h-10 items-center gap-3 rounded-2xl border border-border/20 bg-background/30 px-3.5 text-left hover:bg-muted/12 transition-all duration-200 sm:h-11 sm:px-4"
+                          className="flex h-10 items-center gap-3 rounded-2xl border border-white/24 bg-white/62 px-3.5 text-left shadow-[0_10px_22px_-20px_rgba(58,51,39,0.10)] hover:bg-white/78 transition-all duration-200 sm:h-11 sm:px-4"
                         >
                           <item.icon className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                           <span className="text-[12px] font-semibold text-foreground">{item.label}</span>
