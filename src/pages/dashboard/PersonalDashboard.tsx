@@ -206,7 +206,7 @@ export default function PersonalDashboard() {
         {/* ─── HERO + KPIs ─── */}
         <section>
           <EditorialCard style={isMobile ? { padding: "14px 14px 12px" } : undefined}>
-            <div className="mb-2.5 flex items-start justify-between gap-3 md:mb-6 md:gap-6">
+            <div className="mb-2 flex items-start justify-between gap-3 md:mb-6 md:gap-6">
               <div className="min-w-0">
                 <Kicker>
                   {new Date().toLocaleDateString("pt-BR", {
@@ -324,10 +324,10 @@ export default function PersonalDashboard() {
         {insightWine && (
           <div>
             <EditorialHeroBand>
-              <div className="relative z-10 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
-                <div className="flex items-start gap-3">
+              <div className="relative z-10 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex items-start gap-2.5 md:gap-3">
                   <div
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10"
+                    className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10"
                     style={{ background: "rgba(201,180,105,0.18)", color: "#E0C879" }}
                   >
                     <Sparkles className="h-4 w-4" />
@@ -340,7 +340,7 @@ export default function PersonalDashboard() {
                       Insight do dia
                     </div>
                     <p
-                      className="line-clamp-2 font-serif text-[14px] font-medium leading-[1.35] sm:line-clamp-none sm:text-[16px] sm:leading-[1.4]"
+                      className="line-clamp-2 font-serif text-[13.5px] font-medium leading-[1.3] sm:line-clamp-none sm:text-[16px] sm:leading-[1.4]"
                       style={{
                         fontFamily: "'Libre Baskerville', Georgia, serif",
                         letterSpacing: "-0.01em",
@@ -361,7 +361,7 @@ export default function PersonalDashboard() {
                 </div>
                 <button
                   type="button"
-                  className="editorial-btn-copper h-9 shrink-0 rounded-full px-3 text-[11.5px] md:h-10 md:px-4"
+                  className="editorial-btn-copper h-8 shrink-0 rounded-full px-3 text-[11px] md:h-10 md:px-4"
                   onClick={() => {
                     setPairingInitialWineId(insightWine.id);
                     setDishToWineOpen(true);
@@ -375,15 +375,15 @@ export default function PersonalDashboard() {
         )}
 
         {/* ─── MAIN GRID ─── */}
-        <div className="grid grid-cols-12 gap-5">
+        <div className="grid grid-cols-12 gap-4 lg:gap-5">
           {/* Prontos para abrir — coluna principal */}
           <section className="col-span-12 lg:col-span-8">
             <EditorialCard>
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="editorial-h2">Prontos para abrir</h2>
+              <div className="mb-3 flex flex-col gap-2 md:mb-4 md:flex-row md:items-center md:justify-between md:gap-3">
+                <div className="min-w-0">
+                  <h2 className="editorial-h2 text-[19px] md:text-[22px]">Prontos para abrir</h2>
                   <p
-                    className="mt-0.5 text-[12px]"
+                    className="mt-0.5 text-[11px] leading-[1.25] md:text-[12px]"
                     style={{ color: "rgba(58,51,39,0.56)" }}
                   >
                     {ready.length}{" "}
@@ -394,7 +394,7 @@ export default function PersonalDashboard() {
                 </div>
                 <button
                   type="button"
-                  className="editorial-btn-ghost h-8 px-3.5 text-[12px]"
+                  className="editorial-btn-ghost h-8 w-fit px-3 text-[11px] md:h-8 md:px-3.5 md:text-[12px]"
                   onClick={() => navigate("/dashboard/cellar")}
                 >
                   Ver adega <ArrowRight className="h-3 w-3" />
@@ -402,7 +402,7 @@ export default function PersonalDashboard() {
               </div>
 
               {/* Search + filter chips */}
-              <div className="editorial-search mb-3">
+              <div className="editorial-search mb-2.5 h-9 md:mb-3 md:h-10">
                 <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
                 <input
                   value={query}
@@ -420,19 +420,21 @@ export default function PersonalDashboard() {
                   </button>
                 )}
               </div>
-              <div className="mb-4 flex flex-wrap gap-1.5">
-                {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map(
-                  (s) => (
-                    <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)}>
-                      {s}
-                    </Chip>
-                  ),
-                )}
+              <div className="mb-3 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex min-w-max items-center gap-1.25">
+                  {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map(
+                    (s) => (
+                      <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)} className="h-[24px] px-2 text-[10px] tracking-[0.04em]">
+                        {s}
+                      </Chip>
+                    ),
+                  )}
+                </div>
               </div>
 
               {/* List */}
               {ready.length === 0 ? (
-                <div className="editorial-empty">
+                <div className="editorial-empty py-10 md:py-12">
                   <div
                     className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
                     style={{ background: "rgba(95,111,82,0.08)", color: "rgba(95,111,82,0.5)" }}

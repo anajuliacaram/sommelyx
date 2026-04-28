@@ -187,8 +187,8 @@ export default function PersonalCellarPage() {
   }, [countryFilter, countryOptions]);
 
   const mobileHeader = (filteredCount: number) => (
-    <EditorialCard style={{ padding: "12px 12px 10px" }}>
-      <div className="flex flex-col gap-2">
+    <EditorialCard style={{ padding: "10px 10px 10px" }}>
+      <div className="flex flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <Kicker>Adega</Kicker>
@@ -215,7 +215,7 @@ export default function PersonalCellarPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.95fr)] gap-2">
           <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
             <SelectTrigger
               aria-label="Ordenar vinhos"
@@ -257,16 +257,16 @@ export default function PersonalCellarPage() {
         <div className="flex justify-end">
           <button
             type="button"
-            className="editorial-btn-primary h-11 w-fit max-w-[60%] rounded-[14px] px-4 text-[12px] font-semibold tracking-[-0.01em] whitespace-nowrap"
+            className="editorial-btn-primary h-11 w-fit max-w-[58%] rounded-[14px] px-4 text-[12px] font-semibold tracking-[-0.01em] whitespace-nowrap"
             onClick={() => setAddOpen(true)}
           >
             + Adicionar
           </button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max items-center gap-1.5">
+            <div className="flex min-w-max items-center gap-1.25">
               <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Tipo</span>
               {styleOptions.map((s) => (
                 <Chip
@@ -282,7 +282,7 @@ export default function PersonalCellarPage() {
           </div>
 
           <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max items-center gap-1.5">
+            <div className="flex min-w-max items-center gap-1.25">
               <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Janela</span>
               {drinkWindowOptions.map((option) => (
                 <Chip
