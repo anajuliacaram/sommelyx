@@ -4,7 +4,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
+import { ArrowUpDown, Globe, Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useWineEvent, useWines, type Wine } from "@/hooks/useWines";
 import { useResolveWineImages } from "@/hooks/useResolveWineImages";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 const currentYear = new Date().getFullYear();
 
@@ -132,6 +133,22 @@ export default function PersonalCellarPage() {
     return [{ key: "all", label: "Todos" }, ...sorted.map((c) => ({ key: c, label: c }))];
   }, [wines]);
 
+  const sortLabel = useMemo(() => {
+    const labels: Record<typeof sort, string> = {
+      recent: "Mais recentes",
+      value_low: "Mais baratos",
+      value: "Mais caros",
+      vintage_old: "Safra antiga",
+      vintage: "Safra nova",
+    };
+    return sort === "recent" ? "Ordenar" : `Ordenar: ${labels[sort]}`;
+  }, [sort]);
+
+  const countryLabel = useMemo(() => {
+    const selected = countryOptions.find((option) => option.key === countryFilter)?.label ?? "Todos";
+    return countryFilter === "all" ? "País" : `País: ${selected}`;
+  }, [countryFilter, countryOptions]);
+
   const mobileHeader = (filteredCount: number) => (
     <EditorialCard style={{ padding: "12px 12px 10px" }}>
       <div className="flex flex-col gap-2.5">
@@ -162,41 +179,41 @@ export default function PersonalCellarPage() {
         </div>
 
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] items-center gap-1.5">
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as typeof sort)}
-            className={`${controlBase} ${controlSurface} min-w-0 px-2.5 pr-8 text-[11.5px]`}
-            style={{
-              backgroundImage:
-                "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
-              backgroundPosition: "calc(100% - 14px) 15px, calc(100% - 9px) 15px",
-              backgroundSize: "5px 5px, 5px 5px",
-              backgroundRepeat: "no-repeat",
-            }}
-          >
-            <option value="recent">Mais recentes</option>
-            <option value="value_low">Mais baratos</option>
-            <option value="value">Mais caros</option>
-            <option value="vintage_old">Safra antiga</option>
-            <option value="vintage">Safra nova</option>
-          </select>
-          <select
-            value={countryFilter}
-            onChange={(e) => setCountryFilter(e.target.value)}
-            className={`${controlBase} ${controlSurface} min-w-0 px-2.5 pr-8 text-[11.5px]`}
-            style={{
-              backgroundImage:
-                "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
-              backgroundPosition: "calc(100% - 14px) 15px, calc(100% - 9px) 15px",
-              backgroundSize: "5px 5px, 5px 5px",
-              backgroundRepeat: "no-repeat",
-            }}
-          >
-            <option value="all">País: Todos</option>
-            {countryOptions.filter((o) => o.key !== "all").map((option) => (
-              <option key={option.key} value={option.key}>{option.label}</option>
-            ))}
-          </select>
+          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+            <SelectTrigger
+              aria-label="Ordenar vinhos"
+              className={`${controlBase} ${controlSurface} min-w-0 w-full px-2.5 text-[11.5px]`}
+            >
+              <div className="flex min-w-0 items-center gap-1.5">
+                <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
+                <span className="min-w-0 truncate">{sortLabel}</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+              <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
+              <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
+              <SelectItem value="value">Ordenar: Mais caros</SelectItem>
+              <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
+              <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
+            <SelectTrigger
+              aria-label="Filtrar por país"
+              className={`${controlBase} ${controlSurface} min-w-0 w-full px-2.5 text-[11.5px]`}
+            >
+              <div className="flex min-w-0 items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
+                <span className="min-w-0 truncate">{countryLabel}</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+              <SelectItem value="all">País</SelectItem>
+              {countryOptions.filter((o) => o.key !== "all").map((option) => (
+                <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="editorial-segmented shrink-0">
             <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
               Grade
@@ -323,41 +340,41 @@ export default function PersonalCellarPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-end gap-1.5 lg:justify-end">
-                  <select
-                    value={sort}
-                    onChange={(e) => setSort(e.target.value as typeof sort)}
-                    className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[190px]`}
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
-                      backgroundPosition: "calc(100% - 16px) 16px, calc(100% - 11px) 16px",
-                      backgroundSize: "5px 5px, 5px 5px",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                  >
-                    <option value="recent">Adicionados mais recentemente</option>
-                    <option value="value_low">Mais baratos</option>
-                    <option value="value">Mais caros</option>
-                    <option value="vintage_old">Safra mais antiga</option>
-                    <option value="vintage">Safra mais nova</option>
-                  </select>
-                  <select
-                    value={countryFilter}
-                    onChange={(e) => setCountryFilter(e.target.value)}
-                    className={`${controlBase} ${controlSurface} pr-9 appearance-none min-w-[150px]`}
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(45deg, transparent 50%, rgba(58,51,39,0.5) 50%), linear-gradient(135deg, rgba(58,51,39,0.5) 50%, transparent 50%)",
-                      backgroundPosition: "calc(100% - 16px) 16px, calc(100% - 11px) 16px",
-                      backgroundSize: "5px 5px, 5px 5px",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                  >
-                    <option value="all">País: Todos</option>
-                    {countryOptions.filter((o) => o.key !== "all").map((option) => (
-                      <option key={option.key} value={option.key}>{option.label}</option>
-                    ))}
-                  </select>
+                  <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+                    <SelectTrigger
+                      aria-label="Ordenar vinhos"
+                      className={`${controlBase} ${controlSurface} min-w-[170px] lg:min-w-[190px] px-3 pr-3 text-[11.5px] sm:text-[12px]`}
+                    >
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
+                        <span className="min-w-0 truncate">{sortLabel}</span>
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                      <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
+                      <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
+                      <SelectItem value="value">Ordenar: Mais caros</SelectItem>
+                      <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
+                      <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
+                    <SelectTrigger
+                      aria-label="Filtrar por país"
+                      className={`${controlBase} ${controlSurface} min-w-[130px] lg:min-w-[150px] px-3 pr-3 text-[11.5px] sm:text-[12px]`}
+                    >
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
+                        <span className="min-w-0 truncate">{countryLabel}</span>
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                      <SelectItem value="all">País</SelectItem>
+                      {countryOptions.filter((o) => o.key !== "all").map((option) => (
+                        <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <div className="editorial-segmented">
                     <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
                       Grade
