@@ -474,8 +474,8 @@ export default function ConsumptionPage() {
 
       {/* Filtros inteligentes */}
       {isMobile ? (
-        <div className="mt-3 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex min-w-[336px] items-center gap-1.5">
+        <div className="mt-3 w-full">
+          <div className="flex w-full items-center gap-1.5">
             {[
               { kind: "period" as const, label: "Período", aria: "Filtrar período" },
               { kind: "source" as const, label: "Origem", aria: "Filtrar origem" },
@@ -489,18 +489,18 @@ export default function ConsumptionPage() {
                   aria-label={filter.aria}
                   onClick={() => setOpenFilter(active ? null : filter.kind)}
                   className={cn(
-                    "flex h-[34px] flex-1 min-w-[96px] items-center justify-between gap-1.5 rounded-[11px] border px-2.5 py-1 text-[13px] font-medium leading-none transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
+                    "flex h-[34px] min-w-0 flex-1 items-center justify-between gap-1.5 rounded-[11px] border px-2 py-1 text-[12.5px] font-medium leading-none transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98] overflow-hidden",
                     active
                       ? "border-[rgba(132,168,108,0.34)] bg-[rgba(132,168,108,0.12)] text-[#23402b] shadow-[0_4px_10px_-12px_rgba(95,127,82,0.18)]"
                       : "border-[rgba(132,168,108,0.24)] bg-[rgba(132,168,108,0.06)] text-[#2f2a22]",
                   )}
                 >
-                  <span className="min-w-0 truncate text-[13px] font-semibold tracking-[-0.01em] text-[#213b26]">
+                  <span className="min-w-0 truncate text-[12.5px] font-semibold tracking-[-0.01em] text-[#213b26]">
                     {filter.label}
                   </span>
                   <ChevronDown
                     className={cn(
-                      "h-3.5 w-3.5 shrink-0 text-[#5F7F52]/60 transition-transform duration-150 ease-out",
+                      "h-3 w-3 shrink-0 text-[#5F7F52]/60 transition-transform duration-150 ease-out",
                       active && "rotate-180",
                     )}
                   />
