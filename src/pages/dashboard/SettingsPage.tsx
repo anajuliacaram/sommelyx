@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useLocation } from "react-router-dom";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 10 } as const,
@@ -21,6 +22,7 @@ const fadeUp = {
 export default function SettingsPage() {
   const { user, profileType, setProfileType } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
 
   const [fullName, setFullName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -42,6 +44,19 @@ export default function SettingsPage() {
       setNotifReports(p.reports ?? false);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const targetId = location.hash.slice(1);
+    if (!targetId) return;
+    const run = () => {
+      const el = document.getElementById(targetId);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    if (typeof window !== "undefined") {
+      window.requestAnimationFrame(run);
+    }
+  }, [location.hash]);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -109,7 +124,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile */}
-      <div className="glass-card p-6 space-y-5">
+      <div id="perfil" className="glass-card scroll-mt-24 p-6 space-y-5">
         <div className="flex items-center gap-2 mb-1">
           <User className="h-4 w-4 text-primary" />
           <h2 className="text-[15px] font-semibold font-sans text-foreground">Perfil</h2>
@@ -129,7 +144,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Notifications */}
-      <div className="glass-card p-6 space-y-5">
+      <div id="preferencias" className="glass-card scroll-mt-24 p-6 space-y-5">
         <div className="flex items-center gap-2 mb-1">
           <Bell className="h-4 w-4 text-primary" />
           <h2 className="text-[15px] font-semibold font-sans text-foreground">Notificações</h2>

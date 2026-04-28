@@ -11,12 +11,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { UserAccountMenu } from "@/components/UserAccountMenu";
 
 export default function DashboardLayout() {
-  const { user, profileType } = useAuth();
+  const { user, profileType, signOut } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<"add" | "open" | "exit">("open");
+  const [accountOpen, setAccountOpen] = useState(false);
   const navigate = useNavigate();
   const { drinkNow, lowStock } = useWineMetrics();
   const { data: wines } = useWines();
@@ -40,6 +42,19 @@ export default function DashboardLayout() {
     () => profileType === "commercial" && navigate("/dashboard/sales"),
     [navigate, profileType],
   );
+  const handleOpenAccount = useCallback(() => setAccountOpen((open) => !open), []);
+  const handleProfileClick = useCallback(() => {
+    setAccountOpen(false);
+    navigate("/dashboard/settings#perfil");
+  }, [navigate]);
+  const handleSettingsClick = useCallback(() => {
+    setAccountOpen(false);
+    navigate("/dashboard/settings#preferencias");
+  }, [navigate]);
+  const handleSignOut = useCallback(() => {
+    setAccountOpen(false);
+    void signOut();
+  }, [signOut]);
 
   const initials =
     user?.user_metadata?.full_name
@@ -125,8 +140,14 @@ export default function DashboardLayout() {
                   type="button"
                   variant="primary"
                   size="icon"
-                  className="h-9 w-9 rounded-xl p-0 text-[11px] font-semibold shadow-[0_10px_24px_-18px_hsl(var(--primary)/0.26)]"
-                  onClick={() => navigate("/dashboard/settings")}
+                  className={cn(
+                    "h-9 w-9 rounded-xl p-0 text-[11px] font-semibold shadow-[0_10px_24px_-18px_hsl(var(--primary)/0.26)]",
+                    accountOpen && "ring-2 ring-primary/20",
+                  )}
+                  onClick={handleOpenAccount}
+                  aria-haspopup="dialog"
+                  aria-expanded={accountOpen}
+                  aria-label="Abrir menu da conta"
                 >
                   {initials}
                 </Button>
@@ -142,6 +163,16 @@ export default function DashboardLayout() {
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} defaultTab={manageTab} />
+      <UserAccountMenu
+        open={accountOpen}
+        onOpenChange={setAccountOpen}
+        name={user?.user_metadata?.full_name || user?.email || "Usuário"}
+        email={user?.email}
+        initials={initials}
+        onProfile={handleProfileClick}
+        onSettings={handleSettingsClick}
+        onSignOut={handleSignOut}
+      />
       
     </SidebarProvider>
   );
