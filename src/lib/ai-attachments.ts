@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/edge-invoke";
 
 export interface AiAnalysisAttachmentPayload {
   imageBase64?: string;
@@ -685,21 +685,24 @@ async function extractPdfOcrText(file: File) {
   trace("ocr_started", { fileName: file.name, sizeBytes: file.size });
   const pdfBase64 = await fileToBase64(file);
   trace("ocr_payload_ready", { fileName: file.name, base64Length: pdfBase64.length });
-  const { data, error } = await supabase.functions.invoke("parse-pdf-ocr", {
-    body: {
-      pdfBase64,
-      fileName: file.name,
-      mimeType: inferMimeType(file),
-    },
-  });
-
-  if (error) {
-    const err: any = createAttachmentError(
-      ((error as any).code as AttachmentPrepErrorCode) || ((error as any).name as AttachmentPrepErrorCode) || "OCR_FAILED",
-      error.message || "Não conseguimos aplicar OCR neste PDF.",
+  let data: any;
+  try {
+    data = await invokeEdgeFunction<any>(
+      "parse-pdf-ocr",
+      {
+        pdfBase64,
+        fileName: file.name,
+        mimeType: inferMimeType(file),
+      },
+      { timeoutMs: 45_000, retries: 1, retryOnAbort: false },
     );
-    err.status = (error as any).status || (error as any).statusCode;
-    err.requestId = (error as any).requestId || (error as any).request_id;
+  } catch (error) {
+    const err: any = createAttachmentError(
+      ((error as any)?.code as AttachmentPrepErrorCode) || ((error as any)?.name as AttachmentPrepErrorCode) || "OCR_FAILED",
+      (error as any)?.message || "Não conseguimos aplicar OCR neste PDF.",
+    );
+    err.status = (error as any)?.status || (error as any)?.statusCode;
+    err.requestId = (error as any)?.requestId || (error as any)?.request_id;
     throw err;
   }
 

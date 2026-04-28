@@ -393,7 +393,6 @@ export async function invokeEdgeFunction<T>(
           retryable,
           message: rawMessage,
         });
-        attempt++;
         await sleep(600 * Math.pow(2, attempt));
         continue;
       }
