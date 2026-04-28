@@ -272,6 +272,7 @@ export default function PersonalCellarPage() {
 
   const filtered = useMemo(() => {
     let list = wines.filter((w) => {
+      if (w.quantity <= 0) return false;
       if (styleFilter !== "todos" && getStyleFamily(w.style) !== styleFilter) return false;
       if (countryFilter !== "all") {
         const resolvedCountry = resolveWineCountry(w);
