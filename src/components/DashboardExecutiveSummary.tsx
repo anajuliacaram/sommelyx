@@ -135,7 +135,7 @@ export function DashboardExecutiveSummary({
                         {metric.label}
                       </p>
                       <div className="mt-1 flex min-w-0 items-baseline gap-1.5">
-                        <p className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1C1C1C] tabular-nums sm:text-[22px] xl:text-[24px]">
+                        <p className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1C1C1C] tabular-nums sm:text-[22px] xl:text-[22px]">
                           {metric.value}
                         </p>
                         <span className="min-w-0 truncate text-[12px] font-medium leading-[1.2] text-[#6B6B6B]">

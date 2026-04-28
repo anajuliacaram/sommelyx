@@ -598,8 +598,8 @@ export default function PersonalDashboard() {
             </div>
 
             <div>
-              <EditorialCard style={{ padding: "20px 22px" }}>
-                <div className="mb-3 flex items-baseline justify-between">
+              <EditorialCard style={{ padding: "16px 18px" }}>
+                <div className="mb-2.5 flex items-baseline justify-between">
                   <h3 className="editorial-h3">Consumo · 6 meses</h3>
                   <span
                     className="text-[11px] font-bold tabular-nums"
@@ -608,7 +608,7 @@ export default function PersonalDashboard() {
                     {consumption.length}
                   </span>
                 </div>
-                <Sparkbar data={consumptionMonthly} accent="#7B1E2B" height={80} />
+                <Sparkbar data={consumptionMonthly} accent="#7B1E2B" height={72} />
               </EditorialCard>
             </div>
 

@@ -197,7 +197,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
       </div>
       {isRow ? (
         <div className="mt-1.5 flex min-w-0 items-baseline gap-1.5">
-          <div className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[24px]">
+          <div className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
             {value}
           </div>
           {sub ? (
@@ -208,7 +208,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         </div>
       ) : (
         <>
-          <div className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[24px]">
+          <div className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
             {value}
           </div>
           {sub && (
@@ -407,7 +407,7 @@ export function Sparkbar({
 
   return (
     <div className="relative overflow-visible" style={{ height }}>
-      <div className="flex h-full items-end gap-2 pb-5">
+      <div className="flex h-full items-end gap-2 pb-4">
         {data.map((d, i) => {
           const isActive = d.value > 0;
           const isSelected = resolvedActiveIndex === i;

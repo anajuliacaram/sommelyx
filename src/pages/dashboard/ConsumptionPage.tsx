@@ -471,8 +471,8 @@ export default function ConsumptionPage() {
       </div>
 
       {/* Monthly chart */}
-      <EditorialCard style={{ padding: "14px 14px 12px" }}>
-        <div className="mb-2.5 flex items-baseline justify-between">
+      <EditorialCard style={{ padding: "12px 12px 10px" }}>
+        <div className="mb-2 flex items-baseline justify-between">
           <div>
             <Kicker>Ritmo de consumo</Kicker>
             <h2 className="editorial-h2 mt-1 text-[18px] md:text-[22px]">{chart.title}</h2>
@@ -484,7 +484,7 @@ export default function ConsumptionPage() {
         <Sparkbar
           data={chart.data}
           accent="#8A6A54"
-          height={140}
+          height={128}
           showValues={!isMobile}
           activeIndex={activeChartIndex}
           tooltipIndex={isMobile ? tooltipChartIndex : null}
