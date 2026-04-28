@@ -474,76 +474,78 @@ export default function PersonalCellarPage() {
                 <EditorialCard
                   key={w.id}
                   className="flex h-full flex-col overflow-hidden"
-                  style={{ padding: 10, cursor: "pointer" }}
+                  style={{ padding: 8, cursor: "pointer" }}
                 >
                   <div className="flex min-h-0 flex-1 flex-col" onClick={() => setEditWine(w)}>
                     {showLabels && (
                       <WineLabelPreview
                         wine={w}
                         alt={w.name}
-                        className="mb-2.5 h-[98px] overflow-hidden rounded-[16px]"
-                        imageClassName="h-[98px] w-full object-cover"
+                        className="mb-2 h-[88px] overflow-hidden rounded-[14px]"
+                        imageClassName="h-[88px] w-full object-cover"
                         generated={false}
                         compact
                       />
                     )}
 
-                    <div className="mb-2 flex min-h-5 items-start justify-between gap-2">
-                      <div
-                        className="h-5 w-5 rounded-full"
-                        style={{
-                          background: `linear-gradient(145deg, ${color}, ${color}cc)`,
-                          boxShadow:
-                            "0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3)",
-                        }}
-                      />
+                    <div className="mb-1.25 flex min-h-0 items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-start gap-1.5">
+                        <div
+                          className="mt-[0.34rem] h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{
+                            background: `linear-gradient(145deg, ${color}, ${color}cc)`,
+                            boxShadow:
+                              "0 1px 3px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.28)",
+                          }}
+                        />
+                        <h3
+                          className="font-serif text-[13px] font-semibold leading-[1.08] tracking-[-0.03em] text-[#1a1713]"
+                          style={{
+                            fontFamily: "'Libre Baskerville', Georgia, serif",
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            overflow: "hidden",
+                            minHeight: 0,
+                          }}
+                        >
+                          {w.name}
+                        </h3>
+                      </div>
                       {w.rating != null && (
                         <div
-                          className="flex items-center gap-1 text-[10px] font-bold tabular-nums"
+                          className="flex items-center gap-1 text-[9.5px] font-bold tabular-nums"
                           style={{ color: "#B48C3A" }}
                         >
-                          <Star className="h-3 w-3 fill-current" /> {Number(w.rating).toFixed(1)}
+                          <Star className="h-2.5 w-2.5 fill-current" /> {Number(w.rating).toFixed(1)}
                         </div>
                       )}
                     </div>
 
-                    <h3
-                      className="font-serif text-[13px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#1a1713]"
-                      style={{
-                        fontFamily: "'Libre Baskerville', Georgia, serif",
-                        display: "-webkit-box",
-                        WebkitBoxOrient: "vertical",
-                        WebkitLineClamp: 2,
-                        overflow: "hidden",
-                        minHeight: 30,
-                      }}
-                    >
-                      {w.name}
-                    </h3>
-                    <p className="mt-1 truncate text-[10px] font-medium text-[#6F665C]">
+                    <p className="mt-0.5 truncate text-[10px] font-medium text-[#6F665C]">
                       {[w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Safra NV · Região n/i"}
                     </p>
 
-                    <div className="mt-2 flex items-center justify-between gap-2">
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
                       <StyleBadge
                         style={w.style}
-                        className="min-h-[20px] text-[9px] leading-none"
+                        className="min-h-[18px] text-[8.5px] leading-none"
                       />
                       <span
-                        className="text-[10px] font-semibold text-[#6F665C]"
+                        className="text-[9.5px] font-semibold text-[#6F665C]"
                       >
                         {w.quantity} un.
                       </span>
                     </div>
 
-                    <div className="mt-2 flex items-center justify-between gap-2">
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
                       <span
-                        className="inline-flex h-6 items-center rounded-full px-2.5 text-[9px] font-bold tracking-[0.02em] whitespace-nowrap"
+                        className="inline-flex h-5.5 items-center rounded-full px-2.5 text-[8.5px] font-bold tracking-[0.02em] whitespace-nowrap"
                         style={statusTone}
                       >
                         {classification.label}
                       </span>
-                      <p className="text-right text-[10px] font-semibold text-[#1a1713]">
+                      <p className="text-right text-[9.5px] font-semibold text-[#1a1713]">
                         {w.current_value != null
                           ? `R$ ${Number(w.current_value).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
                           : "Preço n/i"}
@@ -552,8 +554,8 @@ export default function PersonalCellarPage() {
 
                     <button
                       type="button"
-                      className="editorial-btn-open mt-2 h-8 w-full rounded-full px-3 text-[11px]"
-                      style={{ minHeight: 32 }}
+                      className="editorial-btn-open mt-1.5 h-7.5 w-full rounded-full px-3 text-[10.5px]"
+                      style={{ minHeight: 30 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenBottle(w);
@@ -568,28 +570,43 @@ export default function PersonalCellarPage() {
                 <EditorialCard
                   key={w.id}
                   className="flex h-full flex-col"
-                  style={{ padding: 18, cursor: "pointer" }}
+                  style={{ padding: 16, cursor: "pointer" }}
                 >
                   <div className="flex min-h-0 flex-1 flex-col" onClick={() => setEditWine(w)}>
                     {showLabels && (
                       <WineLabelPreview
                         wine={w}
                         alt={w.name}
-                        className="mb-3.5 h-[176px] sm:h-[168px]"
+                        className="mb-2.5 h-[176px] sm:h-[168px]"
                         imageClassName="h-[176px] w-full object-contain sm:h-[168px]"
                         generated={false}
                         compact
                       />
                     )}
-                    <div className="mb-3 flex min-h-6 items-start justify-between">
-                      <div
-                        className="h-6 w-6 rounded-full"
-                        style={{
-                          background: `linear-gradient(145deg, ${color}, ${color}cc)`,
-                          boxShadow:
-                            "0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3)",
-                        }}
-                      />
+                    <div className="mb-1.5 flex min-h-0 items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-start gap-1.5">
+                        <div
+                          className="mt-[0.38rem] h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{
+                            background: `linear-gradient(145deg, ${color}, ${color}cc)`,
+                            boxShadow:
+                              "0 1px 3px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.28)",
+                          }}
+                        />
+                        <h3
+                          className="min-w-0 font-serif text-[18px] font-semibold leading-[1.18] tracking-[-0.01em]"
+                          style={{
+                            fontFamily: "'Libre Baskerville', Georgia, serif",
+                            color: "#1a1713",
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {w.name}
+                        </h3>
+                      </div>
                       {w.rating != null && (
                         <div
                           className="flex items-center gap-1 text-[12px] font-bold tabular-nums"
@@ -599,59 +616,45 @@ export default function PersonalCellarPage() {
                         </div>
                       )}
                     </div>
-                    <h3
-                      className="min-h-[46px] font-serif"
-                      style={{
-                        fontFamily: "'Libre Baskerville', Georgia, serif",
-                        fontSize: 18,
-                        fontWeight: 600,
-                        letterSpacing: "-0.01em",
-                        color: "#1a1713",
-                        lineHeight: 1.25,
-                      }}
-                    >
-                      {w.name}
-                    </h3>
                     <p
-                      className="mt-1.5 min-h-[18px] truncate text-[12.5px]"
+                      className="mt-0.5 min-h-[18px] truncate text-[12.25px]"
                       style={{ color: "rgba(58,51,39,0.6)" }}
                     >
                       {[w.vintage, w.region, w.country].filter(Boolean).join(" · ")}
                     </p>
-                    <div className="mt-3.5 min-h-[42px]">
+                    <div className="mt-2.25 min-h-[34px]">
                       <DrinkWindow from={dw.from} until={dw.until} current={currentYear} estimated={dw.estimated} />
                     </div>
                   </div>
                   <div
-                    className="mt-4 border-t pt-4"
-                    style={{ borderColor: "rgba(95,111,82,0.1)" }}
+                    className="mt-3 pt-0"
                   >
-                    <div className="flex min-h-[96px] flex-col gap-3">
-                      <div className="flex min-h-[32px] flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                    <div className="flex min-h-[84px] flex-col gap-2.5">
+                      <div className="flex min-h-[28px] flex-wrap items-center justify-between gap-x-3 gap-y-2">
                         <StyleBadge
                           style={w.style}
-                          className="min-h-[24px] text-[11px] leading-none"
+                          className="min-h-[22px] text-[10px] leading-none"
                         />
                         <div className="text-right">
                           {w.current_value != null && (
                             <div
-                              className="text-[15px] font-bold tracking-[-0.02em]"
+                              className="text-[14px] font-bold tracking-[-0.02em]"
                               style={{ color: "#1a1713" }}
                             >
                               R$ {Number(w.current_value).toLocaleString("pt-BR")}
                             </div>
                           )}
                           <div
-                            className="text-[11.5px] font-semibold"
+                            className="text-[11px] font-semibold"
                             style={{ color: "rgba(58,51,39,0.55)" }}
                           >
                             {w.quantity} un.
                           </div>
                         </div>
                       </div>
-                      <div className="flex min-h-[42px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex min-h-[34px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <span
-                          className="inline-flex h-8 w-fit items-center rounded-full px-3.5 text-[11px] font-bold tracking-[0.02em] whitespace-nowrap"
+                          className="inline-flex h-7 w-fit items-center rounded-full px-3 text-[10px] font-bold tracking-[0.02em] whitespace-nowrap"
                           style={statusTone}
                         >
                           {classification.label}
@@ -659,7 +662,7 @@ export default function PersonalCellarPage() {
                         <button
                           type="button"
                           className="editorial-btn-open w-full sm:w-auto"
-                          style={{ minHeight: 42, padding: "0 16px", fontSize: 13 }}
+                          style={{ minHeight: 36, padding: "0 14px", fontSize: 12 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenBottle(w);
