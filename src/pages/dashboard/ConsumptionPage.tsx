@@ -421,18 +421,18 @@ export default function ConsumptionPage() {
       </header>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <EditorialKpiCard
           icon={<GlassWater className="h-4 w-4" />}
           accent="#7B1E2B"
-          label="Consumo nos últimos 6 meses"
+          label="Consumo (6 meses)"
           value={total}
           sub="garrafas"
         />
         <EditorialKpiCard
           icon={<TrendingUp className="h-4 w-4" />}
           accent="#5F7F52"
-          label="Ritmo médio mensal"
+          label="Ritmo mensal"
           value={avgPerMonth}
           sub="por mês"
         />
@@ -446,7 +446,7 @@ export default function ConsumptionPage() {
         <EditorialKpiCard
           icon={<Calendar className="h-4 w-4" />}
           accent="#6B8298"
-          label="Última garrafa aberta"
+          label="Última abertura"
           value={lastLabel}
           sub={lastEntry?.wine_name || ""}
         />

@@ -164,7 +164,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
   accent?: string;
 }) {
   return (
-    <div className="editorial-kpi flex h-full min-h-[88px] flex-col gap-1.25 sm:min-h-[104px] sm:gap-1.5">
+    <div className="editorial-kpi flex h-full min-h-[100px] flex-col gap-2 px-3.5 py-4 sm:min-h-[104px] sm:gap-1.5 sm:px-0 sm:py-0">
       <div className="flex items-start gap-1.5">
         <div
           className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-[10px] sm:h-9 sm:w-9 sm:rounded-[12px]"
@@ -172,15 +172,15 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         >
           {icon}
         </div>
-        <span className="min-w-0 text-[9px] font-bold uppercase leading-[1.18] tracking-[0.10em] text-[rgba(58,51,39,0.56)] sm:tracking-[0.12em]">
+        <span className="min-w-0 truncate text-[11px] font-bold uppercase leading-[1.18] tracking-[0.08em] text-[rgba(58,51,39,0.56)] opacity-70 sm:tracking-[0.12em]">
           {label}
         </span>
       </div>
-      <div className="text-[17px] font-bold leading-[1.02] tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[30px]">
+      <div className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[30px]">
         {value}
       </div>
       {sub && (
-        <span className="text-[8px] font-bold uppercase leading-[1.12] tracking-[0.11em] text-[rgba(58,51,39,0.42)] sm:text-[9px]">
+        <span className="mt-[2px] text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.42)] sm:text-[9px] sm:font-bold sm:uppercase sm:tracking-[0.11em]">
           {sub}
         </span>
       )}
