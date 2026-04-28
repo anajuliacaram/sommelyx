@@ -165,24 +165,26 @@ export function EditorialKpiCard({
 }) {
   return (
     <div className="editorial-kpi">
-      <div className="mb-5 flex items-center justify-between">
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-[12px]"
-          style={{ color: accent, background: `${accent}14` }}
-        >
-          {icon}
+      <div className="mb-2.5 flex items-center justify-between gap-2 sm:mb-5">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] sm:h-9 sm:w-9 sm:rounded-[12px]"
+            style={{ color: accent, background: `${accent}14` }}
+          >
+            {icon}
+          </div>
+          <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.11em] text-[rgba(58,51,39,0.56)] sm:text-[9px] sm:tracking-[0.12em]">
+            {label}
+          </span>
         </div>
         {sub && (
-          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[rgba(58,51,39,0.42)]">
+          <span className="shrink-0 text-[8.5px] font-bold uppercase tracking-[0.12em] text-[rgba(58,51,39,0.42)] sm:text-[9px]">
             {sub}
           </span>
         )}
       </div>
-      <div className="text-[28px] sm:text-[32px] font-bold leading-none tracking-[-0.04em] text-[#1a1713] tabular-nums">
+      <div className="text-[22px] font-bold leading-none tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[32px]">
         {value}
-      </div>
-      <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.11em] text-[rgba(58,51,39,0.52)]">
-        {label}
       </div>
     </div>
   );

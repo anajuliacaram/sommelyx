@@ -200,7 +200,7 @@ export default function PersonalDashboard() {
         {/* ─── HERO + KPIs ─── */}
         <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <EditorialCard>
-            <div className="mb-6 flex items-start justify-between gap-6">
+            <div className="mb-3 flex items-start justify-between gap-3 md:mb-6 md:gap-6">
               <div className="min-w-0">
                 <Kicker>
                   {new Date().toLocaleDateString("pt-BR", {
@@ -209,7 +209,7 @@ export default function PersonalDashboard() {
                     month: "long",
                   })}
                 </Kicker>
-                <h1 className="editorial-h1 mt-1.5">
+                <h1 className="editorial-h1 mt-1">
                   Olá,{" "}
                   <span
                     style={{
@@ -223,7 +223,7 @@ export default function PersonalDashboard() {
                   </span>
                 </h1>
                 <p
-                  className="mt-2 max-w-[520px] text-[13px] leading-[1.5]"
+                  className="mt-1.5 max-w-[520px] text-[12.5px] leading-[1.45] md:mt-2 md:text-[13px] md:leading-[1.5]"
                   style={{ color: "rgba(58,51,39,0.64)" }}
                 >
                   {totalBottles > 0 ? (
@@ -281,7 +281,7 @@ export default function PersonalDashboard() {
             </div>
 
             {/* KPI grid */}
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
               <EditorialKpiCard
                 icon={<Layers className="h-4 w-4" />}
                 accent="#5F7F52"
