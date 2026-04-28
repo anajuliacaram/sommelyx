@@ -337,6 +337,20 @@ export default function ConsumptionPage() {
       data: buckets.map((m) => ({ label: m.label, value: map[m.key] || 0 })),
     };
   }, [entries, period, source, months]);
+  const defaultActiveChartIndex = useMemo(() => {
+    let last = null as number | null;
+    chart.data.forEach((item, index) => {
+      if (item.value > 0) last = index;
+    });
+    return last;
+  }, [chart.data]);
+  const [activeChartIndex, setActiveChartIndex] = useState<number | null>(defaultActiveChartIndex);
+  const [tooltipChartIndex, setTooltipChartIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    setActiveChartIndex(defaultActiveChartIndex);
+    setTooltipChartIndex(null);
+  }, [defaultActiveChartIndex]);
 
   const total = entries.length;
   const avgPerMonth = total > 0 ? (total / 6).toFixed(1).replace(".", ",") : "0";
@@ -466,9 +480,15 @@ export default function ConsumptionPage() {
         <Sparkbar
           data={chart.data}
           accent="#8A6A54"
-          height={52}
-          showValues={false}
-          barWidth={period === "year" ? 4 : 6}
+          height={140}
+          showValues={!isMobile}
+          activeIndex={activeChartIndex}
+          tooltipIndex={isMobile ? tooltipChartIndex : null}
+          onBarSelect={(index) => {
+            setActiveChartIndex(index);
+            if (isMobile) setTooltipChartIndex(index);
+          }}
+          barWidth={period === "year" ? 6 : 10}
         />
       </EditorialCard>
 

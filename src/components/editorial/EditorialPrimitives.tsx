@@ -2,7 +2,7 @@
 // Adaptadas ao tema claro/creme do Sommelyx, accent vinho #7B1E2B.
 
 import { cn } from "@/lib/utils";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useEffect, useMemo, useState } from "react";
 
 export const STYLE_COLORS: Record<string, string> = {
   tinto: "#7B1E2B",
@@ -350,46 +350,92 @@ export function getDrinkWindowIndicatorPosition({
 /* ── Sparkbar ────────────────────────────────────────── */
 export function Sparkbar({
   data,
-  height = 80,
+  height = 140,
   accent = "#7B1E2B",
   showValues = true,
   barWidth = 10,
+  activeIndex,
+  tooltipIndex,
+  onBarSelect,
 }: {
   data: { label: string; value: number }[];
   height?: number;
   accent?: string;
   showValues?: boolean;
   barWidth?: number;
+  activeIndex?: number | null;
+  tooltipIndex?: number | null;
+  onBarSelect?: (index: number) => void;
 }) {
   const max = Math.max(...data.map((d) => d.value), 1);
+  const resolvedActiveIndex = activeIndex ?? null;
+  const inlineValuesAllowed = showValues && data.length <= 8;
+
   return (
-    <div className="flex items-end gap-2" style={{ height }}>
-      {data.map((d, i) => (
-        <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-1">
-          {showValues && (
-            <span
-              className="text-[10px] font-semibold tabular-nums leading-none"
-              style={{ color: d.value > 0 ? accent : "rgba(58,51,39,0.35)" }}
+    <div className="relative overflow-visible" style={{ height }}>
+      <div className="flex h-full items-end gap-2 pb-5">
+        {data.map((d, i) => {
+          const isActive = d.value > 0;
+          const isSelected = resolvedActiveIndex === i;
+          const barH = Math.max(4, (d.value / max) * 100);
+          const tooltipVisible = tooltipIndex === i;
+          return (
+            <button
+              key={`${d.label}-${i}`}
+              type="button"
+              onClick={() => onBarSelect?.(i)}
+              onFocus={() => onBarSelect?.(i)}
+              className="relative flex min-w-0 flex-1 flex-col items-center gap-1 bg-transparent p-0 text-left outline-none"
+              aria-label={`${d.label}: ${d.value} garrafas`}
             >
-              {d.value}
-            </span>
-          )}
-          <div className="relative flex w-full items-end justify-center" style={{ height: height - (showValues ? 26 : 14) }}>
-            <div
-              className="rounded-t-[3px] transition-all"
-              style={{
-                width: barWidth,
-                height: `${Math.max(4, (d.value / max) * 100)}%`,
-                background: d.value > 0 ? accent : "rgba(95,111,82,0.14)",
-                opacity: d.value > 0 ? 0.92 : 1,
-              }}
-            />
-          </div>
-          <span className="text-[9px] font-bold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.45)]">
-            {d.label}
-          </span>
-        </div>
-      ))}
+              {tooltipVisible ? (
+                <div
+                  className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/60 bg-white/96 px-2.5 py-1 text-[10px] font-semibold tabular-nums text-[#1f1a16] shadow-[0_10px_24px_-18px_rgba(58,51,39,0.38)] transition-all duration-150 ease-out"
+                >
+                  {`${d.label}: ${d.value} garrafas`}
+                  <div
+                    className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[1px] border-b border-r border-white/60 bg-white/96"
+                  />
+                </div>
+              ) : null}
+              <span
+                className={cn(
+                  "min-h-[12px] text-[10px] font-semibold tabular-nums leading-none transition-all duration-150 ease-out",
+                  inlineValuesAllowed && isActive ? "opacity-100" : "opacity-0",
+                )}
+                style={{ color: isActive ? accent : "rgba(58,51,39,0.34)" }}
+              >
+                {isActive ? d.value : "0"}
+              </span>
+              <div className="relative flex w-full items-end justify-center" style={{ height: height - 42 }}>
+                <div
+                  className={cn(
+                    "rounded-t-[4px] transition-all duration-150 ease-out",
+                    isSelected && "shadow-[0_8px_18px_-12px_rgba(58,51,39,0.45)]",
+                  )}
+                  style={{
+                    width: isSelected ? barWidth + 2 : barWidth,
+                    height: `${barH}%`,
+                    minHeight: isActive ? 6 : 4,
+                    background: isActive
+                      ? accent
+                      : "rgba(95,111,82,0.14)",
+                    opacity: isActive ? (isSelected ? 1 : 0.94) : 1,
+                  }}
+                />
+              </div>
+              <span
+                className="text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors duration-150 ease-out"
+                style={{
+                  color: isSelected ? "rgba(31,26,22,0.82)" : "rgba(58,51,39,0.56)",
+                }}
+              >
+                {d.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
