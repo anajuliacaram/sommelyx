@@ -340,11 +340,12 @@ async function loadHtmlImage(file: File, mode: "object-url" | "data-url") {
         path: mode,
       });
       reject(createAttachmentError(
-        isProblematicMobileImageFormat(file.type || "", file.name) ? "UNSUPPORTED_IMAGE_FORMAT" : "IMAGE_DECODE_FAILED",
-        isProblematicMobileImageFormat(file.type || "", file.name)
-          ? "Esse formato de imagem não foi aceito no celular."
-          : "Não conseguimos ler essa imagem.",
-        { path: mode },
+        "IMAGE_DECODE_FAILED",
+        "Não conseguimos ler essa imagem.",
+        {
+          path: mode,
+          problematicMobileFormat: isProblematicMobileImageFormat(file.type || "", file.name),
+        },
       ));
     };
 
@@ -388,22 +389,17 @@ async function decodeImageFile(file: File) {
       return { source, path: attempt.path };
     } catch (error) {
       lastError = error;
-      if ((error as any)?.code === "UNSUPPORTED_IMAGE_FORMAT") {
-        break;
-      }
     }
   }
 
-  const code = isProblematicMobileImageFormat(file.type || "", file.name) ? "UNSUPPORTED_IMAGE_FORMAT" : "IMAGE_DECODE_FAILED";
   throw createAttachmentError(
-    code,
-    code === "UNSUPPORTED_IMAGE_FORMAT"
-      ? "Esse formato de imagem não foi aceito no celular. Tente converter para JPG ou use a câmera."
-      : "Não conseguimos ler essa imagem no celular.",
+    "IMAGE_DECODE_FAILED",
+    "Não conseguimos ler essa imagem no celular.",
     {
       fileName: file.name,
       mimeType: inferMimeType(file),
       lastError: lastError instanceof Error ? lastError.message : String(lastError ?? ""),
+      problematicMobileFormat: isProblematicMobileImageFormat(file.type || "", file.name),
     },
   );
 }

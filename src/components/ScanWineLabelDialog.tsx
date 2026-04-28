@@ -105,6 +105,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         },
         payloadSizeEstimateBytes: Math.round((base64.length * 3) / 4),
       });
+      console.info("[ScanWineLabelDialog] request_started", {
+        function: "scan-wine-label",
+        mimeType: metadata?.mimeType || null,
+        fileName: metadata?.fileName || null,
+        imageBase64Length: base64.length,
+      });
       const data = await invokeEdgeFunction<{ wine: ScannedWineData }>(
         "scan-wine-label",
         {
@@ -117,6 +123,11 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
       if (!data?.wine) throw new Error("Nenhum dado encontrado");
 
+      console.info("[ScanWineLabelDialog] request_finished", {
+        function: "scan-wine-label",
+        success: true,
+        fileName: metadata?.fileName || null,
+      });
       setScannedData(data.wine);
       setStep("preview");
     } catch (err: unknown) {
@@ -125,6 +136,14 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       const e = err as any;
       const code = e?.code as string | undefined;
       const requestId = e?.requestId as string | undefined;
+
+      console.info("[ScanWineLabelDialog] request_finished", {
+        function: "scan-wine-label",
+        success: false,
+        code: code || null,
+        requestId: requestId || null,
+        fileName: metadata?.fileName || null,
+      });
 
       if (requestId) {
         console.log("[scan-wine-label] requestId", requestId);
@@ -231,6 +250,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           msg = "Imagem inválida. Envie uma foto legível do rótulo.";
         } else if (code === "INVALID_IMAGE_BASE64") {
           msg = "A imagem enviada não pôde ser lida corretamente. Tente outra foto ou use a câmera.";
+        } else if (code === "IMAGE_DECODE_FAILED" || code === "UNSUPPORTED_IMAGE_FORMAT") {
+          msg = "Não conseguimos processar esta imagem. Tente outra foto do rótulo.";
         } else if (code === "IMAGE_TOO_LARGE" || code === "FILE_TOO_LARGE") {
           msg = "A imagem está muito grande. Tente uma foto mais leve.";
         } else if (code === "AI_PARSE_ERROR") {

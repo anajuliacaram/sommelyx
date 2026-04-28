@@ -348,7 +348,7 @@ serve(async (req) => {
     const imageBase64Raw = payload?.imageBase64;
     const payloadMimeType = typeof payload?.mimeType === "string" ? payload.mimeType.trim() : null;
     const payloadFileName = typeof payload?.fileName === "string" ? payload.fileName.trim() : null;
-    console.log(`[${FUNCTION_NAME}] step: request_received request_id=${requestId} auth_present=${Boolean(authorization)} mime=${payloadMimeType || "unknown"} file=${payloadFileName || "unknown"} image_base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
+    console.log(`[${FUNCTION_NAME}] step: request_received request_id=${requestId} auth_present=${Boolean(authorization)} payload_keys=${Object.keys(payload || {}).join(",") || "none"} mime=${payloadMimeType || "unknown"} file=${payloadFileName || "unknown"} image_base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
       await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, { reason: "missing_image" });
       return fail(400, {
