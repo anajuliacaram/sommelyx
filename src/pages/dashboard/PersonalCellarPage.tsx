@@ -178,13 +178,13 @@ export default function PersonalCellarPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] items-center gap-1.5">
+        <div className="grid grid-cols-[minmax(116px,1fr)_minmax(104px,1fr)_auto_auto] items-center gap-1.5">
           <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
             <SelectTrigger
               aria-label="Ordenar vinhos"
-              className={`${controlBase} ${controlSurface} min-w-0 w-full px-2.5 text-[11.5px]`}
+              className={`${controlBase} ${controlSurface} min-w-[116px] w-full px-2.5 text-[11.5px]`}
             >
-              <div className="flex min-w-0 items-center gap-1.5">
+              <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
                 <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
                 <span className="min-w-0 truncate">{sortLabel}</span>
               </div>
@@ -200,9 +200,9 @@ export default function PersonalCellarPage() {
           <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
             <SelectTrigger
               aria-label="Filtrar por país"
-              className={`${controlBase} ${controlSurface} min-w-0 w-full px-2.5 text-[11.5px]`}
+              className={`${controlBase} ${controlSurface} min-w-[104px] w-full px-2.5 text-[11.5px]`}
             >
-              <div className="flex min-w-0 items-center gap-1.5">
+              <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
                 <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
                 <span className="min-w-0 truncate">{countryLabel}</span>
               </div>
