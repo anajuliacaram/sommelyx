@@ -433,7 +433,7 @@ export function PairingErrorState({
         <X className="h-7 w-7 text-destructive/60" />
       </div>
       <div className="space-y-1.5 text-center">
-        <p className="text-[15px] font-semibold text-[#1A1A1A]">Não foi possível analisar</p>
+        <p className="text-[15px] font-semibold text-[#1A1A1A]">Não conseguimos concluir a leitura</p>
         <p className="text-[13px] text-[#888] max-w-[280px] leading-relaxed">{message}</p>
       </div>
       <div className="flex w-full max-w-[280px] flex-col gap-2">

@@ -121,15 +121,16 @@ function isAbortErrorMessage(message: string) {
 
 function classifyEdgeError(message: string, status?: number, code?: string): string {
   if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID" || status === 401) return "Sua sessão expirou. Faça login novamente.";
-  if (code === "AI_TIMEOUT" || status === 408) return "Tempo de resposta excedido. Tente novamente.";
+  if (code === "AI_TIMEOUT" || status === 408) return "Tempo excedido. Tente novamente em instantes.";
   if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
-  if (code === "INVALID_IMAGE") return "Imagem inválida. Envie uma foto legível da carta.";
+  if (code === "INVALID_IMAGE") return "Imagem inválida. Envie uma foto legível do rótulo.";
+  if (code === "INVALID_IMAGE_BASE64" || code === "IMAGE_DECODE_FAILED" || code === "UNSUPPORTED_IMAGE_FORMAT") return "Não conseguimos processar esta imagem. Tente outra foto do rótulo.";
   if (code === "INVALID_FILE_TYPE") return "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível.";
   if (code === "INVALID_PDF") return "O PDF enviado não pôde ser lido. Tente outro arquivo.";
   if (code === "FILE_TOO_LARGE" || code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
   if (code === "PDF_PARSE_FAILED") return "Não foi possível ler o PDF. Tente uma versão mais nítida ou uma imagem da carta.";
   if (code === "OCR_FAILED") return "Não foi possível aplicar OCR neste arquivo. Tente novamente com outra foto ou PDF.";
-  if (code === "EMPTY_EXTRACTION") return "Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível.";
+  if (code === "EMPTY_EXTRACTION") return "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.";
   if (code === "AI_PARSE_ERROR" || code === "INVALID_AI_RESPONSE" || message.includes("INVALID_AI_RESPONSE") || message.includes("EMPTY_AI_RESPONSE")) {
     return "A resposta da IA veio em um formato inválido. Tente novamente em instantes.";
   }
@@ -142,7 +143,7 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
   }
   if (isAbortErrorMessage(message)) return "Tempo de resposta excedido. Tente novamente.";
   if (isSdkRelayError(message)) return "A solicitação não pôde ser enviada. Tente novamente.";
-  if (message.toLowerCase().includes("tempo limite")) return "Demorou mais que o esperado. Tente novamente.";
+  if (message.toLowerCase().includes("tempo limite")) return "Tempo excedido. Tente novamente em instantes.";
   if (status === 429) return "Muitas requisições. Aguarde um momento e tente novamente.";
   if (status === 402) return "Limite de uso atingido. Tente novamente mais tarde.";
   if (status === 503 || status === 504) return "O serviço está temporariamente indisponível. Tente novamente em instantes.";

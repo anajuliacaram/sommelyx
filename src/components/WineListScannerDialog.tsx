@@ -8,6 +8,7 @@ import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineList
 import { getAttachmentErrorMessage, prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
+import { notifySuccess } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
 import {
   CompatibilityBadge,
@@ -227,7 +228,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         bestValue: data.bestValue,
       });
       if (!data.wines?.length) {
-        const emptyErr: any = new Error("Não conseguimos identificar vinhos válidos nesse arquivo.");
+        const emptyErr: any = new Error("PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.");
         emptyErr.code = "EMPTY_EXTRACTION";
         throw emptyErr;
       }
@@ -235,6 +236,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       console.info("[WineListScannerDialog] normalized_wines_ready", {
         normalizedWineCount: data.wines.length,
         firstWine: data.wines[0]?.name,
+      });
+      notifySuccess("Carta analisada", {
+        description: `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} prontos para refinar.`,
+        duration: 2800,
       });
       setStep("results");
     } catch (err: any) {
@@ -250,9 +255,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         console.log("[WineListScannerDialog] requestId", err.requestId);
       }
       if (err?.code === "EMPTY_EXTRACTION") {
-        setErrorMsg("Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível.");
+        setErrorMsg("PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.");
       } else {
-        setErrorMsg(err.message || "Não foi possível analisar a carta");
+        setErrorMsg(err.message || "Não conseguimos concluir a leitura da carta.");
       }
       setStep("error");
     }
@@ -312,7 +317,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         code: (error as any)?.code,
         requestId: (error as any)?.requestId,
       });
-      setErrorMsg(getAttachmentErrorMessage(error, "Não conseguimos ler esse anexo."));
+      setErrorMsg(getAttachmentErrorMessage(error, "Não conseguimos concluir a leitura desse arquivo."));
       setStep("error");
     }
   }, [runScan, toast]);
@@ -782,9 +787,12 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
             </div>
 
             {wine.reasoning && (
-              <p className="line-clamp-3 text-[12px] leading-relaxed text-foreground/65">
-                {wine.reasoning}
-              </p>
+              <div className="space-y-1 pl-[0.5px]">
+                <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary/50">Por que vale a pena</p>
+                <p className="line-clamp-3 text-[12px] leading-relaxed text-foreground/65">
+                  {wine.reasoning}
+                </p>
+              </div>
             )}
           </div>
 

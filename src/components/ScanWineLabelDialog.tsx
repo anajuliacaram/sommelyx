@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
+import { notifySuccess } from "@/lib/feedback";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
@@ -130,6 +131,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       });
       setScannedData(data.wine);
       setStep("preview");
+      notifySuccess("Rótulo identificado", {
+        description: "Revise os dados antes de salvar.",
+        duration: 2400,
+      });
     } catch (err: unknown) {
       console.error("Scan error:", err);
 
@@ -243,7 +248,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         setSupportCode(err.requestId ?? null);
 
         const code = err.code;
-        let msg = "Não foi possível analisar o rótulo. Tente novamente.";
+      let msg = "Não conseguimos concluir a leitura do rótulo. Tente novamente.";
         if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
           msg = "Sua sessão expirou. Faça login novamente para continuar.";
         } else if (code === "INVALID_IMAGE") {
@@ -257,9 +262,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         } else if (code === "AI_PARSE_ERROR") {
           msg = "A leitura do rótulo voltou em formato inválido. Tente novamente com outra foto.";
         } else if (code === "AI_TIMEOUT") {
-          msg = "Tempo de resposta excedido. Tente novamente com uma foto mais nítida.";
+          msg = "Tempo excedido. Tente novamente com uma foto mais nítida.";
         } else if (code === "AI_UNAVAILABLE") {
-          msg = "Não conseguimos concluir a leitura agora. Tente novamente com outra foto.";
+          msg = "O serviço está temporariamente indisponível. Tente novamente com outra foto.";
         }
         setErrorMsg(msg);
         setStep("error");
@@ -267,7 +272,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       }
 
       setSupportCode(null);
-      const fallbackMessage = "Não conseguimos ler o rótulo com clareza. Tente outra foto.";
+      const fallbackMessage = "Não conseguimos concluir a leitura do rótulo. Tente outra foto.";
       setErrorMsg(getAttachmentErrorMessage(err, fallbackMessage));
       setStep("error");
     }

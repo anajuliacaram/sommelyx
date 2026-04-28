@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Loader2, Sparkles, BookOpen } from "@/icons/lucide";
+import { UtensilsCrossed, Sparkles, BookOpen } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { getWinePairings, type PairingResult, type WineProfile, type Recipe } from "@/lib/sommelier-ai";
+import { notifySuccess } from "@/lib/feedback";
 import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
 import {
@@ -14,6 +15,8 @@ import {
   RecipeButton,
   PremiumResultCard,
   SectionHeader,
+  PairingLoadingState,
+  PairingErrorState,
 } from "@/components/pairing/shared";
 
 interface WinePairingPanelProps {
@@ -108,8 +111,12 @@ export function WinePairingPanel({
       setPairings(result.pairings);
       setWineProfile(result.wineProfile || null);
       setPairingLogic(result.pairingLogic || null);
+      notifySuccess("Harmonização pronta", {
+        description: `${Math.min(result.pairings.length, 5)} sugestões pensadas para acidez, corpo e taninos.`,
+        duration: 2800,
+      });
     } catch (err: any) {
-      setError(err.message || "Não foi possível gerar sugestões");
+      setError(err.message || "Não conseguimos concluir a análise agora.");
     } finally {
       setLoading(false);
     }
@@ -140,38 +147,25 @@ export function WinePairingPanel({
 
   return (
     <div className="space-y-3">
-      <SectionHeader icon="chef" label="Harmoniza com" />
+      <SectionHeader icon="chef" label="Harmoniza com" count={pairings ? Math.min(pairings.length, 5) : undefined} />
 
       <AnimatePresence mode="wait">
         {loading ? (
-          <motion.div
+          <PairingLoadingState
             key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex items-center gap-2.5 py-4"
-          >
-            <Loader2 className="h-4 w-4 animate-spin text-primary/60" />
-            <span className="text-[12px] text-[#888]">Analisando harmonizações…</span>
-          </motion.div>
+            steps={[
+              "Lendo o perfil do vinho…",
+              "Avaliando acidez, corpo e taninos…",
+              "Montando 5 opções claras…",
+            ]}
+            subtitle="Harmonização"
+          />
         ) : error ? (
-          <motion.div
+          <PairingErrorState
             key="error"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="py-3"
-          >
-            <p className="text-[12px] text-destructive/80 font-medium">{error}</p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleFetch}
-              className="h-8 mt-1.5 px-3 text-[11px] text-primary/70 rounded-xl"
-            >
-              Tentar novamente
-            </Button>
-          </motion.div>
+            message={error}
+            onRetry={handleFetch}
+          />
         ) : pairings ? (
           <motion.div
             key="pairings"
@@ -179,6 +173,10 @@ export function WinePairingPanel({
             animate={{ opacity: 1, y: 0 }}
             className="space-y-3"
           >
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/10 bg-primary/[0.06] px-2.5 py-1 text-[10px] font-semibold text-primary/75">
+              <Sparkles className="h-3 w-3" />
+              Leitura concluída
+            </div>
             {/* Wine Structure Section */}
             {wineProfile?.summary && (
               <div
@@ -216,7 +214,7 @@ export function WinePairingPanel({
 
             {/* Pairing Cards */}
             <ul className="space-y-2.5">
-              {pairings.map((p, i) => (
+              {pairings.slice(0, 5).map((p, i) => (
                 <PremiumResultCard key={i} index={i}>
                   {/* Header: dish name + match badge */}
                   <div className="flex items-start justify-between gap-2">
@@ -238,7 +236,10 @@ export function WinePairingPanel({
                   </div>
 
                   {/* Explanation */}
-                  <p className="text-[12.5px] text-[#555] leading-relaxed pl-[22px]">{p.reason}</p>
+                  <div className="pl-[22px]">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary/55 mb-1">Por que funciona</p>
+                    <p className="text-[12.5px] text-[#555] leading-relaxed">{p.reason}</p>
+                  </div>
 
                   {/* Recipe button */}
                   {p.recipe && (

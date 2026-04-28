@@ -2,7 +2,7 @@ import { invokeEdgeFunction, EdgeFunctionError } from "@/lib/edge-invoke";
 import type { AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
 import { normalizeWineData } from "@/lib/wine-normalization";
 
-const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes.";
+const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos concluir a leitura agora. Verifique sua conexão e tente novamente em instantes.";
 const ANALYZE_WINE_LIST_TIMEOUT_MS = 65_000;
 
 function nowMs() {
@@ -266,7 +266,7 @@ function classifyError(err: unknown): ClassifiedError {
     return { type: "auth", message: "Sua sessão expirou. Faça login novamente.", code: code ?? "AUTH_INVALID", status, requestId, retryable };
   }
   if (status === 408 || code === "AI_TIMEOUT" || lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
-    return { type: "timeout", message: "Tempo de resposta excedido. Tente novamente.", code: code ?? "AI_TIMEOUT", status, requestId, retryable };
+    return { type: "timeout", message: "Tempo excedido. Tente novamente em instantes.", code: code ?? "AI_TIMEOUT", status, requestId, retryable };
   }
   if (code === "INVALID_FILE_TYPE" || code === "FILE_INVALID" || lower.includes("tipo de arquivo inválido")) {
     return { type: "invalid_file", message: "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível.", code: code ?? "INVALID_FILE_TYPE", status, requestId, retryable };
@@ -275,7 +275,7 @@ function classifyError(err: unknown): ClassifiedError {
     return { type: "invalid_file", message: code === "IMAGE_TOO_LARGE" ? "A imagem está muito grande. Tente uma foto mais leve." : "Arquivo inválido. Envie uma imagem ou PDF legível.", code: code ?? "FILE_TOO_LARGE", status, requestId, retryable };
   }
   if (code === "EMPTY_EXTRACTION") {
-    return { type: "empty", message: "Não conseguimos identificar vinhos válidos nesse arquivo. Tente outra foto ou um PDF mais legível.", code, status, requestId, retryable };
+    return { type: "empty", message: "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.", code, status, requestId, retryable };
   }
   if (code === "OCR_FAILED" || code === "PDF_PARSE_FAILED") {
     return { type: "ai_fail", message: "Não foi possível ler o PDF. Tente um arquivo mais nítido ou uma imagem da carta.", code, status, requestId, retryable };
@@ -778,8 +778,104 @@ function fallbackPairingsForDish(_dish: string, _cellarWines?: WineSummary[]): W
   return [];
 }
 
-function fallbackPairingsForWine(_wine: { name?: string; style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }): PairingResult[] {
-  return [];
+function createFallbackPairing(
+  dish: string,
+  reason: string,
+  match: PairingResult["match"],
+  harmony_type: NonNullable<PairingResult["harmony_type"]>,
+  harmony_label: string,
+): PairingResult {
+  return {
+    dish,
+    reason,
+    match,
+    harmony_type,
+    harmony_label,
+    category: "classico",
+  };
+}
+
+function dedupePairings(pairings: PairingResult[]) {
+  const seen = new Set<string>();
+  return pairings.filter((pairing) => {
+    const key = normalizeForMatch(pairing.dish);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function fallbackPairingsForWine(wine: { name?: string; style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }): PairingResult[] {
+  const style = normalizeForMatch(wine.style).replace(/\s+/g, " ");
+  const isRed = /\btinto|red|malbec|cabernet|syrah|merlot|tempranillo|nebbiolo|sangiovese|pinot noir\b/i.test(style);
+  const isWhite = /\bbranco|white|chardonnay|sauvignon|riesling|alvarinho|verdejo|pinot gris|moscato\b/i.test(style);
+  const isRose = /\bros[eé]|rose\b/i.test(style);
+  const isSparkling = /\bespumante|sparkling|champagne|prosecco|cava|brut\b/i.test(style);
+
+  if (isRed) {
+    return [
+      createFallbackPairing("Picanha grelhada", "A gordura da carne pede taninos firmes e boa acidez para limpar o paladar.", "perfeito", "contraste", "gordura + taninos"),
+      createFallbackPairing("Cordeiro assado", "A textura suculenta do cordeiro encontra estrutura e presença no vinho.", "perfeito", "equilíbrio", "estrutura + intensidade"),
+      createFallbackPairing("Massa ao molho vermelho", "A acidez do molho pede um vinho com corpo e frescor suficiente para acompanhar o tomate.", "muito bom", "complemento", "tomate + acidez"),
+      createFallbackPairing("Queijo curado", "O sal e a gordura do queijo ganham frescor quando o vinho tem taninos e acidez em boa medida.", "muito bom", "contraste", "sal + taninos"),
+      createFallbackPairing("Hambúrguer artesanal", "A untuosidade e o sabor tostado pedem vinho de corpo médio e taninos que sustentem a mordida.", "bom", "equilíbrio", "gordura + estrutura"),
+    ];
+  }
+
+  if (isWhite) {
+    return [
+      createFallbackPairing("Peixe grelhado", "A delicadeza do peixe pede acidez viva e textura leve para não pesar no prato.", "perfeito", "limpeza", "leveza + frescor"),
+      createFallbackPairing("Frutos do mar", "A salinidade pede frescor e mineralidade para manter o conjunto preciso.", "perfeito", "contraste", "sal + mineralidade"),
+      createFallbackPairing("Risoto de limão", "A cremosidade do risoto ganha corte com acidez e final mais tenso.", "muito bom", "equilíbrio", "cremosidade + acidez"),
+      createFallbackPairing("Queijo de cabra", "O caráter ácido e lácteo do queijo acompanha bem um branco de frescor marcante.", "muito bom", "contraste", "laticínio + frescor"),
+      createFallbackPairing("Frango ao molho leve", "Pratos mais delicados pedem vinhos de corpo médio e acidez suficiente para sustentar o molho.", "bom", "complemento", "molho leve + corpo médio"),
+    ];
+  }
+
+  if (isRose) {
+    return [
+      createFallbackPairing("Sushi", "A acidez e a leveza do rosé limpam o paladar sem sobrepor o peixe cru.", "perfeito", "limpeza", "textura delicada + frescor"),
+      createFallbackPairing("Pizza margherita", "O tomate e a mozzarella pedem frescor e fruta, sem tanino dominante.", "muito bom", "equilíbrio", "tomate + fruta"),
+      createFallbackPairing("Salada com frutas", "A acidez da fruta e o perfil leve do prato combinam com um rosé refrescante.", "muito bom", "semelhança", "frescor + delicadeza"),
+      createFallbackPairing("Tábua de frios", "O sal e a variedade de texturas funcionam com um vinho versátil e pouco agressivo.", "bom", "contraste", "sal + versatilidade"),
+      createFallbackPairing("Frango grelhado", "A proteína leve precisa de vinho com frescor e fruta sem excesso de peso.", "bom", "complemento", "proteína leve + frescor"),
+    ];
+  }
+
+  if (isSparkling) {
+    return [
+      createFallbackPairing("Canapés e entradas", "A efervescência e a acidez preparam o paladar antes do prato principal.", "perfeito", "limpeza", "gás + entrada"),
+      createFallbackPairing("Frituras leves", "A espuma e a acidez limpam a gordura e deixam a sensação mais seca.", "perfeito", "limpeza", "gordura + acidez"),
+      createFallbackPairing("Camarão empanado", "A textura crocante pede um vinho que corte a fritura sem dominar o sabor.", "muito bom", "contraste", "crosta + frescor"),
+      createFallbackPairing("Omelete", "A textura macia combina com a vibração do espumante e sua acidez refrescante.", "muito bom", "equilíbrio", "textura macia + acidez"),
+      createFallbackPairing("Sobremesas delicadas", "Quando a doçura é leve, o gás traz leveza e mantém o conjunto elegante.", "bom", "semelhança", "doçura leve + leveza"),
+    ];
+  }
+
+  return [
+    createFallbackPairing("Tábua de frios", "Uma harmonização versátil que respeita sal, gordura e textura sem exigir muita intensidade.", "muito bom", "contraste", "versatilidade"),
+    createFallbackPairing("Peixe grelhado", "A acidez ajuda a manter frescor e a preservar a leitura do prato.", "muito bom", "limpeza", "frescor"),
+    createFallbackPairing("Massa leve", "A massa pede equilíbrio de corpo e acidez para não perder a forma.", "bom", "equilíbrio", "equilíbrio"),
+    createFallbackPairing("Queijos suaves", "A cremosidade funciona com vinhos de perfil delicado e boa precisão.", "bom", "complemento", "cremosidade"),
+    createFallbackPairing("Legumes assados", "A caramelização pede um vinho que acompanhe a doçura natural sem pesar.", "bom", "semelhança", "caramelização"),
+  ];
+}
+
+function fallbackPairingLogicForWine(wine: { style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }) {
+  const style = normalizeForMatch(wine.style);
+  if (/\btinto|red|malbec|cabernet|syrah|merlot|tempranillo|nebbiolo|sangiovese|pinot noir\b/i.test(style)) {
+    return "Taninos, corpo e acidez pedem pratos com gordura, proteína e preparo mais intenso para que o vinho mantenha presença sem dominar o prato.";
+  }
+  if (/\bbranco|white|chardonnay|sauvignon|riesling|alvarinho|verdejo|pinot gris|moscato\b/i.test(style)) {
+    return "A acidez e o frescor pedem pratos mais delicados, com gordura moderada ou textura cremosa para criar contraste limpo e elegante.";
+  }
+  if (/\bros[eé]|rose\b/i.test(style)) {
+    return "A fruta e a leveza do rosé funcionam melhor com pratos frescos, salgados e de intensidade média, sem excesso de gordura.";
+  }
+  if (/\bespumante|sparkling|champagne|prosecco|cava|brut\b/i.test(style)) {
+    return "A acidez e a efervescência limpam gordura e destacam entradas, frituras leves e pratos delicados com textura mais macia.";
+  }
+  return "A avaliação privilegia o equilíbrio entre corpo, acidez, taninos e intensidade do prato para sugerir combinações mais precisas.";
 }
 
 // ── Validation helpers ──
@@ -845,9 +941,29 @@ export async function getWinePairings(wine: {
       logTiming("wine-to-food", "total", totalStartedAt, { wineName: wine.name, outcome: "fallback" });
       return data;
     }
-    if (data && Array.isArray(data.pairings) && data.pairings.length > 0) {
-      logTiming("wine-to-food", "total", totalStartedAt, { wineName: wine.name, outcome: "success", pairings: data.pairings.length });
-      return data;
+    if (data && Array.isArray(data.pairings)) {
+      const mergedPairings = dedupePairings([
+        ...data.pairings,
+        ...fallbackPairingsForWine(wine).filter((fallback) =>
+          !data.pairings.some((existing) => normalizeForMatch(existing.dish) === normalizeForMatch(fallback.dish)),
+        ),
+      ]).slice(0, 5);
+
+      const response: PairingResponse = {
+        ...data,
+        pairings: mergedPairings,
+        pairingLogic: typeof data.pairingLogic === "string" && data.pairingLogic.trim().length > 0
+          ? data.pairingLogic
+          : fallbackPairingLogicForWine(wine),
+      };
+
+      logTiming("wine-to-food", "total", totalStartedAt, {
+        wineName: wine.name,
+        outcome: mergedPairings.length >= 5 ? "success" : "lenient_success",
+        pairings: mergedPairings.length,
+        filledFromFallback: mergedPairings.length - data.pairings.length,
+      });
+      return response;
     }
     if (data && typeof (data as any).message === "string" && Array.isArray((data as any).pairings)) {
       throw new Error((data as any).message);

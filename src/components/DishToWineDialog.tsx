@@ -12,7 +12,7 @@ import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@
 import { cn } from "@/lib/utils";
 import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
-import { useToast } from "@/hooks/use-toast";
+import { notifySuccess } from "@/lib/feedback";
 import {
   CompatibilityBadge,
   MatchDot,
@@ -99,7 +99,6 @@ const popularDishes = [
 
 export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWine }: DishToWineDialogProps) {
   const { data: wines } = useWines();
-  const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const fileGalleryRef = useRef<HTMLInputElement>(null);
   const menuFileRef = useRef<HTMLInputElement>(null);
@@ -220,11 +219,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setError(null);
       setSuggestions(result.suggestions);
       setDishProfile(result.dishProfile || null);
+      notifySuccess("Sugestões prontas", {
+        description: `${result.suggestions.length} opções pensadas para o prato.`,
+        duration: 2600,
+      });
       setStep("results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] cellar search failed:", err);
-      setError(err?.message || "Não foi possível buscar sugestões");
+      setError(err?.message || "Não conseguimos concluir a leitura agora.");
     } finally {
       if (isLatest(reqId)) setLoading(false);
     }
@@ -256,11 +259,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setPairings(result.pairings);
       setWineProfile(result.wineProfile || null);
       setPairingLogic(result.pairingLogic || null);
+      notifySuccess("Harmonização pronta", {
+        description: `${Math.min(result.pairings.length, 5)} sugestões com porquê técnico.`,
+        duration: 2600,
+      });
       setStep("wine-results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] wine pairings failed:", err);
-      setError(err?.message || "Não foi possível buscar sugestões");
+      setError(err?.message || "Não conseguimos concluir a leitura agora.");
     } finally {
       if (isLatest(reqId)) setLoading(false);
     }
@@ -339,11 +346,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         setPairings(result.pairings);
         setWineProfile(result.wineProfile || null);
         setPairingLogic(result.pairingLogic || null);
+        notifySuccess("Harmonização pronta", {
+          description: `${Math.min(result.pairings.length, 5)} sugestões com leitura técnica.`,
+          duration: 2600,
+        });
       } catch (err: any) {
         if (!isLatest(reqId)) return;
         console.error("[DishToWineDialog] deep-link pairings failed:", err);
-        setDeepLinkError(err?.message || "Não foi possível buscar sugestões");
-        setError(err?.message || "Não foi possível buscar sugestões");
+        setDeepLinkError(err?.message || "Não conseguimos concluir a leitura agora.");
+        setError(err?.message || "Não conseguimos concluir a leitura agora.");
       } finally {
         if (isLatest(reqId)) {
           setLoading(false);
@@ -420,11 +431,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", retry: true, wines: result.wines?.length || 0 });
           setError(null);
           setScanResults(result);
+          notifySuccess("Carta analisada", {
+            description: `${result.wines?.length || 0} vinhos lidos com sucesso.`,
+            duration: 2600,
+          });
           setStep("scan-results");
         } catch (err: any) {
           if (!isLatest(retryId)) return;
           console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", retry: true, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-          setError(err.message || "Erro ao analisar a carta");
+          setError(err.message || "Não conseguimos concluir a leitura da carta.");
           setStep("photo");
         } finally {
           if (isLatest(retryId)) setLoading(false);
@@ -438,11 +453,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", id: reqId, wines: result.wines?.length || 0 });
       setError(null);
       setScanResults(result);
+      notifySuccess("Carta analisada", {
+        description: `${result.wines?.length || 0} vinhos prontos para refinar.`,
+        duration: 2600,
+      });
       setStep("scan-results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-      setError(getAttachmentErrorMessage(err, err?.message || "Erro ao analisar a carta"));
+      setError(getAttachmentErrorMessage(err, err?.message || "Não conseguimos concluir a leitura da carta."));
       setStep("photo");
     } finally {
       if (isLatest(reqId)) setLoading(false);
@@ -496,11 +515,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setError(null);
           setMenuResults(result);
           setWineProfile(result.wineProfile || null);
+          notifySuccess("Cardápio lido", {
+            description: `${result.dishes?.length || 0} pratos identificados.`,
+            duration: 2600,
+          });
           setStep("ext-menu-results");
         } catch (err: any) {
           if (!isLatest(retryId)) return;
           console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", retry: true, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-          setError(err.message || "Erro ao analisar o cardápio");
+          setError(err.message || "Não conseguimos concluir a leitura do cardápio.");
           setStep("ext-menu-photo");
         } finally {
           if (isLatest(retryId)) setLoading(false);
@@ -514,11 +537,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setError(null);
       setMenuResults(result);
       setWineProfile(result.wineProfile || null);
+      notifySuccess("Cardápio lido", {
+        description: `${result.dishes?.length || 0} pratos identificados.`,
+        duration: 2600,
+      });
       setStep("ext-menu-results");
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-      setError(getAttachmentErrorMessage(err, err?.message || "Erro ao analisar o cardápio"));
+      setError(getAttachmentErrorMessage(err, err?.message || "Não conseguimos concluir a leitura do cardápio."));
       setStep("ext-menu-photo");
     } finally {
       if (isLatest(reqId)) setLoading(false);
@@ -1528,9 +1555,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           )}
 
                           {/* Explanation */}
-                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
-                            {s.reason}
-                          </p>
+                          <div className="pl-[18px] space-y-1">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary/50">Por que funciona</p>
+                            <p className="text-[12.5px] text-foreground/65 leading-relaxed">
+                              {s.reason}
+                            </p>
+                          </div>
 
                           {/* Badges: classification + harmony */}
                           <div className="flex items-center gap-2 pl-[18px] flex-wrap">
@@ -1679,9 +1709,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                               {p.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.highlight}</span>}
                             </div>
                           )}
-                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
-                            {p.reason}
-                          </p>
+                          <div className="pl-[18px] space-y-1">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary/50">Por que funciona</p>
+                            <p className="text-[12.5px] text-foreground/65 leading-relaxed">
+                              {p.reason}
+                            </p>
+                          </div>
                           {p.recipe && (
                             <div className="pl-[18px] pt-1.5">
                               <button

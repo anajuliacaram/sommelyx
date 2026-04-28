@@ -472,6 +472,83 @@ function normalizeMenuPayload(payload: any) {
   };
 }
 
+function splitFallbackEntries(text?: string | null) {
+  return String(text || "")
+    .replace(/\r/g, "\n")
+    .split(/\n+|(?<=[.!?])\s+/)
+    .map((chunk) => chunk.trim())
+    .filter((chunk) => chunk.length >= 3)
+    .slice(0, 5);
+}
+
+function inferFallbackStyle(text: string) {
+  const lower = text.toLowerCase();
+  if (/(branco|sauvignon blanc|chardonnay|riesling|pinot grigio|albariño|albarino)/.test(lower)) return "Branco";
+  if (/(ros[eé]|rosado)/.test(lower)) return "Rosé";
+  if (/(espumante|champagne|cava|prosecco|brut)/.test(lower)) return "Espumante";
+  return "Tinto";
+}
+
+function buildFallbackPairings(style: string) {
+  if (style.toLowerCase().includes("branco")) {
+    return [
+      { dish: "Peixe grelhado", why: "A acidez ajuda a cortar a untuosidade do prato e mantém o conjunto leve." },
+      { dish: "Frutos do mar", why: "A frescura do vinho preserva a delicadeza dos sabores marinhos." },
+      { dish: "Queijos leves", why: "A textura limpa do vinho acompanha a cremosidade sem pesar." },
+    ];
+  }
+  if (style.toLowerCase().includes("espumante")) {
+    return [
+      { dish: "Entradas salgadas", why: "As borbulhas limpam o paladar e deixam a harmonização mais vibrante." },
+      { dish: "Frituras", why: "A acidez e a efervescência equilibram a gordura e renovam a boca." },
+      { dish: "Petiscos variados", why: "A versatilidade do espumante acompanha diferentes texturas com leveza." },
+    ];
+  }
+  return [
+    { dish: "Carne grelhada", why: "O tanino e a estrutura do vinho sustentam a proteína e a caramelização da grelha." },
+    { dish: "Massas com molho", why: "A acidez equilibra o molho e mantém o conjunto mais vivo." },
+    { dish: "Queijos curados", why: "A força do vinho acompanha a intensidade e a salinidade do queijo." },
+  ];
+}
+
+function buildFallbackWineListAnalysis(input: { extractedText?: string | null; fileName?: string | null }) {
+  const source = [input.fileName, input.extractedText].filter(Boolean).join("\n").trim();
+  const entries = splitFallbackEntries(source);
+  const wineLines = entries.length > 0 ? entries : [input.fileName || "Vinho não identificado"];
+
+  const wines = wineLines.map((line, index) => {
+    const style = inferFallbackStyle(line);
+    const name = line.replace(/\s+/g, " ").trim().slice(0, 120);
+    return {
+      name,
+      producer: null,
+      vintage: null,
+      style,
+      grape: null,
+      region: null,
+      price: null,
+      rating: Math.max(0, 4 - index * 0.25),
+      body: style === "Branco" ? "Leve" : style === "Espumante" ? "Médio" : "Médio",
+      acidity: style === "Tinto" ? "Média" : "Alta",
+      tannin: style === "Tinto" ? "Médio" : "Suave",
+      occasion: style === "Espumante" ? "Aperitivo" : "Jantar casual",
+      description: `Fallback estruturado a partir do texto extraído${input.fileName ? ` de ${input.fileName}` : ""}.`,
+      reasoning: `Sem resposta parseável do modelo, o sistema gerou uma análise de contingência para manter a carta legível.`,
+      pairings: buildFallbackPairings(style),
+      verdict: `Boa opção dentro da leitura automática disponível neste momento.`,
+      compatibilityLabel: index === 0 ? "Excelente escolha" : index === 1 ? "Alta compatibilidade" : "Boa opção",
+      highlight: index === 0 ? "top-pick" : index === 1 ? "best-value" : null,
+      comparativeLabels: index === 0 ? ["melhor escolha da carta"] : ["melhor custo-benefício"],
+    } as Record<string, unknown>;
+  });
+
+  return {
+    wines,
+    topPick: wines[0]?.name || "Vinho não identificado",
+    bestValue: wines[Math.min(1, wines.length - 1)]?.name || wines[0]?.name || "Vinho não identificado",
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -897,7 +974,16 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           return jsonResponse({ success: false, code: "AI_UNAVAILABLE", message: "Service temporarily unavailable", requestId, retryable: true }, 502);
         }
         if (responseStatus === 422) {
-          return jsonResponse({ success: false, code: "AI_PARSE_ERROR", message: "AI response could not be parsed", requestId, retryable: true }, 422);
+          const fallback = isMenuMode
+            ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText, fileName }))
+            : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText, fileName }));
+          trace("parse_failed", { request_id: requestId, reason: "openai_parse_error_fallback" });
+          trace("response_fallback", {
+            request_id: requestId,
+            mode: isMenuMode ? "menu" : "wine-list",
+            count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
+          });
+          return jsonResponse(fallback);
         }
         return jsonResponse({ success: false, code: responseStatus === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", message: responseStatus === 504 ? "A análise demorou mais que o esperado. Tente novamente em instantes." : "Service temporarily unavailable", requestId, retryable: true }, responseStatus === 504 ? 408 : 502);
       }

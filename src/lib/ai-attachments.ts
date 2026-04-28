@@ -126,7 +126,7 @@ export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi p
     case "OCR_FAILED":
       return "Não conseguimos extrair o texto desse arquivo. Tente outra foto ou um PDF mais nítido.";
     case "EMPTY_EXTRACTION":
-      return "Não conseguimos identificar vinhos válidos nesse arquivo.";
+      return "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.";
     default:
       return error instanceof Error && error.message ? error.message : fallback;
   }
