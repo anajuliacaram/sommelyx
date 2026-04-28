@@ -189,6 +189,11 @@ export default function ConsumptionPage() {
       .map((opt) => opt.label)
       .join(" · ");
   }, [source]);
+  const sourceButtonLabel = useMemo(() => {
+    if (source.length === 0) return "Todas";
+    if (source.length === 2) return "Ambas";
+    return sourceOptions.find((opt) => source.includes(opt.value))?.label ?? "Todas";
+  }, [source]);
   const sortValueLabel = sortOptions.find((opt) => opt.value === sortBy)?.label ?? "Mais recentes";
   const activeFilterSummary = useMemo(() => {
     const parts = [
@@ -468,8 +473,114 @@ export default function ConsumptionPage() {
       </EditorialCard>
 
       {/* Filtros inteligentes */}
-      <div className="grid gap-2 md:grid-cols-3">
-        {[
+      {isMobile ? (
+        <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex min-w-[320px] items-center gap-1.5">
+            {[
+              { kind: "period" as const, value: periodValueLabel, aria: "Filtrar período" },
+              { kind: "source" as const, value: sourceButtonLabel, aria: "Filtrar origem" },
+              { kind: "sort" as const, value: sortValueLabel, aria: "Ordenar consumo" },
+            ].map((filter) => {
+              const active = openFilter === filter.kind;
+              return (
+                <button
+                  key={filter.kind}
+                  type="button"
+                  aria-label={filter.aria}
+                  onClick={() => setOpenFilter(active ? null : filter.kind)}
+                  className={cn(
+                    "flex h-9 flex-1 min-w-[92px] items-center justify-between gap-2 rounded-[14px] border px-3 text-[13px] font-medium leading-none transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
+                    active
+                      ? "border-[rgba(95,111,82,0.26)] bg-[rgba(95,111,82,0.10)] text-[#305231] shadow-[0_6px_16px_-12px_rgba(95,127,82,0.20)]"
+                      : "border-[rgba(95,111,82,0.14)] bg-[rgba(255,255,255,0.88)] text-[#2f2a22]",
+                  )}
+                >
+                  <span className="min-w-0 truncate">{filter.value}</span>
+                  <ChevronDown
+                    className={cn(
+                      "h-3.5 w-3.5 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out",
+                      active && "rotate-180",
+                    )}
+                  />
+                </button>
+              );
+            })}
+          </div>
+          {[
+            { kind: "period" as const, title: "Período", value: periodValueLabel },
+            { kind: "source" as const, title: "Origem", value: sourceValueLabel },
+            { kind: "sort" as const, title: "Ordenar", value: sortValueLabel },
+          ].map((box) => {
+            const open = openFilter === box.kind;
+            const options =
+              box.kind === "period"
+                ? periodOptions.map((opt) => (
+                    <FilterChoice
+                      key={opt.value}
+                      active={period === opt.value}
+                      label={opt.label}
+                      onClick={() => {
+                        setPeriod(opt.value);
+                        setOpenFilter(null);
+                      }}
+                    />
+                  ))
+                : box.kind === "source"
+                  ? [
+                      <FilterChoice
+                        key="all"
+                        active={source.length === 0}
+                        label="Todas"
+                        onClick={() => {
+                          setAllSources();
+                          setOpenFilter(null);
+                        }}
+                      />,
+                      ...sourceOptions.map((opt) => (
+                        <FilterChoice
+                          key={opt.value}
+                          active={source.includes(opt.value)}
+                          label={opt.label}
+                          onClick={() => toggleSource(opt.value)}
+                        />
+                      )),
+                    ]
+                  : sortOptions.map((opt) => (
+                      <FilterChoice
+                        key={opt.value}
+                        active={sortBy === opt.value}
+                        label={opt.label}
+                        onClick={() => {
+                          setSortBy(opt.value);
+                          setOpenFilter(null);
+                        }}
+                      />
+                    ));
+
+            return (
+              <FilterPanel
+                key={box.kind}
+                title={box.title}
+                mobileTitle={box.title}
+                description={
+                  box.kind === "period"
+                    ? "Escolha a janela de análise."
+                    : box.kind === "source"
+                      ? "Selecione uma ou mais origens."
+                      : "Escolha a ordem da lista."
+                }
+                open={open}
+                onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
+                mobile
+              >
+                <div className="space-y-1.5">{options}</div>
+              </FilterPanel>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid gap-2 md:grid-cols-3">
+          {[
           { kind: "period" as const, title: "Período", value: periodValueLabel },
           { kind: "source" as const, title: "Origem", value: sourceValueLabel },
           { kind: "sort" as const, title: "Ordenar", value: sortValueLabel },
@@ -550,51 +661,30 @@ export default function ConsumptionPage() {
 
           return (
             <div key={box.kind} className="min-w-0">
-              {isMobile ? (
-                <>
-                  {trigger}
-                  <FilterPanel
-                    title={box.title}
-                    mobileTitle={box.title}
-                    description={
-                      box.kind === "period"
-                        ? "Escolha a janela de análise."
-                        : box.kind === "source"
-                          ? "Selecione uma ou mais origens."
-                          : "Escolha a ordem da lista."
-                    }
-                    open={open}
-                    onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
-                    mobile
-                  >
-                    <div className="space-y-1.5">{options}</div>
-                  </FilterPanel>
-                </>
-              ) : (
-                <Popover open={open} onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}>
-                  <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-                  <FilterPanel
-                    title={box.title}
-                    mobileTitle={box.title}
-                    description={
-                      box.kind === "period"
-                        ? "Escolha a janela de análise."
-                        : box.kind === "source"
-                          ? "Selecione uma ou mais origens."
-                          : "Escolha a ordem da lista."
-                    }
-                    open={open}
-                    onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
-                    mobile={false}
-                  >
-                    <div className="space-y-1.5">{options}</div>
-                  </FilterPanel>
-                </Popover>
-              )}
+              <Popover open={open} onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}>
+                <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+                <FilterPanel
+                  title={box.title}
+                  mobileTitle={box.title}
+                  description={
+                    box.kind === "period"
+                      ? "Escolha a janela de análise."
+                      : box.kind === "source"
+                        ? "Selecione uma ou mais origens."
+                        : "Escolha a ordem da lista."
+                  }
+                  open={open}
+                  onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
+                  mobile={false}
+                >
+                  <div className="space-y-1.5">{options}</div>
+                </FilterPanel>
+              </Popover>
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
 
       {activeFilterSummary ? (
         <div className="flex items-center justify-between gap-3 rounded-[16px] border border-[rgba(95,111,82,0.12)] bg-[rgba(95,111,82,0.05)] px-3 py-2 text-[11.5px] leading-[1.25] text-[rgba(58,51,39,0.72)]">
