@@ -45,7 +45,7 @@ export function RangeSliderFilter({
   );
 
   return (
-    <div className="w-full rounded-[16px] border border-black/5 bg-white/88 px-3 py-2.5 shadow-[0_12px_28px_-22px_rgba(58,51,39,0.18)] backdrop-blur-2xl">
+    <div className="w-full rounded-[16px] border border-white/50 ring-1 ring-black/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.95)_0%,rgba(255,255,255,0.88)_52%,rgba(248,244,237,0.90)_100%)] px-3 py-2.5 shadow-[0_18px_38px_-28px_rgba(58,51,39,0.22),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-2xl saturate-150">
       <div className="flex items-center justify-between">
         <span
           className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-neutral-600 transition-colors"
