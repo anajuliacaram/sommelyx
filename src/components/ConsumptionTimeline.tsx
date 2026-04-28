@@ -106,14 +106,10 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                         </span>
                       </div>
 
-                      <div className="relative flex h-full min-h-[36px] items-center justify-center">
+                      <div className="flex h-full min-h-[36px] items-center justify-center">
                         <span
                           aria-hidden
-                          className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 rounded-full bg-[linear-gradient(180deg,rgba(95,111,82,0.10)_0%,rgba(95,111,82,0.18)_50%,rgba(95,111,82,0.10)_100%)]"
-                        />
-                        <span
-                          aria-hidden
-                          className="relative z-10 inline-block h-2.5 w-2.5 rounded-full border border-white shadow-[0_1px_3px_rgba(0,0,0,0.10)]"
+                          className="inline-block h-[24px] w-[3px] rounded-[2px]"
                           style={{ background: color }}
                         />
                       </div>
