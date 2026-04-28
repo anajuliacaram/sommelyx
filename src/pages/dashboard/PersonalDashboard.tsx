@@ -287,7 +287,7 @@ export default function PersonalDashboard() {
             </div>
 
             {/* KPI grid */}
-            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4 md:gap-3">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
               <EditorialKpiCard
                 icon={<Layers className="h-4 w-4" />}
                 accent="#5F7F52"
@@ -324,15 +324,15 @@ export default function PersonalDashboard() {
         {insightWine && (
           <div>
             <EditorialHeroBand>
-              <div className="relative z-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                <div className="flex items-center gap-4">
+              <div className="relative z-10 flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+                <div className="flex items-start gap-3">
                   <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10"
                     style={{ background: "rgba(201,180,105,0.18)", color: "#E0C879" }}
                   >
                     <Sparkles className="h-4 w-4" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div
                       className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em]"
                       style={{ color: "rgba(230,215,170,0.78)" }}
@@ -340,7 +340,7 @@ export default function PersonalDashboard() {
                       Insight do dia
                     </div>
                     <p
-                      className="font-serif text-[16px] font-medium leading-[1.4] sm:text-[18px]"
+                      className="line-clamp-2 font-serif text-[14px] font-medium leading-[1.35] sm:line-clamp-none sm:text-[16px] sm:leading-[1.4]"
                       style={{
                         fontFamily: "'Libre Baskerville', Georgia, serif",
                         letterSpacing: "-0.01em",
@@ -361,7 +361,7 @@ export default function PersonalDashboard() {
                 </div>
                 <button
                   type="button"
-                  className="editorial-btn-copper shrink-0"
+                  className="editorial-btn-copper h-9 shrink-0 rounded-full px-3 text-[11.5px] md:h-10 md:px-4"
                   onClick={() => {
                     setPairingInitialWineId(insightWine.id);
                     setDishToWineOpen(true);

@@ -188,20 +188,20 @@ export default function PersonalCellarPage() {
 
   const mobileHeader = (filteredCount: number) => (
     <EditorialCard style={{ padding: "12px 12px 10px" }}>
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <Kicker>Adega</Kicker>
             <h1 className="editorial-page-h1 mt-0.5 !text-[24px] leading-tight tracking-[-0.04em]">
               Minha Adega
             </h1>
-            <div className="mt-1 text-[11px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
+            <div className="mt-1 text-[11px] font-medium leading-[1.3] tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
               <b style={{ color: "#1a1713", fontWeight: 700 }}>{filteredCount}</b> / {wines.length} vinhos
             </div>
           </div>
         </div>
 
-        <div className="editorial-search min-w-0 h-10 px-3">
+        <div className="editorial-search min-w-0 h-11 px-3">
           <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
           <input
             value={query}
@@ -215,96 +215,85 @@ export default function PersonalCellarPage() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max items-center gap-1.5">
-              <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-              <SelectTrigger
-                  aria-label="Ordenar vinhos"
-                  className={`${controlBase} ${controlSurface} h-9 min-w-[182px] px-2.5 text-[11.5px]`}
-                >
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
-                    <span className="min-w-0">{sortLabel}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
-                  <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
-                  <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
-                  <SelectItem value="value">Ordenar: Mais caros</SelectItem>
-                  <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
-                  <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-              <SelectTrigger
-                  aria-label="Filtrar por país"
-                  className={`${controlBase} ${controlSurface} h-9 min-w-[136px] px-2.5 text-[11.5px]`}
-                >
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
-                    <span className="min-w-0">{countryLabel}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
-                  <SelectItem value="all">País</SelectItem>
-                  {countryOptions.filter((o) => o.key !== "all").map((option) => (
-                    <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="editorial-segmented shrink-0">
-                <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
-                  Grade
-                </button>
-                <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
-                  Lista
-                </button>
+        <div className="grid grid-cols-2 gap-2">
+          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+            <SelectTrigger
+              aria-label="Ordenar vinhos"
+              className={`${controlBase} ${controlSurface} h-11 min-w-0 px-3 text-[11.5px]`}
+            >
+              <div className="flex min-w-0 items-center gap-1.5">
+                <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
+                <span className="min-w-0 truncate">{sortLabel}</span>
               </div>
-            </div>
-          </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+              <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
+              <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
+              <SelectItem value="value">Ordenar: Mais caros</SelectItem>
+              <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
+              <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
+            </SelectContent>
+          </Select>
 
+          <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
+            <SelectTrigger
+              aria-label="Filtrar por país"
+              className={`${controlBase} ${controlSurface} h-11 min-w-0 px-3 text-[11.5px]`}
+            >
+              <div className="flex min-w-0 items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
+                <span className="min-w-0 truncate">{countryLabel}</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+              <SelectItem value="all">País</SelectItem>
+              {countryOptions.filter((o) => o.key !== "all").map((option) => (
+                <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex justify-end">
           <button
             type="button"
-            className="editorial-btn-primary h-9 w-full rounded-[14px] px-3 text-[12px] font-semibold tracking-[-0.01em]"
+            className="editorial-btn-primary h-11 w-fit max-w-[60%] rounded-[14px] px-4 text-[12px] font-semibold tracking-[-0.01em] whitespace-nowrap"
             onClick={() => setAddOpen(true)}
           >
             + Adicionar
           </button>
         </div>
 
-          <div className="rounded-[14px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.28)] px-2 py-1.5">
-            <div className="space-y-1.25">
-              <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <div className="flex min-w-max items-center gap-1.5">
-                <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Tipo</span>
-                {styleOptions.map((s) => (
-                  <Chip
-                    key={s.key}
-                    active={styleFilter === s.key}
-                    onClick={() => setStyleFilter(s.key)}
-                    className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em] shrink-0 whitespace-nowrap"
-                  >
-                    {s.label}
-                  </Chip>
-                ))}
-              </div>
+        <div className="space-y-2">
+          <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex min-w-max items-center gap-1.5">
+              <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Tipo</span>
+              {styleOptions.map((s) => (
+                <Chip
+                  key={s.key}
+                  active={styleFilter === s.key}
+                  onClick={() => setStyleFilter(s.key)}
+                  className="h-[24px] shrink-0 whitespace-nowrap px-2 text-[10px] normal-case tracking-[-0.01em]"
+                >
+                  {s.label}
+                </Chip>
+              ))}
             </div>
+          </div>
 
-            <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="flex min-w-max items-center gap-1.5">
-                <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Janela</span>
-                {drinkWindowOptions.map((option) => (
-                  <Chip
-                    key={option.key}
-                    active={drinkWindowFilter === option.key}
-                    onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                    className="h-[24px] px-2 text-[10px] normal-case tracking-[-0.01em] shrink-0 whitespace-nowrap"
-                  >
-                    {option.label}
-                  </Chip>
-                ))}
-              </div>
+          <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex min-w-max items-center gap-1.5">
+              <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Janela</span>
+              {drinkWindowOptions.map((option) => (
+                <Chip
+                  key={option.key}
+                  active={drinkWindowFilter === option.key}
+                  onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+                  className="h-[24px] shrink-0 whitespace-nowrap px-2 text-[10px] normal-case tracking-[-0.01em]"
+                >
+                  {option.label}
+                </Chip>
+              ))}
             </div>
           </div>
         </div>

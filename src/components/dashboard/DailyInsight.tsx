@@ -283,9 +283,9 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
   const hasSuggestions = suggestions.length > 0;
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-3">
       <motion.div
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#1B3B27] to-[#102515] p-4 sm:p-5 text-white shadow-[0_14px_32px_-22px_rgba(18,54,31,0.6)]"
+        className="relative min-h-[122px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#1B3B27] to-[#102515] p-3.5 text-white shadow-[0_14px_32px_-22px_rgba(18,54,31,0.6)] sm:p-5"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -293,10 +293,13 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
         <div className="pointer-events-none absolute -right-10 top-0 h-24 w-24 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[#C8A96A]/10 blur-2xl" />
 
-        <div className="relative flex items-start justify-between gap-3">
-          <div className="min-w-0">
+        <div className="relative flex items-start gap-3 md:items-center">
+          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/12 text-[#EAD9A0] ring-1 ring-white/10">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="min-w-0 flex-1">
             <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/70">INSIGHT DO DIA</p>
-            <p className="mt-1.5 max-w-2xl text-[15px] font-semibold tracking-tight text-white sm:text-[16px] leading-snug">
+            <p className="mt-1.5 line-clamp-2 max-w-2xl text-[14px] font-semibold leading-[1.35] tracking-tight text-white sm:line-clamp-none sm:text-[16px] sm:leading-snug">
               {insightSentence}
             </p>
           </div>
@@ -305,7 +308,7 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
             <Button
               type="button"
               variant="secondary"
-              className="h-8 shrink-0 rounded-xl bg-white text-[#1A1A1A] hover:bg-white/95 text-[12px] px-3"
+              className="h-8 shrink-0 rounded-xl bg-white px-3 text-[11.5px] text-[#1A1A1A] hover:bg-white/95"
               onClick={onViewRecs ?? (() => navigate("/dashboard/cellar"))}
             >
               Ver recomendações
@@ -330,13 +333,13 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
         </div>
       )}
 
-      <div className="flex items-start gap-3 rounded-2xl border border-border bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm">
         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6F7F5B]/10 text-[#6F7F5B]">
           <Wine className="h-4 w-4" />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#5F5F5F]">CELLAR FEEDBACK</p>
-          <p className="mt-1 text-sm leading-relaxed text-[#5F5F5F]">
+          <p className="mt-1 text-sm leading-[1.35] text-[#5F5F5F]">
             {feedbackSentence}
           </p>
         </div>

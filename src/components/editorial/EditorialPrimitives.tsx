@@ -164,28 +164,26 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
   accent?: string;
 }) {
   return (
-    <div className="editorial-kpi">
-      <div className="mb-2 flex items-start justify-between gap-2 sm:mb-5">
-        <div className="flex min-w-0 items-start gap-1.5">
-          <div
-            className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[10px] sm:h-9 sm:w-9 sm:rounded-[12px]"
-            style={{ color: accent, background: `${accent}14` }}
-          >
-            {icon}
-          </div>
-          <span className="min-h-[2.1em] min-w-0 text-[9px] font-bold uppercase leading-[1.12] tracking-[0.11em] text-[rgba(58,51,39,0.56)] sm:text-[9px] sm:tracking-[0.12em]">
-            {label}
-          </span>
+    <div className="editorial-kpi flex h-full min-h-[96px] flex-col gap-1.5 sm:min-h-[112px] sm:gap-2">
+      <div className="flex items-start gap-1.5">
+        <div
+          className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-[10px] sm:h-9 sm:w-9 sm:rounded-[12px]"
+          style={{ color: accent, background: `${accent}14` }}
+        >
+          {icon}
         </div>
-        {sub && (
-          <span className="shrink-0 text-[8.5px] font-bold uppercase tracking-[0.12em] text-[rgba(58,51,39,0.42)] sm:text-[9px]">
-            {sub}
-          </span>
-        )}
+        <span className="min-w-0 text-[9px] font-bold uppercase leading-[1.22] tracking-[0.11em] text-[rgba(58,51,39,0.56)] sm:tracking-[0.12em]">
+          {label}
+        </span>
       </div>
-      <div className="text-[20px] font-bold leading-none tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[32px]">
+      <div className="text-[18px] font-bold leading-[1.05] tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[32px]">
         {value}
       </div>
+      {sub && (
+        <span className="text-[8.5px] font-bold uppercase leading-[1.18] tracking-[0.12em] text-[rgba(58,51,39,0.42)] sm:text-[9px]">
+          {sub}
+        </span>
+      )}
     </div>
   );
 });
