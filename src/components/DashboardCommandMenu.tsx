@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -47,7 +47,7 @@ interface DashboardCommandMenuProps {
   onRegisterSale?: () => void;
 }
 
-export function DashboardCommandMenu({
+export const DashboardCommandMenu = memo(function DashboardCommandMenu({
   profileType,
   wines,
   alertCount,
@@ -231,4 +231,6 @@ export function DashboardCommandMenu({
       </CommandDialog>
     </>
   );
-}
+});
+
+DashboardCommandMenu.displayName = "DashboardCommandMenu";

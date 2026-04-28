@@ -121,8 +121,7 @@ export default function ReportsPage() {
         </TabsList>
       </Tabs>
 
-      {tab === "estoque" && (
-        <div className="space-y-3">
+      <div className={tab === "estoque" ? "space-y-3" : "hidden space-y-3"}>
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: "Garrafas", value: totalBottles, icon: Wine },
@@ -185,11 +184,9 @@ export default function ReportsPage() {
               </div>
             )}
           </div>
-        </div>
-      )}
+      </div>
 
-      {tab === "vendas" && (
-        <div className="space-y-3">
+      <div className={tab === "vendas" ? "space-y-3" : "hidden space-y-3"}>
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: "Faturamento", value: `R$ ${salesRevenue.toLocaleString("pt-BR")}`, icon: DollarSign },
@@ -244,8 +241,7 @@ export default function ReportsPage() {
               )}
             </div>
           )}
-        </div>
-      )}
+      </div>
 
       <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
         <CalendarDays className="h-3 w-3" /> Atualizado em tempo real a partir do banco.

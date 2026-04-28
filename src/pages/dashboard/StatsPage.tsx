@@ -49,7 +49,7 @@ export default function StatsPage() {
   if (isLoading) return <div className="text-muted-foreground text-sm p-8">Carregando…</div>;
 
   return (
-    <div className="space-y-7 max-w-[1200px]">
+    <div className="space-y-6 max-w-[1200px]">
       <div>
         <div className="section-surface">
           <h1 className="t-title">Relatórios & analytics</h1>
@@ -80,9 +80,9 @@ export default function StatsPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
         {byStyle.length > 0 && (
-          <div className="chart-surface">
+          <div className="chart-surface p-4 sm:p-5">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Distribuição por estilo</h3>
-            <ResponsiveContainer width="100%" height={140}>
+            <ResponsiveContainer width="100%" height={132}>
               <BarChart data={byStyle}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.12)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.6)" }} axisLine={false} tickLine={false} />
@@ -98,7 +98,7 @@ export default function StatsPage() {
 
         {/* By country — horizontal bars */}
         {byCountry.length > 0 && (
-          <div className="chart-surface">
+          <div className="chart-surface p-4 sm:p-5">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5 flex items-center gap-1">
               <Globe className="h-3 w-3 text-foreground/40" />
               Por país
@@ -122,9 +122,9 @@ export default function StatsPage() {
         )}
 
         {byVintage.length > 0 && (
-          <div className="chart-surface">
+          <div className="chart-surface p-4 sm:p-5">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Por safra</h3>
-            <ResponsiveContainer width="100%" height={140}>
+            <ResponsiveContainer width="100%" height={132}>
               <BarChart data={byVintage}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.12)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.6)" }} axisLine={false} tickLine={false} />
@@ -137,7 +137,7 @@ export default function StatsPage() {
         )}
 
         {topRated.length > 0 && (
-          <div className="chart-surface">
+          <div className="chart-surface p-4 sm:p-5">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Mais bem avaliados</h3>
             <div className="space-y-1">
               {topRated.map((w, i) => (

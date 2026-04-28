@@ -41,6 +41,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useWineEvent, useWineMetrics } from "@/hooks/useWines";
 
 function buildMonthWindow(size: number) {
@@ -68,6 +69,7 @@ export default function PersonalDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Sommelier";
 
   const { totalBottles, totalValue, drinkNow, wines } = useWineMetrics();
@@ -203,8 +205,8 @@ export default function PersonalDashboard() {
       <div className="editorial-page">
         {/* ─── HERO + KPIs ─── */}
         <section>
-          <EditorialCard>
-            <div className="mb-3 flex items-start justify-between gap-3 md:mb-6 md:gap-6">
+          <EditorialCard style={isMobile ? { padding: "14px 14px 12px" } : undefined}>
+            <div className="mb-2.5 flex items-start justify-between gap-3 md:mb-6 md:gap-6">
               <div className="min-w-0">
                 <Kicker>
                   {new Date().toLocaleDateString("pt-BR", {
@@ -213,7 +215,7 @@ export default function PersonalDashboard() {
                     month: "long",
                   })}
                 </Kicker>
-                <h1 className="editorial-h1 mt-1">
+                <h1 className={`editorial-h1 mt-1 ${isMobile ? "!text-[26px] leading-[1.02]" : ""}`}>
                   Olá,{" "}
                   <span
                     style={{
@@ -227,7 +229,7 @@ export default function PersonalDashboard() {
                   </span>
                 </h1>
                 <p
-                  className="mt-1.5 max-w-[520px] text-[12.5px] leading-[1.45] md:mt-2 md:text-[13px] md:leading-[1.5]"
+                  className={`mt-1.5 max-w-[520px] text-[12.5px] leading-[1.45] md:mt-2 md:text-[13px] md:leading-[1.5] ${isMobile ? "!text-[12px] !leading-[1.35]" : ""}`}
                   style={{ color: "rgba(58,51,39,0.64)" }}
                 >
                   {totalBottles > 0 ? (
@@ -285,7 +287,7 @@ export default function PersonalDashboard() {
             </div>
 
             {/* KPI grid */}
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4 md:gap-3">
               <EditorialKpiCard
                 icon={<Layers className="h-4 w-4" />}
                 accent="#5F7F52"

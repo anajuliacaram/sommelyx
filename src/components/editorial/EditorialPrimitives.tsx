@@ -2,7 +2,7 @@
 // Adaptadas ao tema claro/creme do Sommelyx, accent vinho #7B1E2B.
 
 import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
+import { memo, ReactNode } from "react";
 
 export const STYLE_COLORS: Record<string, string> = {
   tinto: "#7B1E2B",
@@ -150,7 +150,7 @@ export function EditorialHeroBand({ children }: { children: ReactNode }) {
 }
 
 /* ── KPI Card editorial ──────────────────────────────── */
-export function EditorialKpiCard({
+export const EditorialKpiCard = memo(function EditorialKpiCard({
   icon,
   label,
   value,
@@ -165,15 +165,15 @@ export function EditorialKpiCard({
 }) {
   return (
     <div className="editorial-kpi">
-      <div className="mb-2.5 flex items-center justify-between gap-2 sm:mb-5">
+      <div className="mb-2 flex items-center justify-between gap-2 sm:mb-5">
         <div className="flex min-w-0 items-center gap-1.5">
           <div
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] sm:h-9 sm:w-9 sm:rounded-[12px]"
+            className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[10px] sm:h-9 sm:w-9 sm:rounded-[12px]"
             style={{ color: accent, background: `${accent}14` }}
           >
             {icon}
           </div>
-          <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.11em] text-[rgba(58,51,39,0.56)] sm:text-[9px] sm:tracking-[0.12em]">
+          <span className="min-w-0 truncate text-[9px] font-bold uppercase tracking-[0.11em] text-[rgba(58,51,39,0.56)] sm:text-[9px] sm:tracking-[0.12em]">
             {label}
           </span>
         </div>
@@ -183,12 +183,14 @@ export function EditorialKpiCard({
           </span>
         )}
       </div>
-      <div className="text-[22px] font-bold leading-none tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[32px]">
+      <div className="text-[20px] font-bold leading-none tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[32px]">
         {value}
       </div>
     </div>
   );
-}
+});
+
+EditorialKpiCard.displayName = "EditorialKpiCard";
 
 /* ── DrinkWindow timeline ──────────────────────────────
    Padronizado: sempre exibe a mesma estrutura visual.

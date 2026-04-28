@@ -178,63 +178,68 @@ export default function PersonalCellarPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-[minmax(116px,1fr)_minmax(104px,1fr)_auto_auto] items-center gap-1.5">
-          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger
-              aria-label="Ordenar vinhos"
-              className={`${controlBase} ${controlSurface} min-w-[116px] w-full px-2.5 text-[11.5px]`}
-            >
-              <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
-                <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
-                <span className="min-w-0 truncate">{sortLabel}</span>
+        <div className="space-y-2">
+          <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex min-w-max items-center gap-1.5">
+              <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+                <SelectTrigger
+                  aria-label="Ordenar vinhos"
+                  className={`${controlBase} ${controlSurface} h-9 min-w-[118px] px-2.5 text-[11.5px]`}
+                >
+                  <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+                    <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
+                    <span className="min-w-0 truncate">{sortLabel}</span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                  <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
+                  <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
+                  <SelectItem value="value">Ordenar: Mais caros</SelectItem>
+                  <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
+                  <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
+                <SelectTrigger
+                  aria-label="Filtrar por país"
+                  className={`${controlBase} ${controlSurface} h-9 min-w-[104px] px-2.5 text-[11.5px]`}
+                >
+                  <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+                    <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
+                    <span className="min-w-0 truncate">{countryLabel}</span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                  <SelectItem value="all">País</SelectItem>
+                  {countryOptions.filter((o) => o.key !== "all").map((option) => (
+                    <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="editorial-segmented shrink-0">
+                <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
+                  Grade
+                </button>
+                <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
+                  Lista
+                </button>
               </div>
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
-              <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
-              <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
-              <SelectItem value="value">Ordenar: Mais caros</SelectItem>
-              <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
-              <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-            <SelectTrigger
-              aria-label="Filtrar por país"
-              className={`${controlBase} ${controlSurface} min-w-[104px] w-full px-2.5 text-[11.5px]`}
-            >
-              <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap">
-                <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
-                <span className="min-w-0 truncate">{countryLabel}</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
-              <SelectItem value="all">País</SelectItem>
-              {countryOptions.filter((o) => o.key !== "all").map((option) => (
-                <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="editorial-segmented shrink-0">
-            <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
-              Grade
-            </button>
-            <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
-              Lista
-            </button>
+            </div>
           </div>
+
           <button
             type="button"
-            className="editorial-btn-primary h-9 rounded-[14px] px-3 text-[12px] font-semibold tracking-[-0.01em]"
+            className="editorial-btn-primary h-9 w-full rounded-[14px] px-3 text-[12px] font-semibold tracking-[-0.01em]"
             onClick={() => setAddOpen(true)}
           >
             + Adicionar
           </button>
         </div>
 
-        <div className="rounded-[14px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.28)] px-2 py-1.5">
-          <div className="space-y-1.25">
-            <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="flex min-w-max items-center gap-1.5">
+          <div className="rounded-[14px] border border-[rgba(95,111,82,0.08)] bg-[rgba(255,255,255,0.28)] px-2 py-1.5">
+            <div className="space-y-1.25">
+              <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex min-w-max items-center gap-1.5">
                 <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Tipo</span>
                 {styleOptions.map((s) => (
                   <Chip
