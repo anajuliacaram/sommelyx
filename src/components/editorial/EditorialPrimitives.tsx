@@ -180,16 +180,16 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
       className={cn(
         "editorial-kpi h-full",
         isRow
-          ? "min-h-[74px] px-3 py-3 sm:min-h-[78px] sm:px-0 sm:py-0"
+          ? "flex h-full flex-col justify-center gap-2 px-3.5 py-3 sm:px-4 sm:py-4"
           : "flex min-h-[92px] flex-col gap-1.5 px-3.5 py-3.5 sm:min-h-[96px] sm:gap-1.5 sm:px-0 sm:py-0",
       )}
       style={surfaceStyle}
     >
-      <div className={cn("flex min-w-0 items-start gap-1.5", isRow && "items-center")}>
+      <div className={cn("flex min-w-0 items-start gap-1.5", isRow && "items-center max-w-[180px]")}>
         <div
           className={cn(
             "flex shrink-0 items-center justify-center rounded-[10px]",
-            isRow ? "h-[22px] w-[22px] sm:h-[24px] sm:w-[24px]" : "h-[22px] w-[22px] sm:h-[26px] sm:w-[26px]",
+            isRow ? "h-[20px] w-[20px] sm:h-[22px] sm:w-[22px]" : "h-[22px] w-[22px] sm:h-[26px] sm:w-[26px]",
           )}
           style={{ color: accent, background: `${accent}14` }}
         >
@@ -197,7 +197,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         </div>
         <span
           className={cn(
-            "min-w-0 font-medium uppercase leading-[1.2] tracking-[0.04em] text-[rgba(58,51,39,0.58)]",
+            "min-w-0 font-medium uppercase leading-[1.2] tracking-[0.08em] text-[rgba(58,51,39,0.58)]",
             isRow ? "whitespace-normal break-words text-[11px] sm:text-[12px]" : "whitespace-normal break-words text-[11px] sm:text-[12px]",
           )}
         >
@@ -205,12 +205,12 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         </span>
       </div>
       {isRow ? (
-        <div className="mt-1.5 flex min-w-0 items-baseline gap-1.5">
-          <div className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
+        <div className="mt-0.5 flex min-w-0 max-w-[180px] items-baseline gap-1.5">
+          <div className="shrink-0 text-[21px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
             {value}
           </div>
           {sub ? (
-            <span className="min-w-0 max-w-[14ch] truncate text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.62)] sm:text-[13px]">
+            <span className="min-w-0 max-w-[12ch] truncate text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.62)] sm:text-[13px]">
               {sub}
             </span>
           ) : null}

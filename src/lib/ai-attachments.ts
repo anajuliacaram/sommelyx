@@ -29,6 +29,14 @@ export interface PreparedSmartPdfImportAttachment {
   ocrUsed: boolean;
 }
 
+export interface PreparedWineListTextAttachment {
+  text: string;
+  mimeType: string;
+  fileName?: string;
+  previewUrl?: string;
+  sourceType: "image-text" | "pdf-text";
+}
+
 export type AttachmentPrepErrorCode =
   | "INVALID_FILE_TYPE"
   | "FILE_TOO_LARGE"
@@ -39,7 +47,8 @@ export type AttachmentPrepErrorCode =
   | "PDF_PARSE_FAILED"
   | "PDF_TOO_LARGE"
   | "OCR_FAILED"
-  | "EMPTY_EXTRACTION";
+  | "EMPTY_EXTRACTION"
+  | "IMAGE_OCR_EMPTY";
 
 export class AttachmentPrepError extends Error {
   code: AttachmentPrepErrorCode;
@@ -127,6 +136,8 @@ export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi p
       return "Não conseguimos extrair o texto desse arquivo. Tente outra foto ou um PDF mais nítido.";
     case "EMPTY_EXTRACTION":
       return "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.";
+    case "IMAGE_OCR_EMPTY":
+      return "Não foi possível ler a imagem. Tente uma foto mais nítida ou um PDF.";
     default:
       return error instanceof Error && error.message ? error.message : fallback;
   }
@@ -711,6 +722,54 @@ async function extractPdfOcrText(file: File) {
   return text;
 }
 
+async function extractImageOcrText(file: File) {
+  console.info("[AI_PIPELINE] step: image_ocr_started", { fileName: file.name, mimeType: file.type || inferMimeType(file), sizeBytes: file.size });
+  const prepared = await prepareScanImageAttachment(file);
+  trace("ocr_image_prepared", {
+    fileName: file.name,
+    mimeType: prepared.mimeType,
+    imageBase64Length: prepared.imageBase64?.length || 0,
+    previewLength: prepared.previewUrl?.length || 0,
+  });
+
+  let data: any;
+  try {
+    data = await invokeEdgeFunction<any>(
+      "extract-image-text",
+      {
+        imageBase64: prepared.imageBase64,
+        mimeType: prepared.mimeType,
+        fileName: prepared.fileName,
+      },
+      { timeoutMs: 45_000, retries: 1, retryOnAbort: false },
+    );
+  } catch (error) {
+    const err: any = createAttachmentError(
+      ((error as any)?.code as AttachmentPrepErrorCode) || ((error as any)?.name as AttachmentPrepErrorCode) || "OCR_FAILED",
+      (error as any)?.message || "Não foi possível ler a imagem.",
+    );
+    err.status = (error as any)?.status || (error as any)?.statusCode;
+    err.requestId = (error as any)?.requestId || (error as any)?.request_id;
+    throw err;
+  }
+
+  const text = normalizeOcrText(String(data?.text ?? data?.extractedText ?? ""));
+  console.info("[AI_PIPELINE] step: image_ocr_success", { fileName: file.name, textLength: text.length });
+  if (!text || text.length < 20) {
+    throw createAttachmentError("IMAGE_OCR_EMPTY", "Não foi possível ler a imagem. Tente uma foto mais nítida ou um PDF.", {
+      fileName: file.name,
+    });
+  }
+
+  return {
+    text,
+    previewUrl: prepared.previewUrl,
+    mimeType: prepared.mimeType,
+    fileName: prepared.fileName,
+    sourceType: "image-text" as const,
+  };
+}
+
 export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
   const cacheKey = fileCacheKey(file);
   const cached = attachmentPreparationCache.get(cacheKey);
@@ -801,6 +860,43 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
     attachmentPreparationCache.delete(cacheKey);
     throw error;
   }
+}
+
+export async function prepareWineListAnalysisTextAttachment(file: File): Promise<PreparedWineListTextAttachment> {
+  const mimeType = inferMimeType(file);
+  trace("wine_list_text_prepare_started", { fileName: file.name, mimeType, sizeBytes: file.size });
+
+  if (mimeType === "application/pdf") {
+    if (file.size > MAX_PDF_FILE_SIZE_BYTES) {
+      throw createAttachmentError("PDF_TOO_LARGE", "PDF muito grande para processar com segurança.", {
+        sizeBytes: file.size,
+      });
+    }
+
+    const text = normalizeOcrText(await extractPdfOcrText(file).catch((error) => {
+      const err = error instanceof Error ? error : new Error("OCR_FAILED");
+      (err as any).code = (err as any).code || "OCR_FAILED";
+      throw err;
+    }));
+    if (!text || text.length < 20) {
+      throw createAttachmentError("EMPTY_EXTRACTION", "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.", {
+        fileName: file.name,
+      });
+    }
+
+    return {
+      text,
+      mimeType,
+      fileName: file.name,
+      sourceType: "pdf-text",
+    };
+  }
+
+  if (!mimeType.startsWith("image/")) {
+    throw createAttachmentError("INVALID_FILE_TYPE", "Envie uma imagem ou PDF válido.", { mimeType });
+  }
+
+  return await extractImageOcrText(file);
 }
 
 export async function prepareWineLabelScanAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {

@@ -21,16 +21,13 @@ const UserProfileSchema = z.object({
 }).optional();
 
 const BodySchema = z.object({
-  imageBase64: z.string().min(64).optional(),
-  extractedText: z.string().min(20).optional(),
+  imageBase64: z.never().optional(),
+  extractedText: z.string().min(20),
   mimeType: z.string().optional(),
   fileName: z.string().optional(),
   userProfile: UserProfileSchema,
   mode: z.enum(["menu-for-wine"]).optional(),
   wineName: z.string().min(1).max(200).optional(),
-}).refine((value) => Boolean(value.imageBase64 || value.extractedText), {
-  message: "Envie uma imagem ou PDF legível",
-  path: ["imageBase64"],
 }).refine((value) => value.mode !== "menu-for-wine" || Boolean(value.wineName), {
   message: "Informe o vinho para analisar o cardápio",
   path: ["wineName"],
@@ -68,7 +65,6 @@ async function buildAnalysisCacheKey(input: {
   mode?: string;
   wineName?: string;
   extractedText?: string;
-  imageBase64?: string;
   mimeType?: string;
   fileName?: string;
 }) {
@@ -78,7 +74,6 @@ async function buildAnalysisCacheKey(input: {
     mimeType: input.mimeType || "",
     fileName: input.fileName || "",
     extractedTextHash: input.extractedText ? await sha256Hex(input.extractedText) : null,
-    imageBase64Hash: input.imageBase64 ? await sha256Hex(input.imageBase64) : null,
   });
   return await sha256Hex(normalized);
 }
@@ -599,7 +594,7 @@ serve(async (req) => {
 
     if (rawBody?.mimeType && typeof rawBody.mimeType === "string") {
       const mime = rawBody.mimeType as string;
-      const validMime = mime.startsWith("image/") || mime === "application/pdf";
+      const validMime = mime.startsWith("image/") || mime === "application/pdf" || mime.startsWith("text/");
       trace("file_type_detected", { request_id: requestId, mimeType: mime, validMime });
       if (!validMime) {
         return jsonResponse({ success: false, code: "INVALID_FILE_TYPE", message: "Unsupported file type", requestId, retryable: false }, 400);
@@ -607,11 +602,8 @@ serve(async (req) => {
     }
 
     if (typeof rawBody?.imageBase64 === "string") {
-      const clean = rawBody.imageBase64.includes(",") ? rawBody.imageBase64.split(",").pop() || "" : rawBody.imageBase64;
-      trace("image_validated", { request_id: requestId, imageBase64Length: clean.length });
-      if (clean.length > MAX_IMAGE_SIZE * 2) {
-        return jsonResponse({ success: false, code: "FILE_TOO_LARGE", message: "Image too large", requestId, retryable: false }, 413);
-      }
+      trace("image_rejected", { request_id: requestId, reason: "image_payload_not_supported" });
+      return jsonResponse({ success: false, code: "INVALID_IMAGE", message: "Este fluxo aceita apenas texto extraído. Envie o texto da carta.", requestId, retryable: false }, 400);
     }
 
     const parsedBody = BodySchema.safeParse(rawBody);
@@ -619,25 +611,20 @@ serve(async (req) => {
       return jsonResponse({ success: false, code: "INVALID_REQUEST", message: "Invalid request payload", requestId, retryable: false }, 400);
     }
 
-    const { imageBase64, extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
-    trace("request_parsed", { request_id: requestId, mimeType, fileName, mode, wineName, extractedTextLength: extractedText?.length || 0 });
+    const { extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
+    const normalizedText = extractedText.trim();
+    trace("request_parsed", { request_id: requestId, mimeType, fileName, mode, wineName, extractedTextLength: normalizedText.length });
     trace("payload_validation_timing", {
       request_id: requestId,
       durationMs: elapsed(startTime),
-      hasImageBase64: Boolean(imageBase64),
-      hasExtractedText: Boolean(extractedText),
+      hasExtractedText: Boolean(normalizedText),
     });
-
-    const cleanBase64 = imageBase64?.includes(",")
-      ? imageBase64.split(",")[1].replace(/\s/g, "")
-      : imageBase64?.replace(/\s/g, "");
 
     pruneCache(analysisCache);
     const cacheKey = await buildAnalysisCacheKey({
       mode,
       wineName,
-      extractedText,
-      imageBase64: cleanBase64,
+      extractedText: normalizedText,
       mimeType,
       fileName,
     });
@@ -654,8 +641,7 @@ serve(async (req) => {
 
     const isMenuMode = mode === "menu-for-wine";
     const externalPayloadShape = {
-      hasImageBase64: Boolean(cleanBase64),
-      hasExtractedText: Boolean(extractedText),
+      hasExtractedText: Boolean(normalizedText),
       mimeType,
       fileName,
     };
@@ -663,8 +649,7 @@ serve(async (req) => {
     const inputSummary = [
       fileName ? `Arquivo: ${fileName}` : null,
       mimeType ? `Tipo: ${mimeType}` : null,
-      extractedText ? "Entrada principal: texto extraído de PDF/anexo" : null,
-      cleanBase64 ? "Entrada complementar: imagem renderizada/comprimida" : null,
+      normalizedText ? "Entrada principal: texto extraído de OCR" : null,
     ].filter(Boolean).join("\n");
 
     let systemPrompt: string;
@@ -885,32 +870,14 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       toolChoice = { type: "function", function: { name: "return_wine_list_analysis" } };
     }
 
-    const userContent: Array<{ type: "text" | "image_url"; text?: string; image_url?: { url: string } }> = [
+    const userContent: Array<{ type: "text"; text: string }> = [
       { type: "text", text: `${userInstructions}\n\n${inputSummary}` },
     ];
-
-    if (extractedText) {
-      trace("pdf_text_extracted", { request_id: requestId, length: extractedText.length });
-      userContent.push({
-        type: "text",
-        text: `Texto extraído do anexo:\n${extractedText}`,
-      });
-    }
-
-    if (cleanBase64) {
-      trace("ocr_started", { request_id: requestId, imageBase64Length: cleanBase64.length });
-      userContent.push({
-        type: "image_url",
-        image_url: { url: `data:image/jpeg;base64,${cleanBase64}` },
-      });
-    }
 
     trace("pairing_request_started", {
       request_id: requestId,
       mode: isMenuMode ? "menu" : "wine-list",
-      hasText: Boolean(extractedText),
-      hasImage: Boolean(cleanBase64),
-      imageLength: cleanBase64?.length || 0,
+      hasText: Boolean(normalizedText),
     });
 
     // ── Retry loop with anti-genericity validation ──
@@ -945,11 +912,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         input: [{
           role: "user" as const,
           content: Array.isArray(userMessageContent)
-            ? userMessageContent.map((part: any) => {
-              if (part.type === "text") return { type: "input_text" as const, text: String(part.text || "") };
-              if (part.type === "image_url") return { type: "input_image" as const, image_url: String(part.image_url?.url || ""), detail: "auto" as const };
-              return { type: "input_text" as const, text: "" };
-            }).filter((part: any) => part.type === "input_text" ? part.text.trim().length > 0 : Boolean(part.image_url))
+            ? userMessageContent.map((part: { type: "text"; text: string }) => ({ type: "input_text" as const, text: String(part.text || "") })).filter((part: any) => part.text.trim().length > 0)
             : [{ type: "input_text" as const, text: String(userMessageContent || "") }],
         }],
         schema: (tools[0] as any)?.function?.parameters || {},
@@ -975,8 +938,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         }
         if (responseStatus === 422) {
           const fallback = isMenuMode
-            ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText, fileName }))
-            : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText, fileName }));
+            ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
+            : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
           trace("parse_failed", { request_id: requestId, reason: "openai_parse_error_fallback" });
           trace("response_fallback", {
             request_id: requestId,

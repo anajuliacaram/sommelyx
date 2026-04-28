@@ -4,8 +4,8 @@ import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, Utensi
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem } from "@/lib/sommelier-ai";
-import { getAttachmentErrorMessage, prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
+import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
+import { getAttachmentErrorMessage, prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
@@ -180,7 +180,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const [attachmentPreview, setAttachmentPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
   const [results, setResults] = useState<WineListAnalysis | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const [lastAttachment, setLastAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
+  const [lastAttachment, setLastAttachment] = useState<WineListAnalysisTextInput | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [mealQuery, setMealQuery] = useState("");
   const [bodyPreference, setBodyPreference] = useState<BodyPreference>("all");
@@ -207,19 +207,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     onOpenChange(v);
   };
 
-  const runScan = useCallback(async (attachment: AiAnalysisAttachmentPayload) => {
+  const runScan = useCallback(async (attachment: WineListAnalysisTextInput) => {
     setStep("scanning");
     setErrorMsg("");
     try {
       const cellarWines = wines?.filter((w) => w.quantity > 0) || [];
       const profile = cellarWines.length >= 3 ? buildUserProfile(cellarWines) : undefined;
       console.info("[WineListScannerDialog] extraction_started", {
-        hasImageBase64: Boolean(attachment.imageBase64),
-        hasExtractedText: Boolean(attachment.extractedText),
+        hasText: Boolean(attachment.text),
         mimeType: attachment.mimeType,
         fileName: attachment.fileName,
-        extractedTextLength: attachment.extractedText?.length || 0,
-        imageBase64Length: attachment.imageBase64?.length || 0,
+        textLength: attachment.text?.length || 0,
       });
       const data = await analyzeWineList(attachment, profile);
       console.info("[WineListScannerDialog] extraction_completed", {
@@ -278,30 +276,27 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
     setStep("scanning");
     try {
-      const prepared = await prepareAiAnalysisAttachment(file);
+      const prepared = await prepareWineListAnalysisTextAttachment(file);
       console.info("[WineListScannerDialog] attachment_prepared", {
         sourceType: prepared.sourceType,
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
-        extractedTextLength: prepared.extractedText?.length || 0,
-        imageBase64Length: prepared.imageBase64?.length || 0,
+        textLength: prepared.text?.length || 0,
         hasPreview: Boolean(prepared.previewUrl),
       });
-      const payload: AiAnalysisAttachmentPayload = {
-        imageBase64: prepared.imageBase64,
-        extractedText: prepared.extractedText,
+      const payload: WineListAnalysisTextInput = {
+        text: prepared.text,
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       };
       console.info("[WineListScannerDialog] backend_called", {
         function: "analyze-wine-list",
         payloadShape: {
-          hasImageBase64: Boolean(payload.imageBase64),
-          hasExtractedText: Boolean(payload.extractedText),
+          hasText: Boolean(payload.text),
           mimeType: payload.mimeType,
           fileName: payload.fileName,
         },
-        payloadSizeEstimateBytes: payload.imageBase64 ? Math.round((payload.imageBase64.length * 3) / 4) : payload.extractedText?.length || 0,
+        payloadSizeEstimateBytes: payload.text?.length || 0,
       });
 
       setAttachmentPreview({
@@ -510,15 +505,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           )}
 
           {step === "scanning" && (
-            <PairingLoadingState
-              steps={[
-                "Processando imagem…",
-                "Identificando vinhos na carta…",
-                "Analisando estrutura de cada vinho…",
-                "Comparando opções da carta…",
-                "Montando recomendações…",
-              ]}
-            />
+          <PairingLoadingState
+            steps={[
+              "Lendo imagem…",
+              "Interpretando carta…",
+              "Gerando análise…",
+            ]}
+          />
           )}
 
           {step === "results" && results && (

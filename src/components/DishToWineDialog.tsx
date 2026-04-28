@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile, type Recipe, type PairingIntent } from "@/lib/sommelier-ai";
+import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile, type Recipe, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
-import { prepareAiAnalysisAttachment, type AiAnalysisAttachmentPayload } from "@/lib/ai-attachments";
+import { prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
@@ -34,8 +34,6 @@ import {
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
-import { getAttachmentErrorMessage } from "@/lib/ai-attachments";
-
 // Compat helpers kept locally for result rendering
 const matchDot: Record<string, string> = matchDotColor;
 const harmonyLabel = harmonyLabelMap;
@@ -120,8 +118,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
-  const [lastWineListAttachment, setLastWineListAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
-  const [lastMenuAttachment, setLastMenuAttachment] = useState<AiAnalysisAttachmentPayload | null>(null);
+  const [lastWineListAttachment, setLastWineListAttachment] = useState<WineListAnalysisTextInput | null>(null);
+  const [lastMenuAttachment, setLastMenuAttachment] = useState<WineListAnalysisTextInput | null>(null);
   const [wineSearchState, setWineSearchState] = useState("");
   const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
   const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante">("all");
@@ -396,11 +394,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setError(null);
     setScanResults(null);
     try {
-      const prepared = await prepareAiAnalysisAttachment(file);
-      console.info("[DishToWineDialog] file_validated", { step: "wine-list", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, extractedTextLength: prepared.extractedText?.length || 0, imageBase64Length: prepared.imageBase64?.length || 0 });
-      const payload: AiAnalysisAttachmentPayload = {
-        imageBase64: prepared.imageBase64,
-        extractedText: prepared.extractedText,
+      const prepared = await prepareWineListAnalysisTextAttachment(file);
+      console.info("[DishToWineDialog] file_validated", { step: "wine-list", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, textLength: prepared.text?.length || 0 });
+      const payload: WineListAnalysisTextInput = {
+        text: prepared.text,
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       };
@@ -408,14 +405,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         step: "wine-list",
         function: "analyze-wine-list",
         payloadShape: {
-          hasImageBase64: Boolean(payload.imageBase64),
-          hasExtractedText: Boolean(payload.extractedText),
+          hasText: Boolean(payload.text),
           mimeType: payload.mimeType,
           fileName: payload.fileName,
         },
-        payloadSizeEstimateBytes: payload.imageBase64 ? Math.round((payload.imageBase64.length * 3) / 4) : payload.extractedText?.length || 0,
+        payloadSizeEstimateBytes: payload.text?.length || 0,
       });
-      setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
+      setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image-text" });
       setLastWineListAttachment(payload);
       lastRetryRef.current = async () => {
         setStep("scanning");
@@ -480,11 +476,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setError(null);
     setMenuResults(null);
     try {
-      const prepared = await prepareAiAnalysisAttachment(file);
-      console.info("[DishToWineDialog] file_validated", { step: "menu", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, extractedTextLength: prepared.extractedText?.length || 0, imageBase64Length: prepared.imageBase64?.length || 0 });
-      const payload: AiAnalysisAttachmentPayload = {
-        imageBase64: prepared.imageBase64,
-        extractedText: prepared.extractedText,
+      const prepared = await prepareWineListAnalysisTextAttachment(file);
+      console.info("[DishToWineDialog] file_validated", { step: "menu", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, textLength: prepared.text?.length || 0 });
+      const payload: WineListAnalysisTextInput = {
+        text: prepared.text,
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       };
@@ -492,14 +487,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         step: "menu",
         function: "analyze-wine-list",
         payloadShape: {
-          hasImageBase64: Boolean(payload.imageBase64),
-          hasExtractedText: Boolean(payload.extractedText),
+          hasText: Boolean(payload.text),
           mimeType: payload.mimeType,
           fileName: payload.fileName,
         },
-        payloadSizeEstimateBytes: payload.imageBase64 ? Math.round((payload.imageBase64.length * 3) / 4) : payload.extractedText?.length || 0,
+        payloadSizeEstimateBytes: payload.text?.length || 0,
       });
-      setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image" });
+      setPreview({ url: prepared.previewUrl, fileName: prepared.fileName || file.name, isPdf: prepared.sourceType !== "image-text" });
       setLastMenuAttachment(payload);
       lastRetryRef.current = async () => {
         setStep("ext-menu-scanning");
@@ -1230,10 +1224,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {step === "ext-menu-scanning" && (
               <PairingLoadingState
                 steps={[
-                  "Processando imagem…",
-                  "Lendo cardápio com inteligência Sommelyx…",
-                  "Identificando pratos…",
-                  "Avaliando harmonizações…",
+                  "Lendo imagem…",
+                  "Interpretando carta…",
+                  "Gerando análise…",
                 ]}
                 subtitle={`Vinho: ${extWineName}`}
               />
@@ -1427,10 +1420,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {step === "scanning" && (
               <PairingLoadingState
                 steps={[
-                  "Processando imagem…",
-                  "Identificando vinhos na carta…",
-                  "Consultando sommelier…",
-                  "Selecionando os melhores para o prato…",
+                  "Lendo imagem…",
+                  "Interpretando carta…",
+                  "Gerando análise…",
                 ]}
                 subtitle={`Prato: ${dish}`}
               />
