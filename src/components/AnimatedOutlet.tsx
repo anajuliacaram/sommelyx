@@ -1,4 +1,4 @@
-import { useOutlet } from "react-router-dom";
+import { useLocation, useOutlet } from "react-router-dom";
 
 /**
  * Renders the current <Outlet> inside AnimatePresence
@@ -6,6 +6,11 @@ import { useOutlet } from "react-router-dom";
  */
 export function AnimatedOutlet() {
   const outlet = useOutlet();
+  const location = useLocation();
 
-  return outlet;
+  return (
+    <div key={location.pathname} className="page-transition-surface">
+      {outlet}
+    </div>
+  );
 }

@@ -64,7 +64,6 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 const AnimatedRoutes = () => {
   const location = useLocation();
   const topKey = location.pathname.startsWith("/dashboard") ? "/dashboard" : location.pathname;
-  const isLegalPage = ["/termos-de-uso", "/politica-de-privacidade", "/assinatura-e-cobranca"].includes(location.pathname);
 
   const routes = (
     <Routes location={location}>
@@ -106,11 +105,11 @@ const AnimatedRoutes = () => {
         </Routes>
   );
 
-  if (isLegalPage) {
-    return routes;
-  }
-
-  return routes;
+  return (
+    <div key={topKey} className="page-transition-surface">
+      {routes}
+    </div>
+  );
 };
 
 const App = () => (

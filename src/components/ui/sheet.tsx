@@ -19,7 +19,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-180 data-[state=closed]:duration-150",
       className,
     )}
     {...props}
@@ -29,7 +29,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 p-3.5 sm:p-5 transition ease-[cubic-bezier(0.22,1,0.36,1)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-250 data-[state=open]:duration-300",
+  "fixed z-50 gap-4 p-3.5 sm:p-5 transition ease-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=open]:duration-180",
   {
     variants: {
       side: {
@@ -68,7 +68,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute right-3.5 top-3.5 z-50 flex min-h-11 min-w-11 h-11 w-11 items-center justify-center rounded-full bg-black/5 text-[#6B6B6B] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:scale-[1.05] hover:bg-black/10 hover:text-[#1A1A1A] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20 disabled:pointer-events-none">
+        <SheetPrimitive.Close className="absolute right-3.5 top-3.5 z-50 flex min-h-11 min-w-11 h-11 w-11 items-center justify-center rounded-full bg-black/5 text-[#6B6B6B] transition-all duration-180 ease-out hover:-translate-y-px hover:scale-[1.03] hover:bg-black/10 hover:text-[#1A1A1A] active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20 disabled:pointer-events-none">
           <X className="h-4.5 w-4.5" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>

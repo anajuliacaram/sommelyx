@@ -6,7 +6,7 @@ import { Loader2 } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:scale-[1.01] active:scale-[0.98] font-medium tracking-tight",
+  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer select-none will-change-transform transition-all duration-200 ease-out hover:-translate-y-px hover:scale-[1.01] hover:shadow-[0_12px_24px_-20px_rgba(0,0,0,0.22)] active:scale-[0.97] font-medium tracking-tight",
   {
     variants: {
       variant: {

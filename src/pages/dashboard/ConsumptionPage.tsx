@@ -48,7 +48,7 @@ function FilterPill({
     <button
       type="button"
       onClick={onClick}
-      className="h-8.5 rounded-full px-3.5 text-[11.5px] font-medium tracking-[-0.005em] transition-all whitespace-nowrap"
+      className="h-8.5 rounded-full px-3.5 text-[11.5px] font-medium tracking-[-0.005em] transition-all duration-150 ease-out whitespace-nowrap hover:-translate-y-px hover:scale-[1.01] active:scale-[0.97]"
       style={{
         background: active ? "rgba(123,30,43,0.10)" : "rgba(255,255,255,0.82)",
         color: active ? "#7B1E2B" : "#6B645C",
@@ -297,7 +297,7 @@ export default function ConsumptionPage() {
       </EditorialCard>
 
       {/* Filtros inteligentes */}
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <span className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5F7F52]">
             Período
