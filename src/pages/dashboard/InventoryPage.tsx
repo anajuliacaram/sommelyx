@@ -878,37 +878,37 @@ export default function InventoryPage() {
                                 return (
                                     <div
                                         key={wine.id}
-                                        className="group rounded-[18px] border border-white/18 bg-white/72 p-3 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]"
+                                        className="group min-w-0 overflow-hidden rounded-[18px] border border-white/18 bg-white/72 p-3 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]"
                                     >
-                                        <div className="flex items-start gap-2.5">
+                                        <div className="flex min-w-0 items-start gap-2">
                                             <WineLabelPreview
                                                 wine={wine}
                                                 alt={wine.name}
                                                 compact
-                                                className="h-14 w-10 shrink-0 rounded-[14px]"
+                                                className="h-16 w-12 shrink-0 rounded-[8px]"
                                                 imageClassName="h-full w-full object-cover"
                                             />
 
-                                            <div className="min-w-0 flex-1 space-y-1.25">
+                                            <div className="min-w-0 flex-1 space-y-1">
                                                 <button
                                                     type="button"
-                                                    className="w-full text-left"
+                                                    className="w-full min-w-0 text-left"
                                                     onClick={() => {
                                                         setEditingWine(wine);
                                                         setEditWineOpen(true);
                                                     }}
                                                 >
-                                                    <p className="truncate text-[13px] font-semibold leading-tight tracking-[-0.03em] text-foreground">
+                                                    <p className="truncate text-[12px] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground">
                                                         {wine.name}
                                                     </p>
-                                                    <p className="mt-0.5 truncate text-[10.5px] font-medium text-muted-foreground/80">
+                                                    <p className="mt-0.5 truncate text-[10px] font-medium text-muted-foreground/80">
                                                         {[wine.vintage ? `Safra ${wine.vintage}` : "Safra NV", wine.country || "País não informado"].join(" · ")}
                                                     </p>
-                                                    <div className="mt-1.5 flex flex-wrap gap-1">
+                                                    <div className="mt-1 flex min-w-0 flex-wrap gap-1">
                                                         {wine.style ? (
                                                             <Badge
                                                                 variant="secondary"
-                                                                className="h-5 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] px-2 text-[9px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--primary))]"
+                                                                className="h-5 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] px-2 text-[8.5px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--primary))]"
                                                             >
                                                                 {wine.style.charAt(0).toUpperCase() + wine.style.slice(1)}
                                                             </Badge>
@@ -916,7 +916,7 @@ export default function InventoryPage() {
                                                         <Badge
                                                             variant="secondary"
                                                             className={cn(
-                                                                "h-5 rounded-full px-2 text-[9px] font-bold uppercase tracking-[0.12em]",
+                                                                "h-5 rounded-full px-2 text-[8.5px] font-bold uppercase tracking-[0.12em]",
                                                                 wine.quantity > 0
                                                                     ? "border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))]"
                                                                     : "border border-[rgba(196,137,52,0.16)] bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)]",
@@ -927,31 +927,31 @@ export default function InventoryPage() {
                                                     </div>
                                                 </button>
 
-                                                <div className="mt-2.5 flex items-center justify-between gap-2.5">
-                                                    <div className="flex items-center gap-2">
+                                                <div className="mt-2 flex items-center justify-between gap-2">
+                                                    <div className="flex min-w-0 items-center gap-1.5">
                                                         {renderStockVisual(wine.quantity)}
                                                         {wine.quantity > 0 && wine.quantity <= 2 ? (
-                                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-destructive/80">Baixo</span>
+                                                            <span className="text-[8px] font-semibold uppercase tracking-wider text-destructive/80">Baixo</span>
                                                         ) : null}
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-[13px] font-semibold tracking-[-0.02em] text-foreground">
+                                                    <div className="min-w-0 text-left leading-tight">
+                                                        <p className="truncate text-[11px] font-semibold tracking-[-0.02em] text-foreground">
                                                             Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                                                         </p>
-                                                        <p className="text-[11px] font-medium text-foreground/72">
+                                                        <p className="truncate text-[10px] font-medium text-foreground/72">
                                                             {purchaseCost != null
-                                                                ? `Custo: R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                                                ? `Custo R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
                                                                 : "Custo não informado"}
                                                         </p>
                                                     </div>
                                                 </div>
 
                                                 <div className="mt-2 flex items-center justify-between gap-2">
-                                                    <div className="flex items-center gap-1.5">
+                                                    <div className="flex min-w-0 items-center gap-1.5">
                                                         {marginPct != null ? (
                                                             <Badge
                                                                 className={cn(
-                                                                    "h-5 rounded-full border px-2 text-[9px] font-bold",
+                                                                    "h-5 rounded-full border px-2 text-[8.5px] font-bold",
                                                                     unitMargin != null && unitMargin >= 0
                                                                         ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                                                                         : "border-amber-200 bg-amber-50 text-amber-700",
@@ -963,11 +963,11 @@ export default function InventoryPage() {
                                                     </div>
                                                 </div>
 
-                                                <div className="mt-2.5 grid grid-cols-2 gap-2">
+                                                <div className="mt-2 flex items-center gap-2">
                                                     <Button
                                                         type="button"
                                                         variant="outline"
-                                                        className="h-[34px] rounded-[10px] text-[13px] font-bold"
+                                                        className="h-9 flex-1 rounded-[10px] px-2.5 text-[13px] font-bold"
                                                         disabled={stockBusyWineId === wine.id}
                                                         onClick={() => void handleQuickStock(wine.id, 1)}
                                                     >
@@ -977,7 +977,7 @@ export default function InventoryPage() {
                                                     <Button
                                                         type="button"
                                                         variant="outline"
-                                                        className="h-[34px] rounded-[10px] text-[13px] font-bold text-destructive border-destructive/20 hover:bg-destructive/5"
+                                                        className="h-9 flex-1 rounded-[10px] px-2.5 text-[13px] font-bold text-destructive border-destructive/20 hover:bg-destructive/5"
                                                         disabled={stockBusyWineId === wine.id}
                                                         onClick={() => void handleQuickStock(wine.id, -1)}
                                                     >
