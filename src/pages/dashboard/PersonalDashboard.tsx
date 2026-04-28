@@ -294,6 +294,7 @@ export default function PersonalDashboard() {
                 label="Garrafas"
                 value={totalBottles}
                 sub="em estoque"
+                layout="row"
               />
               <EditorialKpiCard
                 icon={<Star className="h-4 w-4" />}
@@ -301,6 +302,7 @@ export default function PersonalDashboard() {
                 label="Valor estimado"
                 value={formatCurrencyShort(totalValue)}
                 sub="atualizado hoje"
+                layout="row"
               />
               <EditorialKpiCard
                 icon={<GlassWater className="h-4 w-4" />}
@@ -308,6 +310,7 @@ export default function PersonalDashboard() {
                 label="Beber agora"
                 value={drinkNow}
                 sub="em janela ideal"
+                layout="row"
               />
               <EditorialKpiCard
                 icon={<Clock className="h-4 w-4" />}
@@ -315,6 +318,7 @@ export default function PersonalDashboard() {
                 label="Em guarda"
                 value={inGuard}
                 sub="aguardando"
+                layout="row"
               />
             </div>
           </EditorialCard>
