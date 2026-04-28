@@ -101,23 +101,23 @@ export function MultiSelectDropdown({
                 align="start"
                 avoidCollisions={false}
                 sideOffset={6}
-                className="w-[92vw] max-w-[280px] sm:w-[260px] p-2.5 rounded-[18px] shadow-[0_18px_40px_-22px_rgba(58,51,39,0.18)] bg-[rgba(255,255,255,0.97)] border border-[rgba(95,111,82,0.08)] backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1"
+                className="w-[92vw] max-w-[280px] sm:w-[260px] p-2.5 rounded-[18px] bg-white/[0.88] backdrop-blur-2xl border border-black/5 shadow-[0_24px_56px_-28px_rgba(58,51,39,0.28)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1"
             >
                 <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-1.5 px-0.5">
                         {showSearch && (
                             <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[rgba(58,51,39,0.36)]" />
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-500" />
                                 <Input
                                     placeholder={searchPlaceholder}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="h-8 rounded-[13px] border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.82)] pl-8 text-[12px] text-[#2A241D] placeholder:text-[rgba(58,51,39,0.38)] focus:border-[rgba(95,111,82,0.16)] focus:ring-[rgba(95,111,82,0.14)] focus:shadow-none"
+                                    className="h-8 rounded-[13px] border-black/5 bg-white/95 pl-8 text-[12px] text-neutral-900 placeholder:text-neutral-500 focus:border-black/10 focus:ring-black/5 focus:shadow-none"
                                 />
                             </div>
                         )}
                         {!showSearch ? <div className="flex-1" /> : null}
-                        <div className="flex shrink-0 rounded-full border border-[rgba(95,111,82,0.10)] bg-[rgba(255,255,255,0.82)] p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                        <div className="flex shrink-0 rounded-full border border-black/5 bg-white/92 p-0.5 shadow-[0_1px_3px_rgba(58,51,39,0.08)]">
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -125,7 +125,7 @@ export function MultiSelectDropdown({
                                 onClick={() => setSortMode("alpha")}
                                 className={cn(
                                     "h-6 w-6 rounded-full transition-[background-color,color] duration-150",
-                                    sortMode === "alpha" ? "bg-[rgba(95,111,82,0.14)] text-[#32422B]" : "text-[rgba(58,51,39,0.42)] hover:text-[#2A241D]"
+                                    sortMode === "alpha" ? "bg-primary/10 text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
                                 )}
                                 title="Ordem alfabética"
                             >
@@ -139,7 +139,7 @@ export function MultiSelectDropdown({
                                 onClick={() => setSortMode("count")}
                                 className={cn(
                                     "h-6 w-6 rounded-full transition-[background-color,color] duration-150",
-                                    sortMode === "count" ? "bg-[rgba(95,111,82,0.14)] text-[#32422B]" : "text-[rgba(58,51,39,0.42)] hover:text-[#2A241D]"
+                                    sortMode === "count" ? "bg-primary/10 text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
                                 )}
                                 title="Ordenar por quantidade"
                             >
@@ -161,38 +161,38 @@ export function MultiSelectDropdown({
                                     return (
                                         <div
                                             key={opt.value}
-                                            className={cn(
-                                                "flex items-center gap-2 px-2.5 py-1.5 rounded-[12px] cursor-pointer transition-colors duration-150",
-                                                isChecked
-                                                    ? "bg-[rgba(123,30,43,0.06)] text-[#7B1E2B]"
-                                                    : "text-[#3A3327] hover:bg-black/[0.03]"
-                                            )}
-                                            onClick={() => onChange(opt.value)}
-                                        >
+                                        className={cn(
+                                            "flex items-center gap-2 px-2.5 py-2 rounded-[12px] cursor-pointer transition-colors duration-150",
+                                            isChecked
+                                                ? "bg-primary/10 text-neutral-900"
+                                                : "text-neutral-900 hover:bg-black/5"
+                                        )}
+                                        onClick={() => onChange(opt.value)}
+                                    >
+                                        <span className={cn(
+                                            "text-[12.5px] leading-normal flex-1 truncate",
+                                            isChecked ? "font-semibold" : "font-medium"
+                                        )}>
+                                            {opt.label}
+                                        </span>
+                                        {opt.count !== undefined && (
                                             <span className={cn(
-                                                "text-[12.5px] leading-normal flex-1 truncate",
-                                                isChecked ? "font-semibold" : "font-medium"
-                                            )}>
-                                                {opt.label}
-                                            </span>
-                                            {opt.count !== undefined && (
-                                                <span className={cn(
                                                     "min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[9.5px] font-medium",
                                                     isChecked
-                                                        ? "bg-[rgba(123,30,43,0.10)] text-[#7B1E2B]"
-                                                        : "bg-[rgba(95,111,82,0.07)] text-[rgba(58,51,39,0.54)]"
+                                                        ? "bg-primary/10 text-neutral-900"
+                                                        : "bg-black/5 text-neutral-700"
                                                 )}>
-                                                    {opt.count}
-                                                </span>
+                                                {opt.count}
+                                            </span>
+                                        )}
+                                        <span
+                                            className={cn(
+                                                "flex h-4 w-4 items-center justify-center rounded-full transition-opacity duration-150",
+                                                isChecked
+                                                    ? "bg-primary/10 text-neutral-900 opacity-100"
+                                                    : "opacity-0"
                                             )}
-                                            <span
-                                                className={cn(
-                                                    "flex h-4 w-4 items-center justify-center rounded-full transition-opacity duration-150",
-                                                    isChecked
-                                                        ? "bg-[rgba(123,30,43,0.12)] text-[#7B1E2B] opacity-100"
-                                                        : "opacity-0"
-                                                )}
-                                                aria-hidden="true"
+                                            aria-hidden="true"
                                             >
                                                 <Check className="h-3 w-3" strokeWidth={2.5} />
                                             </span>
@@ -204,10 +204,10 @@ export function MultiSelectDropdown({
                     </ScrollArea>
 
                     {hasSelection && (
-                        <div className="border-t border-[rgba(95,111,82,0.08)] px-0.5 pt-1">
+                        <div className="border-t border-black/5 px-0.5 pt-1">
                             <Button
                                 variant="ghost"
-                                className="h-7 w-full justify-center rounded-[10px] text-[11px] font-semibold text-[#7B1E2B] transition-colors duration-150 hover:bg-[rgba(123,30,43,0.06)] hover:text-[#5A1420]"
+                                className="h-7 w-full justify-center rounded-[10px] text-[11px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/10 hover:text-[#5A1420]"
                                 onClick={() => {
                                     onClear()
                                     setOpen(false)
