@@ -36,7 +36,7 @@ export function PremiumEmptyState({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "editorial-hero flex flex-col items-center justify-center py-16 lg:py-20 px-8 text-center relative",
+                "editorial-hero flex flex-col items-center justify-center py-12 lg:py-16 px-6 text-center relative",
                 className
             )}
         >
@@ -45,18 +45,18 @@ export function PremiumEmptyState({
             <motion.div
                 animate={reducedMotion ? {} : { y: [-2, 2, -2] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="relative flex items-center justify-center w-16 h-16 mb-8"
+                className="relative flex items-center justify-center w-14 h-14 mb-6"
             >
                 <div className="absolute inset-0 bg-copper/[0.08] rounded-full blur-lg pointer-events-none" />
-                <div className="relative z-10 w-12 h-12 rounded-lg bg-[hsl(0_0%_100%/0.08)] border border-[hsl(0_0%_100%/0.10)] flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-copper" strokeWidth={1.5} />
+                <div className="relative z-10 w-11 h-11 rounded-lg bg-[hsl(0_0%_100%/0.08)] border border-[hsl(0_0%_100%/0.10)] flex items-center justify-center">
+                    <Icon className="w-4.5 h-4.5 text-copper" strokeWidth={1.5} />
                 </div>
             </motion.div>
 
-            <h3 className="font-serif text-[22px] font-semibold text-[hsl(var(--cream-warm))] tracking-[-0.01em] mb-2 relative z-10">
+            <h3 className="font-serif text-[20px] font-semibold text-[hsl(var(--cream-warm))] tracking-[-0.01em] mb-1.5 relative z-10">
                 {title}
             </h3>
-            <p className="text-[14px] text-[hsl(var(--cream-warm)/0.6)] max-w-[340px] leading-relaxed mb-8 relative z-10">
+            <p className="text-[13px] text-[hsl(var(--cream-warm)/0.62)] max-w-[340px] leading-relaxed mb-6 relative z-10">
                 {description}
             </p>
 

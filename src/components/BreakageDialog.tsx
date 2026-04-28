@@ -152,7 +152,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                         {filteredWines.length === 0 ? (
                           <div className="px-3 py-6 text-center">
                             <p className="text-[11px] text-muted-foreground">
-                              {winesInStock.length === 0 ? "Nenhum vinho em estoque" : "Nenhum vinho encontrado"}
+                              {winesInStock.length === 0 ? "Nenhum vinho disponível no estoque" : "Nenhum vinho encontrado"}
                             </p>
                           </div>
                         ) : (

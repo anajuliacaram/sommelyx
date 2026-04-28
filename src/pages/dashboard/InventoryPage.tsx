@@ -847,7 +847,7 @@ export default function InventoryPage() {
                     <PremiumEmptyState
                         icon={Search}
                         title="Nenhum vinho encontrado"
-                        description="Ajuste os filtros ou limpe a busca para ver os resultados."
+                        description="Ajuste a busca ou os filtros para encontrar o vinho que você procura."
                         secondaryAction={{ label: "Limpar filtros", onClick: clearAllFilters }}
                         className="rounded-none border-0 bg-transparent shadow-none"
                     />

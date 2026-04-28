@@ -1044,7 +1044,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           Nenhum vinho encontrado na sua adega
                         </p>
                         <p className="text-[11px] text-muted-foreground/45">
-                          Tente outro nome, produtor ou uva
+                          Tente outro nome, produtor, uva ou região
                         </p>
                       </div>
                     )}
@@ -1053,10 +1053,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       <div className="text-center py-10 space-y-2">
                         <WineIcon className="h-7 w-7 text-muted-foreground/30 mx-auto" />
                         <p className="text-[13px] font-medium text-muted-foreground/70">
-                          Sua adega está vazia no momento
+                          Você ainda não adicionou vinhos na sua adega
                         </p>
                         <p className="text-[11px] text-muted-foreground/45">
-                          Adicione vinhos para usar a harmonização
+                          Adicione sua primeira garrafa para usar a harmonização
                         </p>
                       </div>
                     )}

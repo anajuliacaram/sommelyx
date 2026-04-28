@@ -263,8 +263,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 )}
                 {filteredWines.length === 0 ? (
                   <div className="px-4 py-8 text-center">
-                    <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado</p>
-                    <p className="text-xs text-black/50 mt-1">Use a busca ou ajuste os filtros</p>
+                    <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado na adega</p>
+                    <p className="text-xs text-black/50 mt-1">Use a busca ou ajuste os filtros para localizar a garrafa certa</p>
                   </div>
                 ) : (
                   filteredWines.map((w) => {

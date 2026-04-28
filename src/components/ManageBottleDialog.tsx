@@ -552,10 +552,10 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             {filteredWines.length === 0 ? (
                               <div className="px-4 py-8 text-center">
                                 <p className="text-[12px] text-[#3A3327]/55">
-                                  {baseWines.length === 0 ? "Nenhum vinho cadastrado" : "Nenhum vinho encontrado"}
+                                  {baseWines.length === 0 ? "Você ainda não cadastrou vinhos" : "Nenhum vinho encontrado"}
                                 </p>
                                 {baseWines.length > 0 && (
-                                  <p className="text-[11px] text-[#3A3327]/45 mt-1">Use a busca ou ajuste os filtros</p>
+                                  <p className="text-[11px] text-[#3A3327]/45 mt-1">Use a busca ou ajuste os filtros para localizar a garrafa certa</p>
                                 )}
                               </div>
                             ) : (

@@ -522,7 +522,7 @@ export default function CommercialDashboard() {
           <PremiumEmptyState
             icon={Package}
             title="Controle total do seu estoque"
-            description="Cadastre seus primeiros produtos para acompanhar valor, giro e níveis de estoque em tempo real."
+            description="Cadastre seus primeiros vinhos para acompanhar valor, giro e níveis de estoque em tempo real."
             primaryAction={{
               label: "Cadastrar produto",
               onClick: () => setAddOpen(true),
@@ -536,8 +536,8 @@ export default function CommercialDashboard() {
         ) : totalBottles === 0 && isFiltered ? (
             <div className="glass-card p-8 sm:p-10 text-center space-y-3">
             <Filter className="h-8 w-8 text-muted-foreground/30 mx-auto" />
-            <p className="text-[15px] font-semibold text-foreground/70">Nenhum item encontrado com esses filtros</p>
-            <p className="text-[13px] text-muted-foreground/50">Tente remover um filtro ou ajuste a seleção</p>
+            <p className="text-[15px] font-semibold text-foreground/70">Nenhum vinho encontrado com esses filtros</p>
+            <p className="text-[13px] text-muted-foreground/50">Tente remover um filtro ou ajuste a seleção para ver mais resultados</p>
             <Button variant="ghost" size="sm" onClick={clearFilters} className="mt-2">
               Limpar filtros
             </Button>
@@ -622,7 +622,7 @@ export default function CommercialDashboard() {
                     <div className="grid gap-2">
                       {lowStockRows.length === 0 ? (
                         <div className="rounded-2xl border border-border/20 bg-muted/8 py-6 text-center sm:py-8">
-                          <p className="text-[13px] text-muted-foreground/40 font-medium">Nenhum item com estoque baixo</p>
+                          <p className="text-[13px] text-muted-foreground/40 font-medium">Nenhum vinho com estoque baixo</p>
                         </div>
                       ) : (
                         lowStockRows.map((w) => (

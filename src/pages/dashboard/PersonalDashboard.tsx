@@ -446,15 +446,15 @@ export default function PersonalDashboard() {
                       color: "rgba(58,51,39,0.7)",
                     }}
                   >
-                    {totalBottles === 0 ? "Sua adega está vazia" : "Nenhum vinho encontrado"}
+                    {totalBottles === 0 ? "Você ainda não adicionou vinhos" : "Nenhum vinho encontrado"}
                   </p>
                   <p
                     className="mx-auto mt-1.5 max-w-[320px] text-[12px]"
                     style={{ color: "rgba(58,51,39,0.48)" }}
                   >
                     {totalBottles === 0
-                      ? "Adicione seu primeiro vinho para começar a acompanhar estoque e janelas de consumo."
-                      : "Ajuste busca ou filtros para ver mais resultados."}
+                      ? "Comece adicionando sua primeira garrafa para acompanhar estoque, consumo e valor."
+                      : "Ajuste busca ou filtros para encontrar um vinho específico."}
                   </p>
                   {totalBottles === 0 && (
                     <button

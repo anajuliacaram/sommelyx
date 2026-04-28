@@ -285,7 +285,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                       <ScrollArea className="max-h-[150px] rounded-xl border border-border/50">
                         {filteredWines.length === 0 ? (
                           <div className="px-3 py-4 text-center">
-                            <p className="text-[11px] text-muted-foreground">Nenhum vinho encontrado</p>
+                            <p className="text-[11px] text-muted-foreground">Nenhum vinho encontrado na adega</p>
                           </div>
                         ) : (
                           <div className="divide-y divide-border/30">
@@ -330,7 +330,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                 {/* Added items */}
                 {items.length === 0 && !pickingItem && (
                   <div className="rounded-xl border border-dashed border-border/60 px-3 py-6 text-center">
-                    <p className="text-[11px] text-muted-foreground">Nenhum item adicionado</p>
+                    <p className="text-[11px] text-muted-foreground">Nenhum item adicionado à venda</p>
                   </div>
                 )}
 
