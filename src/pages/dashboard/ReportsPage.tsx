@@ -3,6 +3,7 @@ import { Wine, DollarSign, ShoppingCart, Tag, Package, CalendarDays } from "@/ic
 import { useWineMetrics } from "@/hooks/useWines";
 import { useSales } from "@/hooks/useBusinessData";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EditorialKpiCard } from "@/components/editorial/EditorialPrimitives";
 import {
   BarChart,
   Bar,
@@ -129,19 +130,22 @@ export default function ReportsPage() {
       </Tabs>
 
       <div className={tab === "estoque" ? "space-y-3" : "hidden space-y-3"}>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-3">
             {[
-              { label: "Garrafas", value: totalBottles, icon: Wine },
-              { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign },
-              { label: "Rótulos", value: wines.filter((w) => w.quantity > 0).length, icon: Tag },
+              { label: "Garrafas", value: totalBottles, icon: Wine, color: "#8F2D56", detail: "em estoque" },
+              { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "#C9A86A", detail: "atualizado hoje" },
+              { label: "Rótulos", value: wines.filter((w) => w.quantity > 0).length, icon: Tag, color: "#C44569", detail: "cadastrados" },
             ].map((m, i) => (
-              <div key={m.label} className="chart-surface p-2.5">
-                <div className="w-5 h-5 rounded-md flex items-center justify-center mb-1 bg-primary/8">
-                  <m.icon className="h-2.5 w-2.5 text-primary" />
-                </div>
-                <p className="text-base font-bold font-sans tabular-nums text-foreground">{m.value}</p>
-                <p className="text-[9px] font-semibold text-muted-foreground/70 uppercase tracking-[0.06em]">{m.label}</p>
-              </div>
+              <EditorialKpiCard
+                key={m.label}
+                icon={<m.icon className="h-3 w-3" style={{ color: m.color }} />}
+                label={m.label}
+                value={m.value}
+                sub={m.detail}
+                accent={m.color}
+                layout="row"
+                className="rounded-[18px] !p-3"
+              />
             ))}
           </div>
 
@@ -194,19 +198,22 @@ export default function ReportsPage() {
       </div>
 
       <div className={tab === "vendas" ? "space-y-3" : "hidden space-y-3"}>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-3">
             {[
-              { label: "Faturamento", value: `R$ ${salesRevenue.toLocaleString("pt-BR")}`, icon: DollarSign },
-              { label: "Unidades", value: salesUnits, icon: Package },
-              { label: "Vendas", value: sales.length, icon: ShoppingCart },
+              { label: "Faturamento", value: `R$ ${salesRevenue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "#C9A86A", detail: "bruto" },
+              { label: "Unidades", value: salesUnits, icon: Package, color: "#5F7F52", detail: "vendidas" },
+              { label: "Vendas", value: sales.length, icon: ShoppingCart, color: "#8F2D56", detail: "registradas" },
             ].map((m, i) => (
-              <div key={m.label} className="chart-surface p-2.5">
-                <div className="w-5 h-5 rounded-md flex items-center justify-center mb-1 bg-primary/8">
-                  <m.icon className="h-2.5 w-2.5 text-primary" />
-                </div>
-                <p className="text-base font-bold font-sans tabular-nums text-foreground">{m.value}</p>
-                <p className="text-[9px] font-semibold text-muted-foreground/70 uppercase tracking-[0.06em]">{m.label}</p>
-              </div>
+              <EditorialKpiCard
+                key={m.label}
+                icon={<m.icon className="h-3 w-3" style={{ color: m.color }} />}
+                label={m.label}
+                value={m.value}
+                sub={m.detail}
+                accent={m.color}
+                layout="row"
+                className="rounded-[18px] !p-3"
+              />
             ))}
           </div>
 

@@ -591,34 +591,53 @@ export default function InventoryPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-4">
-                    <PremiumKpiCard className="min-h-[88px] rounded-[18px] !p-3 md:min-h-[122px] md:rounded-[22px] md:!p-5">
-                        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
+                    <PremiumKpiCard className="min-h-[78px] rounded-[18px] !p-3 md:min-h-[82px] md:rounded-[22px] md:!p-4">
+                        <div className="flex items-start gap-1.5">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] leading-[1.15] text-muted-foreground/70">
                             Rótulos cadastrados
-                        </p>
-                        <div className="mt-2.5 flex items-end justify-between gap-2.5 md:mt-4 md:gap-3">
-                            <p className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-foreground tabular-nums md:text-[28px] md:font-black md:tracking-[-0.05em]">{summary.labels}</p>
-                            <Tag className="h-4 w-4 text-primary/48 md:h-5 md:w-5" />
+                            </p>
+                            <Tag className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/48 md:h-4 md:w-4" />
+                        </div>
+                        <div className="mt-1.5 flex min-w-0 items-baseline gap-2 md:mt-2">
+                            <p className="text-[22px] font-semibold leading-[1.15] tracking-[-0.04em] text-foreground tabular-nums md:text-[26px] md:font-semibold">
+                                {summary.labels}
+                            </p>
+                            <span className="min-w-0 truncate text-[13px] font-medium leading-[1.2] text-foreground/68">
+                                rótulos
+                            </span>
                         </div>
                     </PremiumKpiCard>
-                    <PremiumKpiCard className="min-h-[88px] rounded-[18px] !p-3 md:min-h-[122px] md:rounded-[22px] md:!p-5">
-                        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
+                    <PremiumKpiCard className="min-h-[78px] rounded-[18px] !p-3 md:min-h-[82px] md:rounded-[22px] md:!p-4">
+                        <div className="flex items-start gap-1.5">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] leading-[1.15] text-muted-foreground/70">
                             Garrafas em estoque
-                        </p>
-                        <div className="mt-2.5 flex items-end justify-between gap-2.5 md:mt-4 md:gap-3">
-                            <p className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-foreground tabular-nums md:text-[28px] md:font-black md:tracking-[-0.05em]">{summary.bottles}</p>
-                            <Package className="h-4 w-4 text-primary/48 md:h-5 md:w-5" />
+                            </p>
+                            <Package className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/48 md:h-4 md:w-4" />
+                        </div>
+                        <div className="mt-1.5 flex min-w-0 items-baseline gap-2 md:mt-2">
+                            <p className="text-[22px] font-semibold leading-[1.15] tracking-[-0.04em] text-foreground tabular-nums md:text-[26px] md:font-semibold">
+                                {summary.bottles}
+                            </p>
+                            <span className="min-w-0 truncate text-[13px] font-medium leading-[1.2] text-foreground/68">
+                                garrafas
+                            </span>
                         </div>
                     </PremiumKpiCard>
-                    <PremiumKpiCard className="col-span-2 min-h-[88px] rounded-[18px] !p-3 md:col-span-1 md:min-h-[122px] md:rounded-[22px] md:!p-5">
-                        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
+                    <PremiumKpiCard className="col-span-2 min-h-[78px] rounded-[18px] !p-3 md:col-span-1 md:min-h-[82px] md:rounded-[22px] md:!p-4">
+                        <div className="flex items-start gap-1.5">
+                            <p className="whitespace-normal text-[11px] font-semibold uppercase tracking-[0.08em] leading-[1.15] text-muted-foreground/70">
                             Valor total
-                        </p>
-                        <div className="mt-2.5 flex items-end justify-between gap-2.5 md:mt-4 md:gap-3">
-                            <p className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-foreground tabular-nums md:text-[28px] md:font-black md:tracking-[-0.05em]">
+                            </p>
+                            <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/48 md:h-4 md:w-4" />
+                        </div>
+                        <div className="mt-1.5 flex min-w-0 items-baseline gap-2 md:mt-2">
+                            <p className="text-[22px] font-semibold leading-[1.15] tracking-[-0.04em] text-foreground tabular-nums md:text-[26px] md:font-semibold">
                                 R$ {summary.totalValue.toLocaleString("pt-BR")}
                             </p>
-                            <Star className="h-4 w-4 text-primary/48 md:h-5 md:w-5" />
+                            <span className="min-w-0 truncate text-[13px] font-medium leading-[1.2] text-foreground/68">
+                                em estoque
+                            </span>
                         </div>
                     </PremiumKpiCard>
                 </div>

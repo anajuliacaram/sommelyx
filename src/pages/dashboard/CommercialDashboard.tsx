@@ -38,6 +38,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { EditorialKpiCard } from "@/components/editorial/EditorialPrimitives";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -320,10 +321,10 @@ export default function CommercialDashboard() {
 
   const kpis = useMemo(
     () => [
-      { label: "Rótulos", value: `${uniqueLabels}`, detail: "Em estoque", icon: Wine },
-      { label: "Garrafas", value: `${totalBottles}`, detail: "Total disponível", icon: Layers },
-      { label: "Valor em estoque", value: formatBRL(totalValue), detail: "Investimento", icon: DollarSign },
-      { label: "Reposição", value: `${lowStock}`, detail: lowStock > 0 ? "Atenção" : "Estoque saudável", icon: AlertTriangle },
+      { label: "Rótulos", value: `${uniqueLabels}`, detail: "em estoque", icon: Wine, accent: "#8F2D56" },
+      { label: "Garrafas", value: `${totalBottles}`, detail: "disponíveis", icon: Layers, accent: "#5F7F52" },
+      { label: "Valor em estoque", value: formatBRL(totalValue), detail: "investimento", icon: DollarSign, accent: "#C9A86A" },
+      { label: "Reposição", value: `${lowStock}`, detail: lowStock > 0 ? "atenção" : "estoque saudável", icon: AlertTriangle, accent: "#C44569" },
     ],
     [lowStock, totalBottles, totalValue, uniqueLabels],
   );
@@ -491,28 +492,26 @@ export default function CommercialDashboard() {
 
         {/* ─── KPI Strip ─── */}
         <div>
-          <div className="grid grid-cols-2 gap-1.5 md:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="card-depth p-3 sm:p-5">
-                  <Skeleton className="h-3 w-16 mb-2.5 rounded-lg" />
-                  <Skeleton className="h-7 w-14 rounded-lg" />
+                <div key={i} className="card-depth p-3 sm:p-4">
+                  <Skeleton className="h-3 w-20 mb-2 rounded-lg" />
+                  <Skeleton className="h-6 w-24 rounded-lg" />
                 </div>
               ))
             ) : (
               kpis.map((kpi) => (
-                <div key={kpi.label} className="card-depth p-3 text-left sm:p-5">
-                  <div className="flex items-center justify-between mb-2.5 sm:mb-3">
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:text-[10.5px] sm:tracking-[0.10em]">
-                      {kpi.label}
-                    </p>
-                    <kpi.icon className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.75} />
-                  </div>
-                  <p className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.025em] text-foreground leading-none tabular-nums">
-                    {kpi.value}
-                  </p>
-                  <p className="text-[10px] sm:text-[11.5px] text-muted-foreground/80 mt-1.5 sm:mt-2.5 font-medium">{kpi.detail}</p>
-                </div>
+                <EditorialKpiCard
+                  key={kpi.label}
+                  icon={<kpi.icon className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                  label={kpi.label}
+                  value={kpi.value}
+                  sub={kpi.detail}
+                  accent={kpi.accent}
+                  layout="row"
+                  className="rounded-[18px] !p-3 sm:!p-4"
+                />
               ))
             )}
           </div>

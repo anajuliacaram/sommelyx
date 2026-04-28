@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Wine, Globe, Grape, TrendingUp, DollarSign } from "@/icons/lucide";
 import { useWineMetrics } from "@/hooks/useWines";
+import { EditorialKpiCard } from "@/components/editorial/EditorialPrimitives";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell
@@ -58,22 +59,23 @@ export default function StatsPage() {
       </div>
 
       {/* KPIs — compact inline */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
         {[
-          { label: "Garrafas", value: totalBottles, icon: Wine, color: "#8F2D56" },
-          { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "#C9A86A" },
-          { label: "Estilos", value: byStyle.length, icon: Grape, color: "#C44569" },
-          { label: "Avaliação média", value: avgRating, icon: TrendingUp, color: "#22c55e" },
+          { label: "Garrafas", value: totalBottles, icon: Wine, color: "#8F2D56", detail: "em estoque" },
+          { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "#C9A86A", detail: "atualizado hoje" },
+          { label: "Estilos", value: byStyle.length, icon: Grape, color: "#C44569", detail: "categorias" },
+          { label: "Avaliação média", value: avgRating, icon: TrendingUp, color: "#22c55e", detail: "notas válidas" },
         ].map((m, i) => (
-          <div key={m.label} className="glass-card p-2.5 flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style={{ background: `${m.color}10` }}>
-              <m.icon className="h-3 w-3" style={{ color: m.color }} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold tracking-tight text-foreground leading-none">{m.value}</p>
-              <p className="text-[8px] font-semibold text-muted-foreground uppercase tracking-[0.04em] mt-0.5">{m.label}</p>
-            </div>
-          </div>
+          <EditorialKpiCard
+            key={m.label}
+            icon={<m.icon className="h-3 w-3" style={{ color: m.color }} />}
+            label={m.label}
+            value={m.value}
+            sub={m.detail}
+            accent={m.color}
+            layout="row"
+            className="rounded-[18px] !p-3"
+          />
         ))}
       </div>
 
