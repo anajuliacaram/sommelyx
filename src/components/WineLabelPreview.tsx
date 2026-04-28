@@ -5,6 +5,21 @@ import { cn } from "@/lib/utils";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { isRenderableWineImageUrl, resolveWineCardImageCandidates } from "@/lib/wine-images";
 
+type WineImageDebugEntry = {
+  wineId: string | null;
+  wineName: string;
+  event: "load" | "error" | "self-heal-start" | "self-heal-success" | "self-heal-error";
+  src?: string | null;
+  nextUrl?: string | null;
+  timestamp: number;
+};
+
+declare global {
+  interface Window {
+    __sommelyxWineImageDebug?: Record<string, WineImageDebugEntry>;
+  }
+}
+
 type WineLabelPreviewProps = {
   wine: {
     id?: string;
@@ -75,6 +90,15 @@ export function WineLabelPreview({
   const showImage = activeRenderable;
   const tone = getFallbackTone(wine.style);
 
+  const recordDebugEvent = (entry: Omit<WineImageDebugEntry, "timestamp">) => {
+    if (!import.meta.env.DEV || typeof window === "undefined") return;
+    window.__sommelyxWineImageDebug ??= {};
+    window.__sommelyxWineImageDebug[wine.id ?? wine.name] = {
+      ...entry,
+      timestamp: Date.now(),
+    };
+  };
+
   const triggerSelfHeal = async (failedSrc: string) => {
     if (!wine.id) return;
     if (!/^https?:\/\//i.test(failedSrc)) return;
@@ -82,6 +106,12 @@ export function WineLabelPreview({
     healingUrls.current.add(failedSrc);
 
     if (import.meta.env.DEV) {
+      recordDebugEvent({
+        wineId: wine.id ?? null,
+        wineName: wine.name,
+        event: "self-heal-start",
+        src: failedSrc,
+      });
       console.debug("[WineLabelPreview] self_heal_start", {
         wineId: wine.id,
         wineName: wine.name,
@@ -109,6 +139,13 @@ export function WineLabelPreview({
       }
 
       if (import.meta.env.DEV) {
+        recordDebugEvent({
+          wineId: wine.id ?? null,
+          wineName: wine.name,
+          event: isRenderableWineImageUrl(nextUrl) ? "self-heal-success" : "self-heal-error",
+          src: failedSrc,
+          nextUrl,
+        });
         console.debug("[WineLabelPreview] self_heal_result", {
           wineId: wine.id,
           wineName: wine.name,
@@ -120,6 +157,12 @@ export function WineLabelPreview({
       }
     } catch (error) {
       if (import.meta.env.DEV) {
+        recordDebugEvent({
+          wineId: wine.id ?? null,
+          wineName: wine.name,
+          event: "self-heal-error",
+          src: failedSrc,
+        });
         console.debug("[WineLabelPreview] self_heal_error", {
           wineId: wine.id,
           wineName: wine.name,
@@ -165,8 +208,13 @@ export function WineLabelPreview({
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
-          crossOrigin="anonymous"
           onLoad={() => {
+            recordDebugEvent({
+              wineId: wine.id ?? null,
+              wineName: wine.name,
+              event: "load",
+              src: activeSrc,
+            });
             if (import.meta.env.DEV) {
               console.debug("[WineLabelPreview] img_load", {
                 wineId: wine.id ?? null,
@@ -176,6 +224,12 @@ export function WineLabelPreview({
             }
           }}
           onError={() => {
+            recordDebugEvent({
+              wineId: wine.id ?? null,
+              wineName: wine.name,
+              event: "error",
+              src: activeSrc,
+            });
             if (import.meta.env.DEV) {
               console.debug("[WineLabelPreview] img_error", {
                 wineId: wine.id ?? null,
