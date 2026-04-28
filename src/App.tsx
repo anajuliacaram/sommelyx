@@ -4,8 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { AnimatePresence } from "framer-motion";
-import { PageTransition } from "@/components/PageTransition";
 import { useAuth } from "@/contexts/AuthContext";
 import { FloatingContactButton } from "@/components/FloatingContactButton";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
@@ -112,13 +110,7 @@ const AnimatedRoutes = () => {
     return routes;
   }
 
-  return (
-    <AnimatePresence mode="wait">
-      <PageTransition key={topKey}>
-        {routes}
-      </PageTransition>
-    </AnimatePresence>
-  );
+  return routes;
 };
 
 const App = () => (

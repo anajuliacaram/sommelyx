@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { Users, Plus, Trash2 } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +52,7 @@ export default function RegistersPage() {
 
   return (
     <div className="space-y-7 max-w-[900px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="glass-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="t-title">Cadastros</h1>
@@ -63,10 +62,10 @@ export default function RegistersPage() {
             <Plus className="h-3 w-3 mr-1" /> Novo cadastro
           </Button>
         </div>
-      </motion.div>
+      </div>
 
       {showForm && (
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="glass-card p-4 space-y-3">
+        <div className="glass-card p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input placeholder="Nome *" value={name} onChange={(e) => setName(e.target.value)} className="h-9 text-[12px]" />
             <select
@@ -87,7 +86,7 @@ export default function RegistersPage() {
               Cancelar
             </Button>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {contacts.length > 0 && (
@@ -102,7 +101,7 @@ export default function RegistersPage() {
       {filtered.length > 0 ? (
         <div className="space-y-1.5">
           {filtered.map((c, i) => (
-            <motion.div key={c.id} className="glass-card p-3 flex items-center gap-3 group" initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
+            <div key={c.id} className="glass-card p-3 flex items-center gap-3 group">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${TYPE_COLORS[c.type].bg}`}>
                 <Users className={`h-3.5 w-3.5 ${TYPE_COLORS[c.type].text}`} />
               </div>
@@ -121,7 +120,7 @@ export default function RegistersPage() {
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
-            </motion.div>
+            </div>
           ))}
         </div>
       ) : contacts.length === 0 ? (

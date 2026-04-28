@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Settings, User, Bell, Building2, Save, Check, AlertTriangle, Wine } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,7 +98,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-7 max-w-2xl">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="section-surface section-surface--full">
           <div className="flex items-center gap-2.5">
             <Settings className="h-6 w-6 text-primary" />
@@ -107,10 +106,10 @@ export default function SettingsPage() {
           </div>
           <p className="t-subtitle mt-1.5">Gerencie seu perfil e preferências da conta</p>
         </div>
-      </motion.div>
+      </div>
 
       {/* Profile */}
-      <motion.div className="glass-card p-6 space-y-5" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+      <div className="glass-card p-6 space-y-5">
         <div className="flex items-center gap-2 mb-1">
           <User className="h-4 w-4 text-primary" />
           <h2 className="text-[15px] font-semibold font-sans text-foreground">Perfil</h2>
@@ -127,10 +126,10 @@ export default function SettingsPage() {
             <p className="text-[10px] mt-1 text-muted-foreground/60">O email não pode ser alterado por aqui.</p>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Notifications */}
-      <motion.div className="glass-card p-6 space-y-5" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+      <div className="glass-card p-6 space-y-5">
         <div className="flex items-center gap-2 mb-1">
           <Bell className="h-4 w-4 text-primary" />
           <h2 className="text-[15px] font-semibold font-sans text-foreground">Notificações</h2>
@@ -159,10 +158,10 @@ export default function SettingsPage() {
             <Switch checked={notifReports} onCheckedChange={setNotifReports} />
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Account Type */}
-      <motion.div className="glass-card p-6 space-y-5 pb-7" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+      <div className="glass-card p-6 space-y-5 pb-7">
         <div>
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-primary" />
@@ -252,10 +251,10 @@ export default function SettingsPage() {
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
       {/* Save button */}
-      <motion.div className="pt-2" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+      <div className="pt-2">
         <Button
           onClick={handleSaveProfile}
           variant="primary"
@@ -265,7 +264,7 @@ export default function SettingsPage() {
           {saved ? <Check className="h-4 w-4 mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}
           {saving ? "Salvando..." : saved ? "Salvo!" : "Salvar configurações"}
         </Button>
-      </motion.div>
+      </div>
 
       {/* Profile switch confirmation */}
       <AlertDialog open={!!switchTarget} onOpenChange={(open) => { if (!open) setSwitchTarget(null); }}>

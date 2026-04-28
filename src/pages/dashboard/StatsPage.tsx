@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { motion } from "framer-motion";
 import { Wine, Globe, Grape, TrendingUp, DollarSign } from "@/icons/lucide";
 import { useWineMetrics } from "@/hooks/useWines";
 import {
@@ -51,12 +50,12 @@ export default function StatsPage() {
 
   return (
     <div className="space-y-7 max-w-[1200px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="section-surface">
           <h1 className="t-title">Relatórios & analytics</h1>
           <p className="t-subtitle mt-1.5">Inteligência sobre a evolução da sua coleção</p>
         </div>
-      </motion.div>
+      </div>
 
       {/* KPIs — compact inline */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
@@ -66,7 +65,7 @@ export default function StatsPage() {
           { label: "Estilos", value: byStyle.length, icon: Grape, color: "#C44569" },
           { label: "Avaliação média", value: avgRating, icon: TrendingUp, color: "#22c55e" },
         ].map((m, i) => (
-          <motion.div key={m.label} className="glass-card p-2.5 flex items-center gap-2" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+          <div key={m.label} className="glass-card p-2.5 flex items-center gap-2">
             <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style={{ background: `${m.color}10` }}>
               <m.icon className="h-3 w-3" style={{ color: m.color }} />
             </div>
@@ -74,14 +73,14 @@ export default function StatsPage() {
               <p className="text-sm font-bold tracking-tight text-foreground leading-none">{m.value}</p>
               <p className="text-[8px] font-semibold text-muted-foreground uppercase tracking-[0.04em] mt-0.5">{m.label}</p>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
         {byStyle.length > 0 && (
-          <motion.div className="chart-surface" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+          <div className="chart-surface">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Distribuição por estilo</h3>
             <ResponsiveContainer width="100%" height={140}>
               <BarChart data={byStyle}>
@@ -94,12 +93,12 @@ export default function StatsPage() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </motion.div>
+          </div>
         )}
 
         {/* By country — horizontal bars */}
         {byCountry.length > 0 && (
-          <motion.div className="chart-surface" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+          <div className="chart-surface">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5 flex items-center gap-1">
               <Globe className="h-3 w-3 text-foreground/40" />
               Por país
@@ -119,11 +118,11 @@ export default function StatsPage() {
                 );
               })}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {byVintage.length > 0 && (
-          <motion.div className="chart-surface" initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+          <div className="chart-surface">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Por safra</h3>
             <ResponsiveContainer width="100%" height={140}>
               <BarChart data={byVintage}>
@@ -134,11 +133,11 @@ export default function StatsPage() {
                 <Bar dataKey="value" fill="hsl(var(--wine))" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </motion.div>
+          </div>
         )}
 
         {topRated.length > 0 && (
-          <motion.div className="chart-surface" initial="hidden" animate="visible" variants={fadeUp} custom={8}>
+          <div className="chart-surface">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Mais bem avaliados</h3>
             <div className="space-y-1">
               {topRated.map((w, i) => (
@@ -152,7 +151,7 @@ export default function StatsPage() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

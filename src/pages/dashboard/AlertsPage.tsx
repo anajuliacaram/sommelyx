@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { Bell, GlassWater, AlertTriangle, ArrowDownRight, Wine, ArrowRight, Sparkles, Loader2, X, BarChart3 } from "@/icons/lucide";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useWines } from "@/hooks/useWines";
@@ -170,7 +170,7 @@ export default function AlertsPage() {
   return (
     <div className="space-y-7 max-w-3xl">
       {/* ── Header ── */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="glass-card px-5 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 min-w-0">
@@ -195,11 +195,11 @@ export default function AlertsPage() {
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* ── Ações inteligentes (CTA premium) ── */}
       {visibleAlerts.length > 0 && (
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-3 pt-1">
+        <div className="space-y-3 pt-1">
           <div className="flex items-center gap-2 px-1">
             <Sparkles className="h-3.5 w-3.5 text-[#7B1E2B]" />
             <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
@@ -295,16 +295,16 @@ export default function AlertsPage() {
               <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#C9B469] transition-transform duration-300 group-hover:rotate-12" />
             </div>
           </button>
-        </motion.div>
+        </div>
       )}
       {visibleAlerts.length === 0 ? (
-        <motion.div className="glass-card px-5 py-10 text-center" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+        <div className="glass-card px-5 py-10 text-center">
           <div className="w-9 h-9 rounded-xl bg-emerald-600/8 flex items-center justify-center mx-auto mb-2.5">
             <Wine className="h-4 w-4 text-emerald-700" />
           </div>
           <h3 className="text-[13px] font-semibold text-foreground mb-0.5">Tudo em ordem!</h3>
           <p className="text-[11px] text-muted-foreground max-w-[220px] mx-auto">Nenhum alerta no momento. Seus vinhos estão bem cuidados.</p>
-        </motion.div>
+        </div>
       ) : (
         <div className="space-y-4">
           {Object.entries(grouped).map(([key, items]) => {
@@ -313,7 +313,7 @@ export default function AlertsPage() {
             const SectionIcon = cfg.icon;
 
             return (
-              <motion.div key={key} id={`alerts-${key}`} initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-1.5 scroll-mt-20">
+              <div key={key} id={`alerts-${key}`} className="space-y-1.5 scroll-mt-20">
                 {/* ── Section header ── */}
                 <div className="flex items-center gap-2 px-1">
                   <div className={cn("w-5 h-5 rounded-md flex items-center justify-center px-[4px]", cfg.accentBg)}>
@@ -335,7 +335,7 @@ export default function AlertsPage() {
                       return map[fam] || "Tinto";
                     })();
                     return (
-                    <motion.div key={a.id} initial="hidden" animate="visible" variants={fadeUp} custom={i + 2}>
+                    <div key={a.id}>
                       <div className="glass-card overflow-hidden relative">
                         {/* Barra lateral colorida por tipo de vinho */}
                         <span
@@ -417,7 +417,7 @@ export default function AlertsPage() {
                         {/* ── Expanded AI insight ── */}
                         <AnimatePresence>
                           {expandedId === a.id && (
-                            <motion.div
+                            <div
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: "auto", opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
@@ -457,14 +457,14 @@ export default function AlertsPage() {
                                   </div>
                                 ) : null}
                               </div>
-                            </motion.div>
+                            </div>
                           )}
                         </AnimatePresence>
                       </div>
-                    </motion.div>
+                    </div>
                   );})}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

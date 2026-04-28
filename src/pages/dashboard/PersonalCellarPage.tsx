@@ -449,10 +449,7 @@ export default function PersonalCellarPage() {
             </div>
           </EditorialCard>
         ) : view === "grid" ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
+          <div
             className={isMobile
               ? "grid grid-cols-2 gap-2"
               : "grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"}
@@ -677,7 +674,7 @@ export default function PersonalCellarPage() {
                 </EditorialCard>
               );
             })}
-          </motion.div>
+          </div>
         ) : (
           <EditorialCard style={{ padding: "8px" }}>
             {filtered.map((w) => {

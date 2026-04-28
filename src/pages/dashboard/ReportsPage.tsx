@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { Wine, DollarSign, ShoppingCart, Tag, Package, CalendarDays } from "@/icons/lucide";
 import { useWineMetrics } from "@/hooks/useWines";
 import { useSales } from "@/hooks/useBusinessData";
@@ -108,12 +107,12 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-7 max-w-[1200px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="section-surface">
           <h1 className="t-title">Relatórios</h1>
           <p className="t-subtitle mt-1.5">Análise de estoque e vendas em tempo real</p>
         </div>
-      </motion.div>
+      </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as ReportTab)}>
         <TabsList className="w-full max-w-xs">
@@ -130,19 +129,19 @@ export default function ReportsPage() {
               { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign },
               { label: "Rótulos", value: wines.filter((w) => w.quantity > 0).length, icon: Tag },
             ].map((m, i) => (
-              <motion.div key={m.label} className="chart-surface p-2.5" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+              <div key={m.label} className="chart-surface p-2.5">
                 <div className="w-5 h-5 rounded-md flex items-center justify-center mb-1 bg-primary/8">
                   <m.icon className="h-2.5 w-2.5 text-primary" />
                 </div>
                 <p className="text-base font-bold font-sans tabular-nums text-foreground">{m.value}</p>
                 <p className="text-[9px] font-semibold text-muted-foreground/70 uppercase tracking-[0.06em]">{m.label}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
             {byCountry.length > 0 && (
-              <motion.div className="chart-surface p-4" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+              <div className="chart-surface p-4">
                 <h3 className="chart-surface-title mb-1">Estoque por País</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
@@ -152,11 +151,11 @@ export default function ReportsPage() {
                     <Tooltip contentStyle={{ background: "rgba(255,255,255,0.94)", border: "1px solid rgba(255,255,255,0.28)", borderRadius: 14, fontSize: 12, boxShadow: "0 12px 28px -12px rgba(44,20,31,0.16)", backdropFilter: "blur(14px)" }} />
                   </PieChart>
                 </ResponsiveContainer>
-              </motion.div>
+              </div>
             )}
 
             {byStyle.length > 0 && (
-              <motion.div className="chart-surface p-4" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+              <div className="chart-surface p-4">
                 <h3 className="chart-surface-title mb-1">Estoque por Estilo</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={byStyle}>
@@ -167,11 +166,11 @@ export default function ReportsPage() {
                     <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" />
                   </BarChart>
                 </ResponsiveContainer>
-              </motion.div>
+              </div>
             )}
 
             {byLabel.length > 0 && (
-              <motion.div className="chart-surface p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <div className="chart-surface p-4 lg:col-span-2">
                 <h3 className="chart-surface-title mb-1">Top Rótulos em Estoque</h3>
                 <div className="space-y-1.5">
                   {byLabel.map((w, i) => (
@@ -183,7 +182,7 @@ export default function ReportsPage() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
         </div>
@@ -197,13 +196,13 @@ export default function ReportsPage() {
               { label: "Unidades", value: salesUnits, icon: Package },
               { label: "Vendas", value: sales.length, icon: ShoppingCart },
             ].map((m, i) => (
-              <motion.div key={m.label} className="chart-surface p-2.5" initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}>
+              <div key={m.label} className="chart-surface p-2.5">
                 <div className="w-5 h-5 rounded-md flex items-center justify-center mb-1 bg-primary/8">
                   <m.icon className="h-2.5 w-2.5 text-primary" />
                 </div>
                 <p className="text-base font-bold font-sans tabular-nums text-foreground">{m.value}</p>
                 <p className="text-[9px] font-semibold text-muted-foreground/70 uppercase tracking-[0.06em]">{m.label}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
 
@@ -214,7 +213,7 @@ export default function ReportsPage() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               {salesByDay.length > 0 && (
-                <motion.div className="chart-surface p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+                <div className="chart-surface p-4 lg:col-span-2">
                   <h3 className="chart-surface-title mb-1">Faturamento por Dia</h3>
                   <ResponsiveContainer width="100%" height={180}>
                     <LineChart data={salesByDay}>
@@ -225,11 +224,11 @@ export default function ReportsPage() {
                       <Line type="monotone" dataKey="value" stroke="hsl(var(--wine))" strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--wine))" }} />
                     </LineChart>
                   </ResponsiveContainer>
-                </motion.div>
+                </div>
               )}
 
               {salesByLabel.length > 0 && (
-                <motion.div className="chart-surface p-4 lg:col-span-2" initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+                <div className="chart-surface p-4 lg:col-span-2">
                   <h3 className="chart-surface-title mb-1">Top Rótulos Vendidos</h3>
                   <div className="space-y-1.5">
                     {salesByLabel.map((w, i) => (
@@ -241,16 +240,16 @@ export default function ReportsPage() {
                       </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               )}
             </div>
           )}
         </div>
       )}
 
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={9} className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+      <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
         <CalendarDays className="h-3 w-3" /> Atualizado em tempo real a partir do banco.
-      </motion.div>
+      </div>
     </div>
   );
 }

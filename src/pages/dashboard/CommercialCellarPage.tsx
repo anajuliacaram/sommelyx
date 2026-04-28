@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Search, Wine, Plus, Pencil, Trash2, LayoutGrid, List, GlassWater, X, UtensilsCrossed, MapPin } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -550,11 +549,8 @@ function EditorialWineCard({
   const ratingLabel = typeof wine.rating === "number" ? wine.rating.toFixed(1) : "—";
 
   return (
-    <motion.article
+    <article
       className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.88)] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-28px_rgba(44,20,31,0.18)]"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
     >
       {showLabels ? (
         <WineLabelPreview
@@ -638,7 +634,7 @@ function EditorialWineCard({
           </Button>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
 

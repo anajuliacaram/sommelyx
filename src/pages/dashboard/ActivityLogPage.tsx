@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { ClipboardList, Plus, Wine, ArrowDownRight, AlertTriangle, ShoppingCart, Filter, Search, MapPin, ArrowLeftRight } from "@/icons/lucide";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -151,12 +150,12 @@ export default function ActivityLogPage() {
 
   return (
     <div className="space-y-7 max-w-[1000px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="section-surface section-surface--full">
           <h1 className="t-title">Log de atividades</h1>
           <p className="t-subtitle mt-1.5">Registro completo de movimentações da sua adega</p>
         </div>
-      </motion.div>
+      </div>
 
       {isCommercial ? (
         <div className="glass-card p-4">
@@ -223,8 +222,8 @@ export default function ActivityLogPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {grouped.map((group, gi) => (
-            <motion.div key={group.dateKey} initial="hidden" animate="visible" variants={fadeUp} custom={gi + 1}>
+          {grouped.map((group) => (
+            <div key={group.dateKey}>
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 px-1">{group.label}</p>
               <div className="space-y-1">
                 {group.items.map(ev => {
@@ -303,7 +302,7 @@ export default function ActivityLogPage() {
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}

@@ -392,7 +392,7 @@ export default function CommercialDashboard() {
 
       <div className="max-w-[1280px] space-y-7">
         {/* ─── Header ─── */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+        <div>
           <div className="surface-clarity rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h1 className="t-title">Resumo da operação</h1>
@@ -434,7 +434,7 @@ export default function CommercialDashboard() {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* ─── Filter Panel ─── */}
         <AnimatePresence>
@@ -514,7 +514,7 @@ export default function CommercialDashboard() {
         )}
 
         {/* ─── KPI Strip ─── */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+        <div>
           <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             {isLoading ? (
               [1, 2, 3, 4].map((i) => (
@@ -540,7 +540,7 @@ export default function CommercialDashboard() {
               ))
             )}
           </div>
-        </motion.div>
+        </div>
 
         {totalBottles === 0 && !isFiltered ? (
           <PremiumEmptyState
@@ -570,7 +570,7 @@ export default function CommercialDashboard() {
           <>
           <div className="grid grid-cols-12 gap-4 md:gap-5">
               {/* ─── Stock Table ─── */}
-              <motion.div className="col-span-12 lg:col-span-7" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+              <div className="col-span-12 lg:col-span-7">
                 <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <div className="min-w-0">
@@ -626,12 +626,12 @@ export default function CommercialDashboard() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* ─── Right Column ─── */}
               <div className="col-span-12 grid gap-4 lg:col-span-5">
                 {/* Alerts */}
-                <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+                <div>
                 <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <div>
@@ -668,10 +668,10 @@ export default function CommercialDashboard() {
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Quick Links */}
-                <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+                <div>
                 <div className="chart-surface p-6">
                     <p className="chart-surface-kicker mb-3.5">Atalhos</p>
                     <div className="grid grid-cols-2 gap-2.5">
@@ -694,12 +694,12 @@ export default function CommercialDashboard() {
                       ))}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
 
             {/* ─── Breakdown Section ─── */}
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+            <div>
               <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
                 {/* By Style */}
                 <div className="chart-surface p-6">
@@ -786,11 +786,11 @@ export default function CommercialDashboard() {
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* ─── Charts ─── */}
             <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3">
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+              <div>
                 <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <h3 className="chart-surface-title">Vendas</h3>
@@ -808,9 +808,9 @@ export default function CommercialDashboard() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={7}>
+              <div>
                 <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <h3 className="chart-surface-title">Movimentação</h3>
@@ -829,9 +829,9 @@ export default function CommercialDashboard() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={8}>
+              <div>
                 <div className="chart-surface p-6">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <h3 className="chart-surface-title">Saldo mensal</h3>
@@ -849,7 +849,7 @@ export default function CommercialDashboard() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </>
         )}

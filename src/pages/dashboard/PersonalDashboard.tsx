@@ -3,7 +3,6 @@
 // Dados reais via Supabase (useWines / useConsumption / useWineEvent).
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -41,15 +40,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
 import { useWineEvent, useWineMetrics } from "@/hooks/useWines";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 6 } as const,
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
-  }),
-} as const;
 
 function buildMonthWindow(size: number) {
   const months: Array<{ key: string; label: string }> = [];
@@ -184,21 +174,19 @@ export default function PersonalDashboard() {
 
   return (
     <>
-      <AnimatePresence>
-        {showOnboarding && (
-          <OnboardingWizard
-            profileType="personal"
-            onComplete={() => {
-              localStorage.setItem("sommelyx_onboarding_done_personal", "true");
-              setShowOnboarding(false);
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {showOnboarding && (
+        <OnboardingWizard
+          profileType="personal"
+          onComplete={() => {
+            localStorage.setItem("sommelyx_onboarding_done_personal", "true");
+            setShowOnboarding(false);
+          }}
+        />
+      )}
 
       <div className="editorial-page">
         {/* ─── HERO + KPIs ─── */}
-        <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+        <section>
           <EditorialCard>
             <div className="mb-3 flex items-start justify-between gap-3 md:mb-6 md:gap-6">
               <div className="min-w-0">
@@ -312,11 +300,11 @@ export default function PersonalDashboard() {
               />
             </div>
           </EditorialCard>
-        </motion.section>
+        </section>
 
         {/* ─── INSIGHT BAND ─── */}
         {insightWine && (
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+          <div>
             <EditorialHeroBand>
               <div className="relative z-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                 <div className="flex items-center gap-4">
@@ -365,19 +353,13 @@ export default function PersonalDashboard() {
                 </button>
               </div>
             </EditorialHeroBand>
-          </motion.div>
+          </div>
         )}
 
         {/* ─── MAIN GRID ─── */}
         <div className="grid grid-cols-12 gap-5">
           {/* Prontos para abrir — coluna principal */}
-          <motion.section
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={2}
-            className="col-span-12 lg:col-span-8"
-          >
+          <section className="col-span-12 lg:col-span-8">
             <EditorialCard>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -553,11 +535,11 @@ export default function PersonalDashboard() {
                 </div>
               )}
             </EditorialCard>
-          </motion.section>
+          </section>
 
           {/* Right column */}
           <aside className="col-span-12 flex flex-col gap-5 lg:col-span-4">
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+            <div>
               <EditorialCard style={{ padding: "20px 22px" }}>
                 <h3 className="editorial-h3">Último aberto</h3>
                 {lastOpened ? (
@@ -589,9 +571,9 @@ export default function PersonalDashboard() {
                   </p>
                 )}
               </EditorialCard>
-            </motion.div>
+            </div>
 
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
+            <div>
               <EditorialCard style={{ padding: "20px 22px" }}>
                 <div className="mb-3 flex items-baseline justify-between">
                   <h3 className="editorial-h3">Consumo · 6 meses</h3>
@@ -604,9 +586,9 @@ export default function PersonalDashboard() {
                 </div>
                 <Sparkbar data={consumptionMonthly} accent="#7B1E2B" height={80} />
               </EditorialCard>
-            </motion.div>
+            </div>
 
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+            <div>
               <EditorialCard style={{ padding: "20px 22px" }}>
                 <h3 className="editorial-h3 mb-3">Alertas</h3>
                 <div className="flex flex-col gap-px">
@@ -648,10 +630,10 @@ export default function PersonalDashboard() {
                   ))}
                 </div>
               </EditorialCard>
-            </motion.div>
+            </div>
 
             {/* Quick actions */}
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
+            <div>
               <EditorialCard style={{ padding: "20px 22px" }}>
                 <h3 className="editorial-h3 mb-3">Atalhos</h3>
                 <div className="flex flex-col gap-2">
@@ -685,7 +667,7 @@ export default function PersonalDashboard() {
                   </button>
                 </div>
               </EditorialCard>
-            </motion.div>
+            </div>
           </aside>
         </div>
       </div>

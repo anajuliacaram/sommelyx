@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { Camera, Heart, Loader2, Plus, Search, Sparkles, Trash2, Upload, Wine, X } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -275,7 +274,7 @@ export default function WishlistPage() {
 
   return (
     <div className="space-y-7 max-w-[980px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="glass-card p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="t-title">Wishlist inteligente</h1>
@@ -288,10 +287,10 @@ export default function WishlistPage() {
             {showForm ? "Fechar" : "Novo item"}
           </Button>
         </div>
-      </motion.div>
+      </div>
 
       {showForm && (
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="glass-card p-5 space-y-5">
+        <div className="glass-card p-5 space-y-5">
           <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="space-y-4">
               <div className="space-y-2">
@@ -487,7 +486,7 @@ export default function WishlistPage() {
               Pesquisar com Sommelyx
             </Button>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {items.length > 0 && (
@@ -502,7 +501,7 @@ export default function WishlistPage() {
       {filtered.length > 0 ? (
         <div className="grid gap-3">
           {filtered.map((item, index) => (
-            <motion.div key={item.id} className="glass-card p-3 sm:p-4 flex gap-3 group" initial="hidden" animate="visible" variants={fadeUp} custom={index + 2}>
+            <div key={item.id} className="glass-card p-3 sm:p-4 flex gap-3 group">
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[20px] border border-border/50 bg-primary/5">
                 <WineLabelPreview
                   wine={{
@@ -561,7 +560,7 @@ export default function WishlistPage() {
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
-            </motion.div>
+            </div>
           ))}
         </div>
       ) : items.length === 0 ? (

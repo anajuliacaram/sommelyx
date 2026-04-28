@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+// Framer Motion removed to keep dashboard navigation stable.
 import { Check, Crown, Zap } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,15 +49,14 @@ export default function Plans() {
   return (
     <div className="max-w-4xl mx-auto space-y-7">
       {/* Header */}
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <h1 className="t-title">Meu plano</h1>
         <p className="t-subtitle mt-1.5">Gerencie sua assinatura e recursos disponíveis</p>
-      </motion.div>
+      </div>
 
       {/* Current plan badge */}
-      <motion.div
+      <div
         className="card-depth p-4 flex items-center justify-between"
-        initial="hidden" animate="visible" variants={fadeUp} custom={1}
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg gradient-wine flex items-center justify-center">
@@ -74,7 +73,7 @@ export default function Plans() {
         <Button variant="secondary" className="rounded-lg h-8 text-[11px] font-medium px-4">
           <Crown className="h-3 w-3 mr-1" /> Fazer Upgrade
         </Button>
-      </motion.div>
+      </div>
 
       {/* Plans grid — same style as landing */}
       <div className="grid md:grid-cols-2 gap-5 max-w-[760px] mx-auto items-stretch">
@@ -83,7 +82,7 @@ export default function Plans() {
           const txt = isLight ? "#2B2B2B" : "#F8F6F3";
 
           return (
-            <motion.div
+            <div
               key={plan.name}
               className={`
                 relative rounded-3xl overflow-hidden flex flex-col transition-all duration-300
@@ -92,11 +91,6 @@ export default function Plans() {
                   : "bg-[linear-gradient(180deg,#2B2B2B_0%,#1F1C20_55%,#171518_100%)] shadow-[0_34px_100px_-68px_rgba(15,15,20,0.80)] ring-1 ring-white/[0.08]"
                 }
               `}
-              initial="hidden"
-              animate="visible"
-              variants={fadeUp}
-              custom={i + 2}
-              whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
             >
               {/* Radial overlays */}
               {isLight ? (
@@ -192,7 +186,7 @@ export default function Plans() {
                   ))}
                 </ul>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>

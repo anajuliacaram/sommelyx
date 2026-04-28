@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { ShoppingCart, Trash2, DollarSign, Package, ChevronDown, ChevronRight, CalendarDays } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
@@ -90,37 +89,37 @@ export default function SalesPage() {
 
   return (
     <div className="space-y-7 max-w-[1000px]">
-      <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+      <div>
         <div className="section-surface section-surface--full">
           <h1 className="t-title">Vendas</h1>
           <p className="t-subtitle mt-1.5">Histórico de vendas e desempenho comercial</p>
         </div>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-3 gap-2 md:gap-3">
-        <motion.div className="glass-card p-3" initial="hidden" animate="visible" variants={fadeUp} custom={1}>
+        <div className="glass-card p-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-2 bg-primary/10">
             <DollarSign className="h-3.5 w-3.5 text-primary" />
           </div>
           <p className="text-lg md:text-xl font-black font-sans tracking-tight text-foreground">R$ {totalRevenue.toLocaleString("pt-BR")}</p>
           <p className="text-[9px] md:text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">Receita total</p>
-        </motion.div>
+        </div>
 
-        <motion.div className="glass-card p-3" initial="hidden" animate="visible" variants={fadeUp} custom={2}>
+        <div className="glass-card p-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-2 bg-accent/10">
             <Package className="h-3.5 w-3.5 text-accent" />
           </div>
           <p className="text-lg md:text-xl font-black font-sans tracking-tight text-foreground">{totalUnits}</p>
           <p className="text-[9px] md:text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">Unidades vendidas</p>
-        </motion.div>
+        </div>
 
-        <motion.div className="glass-card p-3" initial="hidden" animate="visible" variants={fadeUp} custom={3}>
+        <div className="glass-card p-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-2 bg-success/10">
             <CalendarDays className="h-3.5 w-3.5 text-success" />
           </div>
           <p className="text-lg md:text-xl font-black font-sans tracking-tight text-foreground">{totalOrders}</p>
           <p className="text-[9px] md:text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">Dias com vendas</p>
-        </motion.div>
+        </div>
       </div>
 
       {dayGroups.length > 0 ? (
@@ -128,7 +127,7 @@ export default function SalesPage() {
           {dayGroups.map((group, gi) => {
             const isCollapsed = collapsedDays.has(group.dateKey);
             return (
-              <motion.div key={group.dateKey} initial="hidden" animate="visible" variants={fadeUp} custom={gi + 4}>
+            <div key={group.dateKey}>
                 <Button
                   type="button"
                   variant="ghost"
@@ -169,7 +168,7 @@ export default function SalesPage() {
                     ))}
                   </div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </div>
