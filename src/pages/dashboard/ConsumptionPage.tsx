@@ -1,7 +1,7 @@
 // Meu Consumo — perfil Pessoal
 // Design "Editorial" fiel ao design-reference (extras.jsx ConsumptionPage).
 
-import { memo, useMemo, useState, type ReactNode } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useConsumption } from "@/hooks/useConsumption";
 import { ConsumptionTimeline } from "@/components/ConsumptionTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +37,8 @@ const sortOptions: Array<{ value: SortBy; label: string }> = [
   { value: "old", label: "Mais antigos" },
   { value: "rating", label: "Melhor avaliados" },
 ];
+
+const STORAGE_KEY = "sommelyx.consumption.filters.v1";
 
 const FilterChoice = memo(function FilterChoice({
   active,
@@ -137,11 +139,47 @@ function buildMonthWindow(size: number) {
 
 export default function ConsumptionPage() {
   const { data: entries = [], isLoading } = useConsumption();
-  const [period, setPeriod] = useState<PeriodFilter>("month");
-  const [source, setSource] = useState<Array<SourceFilter>>([]);
-  const [sortBy, setSortBy] = useState<SortBy>("recent");
+  const [period, setPeriod] = useState<PeriodFilter>(() => {
+    if (typeof window === "undefined") return "month";
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return "month";
+    try {
+      const parsed = JSON.parse(stored) as Partial<{ period: PeriodFilter }>;
+      return parsed.period ?? "month";
+    } catch {
+      return "month";
+    }
+  });
+  const [source, setSource] = useState<Array<SourceFilter>>(() => {
+    if (typeof window === "undefined") return [];
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
+    try {
+      const parsed = JSON.parse(stored) as Partial<{ source: Array<SourceFilter> }>;
+      return Array.isArray(parsed.source) ? parsed.source.filter((item): item is SourceFilter => item === "cellar" || item === "external") : [];
+    } catch {
+      return [];
+    }
+  });
+  const [sortBy, setSortBy] = useState<SortBy>(() => {
+    if (typeof window === "undefined") return "recent";
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return "recent";
+    try {
+      const parsed = JSON.parse(stored) as Partial<{ sortBy: SortBy }>;
+      return parsed.sortBy ?? "recent";
+    } catch {
+      return "recent";
+    }
+  });
   const [openFilter, setOpenFilter] = useState<"period" | "source" | "sort" | null>(null);
+  const [displayEntries, setDisplayEntries] = useState(entries);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const isMobile = useIsMobile();
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+  const filterTimeoutRef = useRef<number | null>(null);
+  const scrollTimeoutRef = useRef<number | null>(null);
 
   const periodValueLabel = periodOptions.find((opt) => opt.value === period)?.label ?? "Mês";
   const sourceValueLabel = useMemo(() => {
@@ -152,6 +190,26 @@ export default function ConsumptionPage() {
       .join(" · ");
   }, [source]);
   const sortValueLabel = sortOptions.find((opt) => opt.value === sortBy)?.label ?? "Mais recentes";
+  const activeFilterSummary = useMemo(() => {
+    const parts = [
+      `Período: ${periodValueLabel}`,
+      `Origem: ${sourceValueLabel}`,
+      `Ordenar: ${sortValueLabel}`,
+    ];
+    const hasActiveFilters = period !== "month" || source.length > 0 || sortBy !== "recent";
+    return hasActiveFilters ? parts.join(" · ") : "";
+  }, [period, periodValueLabel, source.length, sourceValueLabel, sortBy, sortValueLabel]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        period,
+        source,
+        sortBy,
+      }),
+    );
+  }, [period, source, sortBy]);
 
   const toggleSource = (value: SourceFilter) => {
     setSource((current) => {
@@ -164,6 +222,13 @@ export default function ConsumptionPage() {
   };
 
   const setAllSources = () => setSource([]);
+
+  const clearFilters = () => {
+    setPeriod("month");
+    setSource([]);
+    setSortBy("recent");
+    setOpenFilter(null);
+  };
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
@@ -299,6 +364,31 @@ export default function ConsumptionPage() {
         return days === 0 ? "hoje" : `há ${days}d`;
       })()
     : "—";
+
+  useEffect(() => {
+    if (!hasLoadedOnce) {
+      setDisplayEntries(filteredEntries);
+      setHasLoadedOnce(true);
+      return;
+    }
+
+    if (filterTimeoutRef.current) window.clearTimeout(filterTimeoutRef.current);
+    if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
+
+    setIsFiltering(true);
+    filterTimeoutRef.current = window.setTimeout(() => {
+      setDisplayEntries(filteredEntries);
+    }, 100);
+    scrollTimeoutRef.current = window.setTimeout(() => {
+      setIsFiltering(false);
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 240);
+
+    return () => {
+      if (filterTimeoutRef.current) window.clearTimeout(filterTimeoutRef.current);
+      if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
+    };
+  }, [filteredEntries, hasLoadedOnce]);
 
   if (isLoading) {
     return (
@@ -506,8 +596,58 @@ export default function ConsumptionPage() {
         })}
       </div>
 
-      {/* Timeline */}
-      <ConsumptionTimeline entries={filteredEntries} />
+      {activeFilterSummary ? (
+        <div className="flex items-center justify-between gap-3 rounded-[16px] border border-[rgba(95,111,82,0.12)] bg-[rgba(95,111,82,0.05)] px-3 py-2 text-[11.5px] leading-[1.25] text-[rgba(58,51,39,0.72)]">
+          <p className="min-w-0 flex-1 truncate">
+            {activeFilterSummary}
+          </p>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-white/75 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#5F7F52] transition-all duration-150 ease-out hover:-translate-y-px hover:scale-[1.01] hover:bg-white"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      ) : null}
+
+      <div ref={resultsRef} className={cn("transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
+        {isFiltering ? (
+          <EditorialCard style={{ padding: "14px 14px 12px" }}>
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-36 rounded-full bg-black/5" />
+              <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
+              <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
+            </div>
+          </EditorialCard>
+        ) : displayEntries.length === 0 ? (
+          <EditorialCard style={{ padding: "16px 16px 18px" }}>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <p className="font-serif text-[15px] text-[rgba(26,23,19,0.72)]">
+                {entries.length === 0
+                  ? "Você ainda não registrou nenhum consumo"
+                  : "Nenhum vinho encontrado para esses filtros"}
+              </p>
+              <p className="mt-1 text-[12px] text-[#7A746B]">
+                {entries.length === 0
+                  ? "Quando você abrir uma garrafa, ela aparecerá aqui."
+                  : "Ajuste os filtros ou limpe a seleção para ver mais brindes."}
+              </p>
+              {activeFilterSummary ? (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="mt-4 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-3 py-1.5 text-[11px] font-semibold text-[#5F7F52] transition-all duration-150 ease-out hover:-translate-y-px hover:scale-[1.01]"
+                >
+                  Limpar filtros
+                </button>
+              ) : null}
+            </div>
+          </EditorialCard>
+        ) : (
+          <ConsumptionTimeline entries={displayEntries} />
+        )}
+      </div>
     </div>
   );
 }
