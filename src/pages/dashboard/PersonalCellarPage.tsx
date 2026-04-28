@@ -3,7 +3,6 @@
 // Dados reais via Supabase.
 
 import { useMemo, useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { ArrowUpDown, Globe, Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
@@ -187,7 +186,7 @@ export default function PersonalCellarPage() {
   }, [countryFilter, countryOptions]);
 
   const mobileHeader = (filteredCount: number) => (
-    <EditorialCard style={{ padding: "10px 10px 10px" }}>
+    <EditorialCard style={{ padding: "12px" }}>
       <div className="flex flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
@@ -215,7 +214,7 @@ export default function PersonalCellarPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.95fr)] gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2">
           <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
             <SelectTrigger
               aria-label="Ordenar vinhos"
@@ -252,12 +251,10 @@ export default function PersonalCellarPage() {
               ))}
             </SelectContent>
           </Select>
-        </div>
 
-        <div className="flex justify-end">
           <button
             type="button"
-            className="editorial-btn-primary h-11 w-fit max-w-[58%] rounded-[14px] px-4 text-[12px] font-semibold tracking-[-0.01em] whitespace-nowrap"
+            className="editorial-btn-primary h-11 w-fit max-w-[118px] justify-self-end rounded-[14px] px-3.5 text-[12px] font-semibold tracking-[-0.01em] whitespace-nowrap shadow-[0_8px_20px_-14px_rgba(95,127,82,0.32)]"
             onClick={() => setAddOpen(true)}
           >
             + Adicionar
@@ -266,14 +263,14 @@ export default function PersonalCellarPage() {
 
         <div className="space-y-1.5">
           <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max items-center gap-1.25">
+            <div className="flex min-w-max items-center gap-1.5">
               <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Tipo</span>
               {styleOptions.map((s) => (
                 <Chip
                   key={s.key}
                   active={styleFilter === s.key}
                   onClick={() => setStyleFilter(s.key)}
-                  className="h-[24px] shrink-0 whitespace-nowrap px-2 text-[10px] normal-case tracking-[-0.01em]"
+                  className="h-[32px] shrink-0 whitespace-nowrap px-2.5 text-[10px] normal-case tracking-[-0.01em]"
                 >
                   {s.label}
                 </Chip>
@@ -282,14 +279,14 @@ export default function PersonalCellarPage() {
           </div>
 
           <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max items-center gap-1.25">
+            <div className="flex min-w-max items-center gap-1.5">
               <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Janela</span>
               {drinkWindowOptions.map((option) => (
                 <Chip
                   key={option.key}
                   active={drinkWindowFilter === option.key}
                   onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                  className="h-[24px] shrink-0 whitespace-nowrap px-2 text-[10px] normal-case tracking-[-0.01em]"
+                  className="h-[32px] shrink-0 whitespace-nowrap px-2.5 text-[10px] normal-case tracking-[-0.01em]"
                 >
                   {option.label}
                 </Chip>
