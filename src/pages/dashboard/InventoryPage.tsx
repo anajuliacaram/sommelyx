@@ -485,7 +485,7 @@ export default function InventoryPage() {
     // MultiSelectDropdown handles its own UI now, so we remove QuickFilterDropdown
 
     return (
-        <div className="relative max-w-[1440px] space-y-5 pb-[calc(72px+env(safe-area-inset-bottom))]">
+        <div className="relative max-w-[1440px] space-y-4 pb-[calc(72px+env(safe-area-inset-bottom))] sm:space-y-5">
             <StockAuditDialog
                 open={auditOpen}
                 onOpenChange={(v) => { setAuditOpen(v); if (!v) setAuditPayload(null); }}
@@ -544,16 +544,16 @@ export default function InventoryPage() {
                 }}
             />
 
-            <section className="space-y-4">
+            <section className="space-y-3.5 sm:space-y-4">
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
                     <div className="min-w-0">
                         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/55">
                             Operação comercial
                         </p>
-                        <h1 className="mt-1 text-[30px] font-black tracking-[-0.05em] text-foreground">
+                        <h1 className="mt-1 text-[26px] font-black tracking-[-0.05em] text-foreground sm:text-[30px]">
                             Estoque
                         </h1>
-                        <p className="mt-1.5 max-w-[720px] text-[13px] font-medium text-muted-foreground/78">
+                        <p className="mt-1.5 max-w-[720px] text-[12px] font-medium text-muted-foreground/78 sm:text-[13px]">
                             Controle de disponibilidade, valor imobilizado e movimentação dos rótulos em uma visão operacional única.
                         </p>
                     </div>
@@ -582,7 +582,7 @@ export default function InventoryPage() {
                         <MagneticButton>
                         <Button
                             variant="primary"
-                            className="h-11 rounded-[16px] px-5 text-[12px] font-bold uppercase tracking-[0.12em] shadow-[0_18px_34px_-24px_hsl(var(--primary)/0.35)]"
+                            className="h-10 rounded-[14px] px-4 text-[11px] font-bold uppercase tracking-[0.12em] shadow-[0_18px_34px_-24px_hsl(var(--primary)/0.35)] sm:h-11 sm:rounded-[16px] sm:px-5 sm:text-[12px]"
                             onClick={() => setAddWineOpen(true)}
                         >
                             <Plus className="mr-1.5 h-3.5 w-3.5" /> Cadastrar vinho
@@ -591,48 +591,48 @@ export default function InventoryPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    <PremiumKpiCard className="min-h-[122px] rounded-[22px] px-4 py-4 md:px-5">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/58">
+                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-4">
+                    <PremiumKpiCard className="min-h-[88px] rounded-[18px] !p-3 md:min-h-[122px] md:rounded-[22px] md:!p-5">
+                        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
                             Rótulos cadastrados
                         </p>
-                        <div className="mt-4 flex items-end justify-between gap-3">
-                            <p className="text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">{summary.labels}</p>
-                            <Tag className="h-5 w-5 text-primary/48" />
+                        <div className="mt-2.5 flex items-end justify-between gap-2.5 md:mt-4 md:gap-3">
+                            <p className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-foreground tabular-nums md:text-[28px] md:font-black md:tracking-[-0.05em]">{summary.labels}</p>
+                            <Tag className="h-4 w-4 text-primary/48 md:h-5 md:w-5" />
                         </div>
                     </PremiumKpiCard>
-                    <PremiumKpiCard className="min-h-[122px] rounded-[22px] px-4 py-4 md:px-5">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/58">
+                    <PremiumKpiCard className="min-h-[88px] rounded-[18px] !p-3 md:min-h-[122px] md:rounded-[22px] md:!p-5">
+                        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
                             Garrafas em estoque
                         </p>
-                        <div className="mt-4 flex items-end justify-between gap-3">
-                            <p className="text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">{summary.bottles}</p>
-                            <Package className="h-5 w-5 text-primary/48" />
+                        <div className="mt-2.5 flex items-end justify-between gap-2.5 md:mt-4 md:gap-3">
+                            <p className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-foreground tabular-nums md:text-[28px] md:font-black md:tracking-[-0.05em]">{summary.bottles}</p>
+                            <Package className="h-4 w-4 text-primary/48 md:h-5 md:w-5" />
                         </div>
                     </PremiumKpiCard>
-                    <PremiumKpiCard className="min-h-[122px] rounded-[22px] px-4 py-4 md:px-5">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground/58">
+                    <PremiumKpiCard className="col-span-2 min-h-[88px] rounded-[18px] !p-3 md:col-span-1 md:min-h-[122px] md:rounded-[22px] md:!p-5">
+                        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70">
                             Valor total
                         </p>
-                        <div className="mt-4 flex items-end justify-between gap-3">
-                            <p className="text-[28px] font-black tracking-[-0.05em] text-foreground tabular-nums">
+                        <div className="mt-2.5 flex items-end justify-between gap-2.5 md:mt-4 md:gap-3">
+                            <p className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-foreground tabular-nums md:text-[28px] md:font-black md:tracking-[-0.05em]">
                                 R$ {summary.totalValue.toLocaleString("pt-BR")}
                             </p>
-                            <Star className="h-5 w-5 text-primary/48" />
+                            <Star className="h-4 w-4 text-primary/48 md:h-5 md:w-5" />
                         </div>
                     </PremiumKpiCard>
                 </div>
 
-                <div className="rounded-[26px] border border-black/[0.05] bg-[rgba(255,255,255,0.76)] px-3 py-3 shadow-[0_18px_40px_-28px_rgba(44,20,31,0.18)] backdrop-blur-xl md:px-4">
-                    <div className="flex flex-col gap-3">
-                        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center">
+                <div className="rounded-[24px] border border-black/[0.05] bg-[rgba(255,255,255,0.76)] px-3 py-3 shadow-[0_18px_40px_-28px_rgba(44,20,31,0.18)] backdrop-blur-xl md:px-4">
+                    <div className="flex flex-col gap-2.5 md:gap-3">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center">
                             <div className="relative min-w-0 flex-1">
                                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/45" />
                                 <Input
                                     placeholder="Pesquisar por rótulo, produtor, região, safra, uva ou localização..."
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    className="h-11 rounded-[16px] border-border/40 bg-white/76 pl-9 text-[13px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-md transition-all focus:border-primary/20 focus:ring-primary/10"
+                                    className="h-10 rounded-[14px] border-border/40 bg-white/76 pl-9 text-[12px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-md transition-all focus:border-primary/20 focus:ring-primary/10 md:h-11 md:rounded-[16px] md:text-[13px]"
                                 />
                             </div>
 
@@ -665,11 +665,11 @@ export default function InventoryPage() {
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            className="h-11 rounded-[16px] border-border/55 bg-white/68 px-3.5 text-[12px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]"
+                                            className="h-10 rounded-[14px] border-border/55 bg-white/68 px-3 text-[11.5px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)] md:h-11 md:rounded-[16px] md:px-3.5 md:text-[12px]"
                                         >
-                                            <ArrowUpDown className="mr-2 h-4 w-4 opacity-75" />
+                                            <ArrowUpDown className="mr-1.5 h-3.5 w-3.5 opacity-75 md:mr-2 md:h-4 md:w-4" />
                                             {sortOptions.find((option) => option.key === sortKey)?.label || "Nome"}
-                                            <ChevronDown className="ml-2 h-4 w-4 opacity-55" />
+                                            <ChevronDown className="ml-1.5 h-3.5 w-3.5 opacity-55 md:ml-2 md:h-4 md:w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-56 rounded-2xl">
@@ -687,14 +687,14 @@ export default function InventoryPage() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="h-11 rounded-[16px] border-border/55 bg-white/68 px-3.5 text-[12px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)]"
-                                    onClick={() => {
-                                        if (isMobile) setFilterOpen(true);
-                                        else setAdvancedFiltersOpen((open) => !open);
-                                    }}
-                                >
-                                    <SlidersHorizontal className="mr-2 h-4 w-4 opacity-75" />
-                                    {isMobile ? "Filtros" : advancedFiltersOpen ? "Ocultar filtros" : "Filtros avançados"}
+                                        className="h-10 rounded-[14px] border-border/55 bg-white/68 px-3 text-[11.5px] font-semibold shadow-[0_10px_24px_-24px_rgba(44,20,31,0.15)] md:h-11 md:rounded-[16px] md:px-3.5 md:text-[12px]"
+                                        onClick={() => {
+                                            if (isMobile) setFilterOpen(true);
+                                            else setAdvancedFiltersOpen((open) => !open);
+                                        }}
+                                    >
+                                        <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5 opacity-75 md:mr-2 md:h-4 md:w-4" />
+                                        {isMobile ? "Filtros" : advancedFiltersOpen ? "Ocultar filtros" : "Filtros avançados"}
                                     {activeFilterCount > 0 ? (
                                         <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-black text-primary-foreground">
                                             {activeFilterCount}
@@ -853,186 +853,185 @@ export default function InventoryPage() {
                     />
                 ) : isMobile ? (
                     <div className="p-2 space-y-2">
-                        {filteredWines.map((wine) => {
-                            const { salePrice, purchaseCost, unitMargin, marginPct } = getCommercialPricing(wine);
-                            const total = salePrice * (wine.quantity ?? 0);
+                        <div className="grid grid-cols-2 gap-3">
+                            {filteredWines.map((wine) => {
+                                const { salePrice, purchaseCost, unitMargin, marginPct } = getCommercialPricing(wine);
+                                return (
+                                    <div
+                                        key={wine.id}
+                                        className="group rounded-[18px] border border-white/18 bg-white/72 p-3 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]"
+                                    >
+                                        <div className="flex items-start gap-2.5">
+                                            <WineLabelPreview
+                                                wine={wine}
+                                                alt={wine.name}
+                                                compact
+                                                className="h-14 w-10 shrink-0 rounded-[14px]"
+                                                imageClassName="h-full w-full object-cover"
+                                            />
 
-                            return (
-                                <div
-                                    key={wine.id}
-                                    className="group rounded-[24px] border border-white/18 bg-white/72 p-4 shadow-[0_14px_30px_-24px_rgba(58,51,39,0.18)] backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/82 hover:shadow-[0_18px_34px_-26px_rgba(58,51,39,0.22)] active:scale-[0.995]"
-                                >
-                                    <div className="flex items-start gap-3.5">
-                                        <WineLabelPreview
-                                            wine={wine}
-                                            alt={wine.name}
-                                            compact
-                                            className="h-16 w-12 shrink-0"
-                                            imageClassName="h-full w-full object-cover"
-                                        />
-
-                                        <div className="flex-1 min-w-0 space-y-1.5">
-                                            <button
-                                                type="button"
-                                                className="w-full text-left"
-                                                onClick={() => {
-                                                    setEditingWine(wine);
-                                                    setEditWineOpen(true);
-                                                }}
-                                            >
-                                                <p className="truncate text-[15px] font-semibold tracking-[-0.03em] text-foreground leading-tight">
-                                                    {wine.name}
-                                                </p>
-                                                <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground/80">
-                                                    {[wine.vintage ? `Safra ${wine.vintage}` : "Safra NV", wine.country || "País não informado"].join(" · ")}
-                                                </p>
-                                                <div className="mt-2 flex flex-wrap gap-1.5">
-                                                    {wine.style ? (
-                                                        <Badge
-                                                            variant="secondary"
-                                                            className="h-5 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] px-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--primary))]"
-                                                        >
-                                                            {wine.style.charAt(0).toUpperCase() + wine.style.slice(1)}
-                                                        </Badge>
-                                                    ) : null}
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className={cn(
-                                                            "h-5 rounded-full px-2.5 text-[9px] font-bold uppercase tracking-[0.12em]",
-                                                            wine.quantity > 0
-                                                                ? "border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))]"
-                                                                : "border border-[rgba(196,137,52,0.16)] bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)]",
-                                                        )}
-                                                    >
-                                                        {wine.quantity > 0 ? "Em estoque" : "Sem estoque"}
-                                                    </Badge>
-                                                </div>
-                                            </button>
-
-                                            <div className="mt-3 flex items-center justify-between gap-3">
-                                                <div className="flex items-center gap-2">
-                                                    {renderStockVisual(wine.quantity)}
-                                                    {wine.quantity > 0 && wine.quantity <= 2 ? (
-                                                        <span className="text-[9px] font-semibold text-destructive/80 uppercase tracking-wider">Baixo</span>
-                                                    ) : null}
-                                                </div>
-                                                <div className="text-right">
-                                                <p className="text-[14px] font-black tracking-[-0.02em] text-foreground">
-                                                    Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
-                                                </p>
-                                                <p className="text-[12px] font-semibold text-foreground/78">
-                                                    {purchaseCost != null
-                                                        ? `Custo: R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                                                        : "Custo não informado"}
-                                                </p>
-                                            </div>
-                                            </div>
-
-                                            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                                                <div className="flex flex-wrap items-center gap-1.5">
-                                                    {marginPct != null ? (
-                                                        <Badge className={cn(
-                                                            "h-6 rounded-full border px-2.5 text-[10px] font-bold",
-                                                            unitMargin != null && unitMargin >= 0
-                                                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                                                : "border-amber-200 bg-amber-50 text-amber-700",
-                                                        )}>
-                                                            Margem {marginPct >= 0 ? "+" : ""}{marginPct.toFixed(0)}%
-                                                        </Badge>
-                                                    ) : null}
-                                                </div>
-                                                <p className="text-[10px] font-semibold text-muted-foreground/72">
-                                                    Total venda R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
+                                            <div className="min-w-0 flex-1 space-y-1.25">
+                                                <button
                                                     type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-9 w-9 rounded-2xl bg-white/60 backdrop-blur-md"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-64 rounded-2xl">
-                                                <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground">
-                                                    Ações
-                                                </DropdownMenuLabel>
-                                                <DropdownMenuItem
-                                                    variant="primary"
+                                                    className="w-full text-left"
                                                     onClick={() => {
                                                         setEditingWine(wine);
                                                         setEditWineOpen(true);
                                                     }}
                                                 >
-                                                    <Pencil className="mr-2 h-4 w-4" /> Editar vinho
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    variant="neutral"
-                                                    disabled={stockBusyWineId === wine.id}
-                                                    onClick={() => void handleQuickStock(wine.id, 1)}
-                                                >
-                                                    <Plus className="mr-2 h-4 w-4" /> Registrar entrada (+1)
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    variant="danger"
-                                                    disabled={stockBusyWineId === wine.id}
-                                                    onClick={() => void handleQuickStock(wine.id, -1)}
-                                                >
-                                                    <Minus className="mr-2 h-4 w-4" /> Registrar saída (-1)
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    variant="ghost"
-                                                    onClick={() => navigate(`/dashboard/log?wine=${encodeURIComponent(wine.id)}`)}
-                                                >
-                                                    <History className="mr-2 h-4 w-4" /> Ver histórico
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    variant="danger"
-                                                    onClick={async () => {
-                                                        if (!confirm("Deseja excluir este vinho?")) return;
-                                                        await deleteWine.mutateAsync(wine.id);
-                                                        toast({ title: "Produto removido." });
-                                                    }}
-                                                >
-                                                    <Trash2 className="mr-2 h-4 w-4" /> Remover
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
+                                                    <p className="truncate text-[13px] font-semibold leading-tight tracking-[-0.03em] text-foreground">
+                                                        {wine.name}
+                                                    </p>
+                                                    <p className="mt-0.5 truncate text-[10.5px] font-medium text-muted-foreground/80">
+                                                        {[wine.vintage ? `Safra ${wine.vintage}` : "Safra NV", wine.country || "País não informado"].join(" · ")}
+                                                    </p>
+                                                    <div className="mt-1.5 flex flex-wrap gap-1">
+                                                        {wine.style ? (
+                                                            <Badge
+                                                                variant="secondary"
+                                                                className="h-5 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] px-2 text-[9px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--primary))]"
+                                                            >
+                                                                {wine.style.charAt(0).toUpperCase() + wine.style.slice(1)}
+                                                            </Badge>
+                                                        ) : null}
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className={cn(
+                                                                "h-5 rounded-full px-2 text-[9px] font-bold uppercase tracking-[0.12em]",
+                                                                wine.quantity > 0
+                                                                    ? "border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.10)] text-[hsl(var(--primary))]"
+                                                                    : "border border-[rgba(196,137,52,0.16)] bg-[rgba(196,137,52,0.10)] text-[hsl(29_50%_32%)]",
+                                                            )}
+                                                        >
+                                                            {wine.quantity > 0 ? "Em estoque" : "Sem estoque"}
+                                                        </Badge>
+                                                    </div>
+                                                </button>
 
-                                    <div className="mt-3 grid grid-cols-2 gap-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            className="h-10 rounded-2xl text-[12px] font-bold"
-                                            disabled={stockBusyWineId === wine.id}
-                                            onClick={() => void handleQuickStock(wine.id, 1)}
-                                        >
-                                            {stockBusyWineId === wine.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                                            Entrada
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            className="h-10 rounded-2xl text-[12px] font-bold text-destructive border-destructive/20 hover:bg-destructive/5"
-                                            disabled={stockBusyWineId === wine.id}
-                                            onClick={() => void handleQuickStock(wine.id, -1)}
-                                        >
-                                            {stockBusyWineId === wine.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Minus className="mr-2 h-4 w-4" />}
-                                            Saída
-                                        </Button>
+                                                <div className="mt-2.5 flex items-center justify-between gap-2.5">
+                                                    <div className="flex items-center gap-2">
+                                                        {renderStockVisual(wine.quantity)}
+                                                        {wine.quantity > 0 && wine.quantity <= 2 ? (
+                                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-destructive/80">Baixo</span>
+                                                        ) : null}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-[13px] font-semibold tracking-[-0.02em] text-foreground">
+                                                            Venda R$ {salePrice.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                                                        </p>
+                                                        <p className="text-[11px] font-medium text-foreground/72">
+                                                            {purchaseCost != null
+                                                                ? `Custo: R$ ${purchaseCost.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                                                : "Custo não informado"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-2 flex items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-1.5">
+                                                        {marginPct != null ? (
+                                                            <Badge
+                                                                className={cn(
+                                                                    "h-5 rounded-full border px-2 text-[9px] font-bold",
+                                                                    unitMargin != null && unitMargin >= 0
+                                                                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                                                        : "border-amber-200 bg-amber-50 text-amber-700",
+                                                                )}
+                                                            >
+                                                                Margem {marginPct >= 0 ? "+" : ""}{marginPct.toFixed(0)}%
+                                                            </Badge>
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-2.5 grid grid-cols-2 gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        className="h-[34px] rounded-[10px] text-[13px] font-bold"
+                                                        disabled={stockBusyWineId === wine.id}
+                                                        onClick={() => void handleQuickStock(wine.id, 1)}
+                                                    >
+                                                        {stockBusyWineId === wine.id ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Plus className="mr-1.5 h-4 w-4" />}
+                                                        Entrada
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        className="h-[34px] rounded-[10px] text-[13px] font-bold text-destructive border-destructive/20 hover:bg-destructive/5"
+                                                        disabled={stockBusyWineId === wine.id}
+                                                        onClick={() => void handleQuickStock(wine.id, -1)}
+                                                    >
+                                                        {stockBusyWineId === wine.id ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Minus className="mr-1.5 h-4 w-4" />}
+                                                        Saída
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-[34px] w-[34px] rounded-[10px] border border-border/50 bg-white/60"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-64 rounded-2xl">
+                                                    <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground">
+                                                        Ações
+                                                    </DropdownMenuLabel>
+                                                    <DropdownMenuItem
+                                                        variant="primary"
+                                                        onClick={() => {
+                                                            setEditingWine(wine);
+                                                            setEditWineOpen(true);
+                                                        }}
+                                                    >
+                                                        <Pencil className="mr-2 h-4 w-4" /> Editar vinho
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        variant="neutral"
+                                                        disabled={stockBusyWineId === wine.id}
+                                                        onClick={() => void handleQuickStock(wine.id, 1)}
+                                                    >
+                                                        <Plus className="mr-2 h-4 w-4" /> Registrar entrada (+1)
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        variant="danger"
+                                                        disabled={stockBusyWineId === wine.id}
+                                                        onClick={() => void handleQuickStock(wine.id, -1)}
+                                                    >
+                                                        <Minus className="mr-2 h-4 w-4" /> Registrar saída (-1)
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        variant="ghost"
+                                                        onClick={() => navigate(`/dashboard/log?wine=${encodeURIComponent(wine.id)}`)}
+                                                    >
+                                                        <History className="mr-2 h-4 w-4" /> Ver histórico
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        variant="danger"
+                                                        onClick={async () => {
+                                                            if (!confirm("Deseja excluir este vinho?")) return;
+                                                            await deleteWine.mutateAsync(wine.id);
+                                                            toast({ title: "Produto removido." });
+                                                        }}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Remover
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        </div>
                     </div>
                 ) : viewMode === "table" ? (
                     <div className="overflow-x-auto">
@@ -1207,9 +1206,7 @@ export default function InventoryPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                             {filteredWines.map((wine) => {
                                 const { salePrice, purchaseCost, unitMargin, marginPct } = getCommercialPricing(wine);
-                                const total = salePrice * (wine.quantity ?? 0);
-
-                                return (
+                            return (
                                     <div
                                         key={wine.id}
                                         className="rounded-2xl border border-white/14 bg-white/55 p-4 shadow-sm backdrop-blur-md transition-colors hover:bg-white/65"
