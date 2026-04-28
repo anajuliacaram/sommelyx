@@ -35,6 +35,8 @@ import {
   STYLE_COLORS,
   StyleBadge,
   getStyleFamily,
+  classifyDrinkWindow,
+  resolveSuggestedDrinkWindow,
 } from "@/components/editorial/EditorialPrimitives";
 import { useAuth } from "@/contexts/AuthContext";
 import { useConsumption } from "@/hooks/useConsumption";
@@ -101,27 +103,41 @@ export default function PersonalDashboard() {
   );
 
   const ready = useMemo(() => {
-    const list = wines.filter(
-      (w) =>
-        w.quantity > 0 &&
-        w.drink_from &&
-        w.drink_until &&
-        currentYear >= w.drink_from &&
-        currentYear <= w.drink_until,
-    );
-    const filtered = list.filter((w) => {
-      if (styleFilter !== "todos" && getStyleFamily(w.style) !== styleFilter) return false;
+    console.log("ready wines:", wines);
+
+    const list = wines
+      .map((w) => {
+        const drinkWindow = resolveSuggestedDrinkWindow(w);
+        const classification = classifyDrinkWindow({
+          current: currentYear,
+          from: drinkWindow.from,
+          until: drinkWindow.until,
+        });
+
+        return { wine: w, drinkWindow, classification };
+      })
+      .filter(({ wine, classification }) => {
+        if (wine.quantity <= 0) return false;
+        return classification.status === "now" || classification.status === "soon";
+      });
+
+    const filtered = list.filter(({ wine }) => {
+      if (styleFilter !== "todos" && getStyleFamily(wine.style) !== styleFilter) return false;
       if (!query) return true;
       const q = query.toLowerCase();
       return (
-        w.name.toLowerCase().includes(q) ||
-        (w.producer || "").toLowerCase().includes(q) ||
-        (w.country || "").toLowerCase().includes(q) ||
-        (w.region || "").toLowerCase().includes(q) ||
-        String(w.vintage ?? "").includes(q)
+        wine.name.toLowerCase().includes(q) ||
+        (wine.producer || "").toLowerCase().includes(q) ||
+        (wine.country || "").toLowerCase().includes(q) ||
+        (wine.region || "").toLowerCase().includes(q) ||
+        String(wine.vintage ?? "").includes(q)
       );
     });
-    return filtered.sort((a, b) => (a.drink_until ?? 9999) - (b.drink_until ?? 9999)).slice(0, 8);
+
+    return filtered
+      .sort((a, b) => a.drinkWindow.until - b.drinkWindow.until)
+      .map(({ wine }) => wine)
+      .slice(0, 8);
   }, [wines, currentYear, query, styleFilter]);
 
   const months = useMemo(() => buildMonthWindow(6), []);
