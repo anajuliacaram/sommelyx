@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, memo } from "react";
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -107,7 +107,7 @@ function wineMatchesFilters(w: WineType, f: ActiveFilters) {
 }
 
 /* ── Filter Chip Component ── */
-function FilterChipGroup({
+const FilterChipGroup = memo(function FilterChipGroup({
   label,
   options,
   selected,
@@ -150,7 +150,7 @@ function FilterChipGroup({
       </div>
     </div>
   );
-}
+});
 
 export default function CommercialDashboard() {
   const { user } = useAuth();

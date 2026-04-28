@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
     Search, Filter, SlidersHorizontal, ArrowUpDown, ChevronDown,
     MoreHorizontal, Trash2, Tag, X,
@@ -71,7 +70,10 @@ export default function InventoryPage() {
     const [addWineOpen, setAddWineOpen] = useState(false);
     const [editWineOpen, setEditWineOpen] = useState(false);
     const [editingWine, setEditingWine] = useState<Wine | null>(null);
-    const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+    const [viewMode, setViewMode] = useState<"table" | "grid">(() => {
+        if (typeof window === "undefined") return "table";
+        return (window.localStorage.getItem("inventory:viewMode") as "table" | "grid" | null) || "table";
+    });
     const [stockBusyWineId, setStockBusyWineId] = useState<string | null>(null);
     const [auditOpen, setAuditOpen] = useState(false);
     const [auditPayload, setAuditPayload] = useState<{
@@ -107,6 +109,10 @@ export default function InventoryPage() {
         parseInt(searchParams.get("minPrice") || "0"),
         parseInt(searchParams.get("maxPrice") || "5000")
     ]);
+
+    useEffect(() => {
+        window.localStorage.setItem("inventory:viewMode", viewMode);
+    }, [viewMode]);
 
     const handleSort = (key: string) => {
         const order = sortKey === key && sortOrder === "asc" ? "desc" : "asc";
@@ -297,72 +303,78 @@ export default function InventoryPage() {
       tagFilters.length +
       (statusFilter !== "all" ? 1 : 0);
 
-    const quickStatusTabs = [
-        { id: "all" as const, label: "Todos", count: wines.length },
-        {
-            id: "low" as const,
-            label: "Baixo estoque",
-            count: wines.filter((wine) => wine.quantity > 0 && wine.quantity <= 2).length,
-        },
-        {
-            id: "out" as const,
-            label: "Sem estoque",
-            count: wines.filter((wine) => wine.quantity === 0).length,
-        },
-    ];
+    const quickStatusTabs = useMemo(
+        () => [
+            { id: "all" as const, label: "Todos", count: wines.length },
+            {
+                id: "low" as const,
+                label: "Baixo estoque",
+                count: wines.filter((wine) => wine.quantity > 0 && wine.quantity <= 2).length,
+            },
+            {
+                id: "out" as const,
+                label: "Sem estoque",
+                count: wines.filter((wine) => wine.quantity === 0).length,
+            },
+        ],
+        [wines],
+    );
 
-    const desktopFilterGroups = [
-        {
-            title: "Região",
-            options: dynamicOptions.regions,
-            selected: regionFilters,
-            param: "region",
-            placeholder: "Buscar região...",
-        },
-        {
-            title: "Setor",
-            options: dynamicOptions.sectors ?? [],
-            selected: sectorFilters,
-            param: "sector",
-            placeholder: "Buscar setor...",
-        },
-        {
-            title: "Gôndola",
-            options: dynamicOptions.zones ?? [],
-            selected: zoneFilters,
-            param: "zone",
-            placeholder: "Buscar gôndola...",
-        },
-        {
-            title: "Linha",
-            options: dynamicOptions.levels ?? [],
-            selected: levelFilters,
-            param: "level",
-            placeholder: "Buscar linha...",
-        },
-        {
-            title: "País",
-            options: dynamicOptions.countries,
-            selected: countryFilters,
-            param: "country",
-            placeholder: "Buscar país...",
-        },
-        {
-            title: "Safra",
-            options: dynamicOptions.vintages,
-            selected: vintageFilters,
-            param: "vintage",
-            placeholder: "Buscar safra...",
-        },
-        {
-            title: "Status",
-            options: dynamicOptions.statusOptions,
-            selected: statusFilter === "all" ? [] : [statusFilter],
-            param: "status",
-            placeholder: undefined,
-            multi: false,
-        },
-    ] as const;
+    const desktopFilterGroups = useMemo(
+        () => [
+            {
+                title: "Região",
+                options: dynamicOptions.regions,
+                selected: regionFilters,
+                param: "region",
+                placeholder: "Buscar região...",
+            },
+            {
+                title: "Setor",
+                options: dynamicOptions.sectors ?? [],
+                selected: sectorFilters,
+                param: "sector",
+                placeholder: "Buscar setor...",
+            },
+            {
+                title: "Gôndola",
+                options: dynamicOptions.zones ?? [],
+                selected: zoneFilters,
+                param: "zone",
+                placeholder: "Buscar gôndola...",
+            },
+            {
+                title: "Linha",
+                options: dynamicOptions.levels ?? [],
+                selected: levelFilters,
+                param: "level",
+                placeholder: "Buscar linha...",
+            },
+            {
+                title: "País",
+                options: dynamicOptions.countries,
+                selected: countryFilters,
+                param: "country",
+                placeholder: "Buscar país...",
+            },
+            {
+                title: "Safra",
+                options: dynamicOptions.vintages,
+                selected: vintageFilters,
+                param: "vintage",
+                placeholder: "Buscar safra...",
+            },
+            {
+                title: "Status",
+                options: dynamicOptions.statusOptions,
+                selected: statusFilter === "all" ? [] : [statusFilter],
+                param: "status",
+                placeholder: undefined,
+                multi: false,
+            },
+        ] as const,
+        [countryFilters, dynamicOptions.countries, dynamicOptions.levels, dynamicOptions.regions, dynamicOptions.sectors, dynamicOptions.statusOptions, dynamicOptions.vintages, dynamicOptions.zones, regionFilters, sectorFilters, statusFilter, vintageFilters, zoneFilters],
+    );
 
     const sortOptions = [
         { key: "name", label: "Nome" },
@@ -740,55 +752,43 @@ export default function InventoryPage() {
                                 </div>
                             </div>
 
-                            <AnimatePresence>
-                                {!isMobile && advancedFiltersOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -8, height: 0 }}
-                                        animate={{ opacity: 1, y: 0, height: "auto" }}
-                                        exit={{ opacity: 0, y: -6, height: 0 }}
-                                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                                        className="overflow-hidden"
-                                    >
-                                        <div className="rounded-[20px] border border-black/[0.05] bg-white/58 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
-                                            <div className="mb-2 flex items-center justify-between gap-2">
-                                                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/58">
-                                                    Filtros avançados
-                                                </p>
-                                                <p className="text-[11px] font-medium text-foreground/52">
-                                                    Região, localização, origem, safra e status
-                                                </p>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
-                                                {desktopFilterGroups.map((group) => (
-                                                    <div key={group.title} className="min-w-0">
-                                                        <MultiSelectDropdown
-                                                            title={group.title}
-                                                            options={group.options}
-                                                            selected={group.selected}
-                                                            onChange={(val) => updateParam(group.param, val, (group as any).multi ?? true)}
-                                                            onClear={() => updateParam(group.param, null, (group as any).multi ?? true)}
-                                                            searchPlaceholder={group.placeholder}
-                                                            searchable={Boolean(group.placeholder)}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
+                            {!isMobile && advancedFiltersOpen && (
+                                <div className="overflow-hidden">
+                                    <div className="rounded-[20px] border border-black/[0.05] bg-white/58 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                                        <div className="mb-2 flex items-center justify-between gap-2">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted-foreground/58">
+                                                Filtros avançados
+                                            </p>
+                                            <p className="text-[11px] font-medium text-foreground/52">
+                                                Região, localização, origem, safra e status
+                                            </p>
                                         </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                                        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
+                                            {desktopFilterGroups.map((group) => (
+                                                <div key={group.title} className="min-w-0">
+                                                    <MultiSelectDropdown
+                                                        title={group.title}
+                                                        options={group.options}
+                                                        selected={group.selected}
+                                                        onChange={(val) => updateParam(group.param, val, (group as any).multi ?? true)}
+                                                        onClear={() => updateParam(group.param, null, (group as any).multi ?? true)}
+                                                        searchPlaceholder={group.placeholder}
+                                                        searchable={Boolean(group.placeholder)}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* --- SELECTED CHIPS --- */}
-            <AnimatePresence>
-                {(styleFilters.length > 0 || countryFilters.length > 0 || regionFilters.length > 0 || grapeFilters.length > 0 || vintageFilters.length > 0 || statusFilter !== "all") && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
+            {(styleFilters.length > 0 || countryFilters.length > 0 || regionFilters.length > 0 || grapeFilters.length > 0 || vintageFilters.length > 0 || statusFilter !== "all") && (
+                    <div
                         className="flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible"
                     >
                         <span className="shrink-0 rounded-full border border-black/[0.05] bg-white/65 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/75">
@@ -833,9 +833,9 @@ export default function InventoryPage() {
                         >
                             Limpar tudo
                         </Button>
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
+            
 
             {/* --- DATA VIEW --- */}
             <div className="overflow-hidden rounded-[28px] border border-black/[0.05] bg-[rgba(255,255,255,0.82)] shadow-[0_18px_46px_-30px_rgba(44,20,31,0.20)] backdrop-blur-xl">

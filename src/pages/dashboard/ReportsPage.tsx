@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Wine, DollarSign, ShoppingCart, Tag, Package, CalendarDays } from "@/icons/lucide";
 import { useWineMetrics } from "@/hooks/useWines";
 import { useSales } from "@/hooks/useBusinessData";
@@ -34,7 +34,14 @@ type ReportTab = "estoque" | "vendas";
 export default function ReportsPage() {
   const { wines, isLoading: winesLoading } = useWineMetrics();
   const { data: sales = [], isLoading: salesLoading } = useSales();
-  const [tab, setTab] = useState<ReportTab>("estoque");
+  const [tab, setTab] = useState<ReportTab>(() => {
+    if (typeof window === "undefined") return "estoque";
+    return (window.localStorage.getItem("reports:tab") as ReportTab | null) ?? "estoque";
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem("reports:tab", tab);
+  }, [tab]);
 
   const isLoading = winesLoading || salesLoading;
 

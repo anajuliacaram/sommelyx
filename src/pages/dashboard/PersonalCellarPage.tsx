@@ -73,14 +73,32 @@ export default function PersonalCellarPage() {
   useResolveWineImages(wines);
   const isMobile = useIsSmallScreen();
 
-  const [query, setQuery] = useState("");
-  const [styleFilter, setStyleFilter] = useState("todos");
-  const [countryFilter, setCountryFilter] = useState("all");
-  const [drinkWindowFilter, setDrinkWindowFilter] = useState<"all" | "now" | "guard">("all");
+  const [query, setQuery] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem("cellar:query") ?? "";
+  });
+  const [styleFilter, setStyleFilter] = useState(() => {
+    if (typeof window === "undefined") return "todos";
+    return window.localStorage.getItem("cellar:styleFilter") ?? "todos";
+  });
+  const [countryFilter, setCountryFilter] = useState(() => {
+    if (typeof window === "undefined") return "all";
+    return window.localStorage.getItem("cellar:countryFilter") ?? "all";
+  });
+  const [drinkWindowFilter, setDrinkWindowFilter] = useState<"all" | "now" | "guard">(() => {
+    if (typeof window === "undefined") return "all";
+    return (window.localStorage.getItem("cellar:drinkWindowFilter") as "all" | "now" | "guard" | null) ?? "all";
+  });
   const [sort, setSort] = useState<
     "recent" | "value_low" | "value" | "vintage_old" | "vintage"
-  >("recent");
-  const [view, setView] = useState<"grid" | "list">("grid");
+  >(() => {
+    if (typeof window === "undefined") return "recent";
+    return (window.localStorage.getItem("cellar:sort") as "recent" | "value_low" | "value" | "vintage_old" | "vintage" | null) ?? "recent";
+  });
+  const [view, setView] = useState<"grid" | "list">(() => {
+    if (typeof window === "undefined") return "grid";
+    return (window.localStorage.getItem("cellar:view") as "grid" | "list" | null) ?? "grid";
+  });
   const [showLabels] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const v = window.localStorage.getItem("cellar:showLabels");
@@ -96,6 +114,25 @@ export default function PersonalCellarPage() {
   const controlSurface = "bg-[rgba(255,255,255,0.78)] border-[rgba(95,111,82,0.12)] text-[#1a1713] shadow-[0_1px_0_rgba(95,111,82,0.04)]";
   const controlMuted = "bg-[rgba(255,255,255,0.68)] border-[rgba(95,111,82,0.10)] text-[rgba(58,51,39,0.72)]";
   const sectionLabel = "text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(58,51,39,0.48)]";
+
+  useEffect(() => {
+    window.localStorage.setItem("cellar:query", query);
+  }, [query]);
+  useEffect(() => {
+    window.localStorage.setItem("cellar:styleFilter", styleFilter);
+  }, [styleFilter]);
+  useEffect(() => {
+    window.localStorage.setItem("cellar:countryFilter", countryFilter);
+  }, [countryFilter]);
+  useEffect(() => {
+    window.localStorage.setItem("cellar:drinkWindowFilter", drinkWindowFilter);
+  }, [drinkWindowFilter]);
+  useEffect(() => {
+    window.localStorage.setItem("cellar:sort", sort);
+  }, [sort]);
+  useEffect(() => {
+    window.localStorage.setItem("cellar:view", view);
+  }, [view]);
 
   const styleOptions = useMemo(() => {
     const styleSet = new Set<string>();

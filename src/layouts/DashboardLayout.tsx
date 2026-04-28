@@ -3,7 +3,7 @@ import { AnimatedOutlet } from "@/components/AnimatedOutlet";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { useWineMetrics, useWines } from "@/hooks/useWines";
@@ -20,8 +20,26 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const { drinkNow, lowStock } = useWineMetrics();
   const { data: wines } = useWines();
-  const alertCount = drinkNow + (profileType === "commercial" ? lowStock : 0);
+  const alertCount = useMemo(() => drinkNow + (profileType === "commercial" ? lowStock : 0), [drinkNow, lowStock, profileType]);
   const isMobile = useIsMobile();
+
+  const handleAddWine = useCallback(() => setAddOpen(true), []);
+  const handleImportCsv = useCallback(
+    () => navigate(profileType === "commercial" ? "/dashboard/inventory" : "/dashboard/cellar"),
+    [navigate, profileType],
+  );
+  const handleRegisterOpen = useCallback(() => {
+    setManageTab("open");
+    setManageOpen(true);
+  }, []);
+  const handleRegisterExit = useCallback(() => {
+    setManageTab("exit");
+    setManageOpen(true);
+  }, []);
+  const handleRegisterSale = useCallback(
+    () => profileType === "commercial" && navigate("/dashboard/sales"),
+    [navigate, profileType],
+  );
 
   const initials =
     user?.user_metadata?.full_name
@@ -81,19 +99,11 @@ export default function DashboardLayout() {
                   profileType={profileType}
                   wines={wines ?? []}
                   alertCount={alertCount}
-                  onAddWine={() => setAddOpen(true)}
-                  onImportCsv={() =>
-                    navigate(profileType === "commercial" ? "/dashboard/inventory" : "/dashboard/cellar")
-                  }
-                  onRegisterOpen={() => {
-                    setManageTab("open");
-                    setManageOpen(true);
-                  }}
-                  onRegisterExit={() => {
-                    setManageTab("exit");
-                    setManageOpen(true);
-                  }}
-                  onRegisterSale={profileType === "commercial" ? () => navigate("/dashboard/sales") : undefined}
+                  onAddWine={handleAddWine}
+                  onImportCsv={handleImportCsv}
+                  onRegisterOpen={handleRegisterOpen}
+                  onRegisterExit={handleRegisterExit}
+                  onRegisterSale={profileType === "commercial" ? handleRegisterSale : undefined}
                 />
               </div>
 
