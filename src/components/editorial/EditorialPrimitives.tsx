@@ -172,15 +172,15 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
       className={cn(
         "editorial-kpi h-full",
         isRow
-          ? "min-h-[76px] px-3 py-3 sm:min-h-[80px] sm:px-0 sm:py-0"
-          : "flex min-h-[100px] flex-col gap-2 px-3.5 py-4 sm:min-h-[104px] sm:gap-1.5 sm:px-0 sm:py-0",
+          ? "min-h-[74px] px-3 py-3 sm:min-h-[78px] sm:px-0 sm:py-0"
+          : "flex min-h-[92px] flex-col gap-1.5 px-3.5 py-3.5 sm:min-h-[96px] sm:gap-1.5 sm:px-0 sm:py-0",
       )}
     >
-      <div className={cn("flex items-start gap-1.5", isRow && "items-center")}>
+      <div className={cn("flex min-w-0 items-start gap-1.5", isRow && "items-center")}>
         <div
           className={cn(
             "flex shrink-0 items-center justify-center rounded-[10px]",
-            isRow ? "h-[22px] w-[22px] sm:h-8 sm:w-8" : "h-[24px] w-[24px] sm:h-9 sm:w-9 sm:rounded-[12px]",
+            isRow ? "h-[22px] w-[22px] sm:h-[24px] sm:w-[24px]" : "h-[22px] w-[22px] sm:h-[26px] sm:w-[26px]",
           )}
           style={{ color: accent, background: `${accent}14` }}
         >
@@ -188,31 +188,31 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         </div>
         <span
           className={cn(
-            "min-w-0 font-bold uppercase leading-[1.18] tracking-[0.08em] text-[rgba(58,51,39,0.56)] opacity-70 sm:tracking-[0.12em]",
-            isRow ? "whitespace-normal text-[11px]" : "truncate text-[11px]",
+            "min-w-0 font-medium uppercase leading-[1.2] tracking-[0.04em] text-[rgba(58,51,39,0.58)]",
+            isRow ? "whitespace-normal break-words text-[11px] sm:text-[12px]" : "whitespace-normal break-words text-[11px] sm:text-[12px]",
           )}
         >
           {label}
         </span>
       </div>
       {isRow ? (
-        <div className="mt-1 flex min-w-0 items-baseline gap-2">
-          <div className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[30px]">
+        <div className="mt-1.5 flex min-w-0 items-baseline gap-1.5">
+          <div className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[24px]">
             {value}
           </div>
           {sub ? (
-            <span className="min-w-0 truncate text-[13px] font-medium leading-[1.2] text-[rgba(58,51,39,0.62)]">
+            <span className="min-w-0 max-w-[14ch] truncate text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.62)] sm:text-[13px]">
               {sub}
             </span>
           ) : null}
         </div>
       ) : (
         <>
-          <div className="text-[22px] font-semibold leading-[1.2] tracking-[-0.04em] text-[#1a1713] tabular-nums sm:text-[30px]">
+          <div className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[24px]">
             {value}
           </div>
           {sub && (
-            <span className="mt-[2px] text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.42)] sm:text-[9px] sm:font-bold sm:uppercase sm:tracking-[0.11em]">
+            <span className="mt-[2px] text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.42)] sm:text-[13px]">
               {sub}
             </span>
           )}

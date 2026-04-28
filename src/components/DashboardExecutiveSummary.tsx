@@ -126,16 +126,24 @@ export function DashboardExecutiveSummary({
                   className="rounded-[16px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.65)] p-4 backdrop-blur-[10px]"
                   style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[#6B6B6B]">{metric.label}</p>
-                      <p className="mt-2 font-serif text-[24px] font-semibold tracking-[-0.02em] text-[#1C1C1C]">{metric.value}</p>
-                    </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">
+                  <div className="flex items-start gap-1.5">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">
                       <Icon className="h-4 w-4 text-copper" />
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.04em] text-[#6B6B6B] sm:text-[12px]">
+                        {metric.label}
+                      </p>
+                      <div className="mt-1 flex min-w-0 items-baseline gap-1.5">
+                        <p className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1C1C1C] tabular-nums sm:text-[22px] xl:text-[24px]">
+                          {metric.value}
+                        </p>
+                        <span className="min-w-0 truncate text-[12px] font-medium leading-[1.2] text-[#6B6B6B]">
+                          {metric.detail}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="mt-2 text-[12px] leading-relaxed text-[#6B6B6B]">{metric.detail}</p>
                 </article>
               );
             })}
