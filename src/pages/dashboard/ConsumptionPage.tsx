@@ -477,9 +477,9 @@ export default function ConsumptionPage() {
         <div className="mt-3 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex min-w-[336px] items-center gap-1.5">
             {[
-              { kind: "period" as const, label: "Período", value: periodValueLabel, aria: "Filtrar período" },
-              { kind: "source" as const, label: "Origem", value: sourceButtonLabel, aria: "Filtrar origem" },
-              { kind: "sort" as const, label: "Ordenar", value: sortValueLabel, aria: "Ordenar consumo" },
+              { kind: "period" as const, label: "Período", aria: "Filtrar período" },
+              { kind: "source" as const, label: "Origem", aria: "Filtrar origem" },
+              { kind: "sort" as const, label: "Ordenar", aria: "Ordenar consumo" },
             ].map((filter) => {
               const active = openFilter === filter.kind;
               return (
@@ -495,13 +495,8 @@ export default function ConsumptionPage() {
                       : "border-[rgba(132,168,108,0.24)] bg-[rgba(132,168,108,0.06)] text-[#2f2a22]",
                   )}
                 >
-                  <span className="flex min-w-0 items-center gap-1.5">
-                    <span className="shrink-0 text-[11px] font-medium tracking-[-0.01em] text-[rgba(95,111,82,0.76)]">
-                      {filter.label}
-                    </span>
-                    <span className="min-w-0 truncate text-[13px] font-semibold tracking-[-0.01em] text-[#213b26]">
-                      {filter.value}
-                    </span>
+                  <span className="min-w-0 truncate text-[13px] font-semibold tracking-[-0.01em] text-[#213b26]">
+                    {filter.label}
                   </span>
                   <ChevronDown
                     className={cn(
