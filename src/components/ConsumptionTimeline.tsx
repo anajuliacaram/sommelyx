@@ -47,13 +47,13 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
   }, [entries]);
 
   return (
-    <section className="rounded-[24px] bg-[#FFFFFF] p-7 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-      <div className="mb-6 flex items-center justify-between gap-4">
+    <section className="rounded-[22px] bg-[#FFFFFF] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] md:p-6">
+      <div className="mb-4 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[rgba(26,23,19,0.5)]">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[rgba(26,23,19,0.5)]">
             Meu Consumo
           </p>
-          <h2 className="mt-1 font-serif text-[1.45rem] font-semibold tracking-[-0.03em] text-[#1A1713]">
+          <h2 className="mt-1 font-serif text-[1.25rem] font-semibold tracking-[-0.03em] text-[#1A1713] md:text-[1.4rem]">
             {title}
           </h2>
         </div>
@@ -69,15 +69,15 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           {months.map((month) => (
             <div key={month.key}>
-              <div className="mb-3 flex items-center gap-3">
-                <span className="font-semibold text-[13px] tracking-[-0.01em] text-[#7B1E2B]">
+              <div className="mb-2.5 flex items-center gap-2.5">
+                <span className="font-semibold text-[12px] tracking-[-0.01em] text-[#7B1E2B]">
                   {month.label}
                 </span>
                 <div className="h-px flex-1 bg-[rgba(95,111,82,0.08)]" />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(0,0,0,0.45)] tabular-nums">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[rgba(0,0,0,0.45)] tabular-nums">
                   {month.events.length} {month.events.length === 1 ? "ABERTURA" : "ABERTURAS"}
                 </span>
               </div>
@@ -95,7 +95,7 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       key={entry.id}
                       onClick={() => !isDemo && setEditing(entry)}
                       disabled={isDemo}
-                      className="group flex items-stretch gap-3 py-3 text-left transition-colors hover:bg-[rgba(123,30,43,0.025)] disabled:cursor-default"
+                      className="group flex items-stretch gap-2.5 py-2.25 text-left transition-colors hover:bg-[rgba(123,30,43,0.025)] disabled:cursor-default"
                       style={{
                         borderBottom:
                           index < month.events.length - 1
@@ -103,22 +103,22 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                             : "none",
                       }}
                     >
-                      <div className="flex w-9 shrink-0 flex-col items-center justify-start text-center">
-                        <span className="font-sans text-[18px] font-bold leading-none tracking-[-0.04em] text-[#1A1713] tabular-nums">
+                      <div className="flex w-8.5 shrink-0 flex-col items-center justify-start text-center">
+                        <span className="font-sans text-[16px] font-bold leading-none tracking-[-0.04em] text-[#1A1713] tabular-nums">
                           {date.getDate()}
                         </span>
-                        <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[rgba(26,23,19,0.45)]">
+                        <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[rgba(26,23,19,0.45)]">
                           {getWeekdayLabel(date)}
                         </span>
                       </div>
 
                       <div
-                        className="w-[3px] shrink-0 self-stretch rounded-[2px]"
-                        style={{ background: color, minHeight: 32 }}
+                        className="w-[2px] shrink-0 self-stretch rounded-[2px]"
+                        style={{ background: color, minHeight: 26 }}
                       />
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-start gap-1.5 font-sans text-[14px] font-semibold tracking-[-0.005em] text-[#1A1713]">
+                        <div className="flex items-start gap-1.25 font-sans text-[13px] font-semibold tracking-[-0.005em] text-[#1A1713]">
                           <span
                             aria-hidden
                             className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
@@ -126,21 +126,21 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                           />
                           <span className="whitespace-normal break-words leading-[1.2]">{entry.wine_name}</span>
                         </div>
-                        <div className="mt-0.5 whitespace-normal break-words text-[12px] text-[rgba(26,23,19,0.55)]">
+                        <div className="mt-0.5 whitespace-normal break-words text-[11px] leading-[1.25] text-[rgba(26,23,19,0.55)]">
                           {entry.location || entry.tasting_notes || "—"}
                         </div>
                       </div>
 
-                      <div className="flex min-w-[52px] shrink-0 items-center justify-end gap-2 text-[11px] font-medium text-[#C9B469]">
+                      <div className="flex min-w-[44px] shrink-0 items-center justify-end gap-1.5 text-[10px] font-medium text-[#C9B469]">
                         <span className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-current" />
+                          <Star className="h-2.5 w-2.5 fill-current" />
                           <span className="tabular-nums">
                             {entry.rating != null ? entry.rating.toFixed(1) : "—"}
                           </span>
                         </span>
                         {!isDemo && (
                           <Pencil
-                            className="h-3.5 w-3.5 text-[rgba(26,23,19,0.3)] opacity-0 transition-opacity group-hover:opacity-100"
+                            className="h-3 w-3 text-[rgba(26,23,19,0.3)] opacity-0 transition-opacity group-hover:opacity-100"
                             aria-hidden
                           />
                         )}

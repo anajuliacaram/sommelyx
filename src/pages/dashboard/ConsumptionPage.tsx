@@ -4,6 +4,14 @@
 import { useMemo, useState } from "react";
 import { useConsumption } from "@/hooks/useConsumption";
 import { ConsumptionTimeline } from "@/components/ConsumptionTimeline";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  EditorialCard,
+  EditorialKpiCard,
+  Kicker,
+  Sparkbar,
+} from "@/components/editorial/EditorialPrimitives";
+import { Calendar, GlassWater, Star, TrendingUp } from "@/icons/lucide";
 
 type PeriodFilter = "week" | "month" | "year";
 type SourceFilter = "cellar" | "external" | "all";
@@ -40,25 +48,18 @@ function FilterPill({
     <button
       type="button"
       onClick={onClick}
-      className="h-9 rounded-full px-4 text-[12px] font-medium tracking-[-0.005em] transition-all"
+      className="h-8.5 rounded-full px-3.5 text-[11.5px] font-medium tracking-[-0.005em] transition-all whitespace-nowrap"
       style={{
-        background: active ? "#7B1E2B" : "#F4F1EC",
-        color: active ? "#FFFFFF" : "#6B645C",
-        boxShadow: active ? "0 2px 8px rgba(123,30,43,0.18)" : "none",
+        background: active ? "rgba(123,30,43,0.10)" : "rgba(255,255,255,0.82)",
+        color: active ? "#7B1E2B" : "#6B645C",
+        border: `1px solid ${active ? "rgba(123,30,43,0.16)" : "rgba(95,111,82,0.10)"}`,
+        boxShadow: active ? "0 2px 8px rgba(123,30,43,0.10)" : "none",
       }}
     >
       {children}
     </button>
   );
 }
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  EditorialCard,
-  EditorialKpiCard,
-  Kicker,
-  Sparkbar,
-} from "@/components/editorial/EditorialPrimitives";
-import { Calendar, GlassWater, Star, TrendingUp } from "@/icons/lucide";
 
 function buildMonthWindow(size: number) {
   const months: Array<{ key: string; label: string }> = [];
@@ -221,7 +222,7 @@ export default function ConsumptionPage() {
   if (isLoading) {
     return (
       <div className="editorial-page">
-        <EditorialCard>
+        <EditorialCard style={{ padding: "14px 14px 12px" }}>
           <Skeleton className="h-3 w-28 rounded-full bg-black/5" />
           <Skeleton className="mt-2 h-7 w-52 rounded-full bg-black/5" />
           <Skeleton className="mt-2 h-4 w-64 rounded-full bg-black/5" />
@@ -236,7 +237,7 @@ export default function ConsumptionPage() {
         <Kicker>Histórico pessoal</Kicker>
         <h1 className="editorial-page-h1 mt-1">Meu Consumo</h1>
         <p
-          className="mt-1 max-w-[560px] text-[13px]"
+          className="mt-1 max-w-[560px] text-[12.5px] leading-[1.35]"
           style={{ color: "rgba(58,51,39,0.6)" }}
         >
           Tudo que você abriu nos últimos meses, com ocasiões e ritmo.
@@ -244,7 +245,7 @@ export default function ConsumptionPage() {
       </header>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
         <EditorialKpiCard
           icon={<GlassWater className="h-4 w-4" />}
           accent="#7B1E2B"
@@ -276,26 +277,32 @@ export default function ConsumptionPage() {
       </div>
 
       {/* Monthly chart */}
-      <EditorialCard>
-        <div className="mb-3 flex items-baseline justify-between">
+      <EditorialCard style={{ padding: "14px 14px 12px" }}>
+        <div className="mb-2.5 flex items-baseline justify-between">
           <div>
             <Kicker>Ritmo de consumo</Kicker>
-            <h2 className="editorial-h2 mt-1">{chart.title}</h2>
+            <h2 className="editorial-h2 mt-1 text-[18px] md:text-[22px]">{chart.title}</h2>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[rgba(58,51,39,0.5)]">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.10em] text-[rgba(58,51,39,0.5)]">
             garrafas / {period === "week" ? "dia" : "mês"}
           </span>
         </div>
-        <Sparkbar data={chart.data} accent="#7B1E2B" height={72} barWidth={period === "year" ? 6 : 10} />
+        <Sparkbar
+          data={chart.data}
+          accent="#8A6A54"
+          height={52}
+          showValues={false}
+          barWidth={period === "year" ? 4 : 6}
+        />
       </EditorialCard>
 
       {/* Filtros inteligentes */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border border-[rgba(123,30,43,0.18)] bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5F7F52]">
             Período
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex min-w-max items-center gap-1.25">
             {periodOptions.map((opt) => (
               <FilterPill key={opt.value} active={period === opt.value} onClick={() => setPeriod(opt.value)}>
                 {opt.label}
@@ -303,11 +310,11 @@ export default function ConsumptionPage() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border border-[rgba(123,30,43,0.18)] bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5F7F52]">
             Origem
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex min-w-max items-center gap-1.25">
             {sourceOptions.map((opt) => (
               <FilterPill key={opt.value} active={source === opt.value} onClick={() => setSource(opt.value)}>
                 {opt.label}
@@ -315,11 +322,11 @@ export default function ConsumptionPage() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border border-[rgba(123,30,43,0.18)] bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5F7F52]">
             Ordenar
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex min-w-max items-center gap-1.25">
             {sortOptions.map((opt) => (
               <FilterPill key={opt.value} active={sortBy === opt.value} onClick={() => setSortBy(opt.value)}>
                 {opt.label}
