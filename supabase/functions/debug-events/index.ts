@@ -4,10 +4,11 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-debug-secret, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const WRAPPED_DEBUG = Deno.env.get("WRAPPED_DEBUG") === "true";
+const DEBUG_SECRET = Deno.env.get("DEBUG_SECRET")?.trim() ?? "";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -19,8 +20,14 @@ function json(body: unknown, status = 200) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (!WRAPPED_DEBUG) return json({ error: "Not found" }, 404);
+  if (!DEBUG_SECRET) return json({ error: "Not found" }, 404);
 
   try {
+    const debugSecret = req.headers.get("x-debug-secret")?.trim() ?? "";
+    if (!debugSecret || debugSecret !== DEBUG_SECRET) {
+      return json({ error: "Not found" }, 404);
+    }
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return json({ error: "Autenticação necessária" }, 401);
