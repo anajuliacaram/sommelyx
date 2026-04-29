@@ -62,29 +62,29 @@ const categories: { key: FaqCategory; label: string; icon: typeof CreditCard; ac
   { key: "privacidade", label: "Privacidade & Suporte", icon: ShieldCheck, accent: "#B8860B", bg: "rgba(198,167,104,0.12)", border: "rgba(198,167,104,0.24)", soft: "rgba(198,167,104,0.05)" },
 ];
 
-const faqs: { q: string; a: string; cat: FaqCategory }[] = [
+export const landingFaqs: { q: string; a: string; cat: FaqCategory }[] = [
   // Planos
-  { cat: "planos", q: "Como funciona o teste grátis de 14 dias?", a: "Você ativa o plano e usa todos os recursos por 14 dias. Dá para cancelar quando quiser, sem cobrança." },
-  { cat: "planos", q: "Qual a diferença entre Pro e Business?", a: "O Pro é para adega pessoal (coleção, consumo, alertas e organização). O Business é para operação comercial, com foco em estoque, vendas e acompanhamento da operação." },
-  { cat: "planos", q: "Posso trocar de plano depois?", a: "Não recomendamos, pois as funções entre Business e Pro são bem diferentes. Se você deseja gerir sua adega pessoal e a do seu estabelecimento, o ideal é ter uma conta para cada." },
-  { cat: "planos", q: "Existe desconto na assinatura anual?", a: "Sim. No Pro você paga R$ 280 por 12 meses (ganha 2 meses grátis). No Business, R$ 600 por 12 meses (ganha 3 meses grátis)." },
-  { cat: "planos", q: "Como cancelo minha assinatura?", a: "A qualquer momento, em dois cliques nas configurações da conta. Sem perguntas, sem multa." },
+  { cat: "planos", q: "Como funciona o teste grátis de 14 dias?", a: "Sim. Você acessa todos os recursos por 14 dias e pode cancelar antes da cobrança." },
+  { cat: "planos", q: "Qual a diferença entre Pro e Business?", a: "Pro é para adega pessoal. Business é para operação comercial, com estoque, vendas e giro." },
+  { cat: "planos", q: "Posso trocar de plano depois?", a: "Não é o fluxo ideal. Pro e Business têm usos diferentes; o mais seguro é usar a conta adequada para cada operação." },
+  { cat: "planos", q: "Existe desconto na assinatura anual?", a: "Sim. Pro custa R$ 280 por 12 meses e Business custa R$ 600 por 12 meses." },
+  { cat: "planos", q: "Como cancelo minha assinatura?", a: "Você pode cancelar nas configurações da conta, sem multa e sem etapas longas." },
 
   // Funcionalidades
-  { cat: "funcionalidades", q: "Consigo importar minha planilha?", a: "Sim. Importe CSV, Excel e PDF. Mapeamos as colunas automaticamente e você confirma antes de salvar." },
-  { cat: "funcionalidades", q: "Posso cadastrar vinhos por foto do rótulo?", a: "Sim. Envie uma foto nítida do rótulo e nossa inteligência extrai produtor, safra, país, região e estilo para preencher o cadastro." },
-  { cat: "funcionalidades", q: "Os dados são preenchidos automaticamente?", a: "Sim. Em importações e na wishlist, identificamos rótulo, produtor, safra, região e mais para acelerar seu cadastro." },
-  { cat: "funcionalidades", q: "A inteligência harmoniza pratos com meus vinhos?", a: "Sim. Informe o prato e a Inteligência Sommelyx sugere os melhores vinhos da SUA adega, com justificativa enológica." },
-  { cat: "funcionalidades", q: "Recebo alertas da janela ideal de consumo?", a: "Sim. O sistema acompanha drink_from / drink_until e avisa quando uma garrafa está no auge ou prestes a passar." },
-  { cat: "funcionalidades", q: "Tem controle de vendas e giro?", a: "No plano Business: controle de vendas, giro por rótulo, relatórios financeiros automáticos e log de movimentações." },
-  { cat: "funcionalidades", q: "Funciona bem no celular?", a: "Sim. Layout responsivo pensado para operação rápida — inclusive escaneamento de rótulos pela câmera do celular." },
-  { cat: "funcionalidades", q: "Consigo organizar por localização física?", a: "Sim. Cadastre zonas, setores, prateleiras e posições. Encontre qualquer garrafa em segundos." },
+  { cat: "funcionalidades", q: "Consigo importar minha planilha?", a: "Sim. A Sommelyx importa CSV, Excel e PDF e permite revisar os dados antes de salvar." },
+  { cat: "funcionalidades", q: "Posso cadastrar vinhos por foto do rótulo?", a: "Sim. A IA lê o rótulo e preenche nome, produtor, safra, país e estilo quando há confiança suficiente." },
+  { cat: "funcionalidades", q: "Os dados são preenchidos automaticamente?", a: "Sim. A plataforma sugere campos com base em OCR, regras de normalização e reconhecimento de produtores." },
+  { cat: "funcionalidades", q: "A inteligência harmoniza pratos com meus vinhos?", a: "Sim. A sugestão considera acidez, corpo, taninos, gordura e intensidade do prato." },
+  { cat: "funcionalidades", q: "Recebo alertas da janela ideal de consumo?", a: "Sim. O sistema acompanha a janela de consumo e destaca quando uma garrafa está no melhor momento." },
+  { cat: "funcionalidades", q: "Tem controle de vendas e giro?", a: "Sim. O plano Business inclui vendas, giro de estoque, relatórios e log de movimentações." },
+  { cat: "funcionalidades", q: "Funciona bem no celular?", a: "Sim. A interface é responsiva e permite escanear rótulos pela câmera do celular." },
+  { cat: "funcionalidades", q: "Consigo organizar por localização física?", a: "Sim. É possível cadastrar zonas, setores, prateleiras e posições." },
 
   // Privacidade
-  { cat: "privacidade", q: "Meus dados ficam privados?", a: "Sim. Sua conta é isolada com Row-Level Security. Seus dados são acessíveis apenas para você e sua operação." },
-  { cat: "privacidade", q: "Onde meus dados são armazenados?", a: "Em infraestrutura segura na nuvem, com backups automáticos e criptografia em trânsito e em repouso." },
-  { cat: "privacidade", q: "Posso exportar meus dados?", a: "Sim. Seus vinhos são seus. Exporte em CSV a qualquer momento, sem fricção." },
-  { cat: "privacidade", q: "Como funciona o suporte?", a: "Use o botão 'Falar com um Sommelier' no canto da tela. Respondemos por e-mail com foco em resolver, não em empurrar." },
+  { cat: "privacidade", q: "Meus dados ficam privados?", a: "Sim. A conta usa isolamento por usuário com Row-Level Security." },
+  { cat: "privacidade", q: "Onde meus dados são armazenados?", a: "Os dados ficam na infraestrutura da plataforma, com proteção de acesso e criptografia em trânsito." },
+  { cat: "privacidade", q: "Posso exportar meus dados?", a: "Sim. Você pode exportar seus vinhos em CSV quando precisar." },
+  { cat: "privacidade", q: "Como funciona o suporte?", a: "O suporte responde por e-mail e foca em resolver o problema com clareza." },
 ];
 
 
@@ -306,7 +306,7 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
 
 export function LandingPricing({ onSignup }: LandingPricingProps) {
   const [activeCat, setActiveCat] = useState<FaqCategory>("planos");
-  const filteredFaqs = faqs.filter((f) => f.cat === activeCat);
+  const filteredFaqs = landingFaqs.filter((f) => f.cat === activeCat);
   const activeMeta = categories.find((c) => c.key === activeCat)!;
 
   return (
@@ -342,6 +342,40 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
             <PlanCard key={plan.name} plan={plan} i={i} onSignup={onSignup} />
           ))}
         </div>
+
+        <motion.div
+          className="mx-auto mt-10 max-w-4xl rounded-2xl p-5 sm:p-6"
+          style={glassCard}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-40px" }}
+          variants={fadeUp}
+          custom={3.5}
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-wine mb-3">
+            Sommelyx vs apps tradicionais
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-black/5 bg-white/60 p-4">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#5F5F5F]">Sommelyx</p>
+              <ul className="mt-2 space-y-2 text-[13px] leading-relaxed text-[#1A1A1A]">
+                <li>• Foco em adega pessoal e comercial.</li>
+                <li>• IA para rótulos, cartas e harmonizações.</li>
+                <li>• Controle de estoque, consumo, vendas e giro.</li>
+                <li>• Dados estruturados para gestão e análise.</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-black/5 bg-white/60 p-4">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#5F5F5F]">Tradicionais</p>
+              <ul className="mt-2 space-y-2 text-[13px] leading-relaxed text-[#1A1A1A]">
+                <li>• Geralmente focam em catálogo ou notas.</li>
+                <li>• Harmonização e leitura de rótulos tendem a ser limitadas.</li>
+                <li>• Operação comercial costuma ser parcial ou ausente.</li>
+                <li>• Menos integração entre estoque, consumo e valor.</li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
 
         {/* FAQ — categorias coloridas */}
         <motion.div

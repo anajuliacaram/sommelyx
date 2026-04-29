@@ -79,9 +79,20 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={2}
-            className="mt-3 sm:mt-4 max-w-lg text-[14px] sm:text-base leading-relaxed text-[#66615A]"
+            className="mt-3 sm:mt-4 max-w-[38rem] text-[14px] sm:text-[15px] leading-relaxed text-[#4F4A45]"
           >
-            Controle total, decisões rápidas e insights reais — sem planilhas.
+            Sommelyx é uma plataforma de gestão de vinhos para adega pessoal e comercial.
+            Ela organiza seu estoque, analisa cartas, lê rótulos e sugere harmonizações com IA.
+          </motion.p>
+
+          <motion.p
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            custom={2.5}
+            className="mt-2 max-w-lg text-[13px] sm:text-[14px] leading-relaxed text-[#6A655E]"
+          >
+            Controle total, decisões rápidas e insights reais para vinho, sem planilhas.
           </motion.p>
 
           <motion.div
