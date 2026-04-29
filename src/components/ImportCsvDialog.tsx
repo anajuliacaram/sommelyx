@@ -21,7 +21,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { ModalCloseButton } from "@/components/ui/modal-close-button";
 import { useWines } from "@/hooks/useWines";
 import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/lib/ai-attachments";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
@@ -2483,11 +2482,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <SheetDescription>Revise os dados antes de confirmar a importação</SheetDescription>
               </div>
             </div>
-            <ModalCloseButton
-              className="absolute right-4 top-4 z-10"
-              label="Fechar importação"
-              onClick={() => { reset(); onOpenChange(false); }}
-            />
           </div>
 
           {step === "preview" ? (
