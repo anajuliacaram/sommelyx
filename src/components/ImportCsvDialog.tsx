@@ -34,17 +34,17 @@ interface ImportCsvDialogProps {
 
 interface ParsedWine {
   name: string;
-  producer?: string;
-  vintage?: number;
-  style?: string;
-  country?: string;
-  region?: string;
-  grape?: string;
-  quantity?: number;
-  purchase_price?: number;
-  cellar_location?: string;
-  drink_from?: number;
-  drink_until?: number;
+  producer?: string | null;
+  vintage?: number | null;
+  style?: string | null;
+  country?: string | null;
+  region?: string | null;
+  grape?: string | null;
+  quantity?: number | null;
+  purchase_price?: number | null;
+  cellar_location?: string | null;
+  drink_from?: number | null;
+  drink_until?: number | null;
   status?: "valid" | "review" | "invalid";
 }
 
@@ -201,6 +201,32 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (typeof value !== "string") return undefined;
     const cleaned = value.trim().replace(/\s+/g, " ");
     return cleaned.length ? cleaned : undefined;
+  };
+
+  const normalizeRow = (row?: Partial<ParsedWine> | null): ParsedWine => {
+    const safeName = normalizeText(row?.name) || `Vinho sem nome`;
+    return {
+      name: safeName,
+      producer: normalizeText(row?.producer) ?? null,
+      vintage: parseYear(row?.vintage ?? null) ?? null,
+      style: normalizeStyle(row?.style || undefined) || null,
+      country: normalizeText(row?.country) ?? null,
+      region: normalizeText(row?.region) ?? null,
+      grape: normalizeText(row?.grape) ?? null,
+      quantity: parseQuantity(row?.quantity) ?? 1,
+      purchase_price: parsePrice(row?.purchase_price ?? null) ?? null,
+      cellar_location: normalizeText(row?.cellar_location) ?? null,
+      drink_from: parseYear(row?.drink_from ?? null) ?? null,
+      drink_until: parseYear(row?.drink_until ?? null) ?? null,
+      status: row?.status ?? resolveParsedStatus({
+        name: safeName,
+        producer: normalizeText(row?.producer) ?? null,
+        country: normalizeText(row?.country) ?? null,
+        grape: normalizeText(row?.grape) ?? null,
+        vintage: parseYear(row?.vintage ?? null) ?? null,
+        purchase_price: parsePrice(row?.purchase_price ?? null) ?? null,
+      }),
+    };
   };
 
   const parseNumberLoose = (value: unknown) => {
@@ -473,77 +499,131 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const buildFallbackRowsFromSourceRows = (sourceRows: ImportSourceRow[], headers: string[] = []) => {
     return sourceRows.map((sourceRow, index) => {
-      const values = Object.values(sourceRow.values).map((value) => normalizeText(value)).filter((value): value is string => !!value);
-      const headerValue = (headerName: string) => {
-        const entry = headers.find((header) => normalizeSearchText(header) === normalizeSearchText(headerName));
-        return entry ? normalizeText(sourceRow.values[entry]) : undefined;
-      };
-      const rawName = headerValue("name") || headerValue("nome") || values[0] || `Linha ${index + 1}`;
-      const rawProducer = headerValue("producer") || headerValue("produtor") || values[1];
-      const rawCountry = headerValue("country") || headerValue("país") || headerValue("pais") || values.find((value) => /Brasil|Argentina|Chile|Portugal|França|Itália|Espanha|Estados Unidos/i.test(value));
-      const rawGrape = headerValue("grape") || headerValue("uva") || values.find((value) => /Blend|Cabernet|Merlot|Malbec|Chardonnay|Syrah|Pinot|Sauvignon|Riesling|Tempranillo/i.test(value));
-      const rawVintage = parseYear(headerValue("vintage") || headerValue("safra") || values.find((value) => /\b(19|20)\d{2}\b/.test(value)));
-      const rawPrice = parsePrice(headerValue("price") || headerValue("preço") || headerValue("preco") || values.find((value) => /R\$|\d+[.,]\d{2}/.test(value)));
-      return {
-        name: normalizeWineData({
+      try {
+        const values = Object.values(sourceRow.values).map((value) => normalizeText(value)).filter((value): value is string => !!value);
+        const headerValue = (headerName: string) => {
+          const entry = headers.find((header) => normalizeSearchText(header) === normalizeSearchText(headerName));
+          return entry ? normalizeText(sourceRow.values[entry]) : undefined;
+        };
+        const rawName = headerValue("name") || headerValue("nome") || values[0] || `Linha ${index + 1}`;
+        const rawProducer = headerValue("producer") || headerValue("produtor") || values[1] || null;
+        const rawCountry = headerValue("country") || headerValue("país") || headerValue("pais") || values.find((value) => /Brasil|Argentina|Chile|Portugal|França|Itália|Espanha|Estados Unidos/i.test(value)) || null;
+        const rawGrape = headerValue("grape") || headerValue("uva") || values.find((value) => /Blend|Cabernet|Merlot|Malbec|Chardonnay|Syrah|Pinot|Sauvignon|Riesling|Tempranillo/i.test(value)) || null;
+        const rawVintage = parseYear(headerValue("vintage") || headerValue("safra") || values.find((value) => /\b(19|20)\d{2}\b/.test(value))) ?? null;
+        const rawPrice = parsePrice(headerValue("price") || headerValue("preço") || headerValue("preco") || values.find((value) => /R\$|\d+[.,]\d{2}/.test(value))) ?? null;
+        const rawRegion = headerValue("region") || headerValue("região") || headerValue("regiao") || null;
+        const rawStyle = normalizeStyle(headerValue("type") || headerValue("style") || values.find((value) => /Tinto|Branco|Ros[eé]|Espumante|Fortificado/i.test(value))) || null;
+        const rawCellarLocation = headerValue("cellar_location") || headerValue("localização") || headerValue("localizacao") || null;
+        return normalizeRow({
           name: normalizeText(rawName) || `Linha ${index + 1}`,
-          producer: rawProducer || null,
-          grape: rawGrape || null,
-          country: rawCountry || null,
-          region: headerValue("region") || headerValue("região") || headerValue("regiao") || undefined,
-        }, { log: false }).name || `Linha ${index + 1}`,
-        producer: rawProducer || undefined,
-        vintage: rawVintage,
-        style: normalizeStyle(headerValue("type") || headerValue("style") || values.find((value) => /Tinto|Branco|Ros[eé]|Espumante|Fortificado/i.test(value))),
-        country: rawCountry || undefined,
-        region: headerValue("region") || headerValue("região") || headerValue("regiao") || undefined,
-        grape: rawGrape || undefined,
-        quantity: 1,
-        purchase_price: rawPrice,
-        cellar_location: headerValue("cellar_location") || headerValue("localização") || headerValue("localizacao") || undefined,
-        drink_from: parseYear(headerValue("drink_from") || headerValue("beber de")) ?? undefined,
-        drink_until: parseYear(headerValue("drink_until") || headerValue("beber até") || headerValue("beber ate")) ?? undefined,
-        status: resolveParsedStatus({
-          name: normalizeText(rawName),
-          producer: rawProducer || null,
-          country: rawCountry || null,
-          grape: rawGrape || null,
-          vintage: rawVintage ?? null,
-          purchase_price: rawPrice ?? null,
-        }),
-      } satisfies ParsedWine;
+          producer: rawProducer,
+          vintage: rawVintage,
+          style: rawStyle,
+          country: rawCountry,
+          region: rawRegion,
+          grape: rawGrape,
+          quantity: 1,
+          purchase_price: rawPrice,
+          cellar_location: rawCellarLocation,
+          drink_from: parseYear(headerValue("drink_from") || headerValue("beber de")) ?? null,
+          drink_until: parseYear(headerValue("drink_until") || headerValue("beber até") || headerValue("beber ate")) ?? null,
+          status: resolveParsedStatus({
+            name: normalizeText(rawName),
+            producer: rawProducer,
+            country: rawCountry,
+            grape: rawGrape,
+            vintage: rawVintage,
+            purchase_price: rawPrice,
+          }),
+        });
+      } catch (error) {
+        console.warn("[ImportCsvDialog] fallback row normalization failed", { index, error });
+        return normalizeRow({
+          name: `Linha ${index + 1}`,
+          producer: null,
+          country: null,
+          grape: null,
+          vintage: null,
+          quantity: 1,
+          purchase_price: null,
+          cellar_location: null,
+          drink_from: null,
+          drink_until: null,
+          status: "review",
+        });
+      }
     });
   };
 
   const normalizeImportedWines = (rows: any[] = []) =>
-    rows.map((w) => {
-      const parsed = normalizeWineData({
-        name: normalizeText(w?.name || w?.wine_name || "") || "",
-        producer: normalizeText(w?.producer || w?.winery || ""),
-        vintage: parseYear(w?.vintage || w?.year),
-        style: normalizeStyle(w?.style || w?.type),
-        country: normalizeText(w?.country),
-        region: normalizeText(w?.region),
-        grape: normalizeText(w?.grape || w?.varietal),
-        quantity: parseQuantity(w?.quantity),
-        purchase_price: parsePrice(w?.purchase_price ?? w?.price),
-        cellar_location: normalizeText(w?.cellar_location),
-        drink_from: parseYear(w?.drink_from || w?.drinkFrom),
-        drink_until: parseYear(w?.drink_until || w?.drinkUntil),
-        image_url: w?.image_url ?? w?.imageUrl ?? null,
-      } as ParsedWine, { log: false });
-      return {
-        ...parsed,
-        name: smartNormalizeImportedName(parsed.name, parsed.country),
-        status: resolveParsedStatus({
-          name: parsed.name,
-          producer: parsed.producer ?? null,
-          country: parsed.country ?? null,
-          grape: parsed.grape ?? null,
-          vintage: parsed.vintage ?? null,
-          purchase_price: parsed.purchase_price ?? null,
-        }),
-      };
+    rows.map((w, index) => {
+      try {
+        const safeRow = normalizeRow({
+          name: normalizeText(w?.name || w?.wine_name || `Vinho sem nome`) || `Vinho sem nome`,
+          producer: normalizeText(w?.producer || w?.winery) ?? null,
+          vintage: parseYear(w?.vintage || w?.year) ?? null,
+          style: normalizeStyle(w?.style || w?.type) || null,
+          country: normalizeText(w?.country) ?? null,
+          region: normalizeText(w?.region) ?? null,
+          grape: normalizeText(w?.grape || w?.varietal) ?? null,
+          quantity: parseQuantity(w?.quantity),
+          purchase_price: parsePrice(w?.purchase_price ?? w?.price) ?? null,
+          cellar_location: normalizeText(w?.cellar_location) ?? null,
+          drink_from: parseYear(w?.drink_from || w?.drinkFrom) ?? null,
+          drink_until: parseYear(w?.drink_until || w?.drinkUntil) ?? null,
+          status: w?.status,
+        });
+        const parsed = normalizeWineData({
+          ...safeRow,
+          name: safeRow.name,
+          producer: safeRow.producer ?? null,
+          grape: safeRow.grape ?? null,
+          country: safeRow.country ?? null,
+          region: safeRow.region ?? null,
+        }, { log: false });
+        const normalized = {
+          ...safeRow,
+          ...parsed,
+          name: smartNormalizeImportedName(parsed.name || safeRow.name, parsed.country || safeRow.country),
+          producer: parsed.producer ?? safeRow.producer ?? null,
+          country: parsed.country ?? safeRow.country ?? null,
+          grape: parsed.grape ?? safeRow.grape ?? null,
+          region: parsed.region ?? safeRow.region ?? null,
+          vintage: parsed.vintage ?? safeRow.vintage ?? null,
+          style: parsed.style ?? safeRow.style ?? null,
+          purchase_price: parsed.purchase_price ?? safeRow.purchase_price ?? null,
+          cellar_location: parsed.cellar_location ?? safeRow.cellar_location ?? null,
+          drink_from: parsed.drink_from ?? safeRow.drink_from ?? null,
+          drink_until: parsed.drink_until ?? safeRow.drink_until ?? null,
+        } satisfies ParsedWine;
+        return {
+          ...normalized,
+          status: resolveParsedStatus({
+            name: normalized.name,
+            producer: normalized.producer ?? null,
+            country: normalized.country ?? null,
+            grape: normalized.grape ?? null,
+            vintage: normalized.vintage ?? null,
+            purchase_price: normalized.purchase_price ?? null,
+          }),
+        };
+      } catch (error) {
+        console.warn("[ImportCsvDialog] normalizeImportedWines row failed", { index, error, row: w });
+        return normalizeRow({
+          name: normalizeText(w?.name || w?.wine_name || `Vinho sem nome`) || `Vinho sem nome`,
+          producer: normalizeText(w?.producer || w?.winery) ?? null,
+          country: normalizeText(w?.country) ?? null,
+          grape: normalizeText(w?.grape || w?.varietal) ?? null,
+          vintage: parseYear(w?.vintage || w?.year) ?? null,
+          style: normalizeStyle(w?.style || w?.type) || null,
+          quantity: parseQuantity(w?.quantity),
+          purchase_price: parsePrice(w?.purchase_price ?? w?.price) ?? null,
+          cellar_location: normalizeText(w?.cellar_location) ?? null,
+          drink_from: parseYear(w?.drink_from || w?.drinkFrom) ?? null,
+          drink_until: parseYear(w?.drink_until || w?.drinkUntil) ?? null,
+          status: "review",
+        });
+      }
     });
 
   const buildGeneratedThumbnail = (row: Pick<DraftWine, "name" | "producer" | "vintage" | "country" | "region" | "grape" | "style" | "type">) => {
@@ -1226,49 +1306,64 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const mapSourceRowsToWines = (sourceRows: ImportSourceRow[], mapping: Record<string, string>): ParsedWine[] => {
-    return sourceRows
-      .map((sourceRow) => {
+    return sourceRows.map((sourceRow, index) => {
+      try {
         const row: Partial<ParsedWine> = {};
         Object.entries(mapping).forEach(([sourceHeader, field]) => {
           const value = sourceRow.values[sourceHeader];
           if (!field || value === undefined || value === null || String(value).trim() === "") return;
           if (field === "vintage" || field === "drink_from" || field === "drink_until") {
-            row[field] = parseYear(value);
+            row[field] = parseYear(value) ?? null;
           } else if (field === "quantity") {
             row.quantity = parseQuantity(value);
           } else if (field === "purchase_price") {
-            row.purchase_price = parsePrice(value);
+            row.purchase_price = parsePrice(value) ?? null;
           } else if (field === "style") {
-            row.style = normalizeStyle(value);
+            row.style = normalizeStyle(value) || null;
           } else {
-            (row as any)[field] = normalizeText(value);
+            (row as any)[field] = normalizeText(value) ?? null;
           }
         });
 
         const normalized = normalizeWineData({
-          name: row.name || "",
+          name: normalizeText(row.name) || "Vinho sem nome",
           producer: row.producer ?? null,
           grape: row.grape ?? null,
           country: row.country ?? null,
           region: row.region ?? null,
         }, { log: false });
 
-        return {
-          name: normalized.name || "",
-          producer: row.producer,
-          vintage: row.vintage,
-          style: row.style,
-          country: row.country,
-          region: row.region,
-          grape: row.grape,
+        return normalizeRow({
+          name: normalized.name || row.name || `Linha ${index + 1}`,
+          producer: row.producer ?? normalized.producer ?? null,
+          vintage: row.vintage ?? normalized.vintage ?? null,
+          style: row.style ?? normalized.style ?? null,
+          country: row.country ?? normalized.country ?? null,
+          region: row.region ?? normalized.region ?? null,
+          grape: row.grape ?? normalized.grape ?? null,
           quantity: row.quantity ?? 1,
-          purchase_price: row.purchase_price,
-          cellar_location: row.cellar_location,
-          drink_from: row.drink_from,
-          drink_until: row.drink_until,
-        };
-      })
-      .filter((row) => row.name.trim().length >= 2);
+          purchase_price: row.purchase_price ?? normalized.purchase_price ?? null,
+          cellar_location: row.cellar_location ?? normalized.cellar_location ?? null,
+          drink_from: row.drink_from ?? normalized.drink_from ?? null,
+          drink_until: row.drink_until ?? normalized.drink_until ?? null,
+        });
+      } catch (error) {
+        console.warn("[ImportCsvDialog] mapSourceRowsToWines row failed", { index, error, sourceRow });
+        return normalizeRow({
+          name: `Vinho sem nome`,
+          producer: null,
+          country: null,
+          grape: null,
+          vintage: null,
+          quantity: 1,
+          purchase_price: null,
+          cellar_location: null,
+          drink_from: null,
+          drink_until: null,
+          status: "review",
+        });
+      }
+    });
   };
 
   const parseCsvLocally = (text: string): {
