@@ -122,7 +122,7 @@ export function AppSidebar() {
               <div className="space-y-2.5">
                 <Button
                   variant="primary"
-                  className="w-full h-12 text-[14px] font-semibold rounded-[18px] gap-1.5 px-4 shadow-[0_14px_28px_-18px_hsl(var(--primary)/0.30)] hover:shadow-[0_18px_34px_-18px_hsl(var(--primary)/0.34)]"
+                  className="w-full h-12 text-[14px] font-semibold rounded-[18px] gap-1.5 px-4 shadow-[0_12px_24px_-16px_hsl(var(--primary)/0.28)] hover:shadow-[0_14px_28px_-18px_hsl(var(--primary)/0.32)]"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-[15px] w-[15px] shrink-0" />
@@ -130,7 +130,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_10px_28px_-12px_rgba(123,30,43,0.45)] transition-all duration-200 flex items-center justify-center gap-2 font-semibold text-[14px]"
+                  className="group w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_8px_20px_-10px_rgba(123,30,43,0.38)] transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] flex items-center justify-center gap-2 font-semibold text-[14px]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-white/90 transition-colors group-hover:text-white" />
@@ -138,7 +138,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-10 rounded-[18px] border border-[rgba(95,111,82,0.12)] bg-[rgba(255,255,255,0.80)] text-[13.5px] font-semibold text-neutral-900 gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-sm transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-[rgba(255,255,255,0.92)] hover:border-[rgba(95,111,82,0.18)] hover:shadow-[0_8px_20px_-16px_rgba(58,51,39,0.18)] active:translate-y-[0.5px]"
+                  className="group w-full h-10 rounded-[18px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] text-[13.5px] font-semibold text-neutral-900 gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-[rgba(255,255,255,0.86)] hover:border-[rgba(95,111,82,0.14)] hover:shadow-[0_10px_20px_-16px_rgba(58,51,39,0.14)] active:translate-y-[0.5px]"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-[15px] w-[15px] shrink-0 text-[#B7791F] transition-colors group-hover:text-[#C98922]" />

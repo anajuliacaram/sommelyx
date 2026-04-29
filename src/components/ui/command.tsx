@@ -26,7 +26,7 @@ interface CommandDialogProps extends DialogProps {}
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
     <Dialog {...props}>
-      <DialogContent className="overflow-hidden p-0 shadow-[0_24px_80px_-16px_rgba(25,18,22,0.25)] border-border/30 bg-card/95 backdrop-blur-2xl rounded-2xl animate-in fade-in-0 zoom-in-[0.97] duration-[180ms]">
+      <DialogContent className="overflow-hidden p-0 shadow-[0_18px_54px_-18px_rgba(25,18,22,0.18)] border-border/30 bg-card/95 backdrop-blur-xl rounded-2xl animate-in fade-in-0 zoom-in-[0.98] duration-150">
         <Command className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground/70 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2.5 [&_[cmdk-item]_svg]:h-4.5 [&_[cmdk-item]_svg]:w-4.5">
           {children}
         </Command>
@@ -105,7 +105,7 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13.5px] font-medium outline-none transition-all duration-[120ms] ease-[cubic-bezier(0.22,1,0.36,1)] data-[disabled=true]:pointer-events-none data-[selected='true']:bg-primary/[0.07] data-[selected=true]:text-foreground data-[selected=true]:-translate-y-[1px] data-[selected=true]:shadow-[0_2px_8px_-3px_hsl(var(--primary)/0.12)] data-[disabled=true]:opacity-50",
+      "relative flex cursor-default select-none items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13.5px] font-medium outline-none transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] data-[disabled=true]:pointer-events-none data-[selected='true']:bg-primary/[0.07] data-[selected=true]:text-foreground data-[selected=true]:-translate-y-[1px] data-[selected=true]:shadow-[0_2px_8px_-3px_hsl(var(--primary)/0.10)] data-[disabled=true]:opacity-50",
       className,
     )}
     {...props}
