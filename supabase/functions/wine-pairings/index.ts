@@ -185,6 +185,88 @@ function isGenericWineName(name?: string | null) {
   return nonGeneric.length === 0;
 }
 
+function nonEmptyString(value: unknown) {
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return false;
+  return !["undefined", "null", "nan", "n/a", "na", "none", "sem dado", "sem dados"].includes(normalized);
+}
+
+function normalizePairingsPayload(payload: unknown, mode: "wine-to-food" | "food-to-wine") {
+  if (!payload || typeof payload !== "object") {
+    return mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] };
+  }
+
+  const data = payload as Record<string, unknown>;
+
+  if (mode === "wine-to-food") {
+    const pairings = Array.isArray(data.pairings)
+      ? data.pairings.filter((pairing) =>
+          pairing &&
+          typeof pairing === "object" &&
+          nonEmptyString((pairing as Record<string, unknown>).dish) &&
+          nonEmptyString((pairing as Record<string, unknown>).reason)
+        ).map((pairing) => {
+          const p = pairing as Record<string, unknown>;
+          return {
+            dish: String(p.dish).trim(),
+            category: nonEmptyString(p.category) ? String(p.category).trim() : "outro",
+            reason: String(p.reason).trim(),
+            match: nonEmptyString(p.match) ? String(p.match).trim() : "bom",
+            harmony_type: nonEmptyString(p.harmony_type) ? String(p.harmony_type).trim() : "equilíbrio",
+            harmony_label: nonEmptyString(p.harmony_label) ? String(p.harmony_label).trim() : "Harmonia equilibrada",
+            dish_profile: typeof p.dish_profile === "object" && p.dish_profile !== null ? p.dish_profile : null,
+            recipe: typeof p.recipe === "object" && p.recipe !== null ? p.recipe : null,
+          };
+        })
+      : [];
+
+    return {
+      ...data,
+      pairings,
+      pairingLogic: nonEmptyString(data.pairingLogic) ? String(data.pairingLogic).trim() : null,
+      wineProfile: typeof data.wineProfile === "object" && data.wineProfile !== null ? data.wineProfile : null,
+    };
+  }
+
+  const suggestions = Array.isArray(data.suggestions)
+    ? data.suggestions.filter((suggestion) =>
+        suggestion &&
+        typeof suggestion === "object" &&
+        nonEmptyString((suggestion as Record<string, unknown>).wineName) &&
+        nonEmptyString((suggestion as Record<string, unknown>).reason)
+      ).map((suggestion) => {
+        const s = suggestion as Record<string, unknown>;
+        return {
+          wineName: String(s.wineName).trim(),
+          style: nonEmptyString(s.style) ? String(s.style).trim() : "tinto",
+          grape: nonEmptyString(s.grape) ? String(s.grape).trim() : "Blend",
+          vintage: Number.isFinite(Number(s.vintage)) ? Number(s.vintage) : 0,
+          region: nonEmptyString(s.region) ? String(s.region).trim() : "",
+          country: nonEmptyString(s.country) ? String(s.country).trim() : "",
+          reason: String(s.reason).trim(),
+          fromCellar: Boolean(s.fromCellar),
+          match: nonEmptyString(s.match) ? String(s.match).trim() : "bom",
+          harmony_type: nonEmptyString(s.harmony_type) ? String(s.harmony_type).trim() : "equilíbrio",
+          harmony_label: nonEmptyString(s.harmony_label) ? String(s.harmony_label).trim() : "Harmonia equilibrada",
+          compatibilityLabel: nonEmptyString(s.compatibilityLabel) ? String(s.compatibilityLabel).trim() : "Boa opção",
+          wineProfile: typeof s.wineProfile === "object" && s.wineProfile !== null ? s.wineProfile : {
+            body: "médio",
+            acidity: "média",
+            tannin: "n/a",
+            style: nonEmptyString(s.style) ? String(s.style).trim() : "elegante",
+          },
+        };
+      })
+    : [];
+
+  return {
+    ...data,
+    suggestions,
+    dishProfile: typeof data.dishProfile === "object" && data.dishProfile !== null ? data.dishProfile : null,
+  };
+}
+
 function validateWineSpecificity(
   _texts: string[],
   _wineName: string,
@@ -928,7 +1010,10 @@ INSTRUÇÕES:
       }
     }
 
-    const parsed = lastParsed || (mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] });
+    const parsed = normalizePairingsPayload(
+      lastParsed || (mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] }),
+      mode,
+    );
     const parsedCount = mode === "wine-to-food"
       ? Array.isArray(parsed.pairings) ? parsed.pairings.length : 0
       : Array.isArray(parsed.suggestions) ? parsed.suggestions.length : 0;
