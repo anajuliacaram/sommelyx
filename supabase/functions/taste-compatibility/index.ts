@@ -4,6 +4,7 @@ import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
+import { buildDeterministicTasteCompatibility } from "../_shared/deterministic-pairing.ts";
 
 
 serve(async (req) => {
@@ -58,6 +59,33 @@ serve(async (req) => {
     const cached = await getCachedAiResponse<any>("taste-compatibility", cacheInput);
     if (cached.hit && cached.payload) {
       return new Response(JSON.stringify(cached.payload), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const deterministic = buildDeterministicTasteCompatibility(
+      {
+        name: targetWine?.name,
+        style: targetWine?.style,
+        grape: targetWine?.grape,
+        country: targetWine?.country,
+        region: targetWine?.region,
+        producer: targetWine?.producer,
+      },
+      Array.isArray(userCellar)
+        ? userCellar.slice(0, 50).map((w: any) => ({
+            name: w?.name || "",
+            style: w?.style || null,
+            grape: w?.grape || null,
+            country: w?.country || null,
+            region: w?.region || null,
+            quantity: w?.quantity || null,
+          }))
+        : [],
+    );
+    if (deterministic) {
+      await setCachedAiResponse("taste-compatibility", cacheInput, deterministic);
+      return new Response(JSON.stringify(deterministic), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

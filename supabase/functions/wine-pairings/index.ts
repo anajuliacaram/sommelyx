@@ -4,6 +4,7 @@ import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
+import { buildDeterministicPairingsForWine, buildDeterministicSuggestionsForDish, shouldUseDeterministicPairing } from "../_shared/deterministic-pairing.ts";
 
 
 const FUNCTION_NAME = "wine-pairings";
@@ -545,6 +546,48 @@ serve(async (req) => {
       return jsonResponse(cached.payload);
     }
     trace("pairings_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded });
+
+    const deterministicResult = mode === "wine-to-food"
+      ? (shouldUseDeterministicPairing({ name: wineName || "", style: wineStyle || null, grape: wineGrape || null, country: wineCountry || null, region: wineRegion || null, producer: wineProducer || null, vintage: wineVintage || null })
+        ? buildDeterministicPairingsForWine({
+            name: wineName || "",
+            style: wineStyle || null,
+            grape: wineGrape || null,
+            country: wineCountry || null,
+            region: wineRegion || null,
+            producer: wineProducer || null,
+            vintage: wineVintage || null,
+          })
+        : null)
+      : buildDeterministicSuggestionsForDish(
+          typeof dish === "string" ? dish : "",
+          Array.isArray(userWines) ? userWines.slice(0, 20).map((wine: any) => ({
+            name: wine?.name || "",
+            producer: wine?.producer || null,
+            region: wine?.region || null,
+            country: wine?.country || null,
+            grape: wine?.grape || null,
+            style: wine?.style || null,
+            vintage: wine?.vintage ?? null,
+            quantity: wine?.quantity ?? null,
+          })) : [],
+        );
+
+    if (deterministicResult) {
+      trace("pairings_deterministic_hit", {
+        request_id: requestId,
+        mode,
+        durationMs: elapsed(startTime),
+        source: deterministicResult.source,
+      });
+      await setCachedAiResponse("wine-pairings", cacheInput, deterministicResult);
+      await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 200, "deterministic_success", Date.now() - startTime, {
+        request_id: requestId,
+        mode,
+        source: deterministicResult.source,
+      });
+      return jsonResponse(deterministicResult);
+    }
 
     const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
     if (!rateLimit.allowed) {
