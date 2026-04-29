@@ -5,7 +5,6 @@ import { designSystem } from "@/styles/designSystem";
 import { LandingBackground } from "@/components/landing/LandingBackground";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
-import { LandingPromptSEO } from "@/components/landing/LandingPromptSEO";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
 import { LandingShowcase } from "@/components/landing/LandingShowcase";
 import { LandingAudience } from "@/components/landing/LandingAudience";
@@ -106,11 +105,10 @@ export default function Landing() {
   };
 
   return (
-    <div className={`${designSystem.pageShell} ${designSystem.pageBackground}`}>
+      <div className={`${designSystem.pageShell} ${designSystem.pageBackground}`}>
       <LandingBackground />
       <LandingHeader onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
       <LandingHero onSignup={handleStartFreeClick} />
-      <LandingPromptSEO />
       <LandingFeatures onSignup={handleStartFreeClick} />
       <LandingShowcase />
       <LandingAudience />

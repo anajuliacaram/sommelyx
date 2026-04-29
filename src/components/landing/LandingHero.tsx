@@ -232,8 +232,6 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
           {/* Glow background */}
           <div className="pointer-events-none absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.18)", filter: "blur(84px)" }} />
           <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.18)", filter: "blur(96px)" }} />
-          <div className="pointer-events-none absolute left-6 top-10 h-40 w-40 rounded-[28px] border border-white/40 bg-white/30 blur-[1px] opacity-50 shadow-[0_16px_32px_-18px_rgba(44,20,31,0.20)]" />
-          <div className="pointer-events-none absolute right-8 bottom-16 h-28 w-28 rounded-[24px] border border-white/40 bg-white/24 blur-[1px] opacity-40 shadow-[0_16px_28px_-18px_rgba(44,20,31,0.16)]" />
 
           <motion.div
             className="relative grid grid-cols-2 gap-3 sm:gap-3.5"

@@ -344,8 +344,15 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
         </div>
 
         <motion.div
-          className="mx-auto mt-10 max-w-4xl rounded-2xl p-5 sm:p-6"
-          style={designSystem.glassCard}
+          className="mx-auto mt-10 max-w-4xl rounded-[20px] p-5 sm:p-6"
+          style={{
+            ...designSystem.glassCard,
+            background: "rgba(255,255,255,0.7)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(0,0,0,0.05)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          }}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
@@ -356,22 +363,46 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
             Sommelyx vs apps tradicionais
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-black/5 bg-white/60 p-4">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#5F5F5F]">Sommelyx</p>
-              <ul className="mt-2 space-y-2 text-[13px] leading-relaxed text-[#1A1A1A]">
-                <li>• Foco em adega pessoal e comercial.</li>
-                <li>• IA para rótulos, cartas e harmonizações.</li>
-                <li>• Controle de estoque, consumo, vendas e giro.</li>
-                <li>• Dados estruturados para gestão e análise.</li>
+            <div className="rounded-[20px] border border-black/5 bg-white/70 p-4">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#6E1E2A]">Sommelyx</p>
+              <ul className="mt-3 space-y-2.5">
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#6E1E2A] shrink-0" />
+                  <span>IA aplicada à adega</span>
+                </li>
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#6E1E2A] shrink-0" />
+                  <span>Controle completo (estoque + giro)</span>
+                </li>
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#6E1E2A] shrink-0" />
+                  <span>Integração entre consumo e valor</span>
+                </li>
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#6E1E2A] shrink-0" />
+                  <span>Uso pessoal e comercial</span>
+                </li>
               </ul>
             </div>
-            <div className="rounded-2xl border border-black/5 bg-white/60 p-4">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#5F5F5F]">Tradicionais</p>
-              <ul className="mt-2 space-y-2 text-[13px] leading-relaxed text-[#1A1A1A]">
-                <li>• Geralmente focam em catálogo ou notas.</li>
-                <li>• Harmonização e leitura de rótulos tendem a ser limitadas.</li>
-                <li>• Operação comercial costuma ser parcial ou ausente.</li>
-                <li>• Menos integração entre estoque, consumo e valor.</li>
+            <div className="rounded-[20px] border border-black/5 bg-white/70 p-4">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#5F5F5F]">Tradicional</p>
+              <ul className="mt-3 space-y-2.5">
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#C4A27D] shrink-0" />
+                  <span>Foco apenas em catálogo</span>
+                </li>
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#C4A27D] shrink-0" />
+                  <span>Sem inteligência real</span>
+                </li>
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#C4A27D] shrink-0" />
+                  <span>Dados desconectados</span>
+                </li>
+                <li className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#1A1A1A]">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#C4A27D] shrink-0" />
+                  <span>Uso limitado</span>
+                </li>
               </ul>
             </div>
           </div>
