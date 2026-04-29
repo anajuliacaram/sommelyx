@@ -69,20 +69,20 @@ export default function ResetPassword() {
               <BrandName className={designSystem.authBrand} />
             </Link>
 
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-8 md:mt-10">
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-6 md:mt-8">
               <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Redefinição protegida
               </span>
-              <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
+              <h1 className={`mt-4 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
                 Uma nova senha, no mesmo <span className="gradient-text">padrão Sommelyx</span>.
               </h1>
-              <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
+              <p className={`mt-4 max-w-[420px] ${designSystem.authBody}`}>
                 Defina uma senha forte para proteger seu acesso.
               </p>
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-8 grid gap-3 sm:grid-cols-3">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-6 grid gap-3 sm:grid-cols-3">
             {[
               { icon: ShieldCheck, label: "Segurança", desc: "Link de recuperação protegido" },
               { icon: KeyRound, label: "Controle", desc: "Regras claras de senha" },
@@ -107,7 +107,7 @@ export default function ResetPassword() {
             className={designSystem.authFormCard}
             style={designSystem.authCard}
           >
-            <div className="mb-6 flex items-center gap-2.5 lg:hidden">
+            <div className="mb-5 flex items-center gap-2.5 lg:hidden">
               <Link to="/" className={designSystem.authLogoLink}>
                 <Logo variant="navbar" className="h-8 w-auto" />
                 <BrandName className="text-[22px]" />
@@ -127,11 +127,11 @@ export default function ResetPassword() {
             ) : !ready ? (
               <div>
                 <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Link inválido</h2>
-                <p className={`mt-4 ${designSystem.authBody}`}>
+                <p className={`mt-3 ${designSystem.authBody}`}>
                   Este link expirou ou não é válido. Solicite um novo link e tente novamente.
                 </p>
 
-                <div className="mt-7 grid gap-3">
+                <div className="mt-6 grid gap-3">
                   <MagneticButton>
                   <Button type="button" onClick={() => navigate("/forgot-password")} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
                     Solicitar novo link <ArrowRight className="ml-2 h-4 w-4" />
@@ -144,18 +144,18 @@ export default function ResetPassword() {
               </div>
             ) : (
               <>
-                <div className="mb-7">
+                <div className="mb-6">
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-wine/[0.06] text-wine">
                     <KeyRound className="h-6 w-6" />
                   </div>
                   <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Redefinir senha</h2>
-                  <p className={`mt-4 ${designSystem.authBody}`}>
+                  <p className={`mt-3 ${designSystem.authBody}`}>
                     Crie uma nova senha para retomar o acesso com segurança.
                   </p>
                 </div>
 
                 {error && (
-                  <div className="mb-5 rounded-[10px] border border-destructive/15 bg-destructive/[0.04] p-4">
+                <div className="mb-4 rounded-[10px] border border-destructive/15 bg-destructive/[0.04] p-4">
                     <p className="text-[13px] font-semibold text-destructive">{error}</p>
                   </div>
                 )}
@@ -188,7 +188,7 @@ export default function ResetPassword() {
 
                   <div className="pt-1">
                     <MagneticButton disabled={loading || !isValid}>
-                    <Button type="submit" disabled={loading || !isValid} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
+                      <Button type="submit" disabled={loading || !isValid} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
                         {loading ? (
                           <span className="flex items-center justify-center gap-3">
                             Redefinindo
@@ -208,7 +208,7 @@ export default function ResetPassword() {
                   </div>
                 </form>
 
-                <div className="mt-7 flex justify-center sm:justify-start">
+                <div className="mt-6 flex justify-center sm:justify-start">
                   <Link to="/login" className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 transition-colors hover:text-foreground">
                     <ChevronLeft className="h-3.5 w-3.5" /> Voltar ao login
                   </Link>

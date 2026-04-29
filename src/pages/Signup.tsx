@@ -104,20 +104,20 @@ export default function Signup() {
               <BrandName className={designSystem.authBrand} />
             </Link>
 
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-8 md:mt-10">
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-6 md:mt-8">
               <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
               </span>
-              <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
+              <h1 className={`mt-4 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
                 Configure sua <span className="gradient-text">conta</span> e evolua sua adega.
               </h1>
-              <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
+              <p className={`mt-4 max-w-[420px] ${designSystem.authBody}`}>
                 Cadastre-se para começar a organizar sua adega com clareza e precisão.
               </p>
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-8 grid gap-3 sm:grid-cols-3">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-6 grid gap-3 sm:grid-cols-3">
             {[
               { icon: BarChart3, label: "Organização", desc: "Base estruturada desde o primeiro dia", bg: "bg-wine/[0.06]", color: "text-wine" },
               { icon: ShieldCheck, label: "Confiabilidade", desc: "Fluxo seguro para iniciar sua operação", bg: "bg-gold/10", color: "text-gold" },
@@ -142,7 +142,7 @@ export default function Signup() {
             className={designSystem.authFormCard}
             style={designSystem.authCard}
           >
-            <div className="mb-6 flex items-center gap-2.5 lg:hidden">
+            <div className="mb-5 flex items-center gap-2.5 lg:hidden">
               <Link to="/" className={designSystem.authLogoLink}>
                 <Logo variant="navbar" className="h-8 w-auto" />
                 <BrandName className="text-[22px]" />
@@ -151,7 +151,7 @@ export default function Signup() {
 
             {awaitingEmailConfirmation ? (
               <>
-                <div className="mb-7">
+                <div className="mb-6">
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-wine/[0.06] text-wine">
                     <MailCheck className="h-6 w-6" />
                   </div>
@@ -192,7 +192,7 @@ export default function Signup() {
               </>
             ) : (
               <>
-                <div className="mb-7">
+                <div className="mb-6">
                   <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Criar conta grátis</h2>
                   <p className={`mt-3 ${designSystem.authBody}`}>Crie sua conta e comece a registrar sua adega.</p>
                 </div>

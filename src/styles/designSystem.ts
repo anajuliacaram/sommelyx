@@ -84,7 +84,7 @@ export const designSystem = {
   authShell:
     "relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary",
   authGrid:
-    "relative z-10 mx-auto grid min-h-screen w-full max-w-[1180px] items-center grid-cols-1 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[1.08fr_0.92fr] lg:gap-10 lg:px-4 lg:py-8",
+    "relative z-10 mx-auto grid min-h-screen w-full max-w-[1180px] items-center grid-cols-1 px-4 py-4 sm:px-6 sm:py-5 lg:grid-cols-[1.08fr_0.92fr] lg:gap-10 lg:px-4 lg:py-6",
   authCard: {
     background: "rgba(255,255,255,0.65)",
     backdropFilter: "blur(12px)",
@@ -93,8 +93,8 @@ export const designSystem = {
     boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
     borderRadius: "20px",
   } as const,
-  authPanel: "rounded-[20px] p-5 sm:p-6 md:p-8 lg:p-10",
-  authFormCard: "w-full max-w-[520px] rounded-[20px] p-5 sm:p-6 md:p-8",
+  authPanel: "rounded-[20px] p-4 sm:p-5 md:p-7 lg:p-8",
+  authFormCard: "w-full max-w-[520px] rounded-[20px] p-4 sm:p-5 md:p-7",
   authLogoLink: "inline-flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-80",
   authLogo: "h-10 sm:h-12 md:h-14 w-auto drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]",
   authBrand: "text-[22px] sm:text-[26px] md:text-[32px]",
