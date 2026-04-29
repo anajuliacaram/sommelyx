@@ -12,6 +12,7 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
+import { designSystem } from "@/styles/designSystem";
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Erro desconhecido.");
 
@@ -28,6 +29,7 @@ export default function Login() {
   const { signIn, user, profileType, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const inputClass = designSystem.inputField;
 
   useEffect(() => {
     if (emailConfirmed) {
@@ -89,7 +91,7 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary" style={{ background: "transparent" }}>
+    <div className={`${designSystem.authShell} ${designSystem.pageBackground}`}>
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
@@ -97,9 +99,9 @@ export default function Login() {
         <div className="absolute inset-0 opacity-[0.25]" style={{ backgroundImage: "linear-gradient(rgba(23,20,29,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.025) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
       </div>
 
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">
+      <div className={designSystem.authGrid}>
         {/* Left panel */}
-        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] p-6 sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12" style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 10px 24px -12px rgba(0,0,0,0.12)" }}>
+        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] p-6 sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12" style={designSystem.glassCardLight}>
           <div>
             <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
               <Logo variant="navbar" className="h-10 sm:h-11 w-auto drop-shadow-[0_4px_12px_rgba(44,20,31,0.10)]" />
@@ -110,7 +112,7 @@ export default function Login() {
               <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
               </span>
-              <h1 className="mt-5 max-w-[560px] text-[36px] font-black leading-[0.97] tracking-[-0.03em] text-foreground sm:text-[44px] lg:text-[54px]">
+              <h1 className="mt-5 max-w-[560px] text-[36px] font-black leading-[0.97] tracking-[-0.03em] text-foreground sm:text-[44px] lg:text-[54px]" style={{ fontFamily: designSystem.typography.heading }}>
                 A inteligência da sua <span className="font-serif italic text-wine">adega</span> começa aqui.
               </h1>
               <p className="mt-6 max-w-[540px] text-[15px] font-medium leading-relaxed text-muted-foreground sm:text-[17px]">
@@ -125,7 +127,7 @@ export default function Login() {
               { icon: ShieldCheck, label: "Confiável", desc: "Dados protegidos e operação estável", bg: "bg-gold/10", color: "text-gold" },
               { icon: Sparkles, label: "Editorial", desc: "Experiência elegante de ponta a ponta", bg: "bg-wine/[0.06]", color: "text-wine" },
             ].map((item) => (
-              <article key={item.label} className="rounded-xl border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <article key={item.label} className="rounded-[20px] border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                 <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
                   <item.icon className="h-4 w-4" />
                 </div>
@@ -143,7 +145,7 @@ export default function Login() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[520px] p-7 md:p-9 rounded-[24px]"
-            style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 10px 24px -12px rgba(15,15,20,0.12)" }}
+            style={designSystem.glassCardSoft}
           >
             <div className="mb-7">
               <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Acesse sua conta</h2>
@@ -174,7 +176,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-12 rounded-xl border-border/50 bg-background/60 px-4 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/25 focus:bg-background/90 focus:ring-2 focus:ring-primary/[0.06]"
+                  className={inputClass}
                 />
               </div>
 
@@ -196,7 +198,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-12 rounded-xl border-border/50 bg-background/60 px-4 pr-12 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/25 focus:bg-background/90 focus:ring-2 focus:ring-primary/[0.06]"
+                    className={`${inputClass} pr-12`}
                   />
                   <Button
                     type="button"
@@ -217,7 +219,7 @@ export default function Login() {
                     type="submit"
                     variant="primary"
                     disabled={loading}
-                    className="w-full h-11 rounded-xl text-[13px] font-bold uppercase tracking-[0.10em] shadow-float"
+                    className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}
                   >
                     {loading ? (
                       <span className="flex items-center gap-3">

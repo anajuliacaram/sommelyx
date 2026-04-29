@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, Wine, Sparkles, TrendingUp, Clock, AlertTriangle, ChefHat, Star } from "@/icons/lucide";
 import { BrandName } from "@/components/BrandName";
 import { formatMotionNumber, useCountUp } from "@/lib/motion";
+import { designSystem } from "@/styles/designSystem";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -25,12 +26,6 @@ const browserFrame = {
   background: "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,247,242,1) 100%)",
   border: "1px solid rgba(0,0,0,0.08)",
   boxShadow: "0 42px 110px -44px rgba(44,20,31,0.36), 0 1px 2px rgba(0,0,0,0.04)",
-} as const;
-
-const innerCard = {
-  background: "linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(248,243,238,0.94) 100%)",
-  border: "1px solid rgba(0,0,0,0.05)",
-  boxShadow: "0 8px 24px -14px rgba(44,20,31,0.18)",
 } as const;
 
 function BrowserChrome({ url }: { url: string }) {
@@ -107,7 +102,7 @@ function DashboardMock() {
           <div
             key={kpi.label}
             className="motion-card-hover motion-enter rounded-xl p-3"
-            style={{ ...innerCard, animationDelay: `${index * 110}ms` }}
+            style={{ ...designSystem.glassCard, animationDelay: `${index * 110}ms` }}
           >
             <p className="text-[8.5px] font-semibold uppercase tracking-[0.10em] text-[#5F5F5F]">{kpi.label}</p>
             <p className="mt-1 text-[14px] font-semibold tracking-tight text-[#1A1A1A]">
@@ -120,7 +115,7 @@ function DashboardMock() {
 
       {/* Chart + List */}
       <div className="grid grid-cols-12 gap-2.5">
-        <div className="col-span-7 rounded-xl p-3" style={innerCard}>
+        <div className="col-span-7 rounded-xl p-3" style={designSystem.glassCard}>
           <div className="flex items-center justify-between mb-2">
             <p className="text-[9px] font-semibold uppercase tracking-[0.10em] text-[#5F5F5F]">Vendas — 6 meses</p>
             <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#2E5E3E]">
@@ -141,7 +136,7 @@ function DashboardMock() {
             ))}
           </div>
         </div>
-        <div className="col-span-5 rounded-xl p-3" style={innerCard}>
+        <div className="col-span-5 rounded-xl p-3" style={designSystem.glassCard}>
           <p className="text-[9px] font-semibold uppercase tracking-[0.10em] text-[#5F5F5F] mb-2">Reposição</p>
           <div className="space-y-1.5">
             {[
@@ -189,7 +184,7 @@ function AdegaMock() {
 
       <div className="space-y-1.5">
         {wines.map((w) => (
-          <div key={w.name} className="flex items-center gap-3 rounded-xl p-2.5" style={innerCard}>
+          <div key={w.name} className="flex items-center gap-3 rounded-xl p-2.5" style={designSystem.glassCard}>
             {/* Bottle silhouette */}
             <div className="relative h-12 w-3 shrink-0">
               <div className="absolute bottom-0 inset-x-0 h-10 rounded-sm" style={{ background: w.color }} />
@@ -248,7 +243,7 @@ function HarmonizarMock() {
           { wine: "Brunello di Montalcino 2018", producer: "Biondi-Santi", score: 92, why: "Estrutura e elegância sustentam a untuosidade do prato.", color: "#5F6F52" },
           { wine: "Chianti Classico Gran Selezione 2019", producer: "Castello di Ama", score: 87, why: "Acidez vibrante refresca o paladar entre garfadas.", color: "#B8860B" },
         ].map((s) => (
-          <div key={s.wine} className="rounded-xl p-3" style={innerCard}>
+          <div key={s.wine} className="rounded-xl p-3" style={designSystem.glassCard}>
             <div className="flex items-start justify-between gap-3 mb-1">
               <div className="min-w-0 flex-1">
                 <p className="text-[12px] font-semibold tracking-tight text-[#1A1A1A] truncate">{s.wine}</p>

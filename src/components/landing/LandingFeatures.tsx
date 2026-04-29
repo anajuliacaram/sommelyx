@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Wine, Clock, Sparkles, BarChart3, ArrowRight } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
+import { designSystem } from "@/styles/designSystem";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -50,14 +51,6 @@ const blocks = [
   },
 ];
 
-const glassCard = {
-  background: "linear-gradient(160deg, rgba(255,255,255,0.96) 0%, rgba(248,243,238,0.94) 100%)",
-  backdropFilter: "blur(10px) saturate(1.08)",
-  WebkitBackdropFilter: "blur(10px) saturate(1.08)",
-  border: "1px solid rgba(255,255,255,0.58)",
-  boxShadow: "0 16px 44px -26px rgba(44,20,31,0.22), 0 1px 2px rgba(0,0,0,0.04)",
-} as const;
-
 interface LandingFeaturesProps {
   onSignup: () => void;
 }
@@ -88,7 +81,7 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
             <motion.div
               key={block.title}
               className="rounded-2xl p-5 sm:p-6 group"
-              style={glassCard}
+              style={designSystem.glassCard}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}

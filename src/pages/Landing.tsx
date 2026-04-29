@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { analytics } from "@/lib/analytics";
+import { designSystem } from "@/styles/designSystem";
 import { LandingBackground } from "@/components/landing/LandingBackground";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
@@ -105,7 +106,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F4F1EC] selection:bg-wine/20 selection:text-foreground">
+    <div className={`${designSystem.pageShell} ${designSystem.pageBackground}`}>
       <LandingBackground />
       <LandingHeader onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
       <LandingHero onSignup={handleStartFreeClick} />

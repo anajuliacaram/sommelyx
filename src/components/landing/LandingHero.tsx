@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Check, Layers, TrendingUp, AlertTriangle, Wine, Sparkles, Clock, Star, Calendar } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { designSystem } from "@/styles/designSystem";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -27,14 +28,6 @@ const floatLoop = {
     ease: "easeInOut" as const,
   },
 };
-
-const glassCard = {
-  background: "rgba(255,255,255,0.94)",
-  backdropFilter: "blur(8px) saturate(1.1)",
-  WebkitBackdropFilter: "blur(8px) saturate(1.1)",
-  border: "1px solid rgba(255,255,255,0.55)",
-  boxShadow: "0 18px 48px -24px rgba(44,20,31,0.28), 0 1px 2px rgba(0,0,0,0.04)",
-} as const;
 
 interface LandingHeroProps {
   onSignup: () => void;
@@ -189,8 +182,8 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                 whileHover={{ y: -2 }}
                 transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="rounded-xl p-2.5"
-                style={glassCard}
-              >
+                  style={designSystem.glassCard}
+                >
                 <div className="flex items-start gap-2">
                   <div
                     className="flex h-7 w-7 items-center justify-center rounded-lg shrink-0"
@@ -216,11 +209,11 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             whileHover={{ y: -2 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="mt-3 sm:mt-3.5 rounded-2xl p-4 max-w-xl"
-            style={{
-              ...glassCard,
-              background: "linear-gradient(160deg, rgba(55,30,36,0.96) 0%, rgba(28,15,20,1) 100%)",
-              border: "1px solid rgba(198,167,104,0.22)",
-            }}
+              style={{
+                ...designSystem.glassCard,
+                background: "linear-gradient(160deg, rgba(55,30,36,0.96) 0%, rgba(28,15,20,1) 100%)",
+                border: "1px solid rgba(198,167,104,0.22)",
+              }}
           >
             <div className="flex items-center gap-2 mb-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.18)", border: "1px solid rgba(198,167,104,0.28)" }}>
@@ -250,7 +243,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             <motion.div
               {...float(0.18)}
               className="col-span-2 rounded-[22px] p-4"
-              style={glassCard}
+              style={designSystem.glassCard}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -282,7 +275,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Reposição — half */}
-            <motion.div {...float(0.26)} className="rounded-[22px] p-3.5" style={glassCard}>
+            <motion.div {...float(0.26)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.24)" }}>
                   <AlertTriangle className="h-3.5 w-3.5" style={{ color: "#B8860B" }} />
@@ -296,7 +289,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Janela ideal — half */}
-            <motion.div {...float(0.32)} className="rounded-[22px] p-3.5" style={glassCard}>
+            <motion.div {...float(0.32)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(95,111,82,0.10)", border: "1px solid rgba(95,111,82,0.18)" }}>
                   <Calendar className="h-3.5 w-3.5" style={{ color: "#5F6F52" }} />
@@ -310,7 +303,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Consumo — full width */}
-            <motion.div {...float(0.40)} className="col-span-2 rounded-[22px] p-4" style={glassCard}>
+            <motion.div {...float(0.40)} className="col-span-2 rounded-[22px] p-4" style={designSystem.glassCard}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(95,111,82,0.10)", border: "1px solid rgba(95,111,82,0.16)" }}>
@@ -342,7 +335,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Mais avaliado — half */}
-            <motion.div {...float(0.48)} className="rounded-[22px] p-3.5" style={glassCard}>
+            <motion.div {...float(0.48)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.28)" }}>
                   <Star className="h-3.5 w-3.5" style={{ color: "#B8860B" }} />
@@ -354,7 +347,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Giro — half */}
-            <motion.div {...float(0.54)} className="rounded-[22px] p-3.5" style={glassCard}>
+            <motion.div {...float(0.54)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(123,30,43,0.08)", border: "1px solid rgba(123,30,43,0.14)" }}>
                   <TrendingUp className="h-3.5 w-3.5 text-wine" />

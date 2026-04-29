@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles, CreditCard, Wine, ShieldCheck } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { designSystem } from "@/styles/designSystem";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -11,14 +12,6 @@ const fadeUp = {
     y: 0,
     transition: { delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
-} as const;
-
-const glassCard = {
-  background: "linear-gradient(160deg, rgba(255,255,255,0.96) 0%, rgba(248,243,238,0.94) 100%)",
-  backdropFilter: "blur(10px) saturate(1.08)",
-  WebkitBackdropFilter: "blur(10px) saturate(1.08)",
-  border: "1px solid rgba(255,255,255,0.58)",
-  boxShadow: "0 16px 44px -26px rgba(44,20,31,0.22), 0 1px 2px rgba(0,0,0,0.04)",
 } as const;
 
 const plans = [
@@ -352,7 +345,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
 
         <motion.div
           className="mx-auto mt-10 max-w-4xl rounded-2xl p-5 sm:p-6"
-          style={glassCard}
+          style={designSystem.glassCard}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { designSystem } from "@/styles/designSystem";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 } as const,
@@ -7,14 +8,6 @@ const fadeUp = {
     y: 0,
     transition: { delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
-} as const;
-
-const glassCard = {
-  background: "rgba(255,255,255,0.92)",
-  backdropFilter: "blur(8px) saturate(1.08)",
-  WebkitBackdropFilter: "blur(8px) saturate(1.08)",
-  border: "1px solid rgba(255,255,255,0.5)",
-  boxShadow: "0 14px 40px -22px rgba(44,20,31,0.20), 0 1px 2px rgba(0,0,0,0.04)",
 } as const;
 
 const howItWorks = [
@@ -66,7 +59,7 @@ export function LandingPromptSEO() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr] gap-3 sm:gap-4">
           <motion.div
             className="rounded-2xl p-5 sm:p-6"
-            style={glassCard}
+            style={designSystem.glassCard}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
@@ -126,7 +119,7 @@ export function LandingPromptSEO() {
           <div className="grid gap-3 sm:gap-4">
             <motion.div
               className="rounded-2xl p-5 sm:p-6"
-              style={glassCard}
+              style={designSystem.glassCard}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}
@@ -150,7 +143,7 @@ export function LandingPromptSEO() {
 
             <motion.div
               className="rounded-2xl p-5 sm:p-6"
-              style={glassCard}
+              style={designSystem.glassCard}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}

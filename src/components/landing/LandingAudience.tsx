@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Wine, UtensilsCrossed, ShoppingCart } from "@/icons/lucide";
+import { designSystem } from "@/styles/designSystem";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
@@ -37,14 +38,6 @@ const audiences = [
   },
 ];
 
-const glassCard = {
-  background: "linear-gradient(160deg, rgba(255,255,255,0.96) 0%, rgba(248,243,238,0.94) 100%)",
-  backdropFilter: "blur(10px) saturate(1.08)",
-  WebkitBackdropFilter: "blur(10px) saturate(1.08)",
-  border: "1px solid rgba(255,255,255,0.58)",
-  boxShadow: "0 16px 44px -26px rgba(44,20,31,0.22), 0 1px 2px rgba(0,0,0,0.04)",
-} as const;
-
 export function LandingAudience() {
   return (
     <section className="relative px-4 sm:px-8 pt-3 pb-6 sm:pb-8 z-10">
@@ -66,7 +59,7 @@ export function LandingAudience() {
             <motion.div
               key={item.title}
               className="rounded-2xl p-5"
-              style={glassCard}
+              style={designSystem.glassCard}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}
