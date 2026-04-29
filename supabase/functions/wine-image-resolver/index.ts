@@ -1,14 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
+import { createCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  "Access-Control-Max-Age": "86400",
-};
 
 const BUCKET = "wishlist-images";
 const SEARCH_TIMEOUT_MS = 12_000;
@@ -546,7 +540,8 @@ async function findRealLabelImage(
   return { ok: false, error: lastError };
 }
 
-function jsonResponse(payload: unknown, status = 200) {
+function jsonResponse(req: Request, payload: unknown, status = 200) {
+  const corsHeaders = createCorsHeaders(req);
   return new Response(JSON.stringify(payload), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -554,6 +549,7 @@ function jsonResponse(payload: unknown, status = 200) {
 }
 
 serve(async (req) => {
+  const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -566,7 +562,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return jsonResponse({ error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
+      return jsonResponse(req, { error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
@@ -581,14 +577,14 @@ serve(async (req) => {
 
     const { data: { user }, error: userError } = await authClient.auth.getUser(token);
     if (userError || !user) {
-      return jsonResponse({ error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
+      return jsonResponse(req, { error: "Sessão expirada. Faça login novamente.", code: "AUTH_REQUIRED" }, 401);
     }
 
     const body = await req.json().catch(() => ({}));
     const wineId = typeof body?.wineId === "string" ? body.wineId.trim() : "";
     const failedUrl = typeof body?.failedUrl === "string" ? body.failedUrl.trim() : "";
     const force = body?.force === true || body?.regenerate === true;
-    if (!wineId) return jsonResponse({ error: "Wine ID inválido." }, 400);
+    if (!wineId) return jsonResponse(req, { error: "Wine ID inválido." }, 400);
 
     console.log("wine-image-resolver request_received", {
       wineId,
@@ -606,7 +602,7 @@ serve(async (req) => {
       .single();
 
     if (wineError || !wine) {
-      return jsonResponse({ error: "Vinho não encontrado." }, 404);
+      return jsonResponse(req, { error: "Vinho não encontrado." }, 404);
     }
 
     const row = wine as WineRow;
@@ -624,7 +620,7 @@ serve(async (req) => {
         imageUrl: row.image_url,
         clientUrl,
       });
-      return jsonResponse({ ok: true, image_url: clientUrl, source: "cached" });
+      return jsonResponse(req, { ok: true, image_url: clientUrl, source: "cached" });
     }
 
     const proxyCandidateUrl = failedUrl || (storagePath ? "" : url);
@@ -641,7 +637,7 @@ serve(async (req) => {
             durationMs: Date.now() - startTime,
           });
 
-          return jsonResponse({
+          return jsonResponse(req, {
             ok: true,
             image_url: persisted.finalUrl,
             source: "proxied-current",
@@ -678,7 +674,7 @@ serve(async (req) => {
             durationMs: Date.now() - startTime,
           });
 
-          return jsonResponse({
+          return jsonResponse(req, {
             ok: true,
             image_url: persisted.finalUrl,
             source: "web-search",
@@ -703,7 +699,7 @@ serve(async (req) => {
             durationMs: Date.now() - startTime,
           });
 
-          return jsonResponse({
+          return jsonResponse(req, {
             ok: true,
             image_url: found.sourceUrl,
             source: "web-search-direct",
@@ -723,7 +719,7 @@ serve(async (req) => {
         persistenceError,
       });
 
-      return jsonResponse({
+      return jsonResponse(req, {
         ok: true,
         image_url: found.sourceUrl,
         source: "web-search-direct-ephemeral",
@@ -744,7 +740,7 @@ serve(async (req) => {
       durationMs: Date.now() - startTime,
     });
 
-    return jsonResponse({
+    return jsonResponse(req, {
       ok: true,
       image_url: fallback,
       source: "fallback-svg",
@@ -753,7 +749,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("wine-image-resolver error:", error);
-    return jsonResponse({
+    return jsonResponse(req, {
       error: "Não foi possível resolver a imagem do vinho. Tente novamente em instantes.",
     }, 500);
   }

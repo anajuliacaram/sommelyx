@@ -2,15 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { callOpenAIResponses } from "../_shared/openai.ts";
+import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { INVALID_INPUT_ERROR, validateTextPayload } from "../_shared/payload-validation.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 const FUNCTION_NAME = "analyze-wine-list";
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
 const ANALYSIS_CACHE_TTL_MS = 10 * 60_000;
@@ -547,6 +542,7 @@ function buildFallbackWineListAnalysis(input: { extractedText?: string | null; f
 }
 
 serve(async (req) => {
+  const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const startTime = Date.now();

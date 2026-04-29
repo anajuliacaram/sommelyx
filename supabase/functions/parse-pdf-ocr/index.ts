@@ -1,14 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { createCorsHeaders } from "../_shared/cors.ts";
 import { INVALID_INPUT_ERROR, bytesFromBase64, detectPdfPageCount, validatePdfPayload } from "../_shared/payload-validation.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 
 const FUNCTION_NAME = "parse-pdf-ocr";
 const MAX_PDF_BYTES = 2 * 1024 * 1024;
@@ -92,6 +87,7 @@ function extractTextFromPdfBytes(bytes: Uint8Array, deadlineAt: number) {
 }
 
 serve(async (req) => {
+  const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const authHeader = req.headers.get("Authorization");
