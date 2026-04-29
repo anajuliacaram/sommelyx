@@ -6,6 +6,7 @@ const DEFAULT_BATCH_SIZE = 10
 const DEFAULT_SEND_DELAY_MS = 200
 const DEFAULT_AUTH_TTL_MINUTES = 15
 const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
+const INTERNAL_SECRET = Deno.env.get('PROCESS_EMAIL_QUEUE_SECRET')?.trim() ?? ''
 
 // Check if an error is a rate-limit (429) response.
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
@@ -91,6 +92,13 @@ Deno.serve(async (req) => {
     )
   }
 
+  if (!INTERNAL_SECRET) {
+    return new Response(
+      JSON.stringify({ error: 'Not found' }),
+      { status: 404, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
   const authHeader = req.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) {
     return new Response(
@@ -108,6 +116,14 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ error: 'Forbidden' }),
       { status: 403, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
+  const secretHeader = req.headers.get('x-internal-secret')?.trim() ?? ''
+  if (!secretHeader || secretHeader !== INTERNAL_SECRET) {
+    return new Response(
+      JSON.stringify({ error: 'Not found' }),
+      { status: 404, headers: { 'Content-Type': 'application/json' } }
     )
   }
 
