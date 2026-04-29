@@ -1,5 +1,6 @@
 import { invokeEdgeFunction, EdgeFunctionError } from "@/lib/edge-invoke";
 import { normalizeWineData } from "@/lib/wine-normalization";
+import { normalizeWineListOcrText } from "@/lib/wine-ocr-normalization";
 
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos concluir a leitura agora. Verifique sua conexão e tente novamente em instantes.";
 const ANALYZE_WINE_LIST_TIMEOUT_MS = 65_000;
@@ -1076,22 +1077,37 @@ export async function analyzeWineList(
 ): Promise<WineListAnalysis> {
   const totalStartedAt = nowMs();
   try {
-    const text = String(analysis.text || "").trim();
+    const normalizedOcr = normalizeWineListOcrText(String(analysis.text || ""), {
+      fileName: analysis.fileName,
+      mimeType: analysis.mimeType,
+    });
+    const text = normalizedOcr.normalizedText.trim();
     console.info("[sommelier-ai] pairing_request_started", {
       mode: "external-wine-list",
       hasText: Boolean(text),
       mimeType: analysis.mimeType,
       fileName: analysis.fileName,
       textLength: text.length,
+      detectedCandidates: normalizedOcr.structured.candidates.length,
     });
     console.info("[AI_PIPELINE] step: analysis_started", {
       flow: "analyze-wine-list",
       fileName: analysis.fileName,
       textLength: text.length,
+      detectedCandidates: normalizedOcr.structured.candidates.length,
     });
     const request = () => invokeEdgeFunction<WineListAnalysis>(
       "analyze-wine-list",
-      { extractedText: text, fileName: analysis.fileName, mimeType: analysis.mimeType, userProfile },
+      {
+        extractedText: text,
+        fileName: analysis.fileName,
+        mimeType: analysis.mimeType,
+        userProfile,
+        normalizedOcr: {
+          structured: normalizedOcr.structured,
+          structuredJson: normalizedOcr.structuredJson,
+        },
+      },
       { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
@@ -1143,7 +1159,11 @@ export async function analyzeMenuForWine(
 ): Promise<MenuAnalysis> {
   const totalStartedAt = nowMs();
   try {
-    const text = String(analysis.text || "").trim();
+    const normalizedOcr = normalizeWineListOcrText(String(analysis.text || ""), {
+      fileName: analysis.fileName,
+      mimeType: analysis.mimeType,
+    });
+    const text = normalizedOcr.cleanText.trim();
     console.info("[sommelier-ai] pairing_request_started", {
       mode: "external-menu",
       wineName,
@@ -1151,16 +1171,28 @@ export async function analyzeMenuForWine(
       mimeType: analysis.mimeType,
       fileName: analysis.fileName,
       textLength: text.length,
+      detectedCandidates: normalizedOcr.structured.candidates.length,
     });
     console.info("[AI_PIPELINE] step: analysis_started", {
       flow: "analyze-menu-for-wine",
       fileName: analysis.fileName,
       textLength: text.length,
       wineName,
+      detectedCandidates: normalizedOcr.structured.candidates.length,
     });
     const request = () => invokeEdgeFunction<MenuAnalysis>(
       "analyze-wine-list",
-      { extractedText: text, fileName: analysis.fileName, mimeType: analysis.mimeType, mode: "menu-for-wine", wineName },
+      {
+        extractedText: text,
+        fileName: analysis.fileName,
+        mimeType: analysis.mimeType,
+        mode: "menu-for-wine",
+        wineName,
+        normalizedOcr: {
+          structured: normalizedOcr.structured,
+          structuredJson: normalizedOcr.structuredJson,
+        },
+      },
       { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
