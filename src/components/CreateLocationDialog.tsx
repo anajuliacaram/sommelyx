@@ -54,7 +54,10 @@ export function CreateLocationDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!createLocation.isPending) onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent
+        className="sm:max-w-[600px] border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
+        style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+      >
         <DialogHeader>
           <DialogTitle className="font-serif text-[18px] tracking-tight">Adicionar localização</DialogTitle>
           <DialogDescription className="text-[12px] leading-relaxed">
@@ -63,7 +66,7 @@ export function CreateLocationDialog({
         </DialogHeader>
 
         <div className="grid gap-4">
-          <div className="surface-clarity p-4">
+          <div className="glass-card p-4">
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Vinho</p>
             <p className="mt-1 text-[13px] font-semibold text-foreground truncate">{wineName}</p>
           </div>
@@ -93,10 +96,10 @@ export function CreateLocationDialog({
                   Motivo <span className="text-destructive">*</span>
                 </Label>
                 <Select value={reason} onValueChange={setReason}>
-                  <SelectTrigger className="mt-1 h-10 rounded-2xl">
+                  <SelectTrigger className="mt-1 h-10 rounded-2xl border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.72)] backdrop-blur-md">
                     <SelectValue placeholder="Selecionar..." />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl">
+                  <SelectContent className="rounded-2xl border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.92)] backdrop-blur-md">
                     {STOCK_AUDIT_REASONS.map((r) => (
                       <SelectItem key={r} value={r}>
                         {r}
@@ -121,7 +124,7 @@ export function CreateLocationDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-2">
-          <Button type="button" variant="outline" className="h-10 rounded-2xl" onClick={close} disabled={createLocation.isPending}>
+          <Button type="button" variant="outline" className="h-10 rounded-2xl border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.72)] backdrop-blur-md" onClick={close} disabled={createLocation.isPending}>
             Cancelar
           </Button>
           <Button

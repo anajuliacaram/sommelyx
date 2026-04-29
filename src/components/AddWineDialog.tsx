@@ -454,7 +454,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   return (
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-l border-black/5 shadow-[0_20px_60px_rgba(0,0,0,0.12)]" style={{ backgroundColor: '#F6F3EF' }}>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]" style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
 
           <div className="px-6 py-6 flex h-full flex-col">
             <SheetHeader className="mb-6">
@@ -524,8 +524,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-5">
                   {/* Scan Label Card */}
                   <div
-                    className="group cursor-pointer rounded-2xl border bg-white p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
-                    style={{ borderColor: '#E5E2DC' }}
+                    className="group cursor-pointer glass-card p-5 flex items-center gap-4 transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setScanOpen(true)}
                   >
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
@@ -540,8 +539,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   </div>
 
                   {labelImagePreview && (
-                    <div className="rounded-2xl border bg-white p-3 flex items-center gap-3" style={{ borderColor: '#E5E2DC' }}>
-                      <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border" style={{ borderColor: '#EFEAE3', backgroundColor: '#F8F6F2' }}>
+                    <div className="glass-card p-3 flex items-center gap-3">
+                      <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border border-[rgba(255,255,255,0.45)] bg-white/50">
                         <img
                           src={labelImagePreview}
                           alt="Foto do rótulo analisado"
@@ -559,8 +558,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
 
                   {/* Import File Card */}
                   <div
-                    className="group cursor-pointer rounded-2xl border bg-white p-4 flex items-center gap-3.5 transition-all duration-200 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
-                    style={{ borderColor: '#E5E2DC' }}
+                    className="group cursor-pointer glass-card p-4 flex items-center gap-3.5 transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setImportCsvOpen(true)}
                   >
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
@@ -638,10 +636,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                   </div>
 
                   {isCommercial ? (
-                    <div
-                      className="rounded-2xl border bg-white p-4 sm:p-5"
-                      style={{ borderColor: '#E5E2DC' }}
-                    >
+                      <div
+                      className="glass-card p-4 sm:p-5"
+                      >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: '#6F7F5B' }}>

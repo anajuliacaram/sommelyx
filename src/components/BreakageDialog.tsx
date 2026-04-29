@@ -93,7 +93,10 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
 
   return (
     <Sheet open={open} onOpenChange={v => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent
+        className="w-full sm:max-w-md overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
+        style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+      >
         <SheetHeader>
           <SheetTitle className="font-serif text-lg flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -125,7 +128,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                   <Label className="text-xs text-muted-foreground">Selecionar vinho</Label>
 
                   {selectedWine ? (
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl border border-destructive/20 bg-destructive/5">
+                    <div className="glass-card flex items-center gap-2 p-2.5 rounded-xl">
                       <div className="flex-1 min-w-0">
                         <p className="text-[12px] font-semibold text-foreground truncate">{selectedWine.name}</p>
                         <p className="text-[10px] text-muted-foreground">
@@ -148,7 +151,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                         />
                       </div>
 
-                      <ScrollArea className="max-h-[180px] rounded-xl border border-border/50">
+                      <ScrollArea className="max-h-[180px] rounded-xl border border-[rgba(255,255,255,0.48)] bg-[rgba(255,255,255,0.58)]">
                         {filteredWines.length === 0 ? (
                           <div className="px-3 py-6 text-center">
                             <p className="text-[11px] text-muted-foreground">
@@ -182,7 +185,7 @@ export function BreakageDialog({ open, onOpenChange }: BreakageDialogProps) {
                 </div>
 
                 {/* Quantity (ruptura zera o estoque) */}
-                <div className="surface-clarity p-4">
+                <div className="glass-card p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
                     Resumo da ruptura
                   </p>

@@ -340,7 +340,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent
+        className="w-full sm:max-w-md overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
+        style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+      >
         <SheetHeader>
           <SheetTitle className="font-serif text-lg">Escanear Rótulo</SheetTitle>
         </SheetHeader>
@@ -376,7 +379,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <Button
                   variant="ghost"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                className="h-12 text-[13px] font-medium border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Escolher da Fototeca
@@ -451,7 +454,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <p className="text-xs font-medium text-success">Rótulo identificado com sucesso</p>
               </div>
 
-              <div className="surface-clarity p-4 space-y-3">
+              <div className="glass-card p-4 space-y-3">
                 {scannedData.name && (
                   <DataRow label="Nome" value={scannedData.name} />
                 )}
@@ -537,12 +540,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <Button
                   onClick={() => fileInputRef.current?.click()}
                   variant="ghost"
-                  className="h-11 text-[13px] border border-border/70 bg-background/60 hover:bg-background"
+                  className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
                 >
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
                   Usar outra foto
                 </Button>
-                <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-border/70 bg-background/60 hover:bg-background">
+                <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md">
                   Cadastrar manualmente
                 </Button>
               </div>

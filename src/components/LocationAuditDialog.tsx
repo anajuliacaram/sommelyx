@@ -63,14 +63,17 @@ export function LocationAuditDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!busy) onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-[560px]">
+      <DialogContent
+        className="sm:max-w-[560px] border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
+        style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{subtitle}</DialogDescription>
         </DialogHeader>
 
         <div className="mt-2 grid gap-4">
-          <div className="surface-clarity p-4">
+          <div className="glass-card p-4">
             <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Localização</p>
             <div className="mt-2 grid grid-cols-12 gap-3 items-start">
               <div className="col-span-12 sm:col-span-6">
@@ -110,10 +113,10 @@ export function LocationAuditDialog({
                     Motivo <span className="text-destructive">*</span>
                   </Label>
                   <Select value={reason} onValueChange={(v) => { setReason(v as any); setTouched(true); }}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.72)] backdrop-blur-md">
                       <SelectValue placeholder="Selecionar..." />
                     </SelectTrigger>
-                    <SelectContent className="rounded-2xl">
+                    <SelectContent className="rounded-2xl border-[rgba(255,255,255,0.45)] bg-[rgba(255,255,255,0.92)] backdrop-blur-md">
                       {STOCK_AUDIT_REASONS.map((r) => (
                         <SelectItem key={r} value={r}>
                           {r}

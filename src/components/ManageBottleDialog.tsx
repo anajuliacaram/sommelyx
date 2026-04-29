@@ -262,7 +262,8 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
     <>
       <Sheet open={open} onOpenChange={v => { if (!v) resetAll(); onOpenChange(v); }}>
         <SheetContent
-          className="w-full sm:max-w-[460px] overflow-y-auto bg-[#F4F1EC] border-l border-black/[0.04] p-0"
+          className="w-full sm:max-w-[460px] overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
+          style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
         >
           {/* Header — premium block icon + serif title */}
           <div className="px-6 pt-6 pb-5 sm:px-7 sm:pt-7">
@@ -316,7 +317,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             key={item.id}
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="surface-clarity flex items-center gap-2.5 px-3 py-2.5 rounded-[12px]"
+                            className="glass-card flex items-center gap-2.5 px-3 py-2.5 rounded-[12px]"
                           >
                             <span
                               className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -393,7 +394,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                     <div>
                       <SectionLabel>Vinho</SectionLabel>
                       {selectedWine ? (
-                        <div className="surface-clarity flex items-center gap-3 p-3 rounded-[14px] border border-[#7B1E2B]/25 bg-[rgba(123,30,43,0.04)]">
+                        <div className="glass-card flex items-center gap-3 p-3 rounded-[14px]">
                           <span
                             className="h-2.5 w-2.5 shrink-0 rounded-full"
                             style={{ background: wineTypeColor(selectedWine.style) }}
@@ -452,7 +453,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                               >
-                                <div className="surface-clarity space-y-2.5 p-3 rounded-[14px]">
+                                <div className="glass-card space-y-2.5 p-3 rounded-[14px]">
                                   {countries.length > 0 && (
                                     <div>
                                       <p className="text-[10px] font-semibold text-[#3A3327]/55 uppercase tracking-[0.12em] mb-1.5">País</p>
