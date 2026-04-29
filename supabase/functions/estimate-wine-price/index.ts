@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
 
 
 Deno.serve(async (req) => {
@@ -33,6 +34,33 @@ Deno.serve(async (req) => {
       );
     }
 
+    const body = await req.json();
+    const { name, producer, vintage, style, country, region, grape } = body;
+
+    if (!name || typeof name !== "string" || name.trim().length < 2) {
+      return new Response(
+        JSON.stringify({ error: "Nome do vinho é obrigatório" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const cacheInput = {
+      name: name.trim(),
+      producer: producer || "",
+      vintage: vintage || null,
+      style: style || "",
+      country: country || "",
+      region: region || "",
+      grape: grape || "",
+    };
+    const cached = await getCachedAiResponse<any>("estimate-wine-price", cacheInput);
+    if (cached.hit && cached.payload) {
+      return new Response(
+        JSON.stringify(cached.payload),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const rateLimit = await checkRateLimit(claimsData.claims.sub, "estimate-wine-price");
     if (!rateLimit.allowed) {
       return new Response(
@@ -41,16 +69,6 @@ Deno.serve(async (req) => {
           code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
         }),
         { status: rateLimit.degraded ? 503 : 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const body = await req.json();
-    const { name, producer, vintage, style, country, region, grape } = body;
-
-    if (!name || typeof name !== "string" || name.trim().length < 2) {
-      return new Response(
-        JSON.stringify({ error: "Nome do vinho é obrigatório" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -130,12 +148,14 @@ REGRAS:
       );
     }
 
+    const response = {
+      estimated_price: Math.round(price * 100) / 100,
+      confidence: parsed.confidence || "media",
+      reasoning: parsed.reasoning || "",
+    };
+    await setCachedAiResponse("estimate-wine-price", cacheInput, response);
     return new Response(
-      JSON.stringify({
-        estimated_price: Math.round(price * 100) / 100,
-        confidence: parsed.confidence || "media",
-        reasoning: parsed.reasoning || "",
-      }),
+      JSON.stringify(response),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

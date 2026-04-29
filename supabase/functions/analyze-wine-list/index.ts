@@ -4,12 +4,11 @@ import { z } from "https://esm.sh/zod@3.25.76";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
 import { INVALID_INPUT_ERROR, validateTextPayload } from "../_shared/payload-validation.ts";
 
 const FUNCTION_NAME = "analyze-wine-list";
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
-const ANALYSIS_CACHE_TTL_MS = 10 * 60_000;
-const analysisCache = new Map<string, { expiresAt: number; payload: unknown }>();
 const UserProfileSchema = z.object({
   topStyles: z.array(z.string()).optional(),
   topGrapes: z.array(z.string()).optional(),
@@ -43,36 +42,6 @@ function trace(stage: string, metadata?: Record<string, unknown>) {
 
 function elapsed(startedAt: number) {
   return Date.now() - startedAt;
-}
-
-function pruneCache(cache: Map<string, { expiresAt: number; payload: unknown }>) {
-  const now = Date.now();
-  for (const [key, value] of cache.entries()) {
-    if (value.expiresAt <= now) cache.delete(key);
-  }
-}
-
-async function sha256Hex(input: string) {
-  const bytes = new TextEncoder().encode(input);
-  const hash = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(hash)).map((value) => value.toString(16).padStart(2, "0")).join("");
-}
-
-async function buildAnalysisCacheKey(input: {
-  mode?: string;
-  wineName?: string;
-  extractedText?: string;
-  mimeType?: string;
-  fileName?: string;
-}) {
-  const normalized = JSON.stringify({
-    mode: input.mode || "wine-list",
-    wineName: input.wineName || "",
-    mimeType: input.mimeType || "",
-    fileName: input.fileName || "",
-    extractedTextHash: input.extractedText ? await sha256Hex(input.extractedText) : null,
-  });
-  return await sha256Hex(normalized);
 }
 
 async function logToDb(
@@ -580,36 +549,6 @@ serve(async (req) => {
     trace("auth_ok", { request_id: requestId, user_id: userId });
     trace("auth_timing", { request_id: requestId, durationMs: elapsed(startTime) });
 
-    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
-    if (!rateLimit.allowed) {
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 429, "rate_limited", Date.now() - startTime, {
-        request_id: requestId,
-        scope: rateLimit.scope,
-        current_count: rateLimit.currentCount,
-        reset_at: rateLimit.resetAt,
-        degraded: rateLimit.degraded,
-      });
-      return jsonResponse(
-        rateLimit.degraded
-          ? {
-            success: false,
-            code: "AI_RATE_LIMIT_UNAVAILABLE",
-            message: "Serviço temporariamente indisponível.",
-            requestId,
-            retryable: true,
-          }
-          : {
-            success: false,
-            code: "RATE_LIMIT_EXCEEDED",
-            message: "Limite de uso atingido.",
-            requestId,
-            retryable: true,
-          },
-        rateLimit.degraded ? 503 : 429,
-      );
-    }
-
-
     const rawBody = await req.json().catch(() => null);
     trace("upload_received", {
       request_id: requestId,
@@ -651,26 +590,56 @@ serve(async (req) => {
       hasExtractedText: Boolean(normalizedText),
     });
 
-    pruneCache(analysisCache);
-    const cacheKey = await buildAnalysisCacheKey({
+    const isMenuMode = mode === "menu-for-wine";
+    const cacheInput = {
       mode,
       wineName,
-      extractedText: normalizedText,
       mimeType,
       fileName,
-    });
-    const cached = analysisCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
+      userProfile,
+      text: normalizedText,
+      isMenuMode,
+    };
+    const cached = await getCachedAiResponse("analyze-wine-list", cacheInput);
+    if (cached.hit && cached.payload) {
       trace("analysis_cache_hit", {
         request_id: requestId,
-        cacheKey,
+        inputHash: cached.inputHash,
         durationMs: elapsed(startTime),
       });
       return jsonResponse(cached.payload);
     }
-    trace("analysis_cache_miss", { request_id: requestId, cacheKey });
+    trace("analysis_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded });
 
-    const isMenuMode = mode === "menu-for-wine";
+    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 429, "rate_limited", Date.now() - startTime, {
+        request_id: requestId,
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
+      });
+      return jsonResponse(
+        rateLimit.degraded
+          ? {
+            success: false,
+            code: "AI_RATE_LIMIT_UNAVAILABLE",
+            message: "Serviço temporariamente indisponível.",
+            requestId,
+            retryable: true,
+          }
+          : {
+            success: false,
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Limite de uso atingido.",
+            requestId,
+            retryable: true,
+          },
+        rateLimit.degraded ? 503 : 429,
+      );
+    }
+
     const externalPayloadShape = {
       hasExtractedText: Boolean(normalizedText),
       mimeType,
@@ -1105,7 +1074,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: true });
       const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
       trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
-      analysisCache.set(cacheKey, { expiresAt: Date.now() + ANALYSIS_CACHE_TTL_MS, payload: normalized });
+      await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
       trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: true });
       return jsonResponse(normalized);
     }
@@ -1126,7 +1095,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: false });
     const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
     trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
-    analysisCache.set(cacheKey, { expiresAt: Date.now() + ANALYSIS_CACHE_TTL_MS, payload: normalized });
+    await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
     trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: false });
     trace("total_function_duration", { request_id: requestId, durationMs: elapsed(startTime) });
     return jsonResponse(normalized);

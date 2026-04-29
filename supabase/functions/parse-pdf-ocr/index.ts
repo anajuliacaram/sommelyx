@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
+import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/ai-cache.ts";
 import { INVALID_INPUT_ERROR, bytesFromBase64, detectPdfPageCount, validatePdfPayload } from "../_shared/payload-validation.ts";
 
 
@@ -115,17 +116,6 @@ serve(async (req) => {
   }
 
   const requestId = crypto.randomUUID();
-  const rateLimit = await checkRateLimit(user.id, FUNCTION_NAME);
-  if (!rateLimit.allowed) {
-    return jsonResponse({
-      success: false,
-      code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
-      message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-      requestId,
-      retryable: true,
-    }, rateLimit.degraded ? 503 : 429);
-  }
-
   const startedAt = Date.now();
   try {
     const body = await req.json().catch(() => ({}));
@@ -149,6 +139,37 @@ serve(async (req) => {
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
+    const cacheInput = {
+      pdfHash: await sha256Hex(validation.base64),
+      mimeType,
+      pageCount: typeof pageCount === "number" ? pageCount : null,
+    };
+    const cached = await getCachedAiResponse<{
+      text: string;
+      extractedText: string;
+      ocrUsed: boolean;
+      pageCount: number | null;
+      textLength: number;
+    }>(FUNCTION_NAME, cacheInput);
+    if (cached.hit && cached.payload) {
+      console.info(`[${FUNCTION_NAME}] cache_hit request_id=${requestId} input_hash=${cached.inputHash}`);
+      return jsonResponse({
+        ...cached.payload,
+      });
+    }
+    console.info(`[${FUNCTION_NAME}] cache_miss request_id=${requestId} input_hash=${cached.inputHash} degraded=${cached.degraded}`);
+
+    const rateLimit = await checkRateLimit(user.id, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      return jsonResponse({
+        success: false,
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        requestId,
+        retryable: true,
+      }, rateLimit.degraded ? 503 : 429);
+    }
+
     const deadlineAt = Date.now() + PROCESSING_TIMEOUT_MS;
     let finalText = "";
     try {
@@ -165,6 +186,14 @@ serve(async (req) => {
     if (!finalText || finalText.length < 20) {
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
+
+    await setCachedAiResponse(FUNCTION_NAME, cacheInput, {
+      text: finalText,
+      extractedText: finalText,
+      ocrUsed: false,
+      pageCount: null,
+      textLength: finalText.length,
+    });
 
     return jsonResponse({
       text: finalText,

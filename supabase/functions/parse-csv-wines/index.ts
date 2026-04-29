@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/ai-cache.ts";
 
 
 const MAX_CSV_SIZE = 1_000_000;
@@ -76,24 +77,6 @@ serve(async (req) => {
 
     userId = user.id;
 
-    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
-    if (!rateLimit.allowed) {
-      await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startTime, {
-        scope: rateLimit.scope,
-        current_count: rateLimit.currentCount,
-        reset_at: rateLimit.resetAt,
-        degraded: rateLimit.degraded,
-      });
-      return new Response(JSON.stringify({
-        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
-        retryable: true,
-      }), {
-        status: rateLimit.degraded ? 503 : 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": rateLimit.degraded ? "30" : "60" },
-      });
-    }
-
     const { csvContent, fileName, fileType, parseMode, textBlocks, ocrUsed } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
       return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
@@ -127,6 +110,43 @@ serve(async (req) => {
     }
     const isSmartPdf = parseMode === "smart-pdf" || fileType === "application/pdf";
     console.log(`[${FUNCTION_NAME}] mode=${isSmartPdf ? "smart-pdf" : "structured"} input_chars=${normalized.length} input_lines=${lines.length} ocr_used=${ocrUsed ? "true" : "false"}`);
+
+    const cacheInput = {
+      csvHash: await sha256Hex(normalized),
+      fileType: typeof fileType === "string" ? fileType : "",
+      parseMode: isSmartPdf ? "smart-pdf" : "structured",
+      ocrUsed: !!ocrUsed,
+      rowCount: detectedRows,
+    };
+    const cached = await getCachedAiResponse<any>("parse-csv-wines", cacheInput);
+    if (cached.hit && cached.payload) {
+      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
+        cached: true,
+        rowCount: detectedRows,
+      });
+      return new Response(JSON.stringify(cached.payload), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startTime, {
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
+      });
+      return new Response(JSON.stringify({
+        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        retryable: true,
+      }), {
+        status: rateLimit.degraded ? 503 : 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": rateLimit.degraded ? "30" : "60" },
+      });
+    }
 
     const chunks: string[] = [];
     const CHUNK_CHAR_LIMIT = isSmartPdf ? 12_000 : 8_500;
@@ -521,6 +541,8 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
       chunks: chunks.length,
       truncated: wasTruncated,
     });
+
+    await setCachedAiResponse("parse-csv-wines", cacheInput, result);
 
     return new Response(JSON.stringify(result), {
       status: 200,

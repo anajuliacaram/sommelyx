@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
+import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/ai-cache.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-validation.ts";
 
@@ -87,23 +88,6 @@ serve(async (req) => {
 
     userId = user.id;
     trace("auth_ok", { request_id: requestId, user_id: userId });
-    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
-    if (!rateLimit.allowed) {
-      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, {
-        request_id: requestId,
-        scope: rateLimit.scope,
-        current_count: rateLimit.currentCount,
-        reset_at: rateLimit.resetAt,
-        degraded: rateLimit.degraded,
-      });
-      return jsonResponse(rateLimit.degraded ? 503 : 429, {
-        success: false,
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
-        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        requestId,
-        retryable: true,
-      });
-    }
 
     const rawBody = await req.json().catch(() => null);
     const parsedBody = BodySchema.safeParse(rawBody);
@@ -130,6 +114,36 @@ serve(async (req) => {
 
     const mimeType = validation.mimeType;
     const imageBase64 = validation.base64;
+    const cacheInput = {
+      imageHash: await sha256Hex(imageBase64),
+      mimeType,
+    };
+    const cached = await getCachedAiResponse<{ text: string }>(FUNCTION_NAME, cacheInput);
+    if (cached.hit && cached.payload) {
+      trace("ocr_cache_hit", { request_id: requestId, fileName, inputHash: cached.inputHash });
+      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { request_id: requestId, fileName, mimeType, cached: true });
+      return jsonResponse(200, { success: true, text: cached.payload.text, extractedText: cached.payload.text, requestId });
+    }
+    trace("ocr_cache_miss", { request_id: requestId, fileName, inputHash: cached.inputHash, degraded: cached.degraded });
+
+    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, {
+        request_id: requestId,
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
+      });
+      return jsonResponse(rateLimit.degraded ? 503 : 429, {
+        success: false,
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        requestId,
+        retryable: true,
+      });
+    }
+
     trace("request_received", {
       request_id: requestId,
       fileName,
@@ -204,6 +218,7 @@ Regras:
     }
 
     await logAudit(userId, 200, "success", Date.now() - startTime, { request_id: requestId, fileName, mimeType, textLength: text.length });
+    await setCachedAiResponse(FUNCTION_NAME, cacheInput, { text });
     return jsonResponse(200, { success: true, text, extractedText: text, requestId });
   } catch (error) {
     console.error(`[${FUNCTION_NAME}] fatal_error`, error instanceof Error ? error.message : String(error));

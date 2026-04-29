@@ -3,11 +3,10 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
 
 
 const FUNCTION_NAME = "wine-pairings";
-const PAIRINGS_CACHE_TTL_MS = 10 * 60_000;
-const pairingsCache = new Map<string, { expiresAt: number; payload: unknown }>();
 
 
 
@@ -47,23 +46,6 @@ function trace(stage: string, metadata?: Record<string, unknown>) {
 
 function elapsed(startedAt: number) {
   return Date.now() - startedAt;
-}
-
-function pruneCache(cache: Map<string, { expiresAt: number; payload: unknown }>) {
-  const now = Date.now();
-  for (const [key, value] of cache.entries()) {
-    if (value.expiresAt <= now) cache.delete(key);
-  }
-}
-
-async function sha256Hex(input: string) {
-  const bytes = new TextEncoder().encode(input);
-  const hash = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(hash)).map((value) => value.toString(16).padStart(2, "0")).join("");
-}
-
-async function buildPairingsCacheKey(input: Record<string, unknown>) {
-  return await sha256Hex(JSON.stringify(input));
 }
 
 // ── Anti-Genericity Validation ──
@@ -511,6 +493,59 @@ serve(async (req) => {
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId, durationMs: elapsed(startTime) });
 
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime);
+      return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
+    }
+    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines, intent } = body as Record<string, any>;
+    const wineProducer = (body as any).wineProducer || null;
+    const wineVintage = (body as any).wineVintage || null;
+    const wineCountry = (body as any).wineCountry || null;
+    trace("request_validation", {
+      request_id: requestId,
+      mode,
+      hasDish: Boolean(dish),
+      hasWineName: Boolean(wineName),
+      cellarCount: Array.isArray(userWines) ? userWines.length : 0,
+      durationMs: elapsed(startTime),
+    });
+
+    const cacheInput = {
+      mode,
+      wineName: wineName || "",
+      wineStyle: wineStyle || "",
+      wineGrape: wineGrape || "",
+      wineRegion: wineRegion || "",
+      wineProducer: wineProducer || "",
+      wineVintage: wineVintage || "",
+      wineCountry: wineCountry || "",
+      dish: dish || "",
+      intent: intent || "",
+      userWines: Array.isArray(userWines)
+        ? userWines.slice(0, 20).map((wine: any) => ({
+            id: wine?.id || null,
+            name: wine?.name || "",
+            producer: wine?.producer || "",
+            region: wine?.region || "",
+            country: wine?.country || "",
+            grape: wine?.grape || "",
+            style: wine?.style || "",
+            vintage: wine?.vintage || null,
+            purchase_price: wine?.purchase_price ?? null,
+            current_value: wine?.current_value ?? null,
+          }))
+        : [],
+    };
+    const cached = await getCachedAiResponse("wine-pairings", cacheInput);
+    if (cached.hit && cached.payload) {
+      trace("pairings_cache_hit", { request_id: requestId, inputHash: cached.inputHash, durationMs: elapsed(startTime) });
+      return jsonResponse(cached.payload);
+    }
+    trace("pairings_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded });
+
     const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
     if (!rateLimit.allowed) {
       await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 429, "rate_limited", Date.now() - startTime, {
@@ -539,61 +574,6 @@ serve(async (req) => {
         rateLimit.degraded ? 503 : 429,
       );
     }
-
-
-    let body: Record<string, unknown>;
-    try {
-      body = await req.json();
-    } catch {
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime);
-      return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
-    }
-    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines, intent } = body as Record<string, any>;
-    const wineProducer = (body as any).wineProducer || null;
-    const wineVintage = (body as any).wineVintage || null;
-    const wineCountry = (body as any).wineCountry || null;
-    trace("request_validation", {
-      request_id: requestId,
-      mode,
-      hasDish: Boolean(dish),
-      hasWineName: Boolean(wineName),
-      cellarCount: Array.isArray(userWines) ? userWines.length : 0,
-      durationMs: elapsed(startTime),
-    });
-
-    pruneCache(pairingsCache);
-    const cacheKey = await buildPairingsCacheKey({
-      mode,
-      wineName: wineName || "",
-      wineStyle: wineStyle || "",
-      wineGrape: wineGrape || "",
-      wineRegion: wineRegion || "",
-      wineProducer: wineProducer || "",
-      wineVintage: wineVintage || "",
-      wineCountry: wineCountry || "",
-      dish: dish || "",
-      intent: intent || "",
-      userWines: Array.isArray(userWines)
-        ? userWines.slice(0, 20).map((wine: any) => ({
-            id: wine?.id || null,
-            name: wine?.name || "",
-            producer: wine?.producer || "",
-            region: wine?.region || "",
-            country: wine?.country || "",
-            grape: wine?.grape || "",
-            style: wine?.style || "",
-            vintage: wine?.vintage || null,
-            purchase_price: wine?.purchase_price ?? null,
-            current_value: wine?.current_value ?? null,
-          }))
-        : [],
-    });
-    const cached = pairingsCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      trace("pairings_cache_hit", { request_id: requestId, cacheKey, durationMs: elapsed(startTime) });
-      return jsonResponse(cached.payload);
-    }
-    trace("pairings_cache_miss", { request_id: requestId, cacheKey });
 
     // ── Wine Technical Profile Construction Instructions ──
     const PROFILE_CONSTRUCTION_RULES = `
@@ -1046,7 +1026,7 @@ INSTRUÇÕES:
 
     // Degradar com elegância: se temos qualquer resultado, devolver mesmo sem passar 100% na validação.
     if (!validationResult.passed && parsedCount > 0) {
-      pairingsCache.set(cacheKey, { expiresAt: Date.now() + PAIRINGS_CACHE_TTL_MS, payload: parsed });
+      await setCachedAiResponse("wine-pairings", cacheInput, parsed);
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success_with_warnings", Date.now() - startTime, {
         mode,
         result_count: parsedCount,
@@ -1079,7 +1059,7 @@ INSTRUÇÕES:
       validation_passed: validationResult.passed,
       validation_failures: validationResult.failures.length,
     });
-    pairingsCache.set(cacheKey, { expiresAt: Date.now() + PAIRINGS_CACHE_TTL_MS, payload: parsed });
+    await setCachedAiResponse("wine-pairings", cacheInput, parsed);
     trace("result_normalization", { request_id: requestId, mode, count: parsedCount, degraded: false, durationMs: elapsed(startTime) });
     trace("total_function_duration", { request_id: requestId, mode, durationMs: elapsed(startTime) });
     return jsonResponse(parsed);

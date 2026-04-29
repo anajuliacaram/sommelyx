@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
 
 
 serve(async (req) => {
@@ -32,17 +33,6 @@ serve(async (req) => {
       });
     }
 
-    const rateLimit = await checkRateLimit(user.id, "wine-insight");
-    if (!rateLimit.allowed) {
-      return new Response(JSON.stringify({
-        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
-      }), {
-        status: rateLimit.degraded ? 503 : 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const AI_MODEL = "gpt-4o-mini";
     console.log(`[wine-insight] provider=openai model=${AI_MODEL}`);
 
@@ -52,6 +42,35 @@ serve(async (req) => {
     if (!alertType || !wineName) {
       return new Response(JSON.stringify({ error: "alertType e wineName são obrigatórios" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const cacheInput = {
+      alertType,
+      wineName,
+      style: style || "",
+      grape: grape || "",
+      region: region || "",
+      country: country || "",
+      vintage: vintage || null,
+      drinkFrom: drinkFrom || null,
+      drinkUntil: drinkUntil || null,
+    };
+    const cached = await getCachedAiResponse<any>("wine-insight", cacheInput);
+    if (cached.hit && cached.payload) {
+      return new Response(JSON.stringify(cached.payload), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const rateLimit = await checkRateLimit(user.id, "wine-insight");
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({
+        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+      }), {
+        status: rateLimit.degraded ? 503 : 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -150,6 +169,7 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
 
     const parsed = result.parsed;
 
+    await setCachedAiResponse("wine-insight", cacheInput, parsed);
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

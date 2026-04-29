@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
 
 
 serve(async (req) => {
@@ -32,6 +33,35 @@ serve(async (req) => {
       });
     }
 
+    const AI_MODEL = "gpt-4o-mini";
+    console.log(`[taste-compatibility] provider=openai model=${AI_MODEL}`);
+
+    const body = await req.json();
+    const { targetWine, userCellar } = body;
+
+    const cacheInput = {
+      targetWine,
+      userCellar: Array.isArray(userCellar)
+        ? userCellar.slice(0, 50).map((wine: any) => ({
+            id: wine?.id || null,
+            name: wine?.name || "",
+            producer: wine?.producer || "",
+            region: wine?.region || "",
+            country: wine?.country || "",
+            grape: wine?.grape || "",
+            style: wine?.style || "",
+            vintage: wine?.vintage || null,
+            quantity: wine?.quantity || 1,
+          }))
+        : [],
+    };
+    const cached = await getCachedAiResponse<any>("taste-compatibility", cacheInput);
+    if (cached.hit && cached.payload) {
+      return new Response(JSON.stringify(cached.payload), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const rateLimit = await checkRateLimit(user.id, "taste-compatibility");
     if (!rateLimit.allowed) {
       return new Response(JSON.stringify({
@@ -42,12 +72,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const AI_MODEL = "gpt-4o-mini";
-    console.log(`[taste-compatibility] provider=openai model=${AI_MODEL}`);
-
-    const body = await req.json();
-    const { targetWine, userCellar } = body;
 
     if (!targetWine || !userCellar?.length) {
       return new Response(JSON.stringify({ compatibility: null, label: "Sem dados suficientes" }), {
@@ -147,6 +171,8 @@ Vinho a avaliar:
     }
 
     const parsed = result.parsed;
+
+    await setCachedAiResponse("taste-compatibility", cacheInput, parsed);
 
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

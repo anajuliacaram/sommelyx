@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
+import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/ai-cache.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-validation.ts";
 
@@ -414,24 +415,6 @@ serve(async (req) => {
 
     userId = validatedUserId;
     console.log(`[${FUNCTION_NAME}] step: auth_ok request_id=${requestId} user_id=${userId}`);
-    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
-    if (!rateLimit.allowed) {
-      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, {
-        request_id: requestId,
-        scope: rateLimit.scope,
-        current_count: rateLimit.currentCount,
-        reset_at: rateLimit.resetAt,
-        degraded: rateLimit.degraded,
-      });
-      return fail(rateLimit.degraded ? 503 : 429, {
-        success: false,
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
-        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        requestId,
-        retryable: true,
-      });
-    }
-
     let payload: ScanLabelRequest = {};
     try {
       payload = await req.json();
@@ -502,6 +485,35 @@ serve(async (req) => {
       base64_length: imageBase64.length,
       size_bytes: sizeBytes,
     });
+
+    const cacheInput = {
+      imageHash: await sha256Hex(imageBase64),
+      mimeType: imageMime,
+    };
+    const cached = await getCachedAiResponse<{ wine: Record<string, unknown>; confidence?: Record<string, number> }>(FUNCTION_NAME, cacheInput);
+    if (cached.hit && cached.payload) {
+      console.log(`[${FUNCTION_NAME}] step: cache_hit request_id=${requestId} input_hash=${cached.inputHash}`);
+      return ok(cached.payload, requestId);
+    }
+    console.log(`[${FUNCTION_NAME}] step: cache_miss request_id=${requestId} input_hash=${cached.inputHash} degraded=${cached.degraded}`);
+
+    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, {
+        request_id: requestId,
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
+      });
+      return fail(rateLimit.degraded ? 503 : 429, {
+        success: false,
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        requestId,
+        retryable: true,
+      });
+    }
 
     const AI_MODEL = Deno.env.get("SCAN_WINE_LABEL_MODEL")?.trim() || "gpt-4o-mini";
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
@@ -782,6 +794,8 @@ serve(async (req) => {
       region_missing_but_allowed: regionMissingButAllowed,
       region_explicitly_invalid: regionExplicitlyInvalid,
     });
+
+    await setCachedAiResponse(FUNCTION_NAME, cacheInput, { wine: normalizedWine, confidence: fieldConfidence });
 
     return ok({ wine: normalizedWine, confidence: fieldConfidence }, requestId);
   } catch (error) {

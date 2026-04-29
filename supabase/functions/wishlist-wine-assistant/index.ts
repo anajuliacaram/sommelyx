@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/ai-cache.ts";
 import { INVALID_INPUT_ERROR, validateImagePayload, validateTextPayload } from "../_shared/payload-validation.ts";
 
 
@@ -160,24 +161,6 @@ serve(async (req) => {
 
     userId = user.id;
 
-    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
-    if (!rateLimit.allowed) {
-      await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startTime, {
-        scope: rateLimit.scope,
-        current_count: rateLimit.currentCount,
-        reset_at: rateLimit.resetAt,
-        degraded: rateLimit.degraded,
-      });
-      return new Response(JSON.stringify({
-        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
-        retryable: true,
-      }), {
-        status: rateLimit.degraded ? 503 : 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": rateLimit.degraded ? "30" : "60" },
-      });
-    }
-
     if (Date.now() > deadlineAt) {
       return new Response(JSON.stringify({ error: "Tempo excedido", code: "TIMEOUT" }), {
         status: 408,
@@ -250,6 +233,37 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const cacheInput = {
+      query: safeQuery || "",
+      imageHash: normalizedImageBase64 ? await sha256Hex(normalizedImageBase64) : null,
+    };
+    const cached = await getCachedAiResponse<AssistantResult>("wishlist-wine-assistant", cacheInput);
+    if (cached.hit && cached.payload) {
+      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { cached: true });
+      return new Response(JSON.stringify(cached.payload), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startTime, {
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
+      });
+      return new Response(JSON.stringify({
+        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        retryable: true,
+      }), {
+        status: rateLimit.degraded ? 503 : 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": rateLimit.degraded ? "30" : "60" },
       });
     }
 
@@ -416,6 +430,8 @@ Regras:
       notes: normalizeValue(suggestionRaw.notes),
       image_url: imageUrl,
     };
+
+    await setCachedAiResponse("wishlist-wine-assistant", cacheInput, result);
 
     await logAudit(userId, 200, "success", Date.now() - startTime, {
       query: safeQuery || "image_only",
