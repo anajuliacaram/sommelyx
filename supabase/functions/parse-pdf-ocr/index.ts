@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
+import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -99,6 +100,18 @@ serve(async (req) => {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
     return jsonResponse({ error: "AUTH_INVALID" }, 401);
+  }
+
+  const requestId = crypto.randomUUID();
+  const rateLimit = await enforceAiRateLimit(user.id, FUNCTION_NAME);
+  if (!rateLimit.allowed) {
+    return jsonResponse({
+      success: false,
+      code: "RATE_LIMIT_EXCEEDED",
+      message: "Limite de uso atingido. Tente novamente em breve.",
+      requestId,
+      retryable: true,
+    }, 429);
   }
 
   const startedAt = Date.now();

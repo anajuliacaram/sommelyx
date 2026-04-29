@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
+import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,30 +14,6 @@ const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 1 * 1024 * 1024;
 const AI_TIMEOUT_MS = 35_000;
 const DEBUG_MODE = Deno.env.get("SCAN_WINE_LABEL_DEBUG") === "true";
-
-
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10;
-const RATE_WINDOW_MS = 60_000;
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(userId);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
-}
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, val] of rateLimitMap) {
-    if (now > val.resetAt) rateLimitMap.delete(key);
-  }
-}, 120_000);
 
 type FailPayload = {
   success: false;
@@ -469,13 +446,18 @@ serve(async (req) => {
 
     userId = validatedUserId;
     console.log(`[${FUNCTION_NAME}] step: auth_ok request_id=${requestId} user_id=${userId}`);
-
-    if (!checkRateLimit(userId)) {
-      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, { request_id: requestId });
+    const rateLimit = await enforceAiRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logAudit(userId, 429, "rate_limited", Date.now() - startTime, {
+        request_id: requestId,
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+      });
       return fail(429, {
         success: false,
-        code: "AI_RATE_LIMIT",
-        message: "Muitas tentativas em pouco tempo. Tente novamente em instantes.",
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "Limite de uso atingido. Tente novamente em breve.",
         requestId,
         retryable: true,
       });

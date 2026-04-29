@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { callOpenAIResponses } from "../_shared/openai.ts";
+import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -581,6 +582,23 @@ serve(async (req) => {
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId });
     trace("auth_timing", { request_id: requestId, durationMs: elapsed(startTime) });
+
+    const rateLimit = await enforceAiRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 429, "rate_limited", Date.now() - startTime, {
+        request_id: requestId,
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+      });
+      return jsonResponse({
+        success: false,
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "Limite de uso atingido. Tente novamente em breve.",
+        requestId,
+        retryable: true,
+      }, 429);
+    }
 
 
     const rawBody = await req.json().catch(() => null);
