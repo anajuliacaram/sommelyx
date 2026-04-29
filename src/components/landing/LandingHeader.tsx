@@ -4,6 +4,7 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { Instagram, Linkedin } from "lucide-react";
+import { designSystem } from "@/styles/designSystem";
 
 interface LandingHeaderProps {
   onLogin: () => void;
@@ -25,7 +26,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
           opacity,
           (o) => `linear-gradient(to bottom, rgba(255,255,255,${Math.min(o + 0.06, 0.92)}), rgba(255,255,255,${o}))`
         ),
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        boxShadow: designSystem.headerShell.boxShadow,
       }}
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -49,12 +50,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             target="_blank"
             rel="noopener noreferrer"
               className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
-              style={{
-              background: "rgba(255,255,255,0.88)",
-              border: "1px solid rgba(0,0,0,0.06)",
-              color: "hsl(var(--wine))",
-              boxShadow: "0 8px 18px -14px rgba(0,0,0,0.18)",
-            }}
+              style={designSystem.socialIcon}
             aria-label="Instagram"
           >
             <Instagram size={16} />
@@ -64,12 +60,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
             target="_blank"
             rel="noopener noreferrer"
               className="hidden sm:flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200 hover:-translate-y-[1px]"
-              style={{
-              background: "rgba(255,255,255,0.88)",
-              border: "1px solid rgba(0,0,0,0.06)",
-              color: "hsl(var(--wine))",
-              boxShadow: "0 8px 18px -14px rgba(0,0,0,0.18)",
-            }}
+              style={designSystem.socialIcon}
             aria-label="LinkedIn"
           >
             <Linkedin size={16} />

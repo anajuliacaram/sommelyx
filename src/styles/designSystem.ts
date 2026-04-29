@@ -53,6 +53,24 @@ export const designSystem = {
     border: "1px solid rgba(255,255,255,0.25)",
     boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 10px 24px -12px rgba(0,0,0,0.12)",
   } as const,
+  headerShell: {
+    backdropFilter: "blur(14px) saturate(1.3)",
+    WebkitBackdropFilter: "blur(14px) saturate(1.3)",
+    background: "linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(255,255,255,0.84))",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+  } as const,
+  footerShell: {
+    borderTop: "1px solid rgba(0,0,0,0.06)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(248,244,237,0.96) 100%)",
+    backdropFilter: "blur(8px) saturate(1.02)",
+    WebkitBackdropFilter: "blur(8px) saturate(1.02)",
+  } as const,
+  socialIcon: {
+    background: "rgba(255,255,255,0.88)",
+    border: "1px solid rgba(0,0,0,0.06)",
+    color: "hsl(var(--wine))",
+    boxShadow: "0 8px 18px -14px rgba(0,0,0,0.18)",
+  } as const,
   primaryButton:
     "h-11 sm:h-12 rounded-2xl px-6 sm:px-7 text-[14px] font-semibold shadow-[0_18px_44px_-22px_rgba(46,74,47,0.50)]",
   pillButton:
