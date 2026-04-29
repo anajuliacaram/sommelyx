@@ -62,11 +62,16 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="max-w-[36rem] text-[1.75rem] sm:text-5xl font-semibold leading-[1.08] sm:leading-[1.05] tracking-[-0.02em]"
-            style={{ color: "#1A1A1A" }}
+            className="max-w-[36rem] text-[1.65rem] sm:text-5xl font-medium leading-[1.08] sm:leading-[1.05] tracking-[-0.01em]"
+            style={{
+              color: "#1A1A1A",
+              fontFamily: "'Fraunces', 'Libre Baskerville', Georgia, serif",
+              fontOpticalSizing: "auto",
+              fontVariationSettings: '"wght" 560',
+            }}
           >
             Gestão inteligente da sua adega, com clareza de{" "}
-            <span className="text-[#7B1E2B] sm:whitespace-nowrap">estoque, valor e giro.</span>
+            <span className="text-[#6B1D2C] sm:whitespace-nowrap">estoque, valor e giro.</span>
           </motion.h1>
 
           <motion.p
@@ -74,7 +79,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={2}
-            className="mt-3 sm:mt-4 max-w-lg text-[14px] sm:text-base leading-relaxed text-[#5F5F5F]"
+            className="mt-3 sm:mt-4 max-w-lg text-[14px] sm:text-base leading-relaxed text-[#66615A]"
           >
             Controle total, decisões rápidas e insights reais — sem planilhas.
           </motion.p>
