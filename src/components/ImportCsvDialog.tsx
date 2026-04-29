@@ -258,6 +258,26 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return style;
   };
 
+  const resolveParsedStatus = (row: {
+    name?: string | null;
+    producer?: string | null;
+    country?: string | null;
+    grape?: string | null;
+    vintage?: number | null;
+    purchase_price?: number | null;
+    price?: number | null;
+    style?: string | null;
+    type?: string | null;
+  }): ParsedWine["status"] => {
+    if (!normalizeText(row.name)) return "invalid";
+    const hasCoreFields =
+      !!normalizeText(row.producer) &&
+      !!normalizeText(row.country) &&
+      !!normalizeText(row.grape) &&
+      !!row.vintage;
+    return hasCoreFields ? "valid" : "review";
+  };
+
   const normalizeType = (value: unknown) => normalizeStyle(value);
 
   const isIllustrativeImage = (value?: string | null) => !!value?.startsWith("data:image/svg+xml");
@@ -482,7 +502,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         cellar_location: headerValue("cellar_location") || headerValue("localização") || headerValue("localizacao") || undefined,
         drink_from: parseYear(headerValue("drink_from") || headerValue("beber de")) ?? undefined,
         drink_until: parseYear(headerValue("drink_until") || headerValue("beber até") || headerValue("beber ate")) ?? undefined,
-        status: normalizeText(rawName) ? (rawPrice != null ? "review" : "review") : "invalid",
+        status: resolveParsedStatus({
+          name: normalizeText(rawName),
+          producer: rawProducer || null,
+          country: rawCountry || null,
+          grape: rawGrape || null,
+          vintage: rawVintage ?? null,
+          purchase_price: rawPrice ?? null,
+        }),
       } satisfies ParsedWine;
     });
   };
@@ -507,6 +534,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       return {
         ...parsed,
         name: smartNormalizeImportedName(parsed.name, parsed.country),
+        status: resolveParsedStatus({
+          name: parsed.name,
+          producer: parsed.producer ?? null,
+          country: parsed.country ?? null,
+          grape: parsed.grape ?? null,
+          vintage: parsed.vintage ?? null,
+          purchase_price: parsed.purchase_price ?? null,
+        }),
       };
     });
 
@@ -2980,7 +3015,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         </div>
                       ) : null}
 
-                      {renderableRows.length > 0 ? (
+                      {draftWines.length > 0 ? (
                         <div className="flex-1 min-h-[320px] overflow-hidden rounded-[24px] border border-white/45"
                           style={{
                             background: "rgba(255,255,255,0.62)",
