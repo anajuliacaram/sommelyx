@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       region: region || "",
       grape: grape || "",
     };
-    const cached = await getCachedAiResponse<any>("estimate-wine-price", cacheInput);
+    const cached = await getCachedAiResponse<any>("estimate-wine-price", cacheInput, { userId: claimsData.claims.sub });
     if (cached.hit && cached.payload) {
       return new Response(
         JSON.stringify(cached.payload),
@@ -153,7 +153,7 @@ REGRAS:
       confidence: parsed.confidence || "media",
       reasoning: parsed.reasoning || "",
     };
-    await setCachedAiResponse("estimate-wine-price", cacheInput, response);
+    await setCachedAiResponse("estimate-wine-price", cacheInput, response, { userId: claimsData.claims.sub });
     return new Response(
       JSON.stringify(response),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

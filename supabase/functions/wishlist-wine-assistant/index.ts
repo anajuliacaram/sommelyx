@@ -240,7 +240,7 @@ serve(async (req) => {
       query: safeQuery || "",
       imageHash: normalizedImageBase64 ? await sha256Hex(normalizedImageBase64) : null,
     };
-    const cached = await getCachedAiResponse<AssistantResult>("wishlist-wine-assistant", cacheInput);
+    const cached = await getCachedAiResponse<AssistantResult>("wishlist-wine-assistant", cacheInput, { userId });
     if (cached.hit && cached.payload) {
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { cached: true });
       return new Response(JSON.stringify(cached.payload), {
@@ -431,7 +431,7 @@ Regras:
       image_url: imageUrl,
     };
 
-    await setCachedAiResponse("wishlist-wine-assistant", cacheInput, result);
+    await setCachedAiResponse("wishlist-wine-assistant", cacheInput, result, { userId });
 
     await logAudit(userId, 200, "success", Date.now() - startTime, {
       query: safeQuery || "image_only",

@@ -150,7 +150,7 @@ serve(async (req) => {
       ocrUsed: boolean;
       pageCount: number | null;
       textLength: number;
-    }>(FUNCTION_NAME, cacheInput);
+    }>(FUNCTION_NAME, cacheInput, { userId: user.id });
     if (cached.hit && cached.payload) {
       console.info(`[${FUNCTION_NAME}] cache_hit request_id=${requestId} input_hash=${cached.inputHash}`);
       return jsonResponse({
@@ -193,7 +193,7 @@ serve(async (req) => {
       ocrUsed: false,
       pageCount: null,
       textLength: finalText.length,
-    });
+    }, { userId: user.id });
 
     return jsonResponse({
       text: finalText,

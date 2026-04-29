@@ -56,7 +56,7 @@ serve(async (req) => {
           }))
         : [],
     };
-    const cached = await getCachedAiResponse<any>("taste-compatibility", cacheInput);
+    const cached = await getCachedAiResponse<any>("taste-compatibility", cacheInput, { userId: user.id });
     if (cached.hit && cached.payload) {
       return new Response(JSON.stringify(cached.payload), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -84,7 +84,7 @@ serve(async (req) => {
         : [],
     );
     if (deterministic) {
-      await setCachedAiResponse("taste-compatibility", cacheInput, deterministic);
+      await setCachedAiResponse("taste-compatibility", cacheInput, deterministic, { userId: user.id });
       return new Response(JSON.stringify(deterministic), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -200,7 +200,7 @@ Vinho a avaliar:
 
     const parsed = result.parsed;
 
-    await setCachedAiResponse("taste-compatibility", cacheInput, parsed);
+    await setCachedAiResponse("taste-compatibility", cacheInput, parsed, { userId: user.id });
 
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

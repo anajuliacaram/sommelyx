@@ -118,7 +118,7 @@ serve(async (req) => {
       ocrUsed: !!ocrUsed,
       rowCount: detectedRows,
     };
-    const cached = await getCachedAiResponse<any>("parse-csv-wines", cacheInput);
+    const cached = await getCachedAiResponse<any>("parse-csv-wines", cacheInput, { userId });
     if (cached.hit && cached.payload) {
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
         cached: true,
@@ -542,7 +542,7 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
       truncated: wasTruncated,
     });
 
-    await setCachedAiResponse("parse-csv-wines", cacheInput, result);
+    await setCachedAiResponse("parse-csv-wines", cacheInput, result, { userId });
 
     return new Response(JSON.stringify(result), {
       status: 200,

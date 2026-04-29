@@ -8,6 +8,8 @@ export type AiCacheLookupResult<T = unknown> = {
   payload?: T;
 };
 
+export type AiCacheScope = "global" | "user";
+
 const STOPWORDS = new Set([
   "a", "o", "as", "os", "um", "uma", "uns", "umas",
   "de", "da", "do", "das", "dos",
@@ -28,6 +30,19 @@ const ENDPOINT_TTLS: Record<string, number | null> = {
   "wine-insight": 7 * 24 * 60 * 60,
   "parse-csv-wines": 7 * 24 * 60 * 60,
   "wishlist-wine-assistant": 7 * 24 * 60 * 60,
+};
+
+const ENDPOINT_SCOPES: Record<string, AiCacheScope> = {
+  "analyze-wine-list": "global",
+  "wine-pairings": "global",
+  "scan-wine-label": "user",
+  "extract-image-text": "user",
+  "parse-pdf-ocr": "user",
+  "taste-compatibility": "user",
+  "estimate-wine-price": "user",
+  "wine-insight": "user",
+  "parse-csv-wines": "user",
+  "wishlist-wine-assistant": "user",
 };
 
 function adminClient() {
@@ -95,14 +110,23 @@ export function getAiCacheTtlSeconds(endpoint: string) {
   return ENDPOINT_TTLS[endpoint] ?? 7 * 24 * 60 * 60;
 }
 
-export async function buildAiCacheKey(endpoint: string, input: unknown) {
-  const inputNormalized = compactNormalizedString(input);
-  const inputHash = await sha256Hex(`${endpoint}:${inputNormalized}`);
-  return { inputHash, inputNormalized };
+export function getAiCacheScope(endpoint: string, override?: AiCacheScope) {
+  return override ?? ENDPOINT_SCOPES[endpoint] ?? "user";
 }
 
-export async function getCachedAiResponse<T = unknown>(endpoint: string, input: unknown): Promise<AiCacheLookupResult<T>> {
-  const { inputHash, inputNormalized } = await buildAiCacheKey(endpoint, input);
+export async function buildAiCacheKey(endpoint: string, input: unknown, options?: { scope?: AiCacheScope; userId?: string | null }) {
+  const inputNormalized = compactNormalizedString(input);
+  const scope = getAiCacheScope(endpoint, options?.scope);
+  const userId = scope === "user" ? String(options?.userId || "").trim() : "";
+  const hashBase = scope === "global"
+    ? `${scope}:${endpoint}:${inputNormalized}`
+    : `${scope}:${userId}:${endpoint}:${inputNormalized}`;
+  const inputHash = await sha256Hex(hashBase);
+  return { inputHash, inputNormalized, scope, userId: scope === "user" ? userId || null : null };
+}
+
+export async function getCachedAiResponse<T = unknown>(endpoint: string, input: unknown, options?: { scope?: AiCacheScope; userId?: string | null }): Promise<AiCacheLookupResult<T>> {
+  const { inputHash, inputNormalized, scope, userId } = await buildAiCacheKey(endpoint, input, options);
   const client = adminClient();
   if (!client) {
     return { hit: false, degraded: true, inputHash, inputNormalized };
@@ -121,34 +145,36 @@ export async function getCachedAiResponse<T = unknown>(endpoint: string, input: 
     }
 
     if (!data) {
-      console.info("[AI_CACHE_MISS]", { endpoint, inputHash });
+      console.info("[AI_CACHE_MISS]", { endpoint, scope, userId, inputHash });
       return { hit: false, degraded: false, inputHash, inputNormalized };
     }
 
     if (data.expires_at && new Date(data.expires_at).getTime() <= Date.now()) {
-      console.info("[AI_CACHE_MISS]", { endpoint, inputHash, reason: "expired" });
+      console.info("[AI_CACHE_MISS]", { endpoint, scope, userId, inputHash, reason: "expired" });
       return { hit: false, degraded: false, inputHash, inputNormalized };
     }
 
-    console.info("[AI_CACHE_HIT]", { endpoint, inputHash });
+    console.info("[AI_CACHE_HIT]", { endpoint, scope, userId, inputHash });
     return { hit: true, degraded: false, inputHash, inputNormalized, payload: data.response as T };
   } catch (error) {
-    console.warn("[AI_CACHE_MISS]", { endpoint, inputHash, reason: error instanceof Error ? error.message : "unknown" });
+    console.warn("[AI_CACHE_MISS]", { endpoint, scope, userId, inputHash, reason: error instanceof Error ? error.message : "unknown" });
     return { hit: false, degraded: true, inputHash, inputNormalized };
   }
 }
 
-export async function setCachedAiResponse<T = unknown>(endpoint: string, input: unknown, response: T) {
+export async function setCachedAiResponse<T = unknown>(endpoint: string, input: unknown, response: T, options?: { scope?: AiCacheScope; userId?: string | null }) {
   const client = adminClient();
   if (!client) return false;
 
-  const { inputHash, inputNormalized } = await buildAiCacheKey(endpoint, input);
+  const { inputHash, inputNormalized, scope, userId } = await buildAiCacheKey(endpoint, input, options);
   const ttlSeconds = getAiCacheTtlSeconds(endpoint);
   const expiresAt = ttlSeconds == null ? null : new Date(Date.now() + ttlSeconds * 1000).toISOString();
 
   try {
     const { error } = await client.from("ai_cache").upsert({
       endpoint,
+      cache_scope: scope,
+      user_id: userId,
       input_hash: inputHash,
       input_normalized: inputNormalized,
       response,
@@ -156,12 +182,12 @@ export async function setCachedAiResponse<T = unknown>(endpoint: string, input: 
       created_at: new Date().toISOString(),
     }, { onConflict: "input_hash" });
     if (error) {
-      console.warn("[AI_CACHE_WRITE_FAILED]", { endpoint, inputHash, reason: error.message });
+      console.warn("[AI_CACHE_WRITE_FAILED]", { endpoint, scope, userId, inputHash, reason: error.message });
       return false;
     }
     return true;
   } catch (error) {
-    console.warn("[AI_CACHE_WRITE_FAILED]", { endpoint, inputHash, reason: error instanceof Error ? error.message : "unknown" });
+    console.warn("[AI_CACHE_WRITE_FAILED]", { endpoint, scope, userId, inputHash, reason: error instanceof Error ? error.message : "unknown" });
     return false;
   }
 }

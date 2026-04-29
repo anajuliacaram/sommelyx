@@ -490,7 +490,11 @@ serve(async (req) => {
       imageHash: await sha256Hex(imageBase64),
       mimeType: imageMime,
     };
-    const cached = await getCachedAiResponse<{ wine: Record<string, unknown>; confidence?: Record<string, number> }>(FUNCTION_NAME, cacheInput);
+    const cached = await getCachedAiResponse<{ wine: Record<string, unknown>; confidence?: Record<string, number> }>(
+      FUNCTION_NAME,
+      cacheInput,
+      { userId },
+    );
     if (cached.hit && cached.payload) {
       console.log(`[${FUNCTION_NAME}] step: cache_hit request_id=${requestId} input_hash=${cached.inputHash}`);
       return ok(cached.payload, requestId);
@@ -795,7 +799,7 @@ serve(async (req) => {
       region_explicitly_invalid: regionExplicitlyInvalid,
     });
 
-    await setCachedAiResponse(FUNCTION_NAME, cacheInput, { wine: normalizedWine, confidence: fieldConfidence });
+    await setCachedAiResponse(FUNCTION_NAME, cacheInput, { wine: normalizedWine, confidence: fieldConfidence }, { userId });
 
     return ok({ wine: normalizedWine, confidence: fieldConfidence }, requestId);
   } catch (error) {

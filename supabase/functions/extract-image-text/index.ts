@@ -118,7 +118,7 @@ serve(async (req) => {
       imageHash: await sha256Hex(imageBase64),
       mimeType,
     };
-    const cached = await getCachedAiResponse<{ text: string }>(FUNCTION_NAME, cacheInput);
+    const cached = await getCachedAiResponse<{ text: string }>(FUNCTION_NAME, cacheInput, { userId });
     if (cached.hit && cached.payload) {
       trace("ocr_cache_hit", { request_id: requestId, fileName, inputHash: cached.inputHash });
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { request_id: requestId, fileName, mimeType, cached: true });
@@ -218,7 +218,7 @@ Regras:
     }
 
     await logAudit(userId, 200, "success", Date.now() - startTime, { request_id: requestId, fileName, mimeType, textLength: text.length });
-    await setCachedAiResponse(FUNCTION_NAME, cacheInput, { text });
+    await setCachedAiResponse(FUNCTION_NAME, cacheInput, { text }, { userId });
     return jsonResponse(200, { success: true, text, extractedText: text, requestId });
   } catch (error) {
     console.error(`[${FUNCTION_NAME}] fatal_error`, error instanceof Error ? error.message : String(error));

@@ -57,7 +57,7 @@ serve(async (req) => {
       drinkFrom: drinkFrom || null,
       drinkUntil: drinkUntil || null,
     };
-    const cached = await getCachedAiResponse<any>("wine-insight", cacheInput);
+    const cached = await getCachedAiResponse<any>("wine-insight", cacheInput, { userId: user.id });
     if (cached.hit && cached.payload) {
       return new Response(JSON.stringify(cached.payload), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -169,7 +169,7 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
 
     const parsed = result.parsed;
 
-    await setCachedAiResponse("wine-insight", cacheInput, parsed);
+    await setCachedAiResponse("wine-insight", cacheInput, parsed, { userId: user.id });
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
