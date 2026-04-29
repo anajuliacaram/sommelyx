@@ -133,13 +133,13 @@ export function FallbackAnalysisBadge({ size = "md" }: { size?: "sm" | "md" }) {
       }}
     >
       <Sparkles className="h-3 w-3 opacity-70" />
-      Quick analysis
+      Análise rápida
     </span>
   );
 }
 
 export function FallbackAnalysisNotice({
-  message = "Here's a quick analysis based on available data",
+  message = "Esta é uma análise rápida com base nos dados disponíveis",
   confidence = "limited",
   className,
 }: {
@@ -149,15 +149,15 @@ export function FallbackAnalysisNotice({
 }) {
   const confidenceConfig = {
     high: {
-      label: "High confidence",
+      label: "Alta confiança",
       className: "bg-[rgba(31,122,87,0.10)] text-[hsl(152_42%_28%)] border-[rgba(31,122,87,0.14)]",
     },
     medium: {
-      label: "Medium confidence",
+      label: "Confiança média",
       className: "bg-[rgba(198,167,104,0.12)] text-[#8B7730] border-[rgba(198,167,104,0.18)]",
     },
     limited: {
-      label: "Limited data",
+      label: "Dados limitados",
       className: "bg-[rgba(122,30,43,0.08)] text-[#7b1e2b] border-[rgba(122,30,43,0.14)]",
     },
   }[confidence];
@@ -170,7 +170,7 @@ export function FallbackAnalysisNotice({
     >
       <div className="flex items-center gap-2">
         <FallbackAnalysisBadge />
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Fallback</span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Análise rápida</span>
       </div>
       <p className="mt-2 text-[12.5px] leading-relaxed text-foreground/70">{message}</p>
       <div className="mt-3">

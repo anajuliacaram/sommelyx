@@ -10,6 +10,7 @@ import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib/ai-attachments";
 import { FallbackAnalysisBadge, FallbackAnalysisNotice } from "@/components/pairing/shared";
+import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 
 interface ScannedWineData {
   name: string | null;
@@ -117,6 +118,15 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setStep("scanning");
     setErrorMsg("");
     setSupportCode(null);
+    const estimatedPayloadBytes = Math.round((base64.length * 3) / 4);
+
+    console.info("SCAN_START", {
+      fileName: metadata?.fileName || null,
+      mimeType: metadata?.mimeType || null,
+      imageBase64Length: base64.length,
+      estimatedPayloadBytes,
+      device: getClientDeviceType(),
+    });
 
     try {
       console.info("[ScanWineLabelDialog] backend_called", {
@@ -126,13 +136,14 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           mimeType: metadata?.mimeType || null,
           fileName: metadata?.fileName || null,
         },
-        payloadSizeEstimateBytes: Math.round((base64.length * 3) / 4),
+        payloadSizeEstimateBytes: estimatedPayloadBytes,
       });
       console.info("[ScanWineLabelDialog] request_started", {
         function: "scan-wine-label",
         mimeType: metadata?.mimeType || null,
         fileName: metadata?.fileName || null,
         imageBase64Length: base64.length,
+        device: getClientDeviceType(),
       });
       const data = await invokeEdgeFunction<{ wine: ScannedWineData }>(
         "scan-wine-label",
@@ -150,6 +161,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         function: "scan-wine-label",
         success: true,
         fileName: metadata?.fileName || null,
+      });
+      console.info("SCAN_SUCCESS", {
+        fileName: metadata?.fileName || null,
+        mimeType: metadata?.mimeType || null,
+        imageBase64Length: base64.length,
+        estimatedPayloadBytes,
+        device: getClientDeviceType(),
       });
       setScannedData(data.wine);
       setStep("preview");
@@ -177,6 +195,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         imageBase64Length: base64?.length || 0,
       };
       console.error("[ScanWineLabelDialog] scan_failed", debugPayload);
+      console.error("SCAN_FAIL", debugPayload);
 
       console.info("[ScanWineLabelDialog] request_finished", {
         function: "scan-wine-label",
@@ -214,6 +233,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
   const handleFile = useCallback(async (file: File) => {
     if (requestBusyRef.current) return;
+    logFileRequestStart("SCAN_FILE_SELECTED", file, { source: "label_scan" });
     if (!isAcceptedMobileImage(file)) {
       toast({ title: "Selecione uma imagem válida", variant: "destructive" });
       return;

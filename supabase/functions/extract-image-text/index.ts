@@ -64,7 +64,7 @@ serve(async (req) => {
   try {
     const authorization = req.headers.get("Authorization");
     if (!authorization) {
-      await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_authorization" });
+      await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_authorization", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
       return jsonResponse(401, { success: false, code: "AUTH_REQUIRED", message: "Authorization header missing", requestId, retryable: false });
     }
 
@@ -82,7 +82,7 @@ serve(async (req) => {
 
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user?.id) {
-      await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
+      await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
       return jsonResponse(401, { success: false, code: "AUTH_INVALID", message: "Invalid auth token", requestId, retryable: false });
     }
 
@@ -96,12 +96,16 @@ serve(async (req) => {
     }
 
     const fileName = parsedBody.data.fileName || "image";
+    const inputSizeBytes = typeof parsedBody.data.imageBase64 === "string" ? parsedBody.data.imageBase64.length : 0;
+    console.info(`[${FUNCTION_NAME}] request_received`, { request_id: requestId, user_id: userId, fileName, mimeType: parsedBody.data.mimeType || "image/jpeg", input_size_bytes: inputSizeBytes });
     const validation = validateImagePayload(parsedBody.data.imageBase64, parsedBody.data.mimeType || "image/jpeg", { maxBytes: 1 * 1024 * 1024 });
     if (!validation.ok) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
         request_id: requestId,
         fileName,
         reason: validation.reason,
+        input_size_bytes: inputSizeBytes,
+        error_type: validation.reason === "invalid_base64" ? "INVALID_IMAGE_BASE64" : "INVALID_IMAGE",
       });
       return jsonResponse(400, {
         success: false,
@@ -121,7 +125,7 @@ serve(async (req) => {
     const cached = await getCachedAiResponse<{ text: string }>(FUNCTION_NAME, cacheInput, { userId });
     if (cached.hit && cached.payload) {
       trace("ocr_cache_hit", { request_id: requestId, fileName, inputHash: cached.inputHash });
-      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { request_id: requestId, fileName, mimeType, cached: true });
+      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { request_id: requestId, fileName, mimeType, cached: true, input_size_bytes: inputSizeBytes, error_type: null });
       return jsonResponse(200, { success: true, text: cached.payload.text, extractedText: cached.payload.text, requestId });
     }
     trace("ocr_cache_miss", { request_id: requestId, fileName, inputHash: cached.inputHash, degraded: cached.degraded });
@@ -134,6 +138,8 @@ serve(async (req) => {
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
         degraded: rateLimit.degraded,
+        input_size_bytes: inputSizeBytes,
+        error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return jsonResponse(rateLimit.degraded ? 503 : 429, {
         success: false,
@@ -149,6 +155,7 @@ serve(async (req) => {
       fileName,
       mimeType,
       imageBase64Length: imageBase64.length,
+      input_size_bytes: inputSizeBytes,
     });
 
     trace("image_ocr_started", { request_id: requestId, fileName, mimeType });
@@ -195,7 +202,7 @@ Regras:
       const code = result.status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE";
       trace("ocr_failed", { request_id: requestId, fileName, status: result.status, error: result.error });
       trace("fallback_used", { request_id: requestId, fileName, step_failed: "ai_request_failed", error_code: code });
-      await logAudit(userId, result.status, code, Date.now() - startTime, { request_id: requestId, fileName, mimeType, error: result.error });
+      await logAudit(userId, result.status, code, Date.now() - startTime, { request_id: requestId, fileName, mimeType, error: result.error, input_size_bytes: inputSizeBytes, error_type: code });
       return jsonResponse(result.status === 504 ? 408 : 502, {
         success: false,
         code,
@@ -210,7 +217,7 @@ Regras:
     trace("parse_success", { request_id: requestId, fileName, textLength: text.length });
 
     if (!text) {
-      await logAudit(userId, 422, "image_ocr_empty", Date.now() - startTime, { request_id: requestId, fileName, mimeType });
+      await logAudit(userId, 422, "image_ocr_empty", Date.now() - startTime, { request_id: requestId, fileName, mimeType, input_size_bytes: inputSizeBytes, error_type: "PARSE_ERROR" });
       return jsonResponse(422, {
         success: false,
         code: "IMAGE_OCR_EMPTY",
@@ -220,12 +227,12 @@ Regras:
       });
     }
 
-    await logAudit(userId, 200, "success", Date.now() - startTime, { request_id: requestId, fileName, mimeType, textLength: text.length });
+    await logAudit(userId, 200, "success", Date.now() - startTime, { request_id: requestId, fileName, mimeType, textLength: text.length, input_size_bytes: inputSizeBytes, error_type: null });
     await setCachedAiResponse(FUNCTION_NAME, cacheInput, { text }, { userId });
     return jsonResponse(200, { success: true, text, extractedText: text, requestId });
   } catch (error) {
     console.error(`[${FUNCTION_NAME}] fatal_error`, error instanceof Error ? error.message : String(error));
-    await logAudit(userId, 500, "fatal_error", Date.now() - startTime, { request_id: requestId, error: error instanceof Error ? error.message : String(error) });
+    await logAudit(userId, 500, "fatal_error", Date.now() - startTime, { request_id: requestId, error: error instanceof Error ? error.message : String(error), input_size_bytes: 0, error_type: "AI_UNAVAILABLE" });
     return jsonResponse(500, { success: false, code: "AI_UNAVAILABLE", message: "O serviço está temporariamente indisponível", requestId, retryable: true });
   }
 });

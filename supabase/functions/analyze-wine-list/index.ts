@@ -522,7 +522,7 @@ serve(async (req) => {
     const authorization = req.headers.get("Authorization");
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header" });
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
       return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
     }
 
@@ -542,7 +542,7 @@ serve(async (req) => {
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
     if (error || !validatedUserId) {
       console.error("AUTH ERROR:", error);
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
       return jsonResponse({ error: "AUTH_INVALID" }, 401);
     }
     userId = validatedUserId;
@@ -550,12 +550,14 @@ serve(async (req) => {
     trace("auth_timing", { request_id: requestId, durationMs: elapsed(startTime) });
 
     const rawBody = await req.json().catch(() => null);
+    const inputSizeBytes = new TextEncoder().encode(JSON.stringify(rawBody ?? {})).length;
     trace("upload_received", {
       request_id: requestId,
       mimeType: rawBody?.mimeType,
       fileName: rawBody?.fileName,
       hasImageBase64: Boolean(rawBody?.imageBase64),
       hasExtractedText: Boolean(rawBody?.extractedText),
+      input_size_bytes: inputSizeBytes,
     });
 
     if (rawBody?.mimeType && typeof rawBody.mimeType === "string") {
@@ -588,6 +590,7 @@ serve(async (req) => {
       request_id: requestId,
       durationMs: elapsed(startTime),
       hasExtractedText: Boolean(normalizedText),
+      input_size_bytes: inputSizeBytes,
     });
 
     const isMenuMode = mode === "menu-for-wine";
@@ -606,10 +609,11 @@ serve(async (req) => {
         request_id: requestId,
         inputHash: cached.inputHash,
         durationMs: elapsed(startTime),
+        input_size_bytes: inputSizeBytes,
       });
       return jsonResponse(cached.payload);
     }
-    trace("analysis_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded });
+    trace("analysis_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded, input_size_bytes: inputSizeBytes });
 
     const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
     if (!rateLimit.allowed) {
@@ -619,6 +623,8 @@ serve(async (req) => {
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
         degraded: rateLimit.degraded,
+        input_size_bytes: inputSizeBytes,
+        error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return jsonResponse(
         rateLimit.degraded
@@ -1076,6 +1082,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         reason: "no_parsed_output",
         mode,
         fallback: true,
+        input_size_bytes: inputSizeBytes,
+        error_type: "PARSE_ERROR",
       });
       return jsonResponse({ ...fallback, fallback: true, fallbackReason: "NO_PARSED_OUTPUT", note: "análise simplificada" });
     }
@@ -1109,6 +1117,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         validation_failures: validationResult.failures.slice(0, 12),
         mode,
         fallback: true,
+        input_size_bytes: inputSizeBytes,
+        error_type: "PARSE_ERROR",
       });
       return jsonResponse({ ...fallback, fallback: true, fallbackReason: "EMPTY_OR_INVALID_EXTRACTION", note: "análise simplificada" });
     }
@@ -1119,7 +1129,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     trace("parse_success", { request_id: requestId, mode, count: parsedCount, degraded: false });
     await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
     trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: false });
-    trace("total_function_duration", { request_id: requestId, durationMs: elapsed(startTime) });
+    trace("total_function_duration", { request_id: requestId, durationMs: elapsed(startTime), input_size_bytes: inputSizeBytes, user_id: userId });
     return jsonResponse(normalized);
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "Erro interno";
@@ -1137,6 +1147,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       reason: isAbort ? "timeout" : "internal_error",
       mode,
       fallback: true,
+      input_size_bytes: inputSizeBytes,
+      error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
     });
     return jsonResponse({ ...fallback, fallback: true, fallbackReason: isAbort ? "TIMEOUT" : "INTERNAL_ERROR", note: "análise simplificada" });
   }

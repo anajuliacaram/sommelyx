@@ -45,11 +45,15 @@ serve(async (req) => {
   const startTime = Date.now();
   const deadlineAt = startTime + PROCESSING_TIMEOUT_MS;
   let userId = "anonymous";
+  let inputSizeBytes = 0;
 
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        input_size_bytes: 0,
+        error_type: "AUTH_REQUIRED",
+      });
       return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -86,7 +90,12 @@ serve(async (req) => {
     }
 
     const rawBytes = new TextEncoder().encode(csvContent);
+    inputSizeBytes = rawBytes.length;
     if (rawBytes.length > MAX_CSV_SIZE) {
+      await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
+        input_size_bytes: inputSizeBytes,
+        error_type: "IMPORT_LIMIT_EXCEEDED",
+      });
       return new Response(JSON.stringify({
         error: "Arquivo muito grande ou muitas linhas.",
         code: "IMPORT_LIMIT_EXCEEDED",
@@ -100,6 +109,10 @@ serve(async (req) => {
     const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
     const detectedRows = Math.max(0, lines.length - 1);
     if (detectedRows > MAX_ROWS) {
+      await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
+        input_size_bytes: inputSizeBytes,
+        error_type: "IMPORT_LIMIT_EXCEEDED",
+      });
       return new Response(JSON.stringify({
         error: "Arquivo muito grande ou muitas linhas.",
         code: "IMPORT_LIMIT_EXCEEDED",
@@ -109,6 +122,13 @@ serve(async (req) => {
       });
     }
     const isSmartPdf = parseMode === "smart-pdf" || fileType === "application/pdf";
+    console.info(`[${FUNCTION_NAME}] request_received`, {
+      user_id: userId,
+      fileName,
+      fileType,
+      input_size_bytes: inputSizeBytes,
+      parseMode: isSmartPdf ? "smart-pdf" : "structured",
+    });
     console.log(`[${FUNCTION_NAME}] mode=${isSmartPdf ? "smart-pdf" : "structured"} input_chars=${normalized.length} input_lines=${lines.length} ocr_used=${ocrUsed ? "true" : "false"}`);
 
     const cacheInput = {
@@ -123,6 +143,8 @@ serve(async (req) => {
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
         cached: true,
         rowCount: detectedRows,
+        input_size_bytes: inputSizeBytes,
+        error_type: null,
       });
       return new Response(JSON.stringify(cached.payload), {
         status: 200,
@@ -137,6 +159,8 @@ serve(async (req) => {
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
         degraded: rateLimit.degraded,
+        input_size_bytes: inputSizeBytes,
+        error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return new Response(JSON.stringify({
         error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
@@ -184,6 +208,10 @@ serve(async (req) => {
     const wasTruncated = isSmartPdf ? normalized.length > chunks.length * CHUNK_CHAR_LIMIT : lines.slice(1).length > chunks.length * 120;
 
     if (Date.now() > deadlineAt) {
+      await logAudit(userId, 408, "fallback_used", Date.now() - startTime, {
+        input_size_bytes: inputSizeBytes,
+        error_type: "TIMEOUT",
+      });
       return new Response(JSON.stringify({
         error: "Tempo excedido",
         code: "TIMEOUT",
@@ -194,6 +222,10 @@ serve(async (req) => {
     }
 
     if (chunks.length === 0) {
+      await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
+        input_size_bytes: inputSizeBytes,
+        error_type: "IMPORT_LIMIT_EXCEEDED",
+      });
       return new Response(JSON.stringify({
         error: "Arquivo muito grande ou muitas linhas.",
         code: "IMPORT_LIMIT_EXCEEDED",
@@ -475,7 +507,12 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
           : status === 402 ? "Créditos de IA esgotados. Adicione créditos em Configurações > Workspace > Uso."
           : status === 408 ? "Tempo excedido"
           : failures.includes(422) ? "INVALID_AI_RESPONSE" : "Não foi possível extrair dados do arquivo.";
-      await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length });
+      await logAudit(userId, status, "ai_error", Date.now() - startTime, {
+        failures,
+        chunks: chunks.length,
+        input_size_bytes: inputSizeBytes,
+        error_type: status === 429 ? "RATE_LIMIT_EXCEEDED" : status === 408 ? "AI_TIMEOUT" : "PARSE_ERROR",
+      });
       return new Response(JSON.stringify({ error: message }), {
         status,
         headers: { ...corsHeaders, "Content-Type": "application/json", ...(status === 429 ? { "Retry-After": "60" } : {}) },
@@ -540,6 +577,8 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
       csv_lines: lines.length,
       chunks: chunks.length,
       truncated: wasTruncated,
+      input_size_bytes: inputSizeBytes,
+      error_type: null,
     });
 
     await setCachedAiResponse("parse-csv-wines", cacheInput, result, { userId });
@@ -552,6 +591,8 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
     console.error("parse-csv-wines error:", err);
     await logAudit(userId, 500, "internal_error", Date.now() - startTime, {
       error: err instanceof Error ? err.message : "unknown",
+      input_size_bytes: inputSizeBytes,
+      error_type: "INTERNAL_ERROR",
     });
     return new Response(JSON.stringify({ error: "Erro interno ao processar arquivo." }), {
       status: 500,

@@ -476,7 +476,7 @@ serve(async (req) => {
     const authorization = req.headers.get("Authorization");
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header" });
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
       return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
     }
 
@@ -497,7 +497,7 @@ serve(async (req) => {
     console.log(`[${FUNCTION_NAME}] auth_validation request_id=${requestId} valid=${Boolean(validatedUserId)}`);
     if (error || !validatedUserId) {
       console.error("AUTH ERROR:", error);
-      await logToDb(supabaseUrl, serviceKey, "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token" });
+      await logToDb(supabaseUrl, serviceKey, "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
       return jsonResponse({ error: "AUTH_INVALID" }, 401);
     }
     userId = validatedUserId;
@@ -507,9 +507,10 @@ serve(async (req) => {
     try {
       body = await req.json();
     } catch {
-      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime);
+      await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { input_size_bytes: 0, error_type: "PARSE_ERROR" });
       return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
     }
+    const inputSizeBytes = new TextEncoder().encode(JSON.stringify(body ?? {})).length;
     const parsedInput = parseSommelierPairingInput(body);
     const normalizedInput = normalizeSommelierPairingInput(parsedInput);
     const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines, intent, wineProducer, wineVintage, wineCountry } = parsedInput;
@@ -520,6 +521,7 @@ serve(async (req) => {
       hasWineName: Boolean(wineName),
       cellarCount: Array.isArray(userWines) ? userWines.length : 0,
       durationMs: elapsed(startTime),
+      input_size_bytes: inputSizeBytes,
     });
 
     const cacheInput = {
@@ -537,10 +539,10 @@ serve(async (req) => {
     };
     const cached = await getCachedAiResponse("wine-pairings", cacheInput, { userId });
     if (cached.hit && cached.payload) {
-      trace("pairings_cache_hit", { request_id: requestId, inputHash: cached.inputHash, durationMs: elapsed(startTime) });
+      trace("pairings_cache_hit", { request_id: requestId, inputHash: cached.inputHash, durationMs: elapsed(startTime), input_size_bytes: inputSizeBytes });
       return jsonResponse(cached.payload);
     }
-    trace("pairings_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded });
+    trace("pairings_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded, input_size_bytes: inputSizeBytes });
 
     const deterministicResult = mode === "wine-to-food"
       ? (shouldUseDeterministicPairing(normalizedInput.wine, normalizedInput.dish)
@@ -561,6 +563,8 @@ serve(async (req) => {
         request_id: requestId,
         mode,
         source: deterministicResult.source,
+        input_size_bytes: inputSizeBytes,
+        error_type: null,
       });
       return jsonResponse(deterministicResult);
     }
@@ -573,6 +577,8 @@ serve(async (req) => {
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
         degraded: rateLimit.degraded,
+        input_size_bytes: inputSizeBytes,
+        error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return jsonResponse(
         rateLimit.degraded
@@ -600,6 +606,7 @@ serve(async (req) => {
       has_dish: Boolean(normalizedInput.dish),
       has_wine: Boolean(normalizedInput.wineName),
       cellar_count: Array.isArray(normalizedInput.cellar) ? normalizedInput.cellar.length : 0,
+      input_size_bytes: inputSizeBytes,
     });
 
     // ── Wine Technical Profile Construction Instructions ──
@@ -1127,6 +1134,8 @@ INSTRUÇÕES:
         mode,
         result_count: finalCount,
         validation_failures: validationResult.failures.slice(0, 12),
+        input_size_bytes: inputSizeBytes,
+        error_type: "PARSE_ERROR",
       });
       trace("fallback_used", { request_id: requestId, mode, count: finalCount, reason: "degraded_success" });
       trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: true, durationMs: elapsed(startTime) });
@@ -1140,6 +1149,8 @@ INSTRUÇÕES:
         mode,
         reason: "no_valid_results",
         validation_failures: validationResult.failures.slice(0, 12),
+        input_size_bytes: inputSizeBytes,
+        error_type: "PARSE_ERROR",
       });
       const friendlyMessage = mode === "wine-to-food"
         ? "Não conseguimos sugerir pratos confiáveis para este vinho agora. Tente novamente em instantes ou informe um vinho com mais detalhes (uva, região, safra)."
@@ -1156,11 +1167,13 @@ INSTRUÇÕES:
       result_count: mode === "wine-to-food" ? parsed.pairings?.length : parsed.suggestions?.length,
       validation_passed: validationResult.passed,
       validation_failures: validationResult.failures.length,
+      input_size_bytes: inputSizeBytes,
+      error_type: null,
     });
     trace("parse_success", { request_id: requestId, mode, count: finalCount, degraded: false });
     await setCachedAiResponse("wine-pairings", cacheInput, finalPayload);
     trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: false, durationMs: elapsed(startTime) });
-    trace("total_function_duration", { request_id: requestId, mode, durationMs: elapsed(startTime) });
+    trace("total_function_duration", { request_id: requestId, mode, durationMs: elapsed(startTime), input_size_bytes: inputSizeBytes, user_id: userId });
     return jsonResponse(finalPayload);
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "unknown";
@@ -1168,7 +1181,7 @@ INSTRUÇÕES:
     console.error("wine-pairings error:", errMsg);
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { error: errMsg, aborted: isAbort });
+    await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { error: errMsg, aborted: isAbort, input_size_bytes: 0, error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE" });
     if (isAbort) {
       return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
     }

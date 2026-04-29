@@ -127,7 +127,7 @@ serve(async (req) => {
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
-    await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "missing_authorization" });
+    await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "missing_authorization", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
     return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
   }
 
@@ -147,7 +147,7 @@ serve(async (req) => {
 
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
-    await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "invalid_token" });
+    await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
     return jsonResponse({ error: "AUTH_INVALID" }, 401);
   }
 
@@ -159,6 +159,8 @@ serve(async (req) => {
     const pdfBase64Raw = String(body?.pdfBase64 || body?.base64Pdf || "").trim();
     const fileName = String(body?.fileName || "pdf").trim();
     const mimeType = String(body?.mimeType || "").trim().toLowerCase();
+    const inputSizeBytes = bytesFromBase64(pdfBase64Raw).length;
+    console.info(`[${FUNCTION_NAME}] request_received`, { request_id: requestId, user_id: userId, fileName, mimeType, input_size_bytes: inputSizeBytes });
 
     if (mimeType !== "application/pdf") {
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
@@ -170,7 +172,8 @@ serve(async (req) => {
         request_id: requestId,
         fileName,
         reason: validation.reason,
-        input_size_bytes: bytesFromBase64(pdfBase64Raw).length,
+        input_size_bytes: inputSizeBytes,
+        error_type: "INVALID_INPUT",
       });
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
@@ -186,6 +189,7 @@ serve(async (req) => {
         reason: "too_many_pages",
         pages_processed: pageCount,
         input_size_bytes: bytes.length,
+        error_type: "IMPORT_LIMIT_EXCEEDED",
       });
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
@@ -210,6 +214,7 @@ serve(async (req) => {
         input_size_bytes: bytes.length,
         pages_processed: typeof pageCount === "number" ? pageCount : null,
         cached: true,
+        error_type: null,
       });
       return jsonResponse({
         ...cached.payload,
@@ -227,6 +232,7 @@ serve(async (req) => {
         degraded: rateLimit.degraded,
         input_size_bytes: bytes.length,
         pages_processed: typeof pageCount === "number" ? pageCount : null,
+        error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return jsonResponse({
         success: false,
@@ -251,6 +257,7 @@ serve(async (req) => {
           step_failed: "timeout",
           input_size_bytes: bytes.length,
           pages_processed: typeof pageCount === "number" ? pageCount : null,
+          error_type: "AI_TIMEOUT",
         });
         return jsonResponse({ success: false, code: "TIMEOUT", message: "Tempo excedido" }, 408);
       }
@@ -265,6 +272,7 @@ serve(async (req) => {
         step_failed: "empty_extraction",
         input_size_bytes: bytes.length,
         pages_processed: typeof pageCount === "number" ? pageCount : null,
+        error_type: "PARSE_ERROR",
       });
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
@@ -282,6 +290,7 @@ serve(async (req) => {
       input_size_bytes: bytes.length,
       pages_processed: typeof pageCount === "number" ? pageCount : null,
       text_length: finalText.length,
+      error_type: null,
     });
 
     await setCachedAiResponse(FUNCTION_NAME, cacheInput, {
@@ -310,6 +319,8 @@ serve(async (req) => {
       request_id: requestId,
       step_failed: "internal_error",
       error_code: "PDF_PARSE_FAILED",
+      input_size_bytes: 0,
+      error_type: "PDF_PARSE_FAILED",
     });
     console.error(`[${FUNCTION_NAME}] error:`, message);
     const lower = message.toLowerCase();

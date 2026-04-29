@@ -26,6 +26,7 @@ import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
 import { designSystem } from "@/styles/designSystem";
+import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -2166,7 +2167,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setLoading(true);
     setImportMode("standard");
     setAnalysisStage("processing");
-    setAiNotes("Processing file...");
+    setAiNotes("Processando arquivo...");
+    logFileRequestStart("IMPORT_START", file, { flow: "spreadsheet_import" });
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     const isPdfFile = file.type === "application/pdf" || ext === "pdf";
 
@@ -2176,6 +2178,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         setImportMode("image");
         setAnalysisStage("extracting");
         const prepared = await prepareAiAnalysisAttachment(file);
+        console.info("IMPORT_IMAGE_PREPARED", {
+          fileName: file.name,
+          fileType: file.type || "unknown",
+          fileSizeBytes: file.size,
+          device: getClientDeviceType(),
+        });
         const scanResult = await invokeEdgeFunction<any>(
           "scan-wine-label",
           { imageBase64: prepared.imageBase64 },
@@ -2198,7 +2206,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       if (isPdfFile) {
         setImportMode("smart-pdf");
         setAnalysisStage("processing");
-        setAiNotes("Processing file...");
+        setAiNotes("Processando arquivo...");
+        console.info("IMPORT_PDF_START", {
+          fileName: file.name,
+          fileType: file.type || "unknown",
+          fileSizeBytes: file.size,
+          device: getClientDeviceType(),
+        });
         await yieldToBrowser();
         const pdfPayload = await prepareSmartPdfImportAttachment(file);
         setAnalysisStage("extracting");
@@ -2269,7 +2283,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }
 
       setAnalysisStage("extracting");
-      setAiNotes("Extracting data...");
+      setAiNotes("Extraindo dados...");
+      console.info("IMPORT_TEXT_START", {
+        fileName: file.name,
+        fileType: file.type || "unknown",
+        fileSizeBytes: file.size,
+        device: getClientDeviceType(),
+      });
       const raw = await fileToCsvLikeText(file);
       if (!raw || !raw.trim()) {
         setParseErrors(["Não conseguimos ler o conteúdo do arquivo. Verifique se ele contém dados de vinhos."]);
@@ -2880,11 +2900,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       </div>
                       <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
                         {analysisStage === "processing"
-                          ? "Processing file..."
+                          ? "Processando arquivo..."
                           : analysisStage === "extracting"
-                            ? "Extracting data..."
+                            ? "Extraindo dados..."
                             : analysisStage === "parsing"
-                              ? "Organizing wine rows..."
+                              ? "Organizando os vinhos..."
                               : "Sommelyx está analisando…"}
                       </p>
                       <p className="mt-1.5 text-xs" style={{ color: "#9CA3AF" }}>

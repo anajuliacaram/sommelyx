@@ -125,12 +125,18 @@ serve(async (req) => {
   const startTime = Date.now();
   const deadlineAt = startTime + MAX_TOTAL_DURATION_MS;
   let userId = "anonymous";
+  let inputSizeBytes = 0;
+  let safeQueryForError = "";
+  let hasImageInput = false;
 
   try {
     const authorization = req.headers.get("Authorization");
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        input_size_bytes: 0,
+        error_type: "AUTH_REQUIRED",
+      });
       return new Response(JSON.stringify({ error: "AUTH_REQUIRED" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -152,7 +158,10 @@ serve(async (req) => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) {
       console.error("AUTH ERROR:", error);
-      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime);
+      await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        input_size_bytes: 0,
+        error_type: "AUTH_REQUIRED",
+      });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -162,6 +171,10 @@ serve(async (req) => {
     userId = user.id;
 
     if (Date.now() > deadlineAt) {
+      await logAudit(userId, 408, "fallback_used", Date.now() - startTime, {
+        input_size_bytes: inputSizeBytes,
+        error_type: "AI_TIMEOUT",
+      });
       return new Response(JSON.stringify({ error: "Tempo excedido", code: "TIMEOUT" }), {
         status: 408,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -178,6 +191,17 @@ serve(async (req) => {
 
     const { query, imageBase64 } = rawBody as Record<string, unknown>;
     const safeQuery = typeof query === "string" ? query.trim() : "";
+    safeQueryForError = safeQuery;
+    hasImageInput = typeof imageBase64 === "string";
+    inputSizeBytes =
+      new TextEncoder().encode(safeQuery).length +
+      (typeof imageBase64 === "string" ? imageBase64.length : 0);
+    console.info(`[${FUNCTION_NAME}] request_received`, {
+      user_id: userId,
+      input_size_bytes: inputSizeBytes,
+      has_image: typeof imageBase64 === "string",
+      query_length: safeQuery.length,
+    });
     if (safeQuery.length > MAX_QUERY_LENGTH) {
       return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
         status: 400,
@@ -186,7 +210,11 @@ serve(async (req) => {
     }
 
     if (!safeQuery && (!imageBase64 || typeof imageBase64 !== "string")) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_input" });
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        reason: "missing_input",
+        input_size_bytes: inputSizeBytes,
+        error_type: "INVALID_INPUT",
+      });
       return new Response(JSON.stringify({ error: "Informe um texto ou imagem." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -196,7 +224,11 @@ serve(async (req) => {
     if (typeof imageBase64 === "string") {
       const validation = validateImagePayload(imageBase64, "image/jpeg", { maxBytes: MAX_IMAGE_SIZE });
       if (!validation.ok) {
-        await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: validation.reason });
+        await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+          reason: validation.reason,
+          input_size_bytes: inputSizeBytes,
+          error_type: validation.reason === "invalid_base64" ? "INVALID_IMAGE_BASE64" : "INVALID_IMAGE",
+        });
         return new Response(JSON.stringify({
           error: INVALID_INPUT_ERROR.message,
           code: INVALID_INPUT_ERROR.code,
@@ -209,7 +241,11 @@ serve(async (req) => {
 
     const queryValidation = validateTextPayload(safeQuery, MAX_QUERY_LENGTH);
     if (safeQuery && !queryValidation.ok) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "query_too_large" });
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        reason: "query_too_large",
+        input_size_bytes: inputSizeBytes,
+        error_type: "INVALID_INPUT",
+      });
       return new Response(JSON.stringify({
         error: INVALID_INPUT_ERROR.message,
         code: INVALID_INPUT_ERROR.code,
@@ -229,7 +265,11 @@ serve(async (req) => {
     const safeImage = typeof imageBase64 === "string" ? validateImagePayload(imageBase64, "image/jpeg", { maxBytes: MAX_IMAGE_SIZE }) : null;
     const normalizedImageBase64 = safeImage?.ok ? safeImage.base64 : null;
     if (typeof imageBase64 === "string" && !normalizedImageBase64) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "invalid_image" });
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        reason: "invalid_image",
+        input_size_bytes: inputSizeBytes,
+        error_type: "INVALID_IMAGE",
+      });
       return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -242,7 +282,11 @@ serve(async (req) => {
     };
     const cached = await getCachedAiResponse<AssistantResult>("wishlist-wine-assistant", cacheInput, { userId });
     if (cached.hit && cached.payload) {
-      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { cached: true });
+      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
+        cached: true,
+        input_size_bytes: inputSizeBytes,
+        error_type: null,
+      });
       return new Response(JSON.stringify(cached.payload), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -256,6 +300,8 @@ serve(async (req) => {
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
         degraded: rateLimit.degraded,
+        input_size_bytes: inputSizeBytes,
+        error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return new Response(JSON.stringify({
         error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
@@ -271,7 +317,11 @@ serve(async (req) => {
     const openaiModel = "gpt-4o-mini";
     console.log(`[wishlist-wine-assistant] openai_key=${maskSecret(openaiKey)} model=${openaiModel}`);
     if (!openaiKey) {
-      await logAudit(userId, 500, "internal_error", Date.now() - startTime, { reason: "missing_api_key" });
+      await logAudit(userId, 500, "internal_error", Date.now() - startTime, {
+        reason: "missing_api_key",
+        input_size_bytes: inputSizeBytes,
+        error_type: "AI_UNAVAILABLE",
+      });
       return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -386,20 +436,33 @@ Regras:
 
       if (!result.ok) {
         if (result.status === 429) {
-          await logAudit(userId, 429, "ai_error", Date.now() - startTime, { reason: "ai_rate_limit" });
+          await logAudit(userId, 429, "ai_error", Date.now() - startTime, {
+            reason: "ai_rate_limit",
+            input_size_bytes: inputSizeBytes,
+            error_type: "RATE_LIMIT_EXCEEDED",
+          });
           return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
             status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
           });
         }
         if (result.status === 422) {
-          await logAudit(userId, 422, "ai_error", Date.now() - startTime, { ai_status: result.status, reason: "invalid_ai_response" });
+          await logAudit(userId, 422, "ai_error", Date.now() - startTime, {
+            ai_status: result.status,
+            reason: "invalid_ai_response",
+            input_size_bytes: inputSizeBytes,
+            error_type: "PARSE_ERROR",
+          });
           return new Response(JSON.stringify({ error: "INVALID_AI_RESPONSE" }), {
             status: 422,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        await logAudit(userId, 502, "ai_error", Date.now() - startTime, { ai_status: result.status });
+        await logAudit(userId, 502, "ai_error", Date.now() - startTime, {
+          ai_status: result.status,
+          input_size_bytes: inputSizeBytes,
+          error_type: "AI_UNAVAILABLE",
+        });
         return new Response(JSON.stringify({ error: "Serviço de IA indisponível." }), {
           status: 502,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -437,6 +500,8 @@ Regras:
       query: safeQuery || "image_only",
       found_image: !!imageUrl,
       wine_name: result.wine_name,
+      input_size_bytes: inputSizeBytes,
+      error_type: null,
     });
 
     return new Response(JSON.stringify({ suggestion: result }), {
@@ -450,7 +515,13 @@ Regras:
       : /api_key|lovable|config|supabase/i.test(errMsg)
         ? "Erro interno no serviço. Tente novamente."
         : errMsg;
-    await logAudit(userId, isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { message: errMsg });
+    await logAudit(userId, isAbort ? 504 : 500, "internal_error", Date.now() - startTime, {
+      message: errMsg,
+      input_size_bytes: inputSizeBytes,
+      error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
+      has_image_input: hasImageInput,
+      query: safeQueryForError || null,
+    });
     return new Response(JSON.stringify({ error: sanitizedMsg }), {
       status: isAbort ? 504 : 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

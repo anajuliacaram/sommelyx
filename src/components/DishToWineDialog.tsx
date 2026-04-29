@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
+import { logFileRequestStart } from "@/lib/observability";
 import {
   SectionHeader,
   PairingSheetHero,
@@ -359,6 +360,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     }
 
     console.info("[DishToWineDialog] upload_received", { step: "wine-list", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
+    logFileRequestStart("PAIRING_START", file, { step: "wine-list" });
     setStep("scanning");
     const reqId = nextRequestId();
     setLoading(true);
@@ -454,6 +456,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     }
 
     console.info("[DishToWineDialog] upload_received", { step: "menu", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
+    logFileRequestStart("PAIRING_START", file, { step: "menu" });
     setStep("ext-menu-scanning");
     const reqId = nextRequestId();
     setLoading(true);

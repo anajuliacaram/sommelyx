@@ -33,10 +33,10 @@ export class AppErrorBoundary extends React.Component<Props, State> {
               <AlertTriangle className="h-6 w-6" />
             </div>
             <h1 className="font-serif text-[24px] font-semibold tracking-[-0.03em] text-neutral-900">
-              Something went wrong
+              Algo deu errado
             </h1>
             <p className="mt-2 text-[14px] leading-relaxed text-neutral-600">
-              Sommelyx hit a render error. Refresh the page to try again.
+              O Sommelyx encontrou um erro de renderização. Recarregue a página para tentar novamente.
             </p>
             <button
               type="button"
@@ -44,7 +44,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
               className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-[#6B7D5A] to-[#4E5F44] px-4 text-[14px] font-semibold text-white shadow-md transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
-              Reload app
+              Recarregar aplicativo
             </button>
           </div>
         </div>

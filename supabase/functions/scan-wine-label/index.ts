@@ -409,6 +409,8 @@ serve(async (req) => {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
         reason: "missing_or_invalid_authorization_header",
+        input_size_bytes: 0,
+        error_type: "AUTH_REQUIRED",
       });
       return fail(401, {
         success: false,
@@ -439,6 +441,8 @@ serve(async (req) => {
         request_id: requestId,
         reason: "invalid_token",
         auth_error: sanitizePreview(error),
+        input_size_bytes: 0,
+        error_type: "AUTH_INVALID",
       });
       return fail(401, {
         success: false,
@@ -459,6 +463,8 @@ serve(async (req) => {
       await logStep(userId, 400, "request_json_failed", Date.now() - startTime, requestId, {
         reason: "invalid_json",
         error: sanitizePreview(parseError),
+        input_size_bytes: 0,
+        error_type: "PARSE_ERROR",
       });
       return fail(400, {
         success: false,
@@ -474,7 +480,11 @@ serve(async (req) => {
     const payloadFileName = typeof payload?.fileName === "string" ? payload.fileName.trim() : null;
     console.log(`[${FUNCTION_NAME}] step: request_received request_id=${requestId} auth_present=${Boolean(authorization)} payload_keys=${Object.keys(payload || {}).join(",") || "none"} mime=${payloadMimeType || "unknown"} file=${payloadFileName || "unknown"} image_base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
-      await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, { reason: "missing_image" });
+      await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, {
+        reason: "missing_image",
+        input_size_bytes: 0,
+        error_type: "INVALID_IMAGE",
+      });
       return fail(400, {
         success: false,
         code: INVALID_INPUT_ERROR.code,
@@ -491,6 +501,8 @@ serve(async (req) => {
         request_id: requestId,
         reason: validation.reason,
         file_name: payloadFileName,
+        input_size_bytes: 0,
+        error_type: "INVALID_IMAGE",
       });
       return fail(400, {
         success: false,
@@ -513,6 +525,8 @@ serve(async (req) => {
       file_name: payloadFileName,
       base64_length: imageBase64.length,
       size_bytes: sizeBytes,
+      input_size_bytes: sizeBytes,
+      error_type: null,
     });
     console.log(`[${FUNCTION_NAME}] step: image_validated request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
     await logStep(userId, 200, "image_validated", Date.now() - startTime, requestId, {
@@ -520,6 +534,8 @@ serve(async (req) => {
       file_name: payloadFileName,
       base64_length: imageBase64.length,
       size_bytes: sizeBytes,
+      input_size_bytes: sizeBytes,
+      error_type: null,
     });
 
     const cacheInput = {
@@ -533,6 +549,13 @@ serve(async (req) => {
     );
     if (cached.hit && cached.payload) {
       console.log(`[${FUNCTION_NAME}] step: cache_hit request_id=${requestId} input_hash=${cached.inputHash}`);
+      await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
+        request_id: requestId,
+        file_name: payloadFileName,
+        image_mime: imageMime,
+        input_size_bytes: sizeBytes,
+        error_type: null,
+      });
       return ok(cached.payload, requestId);
     }
     console.log(`[${FUNCTION_NAME}] step: cache_miss request_id=${requestId} input_hash=${cached.inputHash} degraded=${cached.degraded}`);
@@ -545,6 +568,8 @@ serve(async (req) => {
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
         degraded: rateLimit.degraded,
+        input_size_bytes: sizeBytes,
+        error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return fail(rateLimit.degraded ? 503 : 429, {
         success: false,
@@ -562,6 +587,8 @@ serve(async (req) => {
       await logStep(userId, 500, "ai_config_missing", Date.now() - startTime, requestId, {
         reason: "missing_openai_api_key",
         model: AI_MODEL,
+        input_size_bytes: sizeBytes,
+        error_type: "AI_UNAVAILABLE",
       });
       return fail(502, {
         success: false,
@@ -714,6 +741,8 @@ serve(async (req) => {
         raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
         step_failed: "structured_parse_failed",
         error_code: "AI_PARSE_ERROR",
+        input_size_bytes: sizeBytes,
+        error_type: "PARSE_ERROR",
       });
       return ok({
         wine: buildFallbackWine(),
@@ -731,6 +760,8 @@ serve(async (req) => {
         raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
         step_failed: "no_structured_output",
         error_code: "AI_PARSE_ERROR",
+        input_size_bytes: sizeBytes,
+        error_type: "PARSE_ERROR",
       });
       return ok({
         wine: buildFallbackWine(),
@@ -746,6 +777,8 @@ serve(async (req) => {
     console.log(`[${FUNCTION_NAME}] step: parse_succeeded request_id=${requestId} fields=${Object.keys(wine).join(",")} parsed_preview=${DEBUG_MODE ? sanitizePreview(parsed) : "hidden"}`);
     await logStep(userId, 200, "parse_succeeded", durationMs, requestId, {
       parsed_fields: Object.keys(wine),
+      input_size_bytes: sizeBytes,
+      error_type: null,
     });
 
     const rawName = typeof wine.name === "string" ? wine.name.trim() : null;
@@ -821,6 +854,8 @@ serve(async (req) => {
         region_explicitly_invalid: regionExplicitlyInvalid,
         step_failed: "insufficient_or_suspicious_label",
         error_code: "LABEL_NOT_IDENTIFIED",
+        input_size_bytes: sizeBytes,
+        error_type: "PARSE_ERROR",
       });
       return ok({
         wine: buildFallbackWine(),
@@ -838,6 +873,8 @@ serve(async (req) => {
       weak_anchors: weakAnchors,
       region_missing_but_allowed: regionMissingButAllowed,
       region_explicitly_invalid: regionExplicitlyInvalid,
+      input_size_bytes: sizeBytes,
+      error_type: null,
     });
 
     await setCachedAiResponse(FUNCTION_NAME, cacheInput, { wine: normalizedWine, confidence: fieldConfidence }, { userId });
@@ -859,6 +896,8 @@ serve(async (req) => {
       stack: DEBUG_MODE ? sanitizePreview(stack) : undefined,
       aborted: isAbort,
       parse_or_inference_issue: isParseOrInferenceIssue,
+      input_size_bytes: sizeBytes,
+      error_type: isAbort ? "AI_TIMEOUT" : isParseOrInferenceIssue ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE",
     });
 
     await logStep(userId, 200, "fallback_used", durationMs, requestId, {
@@ -866,6 +905,8 @@ serve(async (req) => {
       error_code: code,
       error: sanitizePreview(errMsg),
       stack: DEBUG_MODE ? sanitizePreview(stack) : undefined,
+      input_size_bytes: sizeBytes,
+      error_type: code,
     });
     return ok({
       wine: buildFallbackWine(),
