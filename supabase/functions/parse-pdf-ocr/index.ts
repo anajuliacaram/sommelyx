@@ -11,6 +11,10 @@ const corsHeaders = {
 };
 
 const FUNCTION_NAME = "parse-pdf-ocr";
+const MAX_PDF_BYTES = 2 * 1024 * 1024;
+const MAX_PDF_PAGES = 10;
+const MAX_EXTRACTED_TEXT_LENGTH = 5000;
+const PROCESSING_TIMEOUT_MS = 10_000;
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -42,22 +46,44 @@ function decodePdfString(input: string) {
     .replace(/\\\)/g, ")");
 }
 
-function extractTextFromPdfBytes(bytes: Uint8Array) {
+function extractTextFromPdfBytes(bytes: Uint8Array, deadlineAt: number) {
   const binary = new TextDecoder("latin1").decode(bytes);
   const chunks: string[] = [];
+  let totalLength = 0;
+
+  const pushChunk = (value: string) => {
+    if (!value) return false;
+    if (Date.now() > deadlineAt) {
+      throw new Error("PDF_TIMEOUT");
+    }
+    const remaining = MAX_EXTRACTED_TEXT_LENGTH - totalLength;
+    if (remaining <= 0) {
+      return true;
+    }
+    const chunk = value.slice(0, remaining);
+    chunks.push(chunk);
+    totalLength += chunk.length;
+    return totalLength >= MAX_EXTRACTED_TEXT_LENGTH;
+  };
 
   const tjRegex = /\((?:\\.|[^\\()])*\)\s*T[Jj]/g;
   for (const match of binary.matchAll(tjRegex)) {
+    if (Date.now() > deadlineAt) {
+      throw new Error("PDF_TIMEOUT");
+    }
     const raw = match[0];
     const textMatch = raw.match(/\(((?:\\.|[^\\()])*)\)\s*T[Jj]/);
-    if (textMatch?.[1]) chunks.push(decodePdfString(textMatch[1]));
+    if (textMatch?.[1] && pushChunk(decodePdfString(textMatch[1]))) break;
   }
 
   const arrayTjRegex = /\[(.*?)\]\s*TJ/gs;
   for (const match of binary.matchAll(arrayTjRegex)) {
+    if (Date.now() > deadlineAt) {
+      throw new Error("PDF_TIMEOUT");
+    }
     const inner = match[1];
     const innerStrings = Array.from(inner.matchAll(/\(((?:\\.|[^\\()])*)\)/g), (m) => decodePdfString(m[1]));
-    if (innerStrings.length > 0) chunks.push(innerStrings.join(" "));
+    if (innerStrings.length > 0 && pushChunk(innerStrings.join(" "))) break;
   }
 
   const text = normalizeText(chunks.join("\n"));
@@ -109,9 +135,13 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const pdfBase64Raw = String(body?.pdfBase64 || body?.base64Pdf || "").trim();
     const fileName = String(body?.fileName || "pdf").trim();
-    const mimeType = String(body?.mimeType || "application/pdf").trim();
+    const mimeType = String(body?.mimeType || "").trim().toLowerCase();
 
-    const validation = validatePdfPayload(pdfBase64Raw, mimeType, { maxBytes: 2 * 1024 * 1024 });
+    if (mimeType !== "application/pdf") {
+      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+    }
+
+    const validation = validatePdfPayload(pdfBase64Raw, mimeType, { maxBytes: MAX_PDF_BYTES });
     if (!validation.ok) {
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
@@ -119,11 +149,20 @@ serve(async (req) => {
     const bytes = bytesFromBase64(validation.base64);
     console.log(`[${FUNCTION_NAME}] file=${fileName} mime=${mimeType} bytes=${bytes.length}`);
     const pageCount = detectPdfPageCount(bytes);
-    if (typeof pageCount === "number" && pageCount > 10) {
+    if (typeof pageCount === "number" && pageCount > MAX_PDF_PAGES) {
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
-    const finalText = extractTextFromPdfBytes(bytes);
+    const deadlineAt = Date.now() + PROCESSING_TIMEOUT_MS;
+    let finalText = "";
+    try {
+      finalText = extractTextFromPdfBytes(bytes, deadlineAt);
+    } catch (error) {
+      if (error instanceof Error && error.message === "PDF_TIMEOUT") {
+        return jsonResponse({ success: false, code: "TIMEOUT", message: "Tempo excedido" }, 408);
+      }
+      throw error;
+    }
     console.log("FINAL_TEXT_LENGTH:", finalText.length);
     console.log(`[${FUNCTION_NAME}] duration_ms=${Date.now() - startedAt}`);
 
