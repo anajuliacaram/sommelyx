@@ -126,7 +126,7 @@ export default function Signup() {
               { icon: ShieldCheck, label: "Confiabilidade", desc: "Fluxo seguro para iniciar sua operação", bg: "bg-gold/10", color: "text-gold" },
               { icon: Sparkles, label: "Escala", desc: "Pronta para crescer com você", bg: "bg-foreground/[0.06]", color: "text-foreground" },
             ].map((item) => (
-              <article key={item.label} className="rounded-[20px] border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <article key={item.label} className="rounded-[20px] p-4" style={designSystem.glassCard}>
                 <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
                   <item.icon className="h-4 w-4" />
                 </div>
@@ -176,7 +176,7 @@ export default function Signup() {
                     onClick={handleResend}
                     disabled={resentLoading}
                     variant="primary"
-                    className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float"
+                    className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}
                   >
                     <span className="flex items-center gap-2">
                       <RefreshCcw className={`h-4 w-4 ${resentLoading ? "animate-spin" : ""}`} />
@@ -186,7 +186,7 @@ export default function Signup() {
 
                   <Button
                     variant="outline"
-                    className="h-11 w-full rounded-[10px] text-[12px] font-bold uppercase tracking-[0.10em]"
+                    className={`w-full ${designSystem.secondaryButton} uppercase tracking-[0.10em]`}
                     onClick={() => navigate("/login")}
                   >
                     Voltar para login
@@ -271,8 +271,8 @@ export default function Signup() {
                     const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
                     if (error) toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                   }}
-              className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-[10px] border border-border/50 bg-background/60 text-[13px] font-semibold text-foreground hover:bg-background/90 hover:shadow-sm"
-            >
+                  className={`mt-4 flex h-11 w-full items-center justify-center gap-3 ${designSystem.secondaryButton}`}
+                >
                   <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
                     <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>

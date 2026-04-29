@@ -91,7 +91,7 @@ export default function ResetPassword() {
               { icon: KeyRound, label: "Controle", desc: "Regras claras de senha" },
               { icon: Lock, label: "Privacidade", desc: "Sessão segura no dispositivo" },
             ].map((item) => (
-              <article key={item.label} className="rounded-[20px] border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <article key={item.label} className="rounded-[20px] p-4" style={designSystem.glassCard}>
                 <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-wine/[0.06] text-wine">
                   <item.icon className="h-4 w-4" />
                 </div>
@@ -136,11 +136,11 @@ export default function ResetPassword() {
 
                 <div className="mt-7 grid gap-3">
                   <MagneticButton>
-                    <Button type="button" onClick={() => navigate("/forgot-password")} variant="primary" className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float">
-                      Solicitar novo link <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </MagneticButton>
-                  <Button type="button" variant="ghost" className="h-11 rounded-[10px] text-[13px] font-bold" onClick={() => navigate("/login")}>
+                  <Button type="button" onClick={() => navigate("/forgot-password")} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
+                    Solicitar novo link <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </MagneticButton>
+                  <Button type="button" variant="ghost" className={`w-full ${designSystem.secondaryButton} uppercase tracking-[0.10em]`} onClick={() => navigate("/login")}>
                     Voltar ao login
                   </Button>
                 </div>
@@ -191,7 +191,7 @@ export default function ResetPassword() {
 
                   <div className="pt-1">
                     <MagneticButton disabled={loading || !isValid}>
-                      <Button type="submit" disabled={loading || !isValid} variant="primary" className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float">
+                    <Button type="submit" disabled={loading || !isValid} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
                         {loading ? (
                           <span className="flex items-center justify-center gap-3">
                             Redefinindo

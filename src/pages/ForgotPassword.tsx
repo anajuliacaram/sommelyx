@@ -74,7 +74,7 @@ export default function ForgotPassword() {
               { icon: Mail, label: "Precisão", desc: "Envio instantâneo para seu e-mail" },
               { icon: KeyRound, label: "Controle", desc: "Redefinição rápida e sem atrito" },
             ].map((item) => (
-              <article key={item.label} className="rounded-[20px] border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <article key={item.label} className="rounded-[20px] p-4" style={designSystem.glassCard}>
                 <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-wine/[0.06] text-wine">
                   <item.icon className="h-4 w-4" />
                 </div>
@@ -117,7 +117,7 @@ export default function ForgotPassword() {
                 <Button
                   type="button"
                   variant="primary"
-                  className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float"
+                  className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}
                   onClick={() => setSent(false)}
                 >
                   Enviar para outro e-mail
@@ -152,7 +152,7 @@ export default function ForgotPassword() {
 
                   <div className="pt-1">
                     <MagneticButton disabled={loading}>
-                      <Button type="submit" disabled={loading} variant="primary" className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float">
+                      <Button type="submit" disabled={loading} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
                         {loading ? (
                           <span className="flex items-center gap-3">
                             Enviando

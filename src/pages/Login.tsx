@@ -127,7 +127,7 @@ export default function Login() {
               { icon: ShieldCheck, label: "Confiável", desc: "Dados protegidos e operação estável", bg: "bg-gold/10", color: "text-gold" },
               { icon: Sparkles, label: "Editorial", desc: "Experiência elegante de ponta a ponta", bg: "bg-wine/[0.06]", color: "text-wine" },
             ].map((item) => (
-              <article key={item.label} className="rounded-[20px] border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <article key={item.label} className="rounded-[20px] p-4" style={designSystem.glassCard}>
                 <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
                   <item.icon className="h-4 w-4" />
                 </div>
@@ -265,7 +265,7 @@ export default function Login() {
                   toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                 }
               }}
-              className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-[10px] border border-border/50 bg-background/60 text-[13px] font-semibold text-foreground hover:bg-background/90 hover:shadow-sm"
+            className={`mt-4 flex h-11 w-full items-center justify-center gap-3 ${designSystem.secondaryButton}`}
             >
               <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
