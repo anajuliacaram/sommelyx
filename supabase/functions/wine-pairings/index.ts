@@ -866,7 +866,16 @@ INSTRUÇÕES:
       if (!result.ok) {
         if (result.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
         if (result.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
-        if (result.status === 422) return jsonResponse({ error: "INVALID_AI_RESPONSE" }, 422);
+        if (result.status === 422) {
+          console.warn("[wine-pairings] AI returned 422; falling back to degraded response", {
+            request_id: requestId,
+            mode,
+            attempt: attempt + 1,
+          });
+          lastParsed = null;
+          validationResult = { passed: false, failures: ["INVALID_AI_RESPONSE"] };
+          break;
+        }
         if (result.status === 504) return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
         console.error("AI gateway error:", result.status, result.errText);
         return jsonResponse({ error: result.errText || "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);
