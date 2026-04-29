@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses, maskSecret } from "../_shared/openai.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { INVALID_INPUT_ERROR, validateImagePayload, validateTextPayload } from "../_shared/payload-validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +12,9 @@ const corsHeaders = {
 };
 
 const FUNCTION_NAME = "wishlist-wine-assistant";
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 1 * 1024 * 1024;
+const MAX_QUERY_LENGTH = 10_000;
+const MAX_TOTAL_DURATION_MS = 10_000;
 
 type AssistantResult = {
   wine_name: string | null;
@@ -80,10 +83,20 @@ function normalizeStyle(value: unknown) {
   return v;
 }
 
-async function getImageFromOpenFoodFacts(query: string) {
+async function getImageFromOpenFoodFacts(query: string, deadlineAt: number) {
+  if (Date.now() > deadlineAt) return null;
   const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=12&fields=product_name,brands,image_url,image_front_url,categories_tags`;
 
-  const response = await fetch(url);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort("timeout"), 2_500);
+  let response: Response;
+  try {
+    response = await fetch(url, { signal: controller.signal });
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!response.ok) return null;
 
   const data = await response.json();
@@ -112,6 +125,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const startTime = Date.now();
+  const deadlineAt = startTime + MAX_TOTAL_DURATION_MS;
   let userId = "anonymous";
 
   try {
@@ -167,8 +181,29 @@ serve(async (req) => {
       });
     }
 
-    const { query, imageBase64 } = await req.json();
+    if (Date.now() > deadlineAt) {
+      return new Response(JSON.stringify({ error: "Tempo excedido", code: "TIMEOUT" }), {
+        status: 408,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const rawBody = await req.json().catch(() => null);
+    if (!rawBody || typeof rawBody !== "object") {
+      return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { query, imageBase64 } = rawBody as Record<string, unknown>;
     const safeQuery = typeof query === "string" ? query.trim() : "";
+    if (safeQuery.length > MAX_QUERY_LENGTH) {
+      return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!safeQuery && (!imageBase64 || typeof imageBase64 !== "string")) {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "missing_input" });
@@ -178,9 +213,44 @@ serve(async (req) => {
       });
     }
 
-    if (typeof imageBase64 === "string" && imageBase64.length > MAX_IMAGE_SIZE) {
-      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "image_too_large" });
-      return new Response(JSON.stringify({ error: "Imagem muito grande. Máximo 10MB." }), {
+    if (typeof imageBase64 === "string") {
+      const validation = validateImagePayload(imageBase64, "image/jpeg", { maxBytes: MAX_IMAGE_SIZE });
+      if (!validation.ok) {
+        await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: validation.reason });
+        return new Response(JSON.stringify({
+          error: INVALID_INPUT_ERROR.message,
+          code: INVALID_INPUT_ERROR.code,
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    const queryValidation = validateTextPayload(safeQuery, MAX_QUERY_LENGTH);
+    if (safeQuery && !queryValidation.ok) {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "query_too_large" });
+      return new Response(JSON.stringify({
+        error: INVALID_INPUT_ERROR.message,
+        code: INVALID_INPUT_ERROR.code,
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (Date.now() > deadlineAt) {
+      return new Response(JSON.stringify({ error: "Tempo excedido", code: "TIMEOUT" }), {
+        status: 408,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const safeImage = typeof imageBase64 === "string" ? validateImagePayload(imageBase64, "image/jpeg", { maxBytes: MAX_IMAGE_SIZE }) : null;
+    const normalizedImageBase64 = safeImage?.ok ? safeImage.base64 : null;
+    if (typeof imageBase64 === "string" && !normalizedImageBase64) {
+      await logAudit(userId, 400, "validation_error", Date.now() - startTime, { reason: "invalid_image" });
+      return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -231,11 +301,11 @@ Regras:
         text: `Texto informado pelo cliente: ${safeQuery}`,
       });
     }
-    if (typeof imageBase64 === "string" && imageBase64.trim().length > 0) {
+    if (normalizedImageBase64) {
       userContent.push({
         type: "image_url",
         image_url: {
-          url: `data:image/jpeg;base64,${imageBase64}`,
+          url: `data:image/jpeg;base64,${normalizedImageBase64}`,
         },
       });
     }
@@ -251,7 +321,7 @@ Regras:
         functionName: FUNCTION_NAME,
         requestId: crypto.randomUUID(),
         model: openaiModel,
-        timeoutMs: 15_000,
+        timeoutMs: 10_000,
         temperature: 0.2,
         instructions: String(messages[0].content),
         input: [
@@ -334,7 +404,7 @@ Regras:
       .join(" ")
       || safeQuery;
 
-    const imageUrl = await getImageFromOpenFoodFacts(searchBasis);
+    const imageUrl = await getImageFromOpenFoodFacts(searchBasis, deadlineAt);
 
     const result: AssistantResult = {
       wine_name: normalizeValue(suggestionRaw.wine_name),
