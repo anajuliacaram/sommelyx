@@ -9,6 +9,8 @@ type WineLike = {
   quantity?: number | null;
 };
 
+export type PairingMode = "wine-to-food" | "food-to-wine";
+
 type PairingResult = {
   dish: string;
   category: string;
@@ -256,6 +258,60 @@ export function shouldUseDeterministicPairing(wine: WineLike, dish?: string | nu
   return Boolean(category !== "unknown" || dishRule);
 }
 
+export function parseSommelierPairingInput(body: Record<string, unknown>) {
+  const mode = body.mode === "food-to-wine" ? "food-to-wine" : "wine-to-food";
+  const wineName = typeof body.wineName === "string" ? body.wineName.trim() : "";
+  const wineStyle = typeof body.wineStyle === "string" ? body.wineStyle.trim() : "";
+  const wineGrape = typeof body.wineGrape === "string" ? body.wineGrape.trim() : "";
+  const wineRegion = typeof body.wineRegion === "string" ? body.wineRegion.trim() : "";
+  const wineProducer = typeof body.wineProducer === "string" ? body.wineProducer.trim() : "";
+  const wineCountry = typeof body.wineCountry === "string" ? body.wineCountry.trim() : "";
+  const wineVintage = Number.isFinite(Number(body.wineVintage)) ? Number(body.wineVintage) : null;
+  const dish = typeof body.dish === "string" ? body.dish.trim() : "";
+  const intent = typeof body.intent === "string" ? body.intent.trim() : "";
+  const userWines = Array.isArray(body.userWines) ? body.userWines : [];
+  return {
+    mode,
+    wineName,
+    wineStyle,
+    wineGrape,
+    wineRegion,
+    wineProducer,
+    wineCountry,
+    wineVintage,
+    dish,
+    intent,
+    userWines,
+  };
+}
+
+export function normalizeSommelierPairingInput(input: ReturnType<typeof parseSommelierPairingInput>) {
+  return {
+    ...input,
+    wine: {
+      name: input.wineName,
+      style: input.wineStyle || null,
+      grape: input.wineGrape || null,
+      region: input.wineRegion || null,
+      producer: input.wineProducer || null,
+      country: input.wineCountry || null,
+      vintage: input.wineVintage,
+    },
+    cellar: input.userWines.slice(0, 20).map((wine: any) => ({
+      id: wine?.id || null,
+      name: wine?.name || "",
+      producer: wine?.producer || "",
+      region: wine?.region || "",
+      country: wine?.country || "",
+      grape: wine?.grape || "",
+      style: wine?.style || "",
+      vintage: wine?.vintage || null,
+      purchase_price: wine?.purchase_price ?? null,
+      current_value: wine?.current_value ?? null,
+    })),
+  };
+}
+
 export function buildDeterministicPairingsForWine(wine: WineLike) {
   const category = detectStyleCategory(wine);
   const rule = category === "unknown"
@@ -300,6 +356,15 @@ export function buildDeterministicPairingsForWine(wine: WineLike) {
     pairings,
     pairingLogic: `${baseName} combina melhor quando a mesa acompanha seu perfil de ${wineProfile.body} e ${wineProfile.acidity} acidez; priorize pratos que respeitem essa estrutura.`,
     wineProfile,
+  };
+}
+
+export function buildBasicSafePairingsForWine(wine: WineLike) {
+  return {
+    source: "fallback" as const,
+    pairings: buildDeterministicPairingsForWine(wine).pairings,
+    pairingLogic: `${wine.name || "Este vinho"} pede pratos que respeitem corpo, acidez e taninos em equilíbrio.`,
+    wineProfile: makeWineProfile(wine, detectStyleCategory(wine) === "unknown" ? "red" : detectStyleCategory(wine)),
   };
 }
 
@@ -411,6 +476,53 @@ export function buildDeterministicSuggestionsForDish(dish: string, userWines: Wi
       fat: rule.category === "queijo" ? "alta" : "moderada",
       category: rule.category,
       explanation: rule.explanation,
+    },
+  };
+}
+
+export function buildBasicSafeSuggestionsForDish(dish: string, userWines: WineLike[]) {
+  const base = buildDeterministicSuggestionsForDish(dish, userWines);
+  if (base) return base;
+  const fallbackSuggestions = userWines.slice(0, 5).map((wine, index) => ({
+    wineName: wine.name || `Vinho ${index + 1}`,
+    style: toPortugueseStyle(detectStyleCategory(wine) === "unknown" ? "red" : detectStyleCategory(wine)),
+    grape: wine.grape || "Blend",
+    vintage: Number.isFinite(Number(wine.vintage)) ? Number(wine.vintage) : 0,
+    region: wine.region || "",
+    country: wine.country || "",
+    reason: `${wine.name || `Vinho ${index + 1}`} pode funcionar com "${dish}" por equilíbrio de corpo, acidez e intensidade.`,
+    fromCellar: true,
+    match: index === 0 ? "perfeito" : index === 1 ? "muito bom" : "bom",
+    harmony_type: "equilíbrio" as const,
+    harmony_label: "equilíbrio técnico",
+    compatibilityLabel: index === 0 ? "Excelente escolha" : index === 1 ? "Alta compatibilidade" : "Boa opção",
+    wineProfile: makeWineProfile(wine, detectStyleCategory(wine) === "unknown" ? "red" : detectStyleCategory(wine)),
+    source: "fallback" as const,
+  }));
+
+  return {
+    source: "fallback" as const,
+    suggestions: fallbackSuggestions.length > 0 ? fallbackSuggestions : [{
+      wineName: "Vinho da adega",
+      style: "tinto",
+      grape: "Blend",
+      vintage: 0,
+      region: "",
+      country: "",
+      reason: "Sugestão simplificada baseada em equilíbrio de corpo e acidez.",
+      fromCellar: true,
+      match: "bom",
+      harmony_type: "equilíbrio",
+      harmony_label: "equilíbrio técnico",
+      compatibilityLabel: "Boa opção",
+      wineProfile: makeWineProfile({ name: "Vinho da adega" }, "red"),
+      source: "fallback" as const,
+    }],
+    dishProfile: {
+      intensity: "média",
+      fat: "moderada",
+      category: "geral",
+      explanation: "Sugestão simplificada baseada em equilíbrio de corpo e acidez.",
     },
   };
 }

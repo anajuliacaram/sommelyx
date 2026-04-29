@@ -4,7 +4,15 @@ import { callOpenAIResponses } from "../_shared/openai.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { getCachedAiResponse, setCachedAiResponse } from "../_shared/ai-cache.ts";
-import { buildDeterministicPairingsForWine, buildDeterministicSuggestionsForDish, shouldUseDeterministicPairing } from "../_shared/deterministic-pairing.ts";
+import {
+  buildBasicSafePairingsForWine,
+  buildBasicSafeSuggestionsForDish,
+  buildDeterministicPairingsForWine,
+  buildDeterministicSuggestionsForDish,
+  normalizeSommelierPairingInput,
+  parseSommelierPairingInput,
+  shouldUseDeterministicPairing,
+} from "../_shared/deterministic-pairing.ts";
 
 
 const FUNCTION_NAME = "wine-pairings";
@@ -501,10 +509,9 @@ serve(async (req) => {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime);
       return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
     }
-    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines, intent } = body as Record<string, any>;
-    const wineProducer = (body as any).wineProducer || null;
-    const wineVintage = (body as any).wineVintage || null;
-    const wineCountry = (body as any).wineCountry || null;
+    const parsedInput = parseSommelierPairingInput(body);
+    const normalizedInput = normalizeSommelierPairingInput(parsedInput);
+    const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines, intent, wineProducer, wineVintage, wineCountry } = parsedInput;
     trace("request_validation", {
       request_id: requestId,
       mode,
@@ -515,32 +522,19 @@ serve(async (req) => {
     });
 
     const cacheInput = {
-      mode,
-      wineName: wineName || "",
-      wineStyle: wineStyle || "",
-      wineGrape: wineGrape || "",
-      wineRegion: wineRegion || "",
-      wineProducer: wineProducer || "",
-      wineVintage: wineVintage || "",
-      wineCountry: wineCountry || "",
-      dish: dish || "",
-      intent: intent || "",
-      userWines: Array.isArray(userWines)
-        ? userWines.slice(0, 20).map((wine: any) => ({
-            id: wine?.id || null,
-            name: wine?.name || "",
-            producer: wine?.producer || "",
-            region: wine?.region || "",
-            country: wine?.country || "",
-            grape: wine?.grape || "",
-            style: wine?.style || "",
-            vintage: wine?.vintage || null,
-            purchase_price: wine?.purchase_price ?? null,
-            current_value: wine?.current_value ?? null,
-          }))
-        : [],
+      mode: normalizedInput.mode,
+      wineName: normalizedInput.wineName,
+      wineStyle: normalizedInput.wineStyle,
+      wineGrape: normalizedInput.wineGrape,
+      wineRegion: normalizedInput.wineRegion,
+      wineProducer: normalizedInput.wineProducer,
+      wineVintage: normalizedInput.wineVintage,
+      wineCountry: normalizedInput.wineCountry,
+      dish: normalizedInput.dish,
+      intent: normalizedInput.intent,
+      userWines: normalizedInput.cellar,
     };
-    const cached = await getCachedAiResponse("wine-pairings", cacheInput);
+    const cached = await getCachedAiResponse("wine-pairings", cacheInput, { userId });
     if (cached.hit && cached.payload) {
       trace("pairings_cache_hit", { request_id: requestId, inputHash: cached.inputHash, durationMs: elapsed(startTime) });
       return jsonResponse(cached.payload);
@@ -548,30 +542,11 @@ serve(async (req) => {
     trace("pairings_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded });
 
     const deterministicResult = mode === "wine-to-food"
-      ? (shouldUseDeterministicPairing({ name: wineName || "", style: wineStyle || null, grape: wineGrape || null, country: wineCountry || null, region: wineRegion || null, producer: wineProducer || null, vintage: wineVintage || null })
-        ? buildDeterministicPairingsForWine({
-            name: wineName || "",
-            style: wineStyle || null,
-            grape: wineGrape || null,
-            country: wineCountry || null,
-            region: wineRegion || null,
-            producer: wineProducer || null,
-            vintage: wineVintage || null,
-          })
-        : null)
-      : buildDeterministicSuggestionsForDish(
-          typeof dish === "string" ? dish : "",
-          Array.isArray(userWines) ? userWines.slice(0, 20).map((wine: any) => ({
-            name: wine?.name || "",
-            producer: wine?.producer || null,
-            region: wine?.region || null,
-            country: wine?.country || null,
-            grape: wine?.grape || null,
-            style: wine?.style || null,
-            vintage: wine?.vintage ?? null,
-            quantity: wine?.quantity ?? null,
-          })) : [],
-        );
+      ? (shouldUseDeterministicPairing(normalizedInput.wine, normalizedInput.dish)
+        ? buildDeterministicPairingsForWine(normalizedInput.wine)
+        : buildBasicSafePairingsForWine(normalizedInput.wine))
+      : (buildDeterministicSuggestionsForDish(normalizedInput.dish, normalizedInput.cellar)
+        ?? buildBasicSafeSuggestionsForDish(normalizedInput.dish, normalizedInput.cellar));
 
     if (deterministicResult) {
       trace("pairings_deterministic_hit", {
@@ -1063,20 +1038,89 @@ INSTRUÇÕES:
       lastParsed || (mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] }),
       mode,
     );
+    const safeFallback = mode === "wine-to-food"
+      ? buildBasicSafePairingsForWine(normalizedInput.wine)
+      : buildBasicSafeSuggestionsForDish(normalizedInput.dish, normalizedInput.cellar);
     const parsedCount = mode === "wine-to-food"
       ? Array.isArray(parsed.pairings) ? parsed.pairings.length : 0
       : Array.isArray(parsed.suggestions) ? parsed.suggestions.length : 0;
+    const fallbackCount = mode === "wine-to-food"
+      ? safeFallback.pairings.length
+      : safeFallback.suggestions.length;
+    const mergeMinCount = () => {
+      if (mode === "wine-to-food") {
+        const pairings = dedupePairings([
+          ...(Array.isArray(parsed.pairings) ? parsed.pairings : []),
+          ...safeFallback.pairings,
+        ]).slice(0, 5);
+        return {
+          ...parsed,
+          pairings,
+          pairingLogic: typeof parsed.pairingLogic === "string" && parsed.pairingLogic.trim().length > 0
+            ? parsed.pairingLogic
+            : safeFallback.pairingLogic,
+          wineProfile: parsed.wineProfile || safeFallback.wineProfile,
+        };
+      }
+      const suggestions = dedupePairings(
+        (Array.isArray(parsed.suggestions) ? parsed.suggestions : []).map((s: any) => ({
+          dish: s.wineName || "Vinho sugerido",
+          reason: s.reason || "Sugestão simplificada baseada em equilíbrio técnico.",
+          match: s.match || "bom",
+          harmony_type: s.harmony_type || "equilíbrio",
+          harmony_label: s.harmony_label || "Equilíbrio técnico",
+          category: "classico",
+          dish_profile: null,
+          recipe: null,
+        })).concat(
+          safeFallback.suggestions.map((s) => ({
+            dish: s.wineName,
+            reason: s.reason,
+            match: s.match,
+            harmony_type: s.harmony_type,
+            harmony_label: s.harmony_label,
+            category: "classico",
+            dish_profile: null,
+            recipe: null,
+          })),
+        ),
+      ).slice(0, 5);
+      return {
+        ...parsed,
+        suggestions: suggestions.map((item: any, index: number) => ({
+          wineName: item.dish,
+          style: safeFallback.suggestions[index]?.style || "tinto",
+          grape: safeFallback.suggestions[index]?.grape || "Blend",
+          vintage: safeFallback.suggestions[index]?.vintage || 0,
+          region: safeFallback.suggestions[index]?.region || "",
+          country: safeFallback.suggestions[index]?.country || "",
+          reason: item.reason,
+          fromCellar: safeFallback.suggestions[index]?.fromCellar ?? true,
+          match: item.match,
+          harmony_type: item.harmony_type,
+          harmony_label: item.harmony_label,
+          compatibilityLabel: safeFallback.suggestions[index]?.compatibilityLabel || "Boa opção",
+          wineProfile: safeFallback.suggestions[index]?.wineProfile || null,
+        })),
+        dishProfile: parsed.dishProfile || safeFallback.dishProfile,
+        note: "análise simplificada",
+      };
+    };
+    const finalPayload = parsedCount >= 5 ? parsed : mergeMinCount();
+    const finalCount = mode === "wine-to-food"
+      ? Array.isArray((finalPayload as any).pairings) ? (finalPayload as any).pairings.length : 0
+      : Array.isArray((finalPayload as any).suggestions) ? (finalPayload as any).suggestions.length : 0;
 
     // Degradar com elegância: se temos qualquer resultado, devolver mesmo sem passar 100% na validação.
-    if (!validationResult.passed && parsedCount > 0) {
-      await setCachedAiResponse("wine-pairings", cacheInput, parsed);
+    if (!validationResult.passed && finalCount > 0) {
+      await setCachedAiResponse("wine-pairings", cacheInput, finalPayload);
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success_with_warnings", Date.now() - startTime, {
         mode,
-        result_count: parsedCount,
+        result_count: finalCount,
         validation_failures: validationResult.failures.slice(0, 12),
       });
-      trace("result_normalization", { request_id: requestId, mode, count: parsedCount, degraded: true, durationMs: elapsed(startTime) });
-      return jsonResponse(parsed);
+      trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: true, durationMs: elapsed(startTime) });
+      return jsonResponse(finalPayload);
     }
 
     if (!validationResult.passed) {
@@ -1091,8 +1135,8 @@ INSTRUÇÕES:
         ? "Não conseguimos sugerir pratos confiáveis para este vinho agora. Tente novamente em instantes ou informe um vinho com mais detalhes (uva, região, safra)."
         : "Não conseguimos sugerir vinhos para este prato agora. Tente reformular o prato (ex: 'risoto de funghi com parmesão') ou tente novamente em instantes.";
       const emptyPayload = mode === "wine-to-food"
-        ? { pairings: [], pairingLogic: null, wineProfile: null, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" }
-        : { suggestions: [], dishProfile: null, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC" };
+        ? { pairings: safeFallback.pairings.slice(0, 5), pairingLogic: safeFallback.pairingLogic, wineProfile: safeFallback.wineProfile, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC", note: "análise simplificada" }
+        : { suggestions: safeFallback.suggestions.slice(0, 5), dishProfile: safeFallback.dishProfile, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC", note: "análise simplificada" };
       return jsonResponse(emptyPayload);
     }
 
@@ -1102,10 +1146,10 @@ INSTRUÇÕES:
       validation_passed: validationResult.passed,
       validation_failures: validationResult.failures.length,
     });
-    await setCachedAiResponse("wine-pairings", cacheInput, parsed);
-    trace("result_normalization", { request_id: requestId, mode, count: parsedCount, degraded: false, durationMs: elapsed(startTime) });
+    await setCachedAiResponse("wine-pairings", cacheInput, finalPayload);
+    trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: false, durationMs: elapsed(startTime) });
     trace("total_function_duration", { request_id: requestId, mode, durationMs: elapsed(startTime) });
-    return jsonResponse(parsed);
+    return jsonResponse(finalPayload);
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "unknown";
     const isAbort = errMsg.toLowerCase().includes("abort");
