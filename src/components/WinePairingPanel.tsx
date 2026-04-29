@@ -21,7 +21,6 @@ interface WinePairingPanelProps {
   wineRegion?: string | null;
   wineProducer?: string | null;
   wineVintage?: number | null;
-  existingPairing?: string | null;
 }
 
 export function WinePairingPanel({
@@ -31,7 +30,6 @@ export function WinePairingPanel({
   wineRegion,
   wineProducer,
   wineVintage,
-  existingPairing,
 }: WinePairingPanelProps) {
   const [pairingResult, setPairingResult] = useState<GeneratedWinePairing | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,12 +41,12 @@ export function WinePairingPanel({
     setPairingResult(null);
     try {
       const result = await generateWinePairing({
-        name: wineName,
-        style: wineStyle,
-        grape: wineGrape,
-        region: wineRegion,
-        producer: wineProducer,
-        vintage: wineVintage,
+        wineName,
+        wineStyle,
+        wineGrape,
+        wineRegion,
+        wineProducer,
+        wineVintage,
       });
       setPairingResult(result);
       notifySuccess("Harmonização pronta", {
