@@ -227,7 +227,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setSuggestions(result.suggestions);
       setDishProfile(result.dishProfile || null);
       notifySuccess("Sugestões prontas", {
-        description: `${result.suggestions.length} opções pensadas para o prato.`,
+        description: result.fallback
+          ? "Não foi possível concluir a leitura com total confiança, então exibimos uma versão simplificada para você revisar."
+          : `${result.suggestions.length} opções pensadas para o prato.`,
         duration: 2600,
       });
       setStep("results");
@@ -267,7 +269,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setWineProfile(result.wineProfile || null);
       setPairingLogic(result.pairingLogic || null);
       notifySuccess("Harmonização pronta", {
-        description: `${Math.min(result.pairings.length, 5)} sugestões com porquê técnico.`,
+        description: result.fallback
+          ? "A análise precisou de fallback, mas ainda retornou sugestões úteis para revisão."
+          : `${Math.min(result.pairings.length, 5)} sugestões com porquê técnico.`,
         duration: 2600,
       });
       setStep("wine-results");
@@ -354,7 +358,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         setWineProfile(result.wineProfile || null);
         setPairingLogic(result.pairingLogic || null);
         notifySuccess("Harmonização pronta", {
-          description: `${Math.min(result.pairings.length, 5)} sugestões com leitura técnica.`,
+          description: result.fallback
+            ? "A leitura precisou ser simplificada, mas ainda há sugestões úteis para revisar."
+            : `${Math.min(result.pairings.length, 5)} sugestões com leitura técnica.`,
           duration: 2600,
         });
       } catch (err: any) {
@@ -446,7 +452,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setError(null);
           setScanResults(result);
           notifySuccess("Carta analisada", {
-            description: `${result.wines?.length || 0} vinhos lidos com sucesso.`,
+            description: result.fallback
+              ? "Não foi possível ler tudo com segurança; mantivemos uma versão simplificada para revisão."
+              : `${result.wines?.length || 0} vinhos lidos com sucesso.`,
             duration: 2600,
           });
           setStep("scan-results");
@@ -468,7 +476,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setError(null);
       setScanResults(result);
       notifySuccess("Carta analisada", {
-        description: `${result.wines?.length || 0} vinhos prontos para refinar.`,
+        description: result.fallback
+          ? "Não foi possível ler tudo com segurança; mantivemos uma versão simplificada para revisão."
+          : `${result.wines?.length || 0} vinhos prontos para refinar.`,
         duration: 2600,
       });
       setStep("scan-results");
@@ -537,7 +547,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setMenuResults(result);
           setWineProfile(result.wineProfile || null);
           notifySuccess("Cardápio lido", {
-            description: `${result.dishes?.length || 0} pratos identificados.`,
+            description: result.fallback
+              ? "A leitura precisou de fallback, mas a revisão continua possível."
+              : `${result.dishes?.length || 0} pratos identificados.`,
             duration: 2600,
           });
           setStep("ext-menu-results");
@@ -559,7 +571,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setMenuResults(result);
       setWineProfile(result.wineProfile || null);
       notifySuccess("Cardápio lido", {
-        description: `${result.dishes?.length || 0} pratos identificados.`,
+        description: result.fallback
+          ? "A leitura precisou de fallback, mas a revisão continua possível."
+          : `${result.dishes?.length || 0} pratos identificados.`,
         duration: 2600,
       });
       setStep("ext-menu-results");

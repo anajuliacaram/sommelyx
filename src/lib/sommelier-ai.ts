@@ -4,6 +4,7 @@ import { normalizeWineListOcrText } from "@/lib/wine-ocr-normalization";
 
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos concluir a leitura agora. Verifique sua conexão e tente novamente em instantes.";
 const ANALYZE_WINE_LIST_TIMEOUT_MS = 12_000;
+const PAIRING_TIMEOUT_MS = 10_000;
 
 function nowMs() {
   if (typeof performance !== "undefined" && typeof performance.now === "function") {
@@ -779,9 +780,58 @@ function buildCellarReason(w: WineSummary, dish: string, harmonyType: string): s
   return parts.join(" ");
 }
 
-// Legacy fallback stubs retained for reference only. Never used as final output.
-function fallbackPairingsForDish(_dish: string, _cellarWines?: WineSummary[]): WineSuggestion[] {
-  return [];
+function buildFallbackDishSuggestionStyle(dish: string): { style: string; explanation: string }[] {
+  const lower = normalizeForMatch(dish);
+  const rule = PAIRING_RULES.find((candidate) => candidate.keywords.some((keyword) => lower.includes(normalizeForMatch(keyword))));
+  const styles = rule?.styles || ["tinto", "branco", "rosé", "espumante", "fortificado"];
+  return styles.slice(0, 5).map((style) => ({
+    style,
+    explanation: rule?.explanation || "A leitura foi simplificada, então priorizamos equilíbrio entre corpo, acidez e intensidade do prato.",
+  }));
+}
+
+function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): WineSuggestion[] {
+  const safeDish = dish?.trim() || "desconhecido";
+  const normalized = normalizeForMatch(safeDish);
+  const matchedRule = PAIRING_RULES.find((rule) => rule.keywords.some((keyword) => normalized.includes(normalizeForMatch(keyword))));
+  const styleHints = buildFallbackDishSuggestionStyle(safeDish);
+  const cellarCandidates = (cellarWines || [])
+    .filter((wine) => wine?.name?.trim())
+    .slice(0, 5);
+
+  const cellarSuggestions = cellarCandidates.map((wine, index) => {
+    const hint = styleHints[index % styleHints.length] || styleHints[0] || { style: wine.style || "tinto", explanation: matchedRule?.explanation || "Harmonização simplificada baseada no prato informado." };
+    const style = wine.style || hint.style;
+    return {
+      wineName: wine.name,
+      style,
+      reason: `${wine.name} é uma alternativa segura para "${safeDish}". ${hint.explanation} O corpo e a acidez ajudam a manter o prato em equilíbrio.`,
+      fromCellar: true,
+      match: "bom" as const,
+      harmony_type: matchedRule?.styles?.includes(style) ? "equilíbrio" : "contraste",
+      harmony_label: matchedRule ? matchedRule.explanation : "harmonia simplificada",
+      grape: wine.grape || undefined,
+      vintage: wine.vintage || undefined,
+      region: wine.region || undefined,
+      country: wine.country || undefined,
+      compatibilityLabel: "Sugestão revisável",
+      wineProfile: null,
+    };
+  });
+
+  const genericSuggestions = styleHints.map((hint, index) => ({
+    wineName: `Sugestão padrão ${index + 1}`,
+    style: hint.style,
+    reason: `Baseado em "${safeDish}", a opção ${hint.style} preserva a leitura estrutural do prato. ${hint.explanation} Se quiser precisão maior, ajuste a escolha manualmente.`,
+    fromCellar: false,
+    match: index === 0 ? ("perfeito" as const) : index < 3 ? ("muito bom" as const) : ("bom" as const),
+    harmony_type: "equilíbrio" as const,
+    harmony_label: "análise simplificada",
+    compatibilityLabel: "Sugestão padrão",
+    wineProfile: null,
+  }));
+
+  return dedupeSuggestions([...cellarSuggestions, ...genericSuggestions]).slice(0, 5);
 }
 
 function createFallbackPairing(
@@ -867,6 +917,16 @@ function fallbackPairingsForWine(wine: { name?: string; style?: string | null; g
   ];
 }
 
+function dedupeSuggestions(suggestions: WineSuggestion[]) {
+  const seen = new Set<string>();
+  return suggestions.filter((suggestion) => {
+    const key = normalizeForMatch(`${suggestion.wineName}|${suggestion.style}`);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function fallbackPairingLogicForWine(wine: { style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }) {
   const style = normalizeForMatch(wine.style);
   if (/\btinto|red|malbec|cabernet|syrah|merlot|tempranillo|nebbiolo|sangiovese|pinot noir\b/i.test(style)) {
@@ -934,7 +994,7 @@ export async function getWinePairings(wine: {
         wineVintage: wine.vintage,
         wineCountry: wine.country,
       },
-      { timeoutMs: 12_000, retries: 1 },
+      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();
@@ -981,18 +1041,28 @@ export async function getWinePairings(wine: {
 
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
-    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
-      throw err;
-    }
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getWinePairings error:", classified.type, classified.message);
     logTiming("wine-to-food", "total", totalStartedAt, {
       wineName: wine.name,
-      outcome: "error",
+      outcome: "fallback",
       code: classified.code,
       type: classified.type,
     });
-    throw new Error(classified.message);
+    return {
+      pairings: fallbackPairingsForWine(wine),
+      wineProfile: {
+        body: wine.style ? normalizeWineData({ name: wine.name, style: wine.style }, { log: false }).style || wine.style : null,
+        acidity: null,
+        tannin: null,
+        style: wine.style || null,
+        complexity: null,
+        summary: "Leitura simplificada devido a instabilidade temporária.",
+      },
+      pairingLogic: fallbackPairingLogicForWine(wine),
+      fallback: true,
+      fallbackReason: classified.message,
+    };
   }
 }
 
@@ -1028,7 +1098,7 @@ export async function getDishWineSuggestions(
           current_value: w.current_value ?? null,
         })),
       },
-      { timeoutMs: 12_000, retries: 1 },
+      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();
@@ -1051,18 +1121,19 @@ export async function getDishWineSuggestions(
 
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
-    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
-      throw err;
-    }
     const classified = classifyError(err);
     console.warn("[sommelier-ai] getDishWineSuggestions error:", classified.type, classified.message);
     logTiming("food-to-wine", "total", totalStartedAt, {
       dish,
-      outcome: "error",
+      outcome: "fallback",
       code: classified.code,
       type: classified.type,
     });
-    throw new Error(classified.message);
+    return {
+      suggestions: fallbackPairingsForDish(dish, userWines),
+      fallback: true,
+      fallbackReason: classified.message,
+    };
   }
 }
 
@@ -1108,7 +1179,7 @@ export async function analyzeWineList(
           structuredJson: normalizedOcr.structuredJson,
         },
       },
-      { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
+      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();
@@ -1138,18 +1209,52 @@ export async function analyzeWineList(
     }
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
-    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
-      throw err;
-    }
     const classified = classifyError(err);
     logTiming("analyze-wine-list", "total", totalStartedAt, {
       fileName: analysis.fileName,
-      outcome: "error",
+      outcome: "fallback",
       code: classified.code,
       type: classified.type,
     });
-    if (classified.type === "auth") throw createClassifiedError(classified, "AUTH_INVALID");
-    throw createClassifiedError(classified);
+    const normalizedOcr = normalizeWineListOcrText(String(analysis.text || ""), {
+      fileName: analysis.fileName,
+      mimeType: analysis.mimeType,
+    });
+    const lines = normalizedOcr.cleanText
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 5);
+    const fallbackWineName = lines[0] || "Não identificado";
+    return {
+      wines: [
+        {
+          name: fallbackWineName,
+          producer: null,
+          vintage: null,
+          style: null,
+          grape: null,
+          region: null,
+          price: null,
+          rating: 50,
+          description: lines.join(" ") || "Leitura simplificada",
+          reasoning: "A análise automática não concluiu com segurança. Mantivemos uma leitura simples para revisão manual.",
+          pairings: lines.slice(0, 2).map((line) => ({ dish: line, why: "Linha preservada para revisão manual." })),
+          verdict: "Leitura simplificada",
+          compatibilityLabel: "Revisar",
+          highlight: null,
+          body: null,
+          acidity: null,
+          tannin: null,
+          occasion: null,
+          comparativeLabels: [],
+        },
+      ],
+      topPick: fallbackWineName,
+      bestValue: fallbackWineName,
+      fallback: true,
+      fallbackReason: classified.message,
+    };
   }
 }
 
@@ -1193,7 +1298,7 @@ export async function analyzeMenuForWine(
           structuredJson: normalizedOcr.structuredJson,
         },
       },
-      { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
+      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();
@@ -1218,19 +1323,53 @@ export async function analyzeMenuForWine(
     }
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
-    if (err instanceof Error && isUserFacingAnalysisError(err.message)) {
-      throw err;
-    }
     const classified = classifyError(err);
     logTiming("analyze-menu-for-wine", "total", totalStartedAt, {
       fileName: analysis.fileName,
       wineName,
-      outcome: "error",
+      outcome: "fallback",
       code: classified.code,
       type: classified.type,
     });
-    if (classified.type === "auth") throw createClassifiedError(classified, "AUTH_INVALID");
-    throw createClassifiedError(classified);
+    const normalizedOcr = normalizeWineListOcrText(String(analysis.text || ""), {
+      fileName: analysis.fileName,
+      mimeType: analysis.mimeType,
+    });
+    const lines = normalizedOcr.cleanText
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 5);
+    const detectedDish = lines[0] || "desconhecido";
+    return {
+      dishes: lines.length > 0
+        ? lines.map((line, index) => ({
+            name: line,
+            match: index === 0 ? "muito bom" : "bom",
+            reason: `Leitura simplificada da linha "${line}". Mantivemos a análise útil enquanto refinamos a interpretação automática.`,
+            highlight: index === 0 ? "top-pick" : null,
+            compatibilityLabel: "Revisar",
+            harmony_type: "equilíbrio",
+            harmony_label: "análise simplificada",
+            dish_profile: null,
+            recipe: null,
+          }))
+        : [{
+            name: detectedDish,
+            match: "bom",
+            reason: "Não foi possível analisar a imagem com segurança. Mantivemos um resultado simples para não bloquear a revisão.",
+            highlight: "top-pick",
+            compatibilityLabel: "Revisar",
+            harmony_type: "equilíbrio",
+            harmony_label: "análise simplificada",
+            dish_profile: null,
+            recipe: null,
+          }],
+      summary: `Leitura simplificada para ${wineName || "o vinho selecionado"}.`,
+      wineProfile: null,
+      fallback: true,
+      fallbackReason: classified.message,
+    };
   }
 }
 

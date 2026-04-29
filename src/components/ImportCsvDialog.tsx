@@ -45,6 +45,7 @@ interface ParsedWine {
   cellar_location?: string;
   drink_from?: number;
   drink_until?: number;
+  status?: "valid" | "review" | "invalid";
 }
 
 interface DraftWine extends ParsedWine {
@@ -353,6 +354,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (!row.name?.trim()) errors.push("Nome obrigatório");
     if (!type) errors.push("Tipo obrigatório");
     if (!row.quantity || row.quantity <= 0) errors.push("Quantidade precisa ser maior que 0");
+    const status = row.status ?? (errors.length === 0 ? "valid" : errors.some((error) => error.includes("Nome")) ? "invalid" : "review");
 
     const confidence = scoreDraftRow({
       ...row,
@@ -367,6 +369,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       type,
       price: row.purchase_price,
       confidence,
+      status,
       fieldConfidence: {
         name_confidence: fieldConfidence(row.name),
         producer_confidence: fieldConfidence(row.producer),
@@ -445,6 +448,43 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     }
 
     return { rows: merged.map((row) => normalizeWineData(row)), duplicateCount };
+  };
+
+  const buildFallbackRowsFromSourceRows = (sourceRows: ImportSourceRow[], headers: string[] = []) => {
+    return sourceRows.map((sourceRow, index) => {
+      const values = Object.values(sourceRow.values).map((value) => normalizeText(value)).filter((value): value is string => !!value);
+      const headerValue = (headerName: string) => {
+        const entry = headers.find((header) => normalizeSearchText(header) === normalizeSearchText(headerName));
+        return entry ? normalizeText(sourceRow.values[entry]) : undefined;
+      };
+      const rawName = headerValue("name") || headerValue("nome") || values[0] || `Linha ${index + 1}`;
+      const rawProducer = headerValue("producer") || headerValue("produtor") || values[1];
+      const rawCountry = headerValue("country") || headerValue("país") || headerValue("pais") || values.find((value) => /Brasil|Argentina|Chile|Portugal|França|Itália|Espanha|Estados Unidos/i.test(value));
+      const rawGrape = headerValue("grape") || headerValue("uva") || values.find((value) => /Blend|Cabernet|Merlot|Malbec|Chardonnay|Syrah|Pinot|Sauvignon|Riesling|Tempranillo/i.test(value));
+      const rawVintage = parseYear(headerValue("vintage") || headerValue("safra") || values.find((value) => /\b(19|20)\d{2}\b/.test(value)));
+      const rawPrice = parsePrice(headerValue("price") || headerValue("preço") || headerValue("preco") || values.find((value) => /R\$|\d+[.,]\d{2}/.test(value)));
+      return {
+        name: normalizeWineData({
+          name: normalizeText(rawName) || `Linha ${index + 1}`,
+          producer: rawProducer || null,
+          grape: rawGrape || null,
+          country: rawCountry || null,
+          region: headerValue("region") || headerValue("região") || headerValue("regiao") || undefined,
+        }, { log: false }).name || `Linha ${index + 1}`,
+        producer: rawProducer || undefined,
+        vintage: rawVintage,
+        style: normalizeStyle(headerValue("type") || headerValue("style") || values.find((value) => /Tinto|Branco|Ros[eé]|Espumante|Fortificado/i.test(value))),
+        country: rawCountry || undefined,
+        region: headerValue("region") || headerValue("região") || headerValue("regiao") || undefined,
+        grape: rawGrape || undefined,
+        quantity: 1,
+        purchase_price: rawPrice,
+        cellar_location: headerValue("cellar_location") || headerValue("localização") || headerValue("localizacao") || undefined,
+        drink_from: parseYear(headerValue("drink_from") || headerValue("beber de")) ?? undefined,
+        drink_until: parseYear(headerValue("drink_until") || headerValue("beber até") || headerValue("beber ate")) ?? undefined,
+        status: normalizeText(rawName) ? (rawPrice != null ? "review" : "review") : "invalid",
+      } satisfies ParsedWine;
+    });
   };
 
   const normalizeImportedWines = (rows: any[] = []) =>
@@ -1331,19 +1371,18 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       return Number(Math.min(1, score).toFixed(2));
     };
 
-    const registerWine = (row: ParsedWine, rawValues: Record<string, string>) => {
+    const registerWine = (row: ParsedWine, rawValues: Record<string, string>, fallbackName?: string) => {
       const normalizedName = normalizeWineData({
-        name: stripPrefixes(row.name || ""),
+        name: stripPrefixes(row.name || fallbackName || ""),
         producer: row.producer ?? null,
         grape: row.grape ?? null,
         country: row.country ?? null,
         region: row.region ?? null,
       }, { log: false }).name;
-      if (!normalizedName || normalizedName.trim().length < 2) return false;
+      const safeName = normalizedName && normalizedName.trim().length >= 2 ? normalizedName : (normalizeWineText(fallbackName || row.name || `Linha ${sourceRows.length + 1}`) || `Linha ${sourceRows.length + 1}`);
       const price = typeof row.purchase_price === "number" ? row.purchase_price : undefined;
-      if (price === undefined) return false;
       const parsedRow: ParsedWine = {
-        name: normalizedName,
+        name: safeName,
         producer: row.producer?.trim() || undefined,
         vintage: row.vintage,
         style: row.style,
@@ -1355,6 +1394,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         cellar_location: row.cellar_location?.trim() || undefined,
         drink_from: row.drink_from,
         drink_until: row.drink_until,
+        status: !safeName?.trim() ? "invalid" : "review",
       };
       const confidence = scoreWine(parsedRow);
       if (confidence >= 0.8) confidenceDistribution.high++;
@@ -1445,7 +1485,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           cellar_location: undefined,
           drink_from: undefined,
           drink_until: undefined,
-        }, rawValues);
+        }, rawValues, rowText);
       }
     };
 
@@ -1512,7 +1552,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           vintage: extracted.vintage ? String(extracted.vintage) : "",
           country: rowCountry || "",
           type: rowType || "",
-        });
+        }, withoutPrice || line);
       }
     };
 
@@ -1525,6 +1565,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       parseLineBlocks();
     }
 
+    console.log("parsedRows", wines);
     console.log("WINES_EXTRACTED:", wines.length);
 
     const successRate = cleanedRowCount > 0 ? wines.length / cleanedRowCount : 0;
@@ -1900,7 +1941,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const getRowIssues = (row: DraftWine) => {
     const issues: string[] = [];
     if (!row.name?.trim()) issues.push("Nome obrigatório");
-    if (!row.type?.trim() && !row.style?.trim()) issues.push("Tipo obrigatório");
+    if (!row.type?.trim() && !row.style?.trim()) issues.push("Tipo precisa de revisão");
     if (row.purchase_price == null && row.price == null) issues.push("Preço ausente");
     if (!row.producer?.trim()) issues.push("Produtor precisa de revisão");
     if (!row.country?.trim()) issues.push("País precisa de revisão");
@@ -1914,9 +1955,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const getImportStatus = (row: DraftWine) => {
     const hasName = !!row.name?.trim();
+    if (!hasName) return "invalid" as const;
     const hasType = !!row.type?.trim() || !!row.style?.trim();
-    if (!hasName || !hasType) return "invalid" as const;
-    const missingSecondary = !row.producer?.trim() || !row.country?.trim() || !row.grape?.trim() || !row.vintage || (row.purchase_price == null && row.price == null);
+    const missingSecondary = !hasType || !row.producer?.trim() || !row.country?.trim() || !row.grape?.trim() || !row.vintage || (row.purchase_price == null && row.price == null);
     const lowConfidence = row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7);
     if (missingSecondary || lowConfidence) return "incomplete" as const;
     return "valid" as const;
@@ -1995,6 +2036,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         );
         const winePayload = scanResult?.wine ?? scanResult?.data?.wine ?? scanResult;
         const imported = normalizeImportedWines([winePayload].filter(Boolean));
+        console.log("parsedRows", imported);
         commitImportedRows(imported, {
           notes: "Imagem do rótulo convertida em uma linha revisável.",
           parseErrors: imported.length > 0 ? [] : ["Não conseguimos identificar um vinho confiável nesta imagem."],
@@ -2049,6 +2091,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
         if (local.wines.length > 0) {
           const normalized = normalizeImportedWines(local.wines);
+          console.log("parsedRows", normalized);
           commitImportedRows(normalized, {
             mapping: local.mapping,
             notes: "Catálogo PDF interpretado automaticamente. Revise os itens antes de importar.",
@@ -2107,6 +2150,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
       if (local.wines.length > 0) {
         const normalized = normalizeImportedWines(local.wines);
+        console.log("parsedRows", normalized);
         const reviewNotes = shouldUseManualMapping
           ? ["Não conseguimos interpretar totalmente a estrutura. Selecione manualmente as colunas para continuar."]
           : [];
@@ -2129,14 +2173,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }
 
       if (local.sourceRows.length > 0) {
-        setDraftWines([]);
+        const fallbackRows = buildFallbackRowsFromSourceRows(local.sourceRows, local.headers);
+        const normalizedFallback = normalizeImportedWines(fallbackRows);
+        console.log("parsedRows", normalizedFallback);
+        commitImportedRows(normalizedFallback, {
+          mapping: local.mapping,
+          notes: local.failureReason || "Não conseguimos interpretar totalmente o arquivo. Revise os itens antes de importar.",
+          parseErrors: [local.failureReason || "Arquivo não contém estrutura reconhecível"],
+        });
         setColumnMapping(local.mapping);
-        setAiNotes(local.failureReason || "Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar.");
-        setParseErrors([
-          local.failureReason || "Arquivo não contém estrutura reconhecível",
-          "Selecione manualmente as colunas para continuar.",
-        ]);
-        setStep("preview");
         setImportSourceConfidence(local.successRate);
         return;
       }

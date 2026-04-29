@@ -192,6 +192,9 @@ export default function WishlistPage() {
       requestBusyRef.current = true;
       setIsAiLoading(true);
       const imageBase64 = file ? await compressImage(file) : undefined;
+      if (file && (!imageBase64 || imageBase64.length < 64)) {
+        throw new Error("INVALID_IMAGE");
+      }
       const data = await invokeEdgeFunction<any>(
         "wishlist-wine-assistant",
         { query: safeQuery || undefined, imageBase64 },
@@ -207,7 +210,12 @@ export default function WishlistPage() {
       const message = getErrorMessage(error);
       toast({
         title: "Inteligência indisponível no momento",
-        description: message === "INVALID_IMAGE" ? "Não conseguimos ler a imagem. Tente outra foto com mais luz ou foco frontal." : message,
+        description:
+          message === "INVALID_IMAGE"
+            ? "Não conseguimos ler a imagem. Tente outra foto com mais luz ou foco frontal."
+            : message === "Sem conexão com servidor. Verifique sua internet."
+              ? "Sem conexão com servidor. Tente novamente ou revise manualmente os campos."
+              : message,
         variant: "destructive",
       });
     } finally {
