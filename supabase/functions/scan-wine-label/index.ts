@@ -9,7 +9,7 @@ import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-va
 
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 1 * 1024 * 1024;
-const AI_TIMEOUT_MS = 35_000;
+const AI_TIMEOUT_MS = 12_000;
 const DEBUG_MODE = Deno.env.get("SCAN_WINE_LABEL_DEBUG") === "true";
 
 type FailPayload = {
@@ -40,6 +40,42 @@ function ok<T extends Record<string, unknown>>(data: T, requestId: string) {
 
 function fail(status: number, payload: FailPayload) {
   return jsonResponse(status, payload);
+}
+
+function buildFallbackWine() {
+  return {
+    name: "Não identificado",
+    producer: null,
+    vintage: null,
+    style: null,
+    country: null,
+    region: null,
+    grape: null,
+    food_pairing: null,
+    tasting_notes: null,
+    cellar_location: null,
+    purchase_price: null,
+    drink_from: null,
+    drink_until: null,
+  };
+}
+
+function buildFallbackConfidence() {
+  return {
+    name: 0.1,
+    producer: 0,
+    vintage: 0,
+    style: 0,
+    country: 0,
+    region: 0,
+    grape: 0,
+    food_pairing: 0,
+    tasting_notes: 0,
+    cellar_location: 0,
+    purchase_price: 0,
+    drink_from: 0,
+    drink_until: 0,
+  };
 }
 
 async function logStep(
@@ -646,24 +682,23 @@ serve(async (req) => {
       const timedOut = status === 504 || String(openaiResult.error).toLowerCase().includes("timeout");
       const parseFailed = status === 422 || openaiResult.error === "INVALID_AI_RESPONSE" || openaiResult.error === "EMPTY_AI_RESPONSE";
       const code = timedOut ? "AI_TIMEOUT" : parseFailed ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE";
-      const message = timedOut
-        ? "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida."
-        : "Service temporarily unavailable";
       console.error(`[${FUNCTION_NAME}] step: ai_failed request_id=${requestId} status=${status} code=${code} preview=${responsePreview}`);
-      await logStep(userId, timedOut ? 408 : 502, "ai_failed", durationMs, requestId, {
+      await logStep(userId, timedOut ? 408 : 502, "fallback_used", durationMs, requestId, {
         ai_status: status,
         ai_error: sanitizePreview(openaiResult.error),
         ai_response_preview: responsePreview,
         timed_out: timedOut,
         parse_failed: parseFailed,
+        step_failed: "ai_failed",
+        error_code: code,
       });
-      return fail(timedOut ? 408 : 502, {
-        success: false,
-        code,
-        message,
-        requestId,
-        retryable: true,
-      });
+      return ok({
+        wine: buildFallbackWine(),
+        confidence: buildFallbackConfidence(),
+        fallback: true,
+        fallbackReason: code,
+        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
+      }, requestId);
     }
 
     console.log(`[${FUNCTION_NAME}] step: ai_response_received request_id=${requestId} raw=${DEBUG_MODE ? sanitizePreview(openaiResult.raw) : "hidden"}`);
@@ -673,33 +708,37 @@ serve(async (req) => {
       parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
     } catch (parseError) {
       console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId}`, parseError);
-      await logStep(userId, 422, "parse_failed", durationMs, requestId, {
+      await logStep(userId, 422, "fallback_used", durationMs, requestId, {
         reason: "structured_parse_failed",
         error: sanitizePreview(parseError),
         raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
+        step_failed: "structured_parse_failed",
+        error_code: "AI_PARSE_ERROR",
       });
-      return fail(422, {
-        success: false,
-        code: "AI_PARSE_ERROR",
-        message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
-        requestId,
-        retryable: true,
-      });
+      return ok({
+        wine: buildFallbackWine(),
+        confidence: buildFallbackConfidence(),
+        fallback: true,
+        fallbackReason: "AI_PARSE_ERROR",
+        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
+      }, requestId);
     }
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
       console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=no_structured_output`);
-      await logStep(userId, 422, "parse_failed", durationMs, requestId, {
+      await logStep(userId, 422, "fallback_used", durationMs, requestId, {
         reason: "no_structured_output",
         raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
+        step_failed: "no_structured_output",
+        error_code: "AI_PARSE_ERROR",
       });
-      return fail(422, {
-        success: false,
-        code: "AI_PARSE_ERROR",
-        message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
-        requestId,
-        retryable: true,
-      });
+      return ok({
+        wine: buildFallbackWine(),
+        confidence: buildFallbackConfidence(),
+        fallback: true,
+        fallbackReason: "AI_PARSE_ERROR",
+        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
+      }, requestId);
     }
 
     const parsed = parsedArgs as Record<string, unknown>;
@@ -772,7 +811,7 @@ serve(async (req) => {
       regionExplicitlyInvalid
     ) {
       console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=insufficient_or_suspicious_label`);
-      await logStep(userId, 422, "parse_failed", durationMs, requestId, {
+      await logStep(userId, 422, "fallback_used", durationMs, requestId, {
         reason: "insufficient_or_suspicious_label",
         suspicious_name: suspiciousName,
         suspicious_producer: suspiciousProducer,
@@ -780,14 +819,16 @@ serve(async (req) => {
         weak_anchors: weakAnchors,
         region_missing_but_allowed: regionMissingButAllowed,
         region_explicitly_invalid: regionExplicitlyInvalid,
+        step_failed: "insufficient_or_suspicious_label",
+        error_code: "LABEL_NOT_IDENTIFIED",
       });
-      return fail(422, {
-        success: false,
-        code: "LABEL_NOT_IDENTIFIED",
-        message: "Não foi possível identificar o rótulo com confiança. Tente outra foto, com o rótulo mais centralizado e sem elementos da interface na imagem.",
-        requestId,
-        retryable: false,
-      });
+      return ok({
+        wine: buildFallbackWine(),
+        confidence: buildFallbackConfidence(),
+        fallback: true,
+        fallbackReason: "LABEL_NOT_IDENTIFIED",
+        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
+      }, requestId);
     }
 
     console.log(`[${FUNCTION_NAME}] final_output request_id=${requestId} wine_name=${normalizedWine.name}`);
@@ -820,32 +861,18 @@ serve(async (req) => {
       parse_or_inference_issue: isParseOrInferenceIssue,
     });
 
-    if (isAbort) {
-      return fail(408, {
-        success: false,
-        code: "AI_TIMEOUT",
-        message: "A análise demorou mais do que o esperado. Tente novamente com uma foto mais nítida.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    if (isParseOrInferenceIssue) {
-      return fail(422, {
-        success: false,
-        code: "AI_PARSE_ERROR",
-        message: "Não foi possível interpretar a resposta da análise. Tente novamente.",
-        requestId,
-        retryable: true,
-      });
-    }
-
-    return fail(502, {
-      success: false,
-      code: "AI_UNAVAILABLE",
-      message: "Service temporarily unavailable",
-      requestId,
-      retryable: true,
+    await logStep(userId, 200, "fallback_used", durationMs, requestId, {
+      step_failed: isAbort ? "timeout" : isParseOrInferenceIssue ? "parse_or_inference_issue" : "internal_error",
+      error_code: code,
+      error: sanitizePreview(errMsg),
+      stack: DEBUG_MODE ? sanitizePreview(stack) : undefined,
     });
+    return ok({
+      wine: buildFallbackWine(),
+      confidence: buildFallbackConfidence(),
+      fallback: true,
+      fallbackReason: code,
+      suggestion: "Tente tirar a foto com mais luz ou foco frontal",
+    }, requestId);
   }
 });

@@ -95,6 +95,15 @@ const popularDishes = [
   "Cordeiro assado",
 ];
 
+function isSupportedOcrFile(file: File) {
+  const mime = (file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  const allowedImageMimes = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"]);
+  if (mime === "application/pdf") return true;
+  if (allowedImageMimes.has(mime)) return true;
+  return [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".pdf"].some((ext) => name.endsWith(ext));
+}
+
 export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWine }: DishToWineDialogProps) {
   const { data: wines } = useWines();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -386,6 +395,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (loading) {
+      e.target.value = "";
+      return;
+    }
+    if (!isSupportedOcrFile(file)) {
+      setError("Não conseguimos ler a imagem. Envie uma foto ou PDF compatível.");
+      e.target.value = "";
+      return;
+    }
 
     console.info("[DishToWineDialog] upload_received", { step: "wine-list", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
     setStep("scanning");
@@ -468,6 +486,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const handleMenuFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (loading) {
+      e.target.value = "";
+      return;
+    }
+    if (!isSupportedOcrFile(file)) {
+      setError("Não conseguimos ler a imagem. Envie uma foto ou PDF compatível.");
+      e.target.value = "";
+      return;
+    }
 
     console.info("[DishToWineDialog] upload_received", { step: "menu", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
     setStep("ext-menu-scanning");
@@ -1179,7 +1206,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <input
                     ref={menuFileRef}
                     type="file"
-                    accept="image/*,application/pdf,.pdf"
+                    accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
                     capture="environment"
                     className="hidden"
                     onChange={handleMenuFileChange}
@@ -1187,7 +1214,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <input
                     ref={menuGalleryRef}
                     type="file"
-                    accept="image/*,application/pdf,.pdf"
+                    accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
                     className="hidden"
                     onChange={handleMenuFileChange}
                   />
@@ -1375,7 +1402,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <input
                     ref={fileRef}
                     type="file"
-                    accept="image/*,application/pdf,.pdf"
+                    accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
                     capture="environment"
                     className="hidden"
                     onChange={handleFileChange}
@@ -1383,7 +1410,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <input
                     ref={fileGalleryRef}
                     type="file"
-                    accept="image/*,application/pdf,.pdf"
+                    accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
                     className="hidden"
                     onChange={handleFileChange}
                   />

@@ -55,7 +55,8 @@ type ScanStep = "capture" | "scanning" | "preview" | "error";
 function isAcceptedMobileImage(file: File) {
   const mime = (file.type || "").toLowerCase();
   const name = (file.name || "").toLowerCase();
-  if (mime.startsWith("image/")) return true;
+  const allowedMime = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"]);
+  if (allowedMime.has(mime)) return true;
   return [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"].some((ext) => name.endsWith(ext));
 }
 
@@ -70,6 +71,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
   const selectedFileRef = useRef<File | null>(null);
+  const requestBusyRef = useRef(false);
   const { toast } = useToast();
 
   const reset = () => {
@@ -107,6 +109,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       fileName?: string;
     },
   ) => {
+    if (requestBusyRef.current) return;
+    requestBusyRef.current = true;
     setStep("scanning");
     setErrorMsg("");
     setSupportCode(null);
@@ -134,7 +138,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           mimeType: metadata?.mimeType,
           fileName: metadata?.fileName,
         },
-        { timeoutMs: 40_000, retries: 1, retryOnAbort: false },
+        { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
       );
 
       if (!data?.wine) throw new Error("Nenhum dado encontrado");
@@ -146,8 +150,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       });
       setScannedData(data.wine);
       setStep("preview");
-      notifySuccess("Rótulo identificado", {
-        description: "Revise os dados antes de salvar.",
+      notifySuccess(data?.fallback ? "Leitura parcial" : "Rótulo identificado", {
+        description: data?.fallback
+          ? "Não conseguimos identificar tudo com segurança. Revise os campos antes de salvar."
+          : "Revise os dados antes de salvar.",
         duration: 2400,
       });
     } catch (err: unknown) {
@@ -189,7 +195,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       } else if (code === "AI_TIMEOUT") {
         msg = "Não conseguimos ler o rótulo com clareza. Tente outra foto mais nítida.";
       } else if (code === "AI_UNAVAILABLE") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente com outra foto.";
+        msg = e?.message?.includes("Sem conexão")
+          ? e.message
+          : "Não conseguimos ler o rótulo com clareza. Tente novamente com outra foto.";
       } else if (code === "CONFIG_ERROR") {
         msg = "Não conseguimos ler o rótulo com clareza. Tente novamente em instantes.";
       } else if (code === "AI_RATE_LIMIT") {
@@ -198,10 +206,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
       setErrorMsg(msg);
       setStep("error");
+    } finally {
+      requestBusyRef.current = false;
     }
   }, []);
 
   const handleFile = useCallback(async (file: File) => {
+    if (requestBusyRef.current) return;
     if (!isAcceptedMobileImage(file)) {
       toast({ title: "Selecione uma imagem válida", variant: "destructive" });
       return;
@@ -393,7 +404,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={cameraInputRef}
                 type="file"
-                accept="image/*,.heic,.heif"
+                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif"
                 capture="environment"
                 className="hidden"
                 onChange={handleSelectedFile}
@@ -401,7 +412,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*,.heic,.heif"
+                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif"
                 className="hidden"
                 onChange={handleSelectedFile}
               />

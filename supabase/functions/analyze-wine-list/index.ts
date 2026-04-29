@@ -906,7 +906,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         functionName: "analyze-wine-list",
         requestId: crypto.randomUUID(),
         model: "gpt-4o-mini",
-        timeoutMs: 25_000,
+        timeoutMs: 12_000,
         temperature: 0.2,
         instructions: systemPrompt,
         input: [{
@@ -1063,7 +1063,21 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
 
     if (!lastParsed) {
       trace("parse_failed", { request_id: requestId, reason: "no_parsed_output" });
-      return jsonResponse({ success: false, code: "AI_PARSE_ERROR", message: "AI response could not be parsed", requestId, retryable: true }, 422);
+      const fallback = isMenuMode
+        ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
+        : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
+      trace("fallback_used", {
+        request_id: requestId,
+        reason: "no_parsed_output",
+        count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
+      });
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 200, "fallback_used", Date.now() - startTime, {
+        request_id: requestId,
+        reason: "no_parsed_output",
+        mode,
+        fallback: true,
+      });
+      return jsonResponse({ ...fallback, fallback: true, fallbackReason: "NO_PARSED_OUTPUT", note: "análise simplificada" });
     }
 
     const parsedCount = isMenuMode
@@ -1074,6 +1088,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: true });
       const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
       trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
+      trace("parse_success", { request_id: requestId, mode, count: parsedCount, degraded: true });
       await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
       trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: true });
       return jsonResponse(normalized);
@@ -1081,20 +1096,27 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
 
     if (!validationResult.passed) {
       trace("parse_failed", { request_id: requestId, reason: "empty_or_invalid_extraction", failures: validationResult.failures.slice(0, 12) });
-      const friendlyMessage = isMenuMode
-        ? "Não conseguimos analisar este cardápio agora. Tente uma foto com melhor iluminação e foco nos pratos, ou tente novamente em instantes."
-        : "Não conseguimos analisar esta carta de vinhos agora. Tente uma foto mais nítida da carta ou tente novamente em instantes.";
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 422, "validation_error", 0, {
-        reason: friendlyMessage,
+      const fallback = isMenuMode
+        ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
+        : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
+      trace("fallback_used", {
+        request_id: requestId,
+        reason: "empty_or_invalid_extraction",
+        count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
+      });
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 200, "fallback_used", Date.now() - startTime, {
+        reason: "empty_or_invalid_extraction",
         validation_failures: validationResult.failures.slice(0, 12),
         mode,
+        fallback: true,
       });
-      return jsonResponse({ success: false, code: "EMPTY_EXTRACTION", message: friendlyMessage, requestId, retryable: true }, 422);
+      return jsonResponse({ ...fallback, fallback: true, fallbackReason: "EMPTY_OR_INVALID_EXTRACTION", note: "análise simplificada" });
     }
 
     trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: false });
     const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
     trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
+    trace("parse_success", { request_id: requestId, mode, count: parsedCount, degraded: false });
     await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
     trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: false });
     trace("total_function_duration", { request_id: requestId, durationMs: elapsed(startTime) });
@@ -1103,9 +1125,19 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     const errMsg = e instanceof Error ? e.message : "Erro interno";
     const isAbort = errMsg.toLowerCase().includes("abort");
     console.error("analyze-wine-list error:", errMsg);
-    if (isAbort) {
-      return jsonResponse({ success: false, code: "AI_TIMEOUT", message: "A análise demorou mais que o esperado. Tente novamente em instantes.", requestId, retryable: true }, 504);
-    }
-    return jsonResponse({ success: false, code: "AI_UNAVAILABLE", message: "Service temporarily unavailable", requestId, retryable: true }, 502);
+    const fallback = isMenuMode
+      ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
+      : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
+    trace("fallback_used", {
+      request_id: requestId,
+      reason: isAbort ? "timeout" : "internal_error",
+      count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
+    });
+    await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 200, "fallback_used", Date.now() - startTime, {
+      reason: isAbort ? "timeout" : "internal_error",
+      mode,
+      fallback: true,
+    });
+    return jsonResponse({ ...fallback, fallback: true, fallbackReason: isAbort ? "TIMEOUT" : "INTERNAL_ERROR", note: "análise simplificada" });
   }
 });

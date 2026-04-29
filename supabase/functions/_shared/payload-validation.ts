@@ -111,7 +111,7 @@ export function validateImagePayload(
   options?: { maxBytes?: number; requireDataUrlPrefix?: boolean },
 ) {
   return parseBinaryPayload(value, {
-    allowedMimeTypes: ["image/jpeg", "image/png"],
+    allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
     fallbackMimeType,
     maxBytes: options?.maxBytes ?? 1 * 1024 * 1024,
     requireDataUrlPrefix: options?.requireDataUrlPrefix ?? false,

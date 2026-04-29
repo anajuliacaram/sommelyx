@@ -208,6 +208,13 @@ serve(async (req) => {
     const lower = message.toLowerCase();
     const code = lower.includes("invalid") || lower.includes("base64") ? "INVALID_INPUT" : "PDF_PARSE_FAILED";
     const status = code === "INVALID_INPUT" ? 400 : 500;
-    return jsonResponse({ success: false, code, message: code === "INVALID_INPUT" ? "Arquivo inválido ou muito grande." : message }, status);
+    return jsonResponse({
+      success: false,
+      code,
+      message: code === "INVALID_INPUT"
+        ? "Arquivo inválido ou muito grande."
+        : "Não foi possível ler o PDF. Tente outro arquivo ou uma imagem da carta.",
+      retryable: code !== "INVALID_INPUT",
+    }, status);
   }
 });

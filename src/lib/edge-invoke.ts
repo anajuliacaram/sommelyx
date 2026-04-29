@@ -137,9 +137,9 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
   if (code === "LABEL_NOT_IDENTIFIED") return "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
   if (isTransportErrorMessage(message)) {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      return "Sem conexão. Verifique sua internet.";
+      return "Sem conexão com servidor. Verifique sua internet.";
     }
-    return "O serviço está temporariamente indisponível. Tente novamente em instantes.";
+    return "Sem conexão com servidor. Tente novamente em instantes.";
   }
   if (isAbortErrorMessage(message)) return "Tempo de resposta excedido. Tente novamente.";
   if (isSdkRelayError(message)) return "A solicitação não pôde ser enviada. Tente novamente.";
@@ -249,7 +249,7 @@ function sanitizeForLog(value: unknown): unknown {
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
-  { timeoutMs = 45_000, retries = 2, retryOnAbort = true }: InvokeOptions = {},
+  { timeoutMs = 45_000, retries = 1, retryOnAbort = true }: InvokeOptions = {},
 ): Promise<T> {
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
@@ -394,7 +394,7 @@ export async function invokeEdgeFunction<T>(
           retryable,
           message: rawMessage,
         });
-        await sleep(600 * Math.pow(2, attempt));
+        await sleep(1000 * Math.pow(2, attempt));
         continue;
       }
 

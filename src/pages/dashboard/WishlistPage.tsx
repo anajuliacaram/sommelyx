@@ -38,6 +38,26 @@ type WishlistSuggestion = {
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Tente novamente em instantes.");
 
+const STRICT_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+function isSupportedWishlistImageFile(file: File) {
+  const mime = file.type.toLowerCase();
+  const name = file.name.toLowerCase();
+  return (
+    STRICT_IMAGE_MIME_TYPES.has(mime) ||
+    name.endsWith(".jpg") ||
+    name.endsWith(".jpeg") ||
+    name.endsWith(".png") ||
+    name.endsWith(".webp")
+  );
+}
+
+function isValidBase64(value: string) {
+  if (!value || typeof value !== "string") return false;
+  if (value.length % 4 !== 0) return false;
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(value);
+}
+
 export default function WishlistPage() {
   const { data: items = [], isLoading } = useWishlist();
   const addWishlist = useAddWishlist();
@@ -62,6 +82,7 @@ export default function WishlistPage() {
   const [search, setSearch] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [lastAiQuery, setLastAiQuery] = useState("");
+  const requestBusyRef = useRef(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -123,7 +144,7 @@ export default function WishlistPage() {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const MAX = 1400;
+          const MAX = 1024;
           let width = img.width;
           let height = img.height;
 
@@ -146,7 +167,12 @@ export default function WishlistPage() {
           }
 
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/jpeg", 0.88).split(",")[1]);
+          const result = canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
+          if (!isValidBase64(result)) {
+            reject(new Error("INVALID_IMAGE"));
+            return;
+          }
+          resolve(result);
         };
         img.onerror = () => reject(new Error("Não foi possível ler a imagem."));
         img.src = String(event.target?.result ?? "");
@@ -160,14 +186,16 @@ export default function WishlistPage() {
     const safeQuery = query?.trim() ?? "";
 
     if (!safeQuery && !file) return;
+    if (requestBusyRef.current) return;
 
     try {
+      requestBusyRef.current = true;
       setIsAiLoading(true);
       const imageBase64 = file ? await compressImage(file) : undefined;
       const data = await invokeEdgeFunction<any>(
         "wishlist-wine-assistant",
         { query: safeQuery || undefined, imageBase64 },
-        { timeoutMs: 75_000, retries: 2 },
+        { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
       );
 
       if (data?.error) throw new Error(String(data.error));
@@ -176,19 +204,25 @@ export default function WishlistPage() {
       applySuggestion(data.suggestion as WishlistSuggestion, !!force);
       if (safeQuery) setLastAiQuery(safeQuery);
     } catch (error) {
+      const message = getErrorMessage(error);
       toast({
         title: "Inteligência indisponível no momento",
-        description: getErrorMessage(error),
+        description: message === "INVALID_IMAGE" ? "Não conseguimos ler a imagem. Tente outra foto com mais luz ou foco frontal." : message,
         variant: "destructive",
       });
     } finally {
       setIsAiLoading(false);
+      requestBusyRef.current = false;
     }
   };
 
   const handleImageSelected = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Selecione uma imagem válida", variant: "destructive" });
+    if (!isSupportedWishlistImageFile(file)) {
+      toast({
+        title: "Não conseguimos ler a imagem",
+        description: "Envie uma foto JPEG, PNG ou WebP. HEIC precisa ser convertido antes do envio.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -406,22 +440,24 @@ export default function WishlistPage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                   className="hidden"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) void handleImageSelected(file);
+                    event.currentTarget.value = "";
                   }}
                 />
                 <input
                   ref={cameraInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                   capture="environment"
                   className="hidden"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) void handleImageSelected(file);
+                    event.currentTarget.value = "";
                   }}
                 />
               </div>

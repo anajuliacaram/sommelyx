@@ -58,6 +58,15 @@ function detectWineType(style?: string): WineType {
   return "unknown";
 }
 
+function isSupportedUploadFile(file: File) {
+  const mime = (file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  const allowedImageMimes = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"]);
+  if (mime === "application/pdf") return true;
+  if (allowedImageMimes.has(mime)) return true;
+  return [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".pdf"].some((ext) => name.endsWith(ext));
+}
+
 const wineTypeConfig: Record<WineType, {
   label: string;
   badgeBg: string;
@@ -188,6 +197,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const [selectedWineName, setSelectedWineName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const requestBusyRef = useRef(false);
 
   const reset = () => {
     setStep("capture");
@@ -208,6 +218,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   };
 
   const runScan = useCallback(async (attachment: WineListAnalysisTextInput) => {
+    if (requestBusyRef.current) return;
+    requestBusyRef.current = true;
     setStep("scanning");
     setErrorMsg("");
     try {
@@ -235,8 +247,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         normalizedWineCount: data.wines.length,
         firstWine: data.wines[0]?.name,
       });
-      notifySuccess("Carta analisada", {
-        description: `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} prontos para refinar.`,
+      notifySuccess(data.fallback ? "Leitura simplificada" : "Carta analisada", {
+        description: data.fallback
+          ? `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} prontos para revisar.`
+          : `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} prontos para refinar.`,
         duration: 2800,
       });
       setStep("results");
@@ -258,10 +272,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         setErrorMsg(err.message || "Não conseguimos concluir a leitura da carta.");
       }
       setStep("error");
+    } finally {
+      requestBusyRef.current = false;
     }
   }, [wines]);
 
   const handleFile = useCallback(async (file: File) => {
+    if (requestBusyRef.current) return;
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     console.info("[WineListScannerDialog] upload_received", {
       fileName: file.name,
@@ -269,7 +286,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       sizeBytes: file.size,
       detectedType: isPdf ? "pdf" : file.type.startsWith("image/") ? "image" : "unsupported",
     });
-    if (!file.type.startsWith("image/") && !isPdf) {
+    if (!isSupportedUploadFile(file)) {
       toast({ title: "Envie uma imagem ou PDF válido", variant: "destructive" });
       return;
     }
@@ -499,8 +516,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </Button>
               </div>
 
-              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-              <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
             </motion.div>
           )}
 

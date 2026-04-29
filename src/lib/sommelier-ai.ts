@@ -3,7 +3,7 @@ import { normalizeWineData } from "@/lib/wine-normalization";
 import { normalizeWineListOcrText } from "@/lib/wine-ocr-normalization";
 
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos concluir a leitura agora. Verifique sua conexão e tente novamente em instantes.";
-const ANALYZE_WINE_LIST_TIMEOUT_MS = 65_000;
+const ANALYZE_WINE_LIST_TIMEOUT_MS = 12_000;
 
 function nowMs() {
   if (typeof performance !== "undefined" && typeof performance.now === "function") {
@@ -300,8 +300,8 @@ function classifyError(err: unknown): ClassifiedError {
     return {
       type: "network",
       message: offline
-        ? "Sem conexão. Verifique sua internet."
-        : "O serviço está temporariamente indisponível. Tente novamente em instantes.",
+        ? "Sem conexão com servidor. Verifique sua internet."
+        : "Sem conexão com servidor. Tente novamente em instantes.",
       code,
       status,
       requestId,
@@ -934,7 +934,7 @@ export async function getWinePairings(wine: {
         wineVintage: wine.vintage,
         wineCountry: wine.country,
       },
-      { timeoutMs: 30_000, retries: 1 },
+      { timeoutMs: 12_000, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();
@@ -1028,7 +1028,7 @@ export async function getDishWineSuggestions(
           current_value: w.current_value ?? null,
         })),
       },
-      { timeoutMs: 30_000, retries: 1 },
+      { timeoutMs: 12_000, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();
@@ -1259,7 +1259,7 @@ export async function getTasteCompatibility(
           quantity: w.quantity,
         })),
       },
-      { timeoutMs: 4_000, retries: 1 },
+      { timeoutMs: 12_000, retries: 1 },
     );
     if (data && (data as any).fallback === true) {
       return data;
@@ -1301,7 +1301,7 @@ export async function getWineInsight(wine: {
         drinkFrom: wine.drinkFrom,
         drinkUntil: wine.drinkUntil,
       },
-      { timeoutMs: 4_000, retries: 1 },
+      { timeoutMs: 12_000, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();

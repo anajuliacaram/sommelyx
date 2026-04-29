@@ -43,6 +43,7 @@ export type AttachmentPrepErrorCode =
   | "IMAGE_DECODE_FAILED"
   | "IMAGE_PROCESSING_FAILED"
   | "IMAGE_TOO_LARGE"
+  | "INVALID_IMAGE"
   | "UNSUPPORTED_IMAGE_FORMAT"
   | "PDF_PARSE_FAILED"
   | "PDF_TOO_LARGE"
@@ -68,10 +69,10 @@ const MAX_IMAGE_DIMENSION_SCAN = 1024;
 const MAX_IMAGE_QUALITY_DESKTOP = 0.74;
 const MAX_IMAGE_QUALITY_MOBILE = 0.64;
 const MAX_IMAGE_QUALITY_SCAN = 0.7;
-const MAX_IMAGE_BASE64_LENGTH_DESKTOP = 1_500_000;
+const MAX_IMAGE_BASE64_LENGTH_DESKTOP = 1_300_000;
 const MAX_IMAGE_BASE64_LENGTH_MOBILE = 900_000;
-const MAX_IMAGE_BASE64_LENGTH_SCAN = 950_000;
-const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+const MAX_IMAGE_BASE64_LENGTH_SCAN = 900_000;
+const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
 const MAX_PDF_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 const MAX_PDF_PAGES_FOR_TEXT = 10;
 const MAX_PDF_PAGES_FOR_RENDER = 2;
@@ -126,6 +127,8 @@ export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi p
       return "Não conseguimos processar essa imagem. Tente outra foto mais nítida.";
     case "IMAGE_TOO_LARGE":
       return "A imagem ficou pesada demais depois do preparo. Tente uma foto mais leve.";
+    case "INVALID_IMAGE":
+      return "Não conseguimos ler a imagem. Tente outra foto ou use a câmera.";
     case "UNSUPPORTED_IMAGE_FORMAT":
       return "Esse formato de imagem não foi aceito no celular. Tente converter para JPG ou use a câmera.";
     case "PDF_PARSE_FAILED":
@@ -201,6 +204,12 @@ function dataUrlToBase64(dataUrl: string) {
   return dataUrl.split(",")[1] ?? dataUrl;
 }
 
+function isValidBase64(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length % 4 !== 0) return false;
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(trimmed);
+}
+
 function downscaleCanvas(canvas: HTMLCanvasElement, maxWidth: number, maxHeight: number) {
   if (canvas.width <= maxWidth && canvas.height <= maxHeight) return canvas;
 
@@ -260,6 +269,9 @@ async function exportOptimizedJpeg(
     const previewUrl = await blobToDataUrl(fallbackBlob);
     const imageBase64 = dataUrlToBase64(previewUrl);
     if (imageBase64.length <= maxBase64Length) {
+      if (!isValidBase64(imageBase64)) {
+        throw createAttachmentError("INVALID_IMAGE", "Não conseguimos preparar a imagem para envio.");
+      }
       return {
         previewUrl,
         imageBase64,
@@ -484,6 +496,13 @@ async function prepareImageAttachment(
     maxBase64Length,
   });
 
+  if (!isValidBase64(optimized.imageBase64)) {
+    throw createAttachmentError("INVALID_IMAGE", "Não conseguimos preparar a imagem para envio.", {
+      fileName: file.name,
+      mimeType,
+    });
+  }
+
   trace("image_preprocessed", {
     fileName: file.name,
     imageBase64Length: optimized.imageBase64.length,
@@ -496,6 +515,13 @@ async function prepareImageAttachment(
     blobSize: optimized.blobSize,
     quality: optimized.quality,
     durationMs: Math.round(nowMs() - preprocessStartedAt),
+  });
+  console.info("[AI_PIPELINE] step: image_processed", {
+    fileName: file.name,
+    mimeType: "image/jpeg",
+    resizedWidth: optimized.width,
+    resizedHeight: optimized.height,
+    base64Length: optimized.imageBase64.length,
   });
 
   trace("attachment_timing", {
@@ -695,6 +721,11 @@ function normalizeOcrText(text: string) {
 async function extractPdfOcrText(file: File) {
   trace("ocr_started", { fileName: file.name, sizeBytes: file.size });
   const pdfBase64 = await fileToBase64(file);
+  if (!isValidBase64(pdfBase64)) {
+    throw createAttachmentError("INVALID_IMAGE", "Não conseguimos preparar a imagem para envio.", {
+      fileName: file.name,
+    });
+  }
   trace("ocr_payload_ready", { fileName: file.name, base64Length: pdfBase64.length });
   let data: any;
   try {
@@ -705,7 +736,7 @@ async function extractPdfOcrText(file: File) {
         fileName: file.name,
         mimeType: inferMimeType(file),
       },
-      { timeoutMs: 45_000, retries: 1, retryOnAbort: false },
+      { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
     );
   } catch (error) {
     const err: any = createAttachmentError(
@@ -741,7 +772,7 @@ async function extractImageOcrText(file: File) {
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       },
-      { timeoutMs: 45_000, retries: 1, retryOnAbort: false },
+      { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
     );
   } catch (error) {
     const err: any = createAttachmentError(
@@ -756,9 +787,7 @@ async function extractImageOcrText(file: File) {
   const text = normalizeOcrText(String(data?.text ?? data?.extractedText ?? ""));
   console.info("[AI_PIPELINE] step: image_ocr_success", { fileName: file.name, textLength: text.length });
   if (!text || text.length < 20) {
-    throw createAttachmentError("IMAGE_OCR_EMPTY", "Não foi possível ler a imagem. Tente uma foto mais nítida ou um PDF.", {
-      fileName: file.name,
-    });
+    console.info("[AI_PIPELINE] step: fallback_used", { fileName: file.name, reason: "image_ocr_empty" });
   }
 
   return {
@@ -879,9 +908,7 @@ export async function prepareWineListAnalysisTextAttachment(file: File): Promise
       throw err;
     }));
     if (!text || text.length < 20) {
-      throw createAttachmentError("EMPTY_EXTRACTION", "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.", {
-        fileName: file.name,
-      });
+      trace("fallback_used", { fileName: file.name, reason: "pdf_text_too_short" });
     }
 
     return {

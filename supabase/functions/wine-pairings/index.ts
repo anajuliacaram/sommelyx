@@ -431,12 +431,13 @@ async function callAI(
 ) {
   const schema = (tools?.[0] as any)?.function?.parameters || {};
   const startedAt = Date.now();
+  trace("ai_request_started", { durationMs: 0 });
 
   const result = await callOpenAIResponses<any>({
     functionName: "wine-pairings",
     requestId: crypto.randomUUID(),
     model: "gpt-4o-mini",
-    timeoutMs: 25_000,
+    timeoutMs: 12_000,
     temperature: 0.35,
     instructions: systemPrompt,
     input: [
@@ -592,6 +593,14 @@ serve(async (req) => {
         rateLimit.degraded ? 503 : 429,
       );
     }
+
+    trace("parse_started", {
+      request_id: requestId,
+      mode,
+      has_dish: Boolean(normalizedInput.dish),
+      has_wine: Boolean(normalizedInput.wineName),
+      cellar_count: Array.isArray(normalizedInput.cellar) ? normalizedInput.cellar.length : 0,
+    });
 
     // ── Wine Technical Profile Construction Instructions ──
     const PROFILE_CONSTRUCTION_RULES = `
@@ -932,7 +941,7 @@ INSTRUÇÕES:
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const aiAttemptStartedAt = Date.now();
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 90_000);
+      const timeout = setTimeout(() => controller.abort(), 12_000);
 
       const retryHint = attempt > 0
         ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre "${wineName}". Cite o nome do vinho, mencione produtor/região/posicionamento.`
@@ -1119,6 +1128,7 @@ INSTRUÇÕES:
         result_count: finalCount,
         validation_failures: validationResult.failures.slice(0, 12),
       });
+      trace("fallback_used", { request_id: requestId, mode, count: finalCount, reason: "degraded_success" });
       trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: true, durationMs: elapsed(startTime) });
       return jsonResponse(finalPayload);
     }
@@ -1137,6 +1147,7 @@ INSTRUÇÕES:
       const emptyPayload = mode === "wine-to-food"
         ? { pairings: safeFallback.pairings.slice(0, 5), pairingLogic: safeFallback.pairingLogic, wineProfile: safeFallback.wineProfile, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC", note: "análise simplificada" }
         : { suggestions: safeFallback.suggestions.slice(0, 5), dishProfile: safeFallback.dishProfile, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC", note: "análise simplificada" };
+      trace("fallback_used", { request_id: requestId, mode, count: mode === "wine-to-food" ? safeFallback.pairings.length : safeFallback.suggestions.length, reason: "no_valid_results" });
       return jsonResponse(emptyPayload);
     }
 
@@ -1146,6 +1157,7 @@ INSTRUÇÕES:
       validation_passed: validationResult.passed,
       validation_failures: validationResult.failures.length,
     });
+    trace("parse_success", { request_id: requestId, mode, count: finalCount, degraded: false });
     await setCachedAiResponse("wine-pairings", cacheInput, finalPayload);
     trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: false, durationMs: elapsed(startTime) });
     trace("total_function_duration", { request_id: requestId, mode, durationMs: elapsed(startTime) });

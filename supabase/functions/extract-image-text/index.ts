@@ -9,7 +9,7 @@ import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-va
 
 
 const FUNCTION_NAME = "extract-image-text";
-const AI_TIMEOUT_MS = 35_000;
+const AI_TIMEOUT_MS = 12_000;
 
 const BodySchema = z.object({
   imageBase64: z.string().min(64),
@@ -152,6 +152,7 @@ serve(async (req) => {
     });
 
     trace("image_ocr_started", { request_id: requestId, fileName, mimeType });
+    trace("parse_started", { request_id: requestId, fileName, mimeType });
 
     const systemPrompt = `Você é um OCR especializado em cartas de vinhos e menus.
 Transcreva fielmente todo texto legível da imagem.
@@ -193,6 +194,7 @@ Regras:
     if (!result.ok) {
       const code = result.status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE";
       trace("ocr_failed", { request_id: requestId, fileName, status: result.status, error: result.error });
+      trace("fallback_used", { request_id: requestId, fileName, step_failed: "ai_request_failed", error_code: code });
       await logAudit(userId, result.status, code, Date.now() - startTime, { request_id: requestId, fileName, mimeType, error: result.error });
       return jsonResponse(result.status === 504 ? 408 : 502, {
         success: false,
@@ -205,6 +207,7 @@ Regras:
 
     const text = String(result.parsed?.text || "").replace(/\r/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
     trace("image_ocr_success", { request_id: requestId, fileName, textLength: text.length });
+    trace("parse_success", { request_id: requestId, fileName, textLength: text.length });
 
     if (!text) {
       await logAudit(userId, 422, "image_ocr_empty", Date.now() - startTime, { request_id: requestId, fileName, mimeType });
