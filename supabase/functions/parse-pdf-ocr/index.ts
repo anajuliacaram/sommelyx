@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
+import { INVALID_INPUT_ERROR, bytesFromBase64, detectPdfPageCount, validatePdfPayload } from "../_shared/payload-validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +11,6 @@ const corsHeaders = {
 };
 
 const FUNCTION_NAME = "parse-pdf-ocr";
-const MAX_PDF_BYTES = 20 * 1024 * 1024;
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -28,16 +28,6 @@ function normalizeText(text: string) {
     .replace(/\n\s+/g, "\n")
     .replace(/\s+\n/g, "\n")
     .trim();
-}
-
-function base64ToBytes(input: string) {
-  const clean = input.includes(",") ? input.split(",").pop() || "" : input;
-  const binary = atob(clean);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
 }
 
 function decodePdfString(input: string) {
@@ -117,26 +107,28 @@ serve(async (req) => {
   const startedAt = Date.now();
   try {
     const body = await req.json().catch(() => ({}));
-    const pdfBase64 = String(body?.pdfBase64 || body?.base64Pdf || "").trim();
+    const pdfBase64Raw = String(body?.pdfBase64 || body?.base64Pdf || "").trim();
     const fileName = String(body?.fileName || "pdf").trim();
     const mimeType = String(body?.mimeType || "application/pdf").trim();
 
-    if (!pdfBase64) {
-      return jsonResponse({ success: false, code: "INVALID_FILE_TYPE", message: "pdfBase64 is required" }, 400);
+    const validation = validatePdfPayload(pdfBase64Raw, mimeType, { maxBytes: 2 * 1024 * 1024 });
+    if (!validation.ok) {
+      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
-    const bytes = base64ToBytes(pdfBase64);
-    if (bytes.length > MAX_PDF_BYTES) {
-      return jsonResponse({ success: false, code: "FILE_TOO_LARGE", message: "PDF file is too large" }, 413);
-    }
+    const bytes = bytesFromBase64(validation.base64);
     console.log(`[${FUNCTION_NAME}] file=${fileName} mime=${mimeType} bytes=${bytes.length}`);
+    const pageCount = detectPdfPageCount(bytes);
+    if (typeof pageCount === "number" && pageCount > 10) {
+      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+    }
 
     const finalText = extractTextFromPdfBytes(bytes);
     console.log("FINAL_TEXT_LENGTH:", finalText.length);
     console.log(`[${FUNCTION_NAME}] duration_ms=${Date.now() - startedAt}`);
 
     if (!finalText || finalText.length < 20) {
-      return jsonResponse({ success: false, code: "EMPTY_EXTRACTION", message: "No readable text found in PDF" }, 422);
+      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
     return jsonResponse({
@@ -150,7 +142,8 @@ serve(async (req) => {
     const message = err instanceof Error ? err.message : "Falha ao processar PDF.";
     console.error(`[${FUNCTION_NAME}] error:`, message);
     const lower = message.toLowerCase();
-    const code = lower.includes("invalid") ? "INVALID_FILE_TYPE" : lower.includes("pdf") ? "PDF_PARSE_FAILED" : "PDF_PARSE_FAILED";
-    return jsonResponse({ success: false, code, message }, 500);
+    const code = lower.includes("invalid") || lower.includes("base64") ? "INVALID_INPUT" : "PDF_PARSE_FAILED";
+    const status = code === "INVALID_INPUT" ? 400 : 500;
+    return jsonResponse({ success: false, code, message: code === "INVALID_INPUT" ? "Arquivo inválido ou muito grande." : message }, status);
   }
 });

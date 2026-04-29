@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
+import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,35 +59,6 @@ async function logStep(
     step: outcome,
     ...(metadata || {}),
   });
-}
-
-function normalizeBase64(input: string) {
-  const trimmed = input.trim();
-  const idx = trimmed.indexOf("base64,");
-  if (idx !== -1) return trimmed.slice(idx + "base64,".length).trim();
-  return trimmed;
-}
-
-function isValidBase64(input: string) {
-  const cleaned = input.replace(/\s+/g, "");
-  if (!cleaned || cleaned.length % 4 !== 0) return false;
-  if (!/^[A-Za-z0-9+/=]+$/.test(cleaned)) return false;
-  try {
-    atob(cleaned);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function parseImageDataUrl(input: string): { mime: string; base64: string } {
-  const trimmed = input.trim();
-  if (trimmed.startsWith("data:") && trimmed.includes(";base64,")) {
-    const mime = trimmed.slice(5, trimmed.indexOf(";base64,")) || "image/jpeg";
-    const base64 = trimmed.slice(trimmed.indexOf("base64,") + "base64,".length).trim();
-    return { mime, base64 };
-  }
-  return { mime: "image/jpeg", base64: trimmed };
 }
 
 function sanitizePreview(value: unknown) {
@@ -474,8 +446,8 @@ serve(async (req) => {
       });
       return fail(400, {
         success: false,
-        code: "INVALID_REQUEST",
-        message: "Não foi possível ler sua solicitação. Tente novamente.",
+        code: INVALID_INPUT_ERROR.code,
+        message: INVALID_INPUT_ERROR.message,
         requestId,
         retryable: true,
       });
@@ -489,72 +461,35 @@ serve(async (req) => {
       await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, { reason: "missing_image" });
       return fail(400, {
         success: false,
-        code: "INVALID_IMAGE",
-        message: "Envie uma foto do rótulo para analisar.",
+        code: INVALID_INPUT_ERROR.code,
+        message: INVALID_INPUT_ERROR.message,
         requestId,
         retryable: false,
       });
     }
 
-    const parsedImage = parseImageDataUrl(imageBase64Raw);
-    const imageMime = payloadMimeType || parsedImage.mime;
-    const imageBase64 = normalizeBase64(parsedImage.base64);
-    console.log(`[${FUNCTION_NAME}] step: image_normalized request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
-    const base64Regex = /^[A-Za-z0-9+/=\s]+$/;
-    const sizeBytes = Math.floor((imageBase64.length * 3) / 4);
-    console.log(`[${FUNCTION_NAME}] step: image_size_checked request_id=${requestId} size_bytes=${sizeBytes}`);
-
-    if (!imageMime.startsWith("image/")) {
-      console.error(`[${FUNCTION_NAME}] step: image_invalid request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
+    const validation = validateImagePayload(imageBase64Raw, payloadMimeType, { maxBytes: MAX_IMAGE_SIZE });
+    if (!validation.ok) {
+      console.error(`[${FUNCTION_NAME}] step: image_invalid request_id=${requestId} reason=${validation.reason}`);
       await logStep(userId, 400, "image_invalid", Date.now() - startTime, requestId, {
         request_id: requestId,
-        reason: "invalid_image_mime",
-        image_mime: imageMime,
-        base64_length: imageBase64.length,
+        reason: validation.reason,
         file_name: payloadFileName,
       });
       return fail(400, {
         success: false,
-        code: "INVALID_IMAGE",
-        message: "Arquivo inválido. Envie uma imagem legível do rótulo.",
+        code: INVALID_INPUT_ERROR.code,
+        message: INVALID_INPUT_ERROR.message,
         requestId,
         retryable: false,
       });
     }
 
-    if (!base64Regex.test(imageBase64) || !isValidBase64(imageBase64)) {
-      console.error(`[${FUNCTION_NAME}] step: image_base64_invalid request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
-      await logStep(userId, 400, "image_base64_invalid", Date.now() - startTime, requestId, {
-        request_id: requestId,
-        reason: "invalid_image_base64",
-        image_mime: imageMime,
-        base64_length: imageBase64.length,
-        file_name: payloadFileName,
-      });
-      return fail(400, {
-        success: false,
-        code: "INVALID_IMAGE_BASE64",
-        message: "Arquivo inválido. Envie uma imagem legível do rótulo.",
-        requestId,
-        retryable: false,
-      });
-    }
-
-    if (sizeBytes > MAX_IMAGE_SIZE) {
-      console.error(`[${FUNCTION_NAME}] step: image_too_large request_id=${requestId} size_bytes=${sizeBytes}`);
-      await logStep(userId, 413, "image_too_large", Date.now() - startTime, requestId, {
-        reason: "image_too_large",
-        size_bytes: sizeBytes,
-        file_name: payloadFileName,
-      });
-      return fail(413, {
-        success: false,
-        code: "IMAGE_TOO_LARGE",
-        message: "A imagem está muito grande. Tente novamente com uma foto mais leve.",
-        requestId,
-        retryable: false,
-      });
-    }
+    const imageMime = validation.mimeType;
+    const imageBase64 = validation.base64;
+    const sizeBytes = validation.byteLength;
+    console.log(`[${FUNCTION_NAME}] step: image_normalized request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
+    console.log(`[${FUNCTION_NAME}] step: image_size_checked request_id=${requestId} size_bytes=${sizeBytes}`);
 
     console.log(`[${FUNCTION_NAME}] step: image_received request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
     await logStep(userId, 200, "image_received", Date.now() - startTime, requestId, {

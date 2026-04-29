@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
+import { INVALID_INPUT_ERROR, validateTextPayload } from "../_shared/payload-validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +24,7 @@ const UserProfileSchema = z.object({
 
 const BodySchema = z.object({
   imageBase64: z.never().optional(),
-  extractedText: z.string().min(20),
+  extractedText: z.string().min(1).max(10_000),
   mimeType: z.string().optional(),
   fileName: z.string().optional(),
   userProfile: UserProfileSchema,
@@ -615,22 +616,26 @@ serve(async (req) => {
       const validMime = mime.startsWith("image/") || mime === "application/pdf" || mime.startsWith("text/");
       trace("file_type_detected", { request_id: requestId, mimeType: mime, validMime });
       if (!validMime) {
-        return jsonResponse({ success: false, code: "INVALID_FILE_TYPE", message: "Unsupported file type", requestId, retryable: false }, 400);
+        return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
       }
     }
 
-    if (typeof rawBody?.imageBase64 === "string") {
-      trace("image_rejected", { request_id: requestId, reason: "image_payload_not_supported" });
-      return jsonResponse({ success: false, code: "INVALID_IMAGE", message: "Este fluxo aceita apenas texto extraído. Envie o texto da carta.", requestId, retryable: false }, 400);
+    if (typeof rawBody?.imageBase64 === "string" || typeof rawBody?.base64Pdf === "string") {
+      trace("image_rejected", { request_id: requestId, reason: "binary_payload_not_supported" });
+      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
 
     const parsedBody = BodySchema.safeParse(rawBody);
     if (!parsedBody.success) {
-      return jsonResponse({ success: false, code: "INVALID_REQUEST", message: "Invalid request payload", requestId, retryable: false }, 400);
+      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
 
     const { extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
-    const normalizedText = extractedText.trim();
+    const textValidation = validateTextPayload(extractedText, 10_000);
+    if (!textValidation.ok) {
+      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
+    }
+    const normalizedText = textValidation.text;
     trace("request_parsed", { request_id: requestId, mimeType, fileName, mode, wineName, extractedTextLength: normalizedText.length });
     trace("payload_validation_timing", {
       request_id: requestId,

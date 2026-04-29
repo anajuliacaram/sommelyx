@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { callOpenAIResponses } from "../_shared/openai.ts";
 import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
+import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,7 +14,6 @@ const corsHeaders = {
 
 const FUNCTION_NAME = "extract-image-text";
 const AI_TIMEOUT_MS = 35_000;
-const MAX_IMAGE_BASE64_LENGTH = 1_400_000;
 
 const BodySchema = z.object({
   imageBase64: z.string().min(64),
@@ -30,25 +30,6 @@ function jsonResponse(status: number, body: Record<string, unknown>) {
 
 function trace(stage: string, metadata?: Record<string, unknown>) {
   console.info(`[AI_PIPELINE] step: ${stage}`, metadata || {});
-}
-
-function normalizeBase64(input: string) {
-  const trimmed = input.trim();
-  const idx = trimmed.indexOf("base64,");
-  if (idx !== -1) return trimmed.slice(idx + "base64,".length).trim();
-  return trimmed.replace(/\s+/g, "");
-}
-
-function isValidBase64(input: string) {
-  const cleaned = input.replace(/\s+/g, "");
-  if (!cleaned || cleaned.length % 4 !== 0) return false;
-  if (!/^[A-Za-z0-9+/=]+$/.test(cleaned)) return false;
-  try {
-    atob(cleaned);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 async function logAudit(
@@ -130,28 +111,34 @@ serve(async (req) => {
     const rawBody = await req.json().catch(() => null);
     const parsedBody = BodySchema.safeParse(rawBody);
     if (!parsedBody.success) {
-      return jsonResponse(400, { success: false, code: "INVALID_REQUEST", message: "Invalid request payload", requestId, retryable: false });
+      return jsonResponse(400, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false });
     }
 
-    const mimeType = parsedBody.data.mimeType || "image/jpeg";
     const fileName = parsedBody.data.fileName || "image";
-    const imageBase64 = normalizeBase64(parsedBody.data.imageBase64);
+    const validation = validateImagePayload(parsedBody.data.imageBase64, parsedBody.data.mimeType || "image/jpeg", { maxBytes: 1 * 1024 * 1024 });
+    if (!validation.ok) {
+      await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
+        request_id: requestId,
+        fileName,
+        reason: validation.reason,
+      });
+      return jsonResponse(400, {
+        success: false,
+        code: INVALID_INPUT_ERROR.code,
+        message: INVALID_INPUT_ERROR.message,
+        requestId,
+        retryable: false,
+      });
+    }
+
+    const mimeType = validation.mimeType;
+    const imageBase64 = validation.base64;
     trace("request_received", {
       request_id: requestId,
       fileName,
       mimeType,
       imageBase64Length: imageBase64.length,
     });
-
-    if (!mimeType.startsWith("image/")) {
-      return jsonResponse(400, { success: false, code: "INVALID_IMAGE", message: "Unsupported image format", requestId, retryable: false });
-    }
-    if (!isValidBase64(imageBase64)) {
-      return jsonResponse(400, { success: false, code: "INVALID_IMAGE_BASE64", message: "Invalid image payload", requestId, retryable: false });
-    }
-    if (imageBase64.length > MAX_IMAGE_BASE64_LENGTH) {
-      return jsonResponse(413, { success: false, code: "FILE_TOO_LARGE", message: "Image too large", requestId, retryable: false });
-    }
 
     trace("image_ocr_started", { request_id: requestId, fileName, mimeType });
 
