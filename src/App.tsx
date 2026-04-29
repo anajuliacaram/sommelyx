@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { FloatingContactButton } from "@/components/FloatingContactButton";
@@ -37,6 +38,14 @@ import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
+const GA_ID = "G-QGLPK87X0G";
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
+  }
+}
 
 const getPostAuthTarget = (profileType: "personal" | "commercial" | null) =>
   profileType ? "/dashboard" : "/select-profile";
@@ -64,6 +73,22 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 const AnimatedRoutes = () => {
   const location = useLocation();
   const topKey = location.pathname.startsWith("/dashboard") ? "/dashboard" : location.pathname;
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (typeof window.gtag !== "function") return;
+
+    window.gtag("config", GA_ID, {
+      page_path: `${location.pathname}${location.search}`,
+      page_title: document.title,
+      page_location: window.location.href,
+    });
+  }, [location.pathname, location.search]);
 
   const routes = (
     <Routes location={location}>
