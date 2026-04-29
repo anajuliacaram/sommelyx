@@ -9,7 +9,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -127,7 +127,7 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
       variants={fadeUp}
       custom={i + 1}
       whileHover={!mobile ? { y: -5 } : undefined}
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* "Mais popular" badge */}
       {plan.badge && (

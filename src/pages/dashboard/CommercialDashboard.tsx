@@ -39,6 +39,7 @@ import { AddWineDialog } from "@/components/AddWineDialog";
 import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { EditorialKpiCard } from "@/components/editorial/EditorialPrimitives";
+import { AnimatedBarShape } from "@/components/ui/chart";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -321,10 +322,10 @@ export default function CommercialDashboard() {
 
   const kpis = useMemo(
     () => [
-      { label: "Rótulos", value: `${uniqueLabels}`, detail: "em estoque", icon: Wine, accent: "#8F2D56" },
-      { label: "Garrafas", value: `${totalBottles}`, detail: "disponíveis", icon: Layers, accent: "#5F7F52" },
-      { label: "Valor em estoque", value: formatBRL(totalValue), detail: "investimento", icon: DollarSign, accent: "#C9A86A" },
-      { label: "Reposição", value: `${lowStock}`, detail: lowStock > 0 ? "atenção" : "estoque saudável", icon: AlertTriangle, accent: "#C44569" },
+      { label: "Rótulos", value: uniqueLabels, detail: "em estoque", icon: Wine, accent: "#8F2D56", format: (v: number) => v.toLocaleString("pt-BR") },
+      { label: "Garrafas", value: totalBottles, detail: "disponíveis", icon: Layers, accent: "#5F7F52", format: (v: number) => v.toLocaleString("pt-BR") },
+      { label: "Valor em estoque", value: totalValue, detail: "investimento", icon: DollarSign, accent: "#C9A86A", format: (v: number) => formatBRL(v) },
+      { label: "Reposição", value: lowStock, detail: lowStock > 0 ? "atenção" : "estoque saudável", icon: AlertTriangle, accent: "#C44569", format: (v: number) => v.toLocaleString("pt-BR") },
     ],
     [lowStock, totalBottles, totalValue, uniqueLabels],
   );
@@ -501,19 +502,22 @@ export default function CommercialDashboard() {
                 </div>
               ))
             ) : (
-              kpis.map((kpi) => (
+              kpis.map((kpi, index) => (
                 <EditorialKpiCard
-                  key={kpi.label}
-                  icon={<kpi.icon className="h-3.5 w-3.5" strokeWidth={1.75} />}
-                  label={kpi.label}
-                  value={kpi.value}
-                  sub={kpi.detail}
-                  accent={kpi.accent}
-                  layout="row"
-                  className="rounded-[18px] !p-3 sm:!p-4"
-                />
-              ))
-            )}
+                key={kpi.label}
+                icon={<kpi.icon className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                label={kpi.label}
+                value={kpi.value}
+                sub={kpi.detail}
+                accent={kpi.accent}
+                layout="row"
+                animatedValue={kpi.value}
+                valueFormatter={(value) => kpi.format(value)}
+                motionIndex={index}
+                className="rounded-[18px] !p-3 sm:!p-4"
+              />
+            ))
+          )}
           </div>
         </div>
 
@@ -687,7 +691,7 @@ export default function CommercialDashboard() {
                   ) : (
                     <div className="flex items-start gap-4 sm:gap-6">
                       <div className="h-[108px] w-[108px] shrink-0 sm:h-[120px] sm:w-[120px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={100}>
                           <PieChart>
                             <Pie
                               data={breakdownByStyle}
@@ -771,14 +775,14 @@ export default function CommercialDashboard() {
                     <h3 className="chart-surface-title">Vendas</h3>
                     <span className="chart-surface-kicker">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
                   </div>
-                  <div className="h-[150px] sm:h-[170px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="h-[110px] sm:h-[120px]">
+                    <ResponsiveContainer width="100%" height={100}>
                       <BarChart data={salesMonthly}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
                         <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
                         <Tooltip contentStyle={chartTooltipStyle} formatter={(v: any) => formatBRL(Number(v))} />
-                        <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" />
+                        <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" shape={(props) => <AnimatedBarShape {...props} />} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -791,15 +795,15 @@ export default function CommercialDashboard() {
                     <h3 className="chart-surface-title">Movimentação</h3>
                     <span className="chart-surface-kicker">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
                   </div>
-                  <div className="h-[150px] sm:h-[170px]">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="h-[110px] sm:h-[120px]">
+                    <ResponsiveContainer width="100%" height={100}>
                       <BarChart data={stockMovesMonthly}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
                         <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
                         <Tooltip contentStyle={chartTooltipStyle} />
-                        <Bar dataKey="in" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--gold))" name="Entrada" />
-                        <Bar dataKey="out" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" name="Saída" />
+                        <Bar dataKey="in" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--gold))" name="Entrada" shape={(props) => <AnimatedBarShape {...props} />} />
+                        <Bar dataKey="out" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" name="Saída" shape={(props) => <AnimatedBarShape {...props} />} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -812,7 +816,7 @@ export default function CommercialDashboard() {
                     <h3 className="chart-surface-title">Saldo mensal</h3>
                     <span className="chart-surface-kicker">{isFiltered ? "recorte atual" : "net"}</span>
                   </div>
-                  <div className="h-[150px] sm:h-[170px]">
+                  <div className="h-[110px] sm:h-[120px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stockMovesMonthly}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />

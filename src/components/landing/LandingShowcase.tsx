@@ -2,13 +2,14 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, Wine, Sparkles, TrendingUp, Clock, AlertTriangle, ChefHat, Star } from "@/icons/lucide";
 import { BrandName } from "@/components/BrandName";
+import { formatMotionNumber, useCountUp } from "@/lib/motion";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -48,13 +49,41 @@ function BrowserChrome({ url }: { url: string }) {
   );
 }
 
+function AnimatedMetric({
+  value,
+  suffix,
+  prefix = "",
+  decimals = 0,
+  tightSuffix = false,
+}: {
+  value: number;
+  suffix?: string;
+  prefix?: string;
+  decimals?: number;
+  tightSuffix?: boolean;
+}) {
+  const animated = useCountUp(value, { duration: 700 });
+  const formatted = formatMotionNumber(animated, decimals);
+  return (
+    <>
+      {prefix}
+      {formatted}
+      {suffix ? (
+        <span className={tightSuffix ? "text-[10px] font-medium text-[#5F5F5F]" : "ml-1 text-[10px] font-medium text-[#5F5F5F]"}>
+          {suffix}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 /* ── DASHBOARD MOCK ── */
 function DashboardMock() {
-  const kpis = [
-    { label: "Estoque", value: "128", suffix: "un.", trend: "+12", color: "#7B1E2B" },
-    { label: "Valor", value: "R$ 92k", suffix: "", trend: "+8%", color: "#5F6F52" },
-    { label: "Giro", value: "37%", suffix: "", trend: "+4%", color: "#B8860B" },
-    { label: "Reposição", value: "6", suffix: "itens", trend: "urgente", color: "#7B1E2B" },
+  const kpis: Array<{ label: string; value: number; suffix?: string; trend: string; color: string; prefix?: string; decimals?: number; tightSuffix?: boolean }> = [
+    { label: "Estoque", value: 128, suffix: "un.", trend: "+12", color: "#7B1E2B" },
+    { label: "Valor", value: 92, suffix: "k", trend: "+8%", color: "#5F6F52", prefix: "R$ ", tightSuffix: true },
+    { label: "Giro", value: 37, suffix: "%", trend: "+4%", color: "#B8860B", tightSuffix: true },
+    { label: "Reposição", value: 6, suffix: "itens", trend: "urgente", color: "#7B1E2B" },
   ];
 
   return (
@@ -74,11 +103,15 @@ function DashboardMock() {
 
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-2 mb-3">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-xl p-3" style={innerCard}>
+        {kpis.map((kpi, index) => (
+          <div
+            key={kpi.label}
+            className="motion-card-hover motion-enter rounded-xl p-3"
+            style={{ ...innerCard, animationDelay: `${index * 110}ms` }}
+          >
             <p className="text-[8.5px] font-semibold uppercase tracking-[0.10em] text-[#5F5F5F]">{kpi.label}</p>
             <p className="mt-1 text-[14px] font-semibold tracking-tight text-[#1A1A1A]">
-              {kpi.value} <span className="text-[10px] font-medium text-[#5F5F5F]">{kpi.suffix}</span>
+              <AnimatedMetric value={kpi.value} suffix={kpi.suffix} prefix={kpi.prefix} tightSuffix={kpi.tightSuffix} />
             </p>
             <p className="mt-0.5 text-[9px] font-semibold" style={{ color: kpi.color }}>{kpi.trend}</p>
           </div>
@@ -96,7 +129,15 @@ function DashboardMock() {
           </div>
           <div className="grid grid-cols-12 items-end gap-1 h-16">
             {[4, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16].map((h, i) => (
-              <div key={i} className="rounded-sm" style={{ height: `${h * 4}px`, background: i === 11 ? "#7B1E2B" : "rgba(123,30,43,0.55)" }} />
+              <div
+                key={i}
+                className="motion-chart-bar rounded-sm"
+                style={{
+                  height: `${h * 4}px`,
+                  background: i === 11 ? "#7B1E2B" : "rgba(123,30,43,0.55)",
+                  animationDelay: `${i * 55}ms`,
+                }}
+              />
             ))}
           </div>
         </div>
@@ -298,7 +339,7 @@ export function LandingShowcase() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           {/* Soft glow per active tab */}
           <div
@@ -316,7 +357,7 @@ export function LandingShowcase() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
               {active === "dashboard" && <DashboardMock />}
               {active === "adega" && <AdegaMock />}

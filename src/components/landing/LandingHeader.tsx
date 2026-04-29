@@ -29,7 +29,7 @@ export function LandingHeader({ onLogin, onSignup }: LandingHeaderProps) {
       }}
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="mx-auto flex items-center justify-between max-w-6xl h-[60px] sm:h-[68px]">
         <a

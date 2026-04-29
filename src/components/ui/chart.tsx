@@ -87,6 +87,43 @@ ${colorConfig
   );
 };
 
+export function AnimatedBarShape(props: {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  fill?: string;
+  radius?: [number, number, number, number];
+  index?: number;
+}) {
+  const { x = 0, y = 0, width = 0, height = 0, fill = "currentColor", radius, index = 0 } = props;
+  const [rx = 0, ry = 0, brx = 0, bry = 0] = radius ?? [6, 6, 0, 0];
+
+  if (width <= 0 || height <= 0) {
+    return null;
+  }
+
+  return (
+    <rect
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      rx={rx}
+      ry={ry}
+      fill={fill}
+      style={
+        {
+          transformBox: "fill-box",
+          transformOrigin: "bottom",
+          animationDelay: `${Math.max(0, index) * 55}ms`,
+        } as React.CSSProperties
+      }
+      className="motion-chart-bar"
+    />
+  );
+}
+
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
 const ChartTooltipContent = React.forwardRef<

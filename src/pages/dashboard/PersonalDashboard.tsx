@@ -295,6 +295,8 @@ export default function PersonalDashboard() {
                 value={totalBottles}
                 sub="em estoque"
                 layout="row"
+                animatedValue={totalBottles}
+                motionIndex={0}
               />
               <EditorialKpiCard
                 icon={<Star className="h-4 w-4" />}
@@ -303,6 +305,9 @@ export default function PersonalDashboard() {
                 value={formatCurrencyShort(totalValue)}
                 sub="atualizado hoje"
                 layout="row"
+                animatedValue={totalValue}
+                valueFormatter={(value) => formatCurrencyShort(value)}
+                motionIndex={1}
               />
               <EditorialKpiCard
                 icon={<GlassWater className="h-4 w-4" />}
@@ -311,6 +316,8 @@ export default function PersonalDashboard() {
                 value={drinkNow}
                 sub="em janela ideal"
                 layout="row"
+                animatedValue={drinkNow}
+                motionIndex={2}
               />
               <EditorialKpiCard
                 icon={<Clock className="h-4 w-4" />}
@@ -319,6 +326,8 @@ export default function PersonalDashboard() {
                 value={inGuard}
                 sub="aguardando"
                 layout="row"
+                animatedValue={inGuard}
+                motionIndex={3}
               />
             </div>
           </EditorialCard>

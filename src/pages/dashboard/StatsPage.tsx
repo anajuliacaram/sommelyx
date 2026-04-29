@@ -6,6 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell
 } from "recharts";
+import { AnimatedBarShape } from "@/components/ui/chart";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 6 } as const,
@@ -47,6 +48,46 @@ export default function StatsPage() {
     return wines.filter(w => w.rating).sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 5);
   }, [wines]);
 
+  const kpis = useMemo(
+    () => [
+      {
+        label: "Garrafas",
+        value: totalBottles,
+        icon: Wine,
+        color: "#8F2D56",
+        detail: "em estoque",
+        animatedValue: totalBottles,
+      },
+      {
+        label: "Valor total",
+        value: `R$ ${totalValue.toLocaleString("pt-BR")}`,
+        icon: DollarSign,
+        color: "#C9A86A",
+        detail: "atualizado hoje",
+        animatedValue: totalValue,
+        valueFormatter: (value: number) => `R$ ${Math.round(value).toLocaleString("pt-BR")}`,
+      },
+      {
+        label: "Estilos",
+        value: byStyle.length,
+        icon: Grape,
+        color: "#C44569",
+        detail: "categorias",
+        animatedValue: byStyle.length,
+      },
+      {
+        label: "Avaliação média",
+        value: avgRating,
+        icon: TrendingUp,
+        color: "#22c55e",
+        detail: "notas válidas",
+        animatedValue: avgRating === "—" ? null : Number(avgRating),
+        valueFormatter: (value: number) => value.toFixed(1),
+      },
+    ],
+    [avgRating, byStyle.length, totalBottles, totalValue],
+  );
+
   if (isLoading) return <div className="text-muted-foreground text-sm p-8">Carregando…</div>;
 
   return (
@@ -60,12 +101,7 @@ export default function StatsPage() {
 
       {/* KPIs — compact inline */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
-        {[
-          { label: "Garrafas", value: totalBottles, icon: Wine, color: "#8F2D56", detail: "em estoque" },
-          { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "#C9A86A", detail: "atualizado hoje" },
-          { label: "Estilos", value: byStyle.length, icon: Grape, color: "#C44569", detail: "categorias" },
-          { label: "Avaliação média", value: avgRating, icon: TrendingUp, color: "#22c55e", detail: "notas válidas" },
-        ].map((m, i) => (
+        {kpis.map((m, i) => (
           <EditorialKpiCard
             key={m.label}
             icon={<m.icon className="h-3 w-3" style={{ color: m.color }} />}
@@ -74,7 +110,10 @@ export default function StatsPage() {
             sub={m.detail}
             accent={m.color}
             layout="row"
-            className="rounded-[18px] !p-3"
+            animatedValue={m.animatedValue ?? null}
+            valueFormatter={m.valueFormatter}
+            motionIndex={i}
+            className="rounded-[18px] !p-3 motion-card-hover motion-enter"
           />
         ))}
       </div>
@@ -84,13 +123,13 @@ export default function StatsPage() {
         {byStyle.length > 0 && (
           <div className="chart-surface p-4 sm:p-5">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Distribuição por estilo</h3>
-            <ResponsiveContainer width="100%" height={132}>
+            <ResponsiveContainer width="100%" height={100}>
               <BarChart data={byStyle}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.12)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.6)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.45)" }} axisLine={false} tickLine={false} width={18} />
                 <Tooltip contentStyle={{ background: "rgba(255,255,255,0.94)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, fontSize: 11, boxShadow: "0 8px 20px -8px rgba(44,20,31,0.12)", backdropFilter: "blur(14px)" }} />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} shape={(props) => <AnimatedBarShape {...props} />}>
                   {byStyle.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Bar>
               </BarChart>
@@ -126,13 +165,13 @@ export default function StatsPage() {
         {byVintage.length > 0 && (
           <div className="chart-surface p-4 sm:p-5">
             <h3 className="text-[11px] font-bold text-foreground mb-1.5">Por safra</h3>
-            <ResponsiveContainer width="100%" height={132}>
+            <ResponsiveContainer width="100%" height={100}>
               <BarChart data={byVintage}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.12)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.6)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.45)" }} axisLine={false} tickLine={false} width={18} />
                 <Tooltip contentStyle={{ background: "rgba(255,255,255,0.94)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, fontSize: 11, boxShadow: "0 8px 20px -8px rgba(44,20,31,0.12)", backdropFilter: "blur(14px)" }} />
-                <Bar dataKey="value" fill="hsl(var(--wine))" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="value" fill="hsl(var(--wine))" radius={[6, 6, 0, 0]} shape={(props) => <AnimatedBarShape {...props} />} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -221,7 +221,7 @@ function WineCard({
   const family = normalizeStyleFamily(wine.style);
 
   return (
-    <div className="w-[280px] shrink-0 rounded-2xl border border-border bg-white p-5 shadow-sm">
+    <div className="motion-card-hover w-[280px] shrink-0 rounded-2xl border border-border bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="line-clamp-1 text-[17px] font-semibold tracking-tight text-[#1A1A1A]">{wine.name}</p>
@@ -285,7 +285,7 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
   return (
     <section className="space-y-3">
       <motion.div
-        className="relative min-h-[122px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#1B3B27] to-[#102515] p-3.5 text-white shadow-[0_14px_32px_-22px_rgba(18,54,31,0.6)] sm:p-5"
+        className="motion-card-hover relative min-h-[122px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#1B3B27] to-[#102515] p-3.5 text-white shadow-[0_14px_32px_-22px_rgba(18,54,31,0.6)] sm:p-5"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -333,7 +333,7 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
         </div>
       )}
 
-      <div className="flex items-start gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm">
+      <div className="motion-card-hover flex items-start gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm">
         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6F7F5B]/10 text-[#6F7F5B]">
           <Wine className="h-4 w-4" />
         </div>

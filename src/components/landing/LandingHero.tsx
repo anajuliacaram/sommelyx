@@ -8,7 +8,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -159,7 +159,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               <motion.div
                 key={item.title}
                 whileHover={{ y: -2 }}
-                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="rounded-xl p-2.5"
                 style={glassCard}
               >
@@ -186,7 +186,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             variants={fadeUp}
             custom={6}
             whileHover={{ y: -2 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="mt-3 sm:mt-3.5 rounded-2xl p-4 max-w-xl"
             style={{
               ...glassCard,

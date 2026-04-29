@@ -7,7 +7,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
@@ -95,7 +95,7 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
               variants={fadeUp}
               custom={i + 1}
               whileHover={{ y: -3 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="flex items-start gap-3.5">
                 <div

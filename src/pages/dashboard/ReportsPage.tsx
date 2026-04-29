@@ -18,6 +18,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import { AnimatedBarShape } from "@/components/ui/chart";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -132,9 +133,9 @@ export default function ReportsPage() {
       <div className={tab === "estoque" ? "space-y-3" : "hidden space-y-3"}>
           <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-3">
             {[
-              { label: "Garrafas", value: totalBottles, icon: Wine, color: "#8F2D56", detail: "em estoque" },
-              { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "#C9A86A", detail: "atualizado hoje" },
-              { label: "Rótulos", value: wines.filter((w) => w.quantity > 0).length, icon: Tag, color: "#C44569", detail: "cadastrados" },
+              { label: "Garrafas", value: totalBottles, icon: Wine, color: "#8F2D56", detail: "em estoque", animatedValue: totalBottles, valueFormatter: (value: number) => value.toLocaleString("pt-BR") },
+              { label: "Valor total", value: `R$ ${totalValue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "#C9A86A", detail: "atualizado hoje", animatedValue: totalValue, valueFormatter: (value: number) => `R$ ${Math.round(value).toLocaleString("pt-BR")}` },
+              { label: "Rótulos", value: wines.filter((w) => w.quantity > 0).length, icon: Tag, color: "#C44569", detail: "cadastrados", animatedValue: wines.filter((w) => w.quantity > 0).length, valueFormatter: (value: number) => Math.round(value).toLocaleString("pt-BR") },
             ].map((m, i) => (
               <EditorialKpiCard
                 key={m.label}
@@ -144,7 +145,10 @@ export default function ReportsPage() {
                 sub={m.detail}
                 accent={m.color}
                 layout="row"
-                className="rounded-[18px] !p-3"
+                animatedValue={m.animatedValue}
+                valueFormatter={m.valueFormatter}
+                motionIndex={i}
+                className="rounded-[18px] !p-3 motion-card-hover motion-enter"
               />
             ))}
           </div>
@@ -153,7 +157,7 @@ export default function ReportsPage() {
             {byCountry.length > 0 && (
               <div className="chart-surface p-4">
                 <h3 className="chart-surface-title mb-1">Estoque por País</h3>
-                <ResponsiveContainer width="100%" height={180}>
+                <ResponsiveContainer width="100%" height={100}>
                   <PieChart>
                     <Pie data={byCountry} cx="50%" cy="50%" innerRadius={36} outerRadius={68} paddingAngle={3} dataKey="value" nameKey="name">
                       {byCountry.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
@@ -167,13 +171,13 @@ export default function ReportsPage() {
             {byStyle.length > 0 && (
               <div className="chart-surface p-4">
                 <h3 className="chart-surface-title mb-1">Estoque por Estilo</h3>
-                <ResponsiveContainer width="100%" height={180}>
+                <ResponsiveContainer width="100%" height={100}>
                   <BarChart data={byStyle}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.68)" }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={20} />
                     <Tooltip contentStyle={{ background: "rgba(255,255,255,0.94)", border: "1px solid rgba(255,255,255,0.28)", borderRadius: 14, fontSize: 12, boxShadow: "0 12px 28px -12px rgba(44,20,31,0.16)", backdropFilter: "blur(14px)" }} />
-                    <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" />
+                    <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" shape={(props) => <AnimatedBarShape {...props} />} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -226,7 +230,7 @@ export default function ReportsPage() {
               {salesByDay.length > 0 && (
                 <div className="chart-surface p-4 lg:col-span-2">
                   <h3 className="chart-surface-title mb-1">Faturamento por Dia</h3>
-                  <ResponsiveContainer width="100%" height={180}>
+                  <ResponsiveContainer width="100%" height={100}>
                     <LineChart data={salesByDay}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
                       <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--foreground) / 0.68)" }} axisLine={false} tickLine={false} />

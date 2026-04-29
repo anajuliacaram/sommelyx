@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { formatMotionNumber, motionDelay, useCountUp, usePrefersReducedMotion } from "@/lib/motion";
 import { ArrowRight, Sparkles } from "@/icons/lucide";
 import type { LucideIcon } from "lucide-react";
 
@@ -16,7 +16,45 @@ type SummaryMetric = {
   detail: string;
   icon: LucideIcon;
   tone?: "wine" | "gold" | "emerald" | "slate";
+  animatedValue?: number | null;
+  valueFormatter?: (value: number) => string;
 };
+
+function AnimatedMetricCard({ metric, index }: { metric: SummaryMetric; index: number }) {
+  const Icon = metric.icon;
+  const reducedMotion = usePrefersReducedMotion();
+  const animated = useCountUp(metric.animatedValue, { duration: 700, enabled: !reducedMotion });
+  const resolvedValue =
+    typeof metric.animatedValue === "number"
+      ? metric.valueFormatter?.(animated) ?? formatMotionNumber(animated, Number.isInteger(metric.animatedValue) ? 0 : 1)
+      : metric.value;
+
+  return (
+    <article
+      className="surface-clarity motion-card-hover motion-enter p-4"
+      style={motionDelay(index, 110)}
+    >
+      <div className="flex items-start gap-1.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">
+          <Icon className="h-4 w-4 text-copper" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-medium uppercase tracking-[0.04em] text-[#6B6B6B] sm:text-[12px]">
+            {metric.label}
+          </p>
+          <div className="mt-1 flex min-w-0 items-baseline gap-1.5">
+            <p className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1C1C1C] tabular-nums sm:text-[22px] xl:text-[22px]">
+              {resolvedValue}
+            </p>
+            <span className="min-w-0 truncate text-[12px] font-medium leading-[1.2] text-[#6B6B6B]">
+              {metric.detail}
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 interface DashboardExecutiveSummaryProps {
   eyebrow: string;
@@ -45,7 +83,7 @@ export function DashboardExecutiveSummary({
   commandHint,
 }: DashboardExecutiveSummaryProps) {
   return (
-    <section className="card-depth relative p-5 sm:p-6">
+    <section className="card-depth motion-card-hover motion-enter relative p-5 sm:p-6">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-10 top-[-60px] h-32 w-32 rounded-full bg-copper/[0.08] blur-[60px]" />
         <div className="absolute right-[-30px] top-10 h-28 w-28 rounded-full bg-[hsl(0_0%_100%/0.04)] blur-[60px]" />
@@ -118,34 +156,9 @@ export function DashboardExecutiveSummary({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1 relative z-10">
-            {metrics.map((metric) => {
-              const Icon = metric.icon;
-              return (
-                <article
-                  key={metric.label}
-                  className="surface-clarity p-4"
-                >
-                  <div className="flex items-start gap-1.5">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">
-                      <Icon className="h-4 w-4 text-copper" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-medium uppercase tracking-[0.04em] text-[#6B6B6B] sm:text-[12px]">
-                        {metric.label}
-                      </p>
-                      <div className="mt-1 flex min-w-0 items-baseline gap-1.5">
-                        <p className="shrink-0 text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1C1C1C] tabular-nums sm:text-[22px] xl:text-[22px]">
-                          {metric.value}
-                        </p>
-                        <span className="min-w-0 truncate text-[12px] font-medium leading-[1.2] text-[#6B6B6B]">
-                          {metric.detail}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+            {metrics.map((metric, index) => (
+              <AnimatedMetricCard key={metric.label} metric={metric} index={index} />
+            ))}
           </div>
         </div>
       </div>

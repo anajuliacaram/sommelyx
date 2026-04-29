@@ -353,7 +353,8 @@ export default function ConsumptionPage() {
   }, [defaultActiveChartIndex]);
 
   const total = entries.length;
-  const avgPerMonth = total > 0 ? (total / 6).toFixed(1).replace(".", ",") : "0";
+  const avgPerMonthValue = total > 0 ? total / 6 : 0;
+  const avgPerMonth = avgPerMonthValue.toFixed(1).replace(".", ",");
 
   const styleStats = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -443,6 +444,8 @@ export default function ConsumptionPage() {
           value={total}
           sub="garrafas"
           layout="row"
+          animatedValue={total}
+          motionIndex={0}
         />
         <EditorialKpiCard
           icon={<TrendingUp className="h-4 w-4" />}
@@ -451,6 +454,9 @@ export default function ConsumptionPage() {
           value={avgPerMonth}
           sub="por mês"
           layout="row"
+          animatedValue={avgPerMonthValue}
+          valueFormatter={(value) => value.toFixed(1).replace(".", ",")}
+          motionIndex={1}
         />
         <EditorialKpiCard
           icon={<Star className="h-4 w-4" />}
@@ -459,6 +465,7 @@ export default function ConsumptionPage() {
           value={styleStats.name}
           sub={styleStats.pct > 0 ? `${styleStats.pct}% do consumo` : ""}
           layout="row"
+          motionIndex={2}
         />
         <EditorialKpiCard
           icon={<Calendar className="h-4 w-4" />}
@@ -467,6 +474,7 @@ export default function ConsumptionPage() {
           value={lastLabel}
           sub={lastEntry?.wine_name || ""}
           layout="row"
+          motionIndex={3}
         />
       </div>
 
@@ -484,7 +492,7 @@ export default function ConsumptionPage() {
         <Sparkbar
           data={chart.data}
           accent="#8A6A54"
-          height={128}
+          height={isMobile ? 84 : 100}
           showValues={!isMobile}
           activeIndex={activeChartIndex}
           tooltipIndex={isMobile ? tooltipChartIndex : null}

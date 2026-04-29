@@ -2,6 +2,7 @@
 // Adaptadas ao tema claro/creme do Sommelyx, accent vinho #7B1E2B.
 
 import { cn } from "@/lib/utils";
+import { formatMotionNumber, motionDelay, useCountUp, usePrefersReducedMotion } from "@/lib/motion";
 import { memo, ReactNode, useEffect, useMemo, useState } from "react";
 
 export const STYLE_COLORS: Record<string, string> = {
@@ -129,15 +130,21 @@ export function EditorialCard({
   children,
   className,
   style,
+  motionIndex,
 }: {
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  motionIndex?: number;
 }) {
+  const motionStyle = motionIndex != null ? motionDelay(motionIndex, 120) : undefined;
   return (
     <div
-      className={cn("editorial-card", className)}
-      style={style}
+      className={cn("editorial-card motion-card-hover motion-enter", className)}
+      style={{
+        ...style,
+        ...(motionStyle ?? {}),
+      }}
     >
       {children}
     </div>
@@ -146,7 +153,7 @@ export function EditorialCard({
 
 /* ── Hero band (insight do dia) ──────────────────────── */
 export function EditorialHeroBand({ children }: { children: ReactNode }) {
-  return <section className="editorial-hero-band">{children}</section>;
+  return <section className="editorial-hero-band motion-card-hover">{children}</section>;
 }
 
 /* ── KPI Card editorial ──────────────────────────────── */
@@ -154,18 +161,27 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
   icon,
   label,
   value,
+  animatedValue,
+  valueFormatter,
   sub,
   accent = "#5F7F52",
   layout = "stacked",
+  motionIndex,
 }: {
   icon: ReactNode;
   label: string;
   value: ReactNode;
+  animatedValue?: number | null;
+  valueFormatter?: (value: number) => ReactNode;
   sub?: string;
   accent?: string;
   layout?: "stacked" | "row";
+  motionIndex?: number;
 }) {
   const isRow = layout === "row";
+  const reduceMotion = usePrefersReducedMotion();
+  const animatedCount = useCountUp(animatedValue, { duration: 720, enabled: !reduceMotion });
+  const motionStyle = motionIndex != null ? motionDelay(motionIndex, 120) : undefined;
   const supportsHexTone = /^#([0-9a-f]{6})$/i.test(accent);
   const surfaceStyle = supportsHexTone
     ? {
@@ -174,16 +190,25 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         boxShadow: "0 14px 30px -26px rgba(58,51,39,0.18), 0 1px 2px rgba(255,255,255,0.36) inset",
       }
     : undefined;
+  const animatedValueNode =
+    typeof animatedValue === "number"
+      ? valueFormatter
+        ? valueFormatter(animatedCount)
+        : formatMotionNumber(animatedCount, Number.isInteger(animatedValue) ? 0 : 1)
+      : value;
 
   return (
     <div
       className={cn(
-        "editorial-kpi h-full",
+        "editorial-kpi h-full motion-card-hover motion-enter",
         isRow
           ? "flex h-full flex-col justify-center gap-2 px-3.5 py-3 sm:px-4 sm:py-4"
           : "flex min-h-[92px] flex-col gap-1.5 px-3.5 py-3.5 sm:min-h-[96px] sm:gap-1.5 sm:px-0 sm:py-0",
       )}
-      style={surfaceStyle}
+      style={{
+        ...surfaceStyle,
+        ...(motionStyle ?? {}),
+      }}
     >
       <div className={cn("flex min-w-0 items-start gap-1.5", isRow && "items-center max-w-[180px]")}>
         <div
@@ -207,7 +232,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
       {isRow ? (
         <div className="mt-0.5 flex min-w-0 max-w-[180px] items-baseline gap-1.5">
           <div className="shrink-0 text-[21px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
-            {value}
+            {animatedValueNode}
           </div>
           {sub ? (
             <span className="min-w-0 max-w-[12ch] truncate text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.62)] sm:text-[13px]">
@@ -218,7 +243,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
       ) : (
         <>
           <div className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
-            {value}
+            {animatedValueNode}
           </div>
           {sub && (
             <span className="mt-[2px] text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.42)] sm:text-[13px]">
@@ -453,10 +478,11 @@ export function Sparkbar({
               <div className="relative flex w-full items-end justify-center" style={{ height: height - 42 }}>
                 <div
                   className={cn(
-                    "rounded-t-[4px] transition-all duration-150 ease-out",
+                    "motion-chart-bar rounded-t-[4px]",
                     isSelected && "shadow-[0_8px_18px_-12px_rgba(58,51,39,0.45)]",
                   )}
                   style={{
+                    ...motionDelay(i, 55),
                     width: isSelected ? barWidth + 2 : barWidth,
                     height: `${barH}%`,
                     minHeight: isActive ? 6 : 4,
