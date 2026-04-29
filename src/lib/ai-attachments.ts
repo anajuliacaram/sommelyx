@@ -10,6 +10,8 @@ export interface AiAnalysisAttachmentPayload {
 export interface PreparedAiAnalysisAttachment extends AiAnalysisAttachmentPayload {
   previewUrl?: string;
   sourceType: "image" | "pdf-text" | "pdf-image";
+  wasOptimized?: boolean;
+  originalMimeType?: string;
 }
 
 export interface PdfTextBlock {
@@ -130,7 +132,7 @@ export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi p
     case "INVALID_IMAGE":
       return "Não conseguimos ler a imagem. Tente outra foto ou use a câmera.";
     case "UNSUPPORTED_IMAGE_FORMAT":
-      return "Esse formato de imagem não foi aceito no celular. Tente converter para JPG ou use a câmera.";
+      return "Formato não suportado. Use JPEG ou PNG.";
     case "PDF_PARSE_FAILED":
       return "Não conseguimos ler esse PDF no celular. Tente uma versão menor ou uma foto da carta.";
     case "PDF_TOO_LARGE":
@@ -536,6 +538,8 @@ async function prepareImageAttachment(
     mimeType: "image/jpeg",
     fileName: file.name,
     sourceType: "image",
+    wasOptimized: isProblematicMobileImageFormat(mimeType, file.name),
+    originalMimeType: mimeType,
   };
 }
 

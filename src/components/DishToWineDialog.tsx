@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getDishWineSuggestions, getWinePairings, analyzeWineList, analyzeMenuForWine, buildUserProfile, type WineSuggestion, type PairingResult, type WineListAnalysis, type MenuAnalysis, type WineProfile, type DishProfile, type Recipe, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
+import { generateWinePairing, analyzeWineList, buildUserProfile, type GeneratedWinePairing, type WineListAnalysis, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
 import { prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
@@ -14,52 +14,16 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import {
-  CompatibilityBadge,
-  MatchDot,
-  MatchLevelBadge,
-  HarmonyTag,
-  WineProfileChips,
-  WineProfileCard,
-  DishProfileCard,
-  DishProfilePills,
-  PremiumResultCard,
   SectionHeader,
   PairingSheetHero,
   PairingLoadingState,
   PairingErrorState,
   PremiumChoiceCard,
-  RecipeButton,
-  harmonyLabelMap,
-  matchDotColor,
+  FallbackAnalysisBadge,
+  FallbackAnalysisNotice,
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
-// Compat helpers kept locally for result rendering
-const matchDot: Record<string, string> = matchDotColor;
-const harmonyLabel = harmonyLabelMap;
-const matchBadge: Record<string, { label: string; className: string }> = {
-  perfeito: { label: "combinação perfeita", className: "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" },
-  "muito bom": { label: "harmonia elegante", className: "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" },
-  bom: { label: "boa combinação", className: "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]" },
-};
-
-const styleTint: Record<string, string> = {
-  tinto: "bg-[hsl(348,40%,50%/0.06)] border-[hsl(348,40%,50%/0.12)]",
-  branco: "bg-[hsl(45,50%,55%/0.06)] border-[hsl(45,50%,55%/0.12)]",
-  rosé: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
-  rose: "bg-[hsl(340,45%,70%/0.06)] border-[hsl(340,45%,70%/0.12)]",
-  espumante: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
-  champagne: "bg-[hsl(38,30%,75%/0.06)] border-[hsl(38,30%,75%/0.12)]",
-};
-
-function getStyleTint(style?: string | null): string {
-  if (!style) return "";
-  const lower = style.toLowerCase();
-  for (const [key, val] of Object.entries(styleTint)) {
-    if (lower.includes(key)) return val;
-  }
-  return "";
-}
 
 interface DishToWineDialogProps {
   open: boolean;
@@ -117,13 +81,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const [dish, setDish] = useState("");
   const [extWineName, setExtWineName] = useState("");
   const [selectedWineId, setSelectedWineId] = useState("");
-  const [suggestions, setSuggestions] = useState<WineSuggestion[] | null>(null);
-  const [pairings, setPairings] = useState<PairingResult[] | null>(null);
-  const [wineProfile, setWineProfile] = useState<WineProfile | null>(null);
-  const [pairingLogic, setPairingLogic] = useState<string | null>(null);
-  const [dishProfile, setDishProfile] = useState<DishProfile | null>(null);
+  const [pairingResult, setPairingResult] = useState<GeneratedWinePairing | null>(null);
   const [scanResults, setScanResults] = useState<WineListAnalysis | null>(null);
-  const [menuResults, setMenuResults] = useState<MenuAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
@@ -158,13 +117,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setDish("");
     setExtWineName("");
     setSelectedWineId("");
-    setSuggestions(null);
-    setPairings(null);
-    setWineProfile(null);
-    setPairingLogic(null);
-    setDishProfile(null);
+    setPairingResult(null);
     setScanResults(null);
-    setMenuResults(null);
     setLoading(false);
     setError(null);
     setPreview(null);
@@ -207,29 +161,31 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     const reqId = nextRequestId();
     setLoading(true);
     setError(null);
-    setSuggestions(null);
+    setPairingResult(null);
     try {
-      const cellarWines = wines?.filter((w) => w.quantity > 0)?.map((w) => ({
-        name: w.name,
-        style: w.style,
-        grape: w.grape,
-        region: w.region,
-        country: w.country,
-        producer: w.producer,
-        vintage: w.vintage,
-        purchase_price: w.purchase_price ?? null,
-        current_value: w.current_value ?? null,
-      }));
-      const result = await getDishWineSuggestions(query, cellarWines, chosenIntent ?? intent);
+      const result = await generateWinePairing({
+        userInputDish: query,
+        cellarWines: wines?.filter((w) => w.quantity > 0)?.map((w) => ({
+          name: w.name,
+          style: w.style,
+          grape: w.grape,
+          region: w.region,
+          country: w.country,
+          producer: w.producer,
+          vintage: w.vintage,
+          purchase_price: w.purchase_price ?? null,
+          current_value: w.current_value ?? null,
+        })) ?? null,
+        intent: chosenIntent ?? intent,
+      });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar" });
       setError(null);
-      setSuggestions(result.suggestions);
-      setDishProfile(result.dishProfile || null);
+      setPairingResult(result);
       notifySuccess("Sugestões prontas", {
         description: result.fallback
           ? "Não foi possível concluir a leitura com total confiança, então exibimos uma versão simplificada para você revisar."
-          : `${result.suggestions.length} opções pensadas para o prato.`,
+          : `${result.pairings.length} opções pensadas para o prato.`,
         duration: 2600,
       });
       setStep("results");
@@ -250,24 +206,21 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     const reqId = nextRequestId();
     setLoading(true);
     setError(null);
-    setPairingLogic(null);
-    setPairings(null);
+    setPairingResult(null);
     try {
-      const result = await getWinePairings({
-        name: wine.name,
-        style: wine.style,
-        grape: wine.grape,
-        region: wine.region,
-        producer: wine.producer,
-        vintage: wine.vintage,
-        country: wine.country,
+      const result = await generateWinePairing({
+        wineName: wine.name,
+        wineStyle: wine.style,
+        wineGrape: wine.grape,
+        wineRegion: wine.region,
+        wineProducer: wine.producer,
+        wineVintage: wine.vintage,
+        wineCountry: wine.country,
       });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:wine", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine" });
       setError(null);
-      setPairings(result.pairings);
-      setWineProfile(result.wineProfile || null);
-      setPairingLogic(result.pairingLogic || null);
+      setPairingResult(result);
       notifySuccess("Harmonização pronta", {
         description: result.fallback
           ? "A análise precisou de fallback, mas ainda retornou sugestões úteis para revisão."
@@ -309,9 +262,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setSource("cellar");
       setSubMode("by-wine");
       setSelectedWineId(initialWineId || initialWine?.id || "");
-      setPairings(null);
-      setWineProfile(null);
-      setPairingLogic(null);
+      setPairingResult(null);
       setError("Não foi possível carregar este vinho da adega.");
       setDeepLinkError("Não foi possível carregar este vinho da adega.");
       setDeepLinkLoading(false);
@@ -322,9 +273,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setSource("cellar");
     setSubMode("by-wine");
     setSelectedWineId(resolvedWine.id);
-    setPairings(null);
-    setWineProfile(null);
-    setPairingLogic(null);
+    setPairingResult(null);
     setError(null);
     setDeepLinkError(null);
     setDeepLinkLoading(true);
@@ -341,22 +290,20 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         source: "insight",
       });
       try {
-        const result = await getWinePairings({
-          name: resolvedWine.name,
-          style: resolvedWine.style,
-          grape: resolvedWine.grape,
-          region: resolvedWine.region,
-          producer: resolvedWine.producer,
-          vintage: resolvedWine.vintage,
-          country: resolvedWine.country,
+        const result = await generateWinePairing({
+          wineName: resolvedWine.name,
+          wineStyle: resolvedWine.style,
+          wineGrape: resolvedWine.grape,
+          wineRegion: resolvedWine.region,
+          wineProducer: resolvedWine.producer,
+          wineVintage: resolvedWine.vintage,
+          wineCountry: resolvedWine.country,
         });
         if (!isLatest(reqId)) return;
         console.info("[DishToWineDialog] request:success", { id: reqId, kind: "deep-link", pairings: result.pairings?.length || 0 });
         setError(null);
         setDeepLinkError(null);
-        setPairings(result.pairings);
-        setWineProfile(result.wineProfile || null);
-        setPairingLogic(result.pairingLogic || null);
+        setPairingResult(result);
         notifySuccess("Harmonização pronta", {
           description: result.fallback
             ? "A leitura precisou ser simplificada, mas ainda há sugestões úteis para revisar."
@@ -511,7 +458,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     const reqId = nextRequestId();
     setLoading(true);
     setError(null);
-    setMenuResults(null);
+    setPairingResult(null);
     try {
       const prepared = await prepareWineListAnalysisTextAttachment(file);
       console.info("[DishToWineDialog] file_validated", { step: "menu", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, textLength: prepared.text?.length || 0 });
@@ -522,7 +469,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       };
       console.info("[DishToWineDialog] backend_called", {
         step: "menu",
-        function: "analyze-wine-list",
+        function: "generate-wine-pairing",
         payloadShape: {
           hasText: Boolean(payload.text),
           mimeType: payload.mimeType,
@@ -537,19 +484,18 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         const retryId = nextRequestId();
         setLoading(true);
         setError(null);
-        setMenuResults(null);
+        setPairingResult(null);
         try {
           console.info("[DishToWineDialog] pairing_request_started", { step: "menu", retry: true, wineName: extWineName, sourceType: prepared.sourceType });
-          const result = await analyzeMenuForWine(payload, extWineName);
+          const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
           if (!isLatest(retryId)) return;
-          console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, dishes: result.dishes?.length || 0 });
+          console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, pairings: result.pairings?.length || 0 });
           setError(null);
-          setMenuResults(result);
-          setWineProfile(result.wineProfile || null);
+          setPairingResult(result);
           notifySuccess("Cardápio lido", {
             description: result.fallback
               ? "A leitura precisou de fallback, mas a revisão continua possível."
-              : `${result.dishes?.length || 0} pratos identificados.`,
+              : `${result.pairings?.length || 0} sugestões identificadas.`,
             duration: 2600,
           });
           setStep("ext-menu-results");
@@ -564,16 +510,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       };
 
       console.info("[DishToWineDialog] pairing_request_started", { step: "menu", wineName: extWineName, sourceType: prepared.sourceType });
-      const result = await analyzeMenuForWine(payload, extWineName);
+      const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
       if (!isLatest(reqId)) return;
-      console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, dishes: result.dishes?.length || 0 });
+      console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, pairings: result.pairings?.length || 0 });
       setError(null);
-      setMenuResults(result);
-      setWineProfile(result.wineProfile || null);
+      setPairingResult(result);
       notifySuccess("Cardápio lido", {
         description: result.fallback
           ? "A leitura precisou de fallback, mas a revisão continua possível."
-          : `${result.dishes?.length || 0} pratos identificados.`,
+          : `${result.pairings?.length || 0} sugestões identificadas.`,
         duration: 2600,
       });
       setStep("ext-menu-results");
@@ -615,16 +560,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setStep("dish");
     } else if (step === "results") {
       setStep(source === "cellar" ? "intent" : "dish");
-      setSuggestions(null);
+      setPairingResult(null);
     } else if (step === "wine-results") {
       setStep("select-wine");
-      setPairings(null);
+      setPairingResult(null);
     } else if (step === "scan-results") {
       setStep("photo");
       setScanResults(null);
     } else if (step === "ext-menu-results") {
       setStep("ext-menu-photo");
-      setMenuResults(null);
+      setPairingResult(null);
     }
   };
 
@@ -1273,126 +1218,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               />
             )}
 
-            {/* ── Ext: Menu results ── */}
-            {step === "ext-menu-results" && menuResults && (
-              <motion.div
-                key="ext-menu-results"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="space-y-3"
-              >
-                {/* Wine profile card */}
-                <WineProfileCard title={extWineName} profile={wineProfile} />
-
-                <SectionHeader icon="chef" label="Pratos do cardápio" />
-
-                {menuResults.summary && (
-                  <p className="text-[11px] text-foreground/80 leading-relaxed italic">
-                    "{menuResults.summary}"
-                  </p>
-                )}
-
-                {menuResults.dishes.length === 0 ? (
-                  <p className="text-[12px] text-muted-foreground text-center py-4">
-                    Não foi possível identificar pratos no cardápio. Tente outra foto.
-                  </p>
-                ) : (
-                  <ul className="space-y-3">
-                    {menuResults.dishes.map((d, i) => {
-                      const compatColor = d.compatibilityLabel === "Combinação perfeita" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
-                        d.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
-                        d.compatibilityLabel === "Harmonização elegante" ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]" :
-                        d.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
-                        d.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
-                        "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
-                      const hLabel = d.harmony_label || (d.harmony_type && harmonyLabel[d.harmony_type]);
-                      return (
-                        <motion.li
-                          key={i}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2.5">
-                              <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[d.match] || "bg-primary/40")} />
-                              <span className="text-[15px] font-bold text-foreground tracking-tight">{d.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              {d.highlight && (
-                                <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/8 rounded-full px-2 py-[2px]">
-                                  {d.highlight === "top-pick" ? "Melhor escolha" : "Melhor custo-benefício"}
-                                </span>
-                              )}
-                              {d.price != null && (
-                                <span className="text-[12px] font-bold text-foreground">
-                                  R$ {d.price.toFixed(0)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          {/* Compatibility + harmony badges */}
-                          <div className="flex items-center gap-2 pl-[18px] flex-wrap">
-                            {d.compatibilityLabel && (
-                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", compatColor)}>
-                                {d.compatibilityLabel}
-                              </span>
-                            )}
-                            {hLabel && (
-                              <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70">
-                                {hLabel}
-                              </span>
-                            )}
-                          </div>
-                          {/* Dish profile pills */}
-                          {d.dish_profile && (
-                            <div className="flex flex-wrap gap-1 pl-[18px]">
-                              {d.dish_profile.intensity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{d.dish_profile.intensity}</span>}
-                              {d.dish_profile.texture && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{d.dish_profile.texture}</span>}
-                              {d.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{d.dish_profile.highlight}</span>}
-                            </div>
-                          )}
-                          {/* Explanation */}
-                          <p className="text-[12.5px] text-foreground/65 leading-relaxed pl-[18px]">
-                            {d.reason}
-                          </p>
-                          {/* Recipe button */}
-                          {d.recipe && (
-                            <div className="pl-[18px] pt-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setRecipeModal({ recipe: d.recipe!, dish: d.name })}
-                                className="recipe-button inline-flex min-h-11 items-center gap-2 rounded-full border border-[rgba(122,46,46,0.10)] bg-[rgba(160,60,60,0.08)] px-4 py-2.5 text-sm font-medium text-[#7a2e2e] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424]"
-                              >
-                                <BookOpen className="h-4 w-4" />
-                                Ver receita
-                              </button>
-                            </div>
-                          )}
-                        </motion.li>
-                      );
-                    })}
-                  </ul>
-                )}
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setMenuResults(null);
-                    setPreview(null);
-                    setWineProfile(null);
-                    setStep("ext-menu-photo");
-                  }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
-                >
-                  Enviar outra foto
-                </Button>
-              </motion.div>
-            )}
-
             {/* ── Photo Upload (external dish → wine list) ── */}
             {step === "photo" && (
               <motion.div
@@ -1469,191 +1294,103 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               />
             )}
 
-            {/* ── Cellar Results (dish → wine suggestions) ── */}
-            {step === "results" && suggestions && (
+            {(step === "results" || step === "wine-results" || step === "ext-menu-results") && pairingResult && (
               <motion.div
-                key="results"
+                key={`${step}-strict`}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                {/* Dish profile section */}
-                <DishProfileCard dish={dish} profile={dishProfile} />
-
-                <SectionHeader icon="sparkles" label={`Vinhos para "${dish}"`} />
-
-                {suggestions.length === 0 ? (
-                  <div className="surface-clarity p-6 text-center space-y-2">
-                    <p className="text-sm text-foreground/70 font-medium">
-                      Nenhum vinho na sua adega combina com esse prato.
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Experimente outro prato ou adicione mais vinhos à adega.
-                    </p>
+                {pairingResult.fallback && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FallbackAnalysisBadge />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Sugestões simplificadas</span>
+                    </div>
+                    <FallbackAnalysisNotice />
                   </div>
-                ) : (
-                  <ul className="space-y-3">
-                    {suggestions.map((s, i) => {
-                      const tint = getStyleTint(s.style);
-                      const meta = [s.grape, s.vintage ? `Safra ${s.vintage}` : null, s.region, s.country].filter(Boolean).join(" · ");
-                      const hLabel = s.harmony_label || (s.harmony_type && harmonyLabel[s.harmony_type]);
-
-                      // Match wine na adega para exibir preço
-                      const matchedWine = s.fromCellar
-                        ? wines?.find((w) => w.name?.toLowerCase().trim() === s.wineName?.toLowerCase().trim())
-                        : null;
-                      const winePrice = matchedWine?.purchase_price ?? matchedWine?.current_value ?? null;
-                      const priceLabel = matchedWine?.purchase_price != null
-                        ? "Pago"
-                        : matchedWine?.current_value != null
-                          ? "Mercado"
-                          : null;
-
-                      const compatColor = s.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
-                        s.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
-                        s.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
-                        s.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
-                        "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
-
-                      return (
-                        <motion.li
-                          key={i}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className={cn(
-                            "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
-                            tint || "bg-card/60 border-border/30",
-                            s.fromCellar && !tint && "border-primary/20 bg-primary/[0.04]",
-                          )}
-                        >
-                          {/* Top: wine identity + classification */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0 space-y-0.5">
-                              <div className="flex items-center gap-2">
-                                <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[s.match] || "bg-primary/40")} />
-                                <span className="text-[15px] font-bold text-foreground tracking-tight">
-                                  {s.wineName}
-                                </span>
-                              </div>
-                              {meta && (
-                                <p className="text-[11px] text-muted-foreground/70 pl-[18px]">{meta}</p>
-                              )}
-                            </div>
-                            <div className="shrink-0 flex flex-col items-end gap-1">
-                              {s.fromCellar && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                                  <WineIcon className="h-3 w-3" />
-                                  Na adega
-                                </span>
-                              )}
-                              {winePrice != null && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(38,36%,52%/0.14)] px-2.5 py-1 text-[10.5px] font-bold tracking-tight text-[hsl(38,55%,30%)]">
-                                  R$ {Number(winePrice).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                  {priceLabel && (
-                                    <span className="ml-0.5 text-[8.5px] font-semibold uppercase tracking-wider opacity-70">
-                                      {priceLabel}
-                                    </span>
-                                  )}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Wine structure pills */}
-                          {s.wineProfile && (s.wineProfile.body || s.wineProfile.acidity || s.wineProfile.tannin) && (
-                            <div className="flex flex-wrap gap-1.5 pl-[18px]">
-                              {s.wineProfile.body && (
-                                <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                                  Corpo {s.wineProfile.body}
-                                </span>
-                              )}
-                              {s.wineProfile.acidity && (
-                                <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                                  Acidez {s.wineProfile.acidity}
-                                </span>
-                              )}
-                              {s.wineProfile.tannin && s.wineProfile.tannin !== "n/a" && (
-                                <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-[9px] font-semibold text-muted-foreground">
-                                  Taninos {s.wineProfile.tannin}
-                                </span>
-                              )}
-                              {s.wineProfile.style && (
-                                <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-0.5 text-[9px] font-semibold text-primary/60">
-                                  {s.wineProfile.style}
-                                </span>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Explanation */}
-                          <div className="pl-[18px] space-y-1">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary/50">Por que funciona</p>
-                            <p className="text-[12.5px] text-foreground/65 leading-relaxed">
-                              {s.reason}
-                            </p>
-                          </div>
-
-                          {/* Badges: classification + harmony */}
-                          <div className="flex items-center gap-2 pl-[18px] flex-wrap">
-                            {s.compatibilityLabel && (
-                              <span className={cn(
-                                "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
-                                compatColor,
-                              )}>
-                                {s.compatibilityLabel}
-                              </span>
-                            )}
-                            {hLabel && (
-                              <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70">
-                                {hLabel}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="pl-[18px] pt-1">
-                            <Button
-                              size="sm"
-                              onClick={() => setConsumeWine({
-                                id: matchedWine?.id || `${s.wineName}-${i}`,
-                                name: matchedWine?.name || s.wineName,
-                                producer: matchedWine?.producer || null,
-                                country: matchedWine?.country || null,
-                                region: matchedWine?.region || null,
-                                grape: matchedWine?.grape || null,
-                                style: matchedWine?.style || null,
-                                vintage: matchedWine?.vintage || null,
-                              })}
-                              className="h-8 rounded-full bg-primary px-4 text-[11.5px] font-semibold tracking-wide text-primary-foreground shadow-[0_2px_8px_-2px_rgba(123,30,43,0.35)] hover:bg-primary/90 hover:shadow-[0_4px_12px_-2px_rgba(123,30,43,0.45)] transition-all"
-                            >
-                              <Check className="mr-1.5 h-3.5 w-3.5" />
-                              Escolher este
-                            </Button>
-                          </div>
-                        </motion.li>
-                      );
-                    })}
-                  </ul>
                 )}
+
+                <div className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-3">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary/65" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Análise</span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {[
+                      ["Acidez", pairingResult.analysis.acidity],
+                      ["Gordura", pairingResult.analysis.fat],
+                      ["Textura", pairingResult.analysis.texture],
+                      ["Perfil", pairingResult.analysis.flavor_profile],
+                      ["Preparo", pairingResult.analysis.cooking_method],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-xl border border-[rgba(0,0,0,0.05)] bg-white/55 p-3">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+                        <p className="mt-1 text-[12.5px] leading-relaxed text-foreground/75">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <SectionHeader
+                  icon="chef"
+                  label={step === "wine-results" ? "Pratos sugeridos" : "Harmonizações"}
+                  count={Math.min(pairingResult.pairings.length, 5)}
+                />
+
+                <ul className="space-y-2.5">
+                  {pairingResult.pairings.slice(0, 5).map((p, i) => (
+                    <li key={i} className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary/55">Sugestão {i + 1}</p>
+                          <h4 className="mt-0.5 text-[15px] font-bold text-foreground tracking-tight">{p.wine}</h4>
+                        </div>
+                        <span className="shrink-0 inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-primary/70">
+                          {p.style}
+                        </span>
+                      </div>
+                      <p className="text-[12.5px] leading-relaxed text-foreground/70">{p.why_it_works}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+                          Acidez {p.structure_match.acidity}
+                        </span>
+                        <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+                          Tanino {p.structure_match.tannin}
+                        </span>
+                        <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+                          Corpo {p.structure_match.body}
+                        </span>
+                        <span className="rounded-full bg-primary/[0.05] px-2 py-1 text-[10px] font-medium text-primary/70">
+                          {p.extra_tip}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
 
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setSuggestions(null);
-                    setDish("");
-                    setStep("dish");
+                    setPairingResult(null);
+                    setPreview(null);
+                    setStep(step === "wine-results" ? "select-wine" : step === "ext-menu-results" ? "ext-menu-photo" : "dish");
                   }}
                   className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
                 >
-                  Buscar outro prato
+                  {step === "wine-results"
+                    ? "Escolher outro vinho"
+                    : step === "ext-menu-results"
+                      ? "Enviar outra foto"
+                      : "Buscar outro prato"}
                 </Button>
               </motion.div>
             )}
 
             {/* ── Wine Results (wine → food suggestions) ── */}
-            {step === "wine-results" && error && !pairings && (
+            {step === "wine-results" && error && !pairingResult && (
               <PairingErrorState
                 key="wine-results-error"
                 message={error}
@@ -1662,7 +1399,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               />
             )}
 
-            {step === "wine-results" && deepLinkLoading && !pairings && (
+            {step === "wine-results" && deepLinkLoading && !pairingResult && (
               <PairingLoadingState
                 steps={[
                   "Carregando o vinho selecionado…",
@@ -1671,114 +1408,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 ]}
                 subtitle={selectedWine?.name || initialWine?.name || "Vinho selecionado"}
               />
-            )}
-
-            {step === "wine-results" && pairings && (
-              <motion.div
-                key="wine-results"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="space-y-3"
-              >
-                {selectedWine && (
-                  <WineProfileCard
-                    title={selectedWine.name}
-                    subtitle={[selectedWine.style, selectedWine.grape, selectedWine.region].filter(Boolean).join(" · ")}
-                    profile={wineProfile}
-                    pairingLogic={pairingLogic}
-                  />
-                )}
-                {!selectedWine && deepLinkError && (
-                  <div className="surface-clarity p-4 rounded-2xl border border-destructive/15 bg-destructive/5 text-sm text-destructive">
-                    Não foi possível carregar os dados completos deste vinho.
-                  </div>
-                )}
-
-                <SectionHeader icon="chef" label="Pratos sugeridos" />
-
-                {pairings.length === 0 ? (
-                  <div className="surface-clarity p-6 text-center space-y-2">
-                    <p className="text-sm text-foreground/70 font-medium">
-                      Nenhuma sugestão encontrada.
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Experimente outro vinho da sua adega.
-                    </p>
-                  </div>
-                ) : (
-                  <ul className="space-y-3">
-                    {pairings.map((p, i) => {
-                      const badge = matchBadge[p.match];
-                      const hLabel = p.harmony_label || (p.harmony_type && harmonyLabel[p.harmony_type]);
-                      return (
-                        <motion.li
-                          key={i}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2.5">
-                              <div className={cn("w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white/60", matchDot[p.match] || "bg-primary/40")} />
-                              <span className="text-[15px] font-bold text-foreground tracking-tight">{p.dish}</span>
-                            </div>
-                            {badge && (
-                              <span className={cn("shrink-0 inline-flex items-center rounded-full px-2 py-[1px] text-[9px] font-semibold tracking-wide", badge.className)}>
-                                {badge.label}
-                              </span>
-                            )}
-                          </div>
-                          {hLabel && (
-                            <span className="inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary/70 ml-[18px]">
-                              {hLabel}
-                            </span>
-                          )}
-                          {p.dish_profile && (
-                            <div className="flex flex-wrap gap-1 pl-[18px]">
-                              {p.dish_profile.intensity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.intensity}</span>}
-                              {p.dish_profile.texture && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.texture}</span>}
-                              {p.dish_profile.highlight && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">{p.dish_profile.highlight}</span>}
-                            </div>
-                          )}
-                          <div className="pl-[18px] space-y-1">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary/50">Por que funciona</p>
-                            <p className="text-[12.5px] text-foreground/65 leading-relaxed">
-                              {p.reason}
-                            </p>
-                          </div>
-                          {p.recipe && (
-                            <div className="pl-[18px] pt-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setRecipeModal({ recipe: p.recipe!, dish: p.dish })}
-                                className="recipe-button inline-flex min-h-11 items-center gap-2 rounded-full border border-[rgba(122,46,46,0.10)] bg-[rgba(160,60,60,0.08)] px-4 py-2.5 text-sm font-medium text-[#7a2e2e] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424]"
-                              >
-                                <BookOpen className="h-4 w-4" />
-                                Ver receita
-                              </button>
-                            </div>
-                          )}
-                        </motion.li>
-                      );
-                    })}
-                  </ul>
-                )}
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setPairings(null);
-                    setSelectedWineId("");
-                    setStep("select-wine");
-                  }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
-                >
-                  Escolher outro vinho
-                </Button>
-              </motion.div>
             )}
 
             {/* ── External Scan Results (dish → wine list photo) ── */}

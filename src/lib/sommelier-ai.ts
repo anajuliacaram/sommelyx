@@ -86,14 +86,6 @@ export interface PairingResult {
   recipe?: Recipe | null;
 }
 
-export interface PairingResponse {
-  pairings: PairingResult[];
-  wineProfile?: WineProfile | null;
-  pairingLogic?: string | null;
-  fallback?: boolean;
-  fallbackReason?: string | null;
-}
-
 export interface WineSuggestionProfile {
   body?: string | null;
   acidity?: string | null;
@@ -115,13 +107,6 @@ export interface WineSuggestion {
   country?: string;
   compatibilityLabel?: string;
   wineProfile?: WineSuggestionProfile | null;
-}
-
-export interface SuggestionResponse {
-  suggestions: WineSuggestion[];
-  dishProfile?: DishProfile | null;
-  fallback?: boolean;
-  fallbackReason?: string | null;
 }
 
 export interface WineListPairing {
@@ -283,6 +268,15 @@ export type WinePairingInput =
       dish?: string | null;
       text?: string | null;
       imageText?: string | null;
+      wineName?: string | null;
+      wineStyle?: string | null;
+      wineGrape?: string | null;
+      wineRegion?: string | null;
+      wineProducer?: string | null;
+      wineVintage?: number | string | null;
+      wineCountry?: string | null;
+      cellarWines?: WineSummary[] | null;
+      intent?: PairingIntent;
     };
 
 // ── Error Classification ──
@@ -899,62 +893,6 @@ function dedupePairings(pairings: PairingResult[]) {
   });
 }
 
-function fallbackPairingsForWine(wine: { name?: string; style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }): PairingResult[] {
-  const style = normalizeForMatch(wine.style).replace(/\s+/g, " ");
-  const isRed = /\btinto|red|malbec|cabernet|syrah|merlot|tempranillo|nebbiolo|sangiovese|pinot noir\b/i.test(style);
-  const isWhite = /\bbranco|white|chardonnay|sauvignon|riesling|alvarinho|verdejo|pinot gris|moscato\b/i.test(style);
-  const isRose = /\bros[eé]|rose\b/i.test(style);
-  const isSparkling = /\bespumante|sparkling|champagne|prosecco|cava|brut\b/i.test(style);
-
-  if (isRed) {
-    return [
-      createFallbackPairing("Picanha grelhada", "A gordura da carne pede taninos firmes e boa acidez para limpar o paladar.", "perfeito", "contraste", "gordura + taninos"),
-      createFallbackPairing("Cordeiro assado", "A textura suculenta do cordeiro encontra estrutura e presença no vinho.", "perfeito", "equilíbrio", "estrutura + intensidade"),
-      createFallbackPairing("Massa ao molho vermelho", "A acidez do molho pede um vinho com corpo e frescor suficiente para acompanhar o tomate.", "muito bom", "complemento", "tomate + acidez"),
-      createFallbackPairing("Queijo curado", "O sal e a gordura do queijo ganham frescor quando o vinho tem taninos e acidez em boa medida.", "muito bom", "contraste", "sal + taninos"),
-      createFallbackPairing("Hambúrguer artesanal", "A untuosidade e o sabor tostado pedem vinho de corpo médio e taninos que sustentem a mordida.", "bom", "equilíbrio", "gordura + estrutura"),
-    ];
-  }
-
-  if (isWhite) {
-    return [
-      createFallbackPairing("Peixe grelhado", "A delicadeza do peixe pede acidez viva e textura leve para não pesar no prato.", "perfeito", "limpeza", "leveza + frescor"),
-      createFallbackPairing("Frutos do mar", "A salinidade pede frescor e mineralidade para manter o conjunto preciso.", "perfeito", "contraste", "sal + mineralidade"),
-      createFallbackPairing("Risoto de limão", "A cremosidade do risoto ganha corte com acidez e final mais tenso.", "muito bom", "equilíbrio", "cremosidade + acidez"),
-      createFallbackPairing("Queijo de cabra", "O caráter ácido e lácteo do queijo acompanha bem um branco de frescor marcante.", "muito bom", "contraste", "laticínio + frescor"),
-      createFallbackPairing("Frango ao molho leve", "Pratos mais delicados pedem vinhos de corpo médio e acidez suficiente para sustentar o molho.", "bom", "complemento", "molho leve + corpo médio"),
-    ];
-  }
-
-  if (isRose) {
-    return [
-      createFallbackPairing("Sushi", "A acidez e a leveza do rosé limpam o paladar sem sobrepor o peixe cru.", "perfeito", "limpeza", "textura delicada + frescor"),
-      createFallbackPairing("Pizza margherita", "O tomate e a mozzarella pedem frescor e fruta, sem tanino dominante.", "muito bom", "equilíbrio", "tomate + fruta"),
-      createFallbackPairing("Salada com frutas", "A acidez da fruta e o perfil leve do prato combinam com um rosé refrescante.", "muito bom", "semelhança", "frescor + delicadeza"),
-      createFallbackPairing("Tábua de frios", "O sal e a variedade de texturas funcionam com um vinho versátil e pouco agressivo.", "bom", "contraste", "sal + versatilidade"),
-      createFallbackPairing("Frango grelhado", "A proteína leve precisa de vinho com frescor e fruta sem excesso de peso.", "bom", "complemento", "proteína leve + frescor"),
-    ];
-  }
-
-  if (isSparkling) {
-    return [
-      createFallbackPairing("Canapés e entradas", "A efervescência e a acidez preparam o paladar antes do prato principal.", "perfeito", "limpeza", "gás + entrada"),
-      createFallbackPairing("Frituras leves", "A espuma e a acidez limpam a gordura e deixam a sensação mais seca.", "perfeito", "limpeza", "gordura + acidez"),
-      createFallbackPairing("Camarão empanado", "A textura crocante pede um vinho que corte a fritura sem dominar o sabor.", "muito bom", "contraste", "crosta + frescor"),
-      createFallbackPairing("Omelete", "A textura macia combina com a vibração do espumante e sua acidez refrescante.", "muito bom", "equilíbrio", "textura macia + acidez"),
-      createFallbackPairing("Sobremesas delicadas", "Quando a doçura é leve, o gás traz leveza e mantém o conjunto elegante.", "bom", "semelhança", "doçura leve + leveza"),
-    ];
-  }
-
-  return [
-    createFallbackPairing("Tábua de frios", "Uma harmonização versátil que respeita sal, gordura e textura sem exigir muita intensidade.", "muito bom", "contraste", "versatilidade"),
-    createFallbackPairing("Peixe grelhado", "A acidez ajuda a manter frescor e a preservar a leitura do prato.", "muito bom", "limpeza", "frescor"),
-    createFallbackPairing("Massa leve", "A massa pede equilíbrio de corpo e acidez para não perder a forma.", "bom", "equilíbrio", "equilíbrio"),
-    createFallbackPairing("Queijos suaves", "A cremosidade funciona com vinhos de perfil delicado e boa precisão.", "bom", "complemento", "cremosidade"),
-    createFallbackPairing("Legumes assados", "A caramelização pede um vinho que acompanhe a doçura natural sem pesar.", "bom", "semelhança", "caramelização"),
-  ];
-}
-
 function dedupeSuggestions(suggestions: WineSuggestion[]) {
   const seen = new Set<string>();
   return suggestions.filter((suggestion) => {
@@ -963,23 +901,6 @@ function dedupeSuggestions(suggestions: WineSuggestion[]) {
     seen.add(key);
     return true;
   });
-}
-
-function fallbackPairingLogicForWine(wine: { style?: string | null; grape?: string | null; region?: string | null; producer?: string | null }) {
-  const style = normalizeForMatch(wine.style);
-  if (/\btinto|red|malbec|cabernet|syrah|merlot|tempranillo|nebbiolo|sangiovese|pinot noir\b/i.test(style)) {
-    return "Taninos, corpo e acidez pedem pratos com gordura, proteína e preparo mais intenso para que o vinho mantenha presença sem dominar o prato.";
-  }
-  if (/\bbranco|white|chardonnay|sauvignon|riesling|alvarinho|verdejo|pinot gris|moscato\b/i.test(style)) {
-    return "A acidez e o frescor pedem pratos mais delicados, com gordura moderada ou textura cremosa para criar contraste limpo e elegante.";
-  }
-  if (/\bros[eé]|rose\b/i.test(style)) {
-    return "A fruta e a leveza do rosé funcionam melhor com pratos frescos, salgados e de intensidade média, sem excesso de gordura.";
-  }
-  if (/\bespumante|sparkling|champagne|prosecco|cava|brut\b/i.test(style)) {
-    return "A acidez e a efervescência limpam gordura e destacam entradas, frituras leves e pratos delicados com textura mais macia.";
-  }
-  return "A avaliação privilegia o equilíbrio entre corpo, acidez, taninos e intensidade do prato para sugerir combinações mais precisas.";
 }
 
 function normalizeWinePairingInput(input: WinePairingInput): string {
@@ -996,7 +917,23 @@ function normalizeWinePairingInput(input: WinePairingInput): string {
     input?.imageText ||
     "";
 
-  return String(rawDish).trim() || "prato não especificado";
+  const dishText = String(rawDish).trim();
+  if (dishText) return dishText;
+
+  const wineDescriptor = [
+    input?.wineName ? `Vinho: ${input.wineName}` : null,
+    input?.wineStyle ? `Estilo: ${input.wineStyle}` : null,
+    input?.wineGrape ? `Uva: ${input.wineGrape}` : null,
+    input?.wineRegion ? `Região: ${input.wineRegion}` : null,
+    input?.wineProducer ? `Produtor: ${input.wineProducer}` : null,
+    input?.wineVintage ? `Safra: ${input.wineVintage}` : null,
+    input?.wineCountry ? `País: ${input.wineCountry}` : null,
+  ]
+    .filter(Boolean)
+    .join(" | ")
+    .trim();
+
+  return wineDescriptor || "prato não especificado";
 }
 
 function safeParse<T>(response: string): T | null {
@@ -1158,274 +1095,172 @@ function fallbackPairing(dish: string): GeneratedWinePairing {
   };
 }
 
+function normalizeGeneratedPairingResponse(data: unknown, dish: string): GeneratedWinePairing {
+  if (!data || typeof data !== "object") {
+    return fallbackPairing(dish);
+  }
+
+  const payload = data as Record<string, unknown>;
+  const fallback = fallbackPairing(dish);
+  const fallbackAnalysis = fallback.analysis;
+  const analysis = payload.analysis && typeof payload.analysis === "object"
+    ? {
+        fat: typeof (payload.analysis as Record<string, unknown>).fat === "string" && String((payload.analysis as Record<string, unknown>).fat).trim().length > 0
+          ? String((payload.analysis as Record<string, unknown>).fat)
+          : fallbackAnalysis.fat,
+        acidity: typeof (payload.analysis as Record<string, unknown>).acidity === "string" && String((payload.analysis as Record<string, unknown>).acidity).trim().length > 0
+          ? String((payload.analysis as Record<string, unknown>).acidity)
+          : fallbackAnalysis.acidity,
+        texture: typeof (payload.analysis as Record<string, unknown>).texture === "string" && String((payload.analysis as Record<string, unknown>).texture).trim().length > 0
+          ? String((payload.analysis as Record<string, unknown>).texture)
+          : fallbackAnalysis.texture,
+        flavor_profile: typeof (payload.analysis as Record<string, unknown>).flavor_profile === "string" && String((payload.analysis as Record<string, unknown>).flavor_profile).trim().length > 0
+          ? String((payload.analysis as Record<string, unknown>).flavor_profile)
+          : fallbackAnalysis.flavor_profile,
+        cooking_method: typeof (payload.analysis as Record<string, unknown>).cooking_method === "string" && String((payload.analysis as Record<string, unknown>).cooking_method).trim().length > 0
+          ? String((payload.analysis as Record<string, unknown>).cooking_method)
+          : fallbackAnalysis.cooking_method,
+      }
+    : fallbackAnalysis;
+
+  const strictPairings = Array.isArray(payload.pairings)
+    ? payload.pairings
+        .filter((pairing): pairing is Record<string, unknown> => Boolean(pairing) && typeof pairing === "object")
+        .map((pairing) => ({
+          wine: typeof pairing.wine === "string" && pairing.wine.trim().length > 0 ? pairing.wine.trim() : "",
+          style: typeof pairing.style === "string" && pairing.style.trim().length > 0 ? pairing.style.trim() : "Médio corpo",
+          why_it_works: typeof pairing.why_it_works === "string" && pairing.why_it_works.trim().length > 0
+            ? pairing.why_it_works.trim()
+            : "Sugestão simplificada com base no equilíbrio do prato.",
+          structure_match: {
+            acidity: typeof pairing.structure_match === "object" && pairing.structure_match !== null && typeof (pairing.structure_match as Record<string, unknown>).acidity === "string" && String((pairing.structure_match as Record<string, unknown>).acidity).trim().length > 0
+              ? String((pairing.structure_match as Record<string, unknown>).acidity)
+              : "média",
+            tannin: typeof pairing.structure_match === "object" && pairing.structure_match !== null && typeof (pairing.structure_match as Record<string, unknown>).tannin === "string" && String((pairing.structure_match as Record<string, unknown>).tannin).trim().length > 0
+              ? String((pairing.structure_match as Record<string, unknown>).tannin)
+              : "médio",
+            body: typeof pairing.structure_match === "object" && pairing.structure_match !== null && typeof (pairing.structure_match as Record<string, unknown>).body === "string" && String((pairing.structure_match as Record<string, unknown>).body).trim().length > 0
+              ? String((pairing.structure_match as Record<string, unknown>).body)
+              : "médio",
+          },
+          extra_tip: typeof pairing.extra_tip === "string" && pairing.extra_tip.trim().length > 0
+            ? pairing.extra_tip.trim()
+            : "Você pode ajustar manualmente",
+        }))
+        .filter((pairing) => pairing.wine.trim().length > 0)
+    : [];
+
+  if (strictPairings.length > 0) {
+    const merged = dedupePairings(
+      strictPairings.concat(fallback.pairings)
+        .map((pairing) => ({
+          dish: pairing.wine,
+          reason: pairing.why_it_works,
+          match: "bom" as const,
+          harmony_type: "equilíbrio" as const,
+          harmony_label: pairing.extra_tip,
+          category: "classico" as const,
+        })),
+    );
+
+    const normalized = merged.slice(0, 5).map((pairing, index) => ({
+      wine: pairing.dish,
+      style: strictPairings[index]?.style || "Médio corpo",
+      why_it_works: pairing.reason,
+      structure_match: {
+        acidity: strictPairings[index]?.structure_match.acidity || "média",
+        tannin: strictPairings[index]?.structure_match.tannin || "médio",
+        body: strictPairings[index]?.structure_match.body || "médio",
+      },
+      extra_tip: strictPairings[index]?.extra_tip || "Você pode ajustar manualmente",
+    }));
+
+    while (normalized.length < 5) {
+      const fallbackSuggestion = fallback.pairings[normalized.length];
+      normalized.push(fallbackSuggestion || {
+        wine: `Sugestão padrão ${normalized.length + 1}`,
+        style: "Médio corpo",
+        why_it_works: `Baseado em "${dish}", esta opção preserva o equilíbrio entre corpo, acidez e intensidade do prato.`,
+        structure_match: { acidity: "média", tannin: "médio", body: "médio" },
+        extra_tip: "Você pode ajustar manualmente",
+      });
+    }
+
+    return {
+      analysis,
+      pairings: normalized.slice(0, 5),
+      fallback: Boolean(payload.fallback) || strictPairings.length < 5,
+      note: typeof payload.note === "string" && payload.note.trim().length > 0
+        ? payload.note
+        : Boolean(payload.fallback) || strictPairings.length < 5
+          ? "análise simplificada"
+          : undefined,
+    };
+  }
+
+  if (Array.isArray(payload.suggestions)) {
+    return buildGeneratedPairingsFromSuggestions(dish, payload.suggestions as WineSuggestion[], Boolean(payload.fallback));
+  }
+
+  return fallbackPairing(dish);
+}
+
 export async function generateWinePairing(input: WinePairingInput): Promise<GeneratedWinePairing> {
   const finalDish = normalizeWinePairingInput(input);
   console.log("dish:", finalDish);
 
   try {
-    const aiResult = await getDishWineSuggestions(finalDish);
-    const responsePayload = buildGeneratedPairingsFromSuggestions(finalDish, aiResult.suggestions, Boolean(aiResult.fallback));
-    const response = JSON.stringify(responsePayload);
+    const hasWineContext = typeof input !== "string" && Boolean(
+      input?.wineName ||
+      input?.wineStyle ||
+      input?.wineGrape ||
+      input?.wineRegion ||
+      input?.wineProducer ||
+      input?.wineVintage ||
+      input?.wineCountry,
+    );
+    const requestPayload = typeof input === "string"
+      ? {
+          mode: "food-to-wine",
+          dish: finalDish,
+          intent: "everyday",
+          cellarWines: undefined,
+        }
+      : hasWineContext
+        ? {
+            mode: "wine-to-food",
+            wineName: input.wineName,
+            wineStyle: input.wineStyle,
+            wineGrape: input.wineGrape,
+            wineRegion: input.wineRegion,
+            wineProducer: input.wineProducer,
+            wineVintage: input.wineVintage,
+            wineCountry: input.wineCountry,
+            dish: finalDish,
+            intent: input.intent,
+            cellarWines: input.cellarWines ?? undefined,
+          }
+        : {
+            mode: "food-to-wine",
+            dish: finalDish,
+            intent: input.intent ?? "everyday",
+            cellarWines: input.cellarWines ?? undefined,
+          };
+
+    const response = await invokeEdgeFunction<any>(
+      "wine-pairings",
+      requestPayload,
+      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
+    );
     console.log("ai_response:", response);
-    const parsed = safeParse<GeneratedWinePairing>(response);
+    const parsed = safeParse<GeneratedWinePairing>(JSON.stringify(response));
     console.log("parsed:", parsed);
 
-    if (!parsed || !Array.isArray(parsed.pairings) || parsed.pairings.length < 1) {
-      return fallbackPairing(finalDish);
-    }
-
-    const pairings = parsed.pairings
-      .filter((pairing) => pairing && typeof pairing.wine === "string" && pairing.wine.trim().length > 0)
-      .map((pairing) => ({
-        ...pairing,
-        structure_match: {
-          acidity: pairing.structure_match?.acidity || "média",
-          tannin: pairing.structure_match?.tannin || "médio",
-          body: pairing.structure_match?.body || "médio",
-        },
-        extra_tip: pairing.extra_tip || "Você pode ajustar manualmente",
-      }));
-
-    if (pairings.length < 5) {
-      const fallback = fallbackPairing(finalDish);
-      const mergedPairings = dedupePairings(
-        pairings.map((pairing) => ({
-          dish: pairing.wine,
-          reason: pairing.why_it_works,
-          match: "bom",
-          harmony_type: "equilíbrio",
-          harmony_label: pairing.extra_tip,
-          category: "classico",
-        })).concat(fallback.pairings.map((pairing) => ({
-          dish: pairing.wine,
-          reason: pairing.why_it_works,
-          match: "bom",
-          harmony_type: "equilíbrio",
-          harmony_label: pairing.extra_tip,
-          category: "classico",
-        }))),
-      ).slice(0, 5);
-
-      return {
-        analysis: parsed.analysis || fallback.analysis,
-        pairings: mergedPairings.map((pairing) => ({
-          wine: pairing.dish,
-          style: "Médio corpo",
-          why_it_works: pairing.reason,
-          structure_match: {
-            acidity: "média",
-            tannin: "médio",
-            body: "médio",
-          },
-          extra_tip: pairing.harmony_label || "Você pode ajustar manualmente",
-        })),
-        fallback: true,
-        note: "análise simplificada",
-      };
-    }
-
-    return {
-      analysis: parsed.analysis,
-      pairings: pairings.slice(0, 5),
-      fallback: Boolean(parsed.fallback),
-      note: parsed.note,
-    };
+    const normalized = normalizeGeneratedPairingResponse(parsed ?? response, finalDish);
+    return normalized;
   } catch (error) {
     console.warn("[generateWinePairing] fallback used", error);
     return fallbackPairing(finalDish);
-  }
-}
-
-// ── Validation helpers ──
-
-function isValidPairings(data: unknown): data is PairingResponse {
-  if (!data || typeof data !== "object") return false;
-  const d = data as Record<string, unknown>;
-  if (!Array.isArray(d.pairings) || d.pairings.length < 1) return false;
-  return d.pairings.every((p: any) => typeof p.dish === "string" && p.dish.length > 0);
-}
-
-function isValidSuggestions(data: unknown): data is SuggestionResponse {
-  if (!data || typeof data !== "object") return false;
-  const d = data as Record<string, unknown>;
-  if (!Array.isArray(d.suggestions) || d.suggestions.length < 1) return false;
-  return d.suggestions.every((s: any) => typeof s.wineName === "string" && s.wineName.length > 0);
-}
-
-// ── API Functions with Fallback ──
-
-export async function getWinePairings(wine: {
-  name: string;
-  style?: string | null;
-  grape?: string | null;
-  region?: string | null;
-  producer?: string | null;
-  vintage?: number | null;
-  country?: string | null;
-}): Promise<PairingResponse> {
-  const totalStartedAt = nowMs();
-  try {
-    console.info("[sommelier-ai] pairing_request_started", {
-      mode: "wine-to-food",
-      source: "cellar",
-      wineName: wine.name,
-      hasProducer: Boolean(wine.producer),
-      hasRegion: Boolean(wine.region),
-      hasCountry: Boolean(wine.country),
-      hasVintage: wine.vintage != null,
-    });
-    const request = () => invokeEdgeFunction<{ pairings: PairingResult[] }>(
-      "wine-pairings",
-      {
-        mode: "wine-to-food",
-        wineName: wine.name,
-        wineStyle: wine.style,
-        wineGrape: wine.grape,
-        wineRegion: wine.region,
-        wineProducer: wine.producer,
-        wineVintage: wine.vintage,
-        wineCountry: wine.country,
-      },
-      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
-    );
-    const requestStartedAt = nowMs();
-    const data = await request();
-    logTiming("wine-to-food", "edge_request", requestStartedAt, {
-      wineName: wine.name,
-      pairings: Array.isArray((data as any)?.pairings) ? (data as any).pairings.length : 0,
-      fallback: Boolean((data as any)?.fallback),
-    });
-    if (data && (data as any).fallback === true) {
-      logTiming("wine-to-food", "total", totalStartedAt, { wineName: wine.name, outcome: "fallback" });
-      return data;
-    }
-    if (data && Array.isArray(data.pairings)) {
-      const mergedPairings = dedupePairings([
-        ...data.pairings,
-        ...fallbackPairingsForWine(wine).filter((fallback) =>
-          !data.pairings.some((existing) => normalizeForMatch(existing.dish) === normalizeForMatch(fallback.dish)),
-        ),
-      ]).slice(0, 5);
-
-      const response: PairingResponse = {
-        ...data,
-        pairings: mergedPairings,
-        pairingLogic: typeof data.pairingLogic === "string" && data.pairingLogic.trim().length > 0
-          ? data.pairingLogic
-          : fallbackPairingLogicForWine(wine),
-      };
-
-      logTiming("wine-to-food", "total", totalStartedAt, {
-        wineName: wine.name,
-        outcome: mergedPairings.length >= 5 ? "success" : "lenient_success",
-        pairings: mergedPairings.length,
-        filledFromFallback: mergedPairings.length - data.pairings.length,
-      });
-      return response;
-    }
-    if (data && typeof (data as any).message === "string" && Array.isArray((data as any).pairings)) {
-      throw new Error((data as any).message);
-    }
-    if (isValidPairings(data)) {
-      logTiming("wine-to-food", "total", totalStartedAt, { wineName: wine.name, outcome: "lenient_success", pairings: data.pairings.length });
-      return data;
-    }
-
-    throw new Error(ANALYSIS_FALLBACK_MESSAGE);
-  } catch (err) {
-    const classified = classifyError(err);
-    console.warn("[sommelier-ai] getWinePairings error:", classified.type, classified.message);
-    logTiming("wine-to-food", "total", totalStartedAt, {
-      wineName: wine.name,
-      outcome: "fallback",
-      code: classified.code,
-      type: classified.type,
-    });
-    return {
-      pairings: fallbackPairingsForWine(wine),
-      wineProfile: {
-        body: wine.style ? normalizeWineData({ name: wine.name, style: wine.style }, { log: false }).style || wine.style : null,
-        acidity: null,
-        tannin: null,
-        style: wine.style || null,
-        complexity: null,
-        summary: "Leitura simplificada devido a instabilidade temporária.",
-      },
-      pairingLogic: fallbackPairingLogicForWine(wine),
-      fallback: true,
-      fallbackReason: classified.message,
-    };
-  }
-}
-
-export async function getDishWineSuggestions(
-  dish: string,
-  userWines?: WineSummary[],
-  intent?: PairingIntent,
-): Promise<SuggestionResponse> {
-  const totalStartedAt = nowMs();
-  try {
-    console.info("[sommelier-ai] pairing_request_started", {
-      mode: "food-to-wine",
-      source: "cellar",
-      dish,
-      userWineCount: userWines?.length || 0,
-      intent: intent ?? "everyday",
-    });
-    const request = () => invokeEdgeFunction<{ suggestions: WineSuggestion[] }>(
-      "wine-pairings",
-      {
-        mode: "food-to-wine",
-        dish,
-        intent: intent ?? "everyday",
-        userWines: userWines?.slice(0, 30)?.map((w) => ({
-          name: w.name,
-          style: w.style,
-          grape: w.grape,
-          region: w.region,
-          country: w.country,
-          vintage: w.vintage,
-          producer: w.producer,
-          purchase_price: w.purchase_price ?? null,
-          current_value: w.current_value ?? null,
-        })),
-      },
-      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
-    );
-    const requestStartedAt = nowMs();
-    const data = await request();
-    logTiming("food-to-wine", "edge_request", requestStartedAt, {
-      dish,
-      suggestions: Array.isArray((data as any)?.suggestions) ? (data as any).suggestions.length : 0,
-      fallback: Boolean((data as any)?.fallback),
-    });
-    if (data && (data as any).fallback === true) {
-      logTiming("food-to-wine", "total", totalStartedAt, { dish, outcome: "fallback" });
-      return data;
-    }
-    if (isValidSuggestions(data)) {
-      logTiming("food-to-wine", "total", totalStartedAt, { dish, outcome: "success", suggestions: data.suggestions.length });
-      return data;
-    }
-    if (data && typeof (data as any).message === "string" && Array.isArray((data as any).suggestions)) {
-      throw new Error((data as any).message);
-    }
-
-    throw new Error(ANALYSIS_FALLBACK_MESSAGE);
-  } catch (err) {
-    const classified = classifyError(err);
-    console.warn("[sommelier-ai] getDishWineSuggestions error:", classified.type, classified.message);
-    logTiming("food-to-wine", "total", totalStartedAt, {
-      dish,
-      outcome: "fallback",
-      code: classified.code,
-      type: classified.type,
-    });
-    return {
-      suggestions: fallbackPairingsForDish(dish, userWines),
-      fallback: true,
-      fallbackReason: classified.message,
-    };
   }
 }
 

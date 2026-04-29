@@ -144,6 +144,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [aiNotes, setAiNotes] = useState("");
   const [parseErrors, setParseErrors] = useState<string[]>([]);
+  const [analysisStage, setAnalysisStage] = useState<"processing" | "extracting" | "parsing" | "normalizing">("processing");
   const [importProgress, setImportProgress] = useState(0);
   const [importErrors, setImportErrors] = useState<string[]>([]);
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
@@ -931,6 +932,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     window.addEventListener("mouseup", onUp);
   };
 
+  const yieldToBrowser = () => new Promise<void>((resolve) => {
+    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
+      resolve();
+      return;
+    }
+    window.requestAnimationFrame(() => resolve());
+  });
+
   const toggleExpandedRow = (index: number) => {
     setExpandedRows((current) => (current.includes(index) ? current.filter((row) => row !== index) : [...current, index]));
   };
@@ -942,8 +951,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const readSpreadsheetAsCsv = async (file: File) => {
     const buffer = await file.arrayBuffer();
+    await yieldToBrowser();
     const xlsxModule = await import("xlsx");
     const XLSX = xlsxModule.default || xlsxModule;
+    await yieldToBrowser();
     const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
     const sheetName = wb.SheetNames?.[0];
     if (!sheetName) return "";
@@ -954,6 +965,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const readPdfAsText = async (file: File) => {
     const buffer = await file.arrayBuffer();
+    await yieldToBrowser();
     const pdfjsModule = await import("pdfjs-dist");
     const pdfjs = pdfjsModule.default || pdfjsModule;
 
@@ -961,6 +973,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const maxPages = Math.min(doc.numPages, 12);
     const pages: string[] = [];
     for (let p = 1; p <= maxPages; p++) {
+      await yieldToBrowser();
       const page = await doc.getPage(p);
       const content = await page.getTextContent();
       const line = (content.items || [])
@@ -1642,6 +1655,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setColumnMapping({});
     setAiNotes("");
     setParseErrors([]);
+    setAnalysisStage("processing");
     setImportProgress(0);
     setImportErrors([]);
     setImportWarnings([]);
@@ -2056,6 +2070,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setStep("analyzing");
     setLoading(true);
     setImportMode("standard");
+    setAnalysisStage("processing");
+    setAiNotes("Processing file...");
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     const isPdfFile = file.type === "application/pdf" || ext === "pdf";
 
@@ -2063,6 +2079,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const isImageFile = file.type.startsWith("image/");
       if (isImageFile) {
         setImportMode("image");
+        setAnalysisStage("extracting");
         const prepared = await prepareAiAnalysisAttachment(file);
         const scanResult = await invokeEdgeFunction<any>(
           "scan-wine-label",
@@ -2070,6 +2087,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           { timeoutMs: 60_000, retries: 1 },
         );
         const winePayload = scanResult?.wine ?? scanResult?.data?.wine ?? scanResult;
+        setAnalysisStage("normalizing");
         const imported = normalizeImportedWines([winePayload].filter(Boolean));
         console.log("parsedRows", imported);
         commitImportedRows(imported, {
@@ -2084,7 +2102,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
       if (isPdfFile) {
         setImportMode("smart-pdf");
+        setAnalysisStage("processing");
+        setAiNotes("Processing file...");
+        await yieldToBrowser();
         const pdfPayload = await prepareSmartPdfImportAttachment(file);
+        setAnalysisStage("extracting");
         const smartContent = [
           `SMART PDF IMPORT MODE`,
           `FILE: ${pdfPayload.fileName || file.name}`,
@@ -2113,6 +2135,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           setParseErrors(["Detectamos um catálogo visual. Aplicando leitura inteligente (OCR)..."]);
         }
 
+        setAnalysisStage("parsing");
         const local = parseCsvLocally(smartContent);
         setImportSourceRows(local.sourceRows);
         setImportSourceHeaders(local.headers);
@@ -2125,6 +2148,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         });
 
         if (local.wines.length > 0) {
+          setAnalysisStage("normalizing");
           const normalized = normalizeImportedWines(local.wines);
           console.log("parsedRows", normalized);
           commitImportedRows(normalized, {
@@ -2149,6 +2173,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         return;
       }
 
+      setAnalysisStage("extracting");
+      setAiNotes("Extracting data...");
       const raw = await fileToCsvLikeText(file);
       if (!raw || !raw.trim()) {
         setParseErrors(["Não conseguimos ler o conteúdo do arquivo. Verifique se ele contém dados de vinhos."]);
@@ -2159,6 +2185,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const csvContent = raw.length > MAX_CLIENT_INPUT_CHARS ? raw.slice(0, MAX_CLIENT_INPUT_CHARS) : raw;
 
       // ── 1) FAST PATH: local deterministic parser for CSV/TSV/spreadsheet exports ──
+      setAnalysisStage("parsing");
       const local = parseCsvLocally(csvContent);
       setImportSourceRows(local.sourceRows);
       setImportSourceHeaders(local.headers);
@@ -2184,6 +2211,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       });
 
       if (local.wines.length > 0) {
+        setAnalysisStage("normalizing");
         const normalized = normalizeImportedWines(local.wines);
         console.log("parsedRows", normalized);
         const reviewNotes = shouldUseManualMapping
@@ -2208,6 +2236,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }
 
       if (local.sourceRows.length > 0) {
+        setAnalysisStage("normalizing");
         const fallbackRows = buildFallbackRowsFromSourceRows(local.sourceRows, local.headers);
         const normalizedFallback = normalizeImportedWines(fallbackRows);
         console.log("parsedRows", normalizedFallback);
@@ -2755,18 +2784,32 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         />
                       </div>
                       <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
-                        {importMode === "smart-pdf" ? "Detectamos um catálogo complexo" : "Sommelyx está analisando…"}
+                        {analysisStage === "processing"
+                          ? "Processing file..."
+                          : analysisStage === "extracting"
+                            ? "Extracting data..."
+                            : analysisStage === "parsing"
+                              ? "Organizing wine rows..."
+                              : "Sommelyx está analisando…"}
                       </p>
                       <p className="mt-1.5 text-xs" style={{ color: "#9CA3AF" }}>
                         {importMode === "smart-pdf"
                           ? (
                             <>
-                              Usando inteligência Sommelyx para interpretar o catálogo de <strong>{fileName}</strong>
+                              {analysisStage === "processing"
+                                ? `Preparando a leitura de ${fileName}`
+                                : analysisStage === "extracting"
+                                  ? `Extraindo texto e blocos de ${fileName}`
+                                  : `Interpretando o catálogo de ${fileName}`}
                             </>
                           )
                           : (
                             <>
-                              Identificando colunas e organizando os dados de <strong>{fileName}</strong>
+                              {analysisStage === "processing"
+                                ? `Preparando o arquivo ${fileName}`
+                                : analysisStage === "extracting"
+                                  ? `Extraindo dados de ${fileName}`
+                                  : `Identificando colunas e organizando os dados de ${fileName}`}
                             </>
                           )}
                       </p>

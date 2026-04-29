@@ -3,7 +3,7 @@ import { Sparkles, UtensilsCrossed, ChefHat, BookOpen, RotateCcw, Wine, X } from
 import { Button } from "@/components/ui/button";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { cn } from "@/lib/utils";
-import type { WineProfile, DishProfile, DishItemProfile, Recipe } from "@/lib/sommelier-ai";
+import type { Recipe } from "@/lib/sommelier-ai";
 
 /* ═══════════════════════════════════════════════
    COMPATIBILITY BADGE — Flagship visual element
@@ -114,6 +114,74 @@ export function CompatibilityBadge({ label, size = "md" }: { label?: string | nu
   );
 }
 
+export function FallbackAnalysisBadge({ size = "md" }: { size?: "sm" | "md" }) {
+  const sizeClass = size === "sm"
+    ? "text-[9px] px-2 py-0.5 gap-1"
+    : "text-[10px] px-2.5 py-1 gap-1";
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center font-bold tracking-wide rounded-full whitespace-nowrap",
+        sizeClass,
+      )}
+      style={{
+        background: "linear-gradient(135deg, rgba(198,167,104,0.14) 0%, rgba(123,30,43,0.08) 100%)",
+        color: "#7b1e2b",
+        border: "1px solid rgba(123,30,43,0.16)",
+        boxShadow: "0 0 10px rgba(123,30,43,0.06)",
+      }}
+    >
+      <Sparkles className="h-3 w-3 opacity-70" />
+      Quick analysis
+    </span>
+  );
+}
+
+export function FallbackAnalysisNotice({
+  message = "Here's a quick analysis based on available data",
+  confidence = "limited",
+  className,
+}: {
+  message?: string;
+  confidence?: "high" | "medium" | "limited";
+  className?: string;
+}) {
+  const confidenceConfig = {
+    high: {
+      label: "High confidence",
+      className: "bg-[rgba(31,122,87,0.10)] text-[hsl(152_42%_28%)] border-[rgba(31,122,87,0.14)]",
+    },
+    medium: {
+      label: "Medium confidence",
+      className: "bg-[rgba(198,167,104,0.12)] text-[#8B7730] border-[rgba(198,167,104,0.18)]",
+    },
+    limited: {
+      label: "Limited data",
+      className: "bg-[rgba(122,30,43,0.08)] text-[#7b1e2b] border-[rgba(122,30,43,0.14)]",
+    },
+  }[confidence];
+
+  return (
+    <div
+      className={cn("rounded-2xl border border-[rgba(123,30,43,0.12)] bg-primary/[0.04] p-4", className)}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-center gap-2">
+        <FallbackAnalysisBadge />
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Fallback</span>
+      </div>
+      <p className="mt-2 text-[12.5px] leading-relaxed text-foreground/70">{message}</p>
+      <div className="mt-3">
+        <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em]", confidenceConfig.className)}>
+          {confidenceConfig.label}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function MatchLevelBadge({ match, size = "md" }: { match: string; size?: "sm" | "md" | "lg" }) {
   const config = matchLevelConfig[match];
   if (!config) return null;
@@ -158,154 +226,6 @@ export function HarmonyTag({ type, label }: { type?: string | null; label?: stri
     <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] bg-primary/[0.07] text-primary/75 border border-primary/[0.08]">
       {text}
     </span>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   WINE PROFILE CHIPS — Technical characteristics
-   ═══════════════════════════════════════════════ */
-
-export function WineProfileChips({ profile }: { profile?: WineProfile | null }) {
-  if (!profile) return null;
-  const chips = [
-    profile.body && `Corpo ${profile.body}`,
-    profile.acidity && `Acidez ${profile.acidity}`,
-    profile.tannin && profile.tannin !== "n/a" && `Taninos ${profile.tannin}`,
-    profile.complexity,
-    profile.style,
-  ].filter(Boolean) as string[];
-
-  if (chips.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {chips.map((chip, i) => (
-        <span
-          key={i}
-          className={cn(
-            "inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold",
-            i === chips.length - 1 && profile.style === chip
-              ? "bg-primary/[0.07] text-primary/65 border border-primary/[0.08]"
-              : "bg-[rgba(0,0,0,0.04)] text-[#666] border border-[rgba(0,0,0,0.06)]",
-          )}
-        >
-          {chip}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   DISH PROFILE PILLS — Dish characteristics
-   ═══════════════════════════════════════════════ */
-
-export function DishProfilePills({ profile }: { profile?: DishItemProfile | null }) {
-  if (!profile) return null;
-  const pills = [profile.intensity, profile.texture, profile.highlight].filter(Boolean);
-  if (pills.length === 0) return null;
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {pills.map((pill, i) => (
-        <span key={i} className="inline-flex items-center rounded-full bg-[rgba(0,0,0,0.035)] px-2 py-0.5 text-[9px] font-semibold text-[#777] border border-[rgba(0,0,0,0.04)]">
-          {pill}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   WINE PROFILE CARD — Premium wine structure section
-   ═══════════════════════════════════════════════ */
-
-export function WineProfileCard({
-  title,
-  subtitle,
-  profile,
-  pairingLogic,
-}: {
-  title: string;
-  subtitle?: string;
-  profile?: WineProfile | null;
-  pairingLogic?: string | null;
-}) {
-  return (
-    <div
-      className="rounded-2xl p-4 sm:p-5 space-y-3"
-      style={{
-        background: "rgba(255,255,255,0.88)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        border: "1px solid rgba(255,255,255,0.25)",
-        boxShadow: "0 8px 24px -12px rgba(44,20,31,0.12), inset 0 1px 0 rgba(255,255,255,0.65)",
-      }}
-    >
-      <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <Wine className="h-4 w-4 text-primary" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[15px] font-bold text-[#1A1A1A] tracking-tight truncate">{title}</p>
-          {subtitle && <p className="text-[11px] text-[#777] truncate mt-0.5">{subtitle}</p>}
-        </div>
-      </div>
-
-      {profile?.summary && (
-        <p className="text-[12.5px] text-[#555] leading-relaxed italic pl-[46px]">{profile.summary}</p>
-      )}
-
-      {profile && <div className="pl-[46px]"><WineProfileChips profile={profile} /></div>}
-
-      {pairingLogic && (
-        <div className="rounded-xl bg-primary/[0.04] border border-primary/[0.08] p-3 ml-[46px]">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70 mb-1.5 flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3" />
-            Lógica da harmonização
-          </p>
-          <p className="text-[12px] text-[#555] leading-relaxed">{pairingLogic}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════
-   DISH PROFILE CARD — Premium dish structure section
-   ═══════════════════════════════════════════════ */
-
-export function DishProfileCard({ dish, profile }: { dish: string; profile?: DishProfile | null }) {
-  if (!profile || (!profile.protein && !profile.intensity)) return null;
-  const pills = [
-    profile.protein,
-    profile.cooking,
-    profile.fat && `gordura ${profile.fat}`,
-    profile.intensity && `intensidade ${profile.intensity}`,
-  ].filter(Boolean);
-
-  return (
-    <div
-      className="rounded-2xl p-4 space-y-2.5"
-      style={{
-        background: "rgba(255,255,255,0.86)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        border: "1px solid rgba(255,255,255,0.25)",
-        boxShadow: "0 6px 18px -10px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.65)",
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <ChefHat className="h-3.5 w-3.5 text-primary/65" />
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/70">Perfil do prato</span>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {pills.map((pill, i) => (
-          <span key={i} className="inline-flex items-center rounded-full bg-[rgba(0,0,0,0.04)] px-2.5 py-0.5 text-[10px] font-semibold text-[#666] border border-[rgba(0,0,0,0.05)]">
-            {pill}
-          </span>
-        ))}
-      </div>
-    </div>
   );
 }
 

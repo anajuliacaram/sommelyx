@@ -26,7 +26,7 @@ import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { cn } from "@/lib/utils";
-import { getWinePairings, type PairingResult } from "@/lib/sommelier-ai";
+import { generateWinePairing, type PairingResult } from "@/lib/sommelier-ai";
 import { AnimatePresence } from "framer-motion";
 const MOBILE_BREAKPOINT = 640;
 function useIsSmallScreen() {
@@ -101,21 +101,11 @@ function getPriorityTagClass() {
   return "inline-flex min-h-[24px] items-center justify-center rounded-full border border-[rgba(31,122,87,0.18)] bg-[rgba(31,122,87,0.12)] px-3 py-1.5 text-[11px] font-medium leading-none tracking-[-0.01em] text-[hsl(152_42%_28%)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]";
 }
 
-type SmartCellarStatusKey = "ready" | "soon" | "hold" | "past" | "pronto";
-
-type SmartCellarStatus = {
-  key: SmartCellarStatusKey;
-  label: string;
-  badgeClass: string;
-  hint: string;
-};
-
 type CardAiState = {
   open: boolean;
   loading: boolean;
   error: string | null;
   source: "ai" | "fallback" | null;
-  pairingLogic: string | null;
   pairings: PairingResult[];
 };
 
@@ -128,145 +118,6 @@ function getStyleFamily(style?: string | null) {
   if (s.includes("fortif")) return "fortificado";
   return "neutro";
 }
-
-function getSmartCellarStatus(wine: Pick<WineType, "drink_from" | "drink_until" | "vintage" | "style">): SmartCellarStatus {
-  const styleFamily = getStyleFamily(wine.style);
-  const age = wine.vintage ? currentYear - wine.vintage : null;
-
-  if (!wine.vintage && !wine.drink_from && !wine.drink_until) {
-    return {
-      key: "pronto",
-      label: "Pronto",
-      badgeClass: "bg-green-100 text-green-800 border-green-200",
-      hint: "Momento ideal para abrir.",
-    };
-  }
-
-  if (wine.drink_from || wine.drink_until) {
-    if (wine.drink_until && currentYear > wine.drink_until) {
-      return {
-        key: "past",
-        label: "Pode ter perdido seu auge",
-        badgeClass: "bg-neutral-100 text-neutral-600 border-neutral-200",
-        hint: "Talvez tenha passado do ponto ideal.",
-      };
-    }
-    if (wine.drink_from && currentYear < wine.drink_from) {
-      return {
-        key: "hold",
-        label: "Guardar",
-        badgeClass: "bg-blue-50 text-blue-700 border-blue-100",
-        hint: "Ainda pede um pouco de guarda.",
-      };
-    }
-    if (wine.drink_until && wine.drink_until - currentYear <= 1) {
-      return {
-        key: "soon",
-        label: "Beber em breve",
-        badgeClass: "bg-amber-50 text-amber-700 border-amber-100",
-        hint: "Melhor abrir em breve.",
-      };
-    }
-    return {
-      key: "ready",
-      label: "Beber agora",
-      badgeClass: "bg-green-100 text-green-800 border-green-200",
-      hint: "Janela ideal de consumo.",
-    };
-  }
-
-  if (age == null) {
-    return {
-      key: "pronto",
-      label: "Pronto",
-      badgeClass: "bg-neutral-100 text-neutral-600 border-neutral-200",
-      hint: "Sem safra suficiente para estimativa.",
-    };
-  }
-
-  const thresholds: Record<string, { hold: number; ready: number; soon: number }> = {
-    tinto: { hold: 2, ready: 8, soon: 12 },
-    branco: { hold: 1, ready: 4, soon: 6 },
-    espumante: { hold: 1, ready: 3, soon: 5 },
-    rosé: { hold: 1, ready: 3, soon: 4 },
-    fortificado: { hold: 3, ready: 12, soon: 18 },
-    neutro: { hold: 2, ready: 6, soon: 9 },
-  };
-  const limits = thresholds[styleFamily];
-
-  if (age < limits.hold) {
-    return {
-      key: "hold",
-      label: "Guardar",
-      badgeClass: "bg-blue-50 text-blue-700 border-blue-100",
-      hint: "Ainda tende a ganhar com guarda.",
-    };
-  }
-  if (age <= limits.ready) {
-    return {
-      key: "ready",
-      label: "Beber agora",
-      badgeClass: "bg-green-100 text-green-800 border-green-200",
-      hint: "Momento ideal para abrir.",
-    };
-  }
-  if (age <= limits.soon) {
-    return {
-      key: "soon",
-      label: "Beber em breve",
-      badgeClass: "bg-amber-50 text-amber-700 border-amber-100",
-      hint: "Começa a pedir atenção.",
-    };
-  }
-  return {
-    key: "past",
-    label: "Pode ter perdido seu auge",
-    badgeClass: "bg-neutral-100 text-neutral-600 border-neutral-200",
-    hint: "Talvez tenha passado do ponto ideal.",
-  };
-}
-
-function buildLocalCellarInsight(wine: Pick<WineType, "style" | "grape" | "region" | "country" | "vintage" | "drink_from" | "drink_until">, status: SmartCellarStatus) {
-  const family = getStyleFamily(wine.style);
-  const age = wine.vintage ? currentYear - wine.vintage : null;
-  const region = wine.region || wine.country;
-
-  if (status.key === "past") {
-    if (family === "tinto") return "Pode ter perdido seu auge: funciona melhor com carnes braseadas, cogumelos e molhos reduzidos.";
-    if (family === "branco") return "Pode ter perdido seu auge: fica mais confortável com pratos cremosos, delicados e pouco agressivos.";
-    if (family === "espumante") return "Pode ter perdido seu auge: ainda pode acompanhar frituras, sal e entradas crocantes com alguma elegância.";
-    return "Pode ter perdido seu auge: prefira pratos de maior intensidade e textura para equilibrar a evolução.";
-  }
-
-  if (status.key === "soon") {
-    if (family === "tinto") return "Beber em breve: carnes grelhadas, cogumelos e ragu mantêm o vinho em boa companhia.";
-    if (family === "branco") return "Beber em breve: combina especialmente com pratos de textura média, como massas leves, aves grelhadas e preparações com molho branco.";
-    if (family === "espumante") return "Beber em breve: petiscos salinos, ostras e entradas crocantes preservam a energia do vinho.";
-    return "Beber em breve: pratos equilibrados e de textura macia ajudam a mostrar seu melhor lado.";
-  }
-
-  if (status.key === "hold") {
-    if (family === "tinto") return "Guardar: ainda pode ganhar profundidade, especialmente se for acompanhado por pratos de textura mais suave.";
-    if (family === "branco") return "Guardar: ainda está jovem, então prefira pratos frescos, ácidos e pouco gordurosos.";
-    if (family === "espumante") return "Guardar: vale mais tempo de garrafa, ou serviço em contexto leve e frio.";
-    return "Guardar: ainda está em construção; dê tempo ou acompanhe com pratos discretos.";
-  }
-
-  if (family === "tinto") {
-    return `Momento ideal para abrir: carnes, cogumelos ou ragu${region ? ` ajudam a traduzir melhor a ${region}` : ""}.`;
-  }
-  if (family === "branco") {
-    return `Momento ideal para abrir: peixe, aves e massas leves${region ? `, especialmente se vier de ${region}` : ""}.`;
-  }
-  if (family === "espumante") {
-    return `Momento ideal para abrir: frituras, ostras e petiscos salgados${age != null ? `, mantendo frescor mesmo com ${age} anos` : ""}.`;
-  }
-  if (family === "rosé") {
-    return `Momento ideal para abrir: saladas, frango e pratos mediterrâneos${region ? `, com eco de ${region}` : ""}.`;
-  }
-  return "Momento ideal para abrir com pratos de textura média e acidez equilibrada.";
-}
-
 function buildFallbackPairings(wine: WineType): PairingResult[] {
   const family = getStyleFamily(wine.style);
   const familyMap: Record<string, Array<{ dish: string; reason: string; label: string }>> = {
@@ -784,7 +635,6 @@ export default function CellarPage() {
     loading: false,
     error: null,
     source: null,
-    pairingLogic: null,
     pairings: [],
   };
 
@@ -811,15 +661,24 @@ export default function CellarPage() {
     if (current.pairings.length > 0) return;
 
     try {
-      const result = await getWinePairings({
-        name: wine.name,
-        style: wine.style,
-        grape: wine.grape,
-        region: wine.region,
-        producer: wine.producer,
-        vintage: wine.vintage,
-        country: wine.country,
+      const result = await generateWinePairing({
+        wineName: wine.name,
+        wineStyle: wine.style,
+        wineGrape: wine.grape,
+        wineRegion: wine.region,
+        wineProducer: wine.producer,
+        wineVintage: wine.vintage,
+        wineCountry: wine.country,
       });
+
+      const pairings = (result.pairings || []).slice(0, 5).map((pairing) => ({
+        dish: pairing.wine,
+        reason: pairing.why_it_works,
+        match: "bom" as const,
+        harmony_type: "equilíbrio" as const,
+        harmony_label: pairing.extra_tip,
+        category: "classico" as const,
+      }));
 
       setCardAiStates((prev) => ({
         ...prev,
@@ -828,8 +687,7 @@ export default function CellarPage() {
           loading: false,
           error: null,
           source: result.fallback ? "fallback" : "ai",
-          pairingLogic: result.pairingLogic || buildLocalCellarInsight(wine, getSmartCellarStatus(wine)),
-          pairings: (result.pairings || []).slice(0, 5),
+          pairings,
         },
       }));
     } catch (error) {
@@ -841,7 +699,6 @@ export default function CellarPage() {
           loading: false,
           error: error instanceof Error ? error.message : "Não foi possível carregar sugestões agora.",
           source: "fallback",
-          pairingLogic: buildLocalCellarInsight(wine, getSmartCellarStatus(wine)),
           pairings: fallbackPairings,
         },
       }));

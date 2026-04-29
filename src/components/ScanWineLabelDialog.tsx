@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib/ai-attachments";
+import { FallbackAnalysisBadge, FallbackAnalysisNotice } from "@/components/pairing/shared";
 
 interface ScannedWineData {
   name: string | null;
@@ -42,6 +43,8 @@ interface ScannedWineData {
   labelImagePreview?: string | null;
   labelImageFile?: File | null;
   labelImageBase64?: string | null;
+  fallback?: boolean;
+  fallbackReason?: string | null;
 }
 
 interface ScanWineLabelDialogProps {
@@ -239,6 +242,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
         sourceType: prepared.sourceType,
+        wasOptimized: prepared.wasOptimized || false,
+        originalMimeType: prepared.originalMimeType || null,
         imageBase64Length: prepared.imageBase64?.length || 0,
         estimatedPayloadBytes: prepared.imageBase64 ? Math.round((prepared.imageBase64.length * 3) / 4) : 0,
       });
@@ -248,6 +253,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       }
       setImagePreview(prepared.previewUrl || previewUrl);
       setLastBase64(prepared.imageBase64 || null);
+      if (prepared.wasOptimized) {
+        notifySuccess("Imagem otimizada automaticamente", {
+          description: "A foto foi convertida para JPEG antes do envio.",
+          duration: 1800,
+        });
+      }
       if (!prepared.imageBase64) {
         throw Object.assign(new Error("Não foi possível preparar a imagem."), { code: "IMAGE_PROCESSING_FAILED" });
       }
@@ -404,7 +415,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={cameraInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif"
                 capture="environment"
                 className="hidden"
                 onChange={handleSelectedFile}
@@ -412,7 +423,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif"
                 className="hidden"
                 onChange={handleSelectedFile}
               />
@@ -464,6 +475,16 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 </div>
                 <p className="text-xs font-medium text-success">Rótulo identificado com sucesso</p>
               </div>
+
+              {scannedData.fallback && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <FallbackAnalysisBadge size="sm" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Leitura simplificada</span>
+                  </div>
+                  <FallbackAnalysisNotice />
+                </div>
+              )}
 
               <div className="glass-card p-4 space-y-3">
                 {scannedData.name && (

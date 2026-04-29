@@ -16,6 +16,8 @@ import {
   PairingLoadingState,
   PairingErrorState,
   SectionHeader,
+  FallbackAnalysisBadge,
+  FallbackAnalysisNotice,
 } from "@/components/pairing/shared";
 
 interface WineListScannerDialogProps {
@@ -545,6 +547,16 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
                 </Button>
               </div>
+
+              {results.fallback && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <FallbackAnalysisBadge />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Leitura simplificada</span>
+                  </div>
+                  <FallbackAnalysisNotice />
+                </div>
+              )}
 
               {/* Filter pills */}
               {availableTypes.length > 1 && (

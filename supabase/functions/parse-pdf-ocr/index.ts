@@ -19,6 +19,36 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+async function logAudit(
+  userId: string,
+  statusCode: number,
+  outcome: string,
+  durationMs: number,
+  metadata?: Record<string, unknown>,
+) {
+  if (!userId || userId === "anonymous") return;
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) return;
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    await adminClient.from("edge_function_logs").insert({
+      user_id: userId,
+      function_name: FUNCTION_NAME,
+      status_code: statusCode,
+      outcome,
+      duration_ms: durationMs,
+      metadata: metadata || {},
+    });
+  } catch (error) {
+    console.error(`[${FUNCTION_NAME}] audit_log_failed`, error instanceof Error ? error.message : String(error));
+  }
+}
+
+function trace(stage: string, metadata?: Record<string, unknown>) {
+  console.info(`[AI_PIPELINE] step: ${stage}`, metadata || {});
+}
+
 function normalizeText(text: string) {
   return text
     .replace(/\r/g, "\n")
@@ -91,8 +121,13 @@ serve(async (req) => {
   const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const requestId = crypto.randomUUID();
+  const startedAt = Date.now();
+  let userId = "anonymous";
+
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
+    await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "missing_authorization" });
     return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
   }
 
@@ -112,11 +147,13 @@ serve(async (req) => {
 
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
+    await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "invalid_token" });
     return jsonResponse({ error: "AUTH_INVALID" }, 401);
   }
 
-  const requestId = crypto.randomUUID();
-  const startedAt = Date.now();
+  userId = user.id;
+  trace("auth_ok", { request_id: requestId, user_id: userId });
+  await logAudit(userId, 200, "auth_ok", 0, { request_id: requestId });
   try {
     const body = await req.json().catch(() => ({}));
     const pdfBase64Raw = String(body?.pdfBase64 || body?.base64Pdf || "").trim();
@@ -129,13 +166,27 @@ serve(async (req) => {
 
     const validation = validatePdfPayload(pdfBase64Raw, mimeType, { maxBytes: MAX_PDF_BYTES });
     if (!validation.ok) {
+      await logAudit(userId, 400, "invalid_input", Date.now() - startedAt, {
+        request_id: requestId,
+        fileName,
+        reason: validation.reason,
+        input_size_bytes: bytesFromBase64(pdfBase64Raw).length,
+      });
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
     const bytes = bytesFromBase64(validation.base64);
-    console.log(`[${FUNCTION_NAME}] file=${fileName} mime=${mimeType} bytes=${bytes.length}`);
+    trace("input_validated", { request_id: requestId, fileName, mimeType, input_size_bytes: bytes.length });
     const pageCount = detectPdfPageCount(bytes);
+    trace("pages_processed", { request_id: requestId, fileName, pages_processed: typeof pageCount === "number" ? pageCount : null });
     if (typeof pageCount === "number" && pageCount > MAX_PDF_PAGES) {
+      await logAudit(userId, 400, "invalid_input", Date.now() - startedAt, {
+        request_id: requestId,
+        fileName,
+        reason: "too_many_pages",
+        pages_processed: pageCount,
+        input_size_bytes: bytes.length,
+      });
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
@@ -152,15 +203,31 @@ serve(async (req) => {
       textLength: number;
     }>(FUNCTION_NAME, cacheInput, { userId: user.id });
     if (cached.hit && cached.payload) {
-      console.info(`[${FUNCTION_NAME}] cache_hit request_id=${requestId} input_hash=${cached.inputHash}`);
+      trace("cache_hit", { request_id: requestId, input_hash: cached.inputHash, fileName });
+      await logAudit(userId, 200, "cache_hit", Date.now() - startedAt, {
+        request_id: requestId,
+        fileName,
+        input_size_bytes: bytes.length,
+        pages_processed: typeof pageCount === "number" ? pageCount : null,
+        cached: true,
+      });
       return jsonResponse({
         ...cached.payload,
       });
     }
-    console.info(`[${FUNCTION_NAME}] cache_miss request_id=${requestId} input_hash=${cached.inputHash} degraded=${cached.degraded}`);
+    trace("cache_miss", { request_id: requestId, input_hash: cached.inputHash, degraded: cached.degraded, fileName });
 
     const rateLimit = await checkRateLimit(user.id, FUNCTION_NAME);
     if (!rateLimit.allowed) {
+      await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startedAt, {
+        request_id: requestId,
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
+        input_size_bytes: bytes.length,
+        pages_processed: typeof pageCount === "number" ? pageCount : null,
+      });
       return jsonResponse({
         success: false,
         code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
@@ -173,19 +240,49 @@ serve(async (req) => {
     const deadlineAt = Date.now() + PROCESSING_TIMEOUT_MS;
     let finalText = "";
     try {
+      trace("parse_started", { request_id: requestId, fileName, input_size_bytes: bytes.length, pages_processed: typeof pageCount === "number" ? pageCount : null });
       finalText = extractTextFromPdfBytes(bytes, deadlineAt);
     } catch (error) {
       if (error instanceof Error && error.message === "PDF_TIMEOUT") {
+        trace("parse_failed", { request_id: requestId, fileName, reason: "timeout" });
+        await logAudit(userId, 408, "fallback_used", Date.now() - startedAt, {
+          request_id: requestId,
+          fileName,
+          step_failed: "timeout",
+          input_size_bytes: bytes.length,
+          pages_processed: typeof pageCount === "number" ? pageCount : null,
+        });
         return jsonResponse({ success: false, code: "TIMEOUT", message: "Tempo excedido" }, 408);
       }
+      trace("parse_failed", { request_id: requestId, fileName, reason: error instanceof Error ? error.message : String(error) });
       throw error;
     }
-    console.log("FINAL_TEXT_LENGTH:", finalText.length);
-    console.log(`[${FUNCTION_NAME}] duration_ms=${Date.now() - startedAt}`);
-
     if (!finalText || finalText.length < 20) {
+      trace("fallback_used", { request_id: requestId, fileName, reason: "empty_extraction" });
+      await logAudit(userId, 400, "fallback_used", Date.now() - startedAt, {
+        request_id: requestId,
+        fileName,
+        step_failed: "empty_extraction",
+        input_size_bytes: bytes.length,
+        pages_processed: typeof pageCount === "number" ? pageCount : null,
+      });
       return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
+
+    trace("parse_success", {
+      request_id: requestId,
+      fileName,
+      textLength: finalText.length,
+      input_size_bytes: bytes.length,
+      pages_processed: typeof pageCount === "number" ? pageCount : null,
+    });
+    await logAudit(userId, 200, "parse_success", Date.now() - startedAt, {
+      request_id: requestId,
+      fileName,
+      input_size_bytes: bytes.length,
+      pages_processed: typeof pageCount === "number" ? pageCount : null,
+      text_length: finalText.length,
+    });
 
     await setCachedAiResponse(FUNCTION_NAME, cacheInput, {
       text: finalText,
@@ -204,6 +301,16 @@ serve(async (req) => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Falha ao processar PDF.";
+    trace("fallback_used", {
+      request_id: requestId,
+      reason: "internal_error",
+      message: String(message).slice(0, 200),
+    });
+    await logAudit(userId, 500, "fallback_used", Date.now() - startedAt, {
+      request_id: requestId,
+      step_failed: "internal_error",
+      error_code: "PDF_PARSE_FAILED",
+    });
     console.error(`[${FUNCTION_NAME}] error:`, message);
     const lower = message.toLowerCase();
     const code = lower.includes("invalid") || lower.includes("base64") ? "INVALID_INPUT" : "PDF_PARSE_FAILED";
