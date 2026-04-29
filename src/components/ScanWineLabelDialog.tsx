@@ -24,6 +24,21 @@ interface ScannedWineData {
   drink_until: number | null;
   purchase_price: number | null;
   cellar_location: string | null;
+  confidence?: {
+    name?: number;
+    producer?: number;
+    vintage?: number;
+    style?: number;
+    country?: number;
+    region?: number;
+    grape?: number;
+    food_pairing?: number;
+    tasting_notes?: number;
+    cellar_location?: number;
+    purchase_price?: number;
+    drink_from?: number;
+    drink_until?: number;
+  } | null;
   labelImagePreview?: string | null;
   labelImageFile?: File | null;
   labelImageBase64?: string | null;

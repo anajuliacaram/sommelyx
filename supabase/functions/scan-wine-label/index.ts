@@ -145,6 +145,138 @@ function normalizeStyle(value: unknown) {
   return v;
 }
 
+function normalizeCountry(value: unknown) {
+  const v = typeof value === "string" ? value.trim() : "";
+  if (!v) return null;
+  const lower = normalizeForMatch(v);
+  if (/(brasil|brazil)/.test(lower)) return "Brasil";
+  if (/(argentina)/.test(lower)) return "Argentina";
+  if (/(chile)/.test(lower)) return "Chile";
+  if (/(franca|france)/.test(lower)) return "França";
+  if (/(italia|italy)/.test(lower)) return "Itália";
+  if (/(portugal)/.test(lower)) return "Portugal";
+  if (/(espanha|spain)/.test(lower)) return "Espanha";
+  if (/(uruguai|uruguay)/.test(lower)) return "Uruguai";
+  if (/(australia|austrália)/.test(lower)) return "Austrália";
+  if (/(nova zelandia|new zealand)/.test(lower)) return "Nova Zelândia";
+  if (/(eua|usa|estados unidos|united states)/.test(lower)) return "EUA";
+  if (/(alemanha|germany)/.test(lower)) return "Alemanha";
+  if (/(africa do sul|south africa)/.test(lower)) return "África do Sul";
+  if (v.length <= 3 && !/[a-z]/i.test(v)) return null;
+  return v;
+}
+
+const COUNTRY_BY_PRODUCER: Array<{ pattern: RegExp; country: string }> = [
+  { pattern: /casa valduga/i, country: "Brasil" },
+  { pattern: /miolo/i, country: "Brasil" },
+  { pattern: /salton/i, country: "Brasil" },
+  { pattern: /luiz argenta/i, country: "Brasil" },
+  { pattern: /catena zapata/i, country: "Argentina" },
+  { pattern: /rutini/i, country: "Argentina" },
+  { pattern: /zuccardi/i, country: "Argentina" },
+  { pattern: /concha y toro/i, country: "Chile" },
+  { pattern: /montes/i, country: "Chile" },
+  { pattern: /santa rita/i, country: "Chile" },
+  { pattern: /cloudy bay/i, country: "Nova Zelândia" },
+  { pattern: /villa maria/i, country: "Nova Zelândia" },
+  { pattern: /antinori/i, country: "Itália" },
+  { pattern: /gaja/i, country: "Itália" },
+  { pattern: /ruffino/i, country: "Itália" },
+  { pattern: /chateau|château/i, country: "França" },
+  { pattern: /baron philippe/i, country: "França" },
+  { pattern: /domaine/i, country: "França" },
+  { pattern: /vega sicilia/i, country: "Espanha" },
+  { pattern: /marques de riscal/i, country: "Espanha" },
+];
+
+function inferCountryFromProducer(producer?: string | null) {
+  const normalized = normalizeForMatch(producer);
+  if (!normalized) return null;
+  for (const entry of COUNTRY_BY_PRODUCER) {
+    if (entry.pattern.test(normalized) || entry.pattern.test(producer || "")) {
+      return entry.country;
+    }
+  }
+  return null;
+}
+
+function normalizeGrape(value: unknown) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return null;
+  const lower = normalizeForMatch(raw);
+  if (!lower) return null;
+  if (/(blend|corte|assemblage|field blend|coupage)/.test(lower)) return "Blend";
+  const splitTokens = raw
+    .split(/[,&/+]| e | and | com /i)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part) => part.length > 2);
+  if (splitTokens.length > 1) return "Blend";
+
+  const knownSingleVarietals = [
+    "cabernet sauvignon",
+    "cabernet franc",
+    "merlot",
+    "malbec",
+    "pinot noir",
+    "syrah",
+    "shiraz",
+    "tannat",
+    "tempranillo",
+    "sangiovese",
+    "nebbiolo",
+    "chardonnay",
+    "sauvignon blanc",
+    "riesling",
+    "pinot grigio",
+    "pinot gris",
+    "alvarinho",
+    "albariño",
+    "moscato",
+    "moscato",
+    "viognier",
+    "chenin blanc",
+    "verdejo",
+    "assyrtiko",
+  ];
+  const found = knownSingleVarietals.find((varietal) => lower.includes(varietal));
+  if (!found) return null;
+  const explicitSingleMarkers = /(100%|100 pct|100 por cento|monovarietal|single varietal|varietal único|varietal unico)/.test(lower);
+  if (explicitSingleMarkers) {
+    return toTitleCase(found);
+  }
+  if (normalizeForMatch(raw) === found) {
+    return toTitleCase(found);
+  }
+  if (splitTokens.length === 1 && normalizeForMatch(splitTokens[0]).includes(found)) {
+    return toTitleCase(found);
+  }
+  return null;
+}
+
+function grapeConfidence(rawGrape: unknown, normalizedGrape: string | null) {
+  const raw = typeof rawGrape === "string" ? rawGrape.trim() : "";
+  if (!raw || !normalizedGrape) return 0;
+  const lower = normalizeForMatch(raw);
+  const normalizedLower = normalizeForMatch(normalizedGrape);
+  const hasBlendSignal = /(blend|corte|assemblage|field blend|coupage)/.test(lower) || /[,/&+]|\be\b|\band\b|\bcom\b/i.test(raw);
+  const explicitSingleMarkers = /(100%|100 pct|100 por cento|monovarietal|single varietal|varietal único|varietal unico)/.test(lower);
+
+  if (normalizedGrape === "Blend") {
+    return confidenceBucket(hasBlendSignal ? 0.85 : 0.78);
+  }
+
+  if (explicitSingleMarkers || lower === normalizedLower) {
+    return confidenceBucket(0.92);
+  }
+
+  if (!hasBlendSignal && lower.includes(normalizedLower)) {
+    return confidenceBucket(0.69);
+  }
+
+  return 0;
+}
+
 function normalizeNumber(value: unknown) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
@@ -153,6 +285,14 @@ function normalizeNumber(value: unknown) {
     if (Number.isFinite(parsed)) return parsed;
   }
   return null;
+}
+
+function toTitleCase(value: string) {
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
 }
 
 function normalizeForMatch(value: unknown) {
@@ -233,6 +373,20 @@ function countWineAnchors(wine: Record<string, unknown>) {
   ].filter(Boolean).length;
 
   return { strongAnchors, weakAnchors };
+}
+
+function confidenceBucket(value: number) {
+  return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
+}
+
+function fieldConfidenceForString(value?: string | null, explicit = false) {
+  if (!value || !value.trim()) return 0;
+  return confidenceBucket(explicit ? 0.92 : 0.78);
+}
+
+function fieldConfidenceForNullable(value?: unknown, confidence = 0.8) {
+  if (value == null || value === "") return 0;
+  return confidenceBucket(confidence);
 }
 
 async function logAudit(
@@ -462,6 +616,7 @@ serve(async (req) => {
       `- Se o país NÃO está escrito no rótulo, retorne country como null. NÃO tente adivinhar baseado no nome do vinho ou produtor.\n` +
       `- Se a região NÃO está escrita no rótulo, retorne region como null. NÃO tente adivinhar.\n` +
       `- Se a uva NÃO está escrita no rótulo, retorne grape como null. NÃO associe "Malbec" automaticamente a "Mendoza" por exemplo.\n` +
+      `- Se mais de uma uva aparecer no rótulo, retorne grape como "Blend".\n` +
       `- Se a safra NÃO está escrita no rótulo, retorne vintage como null.\n` +
       `- Cada campo deve conter SOMENTE o que está literalmente visível na imagem.\n` +
       `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado. Deduza APENAS pela cor visível da garrafa/líquido ou se estiver escrito.\n` +
@@ -624,20 +779,50 @@ serve(async (req) => {
       parsed_fields: Object.keys(wine),
     });
 
+    const rawName = typeof wine.name === "string" ? wine.name.trim() : null;
+    const rawProducer = typeof wine.producer === "string" ? wine.producer.trim() : null;
+    const rawCountry = typeof wine.country === "string" ? wine.country.trim() : null;
+    const rawRegion = typeof wine.region === "string" ? wine.region.trim() : null;
+    const rawGrape = typeof wine.grape === "string" ? wine.grape.trim() : null;
+    const canonicalCountry = normalizeCountry(rawCountry) || inferCountryFromProducer(rawProducer);
+    const normalizedRegion = rawRegion && !isAbsurdRegionValue(rawRegion) ? rawRegion : null;
+    const normalizedGrape = normalizeGrape(rawGrape);
+    const hasExplicitCountry = Boolean(rawCountry && normalizeCountry(rawCountry));
+    const hasMappedCountry = Boolean(!hasExplicitCountry && canonicalCountry && rawProducer);
+    const countryConfidence = hasExplicitCountry ? 0.92 : hasMappedCountry ? 0.82 : 0;
+    const regionConfidence = normalizedRegion ? 0.82 : 0;
+    const grapeFieldConfidence = grapeConfidence(rawGrape, normalizedGrape);
+
     const normalizedWine = {
-      name: typeof wine.name === "string" ? wine.name.trim() : null,
-      producer: typeof wine.producer === "string" ? wine.producer.trim() : null,
+      name: rawName,
+      producer: rawProducer,
       vintage: normalizeNumber(wine.vintage),
       style: normalizeStyle(wine.style),
-      country: typeof wine.country === "string" ? wine.country.trim() : null,
-      region: typeof wine.region === "string" ? wine.region.trim() : null,
-      grape: typeof wine.grape === "string" ? wine.grape.trim() : null,
+      country: countryConfidence >= 0.7 ? canonicalCountry ?? null : null,
+      region: regionConfidence >= 0.7 ? normalizedRegion : null,
+      grape: grapeFieldConfidence >= 0.7 ? normalizedGrape : null,
       food_pairing: typeof wine.food_pairing === "string" ? wine.food_pairing.trim() : null,
       tasting_notes: typeof wine.tasting_notes === "string" ? wine.tasting_notes.trim() : null,
       cellar_location: typeof wine.cellar_location === "string" ? wine.cellar_location.trim() : null,
       purchase_price: normalizeNumber(wine.purchase_price),
       drink_from: normalizeNumber(wine.drink_from),
       drink_until: normalizeNumber(wine.drink_until),
+    };
+
+    const fieldConfidence = {
+      name: fieldConfidenceForString(normalizedWine.name, true),
+      producer: fieldConfidenceForString(normalizedWine.producer, true),
+      vintage: fieldConfidenceForNullable(normalizedWine.vintage, 0.85),
+      style: fieldConfidenceForNullable(normalizedWine.style, 0.82),
+      country: countryConfidence,
+      region: regionConfidence,
+      grape: grapeFieldConfidence,
+      food_pairing: fieldConfidenceForNullable(normalizedWine.food_pairing, 0.72),
+      tasting_notes: fieldConfidenceForNullable(normalizedWine.tasting_notes, 0.72),
+      cellar_location: fieldConfidenceForNullable(normalizedWine.cellar_location, 0.65),
+      purchase_price: fieldConfidenceForNullable(normalizedWine.purchase_price, 0.7),
+      drink_from: fieldConfidenceForNullable(normalizedWine.drink_from, 0.7),
+      drink_until: fieldConfidenceForNullable(normalizedWine.drink_until, 0.7),
     };
 
     const suspiciousName = hasArtifactToken(normalizedWine.name);
@@ -684,7 +869,7 @@ serve(async (req) => {
       region_explicitly_invalid: regionExplicitlyInvalid,
     });
 
-    return ok({ wine: normalizedWine }, requestId);
+    return ok({ wine: normalizedWine, confidence: fieldConfidence }, requestId);
   } catch (error) {
     const durationMs = Date.now() - startTime;
     const errMsg = error instanceof Error ? error.message : "unknown";

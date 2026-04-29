@@ -49,6 +49,7 @@ type ScanSuggestionInput = {
   labelImagePreview?: string | null;
   labelImageFile?: File | null;
   labelImageBase64?: string | null;
+  confidence?: Record<string, number | null | undefined> | null;
 };
 
 function normalizeSuggestionText(value?: string | null) {
@@ -158,6 +159,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [labelImagePreview, setLabelImagePreview] = useState<string | null>(null);
   const [labelImageFile, setLabelImageFile] = useState<File | null>(null);
   const [labelImageBase64, setLabelImageBase64] = useState<string | null>(null);
+  const [aiPrefilledFields, setAiPrefilledFields] = useState<Record<string, boolean>>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -260,24 +262,32 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setLabelImagePreview(null); setLabelImageFile(null); setLabelImageBase64(null); setNoPriceInfo(false);
     setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
+    setAiPrefilledFields({});
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
 
   const handleScanComplete = (data: any) => {
     const normalized = normalizeWineData(data, { log: true });
-    if (normalized.name) setName(normalized.name);
-    if (normalized.producer) setProducer(normalized.producer);
-    if (normalized.vintage) setVintage(String(normalized.vintage));
-    if (normalized.style) setStyle(normalized.style);
-    if (normalized.country) setCountry(normalized.country);
-    if (normalized.region) setRegion(normalized.region);
-    if (normalized.grape) setGrape(normalized.grape);
-    if (normalized.food_pairing) setFoodPairing(normalized.food_pairing);
-    if (normalized.tasting_notes) setNotes(normalized.tasting_notes);
-    if (normalized.drink_from) setDrinkFrom(String(normalized.drink_from));
-    if (normalized.drink_until) setDrinkUntil(String(normalized.drink_until));
-    if (normalized.purchase_price) setLastPaid(String(normalized.purchase_price));
+    const confidence = (data?.confidence || {}) as Record<string, number | null | undefined>;
+    const shouldPrefill = (key: string, fallback = 0) => {
+      const value = confidence[key];
+      const resolved = typeof value === "number" ? value : fallback;
+      return resolved >= 0.7;
+    };
+    const nextPrefilled: Record<string, boolean> = {};
+    if (normalized.name && shouldPrefill("name")) { setName(normalized.name); nextPrefilled.name = true; }
+    if (normalized.producer && shouldPrefill("producer")) { setProducer(normalized.producer); nextPrefilled.producer = true; }
+    if (normalized.vintage && shouldPrefill("vintage")) { setVintage(String(normalized.vintage)); nextPrefilled.vintage = true; }
+    if (normalized.style && shouldPrefill("style")) { setStyle(normalized.style); nextPrefilled.style = true; }
+    if (normalized.country && shouldPrefill("country")) { setCountry(normalized.country); nextPrefilled.country = true; }
+    if (normalized.region && shouldPrefill("region")) { setRegion(normalized.region); nextPrefilled.region = true; }
+    if (normalized.grape && shouldPrefill("grape")) { setGrape(normalized.grape); nextPrefilled.grape = true; }
+    if (normalized.food_pairing && shouldPrefill("food_pairing")) { setFoodPairing(normalized.food_pairing); nextPrefilled.food_pairing = true; }
+    if (normalized.tasting_notes && shouldPrefill("tasting_notes")) { setNotes(normalized.tasting_notes); nextPrefilled.tasting_notes = true; }
+    if (normalized.drink_from && shouldPrefill("drink_from")) { setDrinkFrom(String(normalized.drink_from)); nextPrefilled.drink_from = true; }
+    if (normalized.drink_until && shouldPrefill("drink_until")) { setDrinkUntil(String(normalized.drink_until)); nextPrefilled.drink_until = true; }
+    if (normalized.purchase_price && shouldPrefill("purchase_price")) { setLastPaid(String(normalized.purchase_price)); nextPrefilled.purchase_price = true; }
     if (normalized.current_value) {
       setCurrentValue(String(normalized.current_value));
       setCurrentValueTouched(false);
@@ -290,6 +300,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (normalized.labelImageFile) setLabelImageFile(normalized.labelImageFile);
     if (normalized.labelImageBase64) setLabelImageBase64(String(normalized.labelImageBase64));
     if (!normalized.purchase_price && !isCommercial) setNoPriceInfo(true);
+    setAiPrefilledFields(nextPrefilled);
 
     // Only set drink window if AI returned them from the label
     // Do NOT use heuristic fallbacks — better to leave blank than fill wrong data
@@ -302,6 +313,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     }
     toast({ title: isCommercial ? "Dados do vinho preenchidos!" : "🍷 Dados do rótulo preenchidos!" });
   };
+
+  const aiFieldStyle = (field: string) => aiPrefilledFields[field]
+    ? {
+        backgroundColor: "rgba(111,127,91,0.06)",
+        borderColor: "rgba(111,127,91,0.28)",
+        boxShadow: "0 0 0 1px rgba(111,127,91,0.12)",
+      }
+    : undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -571,6 +590,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         placeholder="Ex: Malbec Reserva"
                         required
                         className="input-premium"
+                        style={aiFieldStyle("name")}
                       />
                     </div>
                     <div>
@@ -581,6 +601,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                         onChange={e => setProducer(e.target.value)}
                         placeholder="Ex: Catena Zapata"
                         className="input-premium"
+                        style={aiFieldStyle("producer")}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -604,13 +625,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           onChange={e => setVintage(e.target.value)}
                           placeholder="2020"
                         className="input-premium"
+                        style={aiFieldStyle("vintage")}
                         />
                       </div>
                     </div>
                     <div>
                       <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Estilo</label>
                       <Select value={style} onValueChange={setStyle}>
-                        <SelectTrigger className="input-premium" style={{ color: style ? '#1F1F1F' : '#9A9A9A' }}>
+                        <SelectTrigger className="input-premium" style={{ color: style ? '#1F1F1F' : '#9A9A9A', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
                           <SelectValue placeholder="Selecionar estilo..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border bg-white shadow-lg" style={{ borderColor: '#E5E2DC' }}>
@@ -659,6 +681,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                             onChange={e => setLastPaid(e.target.value)}
                             placeholder="0,00"
                             className="input-premium"
+                            style={aiFieldStyle("purchase_price")}
                           />
                         </div>
                         <div>
@@ -706,16 +729,16 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>País</label>
-                          <input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="input-premium" />
+                          <input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="input-premium" style={aiFieldStyle("country")} />
                         </div>
                         <div>
                           <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Região</label>
-                          <input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="input-premium" />
+                          <input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="input-premium" style={aiFieldStyle("region")} />
                         </div>
                       </div>
                       <div>
                         <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Uva</label>
-                        <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" />
+                        <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" style={aiFieldStyle("grape")} />
                       </div>
                       {!isCommercial && (
                         <div>
@@ -740,7 +763,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           </label>
                           {!noPriceInfo && (
                           <div className="grid grid-cols-2 gap-2">
-                            <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="input-premium" />
+                              <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="input-premium" style={aiFieldStyle("purchase_price")} />
                             <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
                           </div>
                         )}
@@ -760,7 +783,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                       </div>
                       <div>
                         <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Harmonização</label>
-                        <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" />
+                        <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
                       </div>
                       {!isCommercial && (
                         <>
@@ -783,7 +806,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                               )}
                             </div>
                             <div className="relative">
-                              <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0.00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1 }} />
+                              <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0.00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
                               {estimating && (
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
                                   <div className="w-4 h-4 border-2 border-[#6F7F5B] border-t-transparent rounded-full animate-spin" />
@@ -802,11 +825,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                             <div className="grid grid-cols-2 gap-3">
                               <div>
                                 <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>A partir de</label>
-                                <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" />
+                                <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
                               </div>
                               <div>
                                 <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Até</label>
-                                <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" />
+                                <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" style={aiFieldStyle("drink_until")} />
                               </div>
                             </div>
                           </div>
@@ -818,6 +841,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                               placeholder="Aromas, sabores, impressões..."
                               rows={3}
                               className="resize-none"
+                              style={aiFieldStyle("tasting_notes")}
                             />
                           </div>
                         </>
