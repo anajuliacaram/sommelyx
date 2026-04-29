@@ -13,6 +13,7 @@ import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { designSystem } from "@/styles/designSystem";
+import { LandingBackground } from "@/components/landing/LandingBackground";
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Erro desconhecido.");
 
@@ -92,12 +93,7 @@ export default function Login() {
 
   return (
     <div className={`${designSystem.authShell} ${designSystem.pageBackground}`}>
-      {/* Ambient orbs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
-        <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-gold/12 via-wine/6 to-transparent blur-[120px]" />
-        <div className="absolute inset-0 opacity-[0.25]" style={{ backgroundImage: "linear-gradient(rgba(23,20,29,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.025) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
-      </div>
+      <LandingBackground />
 
       <div className={designSystem.authGrid}>
         {/* Left panel */}
@@ -113,7 +109,7 @@ export default function Login() {
                 <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
               </span>
               <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
-                A inteligência da sua <span className="font-serif italic text-wine">adega</span> começa aqui.
+                A inteligência da sua <span className="gradient-text">adega</span> começa aqui.
               </h1>
               <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
                 Entre para organizar estoque, valor e giro com a precisão Sommelyx.
@@ -127,7 +123,7 @@ export default function Login() {
               { icon: ShieldCheck, label: "Confiável", desc: "Dados protegidos e operação estável", bg: "bg-gold/10", color: "text-gold" },
               { icon: Sparkles, label: "Editorial", desc: "Experiência elegante de ponta a ponta", bg: "bg-wine/[0.06]", color: "text-wine" },
             ].map((item) => (
-              <article key={item.label} className="rounded-[20px] p-4" style={designSystem.glassCard}>
+              <article key={item.label} className="glass-card p-4">
                 <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
                   <item.icon className="h-4 w-4" />
                 </div>

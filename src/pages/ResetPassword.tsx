@@ -12,6 +12,7 @@ import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { designSystem } from "@/styles/designSystem";
+import { LandingBackground } from "@/components/landing/LandingBackground";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -58,11 +59,7 @@ export default function ResetPassword() {
 
   return (
     <div className={`${designSystem.authShell} ${designSystem.pageBackground}`}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
-        <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-gold/12 via-wine/6 to-transparent blur-[120px]" />
-        <div className="absolute inset-0 opacity-[0.25]" style={{ backgroundImage: "linear-gradient(rgba(23,20,29,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.025) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
-      </div>
+      <LandingBackground />
 
       <div className={designSystem.authGrid}>
         <section className={`hidden lg:flex order-2 flex-col justify-between lg:order-1 ${designSystem.authPanel}`} style={designSystem.authCard}>
@@ -77,7 +74,7 @@ export default function ResetPassword() {
                 <Sparkles className="h-3.5 w-3.5" /> Redefinição protegida
               </span>
               <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
-                Uma nova senha, no mesmo <span className="font-serif italic text-wine">padrão Sommelyx</span>.
+                Uma nova senha, no mesmo <span className="gradient-text">padrão Sommelyx</span>.
               </h1>
               <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
                 Defina uma senha forte para proteger seu acesso.
@@ -91,7 +88,7 @@ export default function ResetPassword() {
               { icon: KeyRound, label: "Controle", desc: "Regras claras de senha" },
               { icon: Lock, label: "Privacidade", desc: "Sessão segura no dispositivo" },
             ].map((item) => (
-              <article key={item.label} className="rounded-[20px] p-4" style={designSystem.glassCard}>
+              <article key={item.label} className="glass-card p-4">
                 <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-wine/[0.06] text-wine">
                   <item.icon className="h-4 w-4" />
                 </div>

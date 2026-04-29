@@ -12,6 +12,7 @@ import { DashboardCommandMenu } from "@/components/DashboardCommandMenu";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { UserAccountMenu } from "@/components/UserAccountMenu";
+import { LandingBackground } from "@/components/landing/LandingBackground";
 
 export default function DashboardLayout() {
   const { user, profileType, signOut } = useAuth();
@@ -67,9 +68,10 @@ export default function DashboardLayout() {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div
-        className="dashboard-shell h-dvh overflow-hidden flex w-full relative"
+        className="dashboard-shell h-dvh overflow-hidden flex w-full relative app-background"
         data-theme={profileType === "commercial" ? "business" : undefined}
       >
+        <LandingBackground />
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header

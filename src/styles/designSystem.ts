@@ -30,7 +30,8 @@ export const designSystem = {
   pageShell:
     "min-h-screen overflow-x-hidden text-foreground selection:bg-primary/15 selection:text-primary",
   pageBackground:
-    "bg-[linear-gradient(135deg,#f6f1eb_0%,#efeae6_100%)]",
+    "app-background",
+  gradientText: "gradient-text",
   sectionContainer: "relative px-4 sm:px-8 z-10",
   glassCard: {
     background: "rgba(255,255,255,0.65)",

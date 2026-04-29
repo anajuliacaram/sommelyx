@@ -74,7 +74,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             }}
           >
             Gestão inteligente da sua adega, com clareza de{" "}
-            <span className="bg-gradient-to-r from-[#4E1B27] via-[#7B1E2B] to-[#A45A42] bg-clip-text text-transparent sm:whitespace-nowrap">
+            <span className="gradient-text sm:whitespace-nowrap">
               estoque, valor e giro.
             </span>
           </motion.h1>

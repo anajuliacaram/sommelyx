@@ -208,6 +208,31 @@
     scroll-margin-top: 24px;
   }
 
+  .app-background {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(200,155,109,0.18), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(123,30,43,0.12), transparent 40%),
+      #f6f1eb;
+  }
+
+  .gradient-text {
+    background: linear-gradient(90deg, #7b1e2b, #c89b6d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .glass-card {
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    border-radius: 20px;
+  }
+
   body.legal-page {
     background-color: #f4f1ec;
     background-image:
