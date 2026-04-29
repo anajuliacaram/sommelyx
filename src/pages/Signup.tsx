@@ -100,21 +100,21 @@ export default function Signup() {
       </div>
 
       <div className={designSystem.authGrid}>
-        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] p-6 sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12" style={designSystem.glassCardLight}>
+        <section className={`hidden lg:flex order-2 flex-col justify-between lg:order-1 ${designSystem.authPanel}`} style={designSystem.glassCardLight}>
           <div>
-            <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
-              <Logo variant="compact" className="h-11 w-auto drop-shadow-[0_4px_12px_rgba(140,32,68,0.10)]" />
-              <BrandName className="text-[24px]" />
+            <Link to="/" className={designSystem.authLogoLink}>
+              <Logo variant="navbar" className={designSystem.authLogo} />
+              <BrandName className={designSystem.authBrand} />
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">
               <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
               </span>
-              <h1 className="mt-5 max-w-[560px] text-[36px] font-black leading-[0.97] tracking-[-0.03em] text-foreground sm:text-[44px] lg:text-[54px]" style={{ fontFamily: designSystem.typography.heading }}>
+              <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
                 Configure sua <span className="font-serif italic text-wine">conta</span> e evolua sua adega.
               </h1>
-              <p className="mt-6 max-w-[540px] text-[15px] font-medium leading-relaxed text-muted-foreground sm:text-[17px]">
+              <p className={`mt-6 max-w-[540px] ${designSystem.authBody}`}>
                 Cadastre-se para centralizar acervo, operação e inteligência de compra no padrão editorial Sommelyx.
               </p>
             </motion.div>
@@ -142,17 +142,24 @@ export default function Signup() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full max-w-[520px] rounded-[24px] p-7 md:p-9"
-            style={designSystem.glassCardSoft}
+            className={designSystem.authFormCard}
+            style={designSystem.authCard}
           >
+            <div className="mb-6 flex items-center gap-2.5 lg:hidden">
+              <Link to="/" className={designSystem.authLogoLink}>
+                <Logo variant="navbar" className="h-8 w-auto" />
+                <BrandName className="text-[22px]" />
+              </Link>
+            </div>
+
             {awaitingEmailConfirmation ? (
               <>
                 <div className="mb-7">
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-wine/[0.06] text-wine">
                     <MailCheck className="h-6 w-6" />
                   </div>
-                  <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Confira seu e-mail</h2>
-                  <p className="mt-4 text-[14px] font-medium leading-relaxed text-muted-foreground">
+                  <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Confira seu e-mail</h2>
+                  <p className={`mt-4 ${designSystem.authBody}`}>
                     Enviamos um link de confirmação para o endereço informado.
                     <br />
                     Abra sua caixa de entrada e clique no link para ativar sua conta.
@@ -169,7 +176,7 @@ export default function Signup() {
                     onClick={handleResend}
                     disabled={resentLoading}
                     variant="primary"
-                    className="h-11 w-full rounded-xl text-[13px] font-bold uppercase tracking-[0.10em] shadow-float"
+                    className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float"
                   >
                     <span className="flex items-center gap-2">
                       <RefreshCcw className={`h-4 w-4 ${resentLoading ? "animate-spin" : ""}`} />
@@ -179,7 +186,7 @@ export default function Signup() {
 
                   <Button
                     variant="outline"
-                    className="h-11 w-full rounded-xl text-[12px] font-bold uppercase tracking-[0.10em]"
+                    className="h-11 w-full rounded-[10px] text-[12px] font-bold uppercase tracking-[0.10em]"
                     onClick={() => navigate("/login")}
                   >
                     Voltar para login
@@ -189,8 +196,8 @@ export default function Signup() {
             ) : (
               <>
                 <div className="mb-7">
-                  <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Criar conta grátis</h2>
-                  <p className="mt-3 text-[14px] font-medium text-muted-foreground">Preencha os dados para acessar o ecossistema Sommelyx.</p>
+                  <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Criar conta grátis</h2>
+                  <p className={`mt-3 ${designSystem.authBody}`}>Preencha os dados para acessar o ecossistema Sommelyx.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -264,7 +271,7 @@ export default function Signup() {
                     const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
                     if (error) toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                   }}
-              className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border/50 bg-background/60 text-[13px] font-semibold text-foreground hover:bg-background/90 hover:shadow-sm"
+              className="mt-4 flex h-11 w-full items-center justify-center gap-3 rounded-[10px] border border-border/50 bg-background/60 text-[13px] font-semibold text-foreground hover:bg-background/90 hover:shadow-sm"
             >
                   <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
+import { designSystem } from "@/styles/designSystem";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -53,32 +54,32 @@ export default function ResetPassword() {
     }
   };
 
-  const inputClass = "h-12 rounded-xl border-border/50 bg-background/60 px-4 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/25 focus:bg-background/90 focus:ring-2 focus:ring-primary/[0.06]";
+  const inputClass = designSystem.inputField;
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary" style={{ background: "transparent" }}>
+    <div className={`${designSystem.authShell} ${designSystem.pageBackground}`}>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-wine/15 via-wine-vivid/8 to-transparent blur-[100px]" />
         <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-gold/12 via-wine/6 to-transparent blur-[120px]" />
         <div className="absolute inset-0 opacity-[0.25]" style={{ backgroundImage: "linear-gradient(rgba(23,20,29,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(23,20,29,0.025) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
       </div>
 
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10">
-        <section className="hidden lg:flex order-2 flex-col justify-between rounded-[24px] p-6 sm:p-8 md:p-10 lg:order-1 lg:rounded-[28px] lg:p-12" style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 10px 24px -12px rgba(0,0,0,0.12)" }}>
+      <div className={designSystem.authGrid}>
+        <section className={`hidden lg:flex order-2 flex-col justify-between lg:order-1 ${designSystem.authPanel}`} style={designSystem.glassCardLight}>
           <div>
-            <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
-              <Logo variant="compact" className="h-11 w-auto drop-shadow-[0_4px_12px_rgba(140,32,68,0.10)]" />
-              <BrandName className="text-[24px]" />
+            <Link to="/" className={designSystem.authLogoLink}>
+              <Logo variant="navbar" className={designSystem.authLogo} />
+              <BrandName className={designSystem.authBrand} />
             </Link>
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">
               <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Redefinição protegida
               </span>
-              <h1 className="mt-5 max-w-[560px] text-[36px] font-black leading-[0.97] tracking-[-0.03em] text-foreground sm:text-[44px] lg:text-[54px]">
+              <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
                 Uma nova senha, com o mesmo <span className="font-serif italic text-wine">padrão premium</span>.
               </h1>
-              <p className="mt-6 max-w-[540px] text-[15px] font-medium leading-relaxed text-muted-foreground sm:text-[17px]">
+              <p className={`mt-6 max-w-[540px] ${designSystem.authBody}`}>
                 Defina uma senha forte para proteger sua conta. Nós cuidamos do resto.
               </p>
             </motion.div>
@@ -90,7 +91,7 @@ export default function ResetPassword() {
               { icon: KeyRound, label: "Controle", desc: "Regras claras de senha" },
               { icon: Lock, label: "Privacidade", desc: "Sessão segura no dispositivo" },
             ].map((item) => (
-              <article key={item.label} className="rounded-xl border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <article key={item.label} className="rounded-[20px] border border-border/40 bg-card/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                 <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-wine/[0.06] text-wine">
                   <item.icon className="h-4 w-4" />
                 </div>
@@ -106,33 +107,40 @@ export default function ResetPassword() {
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full max-w-[520px] rounded-[24px] p-7 md:p-9"
-            style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)", boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 10px 24px -12px rgba(15,15,20,0.12)" }}
+            className={designSystem.authFormCard}
+            style={designSystem.authCard}
           >
+            <div className="mb-6 flex items-center gap-2.5 lg:hidden">
+              <Link to="/" className={designSystem.authLogoLink}>
+                <Logo variant="navbar" className="h-8 w-auto" />
+                <BrandName className="text-[22px]" />
+              </Link>
+            </div>
+
             {success ? (
               <div className="text-center">
                 <div className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-success/[0.08] text-success">
                   <CheckCircle2 className="h-6 w-6" />
                 </div>
-                <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Senha redefinida</h2>
-                <p className="mt-4 text-[14px] font-medium leading-relaxed text-muted-foreground">
+                <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Senha redefinida</h2>
+                <p className={`mt-4 ${designSystem.authBody}`}>
                   Tudo certo. Vamos te levar ao dashboard em instantes.
                 </p>
               </div>
             ) : !ready ? (
               <div>
-                <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Link inválido</h2>
-                <p className="mt-4 text-[14px] font-medium leading-relaxed text-muted-foreground">
+                <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Link inválido</h2>
+                <p className={`mt-4 ${designSystem.authBody}`}>
                   Este link de recuperação expirou ou não é válido. Solicite um novo link e tente novamente.
                 </p>
 
                 <div className="mt-7 grid gap-3">
                   <MagneticButton>
-                    <Button type="button" onClick={() => navigate("/forgot-password")} variant="primary" className="h-11 w-full rounded-xl text-[13px] font-bold uppercase tracking-[0.10em] shadow-float">
+                    <Button type="button" onClick={() => navigate("/forgot-password")} variant="primary" className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float">
                       Solicitar novo link <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </MagneticButton>
-                  <Button type="button" variant="ghost" className="h-11 rounded-xl text-[13px] font-bold" onClick={() => navigate("/login")}>
+                  <Button type="button" variant="ghost" className="h-11 rounded-[10px] text-[13px] font-bold" onClick={() => navigate("/login")}>
                     Voltar ao login
                   </Button>
                 </div>
@@ -143,14 +151,14 @@ export default function ResetPassword() {
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-wine/[0.06] text-wine">
                     <KeyRound className="h-6 w-6" />
                   </div>
-                  <h2 className="text-[30px] font-serif font-bold italic leading-none tracking-tight text-foreground">Redefinir senha</h2>
-                  <p className="mt-4 text-[14px] font-medium leading-relaxed text-muted-foreground">
+                  <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Redefinir senha</h2>
+                  <p className={`mt-4 ${designSystem.authBody}`}>
                     Crie uma nova senha para sua conta. Recomendamos no mínimo 8 caracteres.
                   </p>
                 </div>
 
                 {error && (
-                  <div className="mb-5 rounded-xl border border-destructive/15 bg-destructive/[0.04] p-4">
+                  <div className="mb-5 rounded-[10px] border border-destructive/15 bg-destructive/[0.04] p-4">
                     <p className="text-[13px] font-semibold text-destructive">{error}</p>
                   </div>
                 )}
@@ -162,10 +170,10 @@ export default function ResetPassword() {
                     </Label>
                     <div className="relative">
                       <Input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Mínimo 8 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className={`${inputClass} pr-12`} />
-                      <Button type="button" variant="ghost" size="icon" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Ocultar" : "Mostrar"} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30">
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Ocultar" : "Mostrar"} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30">
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     {password.length > 0 && password.length < 8 && (
                       <p className="text-[12px] font-semibold text-warning">Mínimo 8 caracteres.</p>
                     )}
@@ -183,7 +191,7 @@ export default function ResetPassword() {
 
                   <div className="pt-1">
                     <MagneticButton disabled={loading || !isValid}>
-                      <Button type="submit" disabled={loading || !isValid} variant="primary" className="h-11 w-full rounded-xl text-[13px] font-bold uppercase tracking-[0.10em] shadow-float">
+                      <Button type="submit" disabled={loading || !isValid} variant="primary" className="h-11 w-full rounded-[10px] text-[13px] font-bold uppercase tracking-[0.10em] shadow-float">
                         {loading ? (
                           <span className="flex items-center justify-center gap-3">
                             Redefinindo
