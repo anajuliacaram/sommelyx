@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
+import { resolveStorageImageUrl } from "@/lib/storage-urls";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 8 } as const,
@@ -215,8 +216,7 @@ export default function WishlistPage() {
 
     if (error) throw error;
 
-    const { data } = supabase.storage.from("wishlist-images").getPublicUrl(path);
-    return data.publicUrl;
+    return resolveStorageImageUrl(path, { fallbackBucket: "wishlist-images" });
   };
 
   const handleAdd = async () => {

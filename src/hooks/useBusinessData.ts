@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Database } from "@/integrations/supabase/types";
+import { resolveStorageImageUrl } from "@/lib/storage-urls";
 
 export interface SaleRecord {
   id: string;
@@ -135,7 +136,13 @@ export function useWishlist() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data ?? []) as WishlistRecord[];
+      const resolved = await Promise.all(
+        (data ?? []).map(async (item) => ({
+          ...item,
+          image_url: await resolveStorageImageUrl(item.image_url, { fallbackBucket: "wishlist-images" }),
+        })),
+      );
+      return resolved as WishlistRecord[];
     },
     enabled: !!user,
     placeholderData: (previousData) => previousData,

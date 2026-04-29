@@ -15,7 +15,6 @@ END;
 $$;
 
 -- 2) Remove broad public SELECT/listing access on wishlist-images.
--- Public bucket delivery remains available through direct object URLs.
 DO $$
 DECLARE pol record;
 BEGIN

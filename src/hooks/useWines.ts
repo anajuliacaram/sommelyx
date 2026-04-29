@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getSommelyxData } from "@/lib/sommelyx-data";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { isPlaceholderWineImageUrl } from "@/lib/wine-images";
+import { extractStorageRef } from "@/lib/storage-urls";
 import { safeLogWrappedEvent, type WrappedEventType, type WrappedMode } from "@/lib/wrapped-events";
 
 export interface Wine {
@@ -33,32 +34,7 @@ export interface Wine {
 export type WineInsert = Omit<Wine, "id" | "created_at" | "updated_at">;
 
 function extractWineLabelStorageRef(imageUrl?: string | null) {
-  const url = typeof imageUrl === "string" ? imageUrl.trim() : "";
-  if (!url) return null;
-  if (/^(data|blob):/i.test(url)) return null;
-
-  if (!/^https?:\/\//i.test(url)) {
-    return { bucket: "wine-label-images", path: url.replace(/^\/+/, "") };
-  }
-
-  const patterns = [
-    /\/storage\/v1\/object\/sign\/(wine-label-images|wishlist-images)\/([^?]+)/i,
-    /\/storage\/v1\/object\/public\/(wine-label-images|wishlist-images)\/([^?]+)/i,
-    /\/storage\/v1\/object\/authenticated\/(wine-label-images|wishlist-images)\/([^?]+)/i,
-  ];
-
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match?.[1] && match?.[2]) {
-      try {
-        return { bucket: match[1], path: decodeURIComponent(match[2]) };
-      } catch {
-        return { bucket: match[1], path: match[2] };
-      }
-    }
-  }
-
-  return null;
+  return extractStorageRef(imageUrl);
 }
 
 async function normalizeWineImageUrl(imageUrl?: string | null) {
@@ -80,12 +56,6 @@ async function normalizeWineImageUrl(imageUrl?: string | null) {
   }
 
   try {
-    if (storageRef.bucket === "wishlist-images") {
-      const { data } = supabase.storage.from(storageRef.bucket).getPublicUrl(storageRef.path);
-      if (data?.publicUrl) return data.publicUrl;
-      return url;
-    }
-
     const { data, error } = await supabase.storage.from(storageRef.bucket).createSignedUrl(storageRef.path, 60 * 60 * 24 * 365 * 10);
     if (!error && data?.signedUrl) {
       if (import.meta.env.DEV) {

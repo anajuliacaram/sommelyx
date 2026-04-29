@@ -19,6 +19,7 @@ import { useCreateWineLocation } from "@/hooks/useWineLocations";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { normalizeWineData } from "@/lib/wine-normalization";
+import { resolveStorageImageUrl } from "@/lib/storage-urls";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -339,10 +340,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
             contentType: "image/jpeg",
           });
           if (!error) {
-            const { data: publicUrl } = supabase.storage
-              .from("wishlist-images")
-              .getPublicUrl(path);
-            if (publicUrl?.publicUrl) imageUrl = publicUrl.publicUrl;
+            imageUrl = await resolveStorageImageUrl(path, { fallbackBucket: "wishlist-images" });
           }
         } catch (uploadError) {
           console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);
@@ -357,10 +355,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
             contentType: labelImageFile.type,
           });
           if (!error) {
-            const { data: publicUrl } = supabase.storage
-              .from("wishlist-images")
-              .getPublicUrl(path);
-            if (publicUrl?.publicUrl) imageUrl = publicUrl.publicUrl;
+            imageUrl = await resolveStorageImageUrl(path, { fallbackBucket: "wishlist-images" });
           }
         } catch (uploadError) {
           console.warn("Wine label upload failed, falling back to internet image lookup:", uploadError);

@@ -189,8 +189,8 @@ async function toClientImageUrl(adminClient: ReturnType<typeof createClient>, va
   const storagePath = extractStoragePath(raw);
   if (!storagePath) return raw;
 
-  const { data } = adminClient.storage.from(BUCKET).getPublicUrl(storagePath);
-  if (data?.publicUrl) return data.publicUrl;
+  const { data } = await adminClient.storage.from(BUCKET).createSignedUrl(storagePath, 60 * 60);
+  if (data?.signedUrl) return data.signedUrl;
   return raw;
 }
 

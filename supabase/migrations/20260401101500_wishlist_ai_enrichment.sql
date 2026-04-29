@@ -32,16 +32,8 @@ FOR EACH ROW
 EXECUTE FUNCTION public.set_wishlist_updated_at();
 
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('wishlist-images', 'wishlist-images', true)
-ON CONFLICT (id) DO NOTHING;
-
-DO $$ BEGIN
-  CREATE POLICY "Public can view wishlist images"
-  ON storage.objects
-  FOR SELECT
-  TO public
-  USING (bucket_id = 'wishlist-images');
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+VALUES ('wishlist-images', 'wishlist-images', false)
+ON CONFLICT (id) DO UPDATE SET public = false;
 
 DO $$ BEGIN
   CREATE POLICY "Users can upload own wishlist images"
