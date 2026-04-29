@@ -247,6 +247,44 @@ export interface WineInsight {
   recommendation: string;
 }
 
+export interface WinePairingAnalysisBlock {
+  fat: string;
+  acidity: string;
+  texture: string;
+  flavor_profile: string;
+  cooking_method: string;
+}
+
+export interface WinePairingSuggestionBlock {
+  wine: string;
+  style: string;
+  why_it_works: string;
+  structure_match: {
+    acidity: string;
+    tannin: string;
+    body: string;
+  };
+  extra_tip: string;
+}
+
+export interface GeneratedWinePairing {
+  analysis: WinePairingAnalysisBlock;
+  pairings: WinePairingSuggestionBlock[];
+  fallback?: boolean;
+  note?: string;
+}
+
+export type WinePairingInput =
+  | string
+  | {
+      userInputDish?: string | null;
+      extractedDishFromImage?: string | null;
+      ocrText?: string | null;
+      dish?: string | null;
+      text?: string | null;
+      imageText?: string | null;
+    };
+
 // ── Error Classification ──
 
 export type AiErrorType = "network" | "timeout" | "auth" | "invalid_file" | "ai_fail" | "empty" | "unknown";
@@ -942,6 +980,260 @@ function fallbackPairingLogicForWine(wine: { style?: string | null; grape?: stri
     return "A acidez e a efervescência limpam gordura e destacam entradas, frituras leves e pratos delicados com textura mais macia.";
   }
   return "A avaliação privilegia o equilíbrio entre corpo, acidez, taninos e intensidade do prato para sugerir combinações mais precisas.";
+}
+
+function normalizeWinePairingInput(input: WinePairingInput): string {
+  if (typeof input === "string") {
+    return input.trim() || "prato não especificado";
+  }
+
+  const rawDish =
+    input?.userInputDish ||
+    input?.extractedDishFromImage ||
+    input?.ocrText ||
+    input?.dish ||
+    input?.text ||
+    input?.imageText ||
+    "";
+
+  return String(rawDish).trim() || "prato não especificado";
+}
+
+function safeParse<T>(response: string): T | null {
+  try {
+    return JSON.parse(response) as T;
+  } catch {
+    return null;
+  }
+}
+
+function dishStructureFromAnalysis(dish: string): WinePairingAnalysisBlock {
+  const analysis = analyzeDish(dish);
+  const fat = analysis.fat === "alta" ? "alta" : analysis.fat === "moderada" ? "média" : "baixa";
+  const acidity =
+    analysis.flavors.some((flavor) => /limão|cítric|vinagre|tomate/i.test(flavor))
+      ? "alta"
+      : analysis.flavors.some((flavor) => /creme|molho|manteiga/i.test(flavor))
+        ? "média"
+        : "média";
+
+  return {
+    fat,
+    acidity,
+    texture: analysis.intensity === "leve" ? "delicada" : analysis.intensity === "forte" ? "estruturada" : "equilibrada",
+    flavor_profile: analysis.flavors.length > 0 ? analysis.flavors.join(", ") : "perfil equilibrado e pouco específico",
+    cooking_method: analysis.cooking || "não identificado",
+  };
+}
+
+function pairingStructureForStyle(style?: string | null, dish?: string | null) {
+  const normalizedStyle = normalizeForMatch(style);
+  const normalizedDish = normalizeForMatch(dish);
+  const hasFattyDish = /gordura|creme|queijo|manteiga|costela|picanha|cordeiro|salmão/i.test(normalizedDish);
+  const hasDelicateDish = /salada|sushi|peixe|camar[aã]o|frango|frutos do mar|legumes/i.test(normalizedDish);
+
+  if (/\btinto|red|malbec|cabernet|syrah|merlot|tempranillo|nebbiolo|sangiovese|pinot noir\b/i.test(normalizedStyle)) {
+    return {
+      acidity: hasFattyDish ? "média a alta" : "média",
+      tannin: "médio a alto",
+      body: hasFattyDish ? "médio a encorpado" : "médio",
+    };
+  }
+
+  if (/\bbranco|white|chardonnay|sauvignon|riesling|alvarinho|verdejo|pinot gris|moscato\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "alta",
+      tannin: "baixo",
+      body: hasDelicateDish ? "leve a médio" : "médio",
+    };
+  }
+
+  if (/\bros[eé]|rose\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "média a alta",
+      tannin: "baixo",
+      body: "leve a médio",
+    };
+  }
+
+  if (/\bespumante|sparkling|champagne|prosecco|cava|brut\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "alta",
+      tannin: "baixo",
+      body: "leve",
+    };
+  }
+
+  if (/\bfortificado|porto|madeira|xerez|sherry\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "média",
+      tannin: "baixo",
+      body: "encorpado",
+    };
+  }
+
+  return {
+    acidity: hasFattyDish ? "média" : "média a alta",
+    tannin: "médio",
+    body: hasDelicateDish ? "leve a médio" : "médio",
+  };
+}
+
+function buildGeneratedPairingsFromSuggestions(
+  dish: string,
+  suggestions: WineSuggestion[],
+  fallback = false,
+): GeneratedWinePairing {
+  const analysis = dishStructureFromAnalysis(dish);
+  const normalizedSuggestions = dedupeSuggestions(suggestions)
+    .map((suggestion) => ({
+      wine: suggestion.wineName,
+      style: suggestion.style,
+      why_it_works: suggestion.reason,
+      structure_match: pairingStructureForStyle(suggestion.style, dish),
+      extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Você pode ajustar manualmente",
+    }))
+    .filter((item) => item.wine.trim().length > 0);
+
+  const fallbackSuggestions = fallbackPairingsForDish(dish).map((suggestion) => ({
+    wine: suggestion.wineName,
+    style: suggestion.style,
+    why_it_works: suggestion.reason,
+    structure_match: pairingStructureForStyle(suggestion.style, dish),
+    extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Você pode ajustar manualmente",
+  }));
+
+  const merged: WinePairingSuggestionBlock[] = [];
+  const seen = new Set<string>();
+  const pushSuggestion = (item: WinePairingSuggestionBlock) => {
+    const key = normalizeForMatch(`${item.wine}|${item.style}`);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    merged.push(item);
+  };
+
+  normalizedSuggestions.forEach(pushSuggestion);
+  fallbackSuggestions.forEach(pushSuggestion);
+
+  while (merged.length < 5) {
+    const index = merged.length;
+    const style = ["tinto", "branco", "rosé", "espumante", "fortificado"][index % 5];
+    pushSuggestion({
+      wine: `Sugestão padrão ${index + 1}`,
+      style,
+      why_it_works: `Baseado em "${dish}", esta opção preserva o equilíbrio entre corpo, acidez e intensidade do prato.`,
+      structure_match: pairingStructureForStyle(style, dish),
+      extra_tip: "Você pode ajustar manualmente",
+    });
+  }
+
+  return {
+    analysis,
+    pairings: merged.slice(0, 5),
+    fallback: fallback || normalizedSuggestions.length === 0,
+    note: fallback || normalizedSuggestions.length === 0 ? "análise simplificada" : undefined,
+  };
+}
+
+function fallbackPairing(dish: string): GeneratedWinePairing {
+  return {
+    analysis: {
+      fat: "médio",
+      acidity: "média",
+      texture: "equilibrada",
+      flavor_profile: "genérico",
+      cooking_method: "não identificado",
+    },
+    pairings: fallbackPairingsForDish(dish)
+      .slice(0, 5)
+      .map((suggestion) => ({
+        wine: suggestion.wineName,
+        style: suggestion.style,
+        why_it_works: suggestion.reason,
+        structure_match: pairingStructureForStyle(suggestion.style, dish),
+        extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Você pode ajustar manualmente",
+      })),
+    fallback: true,
+    note: "análise simplificada",
+  };
+}
+
+export async function generateWinePairing(input: WinePairingInput): Promise<GeneratedWinePairing> {
+  const finalDish = normalizeWinePairingInput(input);
+  console.log("dish:", finalDish);
+
+  try {
+    const aiResult = await getDishWineSuggestions(finalDish);
+    const responsePayload = buildGeneratedPairingsFromSuggestions(finalDish, aiResult.suggestions, Boolean(aiResult.fallback));
+    const response = JSON.stringify(responsePayload);
+    console.log("ai_response:", response);
+    const parsed = safeParse<GeneratedWinePairing>(response);
+    console.log("parsed:", parsed);
+
+    if (!parsed || !Array.isArray(parsed.pairings) || parsed.pairings.length < 1) {
+      return fallbackPairing(finalDish);
+    }
+
+    const pairings = parsed.pairings
+      .filter((pairing) => pairing && typeof pairing.wine === "string" && pairing.wine.trim().length > 0)
+      .map((pairing) => ({
+        ...pairing,
+        structure_match: {
+          acidity: pairing.structure_match?.acidity || "média",
+          tannin: pairing.structure_match?.tannin || "médio",
+          body: pairing.structure_match?.body || "médio",
+        },
+        extra_tip: pairing.extra_tip || "Você pode ajustar manualmente",
+      }));
+
+    if (pairings.length < 5) {
+      const fallback = fallbackPairing(finalDish);
+      const mergedPairings = dedupePairings(
+        pairings.map((pairing) => ({
+          dish: pairing.wine,
+          reason: pairing.why_it_works,
+          match: "bom",
+          harmony_type: "equilíbrio",
+          harmony_label: pairing.extra_tip,
+          category: "classico",
+        })).concat(fallback.pairings.map((pairing) => ({
+          dish: pairing.wine,
+          reason: pairing.why_it_works,
+          match: "bom",
+          harmony_type: "equilíbrio",
+          harmony_label: pairing.extra_tip,
+          category: "classico",
+        }))),
+      ).slice(0, 5);
+
+      return {
+        analysis: parsed.analysis || fallback.analysis,
+        pairings: mergedPairings.map((pairing) => ({
+          wine: pairing.dish,
+          style: "Médio corpo",
+          why_it_works: pairing.reason,
+          structure_match: {
+            acidity: "média",
+            tannin: "médio",
+            body: "médio",
+          },
+          extra_tip: pairing.harmony_label || "Você pode ajustar manualmente",
+        })),
+        fallback: true,
+        note: "análise simplificada",
+      };
+    }
+
+    return {
+      analysis: parsed.analysis,
+      pairings: pairings.slice(0, 5),
+      fallback: Boolean(parsed.fallback),
+      note: parsed.note,
+    };
+  } catch (error) {
+    console.warn("[generateWinePairing] fallback used", error);
+    return fallbackPairing(finalDish);
+  }
 }
 
 // ── Validation helpers ──
