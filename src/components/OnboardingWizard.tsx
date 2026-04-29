@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wine, Clock, ShieldCheck, Sparkles, ArrowRight, X, Package, TrendingUp, Users } from "@/icons/lucide";
+import { Wine, Clock, ShieldCheck, Sparkles, ArrowRight, Package, TrendingUp, Users } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
+import { ModalCloseButton } from "@/components/ui/modal-close-button";
 
 interface Benefit {
   icon: React.ElementType;
@@ -71,16 +72,11 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
         animate={{ scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
       >
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
+        <ModalCloseButton
+          className="absolute top-4 right-4 z-10 h-8 w-8"
+          label="Pular onboarding"
           onClick={handleSkip}
-          className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50"
-          title="Pular"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        />
 
         <div className="px-6 pt-6 pb-2">
           <div className="flex items-center justify-between mb-2">

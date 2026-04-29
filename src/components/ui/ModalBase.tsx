@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
-import { DialogClose, DialogDescription, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog";
+import { DialogDescription, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog";
+import { ModalCloseButton } from "@/components/ui/modal-close-button";
 
 export interface ModalBaseProps {
   title: string;
@@ -60,16 +60,13 @@ export function ModalBase({
                 </DialogDescription>
               ) : null}
             </div>
-            <DialogClose asChild>
-              <button
-                type="button"
-                aria-label="Fechar modal"
+            <DialogPrimitive.Close asChild>
+              <ModalCloseButton
+                className="shrink-0"
+                label="Fechar modal"
                 onClick={onClose}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black/5 text-[#6B6B6B] transition-all duration-200 hover:bg-black/10 hover:text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </DialogClose>
+              />
+            </DialogPrimitive.Close>
             </div>
           </div>
 

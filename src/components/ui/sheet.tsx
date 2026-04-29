@@ -1,9 +1,9 @@
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from "class-variance-authority";
-import { X } from "@/icons/lucide";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { ModalCloseButton } from "@/components/ui/modal-close-button";
 
 const Sheet = SheetPrimitive.Root;
 
@@ -68,9 +68,8 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute right-3.5 top-3.5 z-50 flex min-h-11 min-w-11 h-11 w-11 items-center justify-center rounded-full bg-black/5 text-[#6B6B6B] transition-all duration-180 ease-out hover:-translate-y-px hover:scale-[1.03] hover:bg-black/10 hover:text-[#1A1A1A] active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20 disabled:pointer-events-none">
-          <X className="h-4.5 w-4.5" />
-          <span className="sr-only">Close</span>
+        <SheetPrimitive.Close asChild>
+          <ModalCloseButton className="absolute right-4 top-4 z-50" label="Fechar modal" />
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>
@@ -79,7 +78,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("mb-4 flex flex-col gap-3 text-left sm:flex-row sm:items-start", className)} {...props} />
+  <div className={cn("mb-4 flex flex-col gap-3 text-left pr-14 sm:pr-16 sm:flex-row sm:items-start", className)} {...props} />
 );
 SheetHeader.displayName = "SheetHeader";
 

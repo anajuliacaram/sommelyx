@@ -1,7 +1,8 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { LogOut, Settings, User, X } from "@/icons/lucide";
+import { LogOut, Settings, User } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
+import { ModalCloseButton } from "@/components/ui/modal-close-button";
 import { cn } from "@/lib/utils";
 
 interface UserAccountMenuProps {
@@ -55,18 +56,11 @@ export const UserAccountMenu = React.memo(function UserAccountMenu({
               "pb-[calc(16px+env(safe-area-inset-bottom))] sm:pb-5",
             )}
           >
-            <DialogPrimitive.Close
-              className={cn(
-                "absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full",
-                "border border-black/5 bg-white/85 text-neutral-900 shadow-[0_8px_18px_-16px_rgba(58,51,39,0.25)]",
-                "transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                "hover:-translate-y-px hover:scale-[1.03] hover:bg-white",
-                "focus:outline-none focus:ring-2 focus:ring-primary/20 active:scale-[0.98]",
-              )}
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar menu da conta</span>
-            </DialogPrimitive.Close>
+            <ModalCloseButton
+              className="absolute right-4 top-4 z-10"
+              label="Fechar menu da conta"
+              onClick={() => onOpenChange(false)}
+            />
 
             <DialogPrimitive.Title className="sr-only">Menu da conta</DialogPrimitive.Title>
 

@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { ModalCloseButton } from "@/components/ui/modal-close-button";
 import { useWines } from "@/hooks/useWines";
 import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/lib/ai-attachments";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
@@ -2472,7 +2473,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         }}
       >
         <div className="flex h-full min-h-0 flex-col bg-white">
-          <div className="sticky top-0 z-30 flex items-center justify-between border-b border-black/5 bg-white px-6 py-4 shrink-0">
+          <div className="sticky top-0 z-30 flex items-center justify-between border-b border-black/5 bg-white px-6 py-4 pr-14 shrink-0">
             <div className="flex items-start gap-4 min-w-0">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
                 <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
@@ -2482,15 +2483,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <SheetDescription>Revise os dados antes de confirmar a importação</SheetDescription>
               </div>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
+            <ModalCloseButton
+              className="absolute right-4 top-4 z-10"
+              label="Fechar importação"
               onClick={() => { reset(); onOpenChange(false); }}
-              className="h-10 w-10 rounded-full bg-black/5 text-[#6B6B6B] hover:bg-black/10 hover:text-[#1A1A1A]"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            />
           </div>
 
           {step === "preview" ? (

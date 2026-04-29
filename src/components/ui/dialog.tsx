@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "@/icons/lucide";
 
 import { cn } from "@/lib/utils";
+import { ModalCloseButton } from "@/components/ui/modal-close-button";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -49,9 +49,8 @@ const DialogContent = React.forwardRef<
         )}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 flex min-h-11 min-w-11 h-11 w-11 items-center justify-center rounded-full bg-black/[0.05] text-[#3A3327]/70 transition-all duration-180 ease-out hover:-translate-y-px hover:scale-[1.03] hover:bg-black/[0.08] hover:text-[#1A1713] active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20 disabled:pointer-events-none">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
+        <DialogPrimitive.Close asChild>
+          <ModalCloseButton className="absolute right-4 top-4 z-10" label="Fechar modal" />
         </DialogPrimitive.Close>
       </div>
     </DialogPrimitive.Content>
@@ -60,7 +59,7 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col gap-4 mb-6 text-left pr-10 [&>p]:mt-0", className)} {...props} />
+  <div className={cn("flex flex-col gap-4 mb-6 text-left pr-14 sm:pr-16 [&>p]:mt-0", className)} {...props} />
 );
 DialogHeader.displayName = "DialogHeader";
 
