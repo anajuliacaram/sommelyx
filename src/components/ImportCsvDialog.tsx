@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Upload, Check, AlertTriangle, X, Sparkles, Loader2 } from "@/icons/lucide";
+import { Upload, Check, AlertTriangle, X, Sparkles, Loader2, ChevronDown, GripVertical } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +25,7 @@ import { useWines } from "@/hooks/useWines";
 import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/lib/ai-attachments";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
+import { designSystem } from "@/styles/designSystem";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -166,9 +167,26 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [importSourceConfidence, setImportSourceConfidence] = useState(1);
   const [importSummary, setImportSummary] = useState<ImportSummary>({ headerDetected: false, ignoredRows: 0 });
   const [importMode, setImportMode] = useState<"standard" | "smart-pdf" | "image">("standard");
+  const [columnWidths, setColumnWidths] = useState<Record<EditableField, number>>({
+    name: 280,
+    producer: 180,
+    vintage: 110,
+    style: 150,
+    quantity: 110,
+    purchase_price: 140,
+    current_value: 140,
+    country: 140,
+    region: 160,
+    grape: 160,
+    cellar_location: 160,
+    drink_from: 120,
+    drink_until: 120,
+  });
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const resizeRef = useRef<{ field: EditableField; startX: number; startWidth: number } | null>(null);
 
   const { data: cellarWines } = useWines();
   const addWine = useAddWine();
@@ -814,6 +832,33 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const getVisibleColumns = () => (showAdvancedColumns ? [...baseColumns, ...advancedColumns] : baseColumns);
+
+  const startColumnResize = (field: EditableField, event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const startWidth = columnWidths[field] || 140;
+    resizeRef.current = { field, startX: event.clientX, startWidth };
+
+    const onMove = (moveEvent: MouseEvent) => {
+      if (!resizeRef.current || resizeRef.current.field !== field) return;
+      const delta = moveEvent.clientX - resizeRef.current.startX;
+      const nextWidth = Math.max(92, Math.min(360, resizeRef.current.startWidth + delta));
+      setColumnWidths((current) => ({ ...current, [field]: nextWidth }));
+    };
+
+    const onUp = () => {
+      resizeRef.current = null;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  const toggleExpandedRow = (index: number) => {
+    setExpandedRows((current) => (current.includes(index) ? current.filter((row) => row !== index) : [...current, index]));
+  };
 
   const readTextFile = async (file: File) => {
     const text = await file.text();
@@ -1877,6 +1922,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return "valid" as const;
   };
 
+  const getDisplayRowStatus = (row: DraftWine) => {
+    const status = getImportStatus(row);
+    if ((row as DraftWine).duplicateWarning) return "duplicate";
+    if (status === "invalid") return "invalid";
+    if (status === "incomplete") return "warning";
+    return "valid";
+  };
+
   const applyManualMapping = () => {
     if (importSourceRows.length === 0 || importSourceHeaders.length === 0) return;
     const remapped = buildWinesFromMapping(importSourceRows, columnMapping);
@@ -2454,70 +2507,114 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[min(1100px,calc(100vw-1rem))] -translate-x-1/2 -translate-y-1/2 rounded-[28px] border-0 p-0 gap-0 overflow-hidden"
+        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[min(1180px,calc(100vw-1rem))] -translate-x-1/2 -translate-y-1/2 rounded-[28px] border-0 p-0 gap-0 overflow-hidden"
         style={{
           left: "50%",
           top: "50%",
           right: "auto",
           bottom: "auto",
           transform: "translate(-50%, -50%)",
-          width: "min(1100px, calc(100vw - 1rem))",
-          maxWidth: "1100px",
+          width: "min(1180px, calc(100vw - 1rem))",
+          maxWidth: "1180px",
           maxHeight: "90vh",
           height: "90vh",
-          background: "#FFFFFF",
-          backdropFilter: "none",
-          WebkitBackdropFilter: "none",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
+          background:
+            "linear-gradient(135deg, rgba(246,241,235,0.98) 0%, rgba(239,231,221,0.98) 42%, rgba(232,222,210,0.98) 100%)",
+          backdropFilter: "blur(18px) saturate(1.05)",
+          WebkitBackdropFilter: "blur(18px) saturate(1.05)",
+          boxShadow: "0 30px 80px rgba(40,25,15,0.14)",
         }}
       >
-        <div className="flex h-full min-h-0 flex-col bg-white">
-          <div className="sticky top-0 z-30 flex items-center justify-between border-b border-black/5 bg-white px-6 py-4 pr-14 shrink-0">
+        <div className="flex h-full min-h-0 flex-col">
+          <div
+            className="sticky top-0 z-30 flex items-center justify-between border-b border-white/40 px-5 py-4 pr-14 shrink-0"
+            style={{
+              ...designSystem.glassCard,
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              background: "rgba(255,255,255,0.60)",
+            }}
+          >
             <div className="flex items-start gap-4 min-w-0">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
                 <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0">
-                <SheetTitle>Importar documento / planilha</SheetTitle>
-                <SheetDescription>Revise os dados antes de confirmar a importação</SheetDescription>
+                <SheetTitle>Review your wines before importing</SheetTitle>
+                <SheetDescription>Click any field to edit, correct duplicates and trust the data before import.</SheetDescription>
               </div>
             </div>
           </div>
 
           {step === "preview" ? (
-            <div className="sticky top-[73px] z-20 border-b border-black/5 bg-white px-6 py-4 flex gap-3 flex-wrap shrink-0">
-              <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-9 text-[12px] px-3">
-                {editMode ? "Bloquear edição" : "Editar dados"}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={applyBulkAll}
-                className="h-9 text-[12px] px-3"
-                disabled={!editMode || (!bulkProducer.trim() && !bulkVintage.trim())}
-              >
-                Preencher todos
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={addBlankRow}
-                className="h-9 text-[12px] px-3"
-                disabled={!editMode}
-              >
-                + Adicionar linha
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => void autoFixImportedRows()} className="h-9 text-[12px] px-3" disabled={enriching || draftWines.length === 0}>
-                ✨ Corrigir automaticamente
-              </Button>
-              <Button variant="ghost" size="sm" onClick={reset} className="h-9 text-[12px] px-3">
-                <X className="h-3.5 w-3.5 mr-1" /> Trocar
-              </Button>
+            <div
+              className="sticky top-[73px] z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/40 px-5 py-4"
+              style={{
+                background: "rgba(255,255,255,0.64)",
+                backdropFilter: "blur(14px)",
+                WebkitBackdropFilter: "blur(14px)",
+              }}
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-9 rounded-full px-4 text-[12px]">
+                  {editMode ? "Bloquear edição" : "Editar dados"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => void autoFixImportedRows()}
+                  className="h-9 rounded-full px-4 text-[12px]"
+                  disabled={enriching || draftWines.length === 0}
+                >
+                  ✨ Corrigir automaticamente
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={applyBulkAll}
+                  className="h-9 rounded-full px-4 text-[12px]"
+                  disabled={!editMode || (!bulkProducer.trim() && !bulkVintage.trim() && !bulkGrape.trim())}
+                >
+                  Preencher vazios
+                </Button>
+                <Button variant="secondary" size="sm" onClick={removeInvalidRows} className="h-9 rounded-full px-4 text-[12px]" disabled={draftWines.length === 0}>
+                  Remover vazios
+                </Button>
+                <Button variant="secondary" size="sm" onClick={removeSelectedRows} className="h-9 rounded-full px-4 text-[12px]" disabled={selectedRows.length === 0}>
+                  Mesclar / remover selecionados
+                </Button>
+                <Button variant="ghost" size="sm" onClick={reset} className="h-9 rounded-full px-4 text-[12px]">
+                  <X className="h-3.5 w-3.5 mr-1" /> Trocar arquivo
+                </Button>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-white/50 bg-white/70 px-3 py-1.5 text-[12px] text-[#5F5F5F] shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> {completeRowsCount} válidos
+                </span>
+                <span className="text-black/20">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" /> {reviewRowsCount} revisão
+                </span>
+                <span className="text-black/20">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" /> {invalidRowsCount} inválidos
+                </span>
+              </div>
             </div>
           ) : null}
 
-          <div className="flex-1 min-h-0 overflow-hidden px-6 pb-6">
-            <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-black/5 bg-white">
+          <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4 sm:px-5 sm:pb-5">
+            <div
+              className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-white/45"
+              style={{
+                background: "rgba(255,255,255,0.62)",
+                backdropFilter: "blur(14px)",
+                WebkitBackdropFilter: "blur(14px)",
+                boxShadow: "0 18px 48px rgba(40,25,15,0.08)",
+              }}
+            >
               <div className="flex-1 min-h-0 overflow-hidden">
                 <AnimatePresence mode="wait">
                   {step === "upload" && (
@@ -2839,214 +2936,425 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       ) : null}
 
                       {renderableRows.length > 0 ? (
-                        <div className="flex-1 min-h-[320px] overflow-hidden rounded-2xl border border-black/5 bg-white">
-                          <div className="flex items-center justify-between gap-3 border-b border-black/5 px-4 py-3">
-                            <div>
-                              <p className="text-[14px] font-semibold text-[#1A1A1A]">Tabela de revisão</p>
-                              <p className="text-[12px] text-black/50">
-                                Nome | Produtor | País | Região | Uva | Safra | Preço | Status
+                        <div className="flex-1 min-h-[320px] overflow-hidden rounded-[24px] border border-white/45"
+                          style={{
+                            background: "rgba(255,255,255,0.62)",
+                            backdropFilter: "blur(14px)",
+                            WebkitBackdropFilter: "blur(14px)",
+                            boxShadow: "0 18px 48px rgba(40,25,15,0.08)",
+                          }}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/40 px-4 py-4">
+                            <div className="min-w-0">
+                              <p className="text-[16px] font-semibold tracking-tight text-[#2a1f1a]">Tabela de revisão</p>
+                              <p className="mt-1 text-[12px] text-[#6b5e55]">
+                                Clique em qualquer campo para editar · arraste as bordas das colunas · use Tab / Enter para avançar.
                               </p>
                             </div>
-                            <div className="rounded-full bg-black/5 px-3 py-1 text-[11px] font-medium text-black/60">
-                              {visibleDraftWines.length} de {renderableRows.length}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+                                {completeRowsCount} válidos
+                              </span>
+                              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700">
+                                {reviewRowsCount} revisão
+                              </span>
+                              <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-semibold text-rose-700">
+                                {invalidRowsCount} inválidos
+                              </span>
+                              <span className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11px] font-semibold text-violet-700">
+                                {duplicateRowsCount} duplicados
+                              </span>
                             </div>
                           </div>
 
-                          <div ref={tableScrollRef} className="max-h-[420px] overflow-y-auto cellar-scroll">
-                            <table className="min-w-[1200px] w-full border-separate border-spacing-0 table-fixed">
-                              <thead className="sticky top-0 z-10 bg-white">
-                                <tr className="border-b border-black/5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
-                                  <th className="px-4 py-2 text-left">Nome</th>
-                                  <th className="px-4 py-2 text-left">Produtor</th>
-                                  <th className="px-4 py-2 text-left">País</th>
-                                  <th className="px-4 py-2 text-left">Região</th>
-                                  <th className="px-4 py-2 text-left">Uva</th>
-                                  <th className="px-4 py-2 text-left">Safra</th>
-                                  <th className="px-4 py-2 text-left">Preço</th>
-                                  <th className="px-4 py-2 text-left">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {visibleDraftWines.map(({ row: wine, index }) => {
-                                  const rowStatus = getImportStatus(wine as DraftWine);
-                                  const issues = getRowIssues(wine as DraftWine);
-                                  const rowHasError = rowStatus === "invalid";
-                                  const rowMissingPrice = wine.purchase_price == null && (wine as DraftWine).price == null;
-                                  const accent = accentForRow(wine as DraftWine);
-                                  const confidence = (wine as DraftWine).confidence;
-                                  const statusTone =
-                                    rowStatus === "invalid"
-                                      ? "bg-rose-100 text-rose-700"
-                                      : rowStatus === "incomplete"
-                                        ? "bg-amber-100 text-amber-700"
-                                        : "bg-emerald-100 text-emerald-700";
-                                  const statusLabel = rowStatus === "invalid" ? "Inválido" : rowStatus === "incomplete" ? "Revisar" : "Válido";
+                          <div className="border-b border-white/40 px-4 py-4">
+                            <div className="grid gap-3 lg:grid-cols-[1.4fr_0.8fr_0.8fr]">
+                              <div className="flex items-center gap-2 rounded-2xl border border-white/50 bg-white/70 px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
+                                <Input
+                                  value={bulkProducer}
+                                  onChange={(e) => setBulkProducer(e.target.value)}
+                                  placeholder="Preencher produtor"
+                                  disabled={!editMode}
+                                  className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+                                />
+                                <Button variant="secondary" size="sm" onClick={applyProducerToSelected} disabled={!editMode || !bulkProducer.trim() || selectedRows.length === 0}>
+                                  Aplicar aos selecionados
+                                </Button>
+                              </div>
+                              <div className="flex items-center gap-2 rounded-2xl border border-white/50 bg-white/70 px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
+                                <Input
+                                  value={bulkVintage}
+                                  onChange={(e) => setBulkVintage(e.target.value)}
+                                  placeholder="Preencher safra"
+                                  type="number"
+                                  disabled={!editMode}
+                                  className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+                                />
+                                <Button variant="secondary" size="sm" onClick={applyVintageToSelected} disabled={!editMode || !bulkVintage.trim() || selectedRows.length === 0}>
+                                  Aplicar aos selecionados
+                                </Button>
+                              </div>
+                              <div className="flex items-center gap-2 rounded-2xl border border-white/50 bg-white/70 px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
+                                <Input
+                                  value={bulkGrape}
+                                  onChange={(e) => setBulkGrape(e.target.value)}
+                                  placeholder="Preencher uva"
+                                  disabled={!editMode}
+                                  className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+                                />
+                                <Button variant="secondary" size="sm" onClick={applyGrapeToSelected} disabled={!editMode || !bulkGrape.trim() || selectedRows.length === 0}>
+                                  Aplicar aos selecionados
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
 
-                                  const fieldRowClass = cn(
-                                    "border-b border-black/5 transition-colors hover:bg-[#FBFAF7]",
-                                    rowStatus === "invalid" && "bg-rose-50/60",
-                                    rowStatus === "incomplete" && "bg-amber-50/60",
-                                    rowStatus === "valid" && confidence < 0.8 && "bg-emerald-50/50",
-                                  );
-
-                                  const textFieldClass = cn(
-                                    "h-10 rounded-xl border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors placeholder:text-[#A39A90] focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none",
-                                    !wine.name?.trim() && "border-rose-300 bg-rose-50",
-                                  );
-
-                                  const valueSelectClass = "h-10 rounded-xl border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none";
-
-                                  return (
-                                    <tr key={`row-${index}`} className={fieldRowClass}>
-                                      <td className="px-4 py-2 align-top" style={{ borderLeft: `4px solid ${rowHasError ? "#D88C7A" : accent.bar}` }}>
-                                        <div className="flex items-start gap-3 min-w-0">
-                                          <div className="mt-0.5 h-10 w-8 shrink-0 overflow-hidden rounded-lg border border-black/5 bg-[#F8F6F2]">
-                                            <WineLabelPreview
-                                              wine={{
-                                                name: wine.name || "Prévia do vinho",
-                                                style: wine.type || wine.style || null,
-                                                image_url: wine.image_url || null,
-                                                fallback_image: buildGeneratedThumbnail({ ...wine, type: wine.type || wine.style }),
-                                              }}
-                                              alt={wine.name || "Prévia do vinho"}
-                                              compact
-                                              generated={!wine.image_url || isIllustrativeImage(wine.image_url)}
-                                              className="h-full w-full rounded-lg"
-                                              imageClassName="h-full w-full object-cover"
-                                            />
+                          <div className="flex-1 min-h-0 overflow-hidden">
+                            <div className="hidden md:block h-full min-h-0">
+                              <div ref={tableScrollRef} className="max-h-[460px] overflow-auto cellar-scroll">
+                                <table className="w-full min-w-[1260px] table-fixed border-separate border-spacing-0">
+                                  <colgroup>
+                                    <col style={{ width: 56 }} />
+                                    <col style={{ width: columnWidths.name }} />
+                                    {visibleColumns
+                                      .filter((column) => column.key !== "name")
+                                      .map((column) => (
+                                        <col key={column.key} style={{ width: columnWidths[column.key] || 160 }} />
+                                      ))}
+                                  </colgroup>
+                                  <thead className="sticky top-0 z-10 bg-white/90 backdrop-blur-md">
+                                    <tr className="border-b border-black/5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
+                                      <th className="px-3 py-3 text-left">
+                                        <button
+                                          type="button"
+                                          onClick={toggleAllRows}
+                                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/5 bg-white/70 hover:bg-white transition-colors"
+                                          aria-label={allRowsSelected ? "Deselecionar todas as linhas" : "Selecionar todas as linhas"}
+                                        >
+                                          {allRowsSelected ? <Check className="h-4 w-4 text-[#6b1f1f]" /> : <span className="h-3.5 w-3.5 rounded-[4px] border border-black/20" />}
+                                        </button>
+                                      </th>
+                                      {visibleColumns.map((column) => (
+                                        <th key={column.key} className="relative px-3 py-3 text-left align-bottom" style={{ width: columnWidths[column.key] }}>
+                                          <div className="flex items-center gap-2">
+                                            <span>{column.label}</span>
+                                            <button
+                                              type="button"
+                                              aria-label={`Redimensionar coluna ${column.label}`}
+                                              onMouseDown={(event) => startColumnResize(column.key, event)}
+                                              className="flex h-7 w-3 cursor-col-resize items-center justify-center text-black/20 hover:text-[#6b1f1f]"
+                                            >
+                                              <GripVertical className="h-3.5 w-3.5" />
+                                            </button>
                                           </div>
-                                          <div className="min-w-0 flex-1">
-                                            <Input
-                                              value={wine.name || ""}
-                                              onChange={(e) => updateWineRow(index, "name", e.target.value)}
-                                              className={textFieldClass}
-                                              onKeyDown={(event) => handleCellKeyDown(event, index, "name")}
-                                              onClick={(e) => e.stopPropagation()}
-                                              placeholder="Nome do vinho"
-                                            />
-                                            {duplicateRowsCount > 0 && (wine as DraftWine).duplicateWarning ? (
-                                              <p className="mt-1 text-[11px] text-amber-700">{(wine as DraftWine).duplicateWarning}</p>
-                                            ) : null}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {visibleDraftWines.map(({ row: wine, index }) => {
+                                      const rowStatus = getImportStatus(wine as DraftWine);
+                                      const displayStatus = getDisplayRowStatus(wine as DraftWine);
+                                      const issues = getRowIssues(wine as DraftWine);
+                                      const rowHasError = rowStatus === "invalid";
+                                      const rowMissingPrice = wine.purchase_price == null && (wine as DraftWine).price == null;
+                                      const accent = accentForRow(wine as DraftWine);
+                                      const confidence = (wine as DraftWine).confidence;
+                                      const statusTone =
+                                        displayStatus === "invalid"
+                                          ? "bg-rose-100 text-rose-700"
+                                          : displayStatus === "warning"
+                                            ? "bg-amber-100 text-amber-700"
+                                            : displayStatus === "duplicate"
+                                              ? "bg-violet-100 text-violet-700"
+                                              : "bg-emerald-100 text-emerald-700";
+                                      const statusLabel =
+                                        displayStatus === "invalid"
+                                          ? "Inválido"
+                                          : displayStatus === "warning"
+                                            ? "Revisar"
+                                            : displayStatus === "duplicate"
+                                              ? "Duplicado"
+                                              : "Válido";
+                                      const rowSelected = selectedSet.has(index);
+                                      const fieldRowClass = cn(
+                                        "border-b border-white/40 transition-colors hover:bg-white/70",
+                                        rowSelected && "bg-white/80",
+                                        displayStatus === "invalid" && "bg-rose-50/60",
+                                        displayStatus === "warning" && "bg-amber-50/60",
+                                        displayStatus === "duplicate" && "bg-violet-50/55",
+                                        displayStatus === "valid" && confidence < 0.8 && "bg-emerald-50/40",
+                                      );
+                                      const textFieldClass = cn(
+                                        "h-11 rounded-[12px] border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors placeholder:text-[#A39A90] focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none",
+                                        !wine.name?.trim() && "border-rose-300 bg-rose-50",
+                                      );
+                                      const valueSelectClass = "h-11 rounded-[12px] border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none";
+
+                                      return (
+                                        <tr key={`row-${index}`} className={fieldRowClass}>
+                                          <td className="px-3 py-3 align-top">
+                                            <button
+                                              type="button"
+                                              onClick={() => toggleRowSelection(index)}
+                                              className={cn(
+                                                "inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
+                                                rowSelected ? "border-[#6b1f1f] bg-[#6b1f1f] text-white" : "border-black/10 bg-white/70 text-transparent hover:text-black/30",
+                                              )}
+                                              aria-label={rowSelected ? "Desmarcar linha" : "Marcar linha"}
+                                            >
+                                              <Check className="h-4 w-4" strokeWidth={3} />
+                                            </button>
+                                          </td>
+                                          <td className="px-3 py-3 align-top" style={{ borderLeft: `4px solid ${rowHasError ? "#D88C7A" : accent.bar}` }}>
+                                            <div className="flex items-start gap-3 min-w-0">
+                                              <div className="mt-0.5 h-10 w-8 shrink-0 overflow-hidden rounded-lg border border-black/5 bg-[#F8F6F2]">
+                                                <WineLabelPreview
+                                                  wine={{
+                                                    name: wine.name || "Prévia do vinho",
+                                                    style: wine.type || wine.style || null,
+                                                    image_url: wine.image_url || null,
+                                                    fallback_image: buildGeneratedThumbnail({ ...wine, type: wine.type || wine.style }),
+                                                  }}
+                                                  alt={wine.name || "Prévia do vinho"}
+                                                  compact
+                                                  generated={!wine.image_url || isIllustrativeImage(wine.image_url)}
+                                                  className="h-full w-full rounded-lg"
+                                                  imageClassName="h-full w-full object-cover"
+                                                />
+                                              </div>
+                                              <div className="min-w-0 flex-1">
+                                                <Input
+                                                  value={wine.name || ""}
+                                                  onChange={(e) => updateWineRow(index, "name", e.target.value)}
+                                                  className={textFieldClass}
+                                                  onKeyDown={(event) => handleCellKeyDown(event, index, "name")}
+                                                  onClick={(e) => e.stopPropagation()}
+                                                  placeholder="Nome do vinho"
+                                                />
+                                                {duplicateRowsCount > 0 && (wine as DraftWine).duplicateWarning ? (
+                                                  <p className="mt-1 text-[11px] text-amber-700">{(wine as DraftWine).duplicateWarning}</p>
+                                                ) : null}
+                                              </div>
+                                            </div>
+                                          </td>
+                                          {visibleColumns.filter((column) => column.key !== "name").map((column) => (
+                                            <React.Fragment key={`${index}-${column.key}`}>
+                                              {renderEditableCell(wine as DraftWine, index, column)}
+                                            </React.Fragment>
+                                          ))}
+                                        </tr>
+                                      );
+                                    })}
+                                    <tr ref={loadMoreRef}>
+                                      <td colSpan={visibleColumns.length + 1} className="h-8" />
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            <div className="md:hidden space-y-3 px-4 py-4">
+                              {visibleDraftWines.map(({ row: wine, index }) => {
+                                const rowStatus = getImportStatus(wine as DraftWine);
+                                const displayStatus = getDisplayRowStatus(wine as DraftWine);
+                                const statusTone =
+                                  displayStatus === "invalid"
+                                    ? "bg-rose-100 text-rose-700"
+                                    : displayStatus === "warning"
+                                      ? "bg-amber-100 text-amber-700"
+                                      : displayStatus === "duplicate"
+                                        ? "bg-violet-100 text-violet-700"
+                                        : "bg-emerald-100 text-emerald-700";
+                                const statusLabel =
+                                  displayStatus === "invalid"
+                                    ? "Inválido"
+                                    : displayStatus === "warning"
+                                      ? "Revisar"
+                                      : displayStatus === "duplicate"
+                                        ? "Duplicado"
+                                        : "Válido";
+                                const rowSelected = selectedSet.has(index);
+                                const expanded = expandedRows.includes(index) || displayStatus !== "valid";
+                                const rowMissingPrice = wine.purchase_price == null && (wine as DraftWine).price == null;
+
+                                return (
+                                  <motion.div
+                                    key={`mobile-${index}`}
+                                    layout
+                                    className={cn(
+                                      "overflow-hidden rounded-[20px] border border-white/50 shadow-[0_12px_28px_rgba(0,0,0,0.06)]",
+                                      rowSelected ? "bg-white/90" : "bg-white/75",
+                                    )}
+                                    style={{
+                                      backdropFilter: "blur(12px)",
+                                      WebkitBackdropFilter: "blur(12px)",
+                                    }}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleRowSelection(index)}
+                                      className={cn(
+                                        "flex w-full items-start gap-3 border-b border-black/5 px-4 py-4 text-left",
+                                        expanded ? "rounded-t-[20px]" : "rounded-[20px]",
+                                      )}
+                                    >
+                                      <div className="h-12 w-9 shrink-0 overflow-hidden rounded-lg border border-black/5 bg-[#F8F6F2]">
+                                        <WineLabelPreview
+                                          wine={{
+                                            name: wine.name || "Prévia do vinho",
+                                            style: wine.type || wine.style || null,
+                                            image_url: wine.image_url || null,
+                                            fallback_image: buildGeneratedThumbnail({ ...wine, type: wine.type || wine.style }),
+                                          }}
+                                          alt={wine.name || "Prévia do vinho"}
+                                          compact
+                                          generated={!wine.image_url || isIllustrativeImage(wine.image_url)}
+                                          className="h-full w-full rounded-lg"
+                                          imageClassName="h-full w-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-start justify-between gap-3">
+                                          <div className="min-w-0">
+                                            <p className="truncate text-[14px] font-semibold text-[#2a1f1a]">{wine.name || "Linha sem nome"}</p>
+                                            <p className="mt-0.5 text-[12px] text-[#6b5e55]">
+                                              {wine.producer || "Produtor pendente"} · {wine.country || "País pendente"}
+                                            </p>
+                                          </div>
+                                          <div className="flex flex-col items-end gap-1">
+                                            <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold", statusTone)}>
+                                              {statusLabel}
+                                            </span>
+                                            <span className="text-[10px] text-black/40">{rowStatus === "invalid" ? "Corrija antes de importar" : "Edite para continuar"}</span>
                                           </div>
                                         </div>
-                                      </td>
-                                      <td className="px-4 py-2 align-top">
-                                        <Input
-                                          value={wine.producer || ""}
-                                          onChange={(e) => updateWineRow(index, "producer", e.target.value)}
-                                          className={textFieldClass}
-                                          onKeyDown={(event) => handleCellKeyDown(event, index, "producer")}
-                                          onClick={(e) => e.stopPropagation()}
-                                          placeholder="Produtor"
-                                        />
-                                      </td>
-                                      <td className="px-4 py-2 align-top">
-                                        <Select
-                                          value={wine.country || "__empty__"}
-                                          onValueChange={(value) => updateWineRow(index, "country", value === "__empty__" ? undefined : value)}
-                                        >
-                                          <SelectTrigger className={valueSelectClass}>
-                                            <SelectValue placeholder="País" />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="__empty__">Em branco</SelectItem>
-                                            {knownCountries.map((country) => (
-                                              <SelectItem key={country} value={country}>
-                                                {country}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                      </td>
-                                      <td className="px-4 py-2 align-top">
-                                        <Input
-                                          value={wine.region || ""}
-                                          onChange={(e) => updateWineRow(index, "region", e.target.value)}
-                                          className={textFieldClass}
-                                          onKeyDown={(event) => handleCellKeyDown(event, index, "region")}
-                                          onClick={(e) => e.stopPropagation()}
-                                          placeholder="Região"
-                                        />
-                                      </td>
-                                      <td className="px-4 py-2 align-top">
-                                        <Select
-                                          value={wine.grape || "__empty__"}
-                                          onValueChange={(value) => updateWineRow(index, "grape", value === "__empty__" ? undefined : value)}
-                                        >
-                                          <SelectTrigger className={valueSelectClass}>
-                                            <SelectValue placeholder="Uva" />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="__empty__">Em branco</SelectItem>
-                                            {knownGrapes.map((grape) => (
-                                              <SelectItem key={grape} value={grape}>
-                                                {grape}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                      </td>
-                                      <td className="px-4 py-2 align-top">
-                                        <Input
-                                          value={wine.vintage ? String(wine.vintage) : ""}
-                                          onChange={(e) => updateWineRow(index, "vintage", e.target.value ? Number.parseInt(e.target.value, 10) : undefined)}
-                                          className={cn(textFieldClass, "max-w-[110px]")}
-                                          onKeyDown={(event) => handleCellKeyDown(event, index, "vintage")}
-                                          onClick={(e) => e.stopPropagation()}
-                                          placeholder="Safra"
-                                          type="number"
-                                        />
-                                      </td>
-                                      <td className="px-4 py-2 align-top">
-                                        <Input
-                                          value={formatPrice((wine as DraftWine).price ?? wine.purchase_price)}
-                                          onChange={(e) => updateWineRow(index, "purchase_price", e.target.value ? Number.parseFloat(e.target.value) : undefined)}
-                                          className={cn(textFieldClass, rowMissingPrice && "border-amber-300 bg-amber-50", "max-w-[130px]")}
-                                          onKeyDown={(event) => handleCellKeyDown(event, index, "purchase_price")}
-                                          onClick={(e) => e.stopPropagation()}
-                                          placeholder="Preço"
-                                          type="number"
-                                          step="0.01"
-                                        />
-                                      </td>
-                                      <td className="px-4 py-2 align-top">
-                                        <div className="flex flex-col gap-2">
-                                          <Select
-                                            value={wine.type || wine.style || "__empty__"}
-                                            onValueChange={(value) => updateWineRow(index, "style", value === "__empty__" ? undefined : value)}
+                                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={() => toggleExpandedRow(index)}
+                                            className="inline-flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1.5 text-[11px] font-medium text-[#4d423b]"
                                           >
-                                            <SelectTrigger className={cn(valueSelectClass, "max-w-[170px]")}>
-                                              <SelectValue placeholder="Estilo" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="__empty__">Em branco</SelectItem>
-                                              {styleOptions.map((opt) => (
-                                                <SelectItem key={opt.value} value={opt.value}>
-                                                  {opt.label}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
+                                            {expanded ? "Ocultar campos" : "Editar campos"}
+                                            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => toggleRowSelection(index)}
+                                            className={cn(
+                                              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors",
+                                              rowSelected ? "bg-[#6b1f1f] text-white" : "bg-[#6b1f1f]/8 text-[#6b1f1f]",
+                                            )}
+                                          >
+                                            <Check className="h-3.5 w-3.5" />
+                                            {rowSelected ? "Selecionada" : "Selecionar"}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </button>
+
+                                    <AnimatePresence initial={false}>
+                                      {expanded ? (
+                                        <motion.div
+                                          initial={{ opacity: 0, height: 0 }}
+                                          animate={{ opacity: 1, height: "auto" }}
+                                          exit={{ opacity: 0, height: 0 }}
+                                          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                                          className="space-y-3 px-4 py-4"
+                                        >
+                                          <div className="grid gap-3 sm:grid-cols-2">
+                                            {[
+                                              { key: "producer" as const, label: "Produtor" },
+                                              { key: "country" as const, label: "País" },
+                                              { key: "region" as const, label: "Região" },
+                                              { key: "grape" as const, label: "Uva" },
+                                              { key: "vintage" as const, label: "Safra" },
+                                              { key: "purchase_price" as const, label: "Preço" },
+                                            ].map((field) => (
+                                              <div key={field.key} className="space-y-1.5">
+                                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">{field.label}</p>
+                                                {field.key === "country" ? (
+                                                  <Select
+                                                    value={wine.country || "__empty__"}
+                                                    onValueChange={(value) => updateWineRow(index, "country", value === "__empty__" ? undefined : value)}
+                                                  >
+                                                    <SelectTrigger className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none">
+                                                      <SelectValue placeholder="País" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                      <SelectItem value="__empty__">Em branco</SelectItem>
+                                                      {knownCountries.map((country) => (
+                                                        <SelectItem key={country} value={country}>
+                                                          {country}
+                                                        </SelectItem>
+                                                      ))}
+                                                    </SelectContent>
+                                                  </Select>
+                                                ) : field.key === "grape" ? (
+                                                  <Select
+                                                    value={wine.grape || "__empty__"}
+                                                    onValueChange={(value) => updateWineRow(index, "grape", value === "__empty__" ? undefined : value)}
+                                                  >
+                                                    <SelectTrigger className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none">
+                                                      <SelectValue placeholder="Uva" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                      <SelectItem value="__empty__">Em branco</SelectItem>
+                                                      {knownGrapes.map((grape) => (
+                                                        <SelectItem key={grape} value={grape}>
+                                                          {grape}
+                                                        </SelectItem>
+                                                      ))}
+                                                    </SelectContent>
+                                                  </Select>
+                                                ) : field.key === "vintage" ? (
+                                                  <Input
+                                                    value={wine.vintage ? String(wine.vintage) : ""}
+                                                    onChange={(e) => updateWineRow(index, "vintage", e.target.value ? Number.parseInt(e.target.value, 10) : undefined)}
+                                                    className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none"
+                                                    type="number"
+                                                    placeholder="Safra"
+                                                  />
+                                                ) : field.key === "purchase_price" ? (
+                                                  <Input
+                                                    value={formatPrice((wine as DraftWine).price ?? wine.purchase_price)}
+                                                    onChange={(e) => updateWineRow(index, "purchase_price", e.target.value ? Number.parseFloat(e.target.value) : undefined)}
+                                                    className={cn("h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none", rowMissingPrice && "border-amber-300")}
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="Preço"
+                                                  />
+                                                ) : (
+                                                  <Input
+                                                    value={field.key === "producer" ? wine.producer || "" : wine.region || ""}
+                                                    onChange={(e) => updateWineRow(index, field.key, e.target.value)}
+                                                    className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none"
+                                                    placeholder={field.label}
+                                                  />
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+
                                           <div className="flex flex-wrap items-center gap-2">
                                             <span className={cn("inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-semibold", statusTone)}>
                                               {statusLabel}
                                             </span>
-                                            {issues.length > 0 ? (
-                                              <span className="text-[10px] font-medium text-black/45">
-                                                {issues.slice(0, 2).join(" · ")}
+                                            {(wine as DraftWine).duplicateWarning ? (
+                                              <span className="inline-flex items-center rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-semibold text-violet-700">
+                                                {(wine as DraftWine).duplicateWarning}
                                               </span>
                                             ) : null}
                                           </div>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                                <tr ref={loadMoreRef}>
-                                  <td colSpan={8} className="h-8" />
-                                </tr>
-                              </tbody>
-                            </table>
+                                        </motion.div>
+                                      ) : null}
+                                    </AnimatePresence>
+                                  </motion.div>
+                                );
+                              })}
+                            </div>
+
+                            <div ref={loadMoreRef} className="h-8" aria-hidden="true" />
                           </div>
                         </div>
                       ) : (
@@ -3116,24 +3424,37 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           </div>
 
           {step === "preview" ? (
-            <div className="sticky bottom-0 z-30 border-t border-black/5 bg-white p-4 flex justify-end shrink-0">
-              <div className="mr-auto flex flex-col gap-1">
-                <div className="flex items-center text-[11px] font-medium text-black/50">
-                  Mostrando {visibleDraftWines.length} de {renderableRows.length} vinhos
+            <div
+              className="sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-white/45 px-4 py-4"
+              style={{
+                background: "rgba(255,255,255,0.68)",
+                backdropFilter: "blur(14px)",
+                WebkitBackdropFilter: "blur(14px)",
+              }}
+            >
+              <div className="flex flex-col gap-1 text-[#5F5F5F]">
+                <div className="flex items-center gap-2 text-[12px] font-medium">
+                  <span>{visibleDraftWines.length} mostrados</span>
+                  <span className="text-black/20">·</span>
+                  <span>{renderableRows.length} total</span>
+                  <span className="text-black/20">·</span>
+                  <span className="text-emerald-700">{completeRowsCount} válidos</span>
+                  <span className="text-black/20">·</span>
+                  <span className="text-amber-700">{reviewRowsCount} revisão</span>
                 </div>
-                <div className="flex items-center text-[12px] font-medium text-black/50">
+                <div className="text-[12px]">
                   {invalidRowsCount > 0
-                    ? `${invalidRowsCount} linha(s) precisam de atenção antes da importação final`
-                    : "Todos os itens ficam visíveis e editáveis antes da importação"}
+                    ? `${invalidRowsCount} linha(s) precisam de correção antes de importar.`
+                    : "Tudo está editável e pronto antes da importação."}
                 </div>
               </div>
               <Button
                 onClick={handleImport}
                 variant="primary"
-                className="h-12"
-                disabled={draftWines.length === 0}
+                className="h-12 rounded-[12px] px-5 text-[13px] font-semibold"
+                disabled={draftWines.length === 0 || invalidRowsCount > 0}
               >
-                <Upload className="h-4 w-4 mr-1.5" /> Importar {draftWines.length} vinho(s)
+                <Upload className="h-4 w-4 mr-1.5" /> Importar {draftWines.length} revisados
               </Button>
             </div>
           ) : null}
