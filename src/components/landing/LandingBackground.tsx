@@ -11,28 +11,28 @@ export function LandingBackground() {
         className="absolute top-[-8%] left-[-8%] w-[42vw] h-[42vw] rounded-full"
         style={{
           background: "radial-gradient(circle, rgba(198,167,104,0.18) 0%, transparent 68%)",
-          filter: "blur(82px)",
+          filter: "blur(60px)",
         }}
       />
       <div
         className="absolute top-[4%] right-[-12%] w-[34vw] h-[34vw] rounded-full"
         style={{
           background: "radial-gradient(circle, rgba(110,30,42,0.11) 0%, transparent 70%)",
-          filter: "blur(88px)",
+          filter: "blur(66px)",
         }}
       />
       <div
         className="absolute top-[36%] left-[18%] w-[30vw] h-[30vw] rounded-full"
         style={{
           background: "radial-gradient(circle, rgba(255,255,255,0.42) 0%, transparent 72%)",
-          filter: "blur(82px)",
+          filter: "blur(60px)",
         }}
       />
       <div
         className="absolute bottom-[5%] right-[10%] w-[24vw] h-[24vw] rounded-full"
         style={{
           background: "radial-gradient(circle, rgba(95,111,82,0.10) 0%, transparent 72%)",
-          filter: "blur(82px)",
+          filter: "blur(60px)",
         }}
       />
 
