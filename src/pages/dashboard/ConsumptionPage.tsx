@@ -17,28 +17,35 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-type PeriodFilter = "week" | "month" | "year";
-type SourceFilter = "cellar" | "external";
-type SortBy = "recent" | "old" | "rating";
+type PeriodFilter = "all" | "week" | "month" | "year";
+type SortBy = "alphabetical" | "most_consumed" | "least_consumed" | "recent";
+type ConsumptionFilters = {
+  period: PeriodFilter;
+  countries: string[];
+  sortBy: SortBy;
+};
+
+const defaultFilters: ConsumptionFilters = {
+  period: "all",
+  countries: [],
+  sortBy: "recent",
+};
 
 const periodOptions: Array<{ value: PeriodFilter; label: string }> = [
+  { value: "all", label: "Todos" },
   { value: "week", label: "Semana" },
   { value: "month", label: "Mês" },
   { value: "year", label: "Ano" },
 ];
 
-const sourceOptions: Array<{ value: SourceFilter; label: string }> = [
-  { value: "cellar", label: "Minha adega" },
-  { value: "external", label: "Adega externa" },
-];
-
 const sortOptions: Array<{ value: SortBy; label: string }> = [
+  { value: "alphabetical", label: "Alfabético" },
+  { value: "most_consumed", label: "Mais consumidos" },
+  { value: "least_consumed", label: "Menos consumidos" },
   { value: "recent", label: "Mais recentes" },
-  { value: "old", label: "Mais antigos" },
-  { value: "rating", label: "Melhor avaliados" },
 ];
 
-const STORAGE_KEY = "sommelyx.consumption.filters.v1";
+const STORAGE_KEY = "sommelyx.consumption.filters.v2";
 
 const FilterChoice = memo(function FilterChoice({
   active,
@@ -64,6 +71,50 @@ const FilterChoice = memo(function FilterChoice({
         <span className="min-w-0 truncate">{label}</span>
       </span>
       {active ? <Check className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]" /> : null}
+    </button>
+  );
+});
+
+const CountryChoice = memo(function CountryChoice({
+  active,
+  label,
+  count,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  count?: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex w-full items-center justify-between rounded-[14px] px-3 py-2.5 text-left text-[12.5px] font-medium leading-[1.18] transition-all duration-150 ease-out hover:bg-black/5 active:scale-[0.98]",
+        active
+          ? "bg-[rgba(95,127,82,0.12)] text-[#305231]"
+          : "bg-white/0 text-[#2f2a22]",
+      )}
+    >
+      <span className="flex min-w-0 items-center gap-2">
+        <span
+          className={cn(
+            "flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
+            active
+              ? "border-[#5F7F52] bg-[#5F7F52] text-white"
+              : "border-[rgba(95,127,82,0.28)] bg-white text-transparent",
+          )}
+        >
+          <Check className="h-2.5 w-2.5" />
+        </span>
+        <span className="min-w-0 truncate">{label}</span>
+      </span>
+      {typeof count === "number" ? (
+        <span className="shrink-0 text-[10.5px] uppercase tracking-[0.08em] text-[rgba(58,51,39,0.52)]">
+          {count}
+        </span>
+      ) : null}
     </button>
   );
 });
@@ -118,61 +169,30 @@ function FilterPanel({
   );
 }
 
-function buildMonthWindow(size: number) {
-  const months: Array<{ key: string; label: string }> = [];
-  const cursor = new Date();
-  cursor.setDate(1);
-  cursor.setHours(0, 0, 0, 0);
-  cursor.setMonth(cursor.getMonth() - (size - 1));
-  for (let i = 0; i < size; i++) {
-    const d = new Date(cursor);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d
-      .toLocaleDateString("pt-BR", { month: "short" })
-      .replace(".", "")
-      .toLowerCase();
-    months.push({ key, label });
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-  return months;
-}
-
 export default function ConsumptionPage() {
   const { data: entries = [], isLoading } = useConsumption();
-  const [period, setPeriod] = useState<PeriodFilter>(() => {
-    if (typeof window === "undefined") return "month";
+  const [filters, setFilters] = useState<ConsumptionFilters>(() => {
+    if (typeof window === "undefined") return defaultFilters;
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return "month";
+    if (!stored) return defaultFilters;
     try {
-      const parsed = JSON.parse(stored) as Partial<{ period: PeriodFilter }>;
-      return parsed.period ?? "month";
+      const parsed = JSON.parse(stored) as Partial<ConsumptionFilters>;
+      return {
+        period: parsed.period ?? defaultFilters.period,
+        countries: Array.isArray(parsed.countries)
+          ? parsed.countries.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+          : defaultFilters.countries,
+        sortBy: parsed.sortBy && ["alphabetical", "most_consumed", "least_consumed", "recent"].includes(parsed.sortBy)
+          ? parsed.sortBy
+          : defaultFilters.sortBy,
+      };
     } catch {
-      return "month";
+      return defaultFilters;
     }
   });
-  const [source, setSource] = useState<Array<SourceFilter>>(() => {
-    if (typeof window === "undefined") return [];
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-    try {
-      const parsed = JSON.parse(stored) as Partial<{ source: Array<SourceFilter> }>;
-      return Array.isArray(parsed.source) ? parsed.source.filter((item): item is SourceFilter => item === "cellar" || item === "external") : [];
-    } catch {
-      return [];
-    }
-  });
-  const [sortBy, setSortBy] = useState<SortBy>(() => {
-    if (typeof window === "undefined") return "recent";
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return "recent";
-    try {
-      const parsed = JSON.parse(stored) as Partial<{ sortBy: SortBy }>;
-      return parsed.sortBy ?? "recent";
-    } catch {
-      return "recent";
-    }
-  });
-  const [openFilter, setOpenFilter] = useState<"period" | "source" | "sort" | null>(null);
+  const [openFilter, setOpenFilter] = useState<"period" | "country" | "sort" | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [draftFilters, setDraftFilters] = useState<ConsumptionFilters>(filters);
   const [displayEntries, setDisplayEntries] = useState(entries);
   const [isFiltering, setIsFiltering] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
@@ -181,104 +201,158 @@ export default function ConsumptionPage() {
   const filterTimeoutRef = useRef<number | null>(null);
   const scrollTimeoutRef = useRef<number | null>(null);
 
-  const periodValueLabel = periodOptions.find((opt) => opt.value === period)?.label ?? "Mês";
-  const sourceValueLabel = useMemo(() => {
-    if (source.length === 0) return "Todas";
-    return sourceOptions
-      .filter((opt) => source.includes(opt.value))
-      .map((opt) => opt.label)
-      .join(" · ");
-  }, [source]);
-  const sourceButtonLabel = useMemo(() => {
-    if (source.length === 0) return "Todas";
-    if (source.length === 2) return "Ambas";
-    return sourceOptions.find((opt) => source.includes(opt.value))?.label ?? "Todas";
-  }, [source]);
-  const sortValueLabel = sortOptions.find((opt) => opt.value === sortBy)?.label ?? "Mais recentes";
+  const countryOptions = useMemo(() => {
+    const map = new Map<string, number>();
+    entries.forEach((entry) => {
+      const country = entry.country?.trim();
+      if (!country) return;
+      map.set(country, (map.get(country) ?? 0) + 1);
+    });
+    return [...map.entries()]
+      .sort(([a], [b]) => a.localeCompare(b, "pt-BR"))
+      .map(([label, count]) => ({ value: label, label, count }));
+  }, [entries]);
+
+  const periodValueLabel = periodOptions.find((opt) => opt.value === filters.period)?.label ?? "Todos";
+  const countryValueLabel = useMemo(() => {
+    if (filters.countries.length === 0) return "Todos";
+    const labels = countryOptions
+      .filter((opt) => filters.countries.includes(opt.value))
+      .map((opt) => opt.label);
+    if (labels.length <= 2) return labels.join(", ");
+    return `${labels.slice(0, 2).join(", ")} +${labels.length - 2}`;
+  }, [countryOptions, filters.countries]);
+  const sortValueLabel = sortOptions.find((opt) => opt.value === filters.sortBy)?.label ?? "Mais recentes";
   const activeFilterSummary = useMemo(() => {
     const parts = [
       `Período: ${periodValueLabel}`,
-      `Origem: ${sourceValueLabel}`,
+      `País: ${countryValueLabel}`,
       `Ordenar: ${sortValueLabel}`,
     ];
-    const hasActiveFilters = period !== "month" || source.length > 0 || sortBy !== "recent";
+    const hasActiveFilters =
+      filters.period !== defaultFilters.period ||
+      filters.countries.length > 0 ||
+      filters.sortBy !== defaultFilters.sortBy;
     return hasActiveFilters ? parts.join(" · ") : "";
-  }, [period, periodValueLabel, source.length, sourceValueLabel, sortBy, sortValueLabel]);
+  }, [countryValueLabel, filters.countries.length, filters.period, filters.sortBy, periodValueLabel, sortValueLabel]);
 
   useEffect(() => {
     window.localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        period,
-        source,
-        sortBy,
+        period: filters.period,
+        countries: filters.countries,
+        sortBy: filters.sortBy,
       }),
     );
-  }, [period, source, sortBy]);
+  }, [filters]);
 
-  const toggleSource = (value: SourceFilter) => {
-    setSource((current) => {
-      if (current.includes(value)) {
-        const next = current.filter((item) => item !== value);
-        return next;
-      }
-      return [...current, value].sort();
+  useEffect(() => {
+    if (mobileFiltersOpen) {
+      setDraftFilters(filters);
+    }
+  }, [filters, mobileFiltersOpen]);
+
+  const clearFilters = () => {
+    setFilters(defaultFilters);
+    setDraftFilters(defaultFilters);
+    setOpenFilter(null);
+    setMobileFiltersOpen(false);
+  };
+
+  const setFilter = (updater: Partial<ConsumptionFilters>) => {
+    setFilters((current) => ({ ...current, ...updater }));
+  };
+
+  const toggleCountry = (country: string, target: "filters" | "draft" = "filters") => {
+    const setter = target === "filters" ? setFilters : setDraftFilters;
+    setter((current) => {
+      const hasCountry = current.countries.includes(country);
+      const nextCountries = hasCountry
+        ? current.countries.filter((value) => value !== country)
+        : [...current.countries, country];
+      return {
+        ...current,
+        countries: nextCountries.sort((a, b) => a.localeCompare(b, "pt-BR")),
+      };
     });
   };
 
-  const setAllSources = () => setSource([]);
-
-  const clearFilters = () => {
-    setPeriod("month");
-    setSource([]);
-    setSortBy("recent");
-    setOpenFilter(null);
+  const applyDraftFilters = () => {
+    setFilters(draftFilters);
+    setMobileFiltersOpen(false);
   };
 
   const filteredEntries = useMemo(() => {
     const now = new Date();
-    const filtered = entries.filter((entry) => {
-      const d = new Date(entry.consumed_at);
-      if (period === "week") {
-        const diff = (now.getTime() - d.getTime()) / 86_400_000;
-        if (diff > 7 || diff < 0) return false;
-      } else if (period === "month") {
-        if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false;
-      } else if (period === "year") {
-        if (d.getFullYear() !== now.getFullYear()) return false;
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const withinPeriod = (value: string) => {
+      const consumedAt = new Date(value);
+      if (filters.period === "all") return true;
+      if (filters.period === "week") {
+        const start = new Date(startOfToday);
+        start.setDate(start.getDate() - 6);
+        return consumedAt >= start && consumedAt <= now;
       }
-      const isCellar = !!entry.wine_id || entry.source === "cellar";
-      if (source.length > 0 && !((source.includes("cellar") && isCellar) || (source.includes("external") && !isCellar))) {
-        return false;
+      if (filters.period === "month") {
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        return consumedAt >= start && consumedAt <= end;
+      }
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      return consumedAt >= start && consumedAt <= end;
+    };
+
+    const filtered = entries.filter((entry) => {
+      if (!withinPeriod(entry.consumed_at)) return false;
+      if (filters.countries.length > 0) {
+        const entryCountry = (entry.country || "").trim().toLowerCase();
+        if (!entryCountry) return false;
+        if (!filters.countries.some((country) => country.trim().toLowerCase() === entryCountry)) return false;
       }
       return true;
     });
 
-    const sorted = [...filtered];
-    if (sortBy === "recent") {
-      sorted.sort((a, b) => new Date(b.consumed_at).getTime() - new Date(a.consumed_at).getTime());
-    } else if (sortBy === "old") {
-      sorted.sort((a, b) => new Date(a.consumed_at).getTime() - new Date(b.consumed_at).getTime());
-    } else if (sortBy === "rating") {
-      sorted.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
-    }
-    return sorted;
-  }, [entries, period, source, sortBy]);
+    const consumptionCountByWine = new Map<string, number>();
+    filtered.forEach((entry) => {
+      const key = (entry.wine_name || "").trim().toLowerCase();
+      if (!key) return;
+      consumptionCountByWine.set(key, (consumptionCountByWine.get(key) ?? 0) + 1);
+    });
 
-  const months = useMemo(() => buildMonthWindow(6), []);
-  // Buckets reativos ao filtro de Período + Origem
+    const sorted = [...filtered].sort((a, b) => {
+      const aName = (a.wine_name || "").trim();
+      const bName = (b.wine_name || "").trim();
+      const aCount = consumptionCountByWine.get(aName.toLowerCase()) ?? 0;
+      const bCount = consumptionCountByWine.get(bName.toLowerCase()) ?? 0;
+
+      switch (filters.sortBy) {
+        case "alphabetical":
+          return aName.localeCompare(bName, "pt-BR");
+        case "most_consumed":
+          if (bCount !== aCount) return bCount - aCount;
+          return new Date(b.consumed_at).getTime() - new Date(a.consumed_at).getTime();
+        case "least_consumed":
+          if (aCount !== bCount) return aCount - bCount;
+          return new Date(b.consumed_at).getTime() - new Date(a.consumed_at).getTime();
+        default:
+          return new Date(b.consumed_at).getTime() - new Date(a.consumed_at).getTime();
+      }
+    });
+
+    return sorted;
+  }, [entries, filters]);
+
   const chart = useMemo(() => {
     const now = new Date();
-    const isInSource = (entry: typeof entries[number]) => {
-      const isCellar = !!entry.wine_id || entry.source === "cellar";
-      if (source.length === 0) return true;
-      if (source.includes("cellar") && isCellar) return true;
-      if (source.includes("external") && !isCellar) return true;
-      return false;
-    };
+    const bucketMap: Record<string, number> = {};
+    const isMonth = filters.period === "month";
+    const isWeek = filters.period === "week";
+    const sourceEntries = filteredEntries;
 
-    if (period === "week") {
-      // Últimos 7 dias
+    if (isWeek) {
       const buckets: Array<{ key: string; label: string }> = [];
       const cursor = new Date(now);
       cursor.setHours(0, 0, 0, 0);
@@ -286,57 +360,76 @@ export default function ConsumptionPage() {
       for (let i = 0; i < 7; i++) {
         const d = new Date(cursor);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-        const label = d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "").slice(0, 3).toLowerCase();
-        buckets.push({ key, label });
+        buckets.push({
+          key,
+          label: d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "").slice(0, 3).toLowerCase(),
+        });
         cursor.setDate(cursor.getDate() + 1);
       }
-      const map: Record<string, number> = {};
-      entries.filter(isInSource).forEach((c) => {
-        const d = new Date(c.consumed_at);
+      sourceEntries.forEach((entry) => {
+        const d = new Date(entry.consumed_at);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-        map[key] = (map[key] || 0) + 1;
+        bucketMap[key] = (bucketMap[key] || 0) + 1;
       });
       return {
         title: "Últimos 7 dias",
-        data: buckets.map((b) => ({ label: b.label, value: map[b.key] || 0 })),
+        data: buckets.map((bucket) => ({ label: bucket.label, value: bucketMap[bucket.key] || 0 })),
       };
     }
 
-    if (period === "year") {
-      // 12 meses do ano atual
-      const buckets = Array.from({ length: 12 }, (_, i) => {
-        const d = new Date(now.getFullYear(), i, 1);
+    if (isMonth) {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const buckets = Array.from({ length: 5 }, (_, i) => {
+        const from = i * 7 + 1;
+        const to = Math.min((i + 1) * 7, daysInMonth);
         return {
-          key: `${d.getFullYear()}-${String(i + 1).padStart(2, "0")}`,
-          label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").slice(0, 3).toLowerCase(),
+          key: `${i}`,
+          label: `${from}-${to}`,
         };
       });
-      const map: Record<string, number> = {};
-      entries.filter(isInSource).forEach((c) => {
-        const d = new Date(c.consumed_at);
-        if (d.getFullYear() !== now.getFullYear()) return;
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        map[key] = (map[key] || 0) + 1;
+      sourceEntries.forEach((entry) => {
+        const d = new Date(entry.consumed_at);
+        if (d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) return;
+        const bucketIndex = Math.min(Math.floor((d.getDate() - 1) / 7), 4);
+        bucketMap[String(bucketIndex)] = (bucketMap[String(bucketIndex)] || 0) + 1;
       });
       return {
-        title: `Ano de ${now.getFullYear()}`,
-        data: buckets.map((b) => ({ label: b.label, value: map[b.key] || 0 })),
+        title: "Mês atual",
+        data: buckets.map((bucket) => ({ label: bucket.label, value: bucketMap[bucket.key] || 0 })),
       };
     }
 
-    // month → últimos 6 meses (default)
-    const buckets = months;
-    const map: Record<string, number> = {};
-    entries.filter(isInSource).forEach((c) => {
-      const d = new Date(c.consumed_at);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      map[key] = (map[key] || 0) + 1;
+    const buckets =
+      filters.period === "all"
+        ? Array.from({ length: 12 }, (_, i) => {
+            const d = new Date(now);
+            d.setMonth(d.getMonth() - (11 - i));
+            return {
+              key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+              label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").slice(0, 3).toLowerCase(),
+            };
+          })
+        : Array.from({ length: 12 }, (_, i) => {
+            const d = new Date(now.getFullYear(), i, 1);
+            return {
+              key: `${d.getFullYear()}-${String(i + 1).padStart(2, "0")}`,
+              label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").slice(0, 3).toLowerCase(),
+            };
+          });
+    sourceEntries.forEach((entry) => {
+      const d = new Date(entry.consumed_at);
+      const key =
+        filters.period === "all"
+          ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+          : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      bucketMap[key] = (bucketMap[key] || 0) + 1;
     });
     return {
-      title: "Últimos 6 meses",
-      data: buckets.map((m) => ({ label: m.label, value: map[m.key] || 0 })),
+      title: filters.period === "all" ? "Últimos 12 meses" : `Ano de ${now.getFullYear()}`,
+      data: buckets.map((bucket) => ({ label: bucket.label, value: bucketMap[bucket.key] || 0 })),
     };
-  }, [entries, period, source, months]);
+  }, [entries, filteredEntries, filters.countries, filters.period]);
   const defaultActiveChartIndex = useMemo(() => {
     let last = null as number | null;
     chart.data.forEach((item, index) => {
@@ -352,13 +445,13 @@ export default function ConsumptionPage() {
     setTooltipChartIndex(null);
   }, [defaultActiveChartIndex]);
 
-  const total = entries.length;
-  const avgPerMonthValue = total > 0 ? total / 6 : 0;
+  const total = filteredEntries.length;
+  const avgPerMonthValue = filters.period === "week" ? total * 4.33 : filters.period === "month" ? total : filters.period === "year" ? total / 12 : total / 12;
   const avgPerMonth = avgPerMonthValue.toFixed(1).replace(".", ",");
 
   const styleStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    entries.forEach((e) => {
+    filteredEntries.forEach((e) => {
       const s = (e.style || "").toLowerCase();
       let family = "outros";
       if (s.includes("tinto")) family = "Tinto";
@@ -372,9 +465,9 @@ export default function ConsumptionPage() {
     if (!sorted.length || total === 0) return { name: "—", pct: 0 };
     const [name, n] = sorted[0];
     return { name, pct: Math.round((n / total) * 100) };
-  }, [entries, total]);
+  }, [filteredEntries, total]);
 
-  const lastEntry = entries[0];
+  const lastEntry = filteredEntries[0];
   const lastLabel = lastEntry
     ? (() => {
         const days = Math.max(
@@ -396,13 +489,13 @@ export default function ConsumptionPage() {
     if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
 
     setIsFiltering(true);
+    setDisplayEntries(filteredEntries);
     filterTimeoutRef.current = window.setTimeout(() => {
-      setDisplayEntries(filteredEntries);
-    }, 100);
-    scrollTimeoutRef.current = window.setTimeout(() => {
       setIsFiltering(false);
+    }, 120);
+    scrollTimeoutRef.current = window.setTimeout(() => {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 240);
+    }, 160);
 
     return () => {
       if (filterTimeoutRef.current) window.clearTimeout(filterTimeoutRef.current);
@@ -486,7 +579,7 @@ export default function ConsumptionPage() {
             <h2 className="editorial-h2 mt-1 text-[18px] md:text-[22px]">{chart.title}</h2>
           </div>
           <span className="text-[9px] font-semibold uppercase tracking-[0.10em] text-[rgba(58,51,39,0.5)]">
-            garrafas / {period === "week" ? "dia" : "mês"}
+            garrafas / {filters.period === "week" ? "dia" : "mês"}
           </span>
         </div>
         <Sparkbar
@@ -500,49 +593,122 @@ export default function ConsumptionPage() {
             setActiveChartIndex(index);
             if (isMobile) setTooltipChartIndex(index);
           }}
-          barWidth={period === "year" ? 6 : 10}
+          barWidth={filters.period === "year" ? 6 : 10}
         />
       </EditorialCard>
 
       {/* Filtros inteligentes */}
       {isMobile ? (
         <div className="mt-3 w-full">
-          <div className="flex w-full items-center gap-1.5">
-            {[
-              { kind: "period" as const, label: "Período", aria: "Filtrar período" },
-              { kind: "source" as const, label: "Origem", aria: "Filtrar origem" },
-              { kind: "sort" as const, label: "Ordenar", aria: "Ordenar consumo" },
-            ].map((filter) => {
-              const active = openFilter === filter.kind;
-              return (
+          <button
+            type="button"
+            onClick={() => setMobileFiltersOpen(true)}
+            className={cn(
+              "flex h-[40px] w-full items-center justify-between rounded-[12px] border px-3 text-left text-[13px] font-semibold tracking-[-0.01em] transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
+              hasActiveFilters
+                ? "border-[rgba(95,127,82,0.24)] bg-[rgba(95,127,82,0.08)] text-[#213b26]"
+                : "border-[rgba(95,127,82,0.18)] bg-[rgba(255,255,255,0.82)] text-[#1E1E1E]",
+            )}
+          >
+            <span className="flex min-w-0 flex-col items-start">
+              <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">Filtros</span>
+              <span className="min-w-0 truncate text-[12px] font-semibold text-[#1E1E1E]">
+                {hasActiveFilters ? activeFilterSummary || "Todos os filtros" : "Período, país e ordenação"}
+              </span>
+            </span>
+            <ChevronDown className={cn("h-4 w-4 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out", mobileFiltersOpen && "rotate-180")} />
+          </button>
+
+          <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+            <SheetContent side="bottom" className="border-t border-white/50 p-4 pt-5">
+              <SheetHeader className="mb-3 flex-col gap-1">
+                <SheetTitle className="text-[17px] font-semibold tracking-tight text-[#1E1E1E]">
+                  Filtros de consumo
+                </SheetTitle>
+                <p className="text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">
+                  Ajuste período, país e ordenação antes de aplicar.
+                </p>
+              </SheetHeader>
+
+              <div className="max-h-[62vh] space-y-4 overflow-y-auto pr-1">
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">Período</p>
+                  <div className="space-y-1.5">
+                    {periodOptions.map((opt) => (
+                      <FilterChoice
+                        key={opt.value}
+                        active={draftFilters.period === opt.value}
+                        label={opt.label}
+                        onClick={() => setDraftFilters((current) => ({ ...current, period: opt.value }))}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">País</p>
+                  <div className="space-y-1.5">
+                    <FilterChoice
+                      active={draftFilters.countries.length === 0}
+                      label="Todos"
+                      onClick={() => setDraftFilters((current) => ({ ...current, countries: [] }))}
+                    />
+                    {countryOptions.map((opt) => (
+                      <CountryChoice
+                        key={opt.value}
+                        active={draftFilters.countries.includes(opt.value)}
+                        label={opt.label}
+                        count={opt.count}
+                        onClick={() => toggleCountry(opt.value, "draft")}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">Ordenar</p>
+                  <div className="space-y-1.5">
+                    {sortOptions.map((opt) => (
+                      <FilterChoice
+                        key={opt.value}
+                        active={draftFilters.sortBy === opt.value}
+                        label={opt.label}
+                        onClick={() => setDraftFilters((current) => ({ ...current, sortBy: opt.value }))}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                {hasActiveFilters ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="h-11 flex-1 rounded-[10px] border border-[rgba(95,127,82,0.18)] bg-white/75 px-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#5F7F52] transition-all duration-150 ease-out hover:-translate-y-px hover:bg-white"
+                  >
+                    Limpar
+                  </button>
+                ) : null}
                 <button
-                  key={filter.kind}
                   type="button"
-                  aria-label={filter.aria}
-                  onClick={() => setOpenFilter(active ? null : filter.kind)}
+                  onClick={applyDraftFilters}
                   className={cn(
-                    "flex h-[34px] min-w-0 flex-1 items-center justify-between gap-1.5 rounded-[11px] border px-2 py-1 text-[12.5px] font-medium leading-none transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98] overflow-hidden",
-                    active
-                      ? "border-[rgba(132,168,108,0.34)] bg-[rgba(132,168,108,0.12)] text-[#23402b] shadow-[0_4px_10px_-12px_rgba(95,127,82,0.18)]"
-                      : "border-[rgba(132,168,108,0.24)] bg-[rgba(132,168,108,0.06)] text-[#2f2a22]",
+                    "h-11 rounded-[10px] bg-[#7a2c34] px-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-white transition-all duration-150 ease-out hover:-translate-y-px hover:bg-[#5a1e24]",
+                    hasActiveFilters ? "flex-1" : "w-full",
                   )}
                 >
-                  <span className="min-w-0 truncate text-[12.5px] font-semibold tracking-[-0.01em] text-[#213b26]">
-                    {filter.label}
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      "h-3 w-3 shrink-0 text-[#5F7F52]/60 transition-transform duration-150 ease-out",
-                      active && "rotate-180",
-                    )}
-                  />
+                  Aplicar
                 </button>
-              );
-            })}
-          </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      ) : (
+        <div className="grid gap-2 md:grid-cols-3">
           {[
             { kind: "period" as const, title: "Período", value: periodValueLabel },
-            { kind: "source" as const, title: "Origem", value: sourceValueLabel },
+            { kind: "country" as const, title: "País", value: countryValueLabel },
             { kind: "sort" as const, title: "Ordenar", value: sortValueLabel },
           ].map((box) => {
             const open = openFilter === box.kind;
@@ -551,172 +717,99 @@ export default function ConsumptionPage() {
                 ? periodOptions.map((opt) => (
                     <FilterChoice
                       key={opt.value}
-                      active={period === opt.value}
+                      active={filters.period === opt.value}
                       label={opt.label}
                       onClick={() => {
-                        setPeriod(opt.value);
+                        setFilter({ period: opt.value });
                         setOpenFilter(null);
                       }}
                     />
                   ))
-                : box.kind === "source"
+                : box.kind === "country"
                   ? [
                       <FilterChoice
                         key="all"
-                        active={source.length === 0}
-                        label="Todas"
+                        active={filters.countries.length === 0}
+                        label="Todos"
                         onClick={() => {
-                          setAllSources();
+                          setFilter({ countries: [] });
                           setOpenFilter(null);
                         }}
                       />,
-                      ...sourceOptions.map((opt) => (
-                        <FilterChoice
+                      ...countryOptions.map((opt) => (
+                        <CountryChoice
                           key={opt.value}
-                          active={source.includes(opt.value)}
+                          active={filters.countries.includes(opt.value)}
                           label={opt.label}
-                          onClick={() => toggleSource(opt.value)}
+                          count={opt.count}
+                          onClick={() => toggleCountry(opt.value)}
                         />
                       )),
                     ]
                   : sortOptions.map((opt) => (
                       <FilterChoice
                         key={opt.value}
-                        active={sortBy === opt.value}
+                        active={filters.sortBy === opt.value}
                         label={opt.label}
                         onClick={() => {
-                          setSortBy(opt.value);
+                          setFilter({ sortBy: opt.value });
                           setOpenFilter(null);
                         }}
                       />
                     ));
 
-            return (
-              <FilterPanel
-                key={box.kind}
-                title={box.title}
-                mobileTitle={box.title}
-                description={
-                  box.kind === "period"
-                    ? "Escolha a janela de análise."
-                    : box.kind === "source"
-                      ? "Selecione uma ou mais origens."
-                      : "Escolha a ordem da lista."
-                }
-                open={open}
-                onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
-                mobile
-              >
-                <div className="space-y-1.5">{options}</div>
-              </FilterPanel>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="grid gap-2 md:grid-cols-3">
-          {[
-          { kind: "period" as const, title: "Período", value: periodValueLabel },
-          { kind: "source" as const, title: "Origem", value: sourceValueLabel },
-          { kind: "sort" as const, title: "Ordenar", value: sortValueLabel },
-        ].map((box) => {
-          const open = openFilter === box.kind;
-          const options =
-            box.kind === "period"
-              ? periodOptions.map((opt) => (
-                  <FilterChoice
-                    key={opt.value}
-                    active={period === opt.value}
-                    label={opt.label}
-                    onClick={() => {
-                      setPeriod(opt.value);
-                      setOpenFilter(null);
-                    }}
-                  />
-                ))
-              : box.kind === "source"
-                ? [
-                    <FilterChoice
-                      key="all"
-                      active={source.length === 0}
-                      label="Todas"
-                      onClick={() => {
-                        setAllSources();
-                        setOpenFilter(null);
-                      }}
-                    />,
-                    ...sourceOptions.map((opt) => (
-                      <FilterChoice
-                        key={opt.value}
-                        active={source.includes(opt.value)}
-                        label={opt.label}
-                        onClick={() => toggleSource(opt.value)}
-                      />
-                    )),
-                  ]
-                : sortOptions.map((opt) => (
-                    <FilterChoice
-                      key={opt.value}
-                      active={sortBy === opt.value}
-                      label={opt.label}
-                      onClick={() => {
-                        setSortBy(opt.value);
-                        setOpenFilter(null);
-                      }}
-                    />
-                  ));
-
-          const trigger = (
+            const trigger = (
               <button
                 type="button"
                 onClick={() => setOpenFilter(open ? null : box.kind)}
                 className={cn(
-                "flex min-h-[66px] w-full items-center justify-between rounded-[20px] border px-4 text-left transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-[0_10px_24px_-18px_rgba(95,127,82,0.22)]",
-                open
-                  ? "border-[rgba(95,111,82,0.26)] bg-[rgba(95,111,82,0.08)]"
-                  : "border-[rgba(95,111,82,0.14)] bg-[rgba(255,255,255,0.88)]",
-              )}
-            >
-              <span className="min-w-0">
-                <span className="block text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">
-                  {box.title}
-                </span>
-                <span className="mt-1 block truncate text-[13.5px] font-semibold leading-[1.15] text-[#1E1E1E]">
-                  {box.value}
-                </span>
-              </span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out",
-                  open && "rotate-180",
+                  "flex min-h-[66px] w-full items-center justify-between rounded-[20px] border px-4 text-left transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-[0_10px_24px_-18px_rgba(95,127,82,0.22)]",
+                  open
+                    ? "border-[rgba(95,111,82,0.26)] bg-[rgba(95,111,82,0.08)]"
+                    : "border-[rgba(95,111,82,0.14)] bg-[rgba(255,255,255,0.88)]",
                 )}
-              />
-            </button>
-          );
+              >
+                <span className="min-w-0">
+                  <span className="block text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">
+                    {box.title}
+                  </span>
+                  <span className="mt-1 block truncate text-[13.5px] font-semibold leading-[1.15] text-[#1E1E1E]">
+                    {box.value}
+                  </span>
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out",
+                    open && "rotate-180",
+                  )}
+                />
+              </button>
+            );
 
-          return (
-            <div key={box.kind} className="min-w-0">
-              <Popover open={open} onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}>
-                <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-                <FilterPanel
-                  title={box.title}
-                  mobileTitle={box.title}
-                  description={
-                    box.kind === "period"
-                      ? "Escolha a janela de análise."
-                      : box.kind === "source"
-                        ? "Selecione uma ou mais origens."
-                        : "Escolha a ordem da lista."
-                  }
-                  open={open}
-                  onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
-                  mobile={false}
-                >
-                  <div className="space-y-1.5">{options}</div>
-                </FilterPanel>
-              </Popover>
-            </div>
-          );
-        })}
+            return (
+              <div key={box.kind} className="min-w-0">
+                <Popover open={open} onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}>
+                  <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+                  <FilterPanel
+                    title={box.title}
+                    mobileTitle={box.title}
+                    description={
+                      box.kind === "period"
+                        ? "Escolha a janela de análise."
+                        : box.kind === "country"
+                          ? "Selecione um ou mais países."
+                          : "Escolha a ordem da lista."
+                    }
+                    open={open}
+                    onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
+                    mobile={false}
+                  >
+                    <div className="space-y-1.5">{options}</div>
+                  </FilterPanel>
+                </Popover>
+              </div>
+            );
+          })}
         </div>
       )}
 
