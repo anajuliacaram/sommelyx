@@ -33,16 +33,20 @@ export class EdgeFunctionError extends Error {
   status?: number;
   code?: string;
   requestId?: string;
+  debugId?: string;
+  debug_id?: string;
   retryable?: boolean;
   rawBody?: unknown;
   functionName?: string;
 
-  constructor(message: string, opts?: { status?: number; code?: string; requestId?: string; retryable?: boolean; rawBody?: unknown; functionName?: string }) {
+  constructor(message: string, opts?: { status?: number; code?: string; requestId?: string; debugId?: string; retryable?: boolean; rawBody?: unknown; functionName?: string }) {
     super(message);
     this.name = "EdgeFunctionError";
     this.status = opts?.status;
     this.code = opts?.code;
     this.requestId = opts?.requestId;
+    this.debugId = opts?.debugId ?? opts?.requestId;
+    this.debug_id = this.debugId;
     this.retryable = opts?.retryable;
     this.rawBody = opts?.rawBody;
     this.functionName = opts?.functionName;
@@ -119,9 +123,36 @@ function isAbortErrorMessage(message: string) {
   );
 }
 
+function normalizeEdgeCode(code?: string, status?: number) {
+  const value = (code || "").trim().toUpperCase();
+  if (value === "AUTH_INVALID") return "AUTH_REQUIRED";
+  if (value === "EMPTY_AI_RESPONSE" || value === "INVALID_AI_RESPONSE" || value === "AI_PARSE_ERROR" || value === "JSON_PARSE_ERROR") {
+    return "PARSE_ERROR";
+  }
+  if (value === "IMAGE_DECODE_FAILED" || value === "INVALID_IMAGE_BASE64" || value === "UNSUPPORTED_IMAGE_FORMAT") {
+    return "INVALID_IMAGE";
+  }
+  if (value === "TIMEOUT" || value === "REQUEST_TIMEOUT" || value === "ABORTED") {
+    return "AI_TIMEOUT";
+  }
+  if (value === "SERVICE_UNAVAILABLE" || value === "EDGE_FAILED" || value === "AI_UNAVAILABLE") {
+    return "AI_UNAVAILABLE";
+  }
+  if (value) return value;
+  if (status === 401) return "AUTH_REQUIRED";
+  if (status === 408) return "AI_TIMEOUT";
+  if (status === 503 || status === 504) return "AI_UNAVAILABLE";
+  return undefined;
+}
+
 function classifyEdgeError(message: string, status?: number, code?: string): string {
-  if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID" || status === 401) return "Sua sessão expirou. Faça login novamente.";
-  if (code === "AI_TIMEOUT" || status === 408) return "Tempo excedido. Tente novamente em instantes.";
+  const normalizedCode = normalizeEdgeCode(code, status);
+  if (normalizedCode === "AUTH_REQUIRED") return "Sessão expirada. Faça login novamente.";
+  if (normalizedCode === "AI_TIMEOUT") return "A análise demorou muito. Tente novamente.";
+  if (normalizedCode === "NETWORK_ERROR") return "Sem conexão com internet";
+  if (normalizedCode === "AI_UNAVAILABLE") return "Não conseguimos analisar no momento. Tente novamente.";
+  if (normalizedCode === "INVALID_IMAGE") return "Imagem inválida ou ilegível.";
+  if (normalizedCode === "PARSE_ERROR") return "Não conseguimos analisar este rótulo.";
   if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
   if (code === "INVALID_IMAGE") return "Imagem inválida. Envie uma foto legível do rótulo.";
   if (code === "INVALID_IMAGE_BASE64" || code === "IMAGE_DECODE_FAILED" || code === "UNSUPPORTED_IMAGE_FORMAT") return "Não conseguimos processar esta imagem. Tente outra foto do rótulo.";
@@ -135,13 +166,10 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
     return "A resposta da IA veio em um formato inválido. Tente novamente em instantes.";
   }
   if (code === "LABEL_NOT_IDENTIFIED") return "Não foi possível identificar esse rótulo com segurança. Tente outra foto ou cadastre manualmente.";
-  if (isTransportErrorMessage(message)) {
-    if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      return "Sem conexão com servidor. Verifique sua internet.";
-    }
-    return "Sem conexão com servidor. Tente novamente em instantes.";
+  if (normalizedCode === "NETWORK_ERROR" || isTransportErrorMessage(message)) {
+    return "Sem conexão com internet";
   }
-  if (isAbortErrorMessage(message)) return "Tempo de resposta excedido. Tente novamente.";
+  if (normalizedCode === "AI_TIMEOUT" || isAbortErrorMessage(message)) return "A análise demorou muito. Tente novamente.";
   if (isSdkRelayError(message)) return "A solicitação não pôde ser enviada. Tente novamente.";
   if (message.toLowerCase().includes("tempo limite")) return "Tempo excedido. Tente novamente em instantes.";
   if (status === 429) return "Muitas requisições. Aguarde um momento e tente novamente.";
@@ -172,8 +200,9 @@ function unwrapResponseData<T>(data: unknown): T {
 
 function parseErrorBody(body: any, fallbackStatus?: number) {
   const status = typeof body?.status === "number" ? body.status : fallbackStatus;
-  const code = body?.code ? String(body.code) : undefined;
+  const code = normalizeEdgeCode(body?.code ? String(body.code) : undefined, status);
   const requestId = body?.requestId ? String(body.requestId) : body?.request_id ? String(body.request_id) : undefined;
+  const debugId = body?.debug_id ? String(body.debug_id) : body?.debugId ? String(body.debugId) : requestId;
   const retryable = typeof body?.retryable === "boolean" ? body.retryable : undefined;
   const rawMessage = typeof body?.message === "string"
     ? body.message
@@ -185,6 +214,7 @@ function parseErrorBody(body: any, fallbackStatus?: number) {
     status,
     code,
     requestId,
+    debugId,
     retryable,
     rawBody: body,
     rawMessage,
@@ -337,6 +367,7 @@ export async function invokeEdgeFunction<T>(
             status: parsed.status ?? response.status,
             code: parsed.code ?? (response.status === 401 ? "AUTH_INVALID" : "EDGE_FAILED"),
             requestId: parsed.requestId,
+            debugId: parsed.debugId,
             retryable: parsed.retryable ?? isRetriable(response.status),
             rawBody: parsed.rawBody ?? parsedBody,
             functionName: name,
@@ -349,6 +380,7 @@ export async function invokeEdgeFunction<T>(
             status: parsed.status,
             code: parsed.code,
             requestId: parsed.requestId,
+            debugId: parsed.debugId,
             retryable: parsed.retryable,
             rawBody: parsed.rawBody ?? parsedBody,
             functionName: name,
@@ -412,10 +444,12 @@ export async function invokeEdgeFunction<T>(
       const isTransport = isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage);
       throw new EdgeFunctionError(classifyEdgeError(toErrorMessage(err)), {
         status: abortFailure ? 408 : undefined,
-        code: abortFailure ? "AI_TIMEOUT" : isTransport ? "AI_UNAVAILABLE" : undefined,
+        code: abortFailure ? "AI_TIMEOUT" : isTransport ? "NETWORK_ERROR" : "AI_UNAVAILABLE",
         retryable: abortFailure ? retryOnAbort : isTransport,
         rawBody: rawMessage || toErrorMessage(err),
         functionName: name,
+        requestId,
+        debugId: requestId,
       });
     }
   }

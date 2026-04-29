@@ -160,51 +160,49 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         duration: 2400,
       });
     } catch (err: unknown) {
-      console.error("Scan error:", err);
-
       const e = err as any;
-      const code = e?.code as string | undefined;
-      const requestId = e?.requestId as string | undefined;
+      const code = String(e?.code || "UNKNOWN");
+      const requestId = String(e?.debugId || e?.requestId || "");
+      const debugPayload = {
+        function: "scan-wine-label",
+        code,
+        message: e?.message || null,
+        status: e?.status ?? null,
+        requestId: e?.requestId ?? null,
+        debugId: e?.debugId ?? null,
+        functionName: e?.functionName ?? null,
+        rawBody: e?.rawBody ?? null,
+        fileName: metadata?.fileName || null,
+        mimeType: metadata?.mimeType || null,
+        imageBase64Length: base64?.length || 0,
+      };
+      console.error("[ScanWineLabelDialog] scan_failed", debugPayload);
 
       console.info("[ScanWineLabelDialog] request_finished", {
         function: "scan-wine-label",
         success: false,
-        code: code || null,
+        code,
         requestId: requestId || null,
         fileName: metadata?.fileName || null,
       });
 
       if (requestId) {
-        console.log("[scan-wine-label] requestId", requestId);
+        setSupportCode(requestId);
       }
 
-      let msg = "Não conseguimos ler o rótulo com clareza.";
-      if (err instanceof EdgeFunctionError) {
-        setSupportCode(err.requestId ?? null);
-      }
-
-      if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
-        msg = "Sua sessão expirou. Faça login novamente para continuar.";
-      } else if (code === "INVALID_IMAGE") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente uma foto mais nítida.";
-      } else if (code === "IMAGE_TOO_LARGE") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente uma foto mais leve.";
-      } else if (code === "FILE_INVALID" || code === "INVALID_IMAGE_BASE64") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente outra foto ou use a câmera.";
-      } else if (code === "LABEL_NOT_IDENTIFIED") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente outra foto ou cadastre manualmente.";
-      } else if (code === "AI_PARSE_ERROR") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente em instantes.";
+      let msg = "Não conseguimos analisar este rótulo.";
+      if (code === "NETWORK_ERROR") {
+        msg = "Sem conexão com internet";
       } else if (code === "AI_TIMEOUT") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente outra foto mais nítida.";
+        msg = "A análise demorou muito. Tente novamente";
+      } else if (code === "INVALID_IMAGE") {
+        msg = "Imagem inválida ou ilegível";
+      } else if (code === "AUTH_REQUIRED") {
+        msg = "Sessão expirada. Faça login novamente";
       } else if (code === "AI_UNAVAILABLE") {
-        msg = e?.message?.includes("Sem conexão")
-          ? e.message
-          : "Não conseguimos ler o rótulo com clareza. Tente novamente com outra foto.";
-      } else if (code === "CONFIG_ERROR") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente em instantes.";
-      } else if (code === "AI_RATE_LIMIT") {
-        msg = "Não conseguimos ler o rótulo com clareza. Tente novamente em instantes.";
+        msg = "Não conseguimos analisar este rótulo.";
+      } else if (code === "PARSE_ERROR") {
+        msg = "Não conseguimos analisar este rótulo.";
       }
 
       setErrorMsg(msg);
