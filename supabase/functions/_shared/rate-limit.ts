@@ -35,7 +35,7 @@ async function consumeScope(
 ) {
   const client = adminClient();
   if (!client) {
-    return { allowed: true, degraded: true } as ConsumeResult;
+    return { allowed: false, degraded: true } as ConsumeResult;
   }
 
   const { data, error } = await client.rpc("consume_ai_rate_limit", {
@@ -48,12 +48,12 @@ async function consumeScope(
 
   if (error) {
     console.warn(`[rate-limit] scope=${scope} endpoint=${endpoint} rpc_failed`, error.message);
-    return { allowed: true, degraded: true } as ConsumeResult;
+    return { allowed: false, degraded: true } as ConsumeResult;
   }
 
   const row = Array.isArray(data) ? (data[0] as RateLimitRow | undefined) : (data as RateLimitRow | null);
   if (!row) {
-    return { allowed: true, degraded: true } as ConsumeResult;
+    return { allowed: false, degraded: true } as ConsumeResult;
   }
 
   return {
@@ -66,7 +66,7 @@ async function consumeScope(
   } as ConsumeResult;
 }
 
-export async function enforceAiRateLimit(userId: string, endpoint: string) {
+export async function checkRateLimit(userId: string, endpoint: string) {
   const minute = await consumeScope(userId, endpoint, "minute", 10, 60);
   if (!minute.allowed) {
     return {
@@ -75,6 +75,7 @@ export async function enforceAiRateLimit(userId: string, endpoint: string) {
       currentCount: minute.currentCount ?? 10,
       remaining: 0,
       resetAt: minute.resetAt ?? null,
+      degraded: minute.degraded ?? true,
     };
   }
 
@@ -86,6 +87,7 @@ export async function enforceAiRateLimit(userId: string, endpoint: string) {
       currentCount: day.currentCount ?? 100,
       remaining: 0,
       resetAt: day.resetAt ?? null,
+      degraded: day.degraded ?? true,
     };
   }
 
@@ -95,5 +97,8 @@ export async function enforceAiRateLimit(userId: string, endpoint: string) {
     currentCount: Math.max(minute.currentCount ?? 0, day.currentCount ?? 0),
     remaining: Math.min(minute.remaining ?? 10, day.remaining ?? 100),
     resetAt: minute.resetAt ?? day.resetAt ?? null,
+    degraded: false,
   };
 }
+
+export const enforceAiRateLimit = checkRateLimit;

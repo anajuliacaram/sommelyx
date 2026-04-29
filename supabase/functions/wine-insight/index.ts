@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +31,17 @@ serve(async (req) => {
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Sessão inválida" }), {
         status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const rateLimit = await checkRateLimit(user.id, "wine-insight");
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({
+        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+      }), {
+        status: rateLimit.degraded ? 503 : 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
-import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -515,21 +515,33 @@ serve(async (req) => {
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId, durationMs: elapsed(startTime) });
 
-    const rateLimit = await enforceAiRateLimit(userId, FUNCTION_NAME);
+    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
     if (!rateLimit.allowed) {
       await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 429, "rate_limited", Date.now() - startTime, {
         request_id: requestId,
         scope: rateLimit.scope,
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
       });
-      return jsonResponse({
-        success: false,
-        code: "RATE_LIMIT_EXCEEDED",
-        message: "Limite de uso atingido. Tente novamente em breve.",
-        requestId,
-        retryable: true,
-      }, 429);
+      return jsonResponse(
+        rateLimit.degraded
+          ? {
+            success: false,
+            code: "AI_RATE_LIMIT_UNAVAILABLE",
+            message: "Serviço temporariamente indisponível.",
+            requestId,
+            retryable: true,
+          }
+          : {
+            success: false,
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Limite de uso atingido.",
+            requestId,
+            retryable: true,
+          },
+        rateLimit.degraded ? 503 : 429,
+      );
     }
 
 

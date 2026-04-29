@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
-import { enforceAiRateLimit } from "../_shared/rate-limit.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { INVALID_INPUT_ERROR, bytesFromBase64, detectPdfPageCount, validatePdfPayload } from "../_shared/payload-validation.ts";
 
 const corsHeaders = {
@@ -119,15 +119,15 @@ serve(async (req) => {
   }
 
   const requestId = crypto.randomUUID();
-  const rateLimit = await enforceAiRateLimit(user.id, FUNCTION_NAME);
+  const rateLimit = await checkRateLimit(user.id, FUNCTION_NAME);
   if (!rateLimit.allowed) {
     return jsonResponse({
       success: false,
-      code: "RATE_LIMIT_EXCEEDED",
-      message: "Limite de uso atingido. Tente novamente em breve.",
+      code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+      message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
       requestId,
       retryable: true,
-    }, 429);
+    }, rateLimit.degraded ? 503 : 429);
   }
 
   const startedAt = Date.now();

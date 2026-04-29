@@ -1,35 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 import { callOpenAIResponses } from "../_shared/openai.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10;
-const RATE_WINDOW_MS = 60_000;
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(userId);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
-}
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, val] of rateLimitMap) {
-    if (now > val.resetAt) rateLimitMap.delete(key);
-  }
-}, 120_000);
 
 const MAX_CSV_SIZE = 2_000_000;
 const FUNCTION_NAME = "parse-csv-wines";
@@ -97,11 +75,21 @@ serve(async (req) => {
 
     userId = user.id;
 
-    if (!checkRateLimit(userId)) {
-      await logAudit(userId, 429, "rate_limited", Date.now() - startTime);
-      return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em 1 minuto." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+    const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
+    if (!rateLimit.allowed) {
+      await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startTime, {
+        scope: rateLimit.scope,
+        current_count: rateLimit.currentCount,
+        reset_at: rateLimit.resetAt,
+        degraded: rateLimit.degraded,
+      });
+      return new Response(JSON.stringify({
+        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        retryable: true,
+      }), {
+        status: rateLimit.degraded ? 503 : 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": rateLimit.degraded ? "30" : "60" },
       });
     }
 
