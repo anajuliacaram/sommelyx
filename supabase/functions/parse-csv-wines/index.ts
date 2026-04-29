@@ -9,7 +9,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const MAX_CSV_SIZE = 2_000_000;
+const MAX_CSV_SIZE = 1_000_000;
+const MAX_ROWS = 200;
+const MAX_CHUNKS = 5;
+const PROCESSING_TIMEOUT_MS = 10_000;
 const FUNCTION_NAME = "parse-csv-wines";
 
 async function logAudit(
@@ -42,6 +45,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const startTime = Date.now();
+  const deadlineAt = startTime + PROCESSING_TIMEOUT_MS;
   let userId = "anonymous";
 
   try {
@@ -101,8 +105,12 @@ serve(async (req) => {
       });
     }
 
-    if (csvContent.length > MAX_CSV_SIZE) {
-      return new Response(JSON.stringify({ error: "Arquivo muito grande. Máximo 2MB." }), {
+    const rawBytes = new TextEncoder().encode(csvContent);
+    if (rawBytes.length > MAX_CSV_SIZE) {
+      return new Response(JSON.stringify({
+        error: "Arquivo muito grande ou muitas linhas.",
+        code: "IMPORT_LIMIT_EXCEEDED",
+      }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -110,12 +118,21 @@ serve(async (req) => {
 
     const normalized = csvContent.replace(/\r\n/g, "\n").trim();
     const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
+    const detectedRows = Math.max(0, lines.length - 1);
+    if (detectedRows > MAX_ROWS) {
+      return new Response(JSON.stringify({
+        error: "Arquivo muito grande ou muitas linhas.",
+        code: "IMPORT_LIMIT_EXCEEDED",
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const isSmartPdf = parseMode === "smart-pdf" || fileType === "application/pdf";
     console.log(`[${FUNCTION_NAME}] mode=${isSmartPdf ? "smart-pdf" : "structured"} input_chars=${normalized.length} input_lines=${lines.length} ocr_used=${ocrUsed ? "true" : "false"}`);
 
     const chunks: string[] = [];
     const CHUNK_CHAR_LIMIT = isSmartPdf ? 12_000 : 8_500;
-    const MAX_CHUNKS = isSmartPdf ? 30 : 25;
 
     if (isSmartPdf) {
       const source = normalized.length > 0 ? normalized : Array.isArray(textBlocks) ? JSON.stringify(textBlocks) : "";
@@ -123,6 +140,7 @@ serve(async (req) => {
         chunks.push(source);
       } else {
         for (let i = 0; i < MAX_CHUNKS; i++) {
+          if (Date.now() > deadlineAt) break;
           const start = i * CHUNK_CHAR_LIMIT;
           const slice = source.slice(start, start + CHUNK_CHAR_LIMIT);
           if (!slice) break;
@@ -138,6 +156,7 @@ serve(async (req) => {
         chunks.push(normalized);
       } else {
         for (let i = 0; i < MAX_CHUNKS; i++) {
+          if (Date.now() > deadlineAt) break;
           const slice = dataLines.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
           if (slice.length === 0) break;
           chunks.push([header, ...slice].join("\n"));
@@ -146,6 +165,26 @@ serve(async (req) => {
     }
 
     const wasTruncated = isSmartPdf ? normalized.length > chunks.length * CHUNK_CHAR_LIMIT : lines.slice(1).length > chunks.length * 120;
+
+    if (Date.now() > deadlineAt) {
+      return new Response(JSON.stringify({
+        error: "Tempo excedido",
+        code: "TIMEOUT",
+      }), {
+        status: 408,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (chunks.length === 0) {
+      return new Response(JSON.stringify({
+        error: "Arquivo muito grande ou muitas linhas.",
+        code: "IMPORT_LIMIT_EXCEEDED",
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const baseSystemPrompt = `Você é um SOMMELIER-DATA-SCIENTIST de elite. Receba conteúdo bruto de arquivo (CSV/TSV, planilha, PDF, Word ou texto) e extraia TODOS os dados de vinhos, MESMO quando o arquivo é desorganizado, sem cabeçalhos claros, ou misturado com texto livre.
 
@@ -324,7 +363,7 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
           functionName: FUNCTION_NAME,
           requestId,
           model: "gpt-4o-mini",
-          timeoutMs: 20_000,
+          timeoutMs: 9_000,
           temperature: 0.4,
           instructions: systemPrompt,
           input: [
@@ -358,7 +397,8 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
 
     async function callAi(chunkText: string): Promise<{ result?: any; errorStatus?: number }> {
       let lastStatus: number | undefined;
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        if (Date.now() > deadlineAt) return { errorStatus: 504 };
         const res = await callAiOnce(chunkText);
         if (res.result) return res;
         lastStatus = res.errorStatus;
@@ -366,6 +406,16 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
         await sleep(500 * Math.pow(2, attempt));
       }
       return { errorStatus: lastStatus ?? 500 };
+    }
+
+    if (chunks.length > MAX_CHUNKS) {
+      return new Response(JSON.stringify({
+        error: "Arquivo muito grande ou muitas linhas.",
+        code: "IMPORT_LIMIT_EXCEEDED",
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // ── PARALLEL chunk processing for speed ──
@@ -380,6 +430,10 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
     for (const settled of chunkResults) {
       if (settled.status === "rejected") {
         failures.push(500);
+        continue;
+      }
+      if (Date.now() > deadlineAt) {
+        failures.push(504);
         continue;
       }
       const { result, errorStatus } = settled.value;
@@ -398,10 +452,11 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
     }
 
     if (allWines.length === 0) {
-      const status = failures.includes(429) ? 429 : failures.includes(402) ? 402 : 422;
+      const status = failures.includes(429) ? 429 : failures.includes(402) ? 402 : failures.includes(504) ? 408 : 422;
       const message =
         status === 429 ? "Muitas requisições. Tente novamente em alguns segundos."
           : status === 402 ? "Créditos de IA esgotados. Adicione créditos em Configurações > Workspace > Uso."
+          : status === 408 ? "Tempo excedido"
           : failures.includes(422) ? "INVALID_AI_RESPONSE" : "Não foi possível extrair dados do arquivo.";
       await logAudit(userId, status, "ai_error", Date.now() - startTime, { failures, chunks: chunks.length });
       return new Response(JSON.stringify({ error: message }), {
