@@ -77,10 +77,10 @@ export default function ResetPassword() {
                 <Sparkles className="h-3.5 w-3.5" /> Redefinição protegida
               </span>
               <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
-                Uma nova senha, com o mesmo <span className="font-serif italic text-wine">padrão premium</span>.
+                Uma nova senha, no mesmo <span className="font-serif italic text-wine">padrão Sommelyx</span>.
               </h1>
               <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
-                Defina uma senha forte para proteger sua conta. Nós cuidamos do resto.
+                Defina uma senha forte para proteger seu acesso.
               </p>
             </motion.div>
           </div>
@@ -131,7 +131,7 @@ export default function ResetPassword() {
               <div>
                 <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Link inválido</h2>
                 <p className={`mt-4 ${designSystem.authBody}`}>
-                  Este link de recuperação expirou ou não é válido. Solicite um novo link e tente novamente.
+                  Este link expirou ou não é válido. Solicite um novo link e tente novamente.
                 </p>
 
                 <div className="mt-7 grid gap-3">
@@ -153,7 +153,7 @@ export default function ResetPassword() {
                   </div>
                   <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Redefinir senha</h2>
                   <p className={`mt-4 ${designSystem.authBody}`}>
-                    Crie uma nova senha para sua conta. Recomendamos no mínimo 8 caracteres.
+                    Crie uma nova senha para retomar o acesso com segurança.
                   </p>
                 </div>
 

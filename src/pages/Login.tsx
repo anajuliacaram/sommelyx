@@ -116,7 +116,7 @@ export default function Login() {
                 A inteligência da sua <span className="font-serif italic text-wine">adega</span> começa aqui.
               </h1>
               <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
-                Um ambiente preciso para gestão de acervo, operação comercial e decisões estratégicas com o padrão Sommelyx.
+                Entre para organizar estoque, valor e giro com a precisão Sommelyx.
               </p>
             </motion.div>
           </div>
@@ -156,7 +156,7 @@ export default function Login() {
 
             <div className="mb-7">
               <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Acesse sua conta</h2>
-              <p className={`mt-3 ${designSystem.authBody}`}>Use suas credenciais para continuar no dashboard Sommelyx.</p>
+              <p className={`mt-3 ${designSystem.authBody}`}>Entre para continuar sua gestão de adega.</p>
             </div>
 
             {emailConfirmed && (

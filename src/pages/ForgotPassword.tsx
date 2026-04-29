@@ -60,10 +60,10 @@ export default function ForgotPassword() {
                 <Sparkles className="h-3.5 w-3.5" /> Recuperação segura
               </span>
               <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
-                Retome o acesso ao seu <span className="font-serif italic text-wine">ecossistema</span> Sommelyx.
+                Retome o acesso à sua <span className="font-serif italic text-wine">adega</span>.
               </h1>
               <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
-                Enviamos um link protegido para você redefinir sua senha com a mesma segurança premium da plataforma.
+                Enviamos um link seguro para redefinir seu acesso.
               </p>
             </motion.div>
           </div>
@@ -133,7 +133,7 @@ export default function ForgotPassword() {
               <>
                 <div className="mb-7">
                   <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Esqueci minha senha</h2>
-                  <p className={`mt-3 ${designSystem.authBody}`}>Informe seu e-mail para receber um link seguro de recuperação.</p>
+                  <p className={`mt-3 ${designSystem.authBody}`}>Informe seu e-mail para receber o link de recuperação.</p>
                 </div>
 
                 {error && (

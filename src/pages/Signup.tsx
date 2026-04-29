@@ -115,7 +115,7 @@ export default function Signup() {
                 Configure sua <span className="font-serif italic text-wine">conta</span> e evolua sua adega.
               </h1>
               <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
-                Cadastre-se para centralizar acervo, operação e inteligência de compra no padrão editorial Sommelyx.
+                Cadastre-se para começar a organizar sua adega com clareza e precisão.
               </p>
             </motion.div>
           </div>
@@ -197,7 +197,7 @@ export default function Signup() {
               <>
                 <div className="mb-7">
                   <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Criar conta grátis</h2>
-                  <p className={`mt-3 ${designSystem.authBody}`}>Preencha os dados para acessar o ecossistema Sommelyx.</p>
+                  <p className={`mt-3 ${designSystem.authBody}`}>Crie sua conta e comece a registrar sua adega.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
