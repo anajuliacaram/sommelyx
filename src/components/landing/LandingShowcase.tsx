@@ -24,13 +24,13 @@ const tabs: { key: TabKey; label: string; icon: typeof LayoutDashboard; accent: 
 const browserFrame = {
   background: "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,247,242,1) 100%)",
   border: "1px solid rgba(0,0,0,0.08)",
-  boxShadow: "0 40px 100px -40px rgba(44,20,31,0.35), 0 1px 2px rgba(0,0,0,0.04)",
+  boxShadow: "0 42px 110px -44px rgba(44,20,31,0.36), 0 1px 2px rgba(0,0,0,0.04)",
 } as const;
 
 const innerCard = {
-  background: "rgba(255,255,255,0.94)",
+  background: "linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(248,243,238,0.94) 100%)",
   border: "1px solid rgba(0,0,0,0.05)",
-  boxShadow: "0 6px 20px -12px rgba(44,20,31,0.18)",
+  boxShadow: "0 8px 24px -14px rgba(44,20,31,0.18)",
 } as const;
 
 function BrowserChrome({ url }: { url: string }) {
@@ -343,11 +343,13 @@ export function LandingShowcase() {
         >
           {/* Soft glow per active tab */}
           <div
-            className="pointer-events-none absolute -inset-x-10 -top-10 h-32 opacity-40"
+            className="pointer-events-none absolute -inset-x-10 -top-10 h-32 opacity-45"
             style={{
               background: `radial-gradient(ellipse at center top, ${activeTab.accent}33, transparent 60%)`,
             }}
           />
+          <div className="pointer-events-none absolute left-6 top-7 h-20 w-20 rounded-[24px] border border-white/50 bg-white/30 blur-[1px] opacity-70 shadow-[0_14px_28px_-18px_rgba(44,20,31,0.18)]" />
+          <div className="pointer-events-none absolute right-8 bottom-8 h-24 w-24 rounded-[24px] border border-white/50 bg-white/24 blur-[1px] opacity-50 shadow-[0_14px_28px_-18px_rgba(44,20,31,0.18)]" />
 
           <BrowserChrome url={`sommelyx.com/dashboard/${active}`} />
 
@@ -358,6 +360,7 @@ export function LandingShowcase() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="relative"
             >
               {active === "dashboard" && <DashboardMock />}
               {active === "adega" && <AdegaMock />}

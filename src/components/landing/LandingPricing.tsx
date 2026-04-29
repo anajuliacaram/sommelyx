@@ -96,6 +96,21 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
   const isLight = plan.isLight;
   const txt = isLight ? "#1A1A1A" : "#F8F6F3";
   const sub = isLight ? "#5F5F5F" : "rgba(248,246,243,0.72)";
+  const surface = isLight
+    ? {
+        background: "linear-gradient(160deg, rgba(255,255,255,0.97) 0%, rgba(248,243,238,0.95) 100%)",
+        backdropFilter: "blur(10px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(10px) saturate(1.08)",
+        border: plan.highlighted ? "1.5px solid rgba(123,30,43,0.35)" : "1px solid rgba(0,0,0,0.06)",
+        boxShadow: plan.highlighted
+          ? "0 32px 84px -42px rgba(110,30,42,0.46), 0 1px 2px rgba(0,0,0,0.04)"
+          : "0 16px 44px -26px rgba(44,20,31,0.20), 0 1px 2px rgba(0,0,0,0.04)",
+      }
+    : {
+        background: "linear-gradient(180deg, rgba(43,43,43,0.98) 0%, rgba(31,28,32,0.99) 55%, rgba(23,21,24,1) 100%)",
+        border: "1px solid rgba(198,167,104,0.18)",
+        boxShadow: "0 18px 50px -28px rgba(15,15,20,0.50)",
+      };
 
   return (
     <motion.div
@@ -104,29 +119,13 @@ function PlanCard({ plan, i, onSignup, mobile = false }: { plan: typeof plans[0]
         ${mobile ? "snap-start shrink-0 w-[88%] max-w-[380px]" : ""}
         relative rounded-3xl overflow-hidden flex flex-col h-full
       `}
-      style={
-        isLight
-          ? {
-              background: "rgba(255,255,255,0.96)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              border: plan.highlighted ? "1.5px solid rgba(123,30,43,0.35)" : "1px solid rgba(0,0,0,0.06)",
-              boxShadow: plan.highlighted
-                ? "0 30px 80px -40px rgba(110,30,42,0.45), 0 1px 2px rgba(0,0,0,0.04)"
-                : "0 14px 40px -22px rgba(44,20,31,0.18), 0 1px 2px rgba(0,0,0,0.04)",
-            }
-          : {
-              background: "linear-gradient(180deg, rgba(43,43,43,0.98) 0%, rgba(31,28,32,0.99) 55%, rgba(23,21,24,1) 100%)",
-              border: "1px solid rgba(198,167,104,0.18)",
-              boxShadow: "0 18px 50px -28px rgba(15,15,20,0.50)",
-            }
-      }
+      style={surface}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-40px" }}
       variants={fadeUp}
       custom={i + 1}
-      whileHover={!mobile ? { y: -5 } : undefined}
+      whileHover={!mobile ? { y: -5, scale: 1.01 } : undefined}
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* "Mais popular" badge */}

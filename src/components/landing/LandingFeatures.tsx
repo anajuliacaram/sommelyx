@@ -51,11 +51,11 @@ const blocks = [
 ];
 
 const glassCard = {
-  background: "rgba(255,255,255,0.92)",
-  backdropFilter: "blur(8px) saturate(1.08)",
-  WebkitBackdropFilter: "blur(8px) saturate(1.08)",
-  border: "1px solid rgba(255,255,255,0.5)",
-  boxShadow: "0 14px 40px -22px rgba(44,20,31,0.22), 0 1px 2px rgba(0,0,0,0.04)",
+  background: "linear-gradient(160deg, rgba(255,255,255,0.96) 0%, rgba(248,243,238,0.94) 100%)",
+  backdropFilter: "blur(10px) saturate(1.08)",
+  WebkitBackdropFilter: "blur(10px) saturate(1.08)",
+  border: "1px solid rgba(255,255,255,0.58)",
+  boxShadow: "0 16px 44px -26px rgba(44,20,31,0.22), 0 1px 2px rgba(0,0,0,0.04)",
 } as const;
 
 interface LandingFeaturesProps {
@@ -94,7 +94,7 @@ export function LandingFeatures({ onSignup }: LandingFeaturesProps) {
               viewport={{ once: true, margin: "-40px" }}
               variants={fadeUp}
               custom={i + 1}
-              whileHover={{ y: -3 }}
+              whileHover={{ y: -3, scale: 1.01 }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="flex items-start gap-3.5">

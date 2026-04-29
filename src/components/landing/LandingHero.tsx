@@ -18,6 +18,16 @@ const float = (delay: number) => ({
   transition: { delay, duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
 });
 
+const floatLoop = {
+  y: [0, -7, 0],
+  transition: {
+    duration: 7.2,
+    repeat: Infinity,
+    repeatType: "loop" as const,
+    ease: "easeInOut" as const,
+  },
+};
+
 const glassCard = {
   background: "rgba(255,255,255,0.94)",
   backdropFilter: "blur(8px) saturate(1.1)",
@@ -62,16 +72,18 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="max-w-[36rem] text-[1.65rem] sm:text-5xl font-medium leading-[1.08] sm:leading-[1.05] tracking-[-0.01em]"
+            className="max-w-[36rem] text-[1.65rem] sm:text-5xl font-medium leading-[1.05] sm:leading-[1.02] tracking-[-0.02em]"
             style={{
               color: "#1A1A1A",
-              fontFamily: "'Fraunces', 'Libre Baskerville', Georgia, serif",
+              fontFamily: "'Playfair Display', 'Fraunces', 'Libre Baskerville', Georgia, serif",
               fontOpticalSizing: "auto",
               fontVariationSettings: '"wght" 560',
             }}
           >
             Gestão inteligente da sua adega, com clareza de{" "}
-            <span className="text-[#6B1D2C] sm:whitespace-nowrap">estoque, valor e giro.</span>
+            <span className="bg-gradient-to-r from-[#4E1B27] via-[#7B1E2B] to-[#A45A42] bg-clip-text text-transparent sm:whitespace-nowrap">
+              estoque, valor e giro.
+            </span>
           </motion.h1>
 
           <motion.p
@@ -225,14 +237,19 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
         {/* Right: Organized grid of dashboard cards */}
         <div className="relative lg:pt-24 xl:pt-32">
           {/* Glow background */}
-          <div className="pointer-events-none absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.14)", filter: "blur(70px)" }} />
-          <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.16)", filter: "blur(90px)" }} />
+          <div className="pointer-events-none absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.18)", filter: "blur(84px)" }} />
+          <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.18)", filter: "blur(96px)" }} />
+          <div className="pointer-events-none absolute left-6 top-10 h-40 w-40 rounded-[28px] border border-white/40 bg-white/30 blur-[1px] opacity-50 shadow-[0_16px_32px_-18px_rgba(44,20,31,0.20)]" />
+          <div className="pointer-events-none absolute right-8 bottom-16 h-28 w-28 rounded-[24px] border border-white/40 bg-white/24 blur-[1px] opacity-40 shadow-[0_16px_28px_-18px_rgba(44,20,31,0.16)]" />
 
-          <div className="relative grid grid-cols-2 gap-3 sm:gap-3.5">
+          <motion.div
+            className="relative grid grid-cols-2 gap-3 sm:gap-3.5"
+            animate={floatLoop}
+          >
             {/* Adega — full width */}
             <motion.div
               {...float(0.18)}
-              className="col-span-2 rounded-2xl p-4"
+              className="col-span-2 rounded-[22px] p-4"
               style={glassCard}
             >
               <div className="flex items-center justify-between">
@@ -265,7 +282,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Reposição — half */}
-            <motion.div {...float(0.26)} className="rounded-2xl p-3.5" style={glassCard}>
+            <motion.div {...float(0.26)} className="rounded-[22px] p-3.5" style={glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.24)" }}>
                   <AlertTriangle className="h-3.5 w-3.5" style={{ color: "#B8860B" }} />
@@ -279,7 +296,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Janela ideal — half */}
-            <motion.div {...float(0.32)} className="rounded-2xl p-3.5" style={glassCard}>
+            <motion.div {...float(0.32)} className="rounded-[22px] p-3.5" style={glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(95,111,82,0.10)", border: "1px solid rgba(95,111,82,0.18)" }}>
                   <Calendar className="h-3.5 w-3.5" style={{ color: "#5F6F52" }} />
@@ -293,7 +310,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Consumo — full width */}
-            <motion.div {...float(0.40)} className="col-span-2 rounded-2xl p-4" style={glassCard}>
+            <motion.div {...float(0.40)} className="col-span-2 rounded-[22px] p-4" style={glassCard}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(95,111,82,0.10)", border: "1px solid rgba(95,111,82,0.16)" }}>
@@ -325,7 +342,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Mais avaliado — half */}
-            <motion.div {...float(0.48)} className="rounded-2xl p-3.5" style={glassCard}>
+            <motion.div {...float(0.48)} className="rounded-[22px] p-3.5" style={glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.28)" }}>
                   <Star className="h-3.5 w-3.5" style={{ color: "#B8860B" }} />
@@ -337,7 +354,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </motion.div>
 
             {/* Giro — half */}
-            <motion.div {...float(0.54)} className="rounded-2xl p-3.5" style={glassCard}>
+            <motion.div {...float(0.54)} className="rounded-[22px] p-3.5" style={glassCard}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(123,30,43,0.08)", border: "1px solid rgba(123,30,43,0.14)" }}>
                   <TrendingUp className="h-3.5 w-3.5 text-wine" />
@@ -349,7 +366,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               </p>
               <p className="mt-0.5 text-[10px] text-[#5F5F5F]">Ritmo saudável</p>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
