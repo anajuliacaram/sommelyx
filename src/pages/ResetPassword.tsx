@@ -65,27 +65,27 @@ export default function ResetPassword() {
       </div>
 
       <div className={designSystem.authGrid}>
-        <section className={`hidden lg:flex order-2 flex-col justify-between lg:order-1 ${designSystem.authPanel}`} style={designSystem.glassCardLight}>
+        <section className={`hidden lg:flex order-2 flex-col justify-between lg:order-1 ${designSystem.authPanel}`} style={designSystem.authCard}>
           <div>
             <Link to="/" className={designSystem.authLogoLink}>
               <Logo variant="navbar" className={designSystem.authLogo} />
               <BrandName className={designSystem.authBrand} />
             </Link>
 
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-10 md:mt-14">
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-8 md:mt-10">
               <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
                 <Sparkles className="h-3.5 w-3.5" /> Redefinição protegida
               </span>
               <h1 className={`mt-5 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
                 Uma nova senha, com o mesmo <span className="font-serif italic text-wine">padrão premium</span>.
               </h1>
-              <p className={`mt-6 max-w-[540px] ${designSystem.authBody}`}>
+              <p className={`mt-6 max-w-[420px] ${designSystem.authBody}`}>
                 Defina uma senha forte para proteger sua conta. Nós cuidamos do resto.
               </p>
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-10 grid gap-3 sm:grid-cols-3">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-8 grid gap-3 sm:grid-cols-3">
             {[
               { icon: ShieldCheck, label: "Segurança", desc: "Link de recuperação protegido" },
               { icon: KeyRound, label: "Controle", desc: "Regras claras de senha" },
@@ -102,7 +102,7 @@ export default function ResetPassword() {
           </motion.div>
         </section>
 
-        <section className="order-1 flex items-center justify-center py-2 lg:order-2 lg:py-0">
+        <section className="order-1 flex items-center justify-center py-0 lg:order-2 lg:py-0">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}

@@ -80,20 +80,20 @@ export const designSystem = {
   authShell:
     "relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary",
   authGrid:
-    "relative z-10 mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 px-4 py-6 sm:px-8 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-14 lg:py-10",
+    "relative z-10 mx-auto grid min-h-screen w-full max-w-[1180px] items-center grid-cols-1 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[1.08fr_0.92fr] lg:gap-10 lg:px-4 lg:py-8",
   authCard: {
-    background: "rgba(255,255,255,0.75)",
+    background: "rgba(255,255,255,0.8)",
     backdropFilter: "blur(12px)",
     WebkitBackdropFilter: "blur(12px)",
     border: "1px solid rgba(0,0,0,0.05)",
     boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
   } as const,
-  authPanel: "rounded-[20px] p-6 sm:p-8 md:p-10 lg:p-12",
-  authFormCard: "w-full max-w-[520px] rounded-[20px] p-6 sm:p-7 md:p-9",
+  authPanel: "rounded-[20px] p-5 sm:p-6 md:p-8 lg:p-10",
+  authFormCard: "w-full max-w-[520px] rounded-[20px] p-5 sm:p-6 md:p-8",
   authLogoLink: "inline-flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-80",
-  authLogo: "h-8 sm:h-10 md:h-12 w-auto drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]",
+  authLogo: "h-10 sm:h-12 md:h-14 w-auto drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]",
   authBrand: "text-[22px] sm:text-[26px] md:text-[32px]",
-  authHeadline: "text-[30px] sm:text-[34px] font-semibold leading-[1.05] tracking-[-0.02em] text-foreground",
+  authHeadline: "text-[28px] sm:text-[32px] font-semibold leading-[1.05] tracking-[-0.02em] text-foreground",
   authBody: "text-[14px] font-medium leading-relaxed text-[#5F5F5F]",
 } as const;
 
