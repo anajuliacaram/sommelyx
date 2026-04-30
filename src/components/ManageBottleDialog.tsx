@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
+import { normalizeScanResult } from "@/lib/scan-normalizer";
 
 interface ManageBottleDialogProps {
   open: boolean;
@@ -102,27 +103,18 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   };
 
   const handleScanComplete = (data: any) => {
-    const raw = data?.wine ?? data ?? {};
-    const normalizeScanText = (value: unknown) => {
-      if (value == null) return "";
-      const text = String(value).trim();
-      if (!text) return "";
-      const lowered = text.toLowerCase();
-      if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) return "";
-      return text;
-    };
-    const normalized = {
-      name: normalizeScanText(raw?.name ?? raw?.wine_name),
-      producer: normalizeScanText(raw?.producer ?? raw?.winery),
-      country: normalizeScanText(raw?.country ?? raw?.pais ?? raw?.país),
-      region: normalizeScanText(raw?.region ?? raw?.regiao ?? raw?.região),
-      grape: normalizeScanText(raw?.grape ?? raw?.varietal),
-      style: normalizeScanText(raw?.style),
-      vintage: normalizeScanText(raw?.vintage),
-      location: normalizeScanText(raw?.cellar_location ?? raw?.location),
-    };
+    const normalized = normalizeScanResult(data);
 
     console.log("SCAN_RESULT_MAPPED", normalized);
+
+    setExtWineName("");
+    setExtProducer("");
+    setExtCountry("");
+    setExtRegion("");
+    setExtGrape("");
+    setExtStyle("");
+    setExtVintage("");
+    setExtLocation("");
 
     if (normalized.name) setExtWineName(normalized.name);
     if (normalized.producer) setExtProducer(normalized.producer);
@@ -130,8 +122,8 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
     if (normalized.region) setExtRegion(normalized.region);
     if (normalized.grape) setExtGrape(normalized.grape);
     if (normalized.style) setExtStyle(normalized.style);
-    if (normalized.vintage) setExtVintage(String(normalized.vintage));
-    if (normalized.location) setExtLocation(normalized.location);
+    if (normalized.vintage != null) setExtVintage(String(normalized.vintage));
+    if (normalized.cellar_location) setExtLocation(normalized.cellar_location);
   };
 
   const addItemToList = () => {

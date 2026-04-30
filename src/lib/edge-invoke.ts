@@ -369,10 +369,6 @@ export async function invokeEdgeFunction<T>(
           }
           const parsed = parseErrorBody(parsedBody, response.status);
 
-          if (response.status === 401 && attempt < retries) {
-            continue;
-          }
-
           throw new EdgeFunctionError(parsed.message, {
             status: parsed.status ?? response.status,
             code: parsed.code ?? (response.status === 401 ? "AUTH_INVALID" : "EDGE_FAILED"),
@@ -429,7 +425,9 @@ export async function invokeEdgeFunction<T>(
       const isLongRunning = timeoutMs >= 60_000;
       const retryable =
         err instanceof EdgeFunctionError
-          ? (err.retryable ?? isRetriable(err.status))
+          ? (err.code === "AUTH_REQUIRED" || err.code === "AUTH_INVALID")
+            ? false
+            : (err.retryable ?? isRetriable(err.status))
           : isAbort
             ? retryOnAbort && (isLongRunning ? false : true)
             : (isTransportFailure && isLongRunning)

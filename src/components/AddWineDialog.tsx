@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { normalizeWineData } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
+import { normalizeScanResult } from "@/lib/scan-normalizer";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -133,50 +134,6 @@ function suggestDrinkWindow(input: ScanSuggestionInput) {
     from,
     until,
   };
-}
-
-function normalizeScanText(value: unknown) {
-  if (value == null) return "";
-  const text = String(value).trim();
-  if (!text) return "";
-  const lowered = text.toLowerCase();
-  if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
-    return "";
-  }
-  if (text.length === 1 && /[a-z0-9]/i.test(text)) return "";
-  return text;
-}
-
-function parseMaybeNumber(value: unknown) {
-  if (value == null || value === "") return null;
-  const num = typeof value === "number" ? value : Number(String(value).replace(",", "."));
-  return Number.isFinite(num) ? num : null;
-}
-
-function findNestedValue(input: unknown, keys: string[]): unknown {
-  if (!input || typeof input !== "object") return undefined;
-  const queue: unknown[] = [input];
-  const seen = new WeakSet<object>();
-  const normalizedKeys = new Set(keys.map((key) => key.toLowerCase()));
-
-  while (queue.length > 0) {
-    const current = queue.shift();
-    if (!current || typeof current !== "object") continue;
-    const currentObj = current as Record<string, unknown>;
-    if (seen.has(currentObj)) continue;
-    seen.add(currentObj);
-
-    for (const [key, value] of Object.entries(currentObj)) {
-      if (normalizedKeys.has(key.toLowerCase())) {
-        return value;
-      }
-      if (value && typeof value === "object") {
-        queue.push(value);
-      }
-    }
-  }
-
-  return undefined;
 }
 
 export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
@@ -315,96 +272,113 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   };
 
   const handleScanComplete = (data: any) => {
-    const raw = data?.wine ?? data ?? {};
-    const normalizeDrinkingWindow = (input: any) => {
-      const start = parseMaybeNumber(
-        findNestedValue(input, ["drinking_window_start", "drink_from", "drinkFrom"]),
-      );
-      const end = parseMaybeNumber(
-        findNestedValue(input, ["drinking_window_end", "drink_until", "drinkUntil"]),
-      );
-      return {
-        start,
-        end,
-      };
-    };
-    const mappedData = normalizeWineData({
-      ...raw,
-      name: normalizeScanText(findNestedValue(raw, ["name", "wine_name"])),
-      producer: normalizeScanText(findNestedValue(raw, ["producer", "winery"])),
-      country: normalizeScanText(findNestedValue(raw, ["country", "pais", "país"])),
-      region: normalizeScanText(findNestedValue(raw, ["region", "regiao", "região"])),
-      grape: normalizeScanText(findNestedValue(raw, ["grape", "varietal"])),
-      style: normalizeScanText(findNestedValue(raw, ["style"])),
-      pairing: normalizeScanText(findNestedValue(raw, ["pairing", "food_pairing", "foodPairing"])),
-      food_pairing: normalizeScanText(findNestedValue(raw, ["food_pairing", "pairing", "foodPairing"])),
-      estimated_price: parseMaybeNumber(findNestedValue(raw, ["estimated_price", "purchase_price", "current_value", "price"])),
-      purchase_price: parseMaybeNumber(findNestedValue(raw, ["purchase_price", "estimated_price", "current_value", "price"])),
-      current_value: parseMaybeNumber(findNestedValue(raw, ["current_value", "estimated_price", "purchase_price", "price"])),
-      drink_from: normalizeDrinkingWindow(raw).start,
-      drink_until: normalizeDrinkingWindow(raw).end,
-      drinking_window_start: normalizeDrinkingWindow(raw).start,
-      drinking_window_end: normalizeDrinkingWindow(raw).end,
-      cellar_location: normalizeScanText(findNestedValue(raw, ["cellar_location", "location"])),
-    }, { log: true });
+    const mappedData = normalizeScanResult(data);
     console.log("SCAN_RESULT_MAPPED", mappedData);
-    const isMeaningful = (value: unknown) => Boolean(normalizeScanText(value));
+
+    setName("");
+    setProducer("");
+    setQuantity("1");
+    setVintage("");
+    setStyle("");
+    setCountry("");
+    setRegion("");
+    setGrape("");
+    setLastPaid("");
+    setLastPaidDate(new Date().toISOString().split("T")[0]);
+    setCurrentValue("");
+    setCurrentValueTouched(false);
+    setLocation({});
+    setNoLocationInfo(false);
+    setDrinkFrom("");
+    setDrinkUntil("");
+    setFoodPairing("");
+    setNotes("");
+    setNoPriceInfo(false);
+    setEstimateConfidence(null);
+    setAiPrefilledFields({});
+    setMissingFields([]);
+    setMoreOpen(false);
+
     const nextPrefilled: Record<string, boolean> = {};
-    setName(isMeaningful(mappedData.name) ? String(mappedData.name) : "");
-    if (isMeaningful(mappedData.name)) nextPrefilled.name = true;
-    setProducer(isMeaningful(mappedData.producer) ? String(mappedData.producer) : "");
-    if (isMeaningful(mappedData.producer)) nextPrefilled.producer = true;
-    setVintage(mappedData.vintage != null ? String(mappedData.vintage) : "");
-    if (mappedData.vintage != null) nextPrefilled.vintage = true;
-    setStyle(isMeaningful(mappedData.style) ? String(mappedData.style) : "");
-    if (isMeaningful(mappedData.style)) nextPrefilled.style = true;
-    setCountry(isMeaningful(mappedData.country) ? String(mappedData.country) : "");
-    if (isMeaningful(mappedData.country)) nextPrefilled.country = true;
-    setRegion(isMeaningful(mappedData.region) ? String(mappedData.region) : "");
-    if (isMeaningful(mappedData.region)) nextPrefilled.region = true;
-    setGrape(isMeaningful(mappedData.grape) ? String(mappedData.grape) : "");
-    if (isMeaningful(mappedData.grape)) nextPrefilled.grape = true;
-    setFoodPairing(isMeaningful(mappedData.food_pairing) ? String(mappedData.food_pairing) : "");
-    if (isMeaningful(mappedData.food_pairing)) nextPrefilled.food_pairing = true;
-    setNotes(isMeaningful(mappedData.tasting_notes) ? String(mappedData.tasting_notes) : "");
-    if (isMeaningful(mappedData.tasting_notes)) nextPrefilled.tasting_notes = true;
-    setDrinkFrom(mappedData.drink_from != null ? String(mappedData.drink_from) : "");
-    if (mappedData.drink_from != null) nextPrefilled.drink_from = true;
-    setDrinkUntil(mappedData.drink_until != null ? String(mappedData.drink_until) : "");
-    if (mappedData.drink_until != null) nextPrefilled.drink_until = true;
+    const isMeaningful = (value: unknown) => {
+      if (value == null) return false;
+      if (typeof value === "number") return Number.isFinite(value);
+      if (typeof value !== "string") return false;
+      const text = value.trim();
+      if (!text) return false;
+      const lowered = text.toLowerCase();
+      return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
+    };
+
+    if (isMeaningful(mappedData.name)) {
+      setName(mappedData.name);
+      nextPrefilled.name = true;
+    }
+    if (isMeaningful(mappedData.producer)) {
+      setProducer(mappedData.producer || "");
+      nextPrefilled.producer = true;
+    }
+    if (mappedData.vintage != null) {
+      setVintage(String(mappedData.vintage));
+      nextPrefilled.vintage = true;
+    }
+    if (isMeaningful(mappedData.style)) {
+      setStyle(mappedData.style || "");
+      nextPrefilled.style = true;
+    }
+    if (isMeaningful(mappedData.country)) {
+      setCountry(mappedData.country || "");
+      nextPrefilled.country = true;
+    }
+    if (isMeaningful(mappedData.region)) {
+      setRegion(mappedData.region || "");
+      nextPrefilled.region = true;
+    }
+    if (isMeaningful(mappedData.grape)) {
+      setGrape(mappedData.grape || "");
+      nextPrefilled.grape = true;
+    }
+    if (mappedData.food_pairing) {
+      setFoodPairing(mappedData.food_pairing);
+      nextPrefilled.food_pairing = true;
+    }
+    if (mappedData.drink_from != null) {
+      setDrinkFrom(String(mappedData.drink_from));
+      nextPrefilled.drink_from = true;
+    }
+    if (mappedData.drink_until != null) {
+      setDrinkUntil(String(mappedData.drink_until));
+      nextPrefilled.drink_until = true;
+    }
     if (mappedData.purchase_price != null) {
       setLastPaid(String(mappedData.purchase_price));
       nextPrefilled.purchase_price = true;
-    } else {
-      setLastPaid("");
     }
-    if (mappedData.current_value != null || mappedData.estimated_price != null) {
-      setCurrentValue(String(mappedData.current_value ?? mappedData.estimated_price));
-      setCurrentValueTouched(false);
-    } else if (!isCommercial) {
-      setCurrentValue(String(suggestPurchasePrice(mappedData)));
-      setCurrentValueTouched(false);
-    } else {
-      setCurrentValue("");
+    if (mappedData.estimated_price != null) {
+      setCurrentValue(String(mappedData.estimated_price));
+      nextPrefilled.estimated_price = true;
     }
     if (isMeaningful(mappedData.cellar_location)) {
-      setLocation({ manualLabel: String(mappedData.cellar_location) });
+      setLocation({ manualLabel: mappedData.cellar_location || "" });
       setNoLocationInfo(false);
-    } else {
-      setLocation({});
+      nextPrefilled.cellar_location = true;
     }
+
     if (mappedData.labelImagePreview) setLabelImagePreview(String(mappedData.labelImagePreview));
     if (mappedData.labelImageFile) setLabelImageFile(mappedData.labelImageFile);
     if (mappedData.labelImageBase64) setLabelImageBase64(String(mappedData.labelImageBase64));
     if (!mappedData.purchase_price && !isCommercial) setNoPriceInfo(true);
     setAiPrefilledFields(nextPrefilled);
 
-    // Only set drink window if AI returned them from the label
-    // Do NOT use heuristic fallbacks — better to leave blank than fill wrong data
-
     if (
-      mappedData.country || mappedData.region || mappedData.grape || mappedData.food_pairing || mappedData.tasting_notes ||
-      mappedData.drink_from || mappedData.drink_until || mappedData.estimated_price || mappedData.current_value
+      mappedData.country ||
+      mappedData.region ||
+      mappedData.grape ||
+      mappedData.food_pairing ||
+      mappedData.drink_from ||
+      mappedData.drink_until ||
+      mappedData.estimated_price ||
+      mappedData.purchase_price
     ) {
       setMoreOpen(true);
     }

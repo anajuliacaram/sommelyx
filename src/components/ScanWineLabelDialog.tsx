@@ -13,45 +13,12 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { FallbackAnalysisBadge, FallbackAnalysisNotice } from "@/components/pairing/shared";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
+import { hasMeaningfulScanResult, normalizeScanResult, type CanonicalScanResult } from "@/lib/scan-normalizer";
 
-interface ScannedWineData {
-  name: string | null;
-  producer: string | null;
-  vintage: number | null;
-  style: string | null;
-  country: string | null;
-  region: string | null;
-  grape: string | null;
-  pairing?: string | null;
-  food_pairing: string | null;
-  tasting_notes: string | null;
-  drink_from: number | null;
-  drink_until: number | null;
-  drinking_window_start?: number | null;
-  drinking_window_end?: number | null;
-  purchase_price: number | null;
-  estimated_price?: number | null;
-  cellar_location: string | null;
-  confidence?: {
-    name?: number;
-    producer?: number;
-    vintage?: number;
-    style?: number;
-    country?: number;
-    region?: number;
-    grape?: number;
-    food_pairing?: number;
-    tasting_notes?: number;
-    cellar_location?: number;
-    purchase_price?: number;
-    drink_from?: number;
-    drink_until?: number;
-  } | null;
+interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
   labelImageFile?: File | null;
   labelImageBase64?: string | null;
-  fallback?: boolean;
-  fallbackReason?: string | null;
 }
 
 interface ScanWineLabelDialogProps {
@@ -82,7 +49,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const previewUrlRef = useRef<string | null>(null);
   const selectedFileRef = useRef<File | null>(null);
   const requestBusyRef = useRef(false);
-  const authRetryAttemptedRef = useRef(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -98,7 +64,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setErrorMsg("");
     setSupportCode(null);
     setLastBase64(null);
-    authRetryAttemptedRef.current = false;
   };
 
   useEffect(() => {
@@ -115,21 +80,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     onOpenChange(v);
   };
 
-  const attemptSessionRecovery = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.auth.refreshSession();
-      const session = data?.session ?? null;
-      console.info("[ScanWineLabelDialog] auth_refresh_attempt", {
-        success: Boolean(session?.access_token),
-        error: error?.message ?? null,
-      });
-      return Boolean(session?.access_token) && !error;
-    } catch (refreshError) {
-      console.warn("[ScanWineLabelDialog] auth_refresh_failed", refreshError);
-      return false;
-    }
-  }, []);
-
   const runScan = useCallback(async (
     base64: string,
     metadata?: {
@@ -142,7 +92,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setStep("scanning");
     setErrorMsg("");
     setSupportCode(null);
-    let retryAfterAuth = false;
     const estimatedPayloadBytes = Math.round((base64.length * 3) / 4);
 
     console.info("SCAN_START", {
@@ -170,7 +119,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         imageBase64Length: base64.length,
         device: getClientDeviceType(),
       });
-      const data = await invokeEdgeFunction<{ wine: ScannedWineData; fallback?: boolean; fallbackReason?: string | null }>(
+      const data = await invokeEdgeFunction<CanonicalScanResult>(
         "scan-wine-label",
         {
           imageBase64: base64,
@@ -179,8 +128,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         },
         { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
       );
-
-      if (!data?.wine) throw new Error("Nenhum dado encontrado");
+      const normalizedWine = normalizeScanResult(data);
 
       console.info("[ScanWineLabelDialog] request_finished", {
         function: "scan-wine-label",
@@ -194,58 +142,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         estimatedPayloadBytes,
         device: getClientDeviceType(),
       });
-      const normalizeScanText = (value: unknown) => {
-        if (value == null) return "";
-        const text = String(value).trim();
-        if (!text) return "";
-        const lowered = text.toLowerCase();
-        if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
-          return "";
-        }
-        if (text.length === 1 && /[a-z0-9]/i.test(text)) return "";
-        return text;
-      };
-
-      const meaningfulFields = [
-        data.wine?.name,
-        data.wine?.producer,
-        data.wine?.style,
-        data.wine?.grape,
-        data.wine?.country,
-        data.wine?.region,
-        data.wine?.food_pairing,
-        data.wine?.tasting_notes,
-        data.wine?.drink_from,
-        data.wine?.drink_until,
-      ].filter((value) => Boolean(normalizeScanText(value)));
-
-      const normalizedWine = {
-        ...data.wine,
-        name: normalizeScanText(data.wine?.name) || "Não identificado",
-        producer: normalizeScanText(data.wine?.producer) || null,
-        style: normalizeScanText(data.wine?.style) || null,
-        grape: normalizeScanText(data.wine?.grape) || null,
-        pairing: normalizeScanText(data.wine?.pairing) || null,
-        country: normalizeScanText(data.wine?.country) || null,
-        region: normalizeScanText(data.wine?.region) || null,
-        tasting_notes: normalizeScanText(data.wine?.tasting_notes) || null,
-        food_pairing: normalizeScanText(data.wine?.food_pairing) || null,
-        drink_from: normalizeScanText(data.wine?.drink_from) || null,
-        drink_until: normalizeScanText(data.wine?.drink_until) || null,
-        drinking_window_start: normalizeScanText(data.wine?.drinking_window_start) || null,
-        drinking_window_end: normalizeScanText(data.wine?.drinking_window_end) || null,
-        estimated_price: data.wine?.estimated_price ?? null,
-        fallback: Boolean(data?.fallback) || meaningfulFields.length === 0,
-        fallbackReason: data?.fallbackReason || (meaningfulFields.length === 0 ? "LABEL_NOT_IDENTIFIED" : null),
-      };
-
       setScannedData(normalizedWine);
       setStep("preview");
-      notifySuccess(normalizedWine.fallback ? "Leitura parcial" : "Rótulo identificado", {
-        description: normalizedWine.fallback
-          ? "Não conseguimos identificar tudo com segurança. Revise os campos antes de salvar."
-          : "Revise os dados antes de salvar.",
-        duration: 2400,
+      notifySuccess(hasMeaningfulScanResult(normalizedWine) ? "Rótulo identificado" : "Leitura parcial", {
+        description: hasMeaningfulScanResult(normalizedWine)
+          ? "Revise os dados antes de salvar."
+          : "Não conseguimos identificar tudo com segurança. Revise os campos antes de salvar.",
+          duration: 2400,
       });
     } catch (err: unknown) {
       const e = err as any;
@@ -287,16 +190,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       } else if (code === "INVALID_IMAGE") {
         msg = "Imagem inválida ou ilegível";
       } else if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
-        const recovered = !authRetryAttemptedRef.current && (await attemptSessionRecovery());
-        if (recovered) {
-          authRetryAttemptedRef.current = true;
-          console.info("[ScanWineLabelDialog] auth_recovered_retry", {
-            fileName: metadata?.fileName || null,
-            mimeType: metadata?.mimeType || null,
-          });
-          retryAfterAuth = true;
-          return;
-        }
+        await supabase.auth.signOut();
         navigate("/login?reauth=1", { replace: true });
         return;
       } else if (code === "AI_UNAVAILABLE") {
@@ -309,13 +203,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setStep("error");
     } finally {
       requestBusyRef.current = false;
-      if (retryAfterAuth) {
-        setTimeout(() => {
-          void runScan(base64, metadata);
-        }, 0);
-      }
     }
-  }, [attemptSessionRecovery, navigate]);
+  }, [navigate]);
 
   const handleFile = useCallback(async (file: File) => {
     if (requestBusyRef.current) return;
@@ -338,7 +227,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     previewUrlRef.current = previewUrl;
     setImagePreview(previewUrl);
     selectedFileRef.current = file;
-    authRetryAttemptedRef.current = false;
     setStep("scanning");
 
     try {
@@ -390,9 +278,11 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         setSupportCode(err.requestId ?? null);
 
         const code = err.code;
-      let msg = "Não conseguimos concluir a leitura do rótulo. Tente novamente.";
+        let msg = "Não conseguimos concluir a leitura do rótulo. Tente novamente.";
         if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
-          msg = "Sua sessão expirou. Faça login novamente para continuar.";
+          await supabase.auth.signOut();
+          navigate("/login?reauth=1", { replace: true });
+          return;
         } else if (code === "INVALID_IMAGE") {
           msg = "Imagem inválida. Envie uma foto legível do rótulo.";
         } else if (code === "INVALID_IMAGE_BASE64") {
@@ -418,7 +308,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setErrorMsg(getAttachmentErrorMessage(err, fallbackMessage));
       setStep("error");
     }
-  }, [runScan, toast]);
+  }, [navigate, runScan, toast]);
 
   const handleSelectedFile = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -465,32 +355,32 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     espumante: "Espumante", sobremesa: "Sobremesa", fortificado: "Fortificado",
   };
 
-  const normalizeScanText = (value: unknown) => {
-    if (value == null) return "";
-    const text = String(value).trim();
-    if (!text) return "";
+  const hasMeaningfulScanValue = (value: unknown) => {
+    if (value == null) return false;
+    if (typeof value === "number") return Number.isFinite(value);
+    if (typeof value !== "string") return false;
+    const text = value.trim();
+    if (!text) return false;
     const lowered = text.toLowerCase();
-    if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
-      return "";
-    }
-    if (text.length === 1 && /[a-z0-9]/i.test(text)) return "";
-    return text;
+    return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
   };
-
-  const hasMeaningfulScanValue = (value: unknown) => Boolean(normalizeScanText(value));
-  const hasMeaningfulScanData = Boolean(
-    normalizeScanText(scannedData?.name) ||
-    normalizeScanText(scannedData?.producer) ||
-    normalizeScanText(scannedData?.style) ||
-    normalizeScanText(scannedData?.grape) ||
-    normalizeScanText(scannedData?.country) ||
-    normalizeScanText(scannedData?.region) ||
-    normalizeScanText(scannedData?.food_pairing) ||
-    normalizeScanText(scannedData?.tasting_notes) ||
-    normalizeScanText(scannedData?.drink_from) ||
-    normalizeScanText(scannedData?.drink_until),
+  const isScanFallback = !hasMeaningfulScanResult(
+    scannedData ?? {
+      name: "",
+      producer: null,
+      country: null,
+      region: null,
+      grape: null,
+      vintage: null,
+      style: null,
+      drink_from: null,
+      drink_until: null,
+      estimated_price: null,
+      purchase_price: null,
+      food_pairing: null,
+      cellar_location: null,
+    },
   );
-  const isScanFallback = Boolean(scannedData?.fallback) || !hasMeaningfulScanData;
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -647,9 +537,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 )}
                 {hasMeaningfulScanValue(scannedData.food_pairing) && (
                   <DataRow label="Harmonização" value={scannedData.food_pairing} />
-                )}
-                {hasMeaningfulScanValue(scannedData.tasting_notes) && (
-                  <DataRow label="Notas" value={scannedData.tasting_notes} />
                 )}
               </div>
 

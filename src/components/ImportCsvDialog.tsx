@@ -27,6 +27,7 @@ import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
 import { designSystem } from "@/styles/designSystem";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
+import { normalizeScanResult } from "@/lib/scan-normalizer";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -2183,7 +2184,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           { imageBase64: prepared.imageBase64 },
           { timeoutMs: 60_000, retries: 1 },
         );
-        const winePayload = scanResult?.wine ?? scanResult?.data?.wine ?? scanResult;
+        const winePayload = normalizeScanResult(scanResult);
         setAnalysisStage("normalizing");
         const imported = normalizeImportedWines([winePayload].filter(Boolean));
         console.log("parsedRows", imported);
@@ -2469,6 +2470,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const handleImport = async () => {
+    console.log("IMPORT_FINAL_ROWS", draftWines);
     const invalidRows = draftWines
       .map((row, index) => ({ row, index, issues: getRowIssues(row) }))
       .filter(({ row }) => getImportStatus(row) === "invalid");

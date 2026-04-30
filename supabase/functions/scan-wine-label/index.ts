@@ -37,7 +37,8 @@ function jsonResponse(req: Request, status: number, body: Record<string, unknown
 }
 
 function ok<T extends Record<string, unknown>>(req: Request, data: T, requestId: string) {
-  return jsonResponse(req, 200, { success: true, data, requestId });
+  void requestId;
+  return jsonResponse(req, 200, data);
 }
 
 function fail(req: Request, status: number, payload: FailPayload) {
@@ -54,9 +55,9 @@ function buildFallbackWine() {
     region: null,
     grape: null,
     food_pairing: null,
-    tasting_notes: null,
     cellar_location: null,
     purchase_price: null,
+    estimated_price: null,
     drink_from: null,
     drink_until: null,
   };
@@ -77,6 +78,27 @@ function buildFallbackConfidence() {
     purchase_price: 0,
     drink_from: 0,
     drink_until: 0,
+  };
+}
+
+function extractCanonicalWineResponse(value: unknown) {
+  const source = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  const wine = source.wine && typeof source.wine === "object" ? source.wine as Record<string, unknown> : source;
+
+  return {
+    name: typeof wine.name === "string" ? wine.name.trim() : "Não identificado",
+    producer: typeof wine.producer === "string" ? wine.producer.trim() || null : null,
+    country: typeof wine.country === "string" ? wine.country.trim() || null : null,
+    region: typeof wine.region === "string" ? wine.region.trim() || null : null,
+    grape: typeof wine.grape === "string" ? wine.grape.trim() || null : null,
+    vintage: normalizeNumber(wine.vintage),
+    style: normalizeStyle(wine.style),
+    drink_from: normalizeNumber(wine.drink_from),
+    drink_until: normalizeNumber(wine.drink_until),
+    estimated_price: normalizeNumber(wine.estimated_price),
+    purchase_price: normalizeNumber(wine.purchase_price),
+    food_pairing: typeof wine.food_pairing === "string" ? wine.food_pairing.trim() || null : null,
+    cellar_location: typeof wine.cellar_location === "string" ? wine.cellar_location.trim() || null : null,
   };
 }
 
@@ -572,7 +594,7 @@ serve(async (req) => {
       imageHash: await sha256Hex(imageBase64),
       mimeType: imageMime,
     };
-    const cached = await getCachedAiResponse<{ wine: Record<string, unknown>; confidence?: Record<string, number> }>(
+    const cached = await getCachedAiResponse<unknown>(
       FUNCTION_NAME,
       cacheInput,
       { userId },
@@ -586,7 +608,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: null,
       });
-      return ok(req, cached.payload, requestId);
+      return ok(req, extractCanonicalWineResponse(cached.payload), requestId);
     }
     console.log(`[${FUNCTION_NAME}] step: cache_miss request_id=${requestId} input_hash=${cached.inputHash} degraded=${cached.degraded}`);
 
@@ -749,13 +771,7 @@ serve(async (req) => {
         step_failed: "ai_failed",
         error_code: code,
       });
-      return ok(req, {
-        wine: buildFallbackWine(),
-        confidence: buildFallbackConfidence(),
-        fallback: true,
-        fallbackReason: code,
-        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
-      }, requestId);
+      return ok(req, buildFallbackWine(), requestId);
     }
 
     console.log(`[${FUNCTION_NAME}] step: ai_response_received request_id=${requestId} raw=${DEBUG_MODE ? sanitizePreview(openaiResult.raw) : "hidden"}`);
@@ -774,13 +790,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok(req, {
-        wine: buildFallbackWine(),
-        confidence: buildFallbackConfidence(),
-        fallback: true,
-        fallbackReason: "AI_PARSE_ERROR",
-        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
-      }, requestId);
+      return ok(req, buildFallbackWine(), requestId);
     }
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
@@ -793,13 +803,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok(req, {
-        wine: buildFallbackWine(),
-        confidence: buildFallbackConfidence(),
-        fallback: true,
-        fallbackReason: "AI_PARSE_ERROR",
-        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
-      }, requestId);
+      return ok(req, buildFallbackWine(), requestId);
     }
 
     const parsed = parsedArgs as Record<string, unknown>;
@@ -816,6 +820,10 @@ serve(async (req) => {
     const rawCountry = typeof wine.country === "string" ? wine.country.trim() : null;
     const rawRegion = typeof wine.region === "string" ? wine.region.trim() : null;
     const rawGrape = typeof wine.grape === "string" ? wine.grape.trim() : null;
+    const rawFoodPairing = typeof wine.food_pairing === "string" ? wine.food_pairing.trim() : null;
+    const rawTastingNotes = typeof wine.tasting_notes === "string" ? wine.tasting_notes.trim() : null;
+    const rawEstimatedPrice = normalizeNumber((wine as Record<string, unknown>).estimated_price);
+    const rawPurchasePrice = normalizeNumber(wine.purchase_price);
     const canonicalCountry = normalizeCountry(rawCountry) || inferCountryFromProducer(rawProducer);
     const normalizedRegion = rawRegion && !isAbsurdRegionValue(rawRegion) ? rawRegion : null;
     const normalizedGrape = normalizeGrape(rawGrape);
@@ -833,10 +841,10 @@ serve(async (req) => {
       country: countryConfidence >= 0.7 ? canonicalCountry ?? null : null,
       region: regionConfidence >= 0.7 ? normalizedRegion : null,
       grape: grapeFieldConfidence >= 0.7 ? normalizedGrape : null,
-      food_pairing: typeof wine.food_pairing === "string" ? wine.food_pairing.trim() : null,
-      tasting_notes: typeof wine.tasting_notes === "string" ? wine.tasting_notes.trim() : null,
+      estimated_price: rawEstimatedPrice ?? rawPurchasePrice ?? null,
+      purchase_price: rawPurchasePrice,
+      food_pairing: rawFoodPairing,
       cellar_location: typeof wine.cellar_location === "string" ? wine.cellar_location.trim() : null,
-      purchase_price: normalizeNumber(wine.purchase_price),
       drink_from: normalizeNumber(wine.drink_from),
       drink_until: normalizeNumber(wine.drink_until),
     };
@@ -850,9 +858,10 @@ serve(async (req) => {
       region: regionConfidence,
       grape: grapeFieldConfidence,
       food_pairing: fieldConfidenceForNullable(normalizedWine.food_pairing, 0.72),
-      tasting_notes: fieldConfidenceForNullable(normalizedWine.tasting_notes, 0.72),
+      tasting_notes: fieldConfidenceForNullable(rawTastingNotes, 0.72),
       cellar_location: fieldConfidenceForNullable(normalizedWine.cellar_location, 0.65),
       purchase_price: fieldConfidenceForNullable(normalizedWine.purchase_price, 0.7),
+      estimated_price: fieldConfidenceForNullable(normalizedWine.estimated_price, 0.7),
       drink_from: fieldConfidenceForNullable(normalizedWine.drink_from, 0.7),
       drink_until: fieldConfidenceForNullable(normalizedWine.drink_until, 0.7),
     };
@@ -888,13 +897,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok(req, {
-        wine: buildFallbackWine(),
-        confidence: buildFallbackConfidence(),
-        fallback: true,
-        fallbackReason: "LABEL_NOT_IDENTIFIED",
-        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
-      }, requestId);
+      return ok(req, buildFallbackWine(), requestId);
     }
 
     const normalizedNameKey = normalizeForMatch(normalizedWine.name);
@@ -915,13 +918,7 @@ serve(async (req) => {
         error_type: "PARSE_ERROR",
         wine_name: normalizedWine.name || null,
       });
-      return ok(req, {
-        wine: normalizedWine,
-        confidence: fieldConfidence,
-        fallback: true,
-        fallbackReason: "LABEL_NOT_IDENTIFIED",
-        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
-      }, requestId);
+      return ok(req, normalizedWine, requestId);
     }
 
     console.log(`[${FUNCTION_NAME}] final_output request_id=${requestId} wine_name=${normalizedWine.name}`);
@@ -935,9 +932,9 @@ serve(async (req) => {
       error_type: null,
     });
 
-    await setCachedAiResponse(FUNCTION_NAME, cacheInput, { wine: normalizedWine, confidence: fieldConfidence }, { userId });
+    await setCachedAiResponse(FUNCTION_NAME, cacheInput, normalizedWine, { userId });
 
-    return ok(req, { wine: normalizedWine, confidence: fieldConfidence }, requestId);
+    return ok(req, normalizedWine, requestId);
   } catch (error) {
     const durationMs = Date.now() - startTime;
     const errMsg = error instanceof Error ? error.message : "unknown";
@@ -966,12 +963,6 @@ serve(async (req) => {
       input_size_bytes: sizeBytes,
       error_type: code,
     });
-    return ok(req, {
-      wine: buildFallbackWine(),
-      confidence: buildFallbackConfidence(),
-      fallback: true,
-      fallbackReason: code,
-      suggestion: "Tente tirar a foto com mais luz ou foco frontal",
-    }, requestId);
+    return ok(req, buildFallbackWine(), requestId);
   }
 });
