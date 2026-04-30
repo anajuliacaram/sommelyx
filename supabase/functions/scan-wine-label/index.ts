@@ -78,6 +78,13 @@ function buildFallbackConfidence() {
   };
 }
 
+function adminClient() {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
+  if (!supabaseUrl || !serviceKey) return null;
+  return createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+}
+
 async function logStep(
   userId: string,
   statusCode: number,
@@ -378,11 +385,9 @@ async function logAudit(
   metadata?: Record<string, unknown>,
 ) {
   try {
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-    await adminClient.from("edge_function_logs").insert({
+    const client = adminClient();
+    if (!client) return;
+    await client.from("edge_function_logs").insert({
       user_id: userId,
       function_name: FUNCTION_NAME,
       status_code: statusCode,
@@ -402,6 +407,10 @@ serve(async (req) => {
   const startTime = Date.now();
   let userId = "anonymous";
   const requestId = crypto.randomUUID();
+  let sizeBytes = 0;
+  let imageMime = "";
+  let imageBase64 = "";
+  let payloadFileName: string | null = null;
 
   try {
     const authorization = req.headers.get("Authorization");
@@ -477,7 +486,7 @@ serve(async (req) => {
 
     const imageBase64Raw = payload?.imageBase64;
     const payloadMimeType = typeof payload?.mimeType === "string" ? payload.mimeType.trim() : null;
-    const payloadFileName = typeof payload?.fileName === "string" ? payload.fileName.trim() : null;
+    payloadFileName = typeof payload?.fileName === "string" ? payload.fileName.trim() : null;
     console.log(`[${FUNCTION_NAME}] step: request_received request_id=${requestId} auth_present=${Boolean(authorization)} payload_keys=${Object.keys(payload || {}).join(",") || "none"} mime=${payloadMimeType || "unknown"} file=${payloadFileName || "unknown"} image_base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
       await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, {
@@ -494,7 +503,26 @@ serve(async (req) => {
       });
     }
 
-    const validation = validateImagePayload(imageBase64Raw, payloadMimeType, { maxBytes: MAX_IMAGE_SIZE });
+    let validation;
+    try {
+      validation = validateImagePayload(imageBase64Raw, payloadMimeType, { maxBytes: MAX_IMAGE_SIZE });
+    } catch (validationError) {
+      console.error(`[${FUNCTION_NAME}] step: image_validation_failed request_id=${requestId}`, validationError);
+      await logStep(userId, 400, "image_invalid", Date.now() - startTime, requestId, {
+        request_id: requestId,
+        reason: "validation_exception",
+        file_name: payloadFileName,
+        input_size_bytes: 0,
+        error_type: "INVALID_IMAGE",
+      });
+      return fail(400, {
+        success: false,
+        code: INVALID_INPUT_ERROR.code,
+        message: INVALID_INPUT_ERROR.message,
+        requestId,
+        retryable: false,
+      });
+    }
     if (!validation.ok) {
       console.error(`[${FUNCTION_NAME}] step: image_invalid request_id=${requestId} reason=${validation.reason}`);
       await logStep(userId, 400, "image_invalid", Date.now() - startTime, requestId, {
@@ -513,9 +541,9 @@ serve(async (req) => {
       });
     }
 
-    const imageMime = validation.mimeType;
-    const imageBase64 = validation.base64;
-    const sizeBytes = validation.byteLength;
+    imageMime = validation.mimeType;
+    imageBase64 = validation.base64;
+    sizeBytes = validation.byteLength;
     console.log(`[${FUNCTION_NAME}] step: image_normalized request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
     console.log(`[${FUNCTION_NAME}] step: image_size_checked request_id=${requestId} size_bytes=${sizeBytes}`);
 
