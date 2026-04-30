@@ -12,12 +12,14 @@ export function LocationFields({
   label = "Localização na adega",
   required,
   className,
+  disabled = false,
 }: {
   value: StructuredLocation;
   onChange: (next: StructuredLocation) => void;
   label?: string;
   required?: boolean;
   className?: string;
+  disabled?: boolean;
 }) {
   const opts = useLocationOptions();
   const [manual, setManual] = useState<boolean>(!!value.manualLabel);
@@ -45,6 +47,7 @@ export function LocationFields({
           type="button"
           variant="ghost"
           className="h-8 px-2 text-[11px] font-semibold"
+          disabled={disabled}
           onClick={() => setManual((v) => !v)}
         >
           {manual ? "Usar seleção" : "Escrever manualmente"}
@@ -57,6 +60,7 @@ export function LocationFields({
           onChange={(e) => onChange({ ...value, manualLabel: normalizeLocationPart(e.target.value) })}
           placeholder="Ex.: Fundos • Gôndola 2 • Linha 3"
           className="h-10 rounded-2xl"
+          disabled={disabled}
         />
       ) : (
         <>
@@ -69,6 +73,7 @@ export function LocationFields({
                 onChange={(e) => onChange({ ...value, sector: normalizeLocationPart(e.target.value), manualLabel: "" })}
                 placeholder="Ex.: Adega principal"
                 className="mt-1 h-10 rounded-2xl"
+                disabled={disabled}
               />
               <datalist id="sommelyx-sector">
                 {opts.sectors.map((v) => (
@@ -84,6 +89,7 @@ export function LocationFields({
                 onChange={(e) => onChange({ ...value, zone: normalizeLocationPart(e.target.value), manualLabel: "" })}
                 placeholder="Ex.: Gôndola 2"
                 className="mt-1 h-10 rounded-2xl"
+                disabled={disabled}
               />
               <datalist id="sommelyx-zone">
                 {opts.zones.map((v) => (
@@ -102,6 +108,7 @@ export function LocationFields({
                 onChange={(e) => onChange({ ...value, level: normalizeLocationPart(e.target.value), manualLabel: "" })}
                 placeholder="Ex.: Linha 3"
                 className="mt-1 h-10 rounded-2xl"
+                disabled={disabled}
               />
               <datalist id="sommelyx-level">
                 {opts.levels.map((v) => (
@@ -117,6 +124,7 @@ export function LocationFields({
                 onChange={(e) => onChange({ ...value, position: normalizeLocationPart(e.target.value), manualLabel: "" })}
                 placeholder="Ex.: Esquerda"
                 className="mt-1 h-10 rounded-2xl"
+                disabled={disabled}
               />
               <datalist id="sommelyx-position">
                 {opts.positions.map((v) => (
@@ -130,4 +138,3 @@ export function LocationFields({
     </div>
   );
 }
-

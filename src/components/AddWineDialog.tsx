@@ -135,6 +135,50 @@ function suggestDrinkWindow(input: ScanSuggestionInput) {
   };
 }
 
+function normalizeScanText(value: unknown) {
+  if (value == null) return "";
+  const text = String(value).trim();
+  if (!text) return "";
+  const lowered = text.toLowerCase();
+  if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
+    return "";
+  }
+  if (text.length === 1 && /[a-z0-9]/i.test(text)) return "";
+  return text;
+}
+
+function parseMaybeNumber(value: unknown) {
+  if (value == null || value === "") return null;
+  const num = typeof value === "number" ? value : Number(String(value).replace(",", "."));
+  return Number.isFinite(num) ? num : null;
+}
+
+function findNestedValue(input: unknown, keys: string[]): unknown {
+  if (!input || typeof input !== "object") return undefined;
+  const queue: unknown[] = [input];
+  const seen = new WeakSet<object>();
+  const normalizedKeys = new Set(keys.map((key) => key.toLowerCase()));
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || typeof current !== "object") continue;
+    const currentObj = current as Record<string, unknown>;
+    if (seen.has(currentObj)) continue;
+    seen.add(currentObj);
+
+    for (const [key, value] of Object.entries(currentObj)) {
+      if (normalizedKeys.has(key.toLowerCase())) {
+        return value;
+      }
+      if (value && typeof value === "object") {
+        queue.push(value);
+      }
+    }
+  }
+
+  return undefined;
+}
+
 export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
@@ -153,6 +197,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [currentValue, setCurrentValue] = useState("");
   const [currentValueTouched, setCurrentValueTouched] = useState(false);
   const [location, setLocation] = useState<StructuredLocation>({});
+  const [noLocationInfo, setNoLocationInfo] = useState(false);
   const [drinkFrom, setDrinkFrom] = useState("");
   const [drinkUntil, setDrinkUntil] = useState("");
   const [foodPairing, setFoodPairing] = useState("");
@@ -260,6 +305,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const reset = () => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
+    setNoLocationInfo(false);
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setLabelImagePreview(null); setLabelImageFile(null); setLabelImageBase64(null); setNoPriceInfo(false);
     setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
@@ -269,46 +315,96 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   };
 
   const handleScanComplete = (data: any) => {
-    const normalized = normalizeWineData(data, { log: true });
-    const confidence = (data?.confidence || {}) as Record<string, number | null | undefined>;
-    const shouldPrefill = (key: string, fallback = 0) => {
-      const value = confidence[key];
-      const resolved = typeof value === "number" ? value : fallback;
-      return resolved >= 0.7;
+    const raw = data?.wine ?? data ?? {};
+    const normalizeDrinkingWindow = (input: any) => {
+      const start = parseMaybeNumber(
+        findNestedValue(input, ["drinking_window_start", "drink_from", "drinkFrom"]),
+      );
+      const end = parseMaybeNumber(
+        findNestedValue(input, ["drinking_window_end", "drink_until", "drinkUntil"]),
+      );
+      return {
+        start,
+        end,
+      };
     };
+    const mappedData = normalizeWineData({
+      ...raw,
+      name: normalizeScanText(findNestedValue(raw, ["name", "wine_name"])),
+      producer: normalizeScanText(findNestedValue(raw, ["producer", "winery"])),
+      country: normalizeScanText(findNestedValue(raw, ["country", "pais", "país"])),
+      region: normalizeScanText(findNestedValue(raw, ["region", "regiao", "região"])),
+      grape: normalizeScanText(findNestedValue(raw, ["grape", "varietal"])),
+      style: normalizeScanText(findNestedValue(raw, ["style"])),
+      pairing: normalizeScanText(findNestedValue(raw, ["pairing", "food_pairing", "foodPairing"])),
+      food_pairing: normalizeScanText(findNestedValue(raw, ["food_pairing", "pairing", "foodPairing"])),
+      estimated_price: parseMaybeNumber(findNestedValue(raw, ["estimated_price", "purchase_price", "current_value", "price"])),
+      purchase_price: parseMaybeNumber(findNestedValue(raw, ["purchase_price", "estimated_price", "current_value", "price"])),
+      current_value: parseMaybeNumber(findNestedValue(raw, ["current_value", "estimated_price", "purchase_price", "price"])),
+      drink_from: normalizeDrinkingWindow(raw).start,
+      drink_until: normalizeDrinkingWindow(raw).end,
+      drinking_window_start: normalizeDrinkingWindow(raw).start,
+      drinking_window_end: normalizeDrinkingWindow(raw).end,
+      cellar_location: normalizeScanText(findNestedValue(raw, ["cellar_location", "location"])),
+    }, { log: true });
+    console.log("SCAN_RESULT_MAPPED", mappedData);
+    const isMeaningful = (value: unknown) => Boolean(normalizeScanText(value));
     const nextPrefilled: Record<string, boolean> = {};
-    if (normalized.name && shouldPrefill("name")) { setName(normalized.name); nextPrefilled.name = true; }
-    if (normalized.producer && shouldPrefill("producer")) { setProducer(normalized.producer); nextPrefilled.producer = true; }
-    if (normalized.vintage && shouldPrefill("vintage")) { setVintage(String(normalized.vintage)); nextPrefilled.vintage = true; }
-    if (normalized.style && shouldPrefill("style")) { setStyle(normalized.style); nextPrefilled.style = true; }
-    if (normalized.country && shouldPrefill("country")) { setCountry(normalized.country); nextPrefilled.country = true; }
-    if (normalized.region && shouldPrefill("region")) { setRegion(normalized.region); nextPrefilled.region = true; }
-    if (normalized.grape && shouldPrefill("grape")) { setGrape(normalized.grape); nextPrefilled.grape = true; }
-    if (normalized.food_pairing && shouldPrefill("food_pairing")) { setFoodPairing(normalized.food_pairing); nextPrefilled.food_pairing = true; }
-    if (normalized.tasting_notes && shouldPrefill("tasting_notes")) { setNotes(normalized.tasting_notes); nextPrefilled.tasting_notes = true; }
-    if (normalized.drink_from && shouldPrefill("drink_from")) { setDrinkFrom(String(normalized.drink_from)); nextPrefilled.drink_from = true; }
-    if (normalized.drink_until && shouldPrefill("drink_until")) { setDrinkUntil(String(normalized.drink_until)); nextPrefilled.drink_until = true; }
-    if (normalized.purchase_price && shouldPrefill("purchase_price")) { setLastPaid(String(normalized.purchase_price)); nextPrefilled.purchase_price = true; }
-    if (normalized.current_value) {
-      setCurrentValue(String(normalized.current_value));
+    setName(isMeaningful(mappedData.name) ? String(mappedData.name) : "");
+    if (isMeaningful(mappedData.name)) nextPrefilled.name = true;
+    setProducer(isMeaningful(mappedData.producer) ? String(mappedData.producer) : "");
+    if (isMeaningful(mappedData.producer)) nextPrefilled.producer = true;
+    setVintage(mappedData.vintage != null ? String(mappedData.vintage) : "");
+    if (mappedData.vintage != null) nextPrefilled.vintage = true;
+    setStyle(isMeaningful(mappedData.style) ? String(mappedData.style) : "");
+    if (isMeaningful(mappedData.style)) nextPrefilled.style = true;
+    setCountry(isMeaningful(mappedData.country) ? String(mappedData.country) : "");
+    if (isMeaningful(mappedData.country)) nextPrefilled.country = true;
+    setRegion(isMeaningful(mappedData.region) ? String(mappedData.region) : "");
+    if (isMeaningful(mappedData.region)) nextPrefilled.region = true;
+    setGrape(isMeaningful(mappedData.grape) ? String(mappedData.grape) : "");
+    if (isMeaningful(mappedData.grape)) nextPrefilled.grape = true;
+    setFoodPairing(isMeaningful(mappedData.food_pairing) ? String(mappedData.food_pairing) : "");
+    if (isMeaningful(mappedData.food_pairing)) nextPrefilled.food_pairing = true;
+    setNotes(isMeaningful(mappedData.tasting_notes) ? String(mappedData.tasting_notes) : "");
+    if (isMeaningful(mappedData.tasting_notes)) nextPrefilled.tasting_notes = true;
+    setDrinkFrom(mappedData.drink_from != null ? String(mappedData.drink_from) : "");
+    if (mappedData.drink_from != null) nextPrefilled.drink_from = true;
+    setDrinkUntil(mappedData.drink_until != null ? String(mappedData.drink_until) : "");
+    if (mappedData.drink_until != null) nextPrefilled.drink_until = true;
+    if (mappedData.purchase_price != null) {
+      setLastPaid(String(mappedData.purchase_price));
+      nextPrefilled.purchase_price = true;
+    } else {
+      setLastPaid("");
+    }
+    if (mappedData.current_value != null || mappedData.estimated_price != null) {
+      setCurrentValue(String(mappedData.current_value ?? mappedData.estimated_price));
       setCurrentValueTouched(false);
     } else if (!isCommercial) {
-      setCurrentValue(String(suggestPurchasePrice(normalized)));
+      setCurrentValue(String(suggestPurchasePrice(mappedData)));
       setCurrentValueTouched(false);
+    } else {
+      setCurrentValue("");
     }
-    if (normalized.cellar_location) setLocation({ manualLabel: String(normalized.cellar_location) });
-    if (normalized.labelImagePreview) setLabelImagePreview(String(normalized.labelImagePreview));
-    if (normalized.labelImageFile) setLabelImageFile(normalized.labelImageFile);
-    if (normalized.labelImageBase64) setLabelImageBase64(String(normalized.labelImageBase64));
-    if (!normalized.purchase_price && !isCommercial) setNoPriceInfo(true);
+    if (isMeaningful(mappedData.cellar_location)) {
+      setLocation({ manualLabel: String(mappedData.cellar_location) });
+      setNoLocationInfo(false);
+    } else {
+      setLocation({});
+    }
+    if (mappedData.labelImagePreview) setLabelImagePreview(String(mappedData.labelImagePreview));
+    if (mappedData.labelImageFile) setLabelImageFile(mappedData.labelImageFile);
+    if (mappedData.labelImageBase64) setLabelImageBase64(String(mappedData.labelImageBase64));
+    if (!mappedData.purchase_price && !isCommercial) setNoPriceInfo(true);
     setAiPrefilledFields(nextPrefilled);
 
     // Only set drink window if AI returned them from the label
     // Do NOT use heuristic fallbacks — better to leave blank than fill wrong data
 
     if (
-      normalized.country || normalized.region || normalized.grape || normalized.food_pairing || normalized.tasting_notes ||
-      normalized.drink_from || normalized.drink_until
+      mappedData.country || mappedData.region || mappedData.grape || mappedData.food_pairing || mappedData.tasting_notes ||
+      mappedData.drink_from || mappedData.drink_until || mappedData.estimated_price || mappedData.current_value
     ) {
       setMoreOpen(true);
     }
@@ -728,9 +824,30 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           <input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="input-premium" style={aiFieldStyle("region")} />
                         </div>
                       </div>
+                      {drinkFrom && drinkUntil && (
+                        <p className="text-[11px] leading-relaxed" style={{ color: '#6B6B6B' }}>
+                          Janela de consumo sugerida: <span className="font-semibold text-foreground">{drinkFrom} – {drinkUntil}</span>
+                        </p>
+                      )}
                       <div>
                         <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Uva</label>
                         <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" style={aiFieldStyle("grape")} />
+                      </div>
+                      <div className="flex items-center gap-2 -mt-1">
+                        <input
+                          id="no-location-info"
+                          type="checkbox"
+                          checked={noLocationInfo}
+                          onChange={(e) => {
+                            setNoLocationInfo(e.target.checked);
+                            if (e.target.checked) setLocation({});
+                          }}
+                          className="w-4 h-4 rounded border accent-[#6F7F5B]"
+                          style={{ borderColor: '#D0CDC6' }}
+                        />
+                        <label htmlFor="no-location-info" className="text-[12px] select-none" style={{ color: '#6B6B6B' }}>
+                          Não quero definir localização agora
+                        </label>
                       </div>
                       {!isCommercial && (
                         <div>
@@ -771,6 +888,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
                           value={location}
                           onChange={setLocation}
                           label="Localização na adega"
+                          disabled={noLocationInfo}
                         />
                       </div>
                       <div>

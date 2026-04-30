@@ -102,13 +102,36 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   };
 
   const handleScanComplete = (data: any) => {
-    if (data.name) setExtWineName(data.name);
-    if (data.producer) setExtProducer(data.producer);
-    if (data.country) setExtCountry(data.country);
-    if (data.region) setExtRegion(data.region);
-    if (data.grape) setExtGrape(data.grape);
-    if (data.style) setExtStyle(data.style);
-    if (data.vintage) setExtVintage(String(data.vintage));
+    const raw = data?.wine ?? data ?? {};
+    const normalizeScanText = (value: unknown) => {
+      if (value == null) return "";
+      const text = String(value).trim();
+      if (!text) return "";
+      const lowered = text.toLowerCase();
+      if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) return "";
+      return text;
+    };
+    const normalized = {
+      name: normalizeScanText(raw?.name ?? raw?.wine_name),
+      producer: normalizeScanText(raw?.producer ?? raw?.winery),
+      country: normalizeScanText(raw?.country ?? raw?.pais ?? raw?.país),
+      region: normalizeScanText(raw?.region ?? raw?.regiao ?? raw?.região),
+      grape: normalizeScanText(raw?.grape ?? raw?.varietal),
+      style: normalizeScanText(raw?.style),
+      vintage: normalizeScanText(raw?.vintage),
+      location: normalizeScanText(raw?.cellar_location ?? raw?.location),
+    };
+
+    console.log("SCAN_RESULT_MAPPED", normalized);
+
+    if (normalized.name) setExtWineName(normalized.name);
+    if (normalized.producer) setExtProducer(normalized.producer);
+    if (normalized.country) setExtCountry(normalized.country);
+    if (normalized.region) setExtRegion(normalized.region);
+    if (normalized.grape) setExtGrape(normalized.grape);
+    if (normalized.style) setExtStyle(normalized.style);
+    if (normalized.vintage) setExtVintage(String(normalized.vintage));
+    if (normalized.location) setExtLocation(normalized.location);
   };
 
   const addItemToList = () => {

@@ -22,11 +22,15 @@ interface ScannedWineData {
   country: string | null;
   region: string | null;
   grape: string | null;
+  pairing?: string | null;
   food_pairing: string | null;
   tasting_notes: string | null;
   drink_from: number | null;
   drink_until: number | null;
+  drinking_window_start?: number | null;
+  drinking_window_end?: number | null;
   purchase_price: number | null;
+  estimated_price?: number | null;
   cellar_location: string | null;
   confidence?: {
     name?: number;
@@ -221,12 +225,16 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         producer: normalizeScanText(data.wine?.producer) || null,
         style: normalizeScanText(data.wine?.style) || null,
         grape: normalizeScanText(data.wine?.grape) || null,
+        pairing: normalizeScanText(data.wine?.pairing) || null,
         country: normalizeScanText(data.wine?.country) || null,
         region: normalizeScanText(data.wine?.region) || null,
         tasting_notes: normalizeScanText(data.wine?.tasting_notes) || null,
         food_pairing: normalizeScanText(data.wine?.food_pairing) || null,
         drink_from: normalizeScanText(data.wine?.drink_from) || null,
         drink_until: normalizeScanText(data.wine?.drink_until) || null,
+        drinking_window_start: normalizeScanText(data.wine?.drinking_window_start) || null,
+        drinking_window_end: normalizeScanText(data.wine?.drinking_window_end) || null,
+        estimated_price: data.wine?.estimated_price ?? null,
         fallback: Boolean(data?.fallback) || meaningfulFields.length === 0,
         fallbackReason: data?.fallbackReason || (meaningfulFields.length === 0 ? "LABEL_NOT_IDENTIFIED" : null),
       };
