@@ -89,6 +89,7 @@ type ImageAttachmentPreset = {
   baseQuality?: number;
   maxBase64Length?: number;
   tracePrefix?: string;
+  preprocessMode?: "default" | "ocr";
 };
 
 async function getPdfJs() {
@@ -441,6 +442,7 @@ async function prepareImageAttachment(
   const maxDimension = preset.maxDimension ?? (mobile ? MAX_IMAGE_DIMENSION_MOBILE : MAX_IMAGE_DIMENSION_DESKTOP);
   const baseQuality = preset.baseQuality ?? (mobile ? MAX_IMAGE_QUALITY_MOBILE : MAX_IMAGE_QUALITY_DESKTOP);
   const maxBase64Length = preset.maxBase64Length ?? (mobile ? MAX_IMAGE_BASE64_LENGTH_MOBILE : MAX_IMAGE_BASE64_LENGTH_DESKTOP);
+  const preprocessMode = preset.preprocessMode ?? "default";
 
   if (!mimeType.startsWith("image/")) {
     throw createAttachmentError("INVALID_FILE_TYPE", "Tipo de arquivo inválido.", { mimeType });
@@ -489,6 +491,26 @@ async function prepareImageAttachment(
   ctx.drawImage(decoded.source as CanvasImageSource, 0, 0, canvas.width, canvas.height);
   if (isImageBitmapSource(decoded.source)) {
     decoded.source.close();
+  }
+
+  if (preprocessMode === "ocr") {
+    const sourceImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = sourceImage.data;
+    const contrast = 1.18;
+    for (let i = 0; i < pixels.length; i += 4) {
+      const gray = pixels[i] * 0.299 + pixels[i + 1] * 0.587 + pixels[i + 2] * 0.114;
+      const contrasted = Math.max(0, Math.min(255, (gray - 128) * contrast + 128));
+      pixels[i] = contrasted;
+      pixels[i + 1] = contrasted;
+      pixels[i + 2] = contrasted;
+    }
+    ctx.putImageData(sourceImage, 0, 0);
+
+    ctx.save();
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
   }
 
   const optimized = await exportOptimizedJpeg(canvas, {
@@ -759,7 +781,13 @@ async function extractPdfOcrText(file: File) {
 
 async function extractImageOcrText(file: File) {
   console.info("[AI_PIPELINE] step: image_ocr_started", { fileName: file.name, mimeType: file.type || inferMimeType(file), sizeBytes: file.size });
-  const prepared = await prepareScanImageAttachment(file);
+  const prepared = await prepareImageAttachment(file, {
+    tracePrefix: "wine_list_ocr_upload",
+    maxDimension: isLikelyMobileDevice() ? 1024 : 1180,
+    baseQuality: isLikelyMobileDevice() ? 0.76 : 0.82,
+    maxBase64Length: isLikelyMobileDevice() ? 1_050_000 : 1_350_000,
+    preprocessMode: "ocr",
+  });
   trace("ocr_image_prepared", {
     fileName: file.name,
     mimeType: prepared.mimeType,

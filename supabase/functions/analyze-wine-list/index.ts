@@ -310,93 +310,88 @@ function isLenientWineListAnalysis(data: any): boolean {
 
 function normalizeWineListPayload(payload: any) {
   const rawWines = Array.isArray(payload?.wines) ? payload.wines : [];
-  const validCompatLabels = ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"];
-
-  const wines = rawWines.map((wine: any) => ({
-    name: String(wine?.name || "Vinho não identificado"),
-    producer: wine?.producer ? String(wine.producer) : null,
-    vintage: typeof wine?.vintage === "number" ? wine.vintage : null,
-    style: wine?.style ? String(wine.style) : null,
-    grape: wine?.grape ? String(wine.grape) : null,
-    region: wine?.region ? String(wine.region) : null,
-    price: typeof wine?.price === "number" ? wine.price : null,
-    rating: typeof wine?.rating === "number" ? Math.max(0, Math.min(5, wine.rating)) : 0,
-    description: wine?.description ? String(wine.description) : null,
-    reasoning: wine?.reasoning ? String(wine.reasoning) : null,
-    pairings: (Array.isArray(wine?.pairings) ? wine.pairings : []).slice(0, 5).map((p: any) => {
-      if (typeof p === "object" && p !== null) {
-        return { dish: String(p.dish || ""), why: String(p.why || p.reason || "") };
-      }
-      return { dish: String(p), why: "" };
-    }),
-    verdict: wine?.verdict ? String(wine.verdict) : "Sem resumo",
-    compatibilityLabel: validCompatLabels.includes(wine?.compatibilityLabel) ? wine.compatibilityLabel : "Boa opção",
-    highlight: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"].includes(wine?.highlight) ? wine.highlight : null,
-    body: wine?.body ? String(wine.body) : null,
-    acidity: wine?.acidity ? String(wine.acidity) : null,
-    tannin: wine?.tannin ? String(wine.tannin) : null,
-    occasion: wine?.occasion ? String(wine.occasion) : null,
-    comparativeLabels: Array.isArray(wine?.comparativeLabels) ? wine.comparativeLabels.filter((l: any) => typeof l === "string").slice(0, 3) : [],
-  }));
-
-  const normalizeToken = (value?: string | null) => (value || "").toLowerCase().replace(/\s+/g, " ").trim();
-  const bodyRank = (value?: string | null) => {
-    const v = normalizeToken(value);
-    if (v.includes("leve")) return 0;
-    if (v.includes("encorp")) return 2;
-    if (v.includes("médio") || v.includes("medio") || v.includes("medium")) return 1;
-    return null;
+  const allowedCategories = new Set(["red", "white", "sparkling", "rose"]);
+  const normalizeString = (value: unknown) => String(value ?? "").trim();
+  const normalizePrice = (value: unknown) => {
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) return Math.round(value * 100) / 100;
+    const numeric = Number(String(value ?? "").replace(/[^\d.,-]/g, "").replace(/\.(?=\d{3}\b)/g, "").replace(",", "."));
+    return Number.isFinite(numeric) && numeric > 0 ? Math.round(numeric * 100) / 100 : null;
   };
-  const tanninRank = (value?: string | null) => {
-    const v = normalizeToken(value);
-    if (v.includes("suave") || v.includes("sedos") || v.includes("baixo")) return 0;
-    if (v.includes("firme") || v.includes("estrutur") || v.includes("robust") || v.includes("alto")) return 2;
-    if (v.includes("médio") || v.includes("medio") || v.includes("moderad")) return 1;
-    return null;
+  const normalizeConfidence = (value: unknown) => {
+    const numeric = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(numeric)) return 0.35;
+    return Math.max(0, Math.min(1, numeric));
   };
-  const scoreForTopPick = (wine: any) => (wine.rating || 0) * 10 + (wine.highlight === "top-pick" ? 8 : 0) + (wine.highlight === "best-value" ? 4 : 0);
-  const scoreForValue = (wine: any) => {
-    if (typeof wine.price !== "number" || wine.price <= 0) return wine.rating || 0;
-    return (wine.rating || 0) * 10 + Math.max(0, 600 / wine.price);
+  const mapCategoryToStyle = (category: string) => {
+    switch (category) {
+      case "red":
+        return "Tinto";
+      case "white":
+        return "Branco";
+      case "sparkling":
+        return "Espumante";
+      case "rose":
+        return "Rosé";
+      default:
+        return null;
+    }
+  };
+  const completenessScore = (wine: any) => (
+    [wine.producer, wine.grape, wine.country, wine.region, wine.price]
+      .filter((value) => value !== null && value !== "")
+      .length
+  );
+  const priceConsistencyScore = (wine: any) => {
+    if (typeof wine.price !== "number" || wine.price <= 0) return 0;
+    const priceText = [wine.name, wine.producer, wine.region].filter(Boolean).join(" ");
+    return /\b(r\$|€|\$|\d{2,4})/i.test(priceText) ? 1 : 0.7;
   };
 
-  const wineNames = new Set(wines.map((wine: any) => wine.name));
-  const derivedTopPick = wines.slice().sort((a: any, b: any) => scoreForTopPick(b) - scoreForTopPick(a))[0]?.name || null;
-  const derivedBestValue = wines.slice().sort((a: any, b: any) => scoreForValue(b) - scoreForValue(a))[0]?.name || null;
-  const finalTopPick = payload?.topPick && wineNames.has(String(payload.topPick)) ? String(payload.topPick) : derivedTopPick;
-  const finalBestValue = payload?.bestValue && wineNames.has(String(payload.bestValue)) ? String(payload.bestValue) : derivedBestValue;
+  const wines = rawWines
+    .map((wine: any) => {
+      const name = normalizeString(wine?.name);
+      const producer = normalizeString(wine?.producer) || null;
+      const grape = normalizeString(wine?.grape) || null;
+      const country = normalizeString(wine?.country) || null;
+      const region = normalizeString(wine?.region) || null;
+      const price = normalizePrice(wine?.price);
+      const category = allowedCategories.has(String(wine?.category || "").toLowerCase())
+        ? String(wine.category).toLowerCase()
+        : "red";
+      const confidence = normalizeConfidence(wine?.confidence);
 
-  const bodyRanks = wines
-    .map((wine: any, index: number) => ({ index, rank: bodyRank(wine.body) }))
-    .filter((entry: any) => entry.rank !== null);
-  const tanninRanks = wines
-    .map((wine: any, index: number) => ({ index, rank: tanninRank(wine.tannin) }))
-    .filter((entry: any) => entry.rank !== null);
-
-  const lightestIndex = bodyRanks.length > 0 ? bodyRanks.slice().sort((a: any, b: any) => a.rank - b.rank)[0].index : -1;
-  const boldestIndex = bodyRanks.length > 0 ? bodyRanks.slice().sort((a: any, b: any) => b.rank - a.rank)[0].index : -1;
-  const easiestIndex = tanninRanks.length > 0 ? tanninRanks.slice().sort((a: any, b: any) => a.rank - b.rank)[0].index : -1;
-  const complexIndex = wines
-    .map((wine: any, index: number) => ({ index, score: (wine.highlight === "most-complex" ? 3 : 0) + (wine.rating || 0) }))
-    .sort((a: any, b: any) => b.score - a.score)[0]?.index ?? -1;
-
-  return {
-    wines: wines.map((wine: any, index: number) => {
-      const derivedLabels = new Set<string>(Array.isArray(wine.comparativeLabels) ? wine.comparativeLabels : []);
-      if (wine.name === finalTopPick) derivedLabels.add("melhor escolha da carta");
-      if (wine.name === finalBestValue) derivedLabels.add("melhor custo-benefício");
-      if (index === lightestIndex) derivedLabels.add("mais leve");
-      if (index === boldestIndex) derivedLabels.add("mais encorpado");
-      if (index === easiestIndex) derivedLabels.add("mais fácil de beber");
-      if (index === complexIndex) derivedLabels.add("mais complexo");
       return {
-        ...wine,
-        comparativeLabels: Array.from(derivedLabels).slice(0, 3),
+        name: name || "Vinho não identificado",
+        producer,
+        grape,
+        country,
+        region,
+        price,
+        category,
+        confidence,
+        style: mapCategoryToStyle(category),
       };
-    }),
-    topPick: finalTopPick,
-    bestValue: finalBestValue,
-  };
+    })
+    .filter((wine: any) => wine.name.trim().length > 0);
+
+  const sorted = wines.sort((a: any, b: any) => {
+    const confidenceDelta = b.confidence - a.confidence;
+    if (confidenceDelta !== 0) return confidenceDelta;
+    const priceConsistencyDelta = priceConsistencyScore(b) - priceConsistencyScore(a);
+    if (priceConsistencyDelta !== 0) return priceConsistencyDelta;
+    return completenessScore(b) - completenessScore(a);
+  });
+
+  const topPick = sorted[0]?.name || null;
+  const bestValue = sorted
+    .filter((wine: any) => typeof wine.price === "number" && wine.price > 0)
+    .sort((a: any, b: any) => {
+      const aScore = a.confidence + completenessScore(a) / 10 - a.price / 10_000;
+      const bScore = b.confidence + completenessScore(b) / 10 - b.price / 10_000;
+      return bScore - aScore;
+    })[0]?.name || topPick;
+
+  return { wines: sorted, topPick, bestValue };
 }
 
 function normalizeMenuPayload(payload: any) {
@@ -486,23 +481,12 @@ function buildFallbackWineListAnalysis(input: { extractedText?: string | null; f
     return {
       name,
       producer: null,
-      vintage: null,
-      style,
       grape: null,
+      country: null,
       region: null,
       price: null,
-      rating: Math.max(0, 4 - index * 0.25),
-      body: style === "Branco" ? "Leve" : style === "Espumante" ? "Médio" : "Médio",
-      acidity: style === "Tinto" ? "Média" : "Alta",
-      tannin: style === "Tinto" ? "Médio" : "Suave",
-      occasion: style === "Espumante" ? "Aperitivo" : "Jantar casual",
-      description: `Fallback estruturado a partir do texto extraído${input.fileName ? ` de ${input.fileName}` : ""}.`,
-      reasoning: `Sem resposta parseável do modelo, o sistema gerou uma análise de contingência para manter a carta legível.`,
-      pairings: buildFallbackPairings(style),
-      verdict: `Boa opção dentro da leitura automática disponível neste momento.`,
-      compatibilityLabel: index === 0 ? "Excelente escolha" : index === 1 ? "Alta compatibilidade" : "Boa opção",
-      highlight: index === 0 ? "top-pick" : index === 1 ? "best-value" : null,
-      comparativeLabels: index === 0 ? ["melhor escolha da carta"] : ["melhor custo-benefício"],
+      category: style === "Branco" ? "white" : style === "Rosé" ? "rose" : style === "Espumante" ? "sparkling" : "red",
+      confidence: Math.max(0.2, 0.72 - index * 0.08),
     } as Record<string, unknown>;
   });
 
@@ -772,41 +756,25 @@ Use apenas pratos LEGÍVEIS no cardápio. Não invente itens.`;
         : "";
 
       systemPrompt = `Você é um sommelier profissional analisando uma carta de vinhos para ajudar o cliente a decidir rapidamente o que pedir.${profileContext}
+Extraia a carta como uma LISTA ESTRUTURADA de vinhos. Não escreva análise sensorial, veredictos, harmonizações ou resumo livre.
 
-REGRA #1 — FALE DO RÓTULO, NUNCA DA UVA GENÉRICA:
-- ERRADO: "Sauvignon Blanc possui notas cítricas e minerais"
-- CERTO: "O Cloudy Bay Sauvignon Blanc, da região de Marlborough na Nova Zelândia, é referência mundial nessa uva — espere um perfil intensamente aromático com maracujá e capim-limão, corpo leve-médio e acidez cortante"
+TRATE O TEXTO como um menu/carta de vinhos.
 
-PARA CADA VINHO da carta, construa um PERFIL MENTAL:
-1. O que se sabe sobre ESTE produtor/vinícola?
-2. O que a REGIÃO de origem implica sobre o estilo?
-3. Qual o POSICIONAMENTO do vinho? (entrada de linha, premium, ícone)
-4. Como ele se compara aos OUTROS vinhos desta carta?
+REGRAS:
+1. Extraia TODOS os vinhos individualmente.
+2. Cada vinho deve ser um objeto em "wines".
+3. Se o OCR mostrar várias linhas de rótulos ou preços, devolva vários vinhos. Nunca colapse a carta em um único resultado.
+4. Não invente campos ausentes. Use string vazia quando faltar texto e 0 apenas quando o preço estiver realmente ausente.
+5. Normalize a categoria para: "red", "white", "sparkling" ou "rose".
+6. Confidence deve ser um número de 0 a 1 baseado na clareza do OCR e na completude daquele item.
+7. Quando houver produtor, uva, país ou região parcialmente legíveis, preserve o que estiver seguro. Não complete com fantasia.
 
-REGRAS DE ANÁLISE:
-1. DESCRIÇÃO ESPECÍFICA: Corpo, acidez, taninos, estilo gastronômico e ocasião ideal. Cite o NOME do vinho, não "este vinho". Referencie o que diferencia ESTE rótulo de outros da mesma uva.
-   Em cada explicação, mencione pelo menos um anchor do rótulo (produtor, região, país, safra ou linha/posicionamento). Se faltar dado, faça inferência cautelosa e diga que está estimando pelo contexto do rótulo.
+PROIBIDO:
+- responder com um único vinho se houver várias entradas detectáveis
+- escrever explicações longas
+- retornar qualquer campo fora do schema`;
 
-2. COMPARAÇÃO RELATIVA: Compare dentro da carta. Atribua labels comparativas derivadas do conjunto analisado e use no máximo 3 por vinho. Priorize: "melhor escolha da carta", "melhor custo-benefício", "mais leve", "mais encorpado", "mais complexo", "mais fácil de beber".
-
-3. COMPATIBILIDADE SEMÂNTICA: "Excelente escolha", "Alta compatibilidade", "Boa opção" ou "Funciona bem". Nem todos podem ser "Excelente".
-
-4. REASONING OBRIGATÓRIO: escreva uma justificativa comparativa curta, 2-4 frases, com lógica técnica real. O reasoning precisa:
-   - comparar este vinho com outros da carta
-   - citar acidez, tanino, corpo, estrutura ou ocasião
-   - citar pelo menos um anchor específico do rótulo (produtor, região, país, safra ou linha/posicionamento)
-   - explicar quando escolher este rótulo versus os demais
-
-5. HARMONIZAÇÃO: 3-5 pratos com lógica sensorial real (ex: "a acidez do [nome] corta a gordura da picanha"). Cada prato precisa ter uma justificativa específica e diferente.
-
-6. VEREDICTO: Frase opinativa DIRETA como sommelier falaria. Ex: "O [nome] é a escolha óbvia se você vai pedir carne — estrutura para aguentar e taninos que pedem gordura" ou "Honestamente, o [nome] está caro para o que entrega — prefira o [outro] por metade do preço".
-
-7. JULGAMENTO HONESTO: Nem todo vinho merece nota alta. Se um vinho é mediano, diga.
-
-PROIBIDO: "bom equilíbrio entre fruta e madeira", "[Uva] possui notas de...", qualquer frase que sirva para qualquer vinho da mesma uva.
-Use apenas conteúdo legível do anexo. Não invente rótulos.`;
-
-      userInstructions = "Analise a carta de vinhos como sommelier. Para cada vinho, fale do RÓTULO ESPECÍFICO (não da uva genérica), compare com os demais, dê veredicto opinativo e sugira 3-5 harmonizações citando o nome do vinho na explicação.";
+      userInstructions = "Considere a entrada como uma carta de vinhos. Extraia todos os vinhos individualmente e devolva apenas o JSON estruturado.";
 
       tools = [{
         type: "function",
@@ -823,55 +791,19 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
                   properties: {
                     name: { type: "string" },
                     producer: { type: "string" },
-                    vintage: { type: "number" },
-                    style: { type: "string", description: "Ex: Tinto, Branco, Rosé, Espumante" },
                     grape: { type: "string" },
+                    country: { type: "string" },
                     region: { type: "string" },
                     price: { type: "number" },
-                    rating: { type: "number", description: "0-5" },
-                    body: { type: "string", description: "Leve, Médio, Encorpado" },
-                    acidity: { type: "string", description: "Baixa, Média, Alta, Vibrante" },
-                    tannin: { type: "string", description: "Suave, Médio, Firme, Robusto (tintos)" },
-                    occasion: { type: "string", description: "Breve descrição da ocasião ideal. Ex: 'Aperitivo descontraído', 'Jantar especial', 'Almoço casual'" },
-                    description: { type: "string", description: "Análise técnica útil para decisão — evite genéricos" },
-                    reasoning: { type: "string", description: "2-4 frases comparando este vinho com outros da carta e explicando a decisão técnica" },
-                    pairings: {
-                      type: "array",
-                      minItems: 3,
-                      maxItems: 5,
-                      items: {
-                        type: "object",
-                        properties: {
-                          dish: { type: "string" },
-                          why: { type: "string", description: "Lógica sensorial breve" },
-                        },
-                        required: ["dish", "why"],
-                        additionalProperties: false,
-                      },
-                      description: "3-5 harmonizações com explicação",
-                    },
-                    verdict: { type: "string", description: "Frase direta opinativa como sommelier falaria ao cliente" },
-                    compatibilityLabel: { type: "string", enum: ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"] },
-                    highlight: { type: "string", enum: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"] },
-                    comparativeLabels: {
-                      type: "array",
-                      items: {
-                        type: "string",
-                        enum: ["melhor escolha da carta", "melhor custo-benefício", "mais leve", "mais encorpado", "mais complexo", "mais fácil de beber"],
-                      },
-                      minItems: 1,
-                      maxItems: 3,
-                      description: "Labels comparativas derivadas do conjunto analisado",
-                    },
+                    category: { type: "string", enum: ["red", "white", "sparkling", "rose"] },
+                    confidence: { type: "number" },
                   },
-                  required: ["name", "producer", "vintage", "style", "grape", "region", "price", "rating", "body", "acidity", "tannin", "occasion", "description", "reasoning", "pairings", "verdict", "compatibilityLabel", "highlight", "comparativeLabels"],
+                  required: ["name", "producer", "grape", "country", "region", "price", "category", "confidence"],
                   additionalProperties: false,
                 },
               },
-              topPick: { type: "string" },
-              bestValue: { type: "string" },
             },
-            required: ["wines", "topPick", "bestValue"],
+            required: ["wines"],
             additionalProperties: false,
           },
         },
@@ -891,7 +823,8 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
 
     // ── Retry loop with anti-genericity validation ──
     // Keep total runtime under edge function/client timeout (~60s).
-    const MAX_ATTEMPTS = 1;
+    const likelyMultipleEntries = !isMenuMode && splitFallbackEntries(normalizedText).length >= 3;
+    const MAX_ATTEMPTS = isMenuMode ? 1 : 2;
     let lastParsed: any = null;
     let validationResult: { passed: boolean; failures: string[] } = { passed: false, failures: [] };
 
@@ -901,7 +834,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       const timeout = setTimeout(() => controller.abort(), 25_000);
 
       const retryHint = attempt > 0
-        ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre cada rótulo. Cite nomes dos vinhos, mencione produtores/regiões/posicionamento. Mesmo com leitura parcial, devolva a melhor análise possível mantendo a estrutura.`
+        ? `\n\n⚠️ A resposta anterior não trouxe vinhos suficientes de forma estruturada. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nReextraia a carta. Se houver várias linhas de vinhos, devolva vários objetos em "wines". Não colapse em um único item.`
         : "";
 
       const userMessageContent = retryHint
@@ -994,65 +927,27 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
           validationResult.passed = true;
         }
       } else {
-        for (const w of (lastParsed.wines || [])) {
-          if (w.description) textsToValidate.push(w.description);
-          if (w.verdict) textsToValidate.push(w.verdict);
-          if (w.reasoning) textsToValidate.push(w.reasoning);
-          for (const p of (Array.isArray(w.pairings) ? w.pairings : [])) {
-            if (p?.why) textsToValidate.push(p.why);
+        const extractedWines = Array.isArray(lastParsed.wines) ? lastParsed.wines : [];
+        validationResult.failures = [];
+        if (extractedWines.length === 0) {
+          validationResult.failures.push("Nenhum vinho extraído");
+        }
+        for (const wine of extractedWines) {
+          if (typeof wine?.name !== "string" || wine.name.trim().length < 2) {
+            validationResult.failures.push("Vinho sem nome suficiente");
+          }
+          if (!["red", "white", "sparkling", "rose"].includes(String(wine?.category || ""))) {
+            validationResult.failures.push(`Categoria inválida para ${wine?.name || "vinho"}`);
+          }
+          const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence);
+          if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1) {
+            validationResult.failures.push(`Confidence inválido para ${wine?.name || "vinho"}`);
           }
         }
-        // For wine list, validate each wine individually
-        const allPassed: boolean[] = [];
-        for (const w of (lastParsed.wines || [])) {
-          const wTexts = [w.description, w.verdict, w.reasoning, ...(Array.isArray(w.pairings) ? w.pairings.map((p: any) => p?.why).filter(Boolean) : [])].filter(Boolean);
-          if (wTexts.length > 0) {
-            const v = validateWineSpecificity(wTexts, w.name || "", w.grape, {
-              wineName: w.name,
-              producer: w.producer ?? null,
-              region: w.region ?? null,
-              country: (w as any).country ?? null,
-              style: w.style ?? null,
-              vintage: w.vintage ?? null,
-              grape: w.grape ?? null,
-            });
-            const wineSpecificFailures: string[] = [...v.failures];
-
-            if (typeof w.reasoning !== "string" || w.reasoning.trim().length < 80) {
-              wineSpecificFailures.push(`Reasoning too short or missing for ${w.name || "vinho"}`);
-            } else if (!hasComparativeLanguage(w.reasoning) || !hasTechnicalLanguage(w.reasoning)) {
-              wineSpecificFailures.push(`Reasoning lacks comparative or technical language for ${w.name || "vinho"}`);
-            }
-
-            if (!Array.isArray(w.pairings) || w.pairings.length < 1) {
-              wineSpecificFailures.push(`Expected at least 1 pairing for ${w.name || "vinho"}`);
-            } else {
-              for (const pairing of w.pairings) {
-                const why = typeof pairing?.why === "string" ? pairing.why : "";
-                if (why.trim().length < 25 || !hasTechnicalLanguage(why) || hasGenericWineLanguage(why)) {
-                  wineSpecificFailures.push(`Pairing explanation too generic for ${w.name || "vinho"} -> ${String(pairing?.dish || "")}`);
-                }
-              }
-            }
-
-            if (!Array.isArray(w.comparativeLabels) || w.comparativeLabels.length < 1) {
-              wineSpecificFailures.push(`Comparative labels missing for ${w.name || "vinho"}`);
-            }
-
-            const compatOk = typeof w.compatibilityLabel === "string" && ["Excelente escolha", "Alta compatibilidade", "Boa opção", "Funciona bem"].includes(w.compatibilityLabel);
-            if (!compatOk) {
-              wineSpecificFailures.push(`Compatibility label invalid for ${w.name || "vinho"}`);
-            }
-
-            const passed = v.passed && wineSpecificFailures.length === 0;
-            allPassed.push(passed);
-            if (!passed) validationResult.failures.push(...wineSpecificFailures);
-          }
+        if (likelyMultipleEntries && extractedWines.length < 3) {
+          validationResult.failures.push(`Esperados pelo menos 3 vinhos estruturados, recebidos ${extractedWines.length}`);
         }
-        validationResult.passed = allPassed.length > 0 && allPassed.every(Boolean);
-        if (!validationResult.passed && isLenientWineListAnalysis(lastParsed)) {
-          validationResult.passed = true;
-        }
+        validationResult.passed = validationResult.failures.length === 0;
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
@@ -1095,7 +990,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       ? Array.isArray(lastParsed.dishes) ? lastParsed.dishes.length : 0
       : Array.isArray(lastParsed.wines) ? lastParsed.wines.length : 0;
 
-    if (!validationResult.passed && parsedCount > 0) {
+    if (!validationResult.passed && parsedCount >= 3) {
       trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: true });
       const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
       trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
@@ -1103,6 +998,30 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
       trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: true });
       return jsonResponse(req, normalized);
+    }
+
+    if (!validationResult.passed && !isMenuMode && likelyMultipleEntries && parsedCount < 3) {
+      trace("parse_failed", {
+        request_id: requestId,
+        reason: "insufficient_wines_extracted",
+        failures: validationResult.failures.slice(0, 12),
+        count: parsedCount,
+      });
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 422, "parse_failed", Date.now() - startTime, {
+        request_id: requestId,
+        reason: "insufficient_wines_extracted",
+        validation_failures: validationResult.failures.slice(0, 12),
+        mode,
+        input_size_bytes: inputSizeBytes,
+        error_type: "INSUFFICIENT_WINES_EXTRACTED",
+      });
+      return jsonResponse(req, {
+        success: false,
+        code: "INSUFFICIENT_WINES_EXTRACTED",
+        message: "Não conseguimos estruturar vinhos suficientes desta carta. Tente outra imagem mais nítida.",
+        requestId,
+        retryable: true,
+      }, 422);
     }
 
     if (!validationResult.passed) {

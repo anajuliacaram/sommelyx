@@ -1,5 +1,4 @@
 import { invokeEdgeFunction, EdgeFunctionError } from "@/lib/edge-invoke";
-import { normalizeWineData } from "@/lib/wine-normalization";
 import { normalizeWineListOcrText } from "@/lib/wine-ocr-normalization";
 
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos concluir a leitura agora. Verifique sua conexão e tente novamente em instantes.";
@@ -116,18 +115,21 @@ export interface WineListPairing {
 
 export interface WineListItem {
   name: string;
-  producer?: string;
-  vintage?: number;
-  style?: string;
-  grape?: string;
-  region?: string;
+  producer?: string | null;
+  grape?: string | null;
+  country?: string | null;
+  region?: string | null;
   price?: number | null;
-  rating: number;
-  description?: string;
+  category: "red" | "white" | "sparkling" | "rose";
+  confidence: number;
+  style?: string | null;
+  vintage?: number | null;
+  rating?: number;
+  description?: string | null;
   reasoning?: string | null;
   pairings?: WineListPairing[];
-  verdict: string;
-  compatibilityLabel: string;
+  verdict?: string | null;
+  compatibilityLabel?: string | null;
   highlight?: "best-value" | "top-pick" | "adventurous" | "lightest" | "boldest" | "most-complex" | "easiest" | null;
   body?: string | null;
   acidity?: string | null;
@@ -150,52 +152,69 @@ export interface WineListAnalysisTextInput {
   fileName?: string;
 }
 
-type WineListTagKind = "primary" | "secondary";
-
-function normalizeWineListTag(label?: string | null): { label: string; kind: WineListTagKind } | null {
-  const value = (label || "").trim().toLowerCase();
-  if (!value) return null;
-
-  if (/melhor escolha|excelente escolha|combinação perfeita|alta compatibilidade|top[-\s]?pick/.test(value)) {
-    return { label: "Melhor escolha", kind: "primary" };
+function mapWineCategoryToStyle(category?: string | null) {
+  switch ((category || "").toLowerCase()) {
+    case "red":
+      return "Tinto";
+    case "white":
+      return "Branco";
+    case "sparkling":
+      return "Espumante";
+    case "rose":
+      return "Rosé";
+    default:
+      return null;
   }
-  if (/melhor custo[-\s]?benef[ií]cio|custo[-\s]?benef[ií]cio|best value/.test(value)) {
-    return { label: "Melhor custo-benefício", kind: "primary" };
-  }
-  if (/mais encorpado|encorpado|corpo maior/.test(value)) return { label: "Mais encorpado", kind: "secondary" };
-  if (/mais leve|leve/.test(value)) return { label: "Mais leve", kind: "secondary" };
-  if (/mais complexo|complexo/.test(value)) return { label: "Mais complexo", kind: "secondary" };
-  if (/mais fácil de beber|facil de beber|fácil de beber/.test(value)) return { label: "Mais fácil de beber", kind: "secondary" };
-  if (/boa opção|funciona bem|harmonização elegante/.test(value)) return { label: "Boa opção", kind: "secondary" };
-  if (/escolha ousada|adventurous|adventure/.test(value)) return { label: "Escolha ousada", kind: "secondary" };
-  return { label: label.trim(), kind: "secondary" };
 }
 
-function normalizeWineListTags<T extends Pick<WineListItem, "comparativeLabels" | "compatibilityLabel">>(item: T): T {
-  const originalComparativeLabels = Array.isArray(item.comparativeLabels) ? item.comparativeLabels.filter((label): label is string => typeof label === "string" && label.trim().length > 0) : [];
-  const normalized = [
-    item.compatibilityLabel,
-    ...originalComparativeLabels,
-  ]
-    .map(normalizeWineListTag)
-    .filter((tag): tag is { label: string; kind: WineListTagKind } => Boolean(tag));
+function normalizeWineListExtraction(raw: any): WineListAnalysis {
+  const normalizedWines: WineListItem[] = (Array.isArray(raw?.wines) ? raw.wines : [])
+    .map((wine: any) => {
+      const name = String(wine?.name ?? "").trim();
+      if (!name) return null;
+      const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence ?? 0);
+      const category = ["red", "white", "sparkling", "rose"].includes(String(wine?.category || "").toLowerCase())
+        ? String(wine.category).toLowerCase() as WineListItem["category"]
+        : "red";
+      const rawPrice = typeof wine?.price === "number" ? wine.price : Number(wine?.price ?? 0);
+      const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
+      return {
+        name,
+        producer: String(wine?.producer ?? "").trim() || null,
+        grape: String(wine?.grape ?? "").trim() || null,
+        country: String(wine?.country ?? "").trim() || null,
+        region: String(wine?.region ?? "").trim() || null,
+        price,
+        category,
+        confidence: Number.isFinite(confidence) ? Math.max(0, Math.min(1, confidence)) : 0.35,
+        style: mapWineCategoryToStyle(category),
+      };
+    })
+    .filter((wine): wine is WineListItem => Boolean(wine));
 
-  const seen = new Set<string>();
-  const unique = normalized.filter((tag) => {
-    const key = tag.label.toLowerCase();
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
+  const completenessScore = (wine: WineListItem) =>
+    [wine.producer, wine.grape, wine.country, wine.region, wine.price].filter((value) => value !== null && value !== "").length;
+  const priceConsistencyScore = (wine: WineListItem) => (typeof wine.price === "number" && wine.price > 0 ? 1 : 0);
+
+  normalizedWines.sort((a, b) => {
+    const confidenceDelta = b.confidence - a.confidence;
+    if (confidenceDelta !== 0) return confidenceDelta;
+    const priceDelta = priceConsistencyScore(b) - priceConsistencyScore(a);
+    if (priceDelta !== 0) return priceDelta;
+    return completenessScore(b) - completenessScore(a);
   });
 
-  const primary = unique.find((tag) => tag.kind === "primary")?.label ?? null;
-  const secondary = unique.find((tag) => tag.kind === "secondary" && tag.label !== primary)?.label ?? null;
-  const cleaned = [primary, secondary].filter((label): label is string => Boolean(label));
+  const topPick = normalizedWines[0]?.name || null;
+  const bestValue = normalizedWines
+    .filter((wine) => typeof wine.price === "number" && wine.price > 0)
+    .sort((a, b) => (b.confidence - a.confidence) || (completenessScore(b) - completenessScore(a)) || ((a.price || 0) - (b.price || 0)))[0]?.name || topPick;
 
   return {
-    ...item,
-    compatibilityLabel: primary ?? item.compatibilityLabel,
-    comparativeLabels: cleaned.length > 0 ? cleaned : originalComparativeLabels,
+    wines: normalizedWines,
+    topPick,
+    bestValue,
+    fallback: Boolean(raw?.fallback),
+    fallbackReason: raw?.fallbackReason ? String(raw.fallbackReason) : null,
   };
 }
 
@@ -1316,27 +1335,29 @@ export async function analyzeWineList(
       wineCount: Array.isArray((data as any)?.wines) ? (data as any).wines.length : 0,
       fallback: Boolean((data as any)?.fallback),
     });
-    if (data && (data as any).fallback === true) {
-      logTiming("analyze-wine-list", "total", totalStartedAt, { fileName: analysis.fileName, outcome: "fallback" });
-      return data;
-    }
-    if (data && Array.isArray(data.wines) && data.wines.length > 0) {
-      const normalizeStartedAt = nowMs();
-      const normalized = { ...data, wines: data.wines.map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
-      logTiming("analyze-wine-list", "normalization", normalizeStartedAt, { fileName: analysis.fileName, wineCount: normalized.wines.length });
-      logTiming("analyze-wine-list", "total", totalStartedAt, { fileName: analysis.fileName, outcome: "success", wineCount: normalized.wines.length });
-      return normalized;
-    }
-    if (data && isValidLenientWineList(data)) {
-      const normalizeStartedAt = nowMs();
-      const normalized = { ...data, wines: (data.wines || []).map((wine) => normalizeWineListTags(normalizeWineData(wine, { log: false }))) };
-      logTiming("analyze-wine-list", "normalization", normalizeStartedAt, { fileName: analysis.fileName, wineCount: normalized.wines.length, lenient: true });
-      logTiming("analyze-wine-list", "total", totalStartedAt, { fileName: analysis.fileName, outcome: "lenient_success", wineCount: normalized.wines.length });
+    const normalized = normalizeWineListExtraction(data);
+    if (normalized.wines.length > 0) {
+      logTiming("analyze-wine-list", "normalization", requestStartedAt, {
+        fileName: analysis.fileName,
+        wineCount: normalized.wines.length,
+        fallback: normalized.fallback,
+      });
+      logTiming("analyze-wine-list", "total", totalStartedAt, {
+        fileName: analysis.fileName,
+        outcome: normalized.fallback ? "fallback" : "success",
+        wineCount: normalized.wines.length,
+      });
       return normalized;
     }
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     const classified = classifyError(err);
+    if (classified.code === "INSUFFICIENT_WINES_EXTRACTED") {
+      throw createClassifiedError({
+        ...classified,
+        message: "Não conseguimos estruturar vinhos suficientes desta carta. Tente outra imagem mais nítida.",
+      }, "INSUFFICIENT_WINES_EXTRACTED");
+    }
     logTiming("analyze-wine-list", "total", totalStartedAt, {
       fileName: analysis.fileName,
       outcome: "fallback",
@@ -1351,37 +1372,22 @@ export async function analyzeWineList(
       .split(/\n+/)
       .map((line) => line.trim())
       .filter(Boolean)
-      .slice(0, 5);
-    const fallbackWineName = lines[0] || "Não identificado";
-    return {
-      wines: [
-        {
-          name: fallbackWineName,
-          producer: null,
-          vintage: null,
-          style: null,
-          grape: null,
-          region: null,
-          price: null,
-          rating: 50,
-          description: lines.join(" ") || "Leitura simplificada",
-          reasoning: "A análise automática não concluiu com segurança. Mantivemos uma leitura simples para revisão manual.",
-          pairings: lines.slice(0, 2).map((line) => ({ dish: line, why: "Linha preservada para revisão manual." })),
-          verdict: "Leitura simplificada",
-          compatibilityLabel: "Revisar",
-          highlight: null,
-          body: null,
-          acidity: null,
-          tannin: null,
-          occasion: null,
-          comparativeLabels: [],
-        },
-      ],
-      topPick: fallbackWineName,
-      bestValue: fallbackWineName,
+      .slice(0, 6);
+    const fallback = normalizeWineListExtraction({
+      wines: lines.map((line, index) => ({
+        name: line,
+        producer: "",
+        grape: "",
+        country: "",
+        region: "",
+        price: 0,
+        category: "red",
+        confidence: Math.max(0.2, 0.68 - index * 0.08),
+      })),
       fallback: true,
       fallbackReason: classified.message,
-    };
+    });
+    return fallback;
   }
 }
 

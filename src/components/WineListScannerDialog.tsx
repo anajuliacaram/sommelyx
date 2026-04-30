@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, Star, Award, TrendingUp, Sparkles, RotateCcw, X, UtensilsCrossed, ChevronDown, ChevronUp, Zap, Feather, Dumbbell, Brain, Smile, Heart } from "@/icons/lucide";
+import { Camera, Upload, RotateCcw, X } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -11,13 +11,11 @@ import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
 import {
-  CompatibilityBadge,
   PairingSheetHero,
   PairingLoadingState,
   PairingErrorState,
   SectionHeader,
   FallbackAnalysisBadge,
-  FallbackAnalysisNotice,
 } from "@/components/pairing/shared";
 
 interface WineListScannerDialogProps {
@@ -26,26 +24,6 @@ interface WineListScannerDialogProps {
 }
 
 type ScanStep = "capture" | "scanning" | "results" | "error";
-
-const highlightIcon: Record<string, typeof Award> = {
-  "best-value": TrendingUp,
-  "top-pick": Award,
-  adventurous: Sparkles,
-  lightest: Feather,
-  boldest: Dumbbell,
-  "most-complex": Brain,
-  easiest: Smile,
-};
-
-const highlightLabel: Record<string, string> = {
-  "best-value": "Melhor custo-benefício",
-  "top-pick": "Melhor escolha",
-  adventurous: "Para experimentar",
-  lightest: "Mais leve da carta",
-  boldest: "Mais encorpado",
-  "most-complex": "Mais complexo",
-  easiest: "Mais fácil de beber",
-};
 
 /* ── Wine type color system ── */
 type WineType = "tinto" | "branco" | "rosé" | "espumante" | "unknown";
@@ -143,46 +121,9 @@ const wineTypeConfig: Record<WineType, {
   },
 };
 
-function StarRating({ rating, wineType = "unknown" }: { rating: number; wineType?: WineType }) {
-  const full = Math.floor(rating);
-  const hasHalf = rating - full >= 0.3;
-  const config = wineTypeConfig[wineType];
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className="h-3.5 w-3.5"
-          style={{
-            color: i < full ? config.starColor : i === full && hasHalf ? config.starColor : "#D4D0CA",
-            fill: i < full ? config.starFill : i === full && hasHalf ? `${config.starFill}80` : "transparent",
-          }}
-        />
-      ))}
-      <span className="text-[11px] font-bold ml-1.5" style={{ color: "#2B2B2B" }}>{rating.toFixed(1)}</span>
-    </div>
-  );
-}
-
 type FilterMode = "all" | "tinto" | "branco" | "rosé" | "espumante";
 type BodyPreference = "all" | "leve" | "encorpado";
 type PriceRange = "all" | "up-to-250" | "250-500" | "500-plus";
-
-function getBodyRank(value?: string | null) {
-  const normalized = (value || "").toLowerCase();
-  if (normalized.includes("leve")) return 0;
-  if (normalized.includes("encorp")) return 2;
-  if (normalized.includes("médio") || normalized.includes("medio") || normalized.includes("medium")) return 1;
-  return null;
-}
-
-function getTanninRank(value?: string | null) {
-  const normalized = (value || "").toLowerCase();
-  if (normalized.includes("suave") || normalized.includes("sedos") || normalized.includes("baixo")) return 0;
-  if (normalized.includes("firme") || normalized.includes("estrutur") || normalized.includes("robust") || normalized.includes("alto")) return 2;
-  if (normalized.includes("médio") || normalized.includes("medio") || normalized.includes("moderad")) return 1;
-  return null;
-}
 
 export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDialogProps) {
   const { data: wines } = useWines();
@@ -249,10 +190,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         normalizedWineCount: data.wines.length,
         firstWine: data.wines[0]?.name,
       });
-      notifySuccess(data.fallback ? "Leitura simplificada" : "Carta analisada", {
-        description: data.fallback
-          ? `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} prontos para revisar.`
-          : `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} prontos para refinar.`,
+      notifySuccess(data.fallback ? "Análise rápida" : "Carta analisada", {
+        description: `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} encontrados.`,
         duration: 2800,
       });
       setStep("results");
@@ -356,18 +295,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     const targetBody = bodyPreference === "all" ? null : bodyPreference;
 
     const scoreWine = (wine: WineListItem) => {
-      let score = (wine.rating || 0) * 12;
+      let score = wine.confidence * 100;
       const allText = [
         wine.name,
         wine.producer,
         wine.style,
         wine.grape,
+        wine.country,
         wine.region,
-        wine.description,
-        wine.reasoning,
-        wine.verdict,
-        ...(wine.comparativeLabels || []),
-        ...(wine.pairings || []).flatMap((p) => [p.dish, p.why]),
       ]
         .filter(Boolean)
         .join(" ")
@@ -377,24 +312,15 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       if (wine.name === results?.bestValue) score += 45;
       if (selectedWineName && wine.name === selectedWineName) score += 80;
 
-      if ((wine.comparativeLabels || []).some((label) => label.includes("melhor escolha"))) score += 18;
-      if ((wine.comparativeLabels || []).some((label) => label.includes("melhor custo-benefício"))) score += 16;
-      if ((wine.comparativeLabels || []).some((label) => label.includes("mais leve"))) score += bodyPreference === "leve" ? 12 : 5;
-      if ((wine.comparativeLabels || []).some((label) => label.includes("mais encorpado"))) score += bodyPreference === "encorpado" ? 12 : 5;
-      if ((wine.comparativeLabels || []).some((label) => label.includes("mais complexo"))) score += 8;
-      if ((wine.comparativeLabels || []).some((label) => label.includes("mais fácil de beber"))) score += 8;
-
       if (mealTokens.length > 0) {
         const matched = mealTokens.filter((token) => allText.includes(token));
         score += Math.min(matched.length * 8, 24);
       }
 
       if (targetBody) {
-        const body = (wine.body || "").toLowerCase();
-        if (targetBody === "leve" && body.includes("leve")) score += 18;
-        if (targetBody === "encorpado" && body.includes("encorp")) score += 18;
-        if (targetBody === "leve" && body.includes("encorp")) score -= 6;
-        if (targetBody === "encorpado" && body.includes("leve")) score -= 6;
+        const wineType = detectWineType(wine.style);
+        if (targetBody === "leve" && (wineType === "branco" || wineType === "rosé" || wineType === "espumante")) score += 12;
+        if (targetBody === "encorpado" && wineType === "tinto") score += 12;
       }
 
       if (priceRange !== "all") {
@@ -407,12 +333,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         score += inRange ? 16 : -5;
       }
 
-      if (wine.compatibilityLabel === "Excelente escolha") score += 10;
-      if (wine.compatibilityLabel === "Alta compatibilidade") score += 8;
-
-      if (getBodyRank(wine.body) === 0) score += bodyPreference === "leve" ? 6 : 2;
-      if (getBodyRank(wine.body) === 2) score += bodyPreference === "encorpado" ? 6 : 2;
-      if (getTanninRank(wine.tannin) === 0) score += 3;
+      if (typeof wine.price === "number" && wine.price > 0) score += 6;
+      if (wine.producer) score += 4;
+      if (wine.grape) score += 4;
+      if (wine.country) score += 3;
+      if (wine.region) score += 3;
 
       return score;
     };
@@ -539,24 +464,27 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-2.5 pt-1.5"
+              className="space-y-2 pt-1"
             >
-              <div className="flex items-center justify-between">
-                <SectionHeader icon="wine" label={`${filteredWines.length} vinho${filteredWines.length !== 1 ? "s" : ""}${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
-                <Button variant="ghost" size="sm" onClick={reset} className="px-2 font-medium text-[10px]">
-                  <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
-                </Button>
-              </div>
-
-              {results.fallback && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <FallbackAnalysisBadge />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Leitura simplificada</span>
-                  </div>
-                  <FallbackAnalysisNotice />
+              <div className="rounded-2xl border border-border/30 bg-background/55 px-3.5 py-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <SectionHeader icon="wine" label={`${filteredWines.length} vinhos encontrados${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
+                  <Button variant="ghost" size="sm" onClick={reset} className="px-2 font-medium text-[10px]">
+                    <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
+                  </Button>
                 </div>
-              )}
+
+                {results.fallback && (
+                  <div className="mt-2 rounded-xl border border-primary/10 bg-primary/5 px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <FallbackAnalysisBadge />
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        Esta é uma análise rápida com base nos dados disponíveis.
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Filter pills */}
               {availableTypes.length > 1 && (
@@ -589,7 +517,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </div>
               )}
 
-              <div className="rounded-2xl border border-border/30 bg-background/50 px-3.5 py-3 space-y-2.5">
+              <div className="rounded-2xl border border-border/30 bg-background/50 px-3.5 py-3 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Refinar a leitura
@@ -617,7 +545,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                       <button
                         key={option.key}
                         onClick={() => setBodyPreference(option.key as BodyPreference)}
-                        className="h-9 rounded-full px-3 text-[10px] font-semibold transition-all"
+                        className="h-8 rounded-full px-3 text-[10px] font-semibold transition-all"
                         style={{
                           background: bodyPreference === option.key ? "rgba(110,30,42,0.10)" : "rgba(0,0,0,0.035)",
                           color: bodyPreference === option.key ? "#5a1528" : "#777",
@@ -641,7 +569,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                       <button
                         key={option.key}
                         onClick={() => setPriceRange(option.key as PriceRange)}
-                        className="h-9 rounded-full px-3 text-[10px] font-semibold transition-all"
+                        className="h-8 rounded-full px-3 text-[10px] font-semibold transition-all"
                         style={{
                           background: priceRange === option.key ? "rgba(198,167,104,0.14)" : "rgba(0,0,0,0.035)",
                           color: priceRange === option.key ? "#7B6528" : "#777",
@@ -661,7 +589,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </div>
               ) : null}
 
-              <div className="max-h-[400px] overflow-y-auto pr-1 cellar-scroll">
+              <div className="max-h-[52vh] overflow-y-auto pr-1 cellar-scroll">
                 <ul className="space-y-3">
                   {displayWines.map((wine, i) => (
                   <WineListCard
@@ -706,12 +634,12 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
   isSelected: boolean;
   onChooseWine: () => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const HighlightIcon = wine.highlight ? highlightIcon[wine.highlight] || Sparkles : null;
   const wineType = detectWineType(wine.style);
   const config = wineTypeConfig[wineType];
-  const compatStyle = wine.compatibilityLabel ? { color: "#047857", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.18)" } : null;
+  const confidenceLabel =
+    wine.confidence >= 0.82 ? "Alta confiança" :
+    wine.confidence >= 0.58 ? "Confiança média" :
+    "Dados limitados";
 
   return (
     <motion.li
@@ -732,7 +660,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
           : "0 6px 24px -6px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
     >
-      <div className="p-4 sm:p-5 space-y-3">
+      <button type="button" onClick={onChooseWine} className="w-full p-4 text-left sm:p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -760,62 +688,25 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                   Melhor custo-benefício
                 </span>
               )}
+              <span
+                className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em]"
+                style={{
+                  background: "rgba(0,0,0,0.04)",
+                  color: "#6B5E55",
+                  border: "1px solid rgba(0,0,0,0.06)",
+                }}
+              >
+                {confidenceLabel}
+              </span>
             </div>
-            <div className="flex items-start justify-between gap-3">
-              <h4 className="line-clamp-2 text-[15px] font-bold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
-                {wine.name}
-              </h4>
+            <h4 className="line-clamp-2 text-[15px] font-bold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
+              {wine.name}
+            </h4>
+            <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+              {wine.producer && <span>{wine.producer}</span>}
+              {wine.region && <span>• {wine.region}</span>}
+              {wine.country && <span>• {wine.country}</span>}
             </div>
-
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {wine.highlight && HighlightIcon && (
-                <span
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em]"
-                  style={{
-                    background: config.badgeBg,
-                    color: config.badgeText,
-                    border: `1px solid ${config.badgeBorder}`,
-                  }}
-                >
-                  <HighlightIcon className="h-2.5 w-2.5" />
-                  {highlightLabel[wine.highlight] || wine.highlight}
-                </span>
-              )}
-              {wine.comparativeLabels?.map((label, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold"
-                  style={{
-                    background: "rgba(0,0,0,0.04)",
-                    color: "#666",
-                    border: "1px solid rgba(0,0,0,0.06)",
-                  }}
-                >
-                  {label}
-                </span>
-              ))}
-              {wine.compatibilityLabel && (
-                <span
-                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold"
-                  style={{
-                    background: compatStyle?.bg ?? "rgba(0,0,0,0.04)",
-                    color: compatStyle?.color ?? "#666",
-                    border: `1px solid ${compatStyle?.border ?? "rgba(0,0,0,0.06)"}`,
-                  }}
-                >
-                  {wine.compatibilityLabel}
-                </span>
-              )}
-            </div>
-
-            {wine.reasoning && (
-              <div className="space-y-1 pl-[0.5px]">
-                <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-primary/50">Por que vale a pena</p>
-                <p className="line-clamp-3 text-[12px] leading-relaxed text-foreground/65">
-                  {wine.reasoning}
-                </p>
-              </div>
-            )}
           </div>
 
           <div className="flex shrink-0 flex-col items-end gap-1">
@@ -824,191 +715,42 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                 R$ {wine.price.toFixed(0)}
               </span>
             )}
+            <span className="text-[10px] text-muted-foreground">{Math.round(wine.confidence * 100)}% de confiança</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 flex-wrap" style={{ color: "#666" }}>
-          {wine.producer && <span className="text-[11px] font-medium">{wine.producer}</span>}
-          {wine.vintage && <span className="text-[11px] font-medium">· {wine.vintage}</span>}
+        <div className="flex flex-wrap gap-2">
+          {config.label && (
+            <span
+              className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold"
+              style={{
+                background: config.badgeBg,
+                color: config.badgeText,
+                border: `1px solid ${config.badgeBorder}`,
+              }}
+            >
+              {config.label}
+            </span>
+          )}
           {wine.grape && (
-            <span className="text-[11px] font-medium flex items-center gap-0.5">
-              · {wine.grape}
+            <span
+              className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-medium"
+              style={{
+                background: config.chipBg,
+                color: config.chipText,
+                border: `1px solid ${config.chipBorder}`,
+              }}
+            >
+              {wine.grape}
             </span>
           )}
         </div>
 
-        {wine.region && (
-          <div className="flex items-center gap-1" style={{ color: "#777" }}>
-            <span className="text-[11px] font-medium">{wine.region}</span>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <StarRating rating={wine.rating} wineType={wineType} />
-            {config.label && (
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em]"
-                style={{
-                  background: config.badgeBg,
-                  color: config.badgeText,
-                  border: `1px solid ${config.badgeBorder}`,
-                }}
-              >
-                {config.label}
-              </span>
-            )}
-          </div>
-          <span
-            className="h-6 whitespace-nowrap rounded-full px-2.5 text-[10px] font-bold"
-            style={{
-              background: "rgba(16,185,129,0.08)",
-              color: "#047857",
-              border: "1px solid rgba(16,185,129,0.18)",
-            }}
-          >
-            {wine.compatibilityLabel}
-          </span>
+        <div className="grid gap-1.5 text-[12px] text-muted-foreground sm:grid-cols-2">
+          <p><span className="font-semibold text-[#2A1F1A]">Produtor:</span> {wine.producer || "Não identificado"}</p>
+          <p><span className="font-semibold text-[#2A1F1A]">Origem:</span> {[wine.region, wine.country].filter(Boolean).join(", ") || "Não identificada"}</p>
         </div>
-
-        {detailsOpen && (
-          <div className="space-y-3">
-            {(wine.body || wine.acidity || wine.tannin) && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {wine.body && (
-                  <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10px] font-semibold text-[#555]">
-                    Corpo: {wine.body}
-                  </span>
-                )}
-                {wine.acidity && (
-                  <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10px] font-semibold text-[#555]">
-                    Acidez: {wine.acidity}
-                  </span>
-                )}
-                {wine.tannin && (
-                  <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10px] font-semibold text-[#555]">
-                    Tanino: {wine.tannin}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {wine.occasion && (
-              <div className="flex items-center gap-1.5" style={{ color: "#666" }}>
-                <Heart className="h-3 w-3" />
-                <span className="text-[11px] font-medium italic">{wine.occasion}</span>
-              </div>
-            )}
-
-            {wine.description && (
-              <p className="text-[13px] leading-relaxed" style={{ color: "#2B2B2B" }}>
-                {wine.description}
-              </p>
-            )}
-
-            <p className="text-[12px] leading-relaxed italic" style={{ color: "#777" }}>
-              "{wine.verdict}"
-            </p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <Button
-            type="button"
-            variant="primary"
-            className="h-8 justify-center rounded-xl px-3 text-[11px] font-semibold"
-            onClick={onChooseWine}
-          >
-            Escolher este vinho
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-8 justify-center rounded-xl border border-border/50 bg-background/55 px-2.5 text-[10px] font-semibold"
-            onClick={() => setDetailsOpen((current) => !current)}
-          >
-            {detailsOpen ? "Ocultar detalhes" : "Ver mais detalhes"}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-8 justify-center rounded-xl border border-border/50 bg-background/55 px-2.5 text-[10px] font-semibold"
-            onClick={() => setExpanded((current) => !current)}
-          >
-            {expanded ? "Ocultar harmonização" : "Harmonizar com prato"}
-          </Button>
-        </div>
-
-        {wine.pairings && wine.pairings.length > 0 && (
-          <div className="mt-2 rounded-2xl border border-[rgba(0,0,0,0.04)] bg-black/[0.015] p-3">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="flex w-full items-center gap-1.5 group"
-            >
-              <UtensilsCrossed className="h-3 w-3" style={{ color: config.badgeText }} />
-              <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "#888" }}>
-                Harmoniza com ({wine.pairings.length})
-              </span>
-              <span className="ml-auto">
-                {expanded ? <ChevronUp className="h-3 w-3" style={{ color: "#aaa" }} /> : <ChevronDown className="h-3 w-3" style={{ color: "#aaa" }} />}
-              </span>
-            </button>
-            <AnimatePresence>
-              {expanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="mt-2 space-y-1.5 overflow-hidden"
-                >
-                  {wine.pairings.map((p, i) => (
-                    <div
-                      key={i}
-                      className="rounded-lg px-3 py-2"
-                      style={{
-                        background: config.chipBg,
-                        border: `1px solid ${config.chipBorder}`,
-                      }}
-                    >
-                      <span className="block text-[12px] font-semibold" style={{ color: config.chipText }}>
-                        {p.dish}
-                      </span>
-                      {p.why && (
-                        <span className="mt-0.5 block text-[10px] leading-snug" style={{ color: "#777" }}>
-                          {p.why}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {!expanded && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {wine.pairings.slice(0, 3).map((p, i) => (
-                  <span
-                    key={i}
-                    className="rounded-full px-2.5 py-1 text-[11px] font-medium"
-                    style={{
-                      background: config.chipBg,
-                      border: `1px solid ${config.chipBorder}`,
-                      color: config.chipText,
-                    }}
-                  >
-                    {p.dish}
-                  </span>
-                ))}
-                {wine.pairings.length > 3 && (
-                  <span className="px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                    +{wine.pairings.length - 3}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      </button>
     </motion.li>
   );
 }
