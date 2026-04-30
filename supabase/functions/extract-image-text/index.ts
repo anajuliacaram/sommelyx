@@ -17,10 +17,13 @@ const BodySchema = z.object({
   fileName: z.string().optional(),
 });
 
-function jsonResponse(status: number, body: Record<string, unknown>) {
+function jsonResponse(req: Request, status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...createCorsHeaders(req),
+      "Content-Type": "application/json",
+    },
   });
 }
 
@@ -65,7 +68,7 @@ serve(async (req) => {
     const authorization = req.headers.get("Authorization");
     if (!authorization) {
       await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_authorization", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-      return jsonResponse(401, { success: false, code: "AUTH_REQUIRED", message: "Authorization header missing", requestId, retryable: false });
+      return jsonResponse(req, 401, { success: false, code: "AUTH_REQUIRED", message: "Authorization header missing", requestId, retryable: false });
     }
 
     const supabase = createClient(
@@ -83,7 +86,7 @@ serve(async (req) => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user?.id) {
       await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-      return jsonResponse(401, { success: false, code: "AUTH_INVALID", message: "Invalid auth token", requestId, retryable: false });
+      return jsonResponse(req, 401, { success: false, code: "AUTH_INVALID", message: "Invalid auth token", requestId, retryable: false });
     }
 
     userId = user.id;
@@ -92,7 +95,7 @@ serve(async (req) => {
     const rawBody = await req.json().catch(() => null);
     const parsedBody = BodySchema.safeParse(rawBody);
     if (!parsedBody.success) {
-      return jsonResponse(400, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false });
+      return jsonResponse(req, 400, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false });
     }
 
     const fileName = parsedBody.data.fileName || "image";
@@ -107,7 +110,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: validation.reason === "invalid_base64" ? "INVALID_IMAGE_BASE64" : "INVALID_IMAGE",
       });
-      return jsonResponse(400, {
+      return jsonResponse(req, 400, {
         success: false,
         code: INVALID_INPUT_ERROR.code,
         message: INVALID_INPUT_ERROR.message,
@@ -126,7 +129,7 @@ serve(async (req) => {
     if (cached.hit && cached.payload) {
       trace("ocr_cache_hit", { request_id: requestId, fileName, inputHash: cached.inputHash });
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, { request_id: requestId, fileName, mimeType, cached: true, input_size_bytes: inputSizeBytes, error_type: null });
-      return jsonResponse(200, { success: true, text: cached.payload.text, extractedText: cached.payload.text, requestId });
+      return jsonResponse(req, 200, { success: true, text: cached.payload.text, extractedText: cached.payload.text, requestId });
     }
     trace("ocr_cache_miss", { request_id: requestId, fileName, inputHash: cached.inputHash, degraded: cached.degraded });
 
@@ -141,7 +144,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
-      return jsonResponse(rateLimit.degraded ? 503 : 429, {
+      return jsonResponse(req, rateLimit.degraded ? 503 : 429, {
         success: false,
         code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
         message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
@@ -203,7 +206,7 @@ Regras:
       trace("ocr_failed", { request_id: requestId, fileName, status: result.status, error: result.error });
       trace("fallback_used", { request_id: requestId, fileName, step_failed: "ai_request_failed", error_code: code });
       await logAudit(userId, result.status, code, Date.now() - startTime, { request_id: requestId, fileName, mimeType, error: result.error, input_size_bytes: inputSizeBytes, error_type: code });
-      return jsonResponse(result.status === 504 ? 408 : 502, {
+      return jsonResponse(req, result.status === 504 ? 408 : 502, {
         success: false,
         code,
         message: result.status === 504 ? "Tempo excedido" : "O serviço está temporariamente indisponível",
@@ -218,7 +221,7 @@ Regras:
 
     if (!text) {
       await logAudit(userId, 422, "image_ocr_empty", Date.now() - startTime, { request_id: requestId, fileName, mimeType, input_size_bytes: inputSizeBytes, error_type: "PARSE_ERROR" });
-      return jsonResponse(422, {
+      return jsonResponse(req, 422, {
         success: false,
         code: "IMAGE_OCR_EMPTY",
         message: "Não foi possível ler a imagem. Tente uma foto mais nítida ou um PDF.",
@@ -229,10 +232,10 @@ Regras:
 
     await logAudit(userId, 200, "success", Date.now() - startTime, { request_id: requestId, fileName, mimeType, textLength: text.length, input_size_bytes: inputSizeBytes, error_type: null });
     await setCachedAiResponse(FUNCTION_NAME, cacheInput, { text }, { userId });
-    return jsonResponse(200, { success: true, text, extractedText: text, requestId });
+    return jsonResponse(req, 200, { success: true, text, extractedText: text, requestId });
   } catch (error) {
     console.error(`[${FUNCTION_NAME}] fatal_error`, error instanceof Error ? error.message : String(error));
     await logAudit(userId, 500, "fatal_error", Date.now() - startTime, { request_id: requestId, error: error instanceof Error ? error.message : String(error), input_size_bytes: 0, error_type: "AI_UNAVAILABLE" });
-    return jsonResponse(500, { success: false, code: "AI_UNAVAILABLE", message: "O serviço está temporariamente indisponível", requestId, retryable: true });
+    return jsonResponse(req, 500, { success: false, code: "AI_UNAVAILABLE", message: "O serviço está temporariamente indisponível", requestId, retryable: true });
   }
 });

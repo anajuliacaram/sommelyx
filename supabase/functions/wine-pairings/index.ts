@@ -19,10 +19,13 @@ const FUNCTION_NAME = "wine-pairings";
 
 
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...createCorsHeaders(req),
+      "Content-Type": "application/json",
+    },
   });
 }
 
@@ -477,7 +480,7 @@ serve(async (req) => {
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-      return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
+      return jsonResponse(req, { error: "AUTH_REQUIRED" }, 401);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -498,7 +501,7 @@ serve(async (req) => {
     if (error || !validatedUserId) {
       console.error("AUTH ERROR:", error);
       await logToDb(supabaseUrl, serviceKey, "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-      return jsonResponse({ error: "AUTH_INVALID" }, 401);
+      return jsonResponse(req, { error: "AUTH_INVALID" }, 401);
     }
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId, durationMs: elapsed(startTime) });
@@ -508,7 +511,7 @@ serve(async (req) => {
       body = await req.json();
     } catch {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { input_size_bytes: 0, error_type: "PARSE_ERROR" });
-      return jsonResponse({ error: "Corpo da requisição inválido" }, 400);
+      return jsonResponse(req, { error: "Corpo da requisição inválido" }, 400);
     }
     const inputSizeBytes = new TextEncoder().encode(JSON.stringify(body ?? {})).length;
     const parsedInput = parseSommelierPairingInput(body);
@@ -540,7 +543,7 @@ serve(async (req) => {
     const cached = await getCachedAiResponse("wine-pairings", cacheInput, { userId });
     if (cached.hit && cached.payload) {
       trace("pairings_cache_hit", { request_id: requestId, inputHash: cached.inputHash, durationMs: elapsed(startTime), input_size_bytes: inputSizeBytes });
-      return jsonResponse(cached.payload);
+      return jsonResponse(req, cached.payload);
     }
     trace("pairings_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded, input_size_bytes: inputSizeBytes });
 
@@ -566,7 +569,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: null,
       });
-      return jsonResponse(deterministicResult);
+      return jsonResponse(req, deterministicResult);
     }
 
     const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
@@ -580,7 +583,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
-      return jsonResponse(
+      return jsonResponse(req, 
         rateLimit.degraded
           ? {
             success: false,
@@ -798,7 +801,7 @@ INSTRUÇÕES:
 7. Sugira de 3 a 5 vinhos reais da adega, NA ORDEM dada, sem inventar categorias genéricas`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
-      return jsonResponse({ error: "Mode inválido" }, 400);
+      return jsonResponse(req, { error: "Mode inválido" }, 400);
     }
 
     const tools = mode === "wine-to-food" ? [
@@ -986,8 +989,8 @@ INSTRUÇÕES:
       });
 
       if (!result.ok) {
-        if (result.status === 429) return jsonResponse({ error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
-        if (result.status === 402) return jsonResponse({ error: "Créditos de IA esgotados." }, 402);
+        if (result.status === 429) return jsonResponse(req, { error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
+        if (result.status === 402) return jsonResponse(req, { error: "Créditos de IA esgotados." }, 402);
         if (result.status === 422) {
           console.warn("[wine-pairings] AI returned 422; falling back to degraded response", {
             request_id: requestId,
@@ -998,9 +1001,9 @@ INSTRUÇÕES:
           validationResult = { passed: false, failures: ["INVALID_AI_RESPONSE"] };
           break;
         }
-        if (result.status === 504) return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
+        if (result.status === 504) return jsonResponse(req, { error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
         console.error("AI gateway error:", result.status, result.errText);
-        return jsonResponse({ error: result.errText || "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);
+        return jsonResponse(req, { error: result.errText || "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);
       }
 
       if (!result.parsed) {
@@ -1139,7 +1142,7 @@ INSTRUÇÕES:
       });
       trace("fallback_used", { request_id: requestId, mode, count: finalCount, reason: "degraded_success" });
       trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: true, durationMs: elapsed(startTime) });
-      return jsonResponse(finalPayload);
+      return jsonResponse(req, finalPayload);
     }
 
     if (!validationResult.passed) {
@@ -1159,7 +1162,7 @@ INSTRUÇÕES:
         ? { pairings: safeFallback.pairings.slice(0, 5), pairingLogic: safeFallback.pairingLogic, wineProfile: safeFallback.wineProfile, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC", note: "análise simplificada" }
         : { suggestions: safeFallback.suggestions.slice(0, 5), dishProfile: safeFallback.dishProfile, message: friendlyMessage, code: "ANALYSIS_NOT_SPECIFIC", note: "análise simplificada" };
       trace("fallback_used", { request_id: requestId, mode, count: mode === "wine-to-food" ? safeFallback.pairings.length : safeFallback.suggestions.length, reason: "no_valid_results" });
-      return jsonResponse(emptyPayload);
+      return jsonResponse(req, emptyPayload);
     }
 
     await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 200, "success", Date.now() - startTime, {
@@ -1174,7 +1177,7 @@ INSTRUÇÕES:
     await setCachedAiResponse("wine-pairings", cacheInput, finalPayload);
     trace("result_normalization", { request_id: requestId, mode, count: finalCount, degraded: false, durationMs: elapsed(startTime) });
     trace("total_function_duration", { request_id: requestId, mode, durationMs: elapsed(startTime), input_size_bytes: inputSizeBytes, user_id: userId });
-    return jsonResponse(finalPayload);
+    return jsonResponse(req, finalPayload);
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "unknown";
     const isAbort = errMsg.toLowerCase().includes("abort");
@@ -1183,8 +1186,8 @@ INSTRUÇÕES:
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { error: errMsg, aborted: isAbort, input_size_bytes: 0, error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE" });
     if (isAbort) {
-      return jsonResponse({ error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
+      return jsonResponse(req, { error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
     }
-    return jsonResponse({ error: "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes." }, 500);
+    return jsonResponse(req, { error: "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes." }, 500);
   }
 });

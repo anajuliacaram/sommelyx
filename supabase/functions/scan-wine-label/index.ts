@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { callOpenAIResponses } from "../_shared/openai.ts";
-import { createCorsHeaders } from "../_shared/cors.ts";
+import { createCorsHeaders, makeCorsResponse } from "../_shared/cors.ts";
 import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/ai-cache.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-validation.ts";
@@ -27,19 +27,21 @@ type ScanLabelRequest = {
   fileName?: unknown;
 };
 
-function jsonResponse(status: number, body: Record<string, unknown>) {
-  return new Response(JSON.stringify(body), {
+function jsonResponse(req: Request, status: number, body: Record<string, unknown>) {
+  return makeCorsResponse(req, JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }
 
-function ok<T extends Record<string, unknown>>(data: T, requestId: string) {
-  return jsonResponse(200, { success: true, data, requestId });
+function ok<T extends Record<string, unknown>>(req: Request, data: T, requestId: string) {
+  return jsonResponse(req, 200, { success: true, data, requestId });
 }
 
-function fail(status: number, payload: FailPayload) {
-  return jsonResponse(status, payload);
+function fail(req: Request, status: number, payload: FailPayload) {
+  return jsonResponse(req, status, payload);
 }
 
 function buildFallbackWine() {
@@ -421,7 +423,7 @@ serve(async (req) => {
         input_size_bytes: 0,
         error_type: "AUTH_REQUIRED",
       });
-      return fail(401, {
+      return fail(req, 401, {
         success: false,
         code: "AUTH_REQUIRED",
         message: "Sua sessão expirou. Faça login novamente para continuar.",
@@ -453,7 +455,7 @@ serve(async (req) => {
         input_size_bytes: 0,
         error_type: "AUTH_INVALID",
       });
-      return fail(401, {
+      return fail(req, 401, {
         success: false,
         code: "AUTH_INVALID",
         message: "Sua sessão expirou. Faça login novamente para continuar.",
@@ -475,7 +477,7 @@ serve(async (req) => {
         input_size_bytes: 0,
         error_type: "PARSE_ERROR",
       });
-      return fail(400, {
+      return fail(req, 400, {
         success: false,
         code: INVALID_INPUT_ERROR.code,
         message: INVALID_INPUT_ERROR.message,
@@ -494,7 +496,7 @@ serve(async (req) => {
         input_size_bytes: 0,
         error_type: "INVALID_IMAGE",
       });
-      return fail(400, {
+      return fail(req, 400, {
         success: false,
         code: INVALID_INPUT_ERROR.code,
         message: INVALID_INPUT_ERROR.message,
@@ -515,7 +517,7 @@ serve(async (req) => {
         input_size_bytes: 0,
         error_type: "INVALID_IMAGE",
       });
-      return fail(400, {
+      return fail(req, 400, {
         success: false,
         code: INVALID_INPUT_ERROR.code,
         message: INVALID_INPUT_ERROR.message,
@@ -532,7 +534,7 @@ serve(async (req) => {
         input_size_bytes: 0,
         error_type: "INVALID_IMAGE",
       });
-      return fail(400, {
+      return fail(req, 400, {
         success: false,
         code: INVALID_INPUT_ERROR.code,
         message: INVALID_INPUT_ERROR.message,
@@ -584,7 +586,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: null,
       });
-      return ok(cached.payload, requestId);
+      return ok(req, cached.payload, requestId);
     }
     console.log(`[${FUNCTION_NAME}] step: cache_miss request_id=${requestId} input_hash=${cached.inputHash} degraded=${cached.degraded}`);
 
@@ -599,7 +601,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
-      return fail(rateLimit.degraded ? 503 : 429, {
+      return fail(req, rateLimit.degraded ? 503 : 429, {
         success: false,
         code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
         message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
@@ -618,7 +620,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "AI_UNAVAILABLE",
       });
-      return fail(502, {
+      return fail(req, 502, {
         success: false,
         code: "AI_UNAVAILABLE",
         message: "Service temporarily unavailable",
@@ -747,7 +749,7 @@ serve(async (req) => {
         step_failed: "ai_failed",
         error_code: code,
       });
-      return ok({
+      return ok(req, {
         wine: buildFallbackWine(),
         confidence: buildFallbackConfidence(),
         fallback: true,
@@ -772,7 +774,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok({
+      return ok(req, {
         wine: buildFallbackWine(),
         confidence: buildFallbackConfidence(),
         fallback: true,
@@ -791,7 +793,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok({
+      return ok(req, {
         wine: buildFallbackWine(),
         confidence: buildFallbackConfidence(),
         fallback: true,
@@ -885,7 +887,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok({
+      return ok(req, {
         wine: buildFallbackWine(),
         confidence: buildFallbackConfidence(),
         fallback: true,
@@ -907,7 +909,7 @@ serve(async (req) => {
 
     await setCachedAiResponse(FUNCTION_NAME, cacheInput, { wine: normalizedWine, confidence: fieldConfidence }, { userId });
 
-    return ok({ wine: normalizedWine, confidence: fieldConfidence }, requestId);
+    return ok(req, { wine: normalizedWine, confidence: fieldConfidence }, requestId);
   } catch (error) {
     const durationMs = Date.now() - startTime;
     const errMsg = error instanceof Error ? error.message : "unknown";
@@ -936,7 +938,7 @@ serve(async (req) => {
       input_size_bytes: sizeBytes,
       error_type: code,
     });
-    return ok({
+    return ok(req, {
       wine: buildFallbackWine(),
       confidence: buildFallbackConfidence(),
       fallback: true,

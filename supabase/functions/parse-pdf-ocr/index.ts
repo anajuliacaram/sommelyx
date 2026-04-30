@@ -12,10 +12,13 @@ const MAX_PDF_PAGES = 10;
 const MAX_EXTRACTED_TEXT_LENGTH = 5000;
 const PROCESSING_TIMEOUT_MS = 10_000;
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...createCorsHeaders(req),
+      "Content-Type": "application/json",
+    },
   });
 }
 
@@ -128,13 +131,13 @@ serve(async (req) => {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
     await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "missing_authorization", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-    return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
+    return jsonResponse(req, { error: "AUTH_REQUIRED" }, 401);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
   if (!supabaseUrl || !supabaseAnonKey) {
-    return jsonResponse({ error: "CONFIG_ERROR" }, 500);
+    return jsonResponse(req, { error: "CONFIG_ERROR" }, 500);
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -148,7 +151,7 @@ serve(async (req) => {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
     await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-    return jsonResponse({ error: "AUTH_INVALID" }, 401);
+    return jsonResponse(req, { error: "AUTH_INVALID" }, 401);
   }
 
   userId = user.id;
@@ -163,7 +166,7 @@ serve(async (req) => {
     console.info(`[${FUNCTION_NAME}] request_received`, { request_id: requestId, user_id: userId, fileName, mimeType, input_size_bytes: inputSizeBytes });
 
     if (mimeType !== "application/pdf") {
-      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
     const validation = validatePdfPayload(pdfBase64Raw, mimeType, { maxBytes: MAX_PDF_BYTES });
@@ -175,7 +178,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: "INVALID_INPUT",
       });
-      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
     const bytes = bytesFromBase64(validation.base64);
@@ -191,7 +194,7 @@ serve(async (req) => {
         input_size_bytes: bytes.length,
         error_type: "IMPORT_LIMIT_EXCEEDED",
       });
-      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
     const cacheInput = {
@@ -216,7 +219,7 @@ serve(async (req) => {
         cached: true,
         error_type: null,
       });
-      return jsonResponse({
+      return jsonResponse(req, {
         ...cached.payload,
       });
     }
@@ -234,7 +237,7 @@ serve(async (req) => {
         pages_processed: typeof pageCount === "number" ? pageCount : null,
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
-      return jsonResponse({
+      return jsonResponse(req, {
         success: false,
         code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
         message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
@@ -259,7 +262,7 @@ serve(async (req) => {
           pages_processed: typeof pageCount === "number" ? pageCount : null,
           error_type: "AI_TIMEOUT",
         });
-        return jsonResponse({ success: false, code: "TIMEOUT", message: "Tempo excedido" }, 408);
+        return jsonResponse(req, { success: false, code: "TIMEOUT", message: "Tempo excedido" }, 408);
       }
       trace("parse_failed", { request_id: requestId, fileName, reason: error instanceof Error ? error.message : String(error) });
       throw error;
@@ -274,7 +277,7 @@ serve(async (req) => {
         pages_processed: typeof pageCount === "number" ? pageCount : null,
         error_type: "PARSE_ERROR",
       });
-      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
     }
 
     trace("parse_success", {
@@ -301,7 +304,7 @@ serve(async (req) => {
       textLength: finalText.length,
     }, { userId: user.id });
 
-    return jsonResponse({
+    return jsonResponse(req, {
       text: finalText,
       extractedText: finalText,
       ocrUsed: false,
@@ -326,7 +329,7 @@ serve(async (req) => {
     const lower = message.toLowerCase();
     const code = lower.includes("invalid") || lower.includes("base64") ? "INVALID_INPUT" : "PDF_PARSE_FAILED";
     const status = code === "INVALID_INPUT" ? 400 : 500;
-    return jsonResponse({
+    return jsonResponse(req, {
       success: false,
       code,
       message: code === "INVALID_INPUT"

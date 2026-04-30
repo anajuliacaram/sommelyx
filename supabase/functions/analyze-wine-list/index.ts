@@ -29,10 +29,13 @@ const BodySchema = z.object({
   path: ["wineName"],
 });
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...createCorsHeaders(req),
+      "Content-Type": "application/json",
+    },
   });
 }
 
@@ -523,7 +526,7 @@ serve(async (req) => {
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-      return jsonResponse({ error: "AUTH_REQUIRED" }, 401);
+      return jsonResponse(req, { error: "AUTH_REQUIRED" }, 401);
     }
 
     const supabase = createClient(
@@ -543,7 +546,7 @@ serve(async (req) => {
     if (error || !validatedUserId) {
       console.error("AUTH ERROR:", error);
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-      return jsonResponse({ error: "AUTH_INVALID" }, 401);
+      return jsonResponse(req, { error: "AUTH_INVALID" }, 401);
     }
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId });
@@ -565,24 +568,24 @@ serve(async (req) => {
       const validMime = mime.startsWith("image/") || mime === "application/pdf" || mime.startsWith("text/");
       trace("file_type_detected", { request_id: requestId, mimeType: mime, validMime });
       if (!validMime) {
-        return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
+        return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
       }
     }
 
     if (typeof rawBody?.imageBase64 === "string" || typeof rawBody?.base64Pdf === "string") {
       trace("image_rejected", { request_id: requestId, reason: "binary_payload_not_supported" });
-      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
+      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
 
     const parsedBody = BodySchema.safeParse(rawBody);
     if (!parsedBody.success) {
-      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
+      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
 
     const { extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
     const textValidation = validateTextPayload(extractedText, 10_000);
     if (!textValidation.ok) {
-      return jsonResponse({ success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
+      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
     const normalizedText = textValidation.text;
     trace("request_parsed", { request_id: requestId, mimeType, fileName, mode, wineName, extractedTextLength: normalizedText.length });
@@ -611,7 +614,7 @@ serve(async (req) => {
         durationMs: elapsed(startTime),
         input_size_bytes: inputSizeBytes,
       });
-      return jsonResponse(cached.payload);
+      return jsonResponse(req, cached.payload);
     }
     trace("analysis_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded, input_size_bytes: inputSizeBytes });
 
@@ -626,7 +629,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
-      return jsonResponse(
+      return jsonResponse(req, 
         rateLimit.degraded
           ? {
             success: false,
@@ -937,10 +940,10 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         });
 
         if (responseStatus === 429) {
-          return jsonResponse({ success: false, code: "AI_RATE_LIMIT", message: "Muitas requisições. Tente novamente em instantes.", requestId, retryable: true }, 429);
+          return jsonResponse(req, { success: false, code: "AI_RATE_LIMIT", message: "Muitas requisições. Tente novamente em instantes.", requestId, retryable: true }, 429);
         }
         if (responseStatus === 402) {
-          return jsonResponse({ success: false, code: "AI_UNAVAILABLE", message: "Service temporarily unavailable", requestId, retryable: true }, 502);
+          return jsonResponse(req, { success: false, code: "AI_UNAVAILABLE", message: "Service temporarily unavailable", requestId, retryable: true }, 502);
         }
         if (responseStatus === 422) {
           const fallback = isMenuMode
@@ -952,9 +955,9 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
             mode: isMenuMode ? "menu" : "wine-list",
             count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
           });
-          return jsonResponse(fallback);
+          return jsonResponse(req, fallback);
         }
-        return jsonResponse({ success: false, code: responseStatus === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", message: responseStatus === 504 ? "A análise demorou mais que o esperado. Tente novamente em instantes." : "Service temporarily unavailable", requestId, retryable: true }, responseStatus === 504 ? 408 : 502);
+        return jsonResponse(req, { success: false, code: responseStatus === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", message: responseStatus === 504 ? "A análise demorou mais que o esperado. Tente novamente em instantes." : "Service temporarily unavailable", requestId, retryable: true }, responseStatus === 504 ? 408 : 502);
       }
 
       parsed = openaiResult.parsed;
@@ -1085,7 +1088,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         input_size_bytes: inputSizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return jsonResponse({ ...fallback, fallback: true, fallbackReason: "NO_PARSED_OUTPUT", note: "análise simplificada" });
+      return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: "NO_PARSED_OUTPUT", note: "análise simplificada" });
     }
 
     const parsedCount = isMenuMode
@@ -1099,7 +1102,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       trace("parse_success", { request_id: requestId, mode, count: parsedCount, degraded: true });
       await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
       trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: true });
-      return jsonResponse(normalized);
+      return jsonResponse(req, normalized);
     }
 
     if (!validationResult.passed) {
@@ -1120,7 +1123,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
         input_size_bytes: inputSizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return jsonResponse({ ...fallback, fallback: true, fallbackReason: "EMPTY_OR_INVALID_EXTRACTION", note: "análise simplificada" });
+      return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: "EMPTY_OR_INVALID_EXTRACTION", note: "análise simplificada" });
     }
 
     trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: false });
@@ -1130,7 +1133,7 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
     await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
     trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: false });
     trace("total_function_duration", { request_id: requestId, durationMs: elapsed(startTime), input_size_bytes: inputSizeBytes, user_id: userId });
-    return jsonResponse(normalized);
+    return jsonResponse(req, normalized);
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "Erro interno";
     const isAbort = errMsg.toLowerCase().includes("abort");
@@ -1150,6 +1153,6 @@ Use apenas conteúdo legível do anexo. Não invente rótulos.`;
       input_size_bytes: inputSizeBytes,
       error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
     });
-    return jsonResponse({ ...fallback, fallback: true, fallbackReason: isAbort ? "TIMEOUT" : "INTERNAL_ERROR", note: "análise simplificada" });
+    return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: isAbort ? "TIMEOUT" : "INTERNAL_ERROR", note: "análise simplificada" });
   }
 });
