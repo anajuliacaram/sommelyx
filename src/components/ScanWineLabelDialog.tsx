@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
@@ -11,6 +12,7 @@ import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib/ai-attachments";
 import { FallbackAnalysisBadge, FallbackAnalysisNotice } from "@/components/pairing/shared";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ScannedWineData {
   name: string | null;
@@ -76,7 +78,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const previewUrlRef = useRef<string | null>(null);
   const selectedFileRef = useRef<File | null>(null);
   const requestBusyRef = useRef(false);
+  const authRetryAttemptedRef = useRef(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const reset = () => {
     if (previewUrlRef.current) {
@@ -90,6 +94,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setErrorMsg("");
     setSupportCode(null);
     setLastBase64(null);
+    authRetryAttemptedRef.current = false;
   };
 
   useEffect(() => {
@@ -106,6 +111,21 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     onOpenChange(v);
   };
 
+  const attemptSessionRecovery = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+      const session = data?.session ?? null;
+      console.info("[ScanWineLabelDialog] auth_refresh_attempt", {
+        success: Boolean(session?.access_token),
+        error: error?.message ?? null,
+      });
+      return Boolean(session?.access_token) && !error;
+    } catch (refreshError) {
+      console.warn("[ScanWineLabelDialog] auth_refresh_failed", refreshError);
+      return false;
+    }
+  }, []);
+
   const runScan = useCallback(async (
     base64: string,
     metadata?: {
@@ -118,6 +138,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setStep("scanning");
     setErrorMsg("");
     setSupportCode(null);
+    let retryAfterAuth = false;
     const estimatedPayloadBytes = Math.round((base64.length * 3) / 4);
 
     console.info("SCAN_START", {
@@ -216,8 +237,19 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         msg = "A análise demorou muito. Tente novamente";
       } else if (code === "INVALID_IMAGE") {
         msg = "Imagem inválida ou ilegível";
-      } else if (code === "AUTH_REQUIRED") {
-        msg = "Sessão expirada. Faça login novamente";
+      } else if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
+        const recovered = !authRetryAttemptedRef.current && (await attemptSessionRecovery());
+        if (recovered) {
+          authRetryAttemptedRef.current = true;
+          console.info("[ScanWineLabelDialog] auth_recovered_retry", {
+            fileName: metadata?.fileName || null,
+            mimeType: metadata?.mimeType || null,
+          });
+          retryAfterAuth = true;
+          return;
+        }
+        navigate("/login?reauth=1", { replace: true });
+        return;
       } else if (code === "AI_UNAVAILABLE") {
         msg = "Não conseguimos analisar este rótulo.";
       } else if (code === "PARSE_ERROR") {
@@ -228,8 +260,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setStep("error");
     } finally {
       requestBusyRef.current = false;
+      if (retryAfterAuth) {
+        setTimeout(() => {
+          void runScan(base64, metadata);
+        }, 0);
+      }
     }
-  }, []);
+  }, [attemptSessionRecovery, navigate]);
 
   const handleFile = useCallback(async (file: File) => {
     if (requestBusyRef.current) return;
@@ -252,6 +289,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     previewUrlRef.current = previewUrl;
     setImagePreview(previewUrl);
     selectedFileRef.current = file;
+    authRetryAttemptedRef.current = false;
     setStep("scanning");
 
     try {

@@ -231,8 +231,7 @@ async function resolveSession(forceRefresh = false) {
     }
   }
 
-  const { data } = await supabase.auth.getSession();
-  const session = data?.session ?? null;
+  const { data: { session } } = await supabase.auth.getSession();
   return session;
 }
 
@@ -299,6 +298,7 @@ export async function invokeEdgeFunction<T>(
     try {
       const session = await resolveSession(attempt > 0);
       const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
+      console.log("AUTH_TOKEN_PRESENT", Boolean(session?.access_token));
 
       if (!session?.access_token) {
         console.warn("[edge-invoke] auth_missing", { function: name, requestId });
