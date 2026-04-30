@@ -860,13 +860,14 @@ serve(async (req) => {
     const suspiciousName = hasArtifactToken(normalizedWine.name);
     const suspiciousProducer = hasArtifactToken(normalizedWine.producer);
     const { strongAnchors, weakAnchors } = countWineAnchors(normalizedWine);
-    const hasEnoughWineContext = strongAnchors >= 1 || weakAnchors >= 2;
-    const hasAnyWineContext = strongAnchors + weakAnchors > 0;
+    const hasNameSignal = Boolean(normalizedWine.name && normalizedWine.name.trim() && !suspiciousName);
+    const hasEnoughWineContext = hasNameSignal || strongAnchors >= 1 || weakAnchors >= 1;
+    const hasAnyWineContext = hasNameSignal || strongAnchors + weakAnchors > 0;
     const regionExplicitlyInvalid = isAbsurdRegionValue(normalizedWine.region);
     const regionMissingButAllowed = !normalizedWine.region || normalizeForMatch(normalizedWine.region) === "";
 
     if (
-      !normalizedWine.name ||
+      !hasNameSignal ||
       suspiciousName ||
       suspiciousProducer ||
       !hasEnoughWineContext ||
@@ -890,6 +891,33 @@ serve(async (req) => {
       return ok(req, {
         wine: buildFallbackWine(),
         confidence: buildFallbackConfidence(),
+        fallback: true,
+        fallbackReason: "LABEL_NOT_IDENTIFIED",
+        suggestion: "Tente tirar a foto com mais luz ou foco frontal",
+      }, requestId);
+    }
+
+    const normalizedNameKey = normalizeForMatch(normalizedWine.name);
+    const isGenericLabelName =
+      !normalizedNameKey ||
+      normalizedNameKey === "nao identificado" ||
+      normalizedNameKey === "não identificado" ||
+      normalizedNameKey === "unknown" ||
+      normalizedNameKey === "unidentified";
+
+    if (isGenericLabelName || fieldConfidence.name < 0.5) {
+      console.error(`[${FUNCTION_NAME}] step: parse_succeeded_but_generic_name request_id=${requestId} name=${normalizedWine.name || "unknown"}`);
+      await logStep(userId, 200, "fallback_used", durationMs, requestId, {
+        reason: "generic_or_low_confidence_name",
+        step_failed: "generic_or_low_confidence_name",
+        error_code: "LABEL_NOT_IDENTIFIED",
+        input_size_bytes: sizeBytes,
+        error_type: "PARSE_ERROR",
+        wine_name: normalizedWine.name || null,
+      });
+      return ok(req, {
+        wine: normalizedWine,
+        confidence: fieldConfidence,
         fallback: true,
         fallbackReason: "LABEL_NOT_IDENTIFIED",
         suggestion: "Tente tirar a foto com mais luz ou foco frontal",
