@@ -140,7 +140,7 @@ const advancedColumns: ColumnDef[] = [
 export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
-  const [step, setStep] = useState<"upload" | "analyzing" | "preview" | "importing" | "done">("upload");
+  const [step, setStep] = useState<"upload" | "analyzing" | "preview" | "review" | "importing" | "done">("upload");
   const [draftWines, setDraftWines] = useState<DraftWine[]>([]);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [aiNotes, setAiNotes] = useState("");
@@ -228,6 +228,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         purchase_price: parsePrice(row?.purchase_price ?? null) ?? null,
       }),
     };
+  };
+
+  const setParsedRows = (rows: ParsedWine[]) => {
+    const parsedRows = normalizeImportedWines(rows);
+    const normalizedRows = normalizeDraftRows(parsedRows);
+    setDraftWines(normalizedRows);
+    setStep(normalizedRows.length > 0 ? "review" : "preview");
+    return normalizedRows;
   };
 
   const parseNumberLoose = (value: unknown) => {
@@ -450,10 +458,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         duplicateGroupKey: base.duplicateGroupKey,
       };
     });
-  };
-
-  const rebuildDraftRows = (rows: ParsedWine[]) => {
-    setDraftWines(normalizeDraftRows(rows));
   };
 
   const dedupeImportedRows = (rows: ParsedWine[]) => {
@@ -1596,10 +1600,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         sourceRows.push({ index: sourceRows.length, values: rawValues });
 
         const price = extractPrice(rowText) ?? (priceHeaderIndex >= 0 ? parsePrice(cells[priceHeaderIndex]) : undefined);
-        if (price === undefined) {
-          ignoredRows++;
-          continue;
-        }
 
         const description = nameHeaderIndex >= 0 ? (cells[nameHeaderIndex] || rowText) : rowText;
         const extracted = extractWineFieldsFromDescription(stripPrefixes(description));
@@ -1645,11 +1645,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           currentProducer = normalizeWineText(extractedBlock || line) || currentProducer;
           continue;
         }
-        if (price === undefined) {
-          ignoredRows++;
-          continue;
-        }
-
         const withoutPrice = line.replace(priceRegex, "").replace(moneyRegex, "").replace(/\s{2,}/g, " ").trim();
         const extracted = extractWineFieldsFromDescription(stripPrefixes(withoutPrice));
         const name = normalizeWineData({
@@ -2008,7 +2003,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   ) => {
     const deduped = dedupeImportedRows(rows);
     setAutoMergedDuplicates(deduped.duplicateCount + (options?.duplicateCount ?? 0));
-    rebuildDraftRows(deduped.rows);
+    const normalized = setParsedRows(deduped.rows);
     setColumnMapping(options?.mapping || {});
     setAiNotes(options?.notes || "");
     setParseErrors(options?.parseErrors || []);
@@ -2020,8 +2015,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setBulkVintage("");
     setBulkGrape("");
     setPreviewLimit(50);
-    setStep("preview");
-    return deduped.rows;
+    return normalized;
   };
 
   const buildWinesFromMapping = (sourceRows: ImportSourceRow[], mapping: Record<string, string>) => {
@@ -2512,7 +2506,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const invalidRowsCount = rowStatuses.filter((status) => status === "invalid").length;
   const duplicateRowsCount = classifications.duplicates.length;
   const identifiedRowsCount = completeRowsCount + reviewRowsCount;
-  const canImport = draftWines.length > 0;
+  const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0;
+  const isReviewStep = step === "preview" || step === "review";
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
     return Array.from(new Set(all.map((wine) => wine.producer).filter((value): value is string => !!value && value.trim().length > 1)))
@@ -2564,7 +2559,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   }, [cellarWines, draftWines]);
 
   useEffect(() => {
-    if (step !== "preview") return;
+    if (step !== "preview" && step !== "review") return;
     const root = tableScrollRef.current;
     const sentinel = loadMoreRef.current;
     if (!root || !sentinel) return;
@@ -2766,13 +2761,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0">
-                <SheetTitle>Review your wines before importing</SheetTitle>
-                <SheetDescription>Click any field to edit, correct duplicates and trust the data before import.</SheetDescription>
+                <SheetTitle>Revise seus vinhos antes de importar</SheetTitle>
+                <SheetDescription>Clique em qualquer campo para editar, corrigir duplicados e confiar nos dados antes da importação.</SheetDescription>
               </div>
             </div>
           </div>
 
-          {step === "preview" ? (
+          {isReviewStep ? (
             <div
               className="sticky top-[73px] z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/40 px-5 py-4"
               style={{
@@ -2874,7 +2869,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                           <Sparkles className="h-3.5 w-3.5" /> Sommelyx Inteligente
                         </p>
                         <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>
-                          Não se preocupe com a ordem ou nome das colunas. O Sommelyx analisa o conteúdo e mapeia automaticamente os dados — nome do vinho, produtor, safra, preço, quantidade e mais.
+                          Não se preocupe com a ordem ou nome das colunas. O Sommelyx analisa o conteúdo e mapeia automaticamente os dados - nome do vinho, produtor, safra, preço, quantidade e mais.
                         </p>
                       </div>
                     </motion.div>
@@ -2931,15 +2926,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </motion.div>
                   )}
 
-                  {step === "preview" && (
+                  {isReviewStep && (
                     <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0 flex-col gap-4 px-6 py-6">
                       <div className="flex flex-wrap items-start justify-between gap-3 shrink-0">
                         <div>
                           <p className="text-sm font-semibold tracking-tight" style={{ color: "#0F0F14" }}>
-                            Revise os dados para continuar
+                            Revise seus vinhos antes de importar
                           </p>
                           <p className="mt-1 text-xs text-black/50">
-                            Clique em qualquer campo para editar · {draftWines.length} vinho(s) importado(s)
+                            Clique em qualquer campo para editar · {draftWines.length} vinho(s) carregado(s)
                           </p>
                         </div>
                       </div>
@@ -3661,7 +3656,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             </div>
           </div>
 
-          {step === "preview" ? (
+          {isReviewStep ? (
             <div
               className="sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-white/45 px-4 py-4"
               style={{
@@ -3690,9 +3685,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 onClick={handleImport}
                 variant="primary"
                 className="h-12 rounded-[12px] px-5 text-[13px] font-semibold"
-                disabled={draftWines.length === 0 || invalidRowsCount > 0}
+                disabled={!canImport}
               >
-                <Upload className="h-4 w-4 mr-1.5" /> Importar {draftWines.length} revisados
+                <Upload className="h-4 w-4 mr-1.5" /> Importar {identifiedRowsCount} revisados
               </Button>
             </div>
           ) : null}
