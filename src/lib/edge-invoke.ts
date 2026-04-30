@@ -198,6 +198,14 @@ function unwrapResponseData<T>(data: unknown): T {
   return data as T;
 }
 
+function shouldCacheEdgeResponse(name: string, value: unknown) {
+  if (name === "scan-wine-label") return false;
+  if (!value || typeof value !== "object") return true;
+  const record = value as Record<string, unknown>;
+  if (record.fallback === true) return false;
+  return true;
+}
+
 function parseErrorBody(body: any, fallbackStatus?: number) {
   const status = typeof body?.status === "number" ? body.status : fallbackStatus;
   const code = normalizeEdgeCode(body?.code ? String(body.code) : undefined, status);
@@ -284,14 +292,16 @@ export async function invokeEdgeFunction<T>(
   const startedAt = Date.now();
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
   const cacheKey = getCacheKey(name, body);
-  const cached = readEdgeCache<T>(cacheKey);
-  if (cached !== null) {
-    console.log("[edge-invoke] cache_hit", {
-      function: name,
-      requestId,
-      durationMs: 0,
-    });
-    return cached;
+  if (name !== "scan-wine-label") {
+    const cached = readEdgeCache<T>(cacheKey);
+    if (cached !== null) {
+      console.log("[edge-invoke] cache_hit", {
+        function: name,
+        requestId,
+        durationMs: 0,
+      });
+      return cached;
+    }
   }
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
@@ -388,7 +398,15 @@ export async function invokeEdgeFunction<T>(
         }
 
         const unwrapped = unwrapResponseData<T>(parsedBody);
-        writeEdgeCache(cacheKey, unwrapped);
+        if (shouldCacheEdgeResponse(name, unwrapped)) {
+          writeEdgeCache(cacheKey, unwrapped);
+        } else if (import.meta.env.DEV) {
+          console.log("[edge-invoke] cache_skip", {
+            function: name,
+            requestId,
+            reason: name === "scan-wine-label" ? "label_scan_not_cached" : "fallback_response_not_cached",
+          });
+        }
         if (import.meta.env.DEV) {
           console.log("[edge-invoke] response", {
             function: name,

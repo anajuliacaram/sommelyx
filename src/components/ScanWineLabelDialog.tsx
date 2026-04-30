@@ -166,7 +166,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         imageBase64Length: base64.length,
         device: getClientDeviceType(),
       });
-      const data = await invokeEdgeFunction<{ wine: ScannedWineData }>(
+      const data = await invokeEdgeFunction<{ wine: ScannedWineData; fallback?: boolean; fallbackReason?: string | null }>(
         "scan-wine-label",
         {
           imageBase64: base64,
@@ -190,10 +190,51 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         estimatedPayloadBytes,
         device: getClientDeviceType(),
       });
-      setScannedData(data.wine);
+      const normalizeScanText = (value: unknown) => {
+        if (value == null) return "";
+        const text = String(value).trim();
+        if (!text) return "";
+        const lowered = text.toLowerCase();
+        if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
+          return "";
+        }
+        if (text.length === 1 && /[a-z0-9]/i.test(text)) return "";
+        return text;
+      };
+
+      const meaningfulFields = [
+        data.wine?.name,
+        data.wine?.producer,
+        data.wine?.style,
+        data.wine?.grape,
+        data.wine?.country,
+        data.wine?.region,
+        data.wine?.food_pairing,
+        data.wine?.tasting_notes,
+        data.wine?.drink_from,
+        data.wine?.drink_until,
+      ].filter((value) => Boolean(normalizeScanText(value)));
+
+      const normalizedWine = {
+        ...data.wine,
+        name: normalizeScanText(data.wine?.name) || "Não identificado",
+        producer: normalizeScanText(data.wine?.producer) || null,
+        style: normalizeScanText(data.wine?.style) || null,
+        grape: normalizeScanText(data.wine?.grape) || null,
+        country: normalizeScanText(data.wine?.country) || null,
+        region: normalizeScanText(data.wine?.region) || null,
+        tasting_notes: normalizeScanText(data.wine?.tasting_notes) || null,
+        food_pairing: normalizeScanText(data.wine?.food_pairing) || null,
+        drink_from: normalizeScanText(data.wine?.drink_from) || null,
+        drink_until: normalizeScanText(data.wine?.drink_until) || null,
+        fallback: Boolean(data?.fallback) || meaningfulFields.length === 0,
+        fallbackReason: data?.fallbackReason || (meaningfulFields.length === 0 ? "LABEL_NOT_IDENTIFIED" : null),
+      };
+
+      setScannedData(normalizedWine);
       setStep("preview");
-      notifySuccess(data?.fallback ? "Leitura parcial" : "Rótulo identificado", {
-        description: data?.fallback
+      notifySuccess(normalizedWine.fallback ? "Leitura parcial" : "Rótulo identificado", {
+        description: normalizedWine.fallback
           ? "Não conseguimos identificar tudo com segurança. Revise os campos antes de salvar."
           : "Revise os dados antes de salvar.",
         duration: 2400,
@@ -416,6 +457,33 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     espumante: "Espumante", sobremesa: "Sobremesa", fortificado: "Fortificado",
   };
 
+  const normalizeScanText = (value: unknown) => {
+    if (value == null) return "";
+    const text = String(value).trim();
+    if (!text) return "";
+    const lowered = text.toLowerCase();
+    if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
+      return "";
+    }
+    if (text.length === 1 && /[a-z0-9]/i.test(text)) return "";
+    return text;
+  };
+
+  const hasMeaningfulScanValue = (value: unknown) => Boolean(normalizeScanText(value));
+  const hasMeaningfulScanData = Boolean(
+    normalizeScanText(scannedData?.name) ||
+    normalizeScanText(scannedData?.producer) ||
+    normalizeScanText(scannedData?.style) ||
+    normalizeScanText(scannedData?.grape) ||
+    normalizeScanText(scannedData?.country) ||
+    normalizeScanText(scannedData?.region) ||
+    normalizeScanText(scannedData?.food_pairing) ||
+    normalizeScanText(scannedData?.tasting_notes) ||
+    normalizeScanText(scannedData?.drink_from) ||
+    normalizeScanText(scannedData?.drink_until),
+  );
+  const isScanFallback = Boolean(scannedData?.fallback) || !hasMeaningfulScanData;
+
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
@@ -529,48 +597,50 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center">
                   <Check className="h-3.5 w-3.5 text-success" />
                 </div>
-                <p className="text-xs font-medium text-success">Rótulo identificado com sucesso</p>
+                <p className="text-xs font-medium text-success">
+                  {isScanFallback ? "Leitura parcial" : "Rótulo identificado com sucesso"}
+                </p>
               </div>
 
-              {scannedData.fallback && (
+              {isScanFallback && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <FallbackAnalysisBadge size="sm" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Leitura simplificada</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Leitura parcial</span>
                   </div>
                   <FallbackAnalysisNotice />
                 </div>
               )}
 
               <div className="glass-card p-4 space-y-3">
-                {scannedData.name && (
+                {hasMeaningfulScanValue(scannedData.name) && (
                   <DataRow label="Nome" value={scannedData.name} />
                 )}
-                {scannedData.producer && (
+                {hasMeaningfulScanValue(scannedData.producer) && (
                   <DataRow label="Produtor" value={scannedData.producer} />
                 )}
-                {scannedData.vintage && (
+                {hasMeaningfulScanValue(scannedData.vintage) && (
                   <DataRow label="Safra" value={String(scannedData.vintage)} />
                 )}
-                {scannedData.style && (
+                {hasMeaningfulScanValue(scannedData.style) && (
                   <DataRow label="Estilo" value={styleLabels[scannedData.style] || scannedData.style} />
                 )}
-                {scannedData.grape && (
+                {hasMeaningfulScanValue(scannedData.grape) && (
                   <DataRow label="Uva" value={scannedData.grape} />
                 )}
-                {scannedData.country && (
+                {hasMeaningfulScanValue(scannedData.country) && (
                   <DataRow label="País" value={scannedData.country} />
                 )}
-                {scannedData.region && (
+                {hasMeaningfulScanValue(scannedData.region) && (
                   <DataRow label="Região" value={scannedData.region} />
                 )}
-                {scannedData.drink_from && scannedData.drink_until && (
+                {hasMeaningfulScanValue(scannedData.drink_from) && hasMeaningfulScanValue(scannedData.drink_until) && (
                   <DataRow label="Janela de consumo" value={`${scannedData.drink_from} – ${scannedData.drink_until}`} />
                 )}
-                {scannedData.food_pairing && (
+                {hasMeaningfulScanValue(scannedData.food_pairing) && (
                   <DataRow label="Harmonização" value={scannedData.food_pairing} />
                 )}
-                {scannedData.tasting_notes && (
+                {hasMeaningfulScanValue(scannedData.tasting_notes) && (
                   <DataRow label="Notas" value={scannedData.tasting_notes} />
                 )}
               </div>
