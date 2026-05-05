@@ -4,7 +4,7 @@ import { Camera, Upload, RotateCcw, X } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { analyzeWineList, buildUserProfile, type WineListAnalysis, type WineListItem, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
+import { analyzeWineList, buildUserProfile, normalizeWineListResponse, type WineListAnalysis, type WineListItem, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { getAttachmentErrorMessage, prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
@@ -275,15 +275,38 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     }
   }, [runScan, toast]);
 
+  const normalizedResults = useMemo<WineListAnalysis>(() => {
+    const empty: WineListAnalysis = {
+      wines: [],
+      topPick: null,
+      bestValue: null,
+      fallback: true,
+      fallbackReason: null,
+    };
 
+    try {
+      const normalized = normalizeWineListResponse(results);
+      if (import.meta.env.DEV) {
+        console.info("[WineListScannerDialog] results_normalized", { raw: results, normalized });
+      }
+      return normalized;
+    } catch (error) {
+      console.error("[WineListScannerDialog] results_normalization_failed", {
+        raw: results,
+        normalized: empty,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      return empty;
+    }
+  }, [results]);
 
   const filteredWines = useMemo(() => {
-    if (!results) return [];
-    return results.wines.filter((w) => {
+    return normalizedResults.wines.filter((w) => {
       if (filterMode === "all") return true;
       return detectWineType(w.style) === filterMode;
     });
-  }, [results, filterMode]);
+  }, [normalizedResults, filterMode]);
 
   const refinedWines = useMemo(() => {
     const mealTokens = mealQuery
@@ -308,8 +331,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         .join(" ")
         .toLowerCase();
 
-      if (wine.name === results?.topPick) score += 60;
-      if (wine.name === results?.bestValue) score += 45;
+      if (wine.name === normalizedResults.topPick) score += 60;
+      if (wine.name === normalizedResults.bestValue) score += 45;
       if (selectedWineName && wine.name === selectedWineName) score += 80;
 
       if (mealTokens.length > 0) {
@@ -343,12 +366,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     };
 
     return [...filteredWines].sort((a, b) => scoreWine(b) - scoreWine(a));
-  }, [filteredWines, mealQuery, bodyPreference, priceRange, results?.bestValue, results?.topPick, selectedWineName]);
+  }, [filteredWines, mealQuery, bodyPreference, priceRange, normalizedResults.bestValue, normalizedResults.topPick, selectedWineName]);
 
   const displayWines = refinedWines.slice(0, 100);
   const isTruncated = refinedWines.length > displayWines.length;
 
-  const availableTypes = results ? [...new Set(results.wines.map(w => detectWineType(w.style)).filter(t => t !== "unknown"))] : [];
+  const availableTypes = [...new Set(normalizedResults.wines.map((w) => detectWineType(w.style)).filter((t) => t !== "unknown"))];
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -458,7 +481,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           />
           )}
 
-          {step === "results" && results && (
+          {step === "results" && (
             <motion.div
               key="results"
               initial={{ opacity: 0, y: 6 }}
@@ -474,7 +497,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   </Button>
                 </div>
 
-                {results.fallback && (
+                {normalizedResults.fallback && (
                   <div className="mt-2 rounded-xl border border-primary/10 bg-primary/5 px-3 py-2">
                     <div className="flex items-center gap-2">
                       <FallbackAnalysisBadge />
@@ -583,32 +606,51 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </div>
               </div>
 
-              {results && results.wines.length > 0 && refinedWines.length === 0 ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[13px] font-medium text-amber-800">
-                  Os dados foram importados, mas não puderam ser exibidos. Atualize a página.
+              {normalizedResults.wines.length === 0 ? (
+                <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
+                  <p className="text-sm font-medium text-foreground">Nenhum vinho identificado com segurança</p>
+                  <p className="text-xs text-muted-foreground">Tente outra foto ou envie um arquivo mais nítido.</p>
+                  <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                    <Button variant="outline" onClick={reset} className="flex-1">
+                      <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                      Tentar novamente
+                    </Button>
+                    <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
+                      <Upload className="h-3.5 w-3.5 mr-1.5" />
+                      Enviar outro arquivo
+                    </Button>
+                  </div>
                 </div>
-              ) : null}
+              ) : (
+                <>
+                  {refinedWines.length === 0 ? (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[13px] font-medium text-amber-800">
+                      Os dados foram importados, mas não puderam ser exibidos. Tente outra foto.
+                    </div>
+                  ) : null}
 
-              <div className="max-h-[52vh] overflow-y-auto pr-1 cellar-scroll">
-                <ul className="space-y-3">
-                  {displayWines.map((wine, i) => (
-                  <WineListCard
-                    key={`${wine.name}-${i}`}
-                    wine={wine}
-                    index={i}
-                    isTopPick={wine.name === results.topPick}
-                    isBestValue={wine.name === results.bestValue}
-                    isSelected={selectedWineName === wine.name}
-                    onChooseWine={() => setSelectedWineName(wine.name)}
-                  />
-                  ))}
-                </ul>
-              </div>
+                  <div className="max-h-[52vh] overflow-y-auto pr-1 cellar-scroll">
+                    <ul className="space-y-3">
+                      {displayWines.map((wine, i) => (
+                        <WineListCard
+                          key={`${wine.name}-${i}`}
+                          wine={wine}
+                          index={i}
+                          isTopPick={wine.name === normalizedResults.topPick}
+                          isBestValue={wine.name === normalizedResults.bestValue}
+                          isSelected={selectedWineName === wine.name}
+                          onChooseWine={() => setSelectedWineName(wine.name)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
 
-              {isTruncated && (
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  Mostrando 100 de {refinedWines.length} vinhos
-                </p>
+                  {isTruncated && (
+                    <p className="text-[11px] font-medium text-muted-foreground">
+                      Mostrando 100 de {refinedWines.length} vinhos
+                    </p>
+                  )}
+                </>
               )}
             </motion.div>
           )}

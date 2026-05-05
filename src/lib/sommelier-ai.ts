@@ -167,8 +167,9 @@ function mapWineCategoryToStyle(category?: string | null) {
   }
 }
 
-function normalizeWineListExtraction(raw: any): WineListAnalysis {
-  const normalizedWines: WineListItem[] = (Array.isArray(raw?.wines) ? raw.wines : [])
+export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
+  const source = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
+  const normalizedWines: WineListItem[] = (Array.isArray(source.wines) ? source.wines : [])
     .map((wine: any) => {
       const name = String(wine?.name ?? "").trim();
       if (!name) return null;
@@ -213,8 +214,8 @@ function normalizeWineListExtraction(raw: any): WineListAnalysis {
     wines: normalizedWines,
     topPick,
     bestValue,
-    fallback: Boolean(raw?.fallback),
-    fallbackReason: raw?.fallbackReason ? String(raw.fallbackReason) : null,
+    fallback: Boolean(source.fallback),
+    fallbackReason: source.fallbackReason ? String(source.fallbackReason) : null,
   };
 }
 
@@ -1150,7 +1151,7 @@ function fallbackPairing(dish: string): GeneratedWinePairing {
   };
 }
 
-function normalizeGeneratedPairingResponse(data: unknown, dish: string): GeneratedWinePairing {
+export function normalizeGeneratedWinePairingResponse(data: unknown, dish: string): GeneratedWinePairing {
   if (!data || typeof data !== "object") {
     return fallbackPairing(dish);
   }
@@ -1311,7 +1312,7 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
     const parsed = safeParse<GeneratedWinePairing>(JSON.stringify(response));
     console.log("parsed:", parsed);
 
-    const normalized = normalizeGeneratedPairingResponse(parsed ?? response, finalDish);
+    const normalized = normalizeGeneratedWinePairingResponse(parsed ?? response, finalDish);
     return normalized;
   } catch (error) {
     console.warn("[generateWinePairing] fallback used", error);
@@ -1371,7 +1372,7 @@ export async function analyzeWineList(
       wineCount: Array.isArray((data as any)?.wines) ? (data as any).wines.length : 0,
       fallback: Boolean((data as any)?.fallback),
     });
-    const normalized = normalizeWineListExtraction(data);
+    const normalized = normalizeWineListResponse(data);
     if (normalized.wines.length > 0) {
       logTiming("analyze-wine-list", "normalization", requestStartedAt, {
         fileName: analysis.fileName,
@@ -1409,7 +1410,7 @@ export async function analyzeWineList(
       .map((line) => line.trim())
       .filter(Boolean)
       .slice(0, 6);
-    const fallback = normalizeWineListExtraction({
+    const fallback = normalizeWineListResponse({
       wines: lines.map((line, index) => ({
         name: line,
         producer: "",

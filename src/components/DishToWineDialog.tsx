@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { generateWinePairing, analyzeWineList, buildUserProfile, type GeneratedWinePairing, type WineListAnalysis, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
+import { generateWinePairing, analyzeWineList, buildUserProfile, normalizeGeneratedWinePairingResponse, normalizeWineListResponse, type GeneratedWinePairing, type WineListAnalysis, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
 import { prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
@@ -578,6 +578,51 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
   const selectedWine = wines?.find((w) => w.id === selectedWineId);
   const availableWines = wines?.filter((w) => w.quantity > 0) || [];
+  const normalizedPairingResult = useMemo<GeneratedWinePairing | null>(() => {
+    if (!pairingResult) return null;
+    try {
+      const normalized = normalizeGeneratedWinePairingResponse(pairingResult, dish || extWineName || selectedWine?.name || "prato");
+      if (import.meta.env.DEV) {
+        console.info("[DishToWineDialog] pairing_result_normalized", {
+          raw: pairingResult,
+          normalized,
+        });
+      }
+      return normalized;
+    } catch (error) {
+      const fallback = normalizeGeneratedWinePairingResponse(null, dish || extWineName || selectedWine?.name || "prato");
+      console.error("[DishToWineDialog] pairing_result_normalization_failed", {
+        raw: pairingResult,
+        normalized: fallback,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      return fallback;
+    }
+  }, [pairingResult, dish, extWineName, selectedWine?.name]);
+
+  const normalizedScanResults = useMemo<WineListAnalysis | null>(() => {
+    if (!scanResults) return null;
+    try {
+      const normalized = normalizeWineListResponse(scanResults);
+      if (import.meta.env.DEV) {
+        console.info("[DishToWineDialog] scan_results_normalized", {
+          raw: scanResults,
+          normalized,
+        });
+      }
+      return normalized;
+    } catch (error) {
+      const fallback: WineListAnalysis = { wines: [], topPick: null, bestValue: null, fallback: true, fallbackReason: null };
+      console.error("[DishToWineDialog] scan_results_normalization_failed", {
+        raw: scanResults,
+        normalized: fallback,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      return fallback;
+    }
+  }, [scanResults]);
 
   const subModeTitle = source === "cellar" ? "Da minha adega" : "Adega externa";
 
@@ -1297,7 +1342,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               />
             )}
 
-            {(step === "results" || step === "wine-results" || step === "ext-menu-results") && pairingResult && (
+            {(step === "results" || step === "wine-results" || step === "ext-menu-results") && normalizedPairingResult && (
               <motion.div
                 key={`${step}-strict`}
                 initial={{ opacity: 0, y: 6 }}
@@ -1305,7 +1350,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                {pairingResult.fallback && (
+                {normalizedPairingResult.fallback && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <FallbackAnalysisBadge />
@@ -1322,11 +1367,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {[
-                      ["Acidez", pairingResult.analysis.acidity],
-                      ["Gordura", pairingResult.analysis.fat],
-                      ["Textura", pairingResult.analysis.texture],
-                      ["Perfil", pairingResult.analysis.flavor_profile],
-                      ["Preparo", pairingResult.analysis.cooking_method],
+                      ["Acidez", normalizedPairingResult.analysis.acidity],
+                      ["Gordura", normalizedPairingResult.analysis.fat],
+                      ["Textura", normalizedPairingResult.analysis.texture],
+                      ["Perfil", normalizedPairingResult.analysis.flavor_profile],
+                      ["Preparo", normalizedPairingResult.analysis.cooking_method],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-xl border border-[rgba(0,0,0,0.05)] bg-white/55 p-3">
                         <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
@@ -1339,11 +1384,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <SectionHeader
                   icon="chef"
                   label={step === "wine-results" ? "Pratos sugeridos" : "Harmonizações"}
-                  count={Math.min(pairingResult.pairings.length, 5)}
+                  count={Math.min(normalizedPairingResult.pairings.length, 5)}
                 />
 
                 <ul className="space-y-2.5">
-                  {pairingResult.pairings.slice(0, 5).map((p, i) => (
+                  {normalizedPairingResult.pairings.slice(0, 5).map((p, i) => (
                     <li key={i} className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -1414,7 +1459,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             )}
 
             {/* ── External Scan Results (dish → wine list photo) ── */}
-            {step === "scan-results" && scanResults && (
+            {step === "scan-results" && normalizedScanResults && (
               <motion.div
                 key="scan-results"
                 initial={{ opacity: 0, y: 6 }}
@@ -1435,7 +1480,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </span>
                 </div>
 
-                {scanResults.wines.length === 0 ? (
+                {normalizedScanResults.wines.length === 0 ? (
                   <div className="surface-clarity p-6 text-center space-y-2">
                     <p className="text-sm text-foreground/70 font-medium">
                       Não foi possível identificar vinhos na imagem.
@@ -1444,7 +1489,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 ) : (
                   <ul className="space-y-3">
-                    {scanResults.wines.map((w, i) => {
+                    {normalizedScanResults.wines.map((w, i) => {
                       const tint = getStyleTint(w.style);
                       const meta = [w.grape, w.vintage ? `Safra ${w.vintage}` : null, w.region].filter(Boolean).join(" · ");
                       const compatColor = w.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
