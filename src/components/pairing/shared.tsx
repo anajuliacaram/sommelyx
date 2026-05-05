@@ -3,6 +3,7 @@ import { Sparkles, UtensilsCrossed, ChefHat, BookOpen, RotateCcw, Wine, X } from
 import { Button } from "@/components/ui/button";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { cn } from "@/lib/utils";
+import { AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 import type { Recipe } from "@/lib/sommelier-ai";
 
 /* ═══════════════════════════════════════════════
@@ -281,15 +282,15 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-2.5 py-0.5">
-      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12 flex items-center justify-center">
-        <Icon className="h-4 w-4 text-[#7B1E2B]" />
+    <div className="flex items-center gap-3 rounded-2xl border border-border/30 bg-white/55 px-4 py-3">
+      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12">
+        <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
       </div>
-      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#777]">
+      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6B6B6B]">
         {label}
       </span>
       {count != null && (
-        <span className="text-[10px] font-bold text-[#999] ml-auto">{count}</span>
+        <span className="ml-auto text-[10px] font-semibold text-[#999]">{count}</span>
       )}
     </div>
   );
@@ -305,10 +306,10 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-4 py-8"
+      className="flex flex-col items-center gap-4 py-10"
     >
       <div
-        className="w-20 h-20 rounded-3xl flex items-center justify-center relative"
+        className="relative flex h-20 w-20 items-center justify-center rounded-3xl"
         style={{
           background: "linear-gradient(135deg, rgba(123,35,48,0.08) 0%, rgba(123,35,48,0.03) 100%)",
           border: "1px solid rgba(123,35,48,0.08)",
@@ -341,10 +342,10 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-4 py-9"
+      className="flex flex-col items-center gap-4 py-10"
     >
       <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center"
+        className="flex h-16 w-16 items-center justify-center rounded-2xl"
         style={{
           background: "linear-gradient(135deg, rgba(220,38,38,0.08) 0%, rgba(185,28,28,0.03) 100%)",
           border: "1px solid rgba(220,38,38,0.12)",
@@ -353,19 +354,19 @@ export function PairingErrorState({
         <X className="h-7 w-7 text-destructive/60" />
       </div>
       <div className="space-y-1.5 text-center">
-        <p className="text-[15px] font-semibold text-[#1A1A1A]">Não conseguimos concluir a leitura</p>
-        <p className="text-[13px] text-[#888] max-w-[280px] leading-relaxed">{message}</p>
+        <p className="text-[16px] font-semibold text-[#1A1A1A]">Não conseguimos concluir a leitura</p>
+        <p className="mx-auto max-w-[320px] text-[13px] leading-relaxed text-[#888]">{message}</p>
       </div>
-      <div className="flex w-full max-w-[280px] flex-col gap-2">
-        <Button onClick={onRetry} variant="secondary" className="h-11 text-[13px] font-semibold rounded-xl">
+      <AiModalActions className="w-full max-w-[320px]">
+        <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">
           <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
-        </Button>
+        </AiModalActionButton>
         {onClose && (
-          <Button onClick={onClose} variant="ghost" className="h-10 text-[12px] text-[#888]">
+          <AiModalActionButton onClick={onClose} variant="ghost" className="w-full text-[#888]">
             Fechar
-          </Button>
+          </AiModalActionButton>
         )}
-      </div>
+      </AiModalActions>
     </motion.div>
   );
 }

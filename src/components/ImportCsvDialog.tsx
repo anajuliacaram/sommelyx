@@ -28,6 +28,7 @@ import { WineLabelPreview } from "@/components/WineLabelPreview";
 import { designSystem } from "@/styles/designSystem";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
+import { AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -2835,15 +2836,19 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               background: "rgba(255,255,255,0.60)",
             }}
           >
-            <div className="flex items-start gap-4 min-w-0">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
-                <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
+              <div className="flex items-start gap-4 min-w-0">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
+                  <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
+                </div>
+                <div className="min-w-0">
+                  <SheetTitle className="text-[22px] font-semibold tracking-tight text-[#1E1E1E]">
+                    Revise seus vinhos antes de importar
+                  </SheetTitle>
+                  <SheetDescription className="mt-1 text-[13px] font-medium leading-relaxed tracking-tight text-[#6B6B6B]">
+                    Clique em qualquer campo para editar, corrigir duplicados e confiar nos dados antes da importação.
+                  </SheetDescription>
+                </div>
               </div>
-              <div className="min-w-0">
-                <SheetTitle>Revise seus vinhos antes de importar</SheetTitle>
-                <SheetDescription>Clique em qualquer campo para editar, corrigir duplicados e confiar nos dados antes da importação.</SheetDescription>
-              </div>
-            </div>
           </div>
 
           {isReviewStep ? (
@@ -2972,7 +2977,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                           transition={{ duration: 1.25, repeat: Infinity, ease: "linear" }}
                         />
                       </div>
-                      <p className="text-sm font-semibold" style={{ color: "#0F0F14" }}>
+                      <p className="text-[15px] font-semibold" style={{ color: "#0F0F14" }}>
                         {analysisStage === "processing"
                           ? "Processando arquivo..."
                           : analysisStage === "extracting"
@@ -2981,24 +2986,24 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                               ? "Organizando os vinhos..."
                               : "Sommelyx está analisando…"}
                       </p>
-                      <p className="mt-1.5 text-xs" style={{ color: "#9CA3AF" }}>
+                      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: "#9CA3AF" }}>
                         {importMode === "smart-pdf"
                           ? (
                             <>
                               {analysisStage === "processing"
-                                ? `Preparando a leitura de ${fileName}`
+                                ? "Preparando a leitura do arquivo"
                                 : analysisStage === "extracting"
-                                  ? `Extraindo texto e blocos de ${fileName}`
-                                  : `Interpretando o catálogo de ${fileName}`}
+                                  ? "Extraindo texto e blocos do arquivo"
+                                  : "Interpretando o catálogo"}
                             </>
                           )
                           : (
                             <>
                               {analysisStage === "processing"
-                                ? `Preparando o arquivo ${fileName}`
+                                ? "Preparando o arquivo"
                                 : analysisStage === "extracting"
-                                  ? `Extraindo dados de ${fileName}`
-                                  : `Identificando colunas e organizando os dados de ${fileName}`}
+                                  ? "Extraindo dados"
+                                  : "Identificando colunas e organizando os dados"}
                             </>
                           )}
                       </p>
@@ -3724,9 +3729,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                             )}
                           </div>
                         )}
-                        <Button variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 text-[13px]">
+                        <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 w-full sm:w-auto">
                           Fechar
-                        </Button>
+                        </AiModalActionButton>
                       </div>
                     </motion.div>
                   )}
@@ -3760,14 +3765,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     : "Tudo está editável e pronto antes da importação."}
                 </div>
               </div>
-              <Button
+              <AiModalActionButton
                 onClick={handleImport}
                 variant="primary"
-                className="h-12 rounded-[12px] px-5 text-[13px] font-semibold"
+                className="h-14 rounded-2xl px-5 text-[14px] font-semibold"
                 disabled={!canImport}
               >
                 <Upload className="h-4 w-4 mr-1.5" /> Importar {identifiedRowsCount} revisados
-              </Button>
+              </AiModalActionButton>
             </div>
           ) : null}
           <AlertDialog open={importWarningOpen} onOpenChange={setImportWarningOpen}>

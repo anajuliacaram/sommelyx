@@ -14,7 +14,7 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
-import { AiModalHeader, AiModalCard, AiStatusCard } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 import {
   SectionHeader,
   PairingLoadingState,
@@ -669,13 +669,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           {preview?.url && (
             <AiModalCard className="p-0 overflow-hidden">
               <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
-                <img src={preview.url} alt={preview.fileName} className="h-full w-full object-cover" />
-              </div>
-              <div className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-foreground truncate">{preview.fileName}</p>
-                  <p className="text-[11px] text-muted-foreground">{preview.isPdf ? "PDF" : "Imagem"}</p>
-                </div>
+                <img src={preview.url} alt="Pré-visualização do arquivo analisado" className="h-full w-full object-cover" />
               </div>
             </AiModalCard>
           )}
@@ -788,18 +782,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             </ul>
           )}
 
-          <Button
+          <AiModalActionButton
             variant="ghost"
-            size="sm"
             onClick={() => {
               setScanResults(null);
               setPreview(null);
               setStep("photo");
             }}
-            className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
+            className="w-full text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200"
           >
             Enviar outra foto
-          </Button>
+          </AiModalActionButton>
         </motion.div>
       );
     } catch (error) {
@@ -942,7 +935,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </div>
 
-                <Button
+                <AiModalActionButton
                   onClick={() => handleSearch()}
                   disabled={!dish.trim() || loading}
                   className="w-full"
@@ -958,7 +951,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       {source === "cellar" ? "Buscar na minha adega" : "Continuar"}
                     </>
                   )}
-                </Button>
+                </AiModalActionButton>
 
                 {!loading && (
                   <div className="space-y-2.5">
@@ -972,7 +965,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSearch(d)}
-                          className="rounded-xl px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
+                          className="h-11 rounded-2xl px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
                         >
                           {d}
                         </Button>
@@ -1372,14 +1365,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </div>
 
-                <Button
+                <AiModalActionButton
                   onClick={() => setStep("ext-menu-photo")}
                   disabled={!extWineName.trim()}
-                  className="w-full h-10 text-[13px] font-medium"
+                  className="w-full"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Continuar — Enviar foto do cardápio
-                </Button>
+                </AiModalActionButton>
               </motion.div>
             )}
 
@@ -1420,24 +1413,24 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   />
 
                   <div className="flex flex-col gap-2.5 w-full">
-                    <Button
+                    <AiModalActionButton
                       type="button"
                       variant="primary"
                       onClick={() => menuFileRef.current?.click()}
-                      className="h-12 text-[13px] font-semibold"
+                      className="w-full"
                     >
                       <Camera className="h-4 w-4 mr-2" />
                       Tirar Foto
-                    </Button>
-                    <Button
+                    </AiModalActionButton>
+                    <AiModalActionButton
                       type="button"
-                      variant="ghost"
+                      variant="secondary"
                       onClick={() => menuGalleryRef.current?.click()}
-                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                      className="w-full"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
-                    </Button>
+                    </AiModalActionButton>
                   </div>
                 </div>
 
@@ -1496,24 +1489,24 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   />
 
                   <div className="flex flex-col gap-2.5 w-full">
-                    <Button
+                    <AiModalActionButton
                       type="button"
                       variant="primary"
                       onClick={() => fileRef.current?.click()}
-                      className="h-12 text-[13px] font-semibold"
+                      className="w-full"
                     >
                       <Camera className="h-4 w-4 mr-2" />
                       Tirar Foto
-                    </Button>
-                    <Button
+                    </AiModalActionButton>
+                    <AiModalActionButton
                       type="button"
-                      variant="ghost"
+                      variant="secondary"
                       onClick={() => fileGalleryRef.current?.click()}
-                      className="h-12 text-[13px] font-medium border border-border/70 bg-background/60 hover:bg-background"
+                      className="w-full"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
-                    </Button>
+                    </AiModalActionButton>
                   </div>
                 </div>
 
@@ -1546,13 +1539,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 {preview?.url && (
                   <AiModalCard className="p-0 overflow-hidden">
                     <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
-                      <img src={preview.url} alt={preview.fileName} className="h-full w-full object-cover" />
-                    </div>
-                    <div className="flex items-center justify-between gap-3 px-4 py-3">
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-semibold text-foreground truncate">{preview.fileName}</p>
-                        <p className="text-[11px] text-muted-foreground">{preview.isPdf ? "PDF" : "Imagem"}</p>
-                      </div>
+                      <img src={preview.url} alt="Pré-visualização do arquivo analisado" className="h-full w-full object-cover" />
                     </div>
                   </AiModalCard>
                 )}
@@ -1623,22 +1610,21 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   ))}
                 </ul>
 
-                <Button
+                <AiModalActionButton
                   variant="ghost"
-                  size="sm"
                   onClick={() => {
                     setPairingResult(null);
                     setPreview(null);
                     setStep(step === "wine-results" ? "select-wine" : step === "ext-menu-results" ? "ext-menu-photo" : "dish");
                   }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
+                  className="w-full text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200"
                 >
                   {step === "wine-results"
                     ? "Escolher outro vinho"
                     : step === "ext-menu-results"
                       ? "Enviar outra foto"
                       : "Buscar outro prato"}
-                </Button>
+                </AiModalActionButton>
               </motion.div>
             )}
 

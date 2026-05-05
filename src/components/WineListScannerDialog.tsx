@@ -10,7 +10,7 @@ import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
-import { AiModalHeader, AiModalCard, AiStatusCard } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 import {
   PairingLoadingState,
   PairingErrorState,
@@ -235,7 +235,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         firstWine: normalized.wines[0]?.name || null,
       });
       if (normalized.wines.length > 0) {
-        notifySuccess(normalized.fallback ? "Análise rápida" : "Carta analisada", {
+        notifySuccess("Análise pronta", {
           description: `${normalized.wines.length} vinho${normalized.wines.length === 1 ? "" : "s"} encontrados.`,
           duration: 2800,
         });
@@ -560,24 +560,24 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
           {safeResults.wines.length === 0 ? (
             <AiModalCard className="text-center space-y-2">
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-[15px] font-semibold text-foreground">
                 {safeResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[13px] text-muted-foreground">
                 {safeResults.fallback
                   ? "Tente novamente ou envie outro arquivo."
                   : "Tente outra foto ou envie um arquivo mais nítido."}
               </p>
-              <div className="flex flex-col gap-2 pt-2 sm:flex-row">
-                <Button variant="outline" onClick={reset} className="flex-1">
+              <AiModalActions className="pt-2">
+                <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                   Tentar novamente
-                </Button>
-                <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
+                </AiModalActionButton>
+                <AiModalActionButton variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
                   Enviar outro arquivo
-                </Button>
-              </div>
+                </AiModalActionButton>
+              </AiModalActions>
             </AiModalCard>
           ) : (
             <>
@@ -620,19 +620,19 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         normalized: results ?? EMPTY_WINE_LIST_ANALYSIS,
       });
       return (
-        <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
-          <p className="text-sm font-medium text-foreground">Não conseguimos interpretar completamente a carta</p>
-          <p className="text-xs text-muted-foreground">Tente novamente ou envie outro arquivo.</p>
-          <div className="flex flex-col gap-2 pt-2 sm:flex-row">
-            <Button variant="outline" onClick={reset} className="flex-1">
+        <div className="rounded-2xl border border-border/30 bg-background/55 px-5 py-5 text-center space-y-2">
+          <p className="text-[15px] font-semibold text-foreground">Não conseguimos interpretar completamente a carta</p>
+          <p className="text-[13px] text-muted-foreground">Tente novamente ou envie outro arquivo.</p>
+          <AiModalActions className="pt-2">
+            <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
               <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
               Tentar novamente
-            </Button>
-            <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
+            </AiModalActionButton>
+            <AiModalActionButton variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
               <Upload className="h-3.5 w-3.5 mr-1.5" />
               Enviar outro arquivo
-            </Button>
-          </div>
+            </AiModalActionButton>
+          </AiModalActions>
         </div>
       );
     }
@@ -712,22 +712,22 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </div>
 
                 <div className="flex flex-col gap-2.5">
-                  <Button
+                  <AiModalActionButton
                     variant="primary"
                     onClick={() => cameraInputRef.current?.click()}
-                    className="w-full h-14 text-[15px]"
+                    className="w-full"
                   >
                     <Camera className="h-4 w-4 mr-2" />
                     Tirar foto
-                  </Button>
-                  <Button
+                  </AiModalActionButton>
+                  <AiModalActionButton
                     variant="secondary"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-12 text-[14px]"
+                    className="w-full"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Escolher imagem ou PDF
-                  </Button>
+                  </AiModalActionButton>
                 </div>
 
                 <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
@@ -772,10 +772,6 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
 }) {
   const wineType = detectWineType(wine.style);
   const config = wineTypeConfig[wineType];
-  const confidenceLabel =
-    wine.confidence >= 0.82 ? "Alta confiança" :
-    wine.confidence >= 0.58 ? "Confiança média" :
-    "Dados limitados";
 
   return (
     <motion.li
@@ -824,21 +820,11 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                   Melhor custo-benefício
                 </span>
               )}
-              <span
-                className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em]"
-                style={{
-                  background: "rgba(0,0,0,0.04)",
-                  color: "#6B5E55",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                }}
-              >
-                {confidenceLabel}
-              </span>
             </div>
-            <h4 className="line-clamp-2 text-[15px] font-bold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
+            <h4 className="line-clamp-2 text-[16px] font-semibold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
               {wine.name}
             </h4>
-            <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+            <div className="flex flex-wrap gap-2 text-[12px] text-muted-foreground">
               {wine.producer && <span>{wine.producer}</span>}
               {wine.region && <span>• {wine.region}</span>}
               {wine.country && <span>• {wine.country}</span>}
@@ -868,21 +854,9 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
               {config.label}
             </span>
           )}
-          {wine.grape && (
-            <span
-              className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-medium"
-              style={{
-                background: config.chipBg,
-                color: config.chipText,
-                border: `1px solid ${config.chipBorder}`,
-              }}
-            >
-              {wine.grape}
-            </span>
-          )}
         </div>
 
-        <div className="grid gap-1.5 text-[12px] text-muted-foreground sm:grid-cols-2">
+        <div className="grid gap-1.5 text-[13px] text-muted-foreground sm:grid-cols-2">
           <p><span className="font-semibold text-[#2A1F1A]">Produtor:</span> {wine.producer || "Não identificado"}</p>
           <p><span className="font-semibold text-[#2A1F1A]">Origem:</span> {[wine.region, wine.country].filter(Boolean).join(", ") || "Não identificada"}</p>
         </div>

@@ -12,7 +12,7 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { hasMeaningfulScanResult, normalizeScanResult, type CanonicalScanResult } from "@/lib/scan-normalizer";
-import { AiModalHeader, AiModalCard, AiStatusCard } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -495,23 +495,23 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   </div>
 
                   <div className="flex flex-col gap-3 w-full">
-                    <Button
-                      variant="primary"
-                      onClick={() => cameraInputRef.current?.click()}
-                      className="h-12 text-[13px] font-semibold"
-                    >
-                      <Camera className="h-4 w-4 mr-2" />
-                      Tirar Foto
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-12 text-[13px] font-medium border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Escolher da Fototeca
-                    </Button>
-                  </div>
+                  <AiModalActionButton
+                    variant="primary"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Tirar Foto
+                  </AiModalActionButton>
+                  <AiModalActionButton
+                    variant="secondary"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Escolher da Fototeca
+                  </AiModalActionButton>
+                </div>
 
                   <p className="text-[10px] leading-relaxed text-muted-foreground text-center max-w-[260px] mx-auto">
                     Use câmera ou fototeca para ler apenas a foto do rótulo.
@@ -591,16 +591,16 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   </AiModalCard>
                 )}
 
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={reset} className="flex-1 h-11 text-[13px]">
+                <AiModalActions>
+                  <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
                     <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                     Reescanear
-                  </Button>
-                  <Button variant="primary" onClick={handleConfirm} className="flex-1 h-11 text-[13px] font-semibold">
+                  </AiModalActionButton>
+                  <AiModalActionButton variant="primary" onClick={handleConfirm} className="flex-1">
                     <Check className="h-4 w-4 mr-1.5" />
                     Usar dados
-                  </Button>
-                </div>
+                  </AiModalActionButton>
+                </AiModalActions>
               </motion.div>
             )}
 
@@ -620,31 +620,31 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   toneClassName="bg-destructive/10 text-destructive ring-destructive/20"
                 />
                 <div className="flex flex-col gap-2 w-full">
-                  <Button
-                    onClick={() => {
-                      if (lastBase64) {
-                        runScan(lastBase64);
-                        return;
-                      }
-                      reset();
-                    }}
-                    variant="secondary"
-                    className="h-11 px-6 text-[13px]"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                    Tentar novamente
-                  </Button>
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="ghost"
-                    className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
-                  >
-                    <Upload className="h-3.5 w-3.5 mr-1.5" />
-                    Usar outra foto
-                  </Button>
-                  <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md">
+                <AiModalActionButton
+                  onClick={() => {
+                    if (lastBase64) {
+                      runScan(lastBase64);
+                      return;
+                    }
+                    reset();
+                  }}
+                  variant="secondary"
+                  className="w-full"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  Tentar novamente
+                </AiModalActionButton>
+                <AiModalActionButton
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="secondary"
+                  className="w-full border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
+                >
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  Usar outra foto
+                </AiModalActionButton>
+                  <AiModalActionButton onClick={() => handleClose(false)} variant="ghost" className="w-full border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md">
                     Cadastrar manualmente
-                  </Button>
+                  </AiModalActionButton>
                 </div>
               </motion.div>
             )}
@@ -658,8 +658,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider shrink-0 pt-0.5">{label}</span>
-      <span className="text-[12px] font-medium text-foreground text-right">{value}</span>
+      <span className="shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-right text-[13.5px] font-medium text-foreground">{value}</span>
     </div>
   );
 }
