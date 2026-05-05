@@ -271,50 +271,27 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setMoreOpen(false); setSuccess(false);
   };
 
+  const isMeaningfulScanValue = (value: unknown) => {
+    if (value == null) return false;
+    if (typeof value === "number") return Number.isFinite(value);
+    if (typeof value !== "string") return false;
+    const text = value.trim();
+    if (!text) return false;
+    const lowered = text.toLowerCase();
+    return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
+  };
+
   const handleScanComplete = (data: any) => {
     const mappedData = normalizeScanResult(data);
     console.log("SCAN_RESULT_MAPPED", mappedData);
 
-    setName("");
-    setProducer("");
-    setQuantity("1");
-    setVintage("");
-    setStyle("");
-    setCountry("");
-    setRegion("");
-    setGrape("");
-    setLastPaid("");
-    setLastPaidDate(new Date().toISOString().split("T")[0]);
-    setCurrentValue("");
-    setCurrentValueTouched(false);
-    setLocation({});
-    setNoLocationInfo(false);
-    setDrinkFrom("");
-    setDrinkUntil("");
-    setFoodPairing("");
-    setNotes("");
-    setNoPriceInfo(false);
-    setEstimateConfidence(null);
-    setAiPrefilledFields({});
-    setMissingFields([]);
-    setMoreOpen(false);
-
     const nextPrefilled: Record<string, boolean> = {};
-    const isMeaningful = (value: unknown) => {
-      if (value == null) return false;
-      if (typeof value === "number") return Number.isFinite(value);
-      if (typeof value !== "string") return false;
-      const text = value.trim();
-      if (!text) return false;
-      const lowered = text.toLowerCase();
-      return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
-    };
 
-    if (isMeaningful(mappedData.name)) {
+    if (isMeaningfulScanValue(mappedData.name)) {
       setName(mappedData.name);
       nextPrefilled.name = true;
     }
-    if (isMeaningful(mappedData.producer)) {
+    if (isMeaningfulScanValue(mappedData.producer)) {
       setProducer(mappedData.producer || "");
       nextPrefilled.producer = true;
     }
@@ -322,23 +299,23 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       setVintage(String(mappedData.vintage));
       nextPrefilled.vintage = true;
     }
-    if (isMeaningful(mappedData.style)) {
+    if (isMeaningfulScanValue(mappedData.style)) {
       setStyle(mappedData.style || "");
       nextPrefilled.style = true;
     }
-    if (isMeaningful(mappedData.country)) {
+    if (isMeaningfulScanValue(mappedData.country)) {
       setCountry(mappedData.country || "");
       nextPrefilled.country = true;
     }
-    if (isMeaningful(mappedData.region)) {
+    if (isMeaningfulScanValue(mappedData.region)) {
       setRegion(mappedData.region || "");
       nextPrefilled.region = true;
     }
-    if (isMeaningful(mappedData.grape)) {
+    if (isMeaningfulScanValue(mappedData.grape)) {
       setGrape(mappedData.grape || "");
       nextPrefilled.grape = true;
     }
-    if (mappedData.food_pairing) {
+    if (isMeaningfulScanValue(mappedData.food_pairing)) {
       setFoodPairing(mappedData.food_pairing);
       nextPrefilled.food_pairing = true;
     }
@@ -358,7 +335,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       setCurrentValue(String(mappedData.estimated_price));
       nextPrefilled.estimated_price = true;
     }
-    if (isMeaningful(mappedData.cellar_location)) {
+    if (isMeaningfulScanValue(mappedData.cellar_location)) {
       setLocation({ manualLabel: mappedData.cellar_location || "" });
       setNoLocationInfo(false);
       nextPrefilled.cellar_location = true;
@@ -367,7 +344,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     if (mappedData.labelImagePreview) setLabelImagePreview(String(mappedData.labelImagePreview));
     if (mappedData.labelImageFile) setLabelImageFile(mappedData.labelImageFile);
     if (mappedData.labelImageBase64) setLabelImageBase64(String(mappedData.labelImageBase64));
-    if (!mappedData.purchase_price && !isCommercial) setNoPriceInfo(true);
+    if (mappedData.purchase_price != null) {
+      setNoPriceInfo(false);
+    } else if (!isCommercial) {
+      setNoPriceInfo(true);
+    }
     setAiPrefilledFields(nextPrefilled);
 
     if (
