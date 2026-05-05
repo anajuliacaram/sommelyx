@@ -332,6 +332,32 @@ function classifyError(err: unknown): ClassifiedError {
   if (code === "FILE_TOO_LARGE" || code === "IMAGE_TOO_LARGE" || lower.includes("arquivo muito grande") || lower.includes("imagem está muito grande")) {
     return { type: "invalid_file", message: code === "IMAGE_TOO_LARGE" ? "A imagem está muito grande. Tente uma foto mais leve." : "Arquivo inválido. Envie uma imagem ou PDF legível.", code: code ?? "FILE_TOO_LARGE", status, requestId, retryable };
   }
+  if (code === "INVALID_CSV" || code === "INVALID_SPREADSHEET" || code === "UNSUPPORTED_FILE_TYPE") {
+    return {
+      type: "invalid_file",
+      message: code === "UNSUPPORTED_FILE_TYPE"
+        ? "Este formato ainda não é suportado. Envie JPG, PNG, PDF ou CSV."
+        : code === "INVALID_SPREADSHEET"
+          ? "Não conseguimos ler esta planilha. Verifique o formato e tente novamente."
+          : "Não conseguimos ler este arquivo CSV. Verifique cabeçalhos e codificação.",
+      code,
+      status,
+      requestId,
+      retryable: false,
+    };
+  }
+  if (code === "INVALID_PDF" || code === "PDF_TEXT_EMPTY") {
+    return {
+      type: "invalid_file",
+      message: code === "PDF_TEXT_EMPTY"
+        ? "Este PDF parece não ter texto legível. Vamos tentar leitura por imagem."
+        : "Não conseguimos ler este PDF. Tente enviar outro arquivo ou uma foto da carta.",
+      code,
+      status,
+      requestId,
+      retryable: false,
+    };
+  }
   if (code === "EMPTY_EXTRACTION") {
     return { type: "empty", message: "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.", code, status, requestId, retryable };
   }
@@ -340,6 +366,16 @@ function classifyError(err: unknown): ClassifiedError {
   }
   if (code === "AI_PARSE_ERROR" || code === "ANALYSIS_NOT_SPECIFIC") {
     return { type: "ai_fail", message: "A resposta da IA veio em um formato inválido. Tente novamente em instantes.", code, status, requestId, retryable };
+  }
+  if (code === "LOW_CONFIDENCE_EXTRACTION" || code === "INSUFFICIENT_WINES_EXTRACTED") {
+    return {
+      type: "ai_fail",
+      message: "Não conseguimos extrair vinhos suficientes com confiança desta carta. Tente outra imagem mais nítida.",
+      code,
+      status,
+      requestId,
+      retryable,
+    };
   }
   if (
     lower.includes("failed to fetch") ||
@@ -1352,11 +1388,11 @@ export async function analyzeWineList(
     throw new Error(ANALYSIS_FALLBACK_MESSAGE);
   } catch (err) {
     const classified = classifyError(err);
-    if (classified.code === "INSUFFICIENT_WINES_EXTRACTED") {
+    if (classified.code === "INSUFFICIENT_WINES_EXTRACTED" || classified.code === "LOW_CONFIDENCE_EXTRACTION") {
       throw createClassifiedError({
         ...classified,
-        message: "Não conseguimos estruturar vinhos suficientes desta carta. Tente outra imagem mais nítida.",
-      }, "INSUFFICIENT_WINES_EXTRACTED");
+        message: "Não conseguimos extrair vinhos suficientes com confiança desta carta. Tente outra imagem mais nítida.",
+      }, classified.code === "LOW_CONFIDENCE_EXTRACTION" ? "LOW_CONFIDENCE_EXTRACTION" : "INSUFFICIENT_WINES_EXTRACTED");
     }
     logTiming("analyze-wine-list", "total", totalStartedAt, {
       fileName: analysis.fileName,

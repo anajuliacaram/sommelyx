@@ -12,6 +12,10 @@ const MAX_CHUNKS = 5;
 const PROCESSING_TIMEOUT_MS = 10_000;
 const FUNCTION_NAME = "parse-csv-wines";
 
+function errorResponse(code: string, message: string, retryable = false) {
+  return { error: message, code, retryable };
+}
+
 async function logAudit(
   userId: string,
   statusCode: number,
@@ -83,7 +87,7 @@ serve(async (req) => {
 
     const { csvContent, fileName, fileType, parseMode, textBlocks, ocrUsed } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
-      return new Response(JSON.stringify({ error: "csvContent é obrigatório" }), {
+      return new Response(JSON.stringify(errorResponse("INVALID_CSV", "O conteúdo CSV está ausente ou inválido.")), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -94,13 +98,10 @@ serve(async (req) => {
     if (rawBytes.length > MAX_CSV_SIZE) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
         input_size_bytes: inputSizeBytes,
-        error_type: "IMPORT_LIMIT_EXCEEDED",
+        error_type: "FILE_TOO_LARGE",
       });
-      return new Response(JSON.stringify({
-        error: "Arquivo muito grande ou muitas linhas.",
-        code: "IMPORT_LIMIT_EXCEEDED",
-      }), {
-        status: 400,
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+        status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -111,13 +112,10 @@ serve(async (req) => {
     if (detectedRows > MAX_ROWS) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
         input_size_bytes: inputSizeBytes,
-        error_type: "IMPORT_LIMIT_EXCEEDED",
+        error_type: "FILE_TOO_LARGE",
       });
-      return new Response(JSON.stringify({
-        error: "Arquivo muito grande ou muitas linhas.",
-        code: "IMPORT_LIMIT_EXCEEDED",
-      }), {
-        status: 400,
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+        status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -130,6 +128,22 @@ serve(async (req) => {
       parseMode: isSmartPdf ? "smart-pdf" : "structured",
     });
     console.log(`[${FUNCTION_NAME}] mode=${isSmartPdf ? "smart-pdf" : "structured"} input_chars=${normalized.length} input_lines=${lines.length} ocr_used=${ocrUsed ? "true" : "false"}`);
+
+    const supportedFileTypes = new Set([
+      "text/csv",
+      "text/plain",
+      "text/tab-separated-values",
+      "application/pdf",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.oasis.opendocument.spreadsheet",
+    ]);
+    if (fileType && typeof fileType === "string" && !supportedFileTypes.has(fileType)) {
+      return new Response(JSON.stringify(errorResponse("UNSUPPORTED_FILE_TYPE", "Este formato ainda não é suportado. Envie JPG, PNG, PDF ou CSV.")), {
+        status: 415,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const cacheInput = {
       csvHash: await sha256Hex(normalized),
@@ -162,11 +176,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
-      return new Response(JSON.stringify({
-        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
-        retryable: true,
-      }), {
+      return new Response(JSON.stringify(errorResponse(rateLimit.degraded ? "AI_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED", rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.", true)), {
         status: rateLimit.degraded ? 503 : 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": rateLimit.degraded ? "30" : "60" },
       });
@@ -210,12 +220,9 @@ serve(async (req) => {
     if (Date.now() > deadlineAt) {
       await logAudit(userId, 408, "fallback_used", Date.now() - startTime, {
         input_size_bytes: inputSizeBytes,
-        error_type: "TIMEOUT",
+        error_type: "AI_TIMEOUT",
       });
-      return new Response(JSON.stringify({
-        error: "Tempo excedido",
-        code: "TIMEOUT",
-      }), {
+      return new Response(JSON.stringify(errorResponse("AI_TIMEOUT", "A leitura demorou mais que o esperado. Tente novamente.", true)), {
         status: 408,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -224,13 +231,10 @@ serve(async (req) => {
     if (chunks.length === 0) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
         input_size_bytes: inputSizeBytes,
-        error_type: "IMPORT_LIMIT_EXCEEDED",
+        error_type: "FILE_TOO_LARGE",
       });
-      return new Response(JSON.stringify({
-        error: "Arquivo muito grande ou muitas linhas.",
-        code: "IMPORT_LIMIT_EXCEEDED",
-      }), {
-        status: 400,
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+        status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -458,11 +462,8 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
     }
 
     if (chunks.length > MAX_CHUNKS) {
-      return new Response(JSON.stringify({
-        error: "Arquivo muito grande ou muitas linhas.",
-        code: "IMPORT_LIMIT_EXCEEDED",
-      }), {
-        status: 400,
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+        status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -594,9 +595,9 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
       input_size_bytes: inputSizeBytes,
       error_type: "INTERNAL_ERROR",
     });
-    return new Response(JSON.stringify({ error: "Erro interno ao processar arquivo." }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      return new Response(JSON.stringify(errorResponse("INVALID_CSV", "Não conseguimos ler este arquivo CSV.")), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
   }
 });

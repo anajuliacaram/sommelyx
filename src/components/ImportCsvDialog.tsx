@@ -1031,55 +1031,80 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const readTextFile = async (file: File) => {
-    const text = await file.text();
-    return text;
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    const decoders = ["utf-8", "windows-1252", "iso-8859-1"];
+    for (const encoding of decoders) {
+      try {
+        const decoded = new TextDecoder(encoding as any, { fatal: false }).decode(bytes);
+        const cleaned = decoded.replace(/^\uFEFF/, "");
+        if (cleaned.trim()) return cleaned;
+      } catch {
+        continue;
+      }
+    }
+    return "";
   };
 
   const readSpreadsheetAsCsv = async (file: File) => {
-    const buffer = await file.arrayBuffer();
-    await yieldToBrowser();
-    const xlsxModule = await import("xlsx");
-    const XLSX = xlsxModule.default || xlsxModule;
-    await yieldToBrowser();
-    const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
-    const sheetName = wb.SheetNames?.[0];
-    if (!sheetName) return "";
-    const ws = wb.Sheets[sheetName];
-    const utils = XLSX.utils || xlsxModule.utils;
-    return utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
+    try {
+      const buffer = await file.arrayBuffer();
+      await yieldToBrowser();
+      const xlsxModule = await import("xlsx");
+      const XLSX = xlsxModule.default || xlsxModule;
+      await yieldToBrowser();
+      const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
+      const sheetName = wb.SheetNames?.[0];
+      if (!sheetName) return "";
+      const ws = wb.Sheets[sheetName];
+      const utils = XLSX.utils || xlsxModule.utils;
+      return utils.sheet_to_csv(ws, { FS: ",", RS: "\n" });
+    } catch (error) {
+      const err = new Error("Não conseguimos ler esta planilha.");
+      (err as any).code = "INVALID_SPREADSHEET";
+      throw err;
+    }
   };
 
   const readPdfAsText = async (file: File) => {
-    const buffer = await file.arrayBuffer();
-    await yieldToBrowser();
-    const pdfjsModule = await import("pdfjs-dist");
-    const pdfjs = pdfjsModule.default || pdfjsModule;
-
-    const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
-    const maxPages = Math.min(doc.numPages, 12);
-    const pages: string[] = [];
-    for (let p = 1; p <= maxPages; p++) {
+    try {
+      const buffer = await file.arrayBuffer();
       await yieldToBrowser();
-      const page = await doc.getPage(p);
-      const content = await page.getTextContent();
-      const line = (content.items || [])
-        .map((it: any) => String(it.str || "").trim())
-        .filter(Boolean)
-        .join(" ");
-      if (line) pages.push(line);
+      const pdfjsModule = await import("pdfjs-dist");
+      const pdfjs = pdfjsModule.default || pdfjsModule;
+
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true } as any).promise;
+      const maxPages = Math.min(doc.numPages, 12);
+      const pages: string[] = [];
+      for (let p = 1; p <= maxPages; p++) {
+        await yieldToBrowser();
+        const page = await doc.getPage(p);
+        const content = await page.getTextContent();
+        const line = (content.items || [])
+          .map((it: any) => String(it.str || "").trim())
+          .filter(Boolean)
+          .join(" ");
+        if (line) pages.push(line);
+      }
+      return pages.join("\n");
+    } catch (error) {
+      const err = new Error("Não conseguimos ler este PDF.");
+      (err as any).code = "INVALID_PDF";
+      throw err;
     }
-    return pages.join("\n");
   };
 
   const readWordAsText = async (file: File) => {
-    const buffer = await file.arrayBuffer();
     try {
+      const buffer = await file.arrayBuffer();
       const mammothModule = await (0, eval)("import('mammoth')");
       const mammoth = mammothModule.default || mammothModule;
       const result = await mammoth.extractRawText({ arrayBuffer: buffer });
       return result.value || "";
     } catch {
-      throw new Error("Arquivos Word precisam ser convertidos em PDF, XLSX ou CSV para importação.");
+      const err = new Error("Arquivos Word precisam ser convertidos em PDF, XLSX ou CSV para importação.");
+      (err as any).code = "UNSUPPORTED_FILE_TYPE";
+      throw err;
     }
   };
 
@@ -2166,12 +2191,28 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     logFileRequestStart("IMPORT_START", file, { flow: "spreadsheet_import" });
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     const isPdfFile = file.type === "application/pdf" || ext === "pdf";
+    const isSpreadsheetFile = ["xls", "xlsx", "ods"].includes(ext);
+    const isPlainTextFile = ["csv", "tsv", "txt"].includes(ext);
+    const isImageFile = file.type.startsWith("image/");
+    const supportedExtensions = new Set(["csv", "tsv", "txt", "pdf", "doc", "docx", "rtf", "xls", "xlsx", "ods"]);
+
+    if (!isPdfFile && !isImageFile && !supportedExtensions.has(ext) && !file.type.startsWith("text/")) {
+      setLoading(false);
+      setStep("preview");
+      setParseErrors(["Este formato ainda não é suportado. Envie JPG, PNG, PDF, CSV ou Excel (.xlsx/.xls)."]);
+      return;
+    }
 
     try {
-      const isImageFile = file.type.startsWith("image/");
       if (isImageFile) {
         setImportMode("image");
         setAnalysisStage("extracting");
+        console.info("[ImportCsvDialog] preparation_started", {
+          flow: "image",
+          fileName: file.name,
+          fileType: file.type || "unknown",
+          fileSizeBytes: file.size,
+        });
         const prepared = await prepareAiAnalysisAttachment(file);
         console.info("IMPORT_IMAGE_PREPARED", {
           fileName: file.name,
@@ -2195,6 +2236,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         setImportSourceRows([]);
         setImportSourceHeaders([]);
         setImportSourceConfidence(imported.length > 0 ? 1 : 0);
+        console.info("[ImportCsvDialog] preparation_completed", {
+          flow: "image",
+          fileName: file.name,
+          success: true,
+        });
         return;
       }
 
@@ -2209,6 +2255,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           device: getClientDeviceType(),
         });
         await yieldToBrowser();
+        console.info("[ImportCsvDialog] preparation_started", {
+          flow: "pdf",
+          fileName: file.name,
+          fileType: file.type || "unknown",
+          fileSizeBytes: file.size,
+        });
         const pdfPayload = await prepareSmartPdfImportAttachment(file);
         setAnalysisStage("extracting");
         const smartContent = [
@@ -2285,6 +2337,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         fileSizeBytes: file.size,
         device: getClientDeviceType(),
       });
+      console.info("[ImportCsvDialog] preparation_started", {
+        flow: isSpreadsheetFile ? "spreadsheet" : isPlainTextFile ? "text" : "document",
+        fileName: file.name,
+        fileType: file.type || "unknown",
+        fileSizeBytes: file.size,
+      });
       const raw = await fileToCsvLikeText(file);
       if (!raw || !raw.trim()) {
         setParseErrors(["Não conseguimos ler o conteúdo do arquivo. Verifique se ele contém dados de vinhos."]);
@@ -2342,6 +2400,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             description: "Importamos uma amostra do arquivo para manter a qualidade da análise. Se precisar, importe em partes.",
           });
         }
+        console.info("[ImportCsvDialog] preparation_completed", {
+          flow: isSpreadsheetFile ? "spreadsheet" : isPlainTextFile ? "text" : "document",
+          fileName: file.name,
+          success: true,
+        });
         return;
       }
 
@@ -2370,8 +2433,18 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       return;
     } catch (err: any) {
       console.error("Import parse error:", err);
+      console.error("[ImportCsvDialog] preparation_failed", {
+        fileName: file.name,
+        fileType: file.type || "unknown",
+        code: err?.code,
+        message: err?.message,
+      });
       const msg = String(err?.message || "");
       const friendly =
+        err?.code === "UNSUPPORTED_FILE_TYPE" ? "Este formato ainda não é suportado. Envie JPG, PNG, PDF, CSV ou Excel (.xlsx/.xls)." :
+        err?.code === "INVALID_SPREADSHEET" ? "Não conseguimos ler esta planilha. Verifique o formato e tente novamente." :
+        err?.code === "INVALID_CSV" ? "Não conseguimos ler este arquivo CSV. Verifique cabeçalhos e codificação." :
+        err?.code === "FILE_TOO_LARGE" ? "O arquivo está muito pesado. Envie uma versão menor." :
         /timeout|abort/i.test(msg) ? "A análise demorou demais. Tente um arquivo menor ou divida em partes."
           : /rate|429/i.test(msg) ? "Muitas tentativas seguidas. Aguarde 1 minuto e tente novamente."
           : /unauth|401|sess/i.test(msg) ? "Sessão expirada. Faça login novamente."

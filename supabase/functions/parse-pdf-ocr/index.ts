@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.1";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { createCorsHeaders } from "../_shared/cors.ts";
 import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/ai-cache.ts";
-import { INVALID_INPUT_ERROR, bytesFromBase64, detectPdfPageCount, validatePdfPayload } from "../_shared/payload-validation.ts";
+import { bytesFromBase64, detectPdfPageCount, validatePdfPayload } from "../_shared/payload-validation.ts";
 
 
 const FUNCTION_NAME = "parse-pdf-ocr";
@@ -20,6 +20,10 @@ function jsonResponse(req: Request, body: unknown, status = 200) {
       "Content-Type": "application/json",
     },
   });
+}
+
+function errorPayload(code: string, message: string, retryable = false) {
+  return { success: false, code, message, retryable };
 }
 
 async function logAudit(
@@ -166,19 +170,35 @@ serve(async (req) => {
     console.info(`[${FUNCTION_NAME}] request_received`, { request_id: requestId, user_id: userId, fileName, mimeType, input_size_bytes: inputSizeBytes });
 
     if (mimeType !== "application/pdf") {
-      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, errorPayload("INVALID_PDF", "Não conseguimos ler este PDF. Tente enviar outro arquivo ou uma foto da carta."), 400);
     }
 
     const validation = validatePdfPayload(pdfBase64Raw, mimeType, { maxBytes: MAX_PDF_BYTES });
     if (!validation.ok) {
+      const code = validation.reason === "payload_too_large"
+        ? "PDF_TOO_LARGE"
+        : validation.reason === "invalid_base64"
+          ? "INVALID_IMAGE_BASE64"
+          : validation.reason === "unsupported_mime_type"
+            ? "UNSUPPORTED_FILE_TYPE"
+            : "INVALID_PDF";
       await logAudit(userId, 400, "invalid_input", Date.now() - startedAt, {
         request_id: requestId,
         fileName,
         reason: validation.reason,
         input_size_bytes: inputSizeBytes,
-        error_type: "INVALID_INPUT",
+        error_type: code,
       });
-      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, errorPayload(
+        code,
+        code === "PDF_TOO_LARGE"
+          ? "O arquivo está muito pesado. Envie uma versão menor."
+          : code === "INVALID_IMAGE_BASE64"
+            ? "Não conseguimos processar este PDF. O conteúdo enviado parece inválido."
+            : code === "UNSUPPORTED_FILE_TYPE"
+              ? "Este formato ainda não é suportado. Envie JPG, PNG, PDF ou CSV."
+              : "Não conseguimos ler este PDF. Tente enviar outro arquivo ou uma foto da carta.",
+      ), code === "PDF_TOO_LARGE" ? 413 : 400);
     }
 
     const bytes = bytesFromBase64(validation.base64);
@@ -192,9 +212,9 @@ serve(async (req) => {
         reason: "too_many_pages",
         pages_processed: pageCount,
         input_size_bytes: bytes.length,
-        error_type: "IMPORT_LIMIT_EXCEEDED",
+        error_type: "PDF_TOO_LARGE",
       });
-      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, errorPayload("PDF_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor."), 413);
     }
 
     const cacheInput = {
@@ -262,7 +282,7 @@ serve(async (req) => {
           pages_processed: typeof pageCount === "number" ? pageCount : null,
           error_type: "AI_TIMEOUT",
         });
-        return jsonResponse(req, { success: false, code: "TIMEOUT", message: "Tempo excedido" }, 408);
+        return jsonResponse(req, errorPayload("AI_TIMEOUT", "A leitura demorou mais que o esperado. Tente novamente.", true), 408);
       }
       trace("parse_failed", { request_id: requestId, fileName, reason: error instanceof Error ? error.message : String(error) });
       throw error;
@@ -275,9 +295,9 @@ serve(async (req) => {
         step_failed: "empty_extraction",
         input_size_bytes: bytes.length,
         pages_processed: typeof pageCount === "number" ? pageCount : null,
-        error_type: "PARSE_ERROR",
+        error_type: "PDF_TEXT_EMPTY",
       });
-      return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message }, 400);
+      return jsonResponse(req, errorPayload("PDF_TEXT_EMPTY", "Este PDF parece não ter texto legível. Vamos tentar leitura por imagem."), 422);
     }
 
     trace("parse_success", {
@@ -327,15 +347,17 @@ serve(async (req) => {
     });
     console.error(`[${FUNCTION_NAME}] error:`, message);
     const lower = message.toLowerCase();
-    const code = lower.includes("invalid") || lower.includes("base64") ? "INVALID_INPUT" : "PDF_PARSE_FAILED";
-    const status = code === "INVALID_INPUT" ? 400 : 500;
+    const code = lower.includes("timeout") ? "AI_TIMEOUT" : lower.includes("invalid") || lower.includes("base64") ? "INVALID_PDF" : "PDF_PARSE_FAILED";
+    const status = code === "AI_TIMEOUT" ? 408 : code === "INVALID_PDF" ? 400 : 500;
     return jsonResponse(req, {
       success: false,
       code,
-      message: code === "INVALID_INPUT"
-        ? "Arquivo inválido ou muito grande."
-        : "Não foi possível ler o PDF. Tente outro arquivo ou uma imagem da carta.",
-      retryable: code !== "INVALID_INPUT",
+      message: code === "INVALID_PDF"
+        ? "Não conseguimos ler este PDF. Tente enviar outro arquivo ou uma foto da carta."
+        : code === "AI_TIMEOUT"
+          ? "A leitura demorou mais que o esperado. Tente novamente."
+          : "Não foi possível ler o PDF. Tente outro arquivo ou uma imagem da carta.",
+      retryable: code !== "INVALID_PDF",
     }, status);
   }
 });

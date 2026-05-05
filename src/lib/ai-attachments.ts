@@ -12,6 +12,13 @@ export interface PreparedAiAnalysisAttachment extends AiAnalysisAttachmentPayloa
   sourceType: "image" | "pdf-text" | "pdf-image";
   wasOptimized?: boolean;
   originalMimeType?: string;
+  decodePath?: "object-url" | "data-url" | "bitmap";
+  originalWidth?: number;
+  originalHeight?: number;
+  resizedWidth?: number;
+  resizedHeight?: number;
+  finalMimeType?: string;
+  finalBase64Length?: number;
 }
 
 export interface PdfTextBlock {
@@ -136,14 +143,20 @@ export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi p
       return "Formato não suportado. Use JPEG ou PNG.";
     case "PDF_PARSE_FAILED":
       return "Não conseguimos ler esse PDF no celular. Tente uma versão menor ou uma foto da carta.";
+    case "INVALID_PDF":
+      return "Não conseguimos ler este PDF. Tente enviar outro arquivo ou uma foto da carta.";
     case "PDF_TOO_LARGE":
       return "O PDF está muito grande para processar no celular. Tente um arquivo menor.";
+    case "PDF_TEXT_EMPTY":
+      return "Este PDF parece não ter texto legível. Vamos tentar leitura por imagem.";
     case "OCR_FAILED":
       return "Não conseguimos extrair o texto desse arquivo. Tente outra foto ou um PDF mais nítido.";
     case "EMPTY_EXTRACTION":
       return "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.";
     case "IMAGE_OCR_EMPTY":
       return "Não foi possível ler a imagem. Tente uma foto mais nítida ou um PDF.";
+    case "UNSUPPORTED_FILE_TYPE":
+      return "Este formato ainda não é suportado. Envie JPG, PNG, PDF ou CSV.";
     default:
       return error instanceof Error && error.message ? error.message : fallback;
   }
@@ -204,7 +217,12 @@ function fileCacheKey(file: File) {
 }
 
 function dataUrlToBase64(dataUrl: string) {
-  return dataUrl.split(",")[1] ?? dataUrl;
+  const trimmed = dataUrl.trim();
+  const commaIndex = trimmed.indexOf(",");
+  if (trimmed.startsWith("data:") && commaIndex !== -1) {
+    return trimmed.slice(commaIndex + 1).replace(/\s+/g, "");
+  }
+  return trimmed.replace(/\s+/g, "");
 }
 
 function isValidBase64(value: string) {
@@ -393,19 +411,10 @@ async function loadHtmlImage(file: File, mode: "object-url" | "data-url") {
 }
 
 async function decodeImageFile(file: File) {
-  const mobile = isLikelyMobileDevice();
-  const attempts: Array<{ path: string; run: () => Promise<HTMLImageElement | ImageBitmap> }> = [
-    ...(mobile
-      ? [
-          { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
-          { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
-          { path: "bitmap", run: () => loadImageBitmap(file) },
-        ]
-      : [
-          { path: "bitmap", run: () => loadImageBitmap(file) },
-          { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
-          { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
-        ]),
+  const attempts: Array<{ path: "object-url" | "data-url" | "bitmap"; run: () => Promise<HTMLImageElement | ImageBitmap> }> = [
+    { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
+    { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
+    { path: "bitmap", run: () => loadImageBitmap(file) },
   ];
 
   let lastError: unknown = null;
@@ -475,6 +484,12 @@ async function prepareImageAttachment(
   const preprocessStartedAt = nowMs();
   const sourceWidth = isImageBitmapSource(decoded.source) ? decoded.source.width : decoded.source.naturalWidth || decoded.source.width;
   const sourceHeight = isImageBitmapSource(decoded.source) ? decoded.source.height : decoded.source.naturalHeight || decoded.source.height;
+  console.info("[AI_PIPELINE] step: image_decode_details", {
+    fileName: file.name,
+    decodeMethod: decoded.path,
+    originalWidth: sourceWidth,
+    originalHeight: sourceHeight,
+  });
   const canvas = document.createElement("canvas");
   canvas.width = sourceWidth;
   canvas.height = sourceHeight;
@@ -547,6 +562,16 @@ async function prepareImageAttachment(
     resizedHeight: optimized.height,
     base64Length: optimized.imageBase64.length,
   });
+  console.info("[AI_PIPELINE] step: image_pipeline_finalized", {
+    fileName: file.name,
+    decodeMethod: decoded.path,
+    originalWidth: sourceWidth,
+    originalHeight: sourceHeight,
+    resizedWidth: optimized.width,
+    resizedHeight: optimized.height,
+    finalMimeType: "image/jpeg",
+    finalBase64Length: optimized.imageBase64.length,
+  });
 
   trace("attachment_timing", {
     stage: "image_total",
@@ -562,15 +587,22 @@ async function prepareImageAttachment(
     sourceType: "image",
     wasOptimized: isProblematicMobileImageFormat(mimeType, file.name),
     originalMimeType: mimeType,
+    decodePath: decoded.path,
+    originalWidth: sourceWidth,
+    originalHeight: sourceHeight,
+    resizedWidth: optimized.width,
+    resizedHeight: optimized.height,
+    finalMimeType: "image/jpeg",
+    finalBase64Length: optimized.imageBase64.length,
   };
 }
 
 async function prepareScanImageAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
   return await prepareImageAttachment(file, {
     tracePrefix: "scan_upload",
-    maxDimension: MAX_IMAGE_DIMENSION_SCAN,
-    baseQuality: MAX_IMAGE_QUALITY_SCAN,
-    maxBase64Length: MAX_IMAGE_BASE64_LENGTH_SCAN,
+    maxDimension: 1024,
+    baseQuality: 0.72,
+    maxBase64Length: 1_000_000,
   });
 }
 

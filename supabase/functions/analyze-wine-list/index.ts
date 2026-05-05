@@ -394,6 +394,116 @@ function normalizeWineListPayload(payload: any) {
   return { wines: sorted, topPick, bestValue };
 }
 
+function normalizeOcrValue(value?: string | number | null) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizePriceTokens(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    const rounded = Math.round(value * 100) / 100;
+    const integer = Math.round(rounded);
+    return Array.from(new Set([
+      String(integer),
+      rounded.toFixed(2).replace(/\.00$/, ""),
+      rounded.toFixed(2),
+    ]));
+  }
+
+  const raw = String(value ?? "").trim();
+  if (!raw) return [];
+  const numeric = Number(raw.replace(/[^\d.,-]/g, "").replace(/\.(?=\d{3}\b)/g, "").replace(",", "."));
+  if (!Number.isFinite(numeric) || numeric <= 0) return [];
+  return normalizePriceTokens(numeric);
+}
+
+function lineLooksLikeWine(line: string) {
+  const normalized = normalizeOcrValue(line);
+  if (normalized.length < 8) return false;
+  const hasVintage = /\b(19|20)\d{2}\b/.test(line);
+  const hasPrice = /\b\d{2,4}(?:[.,]\d{2})?\b/.test(line);
+  const hasWineToken = /\b(malbec|cabernet|merlot|pinot|chardonnay|riesling|syrah|shiraz|tempranillo|sauvignon|cava|brut|prosecco|rose|ros[eé]|torrontes|nebbiolo|sangiovese)\b/i.test(line);
+  return hasPrice || hasVintage || hasWineToken;
+}
+
+function buildGroundingContext(ocrText: string) {
+  const lines = String(ocrText || "")
+    .replace(/\r/g, "\n")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return {
+    rawText: ocrText,
+    normalizedText: normalizeOcrValue(ocrText),
+    lines,
+    normalizedLines: lines.map((line) => normalizeOcrValue(line)),
+    likelyWineLines: lines.filter(lineLooksLikeWine),
+  };
+}
+
+function scoreOcrMatch(target: string, source: string) {
+  const normalizedTarget = normalizeOcrValue(target);
+  if (!normalizedTarget || normalizedTarget.length < 3) return false;
+  if (source.includes(normalizedTarget)) return true;
+
+  const tokens = normalizedTarget.split(" ").filter((token) => token.length > 2);
+  if (tokens.length >= 2) {
+    const hits = tokens.filter((token) => source.includes(token)).length;
+    return hits >= Math.min(tokens.length, 3);
+  }
+
+  return false;
+}
+
+function applyGroundedWineExtraction(payload: any, ocrText: string) {
+  const normalized = normalizeWineListPayload(payload);
+  const grounding = buildGroundingContext(ocrText);
+  const filtered = normalized.wines
+    .map((wine) => {
+      const nameMatched = scoreOcrMatch(wine.name, grounding.normalizedText);
+      const producerMatched = scoreOcrMatch(wine.producer, grounding.normalizedText);
+      const priceMatched = normalizePriceTokens(wine.price).some((token) =>
+        grounding.lines.some((line) => line.includes(token))
+      );
+
+      if (!nameMatched && !producerMatched) {
+        return null;
+      }
+
+      let confidence = Math.min(1, Math.max(0.15, Number(wine.confidence) || 0.35));
+      if (nameMatched && priceMatched) {
+        confidence = Math.max(confidence, 0.9);
+      } else if (nameMatched || producerMatched) {
+        confidence = Math.min(confidence, 0.68);
+      } else {
+        confidence = Math.min(confidence, 0.42);
+      }
+
+      return {
+        ...wine,
+        confidence,
+      };
+    })
+    .filter((wine): wine is NonNullable<typeof wine> => Boolean(wine));
+
+  const grounded = normalizeWineListPayload({
+    wines: filtered,
+    topPick: normalized.topPick,
+    bestValue: normalized.bestValue,
+  });
+
+  return {
+    grounded,
+    candidateLineCount: grounding.likelyWineLines.length,
+  };
+}
+
 function normalizeMenuPayload(payload: any) {
   const dishes = Array.isArray(payload?.dishes) ? payload.dishes : [];
   const validCompatLabels = ["Combinação perfeita", "Alta compatibilidade", "Harmonização elegante", "Boa opção", "Escolha ousada", "Pouco indicado"];
@@ -755,7 +865,7 @@ Use apenas pratos LEGÍVEIS no cardápio. Não invente itens.`;
 - Faixa de preço habitual: R$ ${userProfile.avgPrice || "variado"}`
         : "";
 
-      systemPrompt = `Você é um sommelier profissional analisando uma carta de vinhos para ajudar o cliente a decidir rapidamente o que pedir.${profileContext}
+      systemPrompt = `Você está fazendo EXTRAÇÃO LITERAL de uma carta de vinhos em OCR bruto.${profileContext}
 Extraia a carta como uma LISTA ESTRUTURADA de vinhos. Não escreva análise sensorial, veredictos, harmonizações ou resumo livre.
 
 TRATE O TEXTO como um menu/carta de vinhos.
@@ -768,9 +878,15 @@ REGRAS:
 5. Normalize a categoria para: "red", "white", "sparkling" ou "rose".
 6. Confidence deve ser um número de 0 a 1 baseado na clareza do OCR e na completude daquele item.
 7. Quando houver produtor, uva, país ou região parcialmente legíveis, preserve o que estiver seguro. Não complete com fantasia.
+8. Você NÃO pode usar conhecimento externo, fama de rótulos ou inferência de mercado.
+9. Você só pode retornar vinhos que estejam explicitamente visíveis no OCR.
+10. Se um nome, produtor ou preço não estiver no texto, deixe vazio ou 0. Nunca substitua por um vinho famoso.
+11. Trate a entrada como TEXTO BRUTO. Extraia linhas que pareçam vinhos com safra, uva, região ou preço.
 
 PROIBIDO:
 - responder com um único vinho se houver várias entradas detectáveis
+- inventar vinhos famosos como Château Margaux, Romanée-Conti, Veuve Clicquot ou qualquer outro rótulo não presente no OCR
+- completar nomes, produtores ou regiões com fantasia
 - escrever explicações longas
 - retornar qualquer campo fora do schema`;
 
@@ -823,7 +939,7 @@ PROIBIDO:
 
     // ── Retry loop with anti-genericity validation ──
     // Keep total runtime under edge function/client timeout (~60s).
-    const likelyMultipleEntries = !isMenuMode && splitFallbackEntries(normalizedText).length >= 3;
+    const likelyMultipleEntries = !isMenuMode && buildGroundingContext(normalizedText).likelyWineLines.length >= 3;
     const MAX_ATTEMPTS = isMenuMode ? 1 : 2;
     let lastParsed: any = null;
     let validationResult: { passed: boolean; failures: string[] } = { passed: false, failures: [] };
@@ -989,36 +1105,47 @@ PROIBIDO:
     const parsedCount = isMenuMode
       ? Array.isArray(lastParsed.dishes) ? lastParsed.dishes.length : 0
       : Array.isArray(lastParsed.wines) ? lastParsed.wines.length : 0;
+    let finalParsedCount = parsedCount;
 
-    if (!validationResult.passed && parsedCount >= 3) {
-      trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: true });
-      const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
-      trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
-      trace("parse_success", { request_id: requestId, mode, count: parsedCount, degraded: true });
-      await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
-      trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: true });
-      return jsonResponse(req, normalized);
+    if (!isMenuMode) {
+      console.log("OCR_TEXT", normalizedText);
+      const groundingResult = applyGroundedWineExtraction(lastParsed, normalizedText);
+      const filteredWines = groundingResult.grounded.wines;
+      console.log("FILTERED_WINES", filteredWines);
+      lastParsed = groundingResult.grounded;
+      validationResult.failures = validationResult.failures.filter((failure) =>
+        !failure.startsWith("Esperados pelo menos 3 vinhos estruturados")
+      );
+
+      if (filteredWines.length === 0) {
+        validationResult.failures.push("Nenhum vinho permaneceu ancorado no OCR");
+      }
+      if (filteredWines.length < 3) {
+        validationResult.failures.push(`Grounding insuficiente: ${filteredWines.length} vinhos ancorados para ${groundingResult.candidateLineCount} linhas candidatas`);
+      }
+      finalParsedCount = filteredWines.length;
+      validationResult.passed = validationResult.failures.length === 0;
     }
 
-    if (!validationResult.passed && !isMenuMode && likelyMultipleEntries && parsedCount < 3) {
+    if (!validationResult.passed && !isMenuMode) {
       trace("parse_failed", {
         request_id: requestId,
-        reason: "insufficient_wines_extracted",
+        reason: "low_confidence_extraction",
         failures: validationResult.failures.slice(0, 12),
-        count: parsedCount,
+        count: finalParsedCount,
       });
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 422, "parse_failed", Date.now() - startTime, {
         request_id: requestId,
-        reason: "insufficient_wines_extracted",
+        reason: "low_confidence_extraction",
         validation_failures: validationResult.failures.slice(0, 12),
         mode,
         input_size_bytes: inputSizeBytes,
-        error_type: "INSUFFICIENT_WINES_EXTRACTED",
+        error_type: "LOW_CONFIDENCE_EXTRACTION",
       });
       return jsonResponse(req, {
         success: false,
-        code: "INSUFFICIENT_WINES_EXTRACTED",
-        message: "Não conseguimos estruturar vinhos suficientes desta carta. Tente outra imagem mais nítida.",
+        code: "LOW_CONFIDENCE_EXTRACTION",
+        message: "Não conseguimos extrair vinhos suficientes com confiança desta carta. Tente outra imagem mais nítida.",
         requestId,
         retryable: true,
       }, 422);
@@ -1045,10 +1172,10 @@ PROIBIDO:
       return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: "EMPTY_OR_INVALID_EXTRACTION", note: "análise simplificada" });
     }
 
-    trace("wines_extracted", { request_id: requestId, count: parsedCount, degraded: false });
+    trace("wines_extracted", { request_id: requestId, count: finalParsedCount, degraded: false });
     const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
     trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
-    trace("parse_success", { request_id: requestId, mode, count: parsedCount, degraded: false });
+    trace("parse_success", { request_id: requestId, mode, count: finalParsedCount, degraded: false });
     await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
     trace("response_serialization_timing", { request_id: requestId, durationMs: elapsed(startTime), cached: true, degraded: false });
     trace("total_function_duration", { request_id: requestId, durationMs: elapsed(startTime), input_size_bytes: inputSizeBytes, user_id: userId });

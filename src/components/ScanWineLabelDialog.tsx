@@ -32,9 +32,9 @@ type ScanStep = "capture" | "scanning" | "preview" | "error";
 function isAcceptedMobileImage(file: File) {
   const mime = (file.type || "").toLowerCase();
   const name = (file.name || "").toLowerCase();
-  const allowedMime = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"]);
+  const allowedMime = new Set(["image/jpeg", "image/jpg", "image/png", "image/heic", "image/heif"]);
   if (allowedMime.has(mime)) return true;
-  return [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"].some((ext) => name.endsWith(ext));
+  return [".jpg", ".jpeg", ".png", ".heic", ".heif"].some((ext) => name.endsWith(ext));
 }
 
 export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: ScanWineLabelDialogProps) {
@@ -97,6 +97,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     console.info("SCAN_START", {
       fileName: metadata?.fileName || null,
       mimeType: metadata?.mimeType || null,
+      finalMimeType: metadata?.mimeType || null,
       imageBase64Length: base64.length,
       estimatedPayloadBytes,
       device: getClientDeviceType(),
@@ -117,6 +118,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         mimeType: metadata?.mimeType || null,
         fileName: metadata?.fileName || null,
         imageBase64Length: base64.length,
+        finalMimeType: metadata?.mimeType || null,
         device: getClientDeviceType(),
       });
       const data = await invokeEdgeFunction<CanonicalScanResult>(
@@ -133,11 +135,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       console.info("[ScanWineLabelDialog] request_finished", {
         function: "scan-wine-label",
         success: true,
+        status: 200,
         fileName: metadata?.fileName || null,
       });
       console.info("SCAN_SUCCESS", {
         fileName: metadata?.fileName || null,
         mimeType: metadata?.mimeType || null,
+        finalMimeType: metadata?.mimeType || null,
         imageBase64Length: base64.length,
         estimatedPayloadBytes,
         device: getClientDeviceType(),
@@ -165,6 +169,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         rawBody: e?.rawBody ?? null,
         fileName: metadata?.fileName || null,
         mimeType: metadata?.mimeType || null,
+        finalMimeType: metadata?.mimeType || null,
         imageBase64Length: base64?.length || 0,
       };
       console.error("[ScanWineLabelDialog] scan_failed", debugPayload);
@@ -174,6 +179,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         function: "scan-wine-label",
         success: false,
         code,
+        status: e?.status ?? null,
         requestId: requestId || null,
         fileName: metadata?.fileName || null,
       });
@@ -234,10 +240,17 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       console.info("[ScanWineLabelDialog] attachment_prepared", {
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
+        finalMimeType: prepared.finalMimeType || prepared.mimeType,
         sourceType: prepared.sourceType,
         wasOptimized: prepared.wasOptimized || false,
         originalMimeType: prepared.originalMimeType || null,
+        decodeMethod: prepared.decodePath || null,
+        originalWidth: prepared.originalWidth || null,
+        originalHeight: prepared.originalHeight || null,
+        resizedWidth: prepared.resizedWidth || null,
+        resizedHeight: prepared.resizedHeight || null,
         imageBase64Length: prepared.imageBase64?.length || 0,
+        finalBase64Length: prepared.finalBase64Length || prepared.imageBase64?.length || 0,
         estimatedPayloadBytes: prepared.imageBase64 ? Math.round((prepared.imageBase64.length * 3) / 4) : 0,
       });
       if (previewUrlRef.current) {
@@ -258,6 +271,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       console.info("[ScanWineLabelDialog] sending_scan_request", {
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
+        finalMimeType: prepared.finalMimeType || prepared.mimeType,
+        decodeMethod: prepared.decodePath || null,
+        originalWidth: prepared.originalWidth || null,
+        originalHeight: prepared.originalHeight || null,
+        resizedWidth: prepared.resizedWidth || null,
+        resizedHeight: prepared.resizedHeight || null,
         imageBase64Length: prepared.imageBase64.length,
         estimatedPayloadBytes: Math.round((prepared.imageBase64.length * 3) / 4),
       });
@@ -437,7 +456,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={cameraInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                accept="image/*,.heic,.heif,.jpg,.jpeg,.png"
                 capture="environment"
                 className="hidden"
                 onChange={handleSelectedFile}
@@ -445,7 +464,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                accept="image/*,.heic,.heif,.jpg,.jpeg,.png"
                 className="hidden"
                 onChange={handleSelectedFile}
               />

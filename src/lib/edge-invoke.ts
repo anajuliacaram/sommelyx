@@ -129,9 +129,15 @@ function normalizeEdgeCode(code?: string, status?: number) {
   if (value === "EMPTY_AI_RESPONSE" || value === "INVALID_AI_RESPONSE" || value === "AI_PARSE_ERROR" || value === "JSON_PARSE_ERROR") {
     return "PARSE_ERROR";
   }
-  if (value === "IMAGE_DECODE_FAILED" || value === "INVALID_IMAGE_BASE64" || value === "UNSUPPORTED_IMAGE_FORMAT") {
+  if (value === "IMAGE_DECODE_FAILED" || value === "INVALID_IMAGE_BASE64" || value === "UNSUPPORTED_IMAGE_FORMAT" || value === "INVALID_IMAGE") {
     return "INVALID_IMAGE";
   }
+  if (value === "INVALID_PDF") return "INVALID_PDF";
+  if (value === "PDF_TOO_LARGE") return "FILE_TOO_LARGE";
+  if (value === "PDF_TEXT_EMPTY") return "PDF_TEXT_EMPTY";
+  if (value === "INVALID_CSV") return "INVALID_CSV";
+  if (value === "INVALID_SPREADSHEET") return "INVALID_SPREADSHEET";
+  if (value === "UNSUPPORTED_FILE_TYPE") return "UNSUPPORTED_FILE_TYPE";
   if (value === "TIMEOUT" || value === "REQUEST_TIMEOUT" || value === "ABORTED") {
     return "AI_TIMEOUT";
   }
@@ -156,7 +162,12 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
   if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
   if (code === "INVALID_IMAGE") return "Imagem inválida. Envie uma foto legível do rótulo.";
   if (code === "INVALID_IMAGE_BASE64" || code === "IMAGE_DECODE_FAILED" || code === "UNSUPPORTED_IMAGE_FORMAT") return "Não conseguimos processar esta imagem. Tente outra foto do rótulo.";
+  if (code === "INVALID_PDF") return "Não conseguimos ler este PDF. Tente enviar outro arquivo ou uma foto da carta.";
+  if (code === "PDF_TEXT_EMPTY") return "Este PDF parece não ter texto legível. Vamos tentar leitura por imagem.";
   if (code === "INVALID_FILE_TYPE") return "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível.";
+  if (code === "INVALID_CSV") return "Não conseguimos ler este arquivo CSV. Verifique cabeçalhos e codificação.";
+  if (code === "INVALID_SPREADSHEET") return "Não conseguimos ler esta planilha. Verifique o formato e tente novamente.";
+  if (code === "UNSUPPORTED_FILE_TYPE") return "Este formato ainda não é suportado. Envie JPG, PNG, PDF ou CSV.";
   if (code === "INVALID_PDF") return "O PDF enviado não pôde ser lido. Tente outro arquivo.";
   if (code === "FILE_TOO_LARGE" || code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
   if (code === "PDF_PARSE_FAILED") return "Não foi possível ler o PDF. Tente uma versão mais nítida ou uma imagem da carta.";

@@ -45,6 +45,21 @@ function fail(req: Request, status: number, payload: FailPayload) {
   return jsonResponse(req, status, payload);
 }
 
+function validationFailureToResponse(reason?: string) {
+  switch (reason) {
+    case "invalid_base64":
+      return { status: 400, code: "INVALID_IMAGE_BASE64", message: "A imagem enviada não pôde ser lida corretamente." };
+    case "payload_too_large":
+      return { status: 413, code: "FILE_TOO_LARGE", message: "A imagem está muito grande. Tente uma foto mais leve." };
+    case "unsupported_mime_type":
+      return { status: 415, code: "UNSUPPORTED_IMAGE_FORMAT", message: "Formato de imagem não suportado." };
+    case "missing_mime_type":
+      return { status: 400, code: "INVALID_IMAGE", message: "Formato da imagem ausente ou inválido." };
+    default:
+      return { status: 400, code: "INVALID_IMAGE", message: "Arquivo de imagem inválido." };
+  }
+}
+
 function buildFallbackWine() {
   return {
     name: "Não identificado",
@@ -438,6 +453,7 @@ serve(async (req) => {
 
   try {
     const authorization = req.headers.get("Authorization");
+    console.info(`[${FUNCTION_NAME}] step: auth_status request_id=${requestId} auth_present=${Boolean(authorization)}`);
     if (!authorization) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
         request_id: requestId,
@@ -511,7 +527,7 @@ serve(async (req) => {
     const imageBase64Raw = payload?.imageBase64;
     const payloadMimeType = typeof payload?.mimeType === "string" ? payload.mimeType.trim() : null;
     payloadFileName = typeof payload?.fileName === "string" ? payload.fileName.trim() : null;
-    console.log(`[${FUNCTION_NAME}] step: request_received request_id=${requestId} auth_present=${Boolean(authorization)} payload_keys=${Object.keys(payload || {}).join(",") || "none"} mime=${payloadMimeType || "unknown"} file=${payloadFileName || "unknown"} image_base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
+    console.info(`[${FUNCTION_NAME}] step: request_received request_id=${requestId} auth_present=${Boolean(authorization)} payload_keys=${Object.keys(payload || {}).join(",") || "none"} mime=${payloadMimeType || "unknown"} file=${payloadFileName || "unknown"} image_base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
     if (!imageBase64Raw || typeof imageBase64Raw !== "string") {
       await logStep(userId, 400, "image_missing", Date.now() - startTime, requestId, {
         reason: "missing_image",
@@ -520,8 +536,8 @@ serve(async (req) => {
       });
       return fail(req, 400, {
         success: false,
-        code: INVALID_INPUT_ERROR.code,
-        message: INVALID_INPUT_ERROR.message,
+        code: "INVALID_IMAGE",
+        message: "Arquivo de imagem inválido.",
         requestId,
         retryable: false,
       });
@@ -541,37 +557,51 @@ serve(async (req) => {
       });
       return fail(req, 400, {
         success: false,
-        code: INVALID_INPUT_ERROR.code,
-        message: INVALID_INPUT_ERROR.message,
+        code: "INVALID_IMAGE",
+        message: "Arquivo de imagem inválido.",
         requestId,
         retryable: false,
       });
     }
+    const validationResult = validation.ok
+      ? {
+          ok: true,
+          mimeType: validation.mimeType,
+          base64Length: validation.base64.length,
+          byteLength: validation.byteLength,
+        }
+      : {
+          ok: false,
+          reason: validation.reason,
+          ...validationFailureToResponse(validation.reason),
+        };
+    console.info(`[${FUNCTION_NAME}] step: validation_result request_id=${requestId} ok=${validationResult.ok} reason=${validation.ok ? "valid" : validation.reason} mime=${payloadMimeType || "unknown"} base64_length=${typeof imageBase64Raw === "string" ? imageBase64Raw.length : 0}`);
     if (!validation.ok) {
-      console.error(`[${FUNCTION_NAME}] step: image_invalid request_id=${requestId} reason=${validation.reason}`);
-      await logStep(userId, 400, "image_invalid", Date.now() - startTime, requestId, {
+      const failure = validationFailureToResponse(validation.reason);
+      console.error(`[${FUNCTION_NAME}] step: image_invalid request_id=${requestId} final_error_code=${failure.code} reason=${validation.reason}`);
+      await logStep(userId, failure.status, "image_invalid", Date.now() - startTime, requestId, {
         request_id: requestId,
         reason: validation.reason,
         file_name: payloadFileName,
         input_size_bytes: 0,
-        error_type: "INVALID_IMAGE",
+        error_type: failure.code,
       });
-      return fail(req, 400, {
+      return fail(req, failure.status, {
         success: false,
-        code: INVALID_INPUT_ERROR.code,
-        message: INVALID_INPUT_ERROR.message,
+        code: failure.code,
+        message: failure.message,
         requestId,
-        retryable: false,
+        retryable: failure.status >= 500 || failure.status === 429,
       });
     }
 
     imageMime = validation.mimeType;
     imageBase64 = validation.base64;
     sizeBytes = validation.byteLength;
-    console.log(`[${FUNCTION_NAME}] step: image_normalized request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
-    console.log(`[${FUNCTION_NAME}] step: image_size_checked request_id=${requestId} size_bytes=${sizeBytes}`);
+    console.info(`[${FUNCTION_NAME}] step: image_normalized request_id=${requestId} mime=${imageMime} base64_length=${imageBase64.length}`);
+    console.info(`[${FUNCTION_NAME}] step: image_size_checked request_id=${requestId} size_bytes=${sizeBytes}`);
 
-    console.log(`[${FUNCTION_NAME}] step: image_received request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
+    console.info(`[${FUNCTION_NAME}] step: image_received request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
     await logStep(userId, 200, "image_received", Date.now() - startTime, requestId, {
       image_mime: imageMime,
       file_name: payloadFileName,
@@ -580,7 +610,7 @@ serve(async (req) => {
       input_size_bytes: sizeBytes,
       error_type: null,
     });
-    console.log(`[${FUNCTION_NAME}] step: image_validated request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
+    console.info(`[${FUNCTION_NAME}] step: image_validated request_id=${requestId} mime=${imageMime} size_bytes=${sizeBytes} base64_length=${imageBase64.length}`);
     await logStep(userId, 200, "image_validated", Date.now() - startTime, requestId, {
       image_mime: imageMime,
       file_name: payloadFileName,
@@ -651,7 +681,7 @@ serve(async (req) => {
       });
     }
 
-    console.log(`[${FUNCTION_NAME}] step: ai_request_started request_id=${requestId} model=${AI_MODEL} image_size_bytes=${sizeBytes}`);
+    console.info(`[${FUNCTION_NAME}] step: ai_request_started request_id=${requestId} model=${AI_MODEL} image_size_bytes=${sizeBytes}`);
 
     const systemPrompt =
       `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia SOMENTE informações que estejam EXPLICITAMENTE VISÍVEIS no rótulo.\n\n` +
@@ -705,7 +735,7 @@ serve(async (req) => {
           role: "user",
           content: [
             { type: "input_text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
-            { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}`, detail: "auto" },
+            { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}`, detail: "high" },
           ],
         },
       ],
@@ -761,7 +791,7 @@ serve(async (req) => {
       const timedOut = status === 504 || String(openaiResult.error).toLowerCase().includes("timeout");
       const parseFailed = status === 422 || openaiResult.error === "INVALID_AI_RESPONSE" || openaiResult.error === "EMPTY_AI_RESPONSE";
       const code = timedOut ? "AI_TIMEOUT" : parseFailed ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE";
-      console.error(`[${FUNCTION_NAME}] step: ai_failed request_id=${requestId} status=${status} code=${code} preview=${responsePreview}`);
+      console.error(`[${FUNCTION_NAME}] step: ai_failed request_id=${requestId} status=${status} final_error_code=${code} preview=${responsePreview}`);
       await logStep(userId, timedOut ? 408 : 502, "fallback_used", durationMs, requestId, {
         ai_status: status,
         ai_error: sanitizePreview(openaiResult.error),
@@ -774,13 +804,13 @@ serve(async (req) => {
       return ok(req, buildFallbackWine(), requestId);
     }
 
-    console.log(`[${FUNCTION_NAME}] step: ai_response_received request_id=${requestId} raw=${DEBUG_MODE ? sanitizePreview(openaiResult.raw) : "hidden"}`);
-    console.log(`[${FUNCTION_NAME}] step: parse_started request_id=${requestId} awaiting_structured_output`);
+    console.info(`[${FUNCTION_NAME}] step: ai_response_received request_id=${requestId} ok=true raw=${DEBUG_MODE ? sanitizePreview(openaiResult.raw) : "hidden"}`);
+    console.info(`[${FUNCTION_NAME}] step: parse_started request_id=${requestId} awaiting_structured_output`);
 
     try {
       parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
     } catch (parseError) {
-      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId}`, parseError);
+      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} final_error_code=AI_PARSE_ERROR`, parseError);
       await logStep(userId, 422, "fallback_used", durationMs, requestId, {
         reason: "structured_parse_failed",
         error: sanitizePreview(parseError),
@@ -794,7 +824,7 @@ serve(async (req) => {
     }
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
-      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=no_structured_output`);
+      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=no_structured_output final_error_code=AI_PARSE_ERROR`);
       await logStep(userId, 422, "fallback_used", durationMs, requestId, {
         reason: "no_structured_output",
         raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
@@ -808,7 +838,7 @@ serve(async (req) => {
 
     const parsed = parsedArgs as Record<string, unknown>;
     const wine = (parsed?.wine ?? parsed) as Record<string, unknown>;
-    console.log(`[${FUNCTION_NAME}] step: parse_succeeded request_id=${requestId} fields=${Object.keys(wine).join(",")} parsed_preview=${DEBUG_MODE ? sanitizePreview(parsed) : "hidden"}`);
+    console.info(`[${FUNCTION_NAME}] step: parse_succeeded request_id=${requestId} fields=${Object.keys(wine).join(",")} parsed_preview=${DEBUG_MODE ? sanitizePreview(parsed) : "hidden"}`);
     await logStep(userId, 200, "parse_succeeded", durationMs, requestId, {
       parsed_fields: Object.keys(wine),
       input_size_bytes: sizeBytes,
@@ -883,7 +913,7 @@ serve(async (req) => {
       !hasAnyWineContext ||
       regionExplicitlyInvalid
     ) {
-      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=insufficient_or_suspicious_label`);
+      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=insufficient_or_suspicious_label final_error_code=LABEL_NOT_IDENTIFIED`);
       await logStep(userId, 422, "fallback_used", durationMs, requestId, {
         reason: "insufficient_or_suspicious_label",
         suspicious_name: suspiciousName,
@@ -909,7 +939,7 @@ serve(async (req) => {
       normalizedNameKey === "unidentified";
 
     if (isGenericLabelName || fieldConfidence.name < 0.5) {
-      console.error(`[${FUNCTION_NAME}] step: parse_succeeded_but_generic_name request_id=${requestId} name=${normalizedWine.name || "unknown"}`);
+      console.error(`[${FUNCTION_NAME}] step: parse_succeeded_but_generic_name request_id=${requestId} name=${normalizedWine.name || "unknown"} final_error_code=LABEL_NOT_IDENTIFIED`);
       await logStep(userId, 200, "fallback_used", durationMs, requestId, {
         reason: "generic_or_low_confidence_name",
         step_failed: "generic_or_low_confidence_name",
@@ -921,7 +951,7 @@ serve(async (req) => {
       return ok(req, normalizedWine, requestId);
     }
 
-    console.log(`[${FUNCTION_NAME}] final_output request_id=${requestId} wine_name=${normalizedWine.name}`);
+    console.info(`[${FUNCTION_NAME}] final_output request_id=${requestId} wine_name=${normalizedWine.name} final_error_code=none`);
     await logStep(userId, 200, "success", durationMs, requestId, {
       wine_name: normalizedWine.name || "unknown",
       strong_anchors: strongAnchors,
@@ -944,7 +974,7 @@ serve(async (req) => {
     const isParseOrInferenceIssue = lower.includes("json") || lower.includes("parse") || lower.includes("structured") || lower.includes("confidence");
     const code = isAbort ? "AI_TIMEOUT" : isParseOrInferenceIssue ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE";
 
-    console.error(`[${FUNCTION_NAME}] step: fatal_error request_id=${requestId} user_id=${userId} code=${code} error=${errMsg}`, error);
+    console.error(`[${FUNCTION_NAME}] step: fatal_error request_id=${requestId} user_id=${userId} code=${code} final_error_code=${code} error=${errMsg}`, error);
 
     await logStep(userId, isAbort ? 408 : 500, "fatal_error", durationMs, requestId, {
       error: sanitizePreview(errMsg),
