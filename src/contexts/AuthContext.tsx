@@ -9,6 +9,8 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   profileType: ProfileType;
+  isLoadingAuth: boolean;
+  isLoadingProfile: boolean;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -36,9 +38,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profileType, setProfileTypeState] = useState<ProfileType>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const mountedRef = useRef(true);
+  const profileLoadIdRef = useRef(0);
   const emailRedirectTo = `${(appUrl ?? window.location.origin).replace(/\/$/, "")}/auth/confirm`;
+  const loading = isLoadingAuth || isLoadingProfile;
 
   const fetchProfileType = useCallback(async (userId: string): Promise<ProfileType> => {
     try {
@@ -58,10 +63,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  const loadProfileForUser = useCallback(async (userId: string) => {
+    const loadId = ++profileLoadIdRef.current;
+    if (mountedRef.current) {
+      setIsLoadingProfile(true);
+    }
+
+    try {
+      const profile = await fetchProfileType(userId);
+      if (mountedRef.current && profileLoadIdRef.current === loadId) {
+        setProfileTypeState(profile);
+      }
+    } finally {
+      if (mountedRef.current && profileLoadIdRef.current === loadId) {
+        setIsLoadingProfile(false);
+      }
+    }
+  }, [fetchProfileType]);
+
   useEffect(() => {
     mountedRef.current = true;
     const loadingTimeout = window.setTimeout(() => {
-      if (mountedRef.current) setLoading(false);
+      if (mountedRef.current) {
+        setIsLoadingAuth(false);
+      }
     }, 3000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -71,13 +96,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setSession(newSession);
         setUser(newSession?.user ?? null);
-        setLoading(false);
 
         if (newSession?.user) {
-          void fetchProfileType(newSession.user.id).then((pt) => {
-            if (mountedRef.current) setProfileTypeState(pt);
-          });
+          void loadProfileForUser(newSession.user.id);
         } else {
+          profileLoadIdRef.current += 1;
+          setIsLoadingProfile(false);
           setProfileTypeState(null);
         }
       }
@@ -92,16 +116,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
-      setLoading(false);
 
       if (initialSession?.user) {
-        void fetchProfileType(initialSession.user.id).then((pt) => {
-          if (mountedRef.current) setProfileTypeState(pt);
-        });
+        void loadProfileForUser(initialSession.user.id);
+      } else {
+        profileLoadIdRef.current += 1;
+        setIsLoadingProfile(false);
+        setProfileTypeState(null);
       }
+      setIsLoadingAuth(false);
     }).catch((error) => {
       console.error("[Auth] getSession failed:", error);
-      if (mountedRef.current) setLoading(false);
+      if (mountedRef.current) {
+        setIsLoadingAuth(false);
+        profileLoadIdRef.current += 1;
+        setIsLoadingProfile(false);
+      }
     });
 
     return () => {
@@ -153,7 +183,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setSession(null);
     setUser(null);
     setProfileTypeState(null);
-    setLoading(false);
+    profileLoadIdRef.current += 1;
+    setIsLoadingAuth(false);
+    setIsLoadingProfile(false);
   };
 
   const setProfileType = async (type: "personal" | "commercial") => {
@@ -191,7 +223,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profileType, loading, signUp, signIn, signOut, resendConfirmationEmail, setProfileType }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        user,
+        profileType,
+        isLoadingAuth,
+        isLoadingProfile,
+        loading,
+        signUp,
+        signIn,
+        signOut,
+        resendConfirmationEmail,
+        setProfileType,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
