@@ -182,11 +182,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar" });
       setError(null);
-      setPairingResult(result);
+      const normalized = normalizeGeneratedWinePairingResponse(result, dish || "prato");
+      setPairingResult(normalized);
       notifySuccess("Sugestões prontas", {
-        description: result.fallback
+        description: normalized.fallback
           ? "Não foi possível concluir a leitura com total confiança, então exibimos uma versão simplificada para você revisar."
-          : `${result.pairings.length} opções pensadas para o prato.`,
+          : `${normalized.pairings.length} opções pensadas para o prato.`,
         duration: 2600,
       });
       setStep("results");
@@ -221,11 +222,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:wine", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine" });
       setError(null);
-      setPairingResult(result);
+      const normalized = normalizeGeneratedWinePairingResponse(result, wine.name || "vinho");
+      setPairingResult(normalized);
       notifySuccess("Harmonização pronta", {
-        description: result.fallback
+        description: normalized.fallback
           ? "A análise precisou de fallback, mas ainda retornou sugestões úteis para revisão."
-          : `${Math.min(result.pairings.length, 5)} sugestões com porquê técnico.`,
+          : `${Math.min(normalized.pairings.length, 5)} sugestões com porquê técnico.`,
         duration: 2600,
       });
       setStep("wine-results");
@@ -301,14 +303,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           wineCountry: resolvedWine.country,
         });
         if (!isLatest(reqId)) return;
-        console.info("[DishToWineDialog] request:success", { id: reqId, kind: "deep-link", pairings: result.pairings?.length || 0 });
+        const normalized = normalizeGeneratedWinePairingResponse(result, resolvedWine.name || "vinho");
+        console.info("[DishToWineDialog] request:success", { id: reqId, kind: "deep-link", pairings: normalized.pairings.length });
         setError(null);
         setDeepLinkError(null);
-        setPairingResult(result);
+        setPairingResult(normalized);
         notifySuccess("Harmonização pronta", {
-          description: result.fallback
+          description: normalized.fallback
             ? "A leitura precisou ser simplificada, mas ainda há sugestões úteis para revisar."
-            : `${Math.min(result.pairings.length, 5)} sugestões com leitura técnica.`,
+            : `${Math.min(normalized.pairings.length, 5)} sugestões com leitura técnica.`,
           duration: 2600,
         });
       } catch (err: any) {
@@ -397,13 +400,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
           const result = await analyzeWineList(payload, profile);
           if (!isLatest(retryId)) return;
-          console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", retry: true, wines: result.wines?.length || 0 });
+          const normalized = normalizeWineListResponse(result);
+          console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", retry: true, wines: normalized.wines.length });
           setError(null);
-          setScanResults(result);
+          setScanResults(normalized);
           notifySuccess("Carta analisada", {
-            description: result.fallback
+            description: normalized.fallback
               ? "Não foi possível ler tudo com segurança; mantivemos uma versão simplificada para revisão."
-              : `${result.wines?.length || 0} vinhos lidos com sucesso.`,
+              : `${normalized.wines.length} vinhos lidos com sucesso.`,
             duration: 2600,
           });
           setStep("scan-results");
@@ -421,13 +425,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", fileName: prepared.fileName, sourceType: prepared.sourceType });
       const result = await analyzeWineList(payload, profile);
       if (!isLatest(reqId)) return;
-      console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", id: reqId, wines: result.wines?.length || 0 });
+      const normalized = normalizeWineListResponse(result);
+      console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", id: reqId, wines: normalized.wines.length });
       setError(null);
-      setScanResults(result);
+      setScanResults(normalized);
       notifySuccess("Carta analisada", {
-        description: result.fallback
+        description: normalized.fallback
           ? "Não foi possível ler tudo com segurança; mantivemos uma versão simplificada para revisão."
-          : `${result.wines?.length || 0} vinhos prontos para refinar.`,
+          : `${normalized.wines.length} vinhos prontos para refinar.`,
         duration: 2600,
       });
       setStep("scan-results");
@@ -492,13 +497,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           console.info("[DishToWineDialog] pairing_request_started", { step: "menu", retry: true, wineName: extWineName, sourceType: prepared.sourceType });
           const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
           if (!isLatest(retryId)) return;
-          console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, pairings: result.pairings?.length || 0 });
+          const normalized = normalizeGeneratedWinePairingResponse(result, currentDishContext);
+          console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, pairings: normalized.pairings.length });
           setError(null);
-          setPairingResult(result);
+          setPairingResult(normalized);
           notifySuccess("Cardápio lido", {
-            description: result.fallback
+            description: normalized.fallback
               ? "A leitura precisou de fallback, mas a revisão continua possível."
-              : `${result.pairings?.length || 0} sugestões identificadas.`,
+              : `${normalized.pairings.length} sugestões identificadas.`,
             duration: 2600,
           });
           setStep("ext-menu-results");
@@ -515,13 +521,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       console.info("[DishToWineDialog] pairing_request_started", { step: "menu", wineName: extWineName, sourceType: prepared.sourceType });
       const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
       if (!isLatest(reqId)) return;
-      console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, pairings: result.pairings?.length || 0 });
+      const normalized = normalizeGeneratedWinePairingResponse(result, currentDishContext);
+      console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, pairings: normalized.pairings.length });
       setError(null);
-      setPairingResult(result);
+      setPairingResult(normalized);
       notifySuccess("Cardápio lido", {
-        description: result.fallback
+        description: normalized.fallback
           ? "A leitura precisou de fallback, mas a revisão continua possível."
-          : `${result.pairings?.length || 0} sugestões identificadas.`,
+          : `${normalized.pairings.length} sugestões identificadas.`,
         duration: 2600,
       });
       setStep("ext-menu-results");
@@ -601,7 +608,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     }
   }, [pairingResult, dish, extWineName, selectedWine?.name]);
 
-  const normalizedScanResults = useMemo<WineListAnalysis | null>(() => {
+    const normalizedScanResults = useMemo<WineListAnalysis | null>(() => {
     if (!scanResults) return null;
     try {
       const normalized = normalizeWineListResponse(scanResults);
@@ -623,6 +630,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       return fallback;
     }
   }, [scanResults]);
+
+  const currentDishContext = dish || extWineName || selectedWine?.name || "prato";
 
   const subModeTitle = source === "cellar" ? "Da minha adega" : "Adega externa";
 

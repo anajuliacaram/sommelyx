@@ -170,9 +170,14 @@ function mapWineCategoryToStyle(category?: string | null) {
 export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
   const source = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
   const normalizedWines: WineListItem[] = (Array.isArray(source.wines) ? source.wines : [])
-    .map((wine: any) => {
-      const name = String(wine?.name ?? "").trim();
-      if (!name) return null;
+    .map((wine: any, index) => {
+      const safeName = String(
+        wine?.name ??
+        wine?.producer ??
+        wine?.title ??
+        wine?.label ??
+        `Vinho sem nome ${index + 1}`,
+      ).trim();
       const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence ?? 0);
       const category = ["red", "white", "sparkling", "rose"].includes(String(wine?.category || "").toLowerCase())
         ? String(wine.category).toLowerCase() as WineListItem["category"]
@@ -180,7 +185,7 @@ export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
       const rawPrice = typeof wine?.price === "number" ? wine.price : Number(wine?.price ?? 0);
       const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
       return {
-        name,
+        name: safeName || `Vinho sem nome ${index + 1}`,
         producer: String(wine?.producer ?? "").trim() || null,
         grape: String(wine?.grape ?? "").trim() || null,
         country: String(wine?.country ?? "").trim() || null,
@@ -191,7 +196,7 @@ export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
         style: mapWineCategoryToStyle(category),
       };
     })
-    .filter((wine): wine is WineListItem => Boolean(wine));
+    .filter((wine): wine is WineListItem => Boolean(wine?.name?.trim()));
 
   const completenessScore = (wine: WineListItem) =>
     [wine.producer, wine.grape, wine.country, wine.region, wine.price].filter((value) => value !== null && value !== "").length;
@@ -1255,7 +1260,8 @@ export function normalizeGeneratedWinePairingResponse(data: unknown, dish: strin
   }
 
   if (Array.isArray(payload.suggestions)) {
-    return buildGeneratedPairingsFromSuggestions(dish, payload.suggestions as WineSuggestion[], Boolean(payload.fallback));
+    const safeSuggestions = payload.suggestions.filter((suggestion): suggestion is WineSuggestion => Boolean(suggestion) && typeof suggestion === "object");
+    return buildGeneratedPairingsFromSuggestions(dish, safeSuggestions, Boolean(payload.fallback));
   }
 
   return fallbackPairing(dish);

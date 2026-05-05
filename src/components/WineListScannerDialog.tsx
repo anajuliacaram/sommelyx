@@ -175,25 +175,23 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         textLength: attachment.text?.length || 0,
       });
       const data = await analyzeWineList(attachment, profile);
+      const normalized = normalizeWineListResponse(data);
       console.info("[WineListScannerDialog] extraction_completed", {
-        winesExtracted: data.wines?.length || 0,
-        topPick: data.topPick,
-        bestValue: data.bestValue,
+        winesExtracted: normalized.wines.length,
+        topPick: normalized.topPick,
+        bestValue: normalized.bestValue,
       });
-      if (!data.wines?.length) {
-        const emptyErr: any = new Error("PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.");
-        emptyErr.code = "EMPTY_EXTRACTION";
-        throw emptyErr;
-      }
-      setResults(data);
+      setResults(normalized);
       console.info("[WineListScannerDialog] normalized_wines_ready", {
-        normalizedWineCount: data.wines.length,
-        firstWine: data.wines[0]?.name,
+        normalizedWineCount: normalized.wines.length,
+        firstWine: normalized.wines[0]?.name || null,
       });
-      notifySuccess(data.fallback ? "Análise rápida" : "Carta analisada", {
-        description: `${data.wines.length} vinho${data.wines.length === 1 ? "" : "s"} encontrados.`,
-        duration: 2800,
-      });
+      if (normalized.wines.length > 0) {
+        notifySuccess(normalized.fallback ? "Análise rápida" : "Carta analisada", {
+          description: `${normalized.wines.length} vinho${normalized.wines.length === 1 ? "" : "s"} encontrados.`,
+          duration: 2800,
+        });
+      }
       setStep("results");
     } catch (err: any) {
       console.error("[WineListScannerDialog] fatal_error", {
