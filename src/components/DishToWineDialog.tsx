@@ -85,6 +85,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const [scanResults, setScanResults] = useState<WineListAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requestMode, setRequestMode] = useState<"dish_only" | "image_only" | "dish_and_image" | null>(null);
   const [preview, setPreview] = useState<{ url?: string | null; fileName: string; isPdf: boolean } | null>(null);
   const [lastWineListAttachment, setLastWineListAttachment] = useState<WineListAnalysisTextInput | null>(null);
   const [lastMenuAttachment, setLastMenuAttachment] = useState<WineListAnalysisTextInput | null>(null);
@@ -121,6 +122,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setScanResults(null);
     setLoading(false);
     setError(null);
+    setRequestMode(null);
     setPreview(null);
     setLastWineListAttachment(null);
     setLastMenuAttachment(null);
@@ -330,16 +332,76 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   }, [open, initialWineId, initialWine, resolveWineFromInsight]);
 
   const handleSearchExternal = useCallback(async (dishName?: string) => {
-    const query = dishName || dish.trim();
-    if (!query) return;
-    setDish(query);
-    setStep("photo");
-  }, [dish]);
+    const query = (dishName || dish).trim();
+    if (!query.trim()) {
+      setError("Informe um prato para harmonizar");
+      return;
+    }
 
-  // Router: from "dish" step, cellar goes to intent picker; external goes to photo upload.
+    setDish(query);
+    lastRetryRef.current = () => { handleSearchExternal(query); };
+    const reqId = nextRequestId();
+    setRequestMode("dish_only");
+    setLoading(true);
+    setError(null);
+    setPairingResult(null);
+    setScanResults(null);
+    setLastWineListAttachment(null);
+    setLastMenuAttachment(null);
+    setPreview(null);
+    setStep("scanning");
+
+    console.info("[DishToWineDialog] input_type", { inputType: "dish_only", dish: query });
+    console.info("[DishToWineDialog] pairing_request_started", {
+      step: "dish",
+      inputType: "dish_only",
+      dish: query,
+    });
+
+    try {
+      const result = await generateWinePairing(query);
+      if (!isLatest(reqId)) return;
+      const normalized = normalizePairingResponse(result, query);
+      console.info("[DishToWineDialog] pairing_request_completed", {
+        step: "dish",
+        inputType: "dish_only",
+        pairings: normalized.pairings.length,
+      });
+      setError(null);
+      setPairingResult(normalized);
+      notifySuccess("Harmonização pronta", {
+        description: normalized.fallback
+          ? "A leitura precisou de fallback, mas ainda há sugestões úteis para revisar."
+          : `${Math.min(normalized.pairings.length, 5)} sugestões com porquê técnico.`,
+        duration: 2600,
+      });
+      setStep("results");
+    } catch (err: any) {
+      if (!isLatest(reqId)) return;
+      console.error("[DishToWineDialog] pairing_request_failed", {
+        step: "dish",
+        inputType: "dish_only",
+        error: err?.message,
+        code: err?.code,
+        status: err?.status,
+        requestId: err?.requestId,
+        functionName: err?.functionName,
+        rawBody: err?.rawBody,
+      });
+      setError(err?.message || "Não conseguimos concluir a harmonização agora.");
+      setStep("dish");
+    } finally {
+      if (isLatest(reqId)) setLoading(false);
+    }
+  }, [dish, nextRequestId]);
+
+  // Router: from "dish" step, cellar goes to intent picker; external runs text-only harmonization.
   const handleSearch = useCallback((dishName?: string) => {
-    const query = dishName || dish.trim();
-    if (!query) return;
+    const query = (dishName || dish).trim();
+    if (!query.trim()) {
+      setError("Informe um prato para harmonizar");
+      return;
+    }
     setDish(query);
     if (source === "cellar") {
       setStep("intent");
@@ -361,7 +423,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       return;
     }
 
+    const hasDishContext = Boolean(dish.trim());
+    setRequestMode(hasDishContext ? "dish_and_image" : "image_only");
     console.info("[DishToWineDialog] upload_received", { step: "wine-list", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
+    console.info("[DishToWineDialog] input_type", {
+      inputType: hasDishContext ? "dish_and_image" : "image_only",
+      dish: hasDishContext ? dish.trim() : null,
+      fileName: file.name,
+      mimeType: file.type,
+    });
     logFileRequestStart("PAIRING_START", file, { step: "wine-list" });
     setStep("scanning");
     const reqId = nextRequestId();
@@ -459,7 +529,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       return;
     }
 
+    const hasDishContext = Boolean(dish.trim());
+    setRequestMode(hasDishContext ? "dish_and_image" : "image_only");
     console.info("[DishToWineDialog] upload_received", { step: "menu", fileName: file.name, mimeType: file.type, sizeBytes: file.size });
+    console.info("[DishToWineDialog] input_type", {
+      inputType: hasDishContext ? "dish_and_image" : "image_only",
+      dish: hasDishContext ? dish.trim() : null,
+      fileName: file.name,
+      mimeType: file.type,
+    });
     logFileRequestStart("PAIRING_START", file, { step: "menu" });
     setStep("ext-menu-scanning");
     const reqId = nextRequestId();
@@ -631,6 +709,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   }, [scanResults]);
 
   const currentDishContext = dish || extWineName || selectedWine?.name || "prato";
+  const loadingSteps = requestMode === "dish_only"
+    ? [
+        "Interpretando o prato…",
+        "Buscando harmonizações…",
+        "Montando sugestões…",
+      ]
+    : [
+        "Lendo imagem…",
+        "Interpretando carta…",
+        "Gerando análise…",
+      ];
+  const loadingSubtitle = requestMode === "dish_only"
+    ? `Gerando harmonização para: ${dish}`
+    : dish.trim()
+      ? `Prato: ${dish}`
+      : "Imagem enviada";
 
   const subModeTitle = source === "cellar" ? "Da minha adega" : "Adega externa";
 
@@ -928,7 +1022,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
                     <Input
                       value={dish}
-                      onChange={(e) => setDish(e.target.value)}
+                      onChange={(e) => {
+                        setDish(e.target.value);
+                        if (error) setError(null);
+                      }}
                       placeholder="Digite o prato ou ingrediente…"
                       className="pl-9"
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -954,6 +1051,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     </>
                   )}
                 </AiModalActionButton>
+
+                {error && !loading && !lastWineListAttachment && !lastMenuAttachment && (
+                  <PairingErrorState
+                    message={error}
+                    onRetry={() => {
+                      if (dish.trim()) handleSearchExternal(dish);
+                    }}
+                    onClose={() => setError(null)}
+                  />
+                )}
 
                 {!loading && (
                   <div className="space-y-2.5">
@@ -1521,12 +1628,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {/* ── Scanning ── */}
             {step === "scanning" && (
               <PairingLoadingState
-                steps={[
-                  "Lendo imagem…",
-                  "Interpretando carta…",
-                  "Gerando análise…",
-                ]}
-                subtitle={`Prato: ${dish}`}
+                steps={loadingSteps}
+                subtitle={loadingSubtitle}
               />
             )}
 
