@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Check, X, RotateCcw } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,7 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { hasMeaningfulScanResult, normalizeScanResult, type CanonicalScanResult } from "@/lib/scan-normalizer";
+import { AiModalHeader, AiModalCard, AiStatusCard } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -422,191 +423,193 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         className="w-full sm:max-w-md overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
         style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
       >
-        <SheetHeader>
-          <SheetTitle className="font-serif text-lg">Escanear Rótulo</SheetTitle>
-        </SheetHeader>
+        <div className="px-4 pt-4 sm:px-5">
+          <AiModalHeader
+            icon={<Camera className="h-5 w-5" />}
+            title="Escanear Rótulo"
+            description="Fotografe ou envie uma imagem do rótulo para preencher os dados automaticamente."
+          />
+        </div>
 
-        <AnimatePresence mode="wait">
-          {step === "capture" && (
-            <motion.div
-              key="capture"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-10"
-            >
-              <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center shadow-[0_8px_24px_hsl(var(--wine)/0.2)]">
-                <Camera className="h-7 w-7 text-primary-foreground" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-base font-semibold text-foreground mb-1">Fotografe o rótulo</h3>
-                <p className="text-xs text-muted-foreground max-w-[260px]">
-                  Tire uma foto nítida do rótulo frontal da garrafa. Nossa inteligência vai extrair todas as informações automaticamente.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-3 w-full mt-4">
-                <Button
-                  variant="primary"
-                  onClick={() => cameraInputRef.current?.click()}
-                  className="h-12 text-[13px] font-semibold"
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Tirar Foto
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => fileInputRef.current?.click()}
-                className="h-12 text-[13px] font-medium border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Escolher da Fototeca
-                </Button>
-              </div>
-
-              <p className="text-[10px] leading-relaxed text-muted-foreground text-center max-w-[260px]">
-                Use câmera ou fototeca para ler apenas a foto do rótulo.
-              </p>
-
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*,.heic,.heif,.jpg,.jpeg,.png"
-                capture="environment"
-                className="hidden"
-                onChange={handleSelectedFile}
-              />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,.heic,.heif,.jpg,.jpeg,.png"
-                className="hidden"
-                onChange={handleSelectedFile}
-              />
-            </motion.div>
-          )}
-
-          {step === "scanning" && (
-            <motion.div
-              key="scanning"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-8"
-            >
-              {imagePreview && (
-                <div className="w-full aspect-[3/4] max-h-[220px] rounded-xl overflow-hidden border border-border/30">
-                  <img src={imagePreview} alt="Label" className="w-full h-full object-cover" />
-                </div>
-              )}
-              <AiProgressiveLoader
-                steps={[
-                  "Processando imagem…",
-                  "Lendo rótulo com inteligência Sommelyx…",
-                  "Extraindo informações…",
-                  "Verificando dados…",
-                ]}
-                interval={2500}
-              />
-            </motion.div>
-          )}
-
-          {step === "preview" && scannedData && (
-            <motion.div
-              key="preview"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="space-y-3 pt-3"
-            >
-              {imagePreview && (
-                <div className="w-full h-32 rounded-xl overflow-hidden border border-border/20">
-                  <img src={imagePreview} alt="Label" className="w-full h-full object-cover" />
-                </div>
-              )}
-
-              <div className={`rounded-2xl ring-1 px-4 py-3 ${resultStatus.tone}`}>
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/70 ring-1 ring-black/5">
-                    {resultStatus.icon}
+        <div className="px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4 sm:px-5">
+          <AnimatePresence mode="wait">
+            {step === "capture" && (
+              <motion.div
+                key="capture"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <AiModalCard className="space-y-4">
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center shadow-[0_8px_24px_hsl(var(--wine)/0.2)]">
+                      <Camera className="h-7 w-7 text-primary-foreground" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-base font-semibold text-foreground">Fotografe o rótulo</h3>
+                      <p className="text-xs text-muted-foreground max-w-[260px]">
+                        Tire uma foto nítida do rótulo frontal da garrafa. Nossa inteligência vai extrair todas as informações automaticamente.
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-5">{resultStatus.title}</p>
-                    <p className="text-xs leading-5 opacity-80">{resultStatus.description}</p>
-                    {resultStatus.warning && (
-                      <p className="text-xs leading-5 mt-1 font-medium">{resultStatus.warning}</p>
-                    )}
+
+                  <div className="flex flex-col gap-3 w-full">
+                    <Button
+                      variant="primary"
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="h-12 text-[13px] font-semibold"
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Tirar Foto
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-12 text-[13px] font-medium border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Escolher da Fototeca
+                    </Button>
                   </div>
-                </div>
-              </div>
 
-              {resultRows.length > 0 && (
-                <div className="rounded-2xl border border-border/20 bg-white/55 px-4 py-3 space-y-2">
-                  {resultRows}
-                </div>
-              )}
+                  <p className="text-[10px] leading-relaxed text-muted-foreground text-center max-w-[260px] mx-auto">
+                    Use câmera ou fototeca para ler apenas a foto do rótulo.
+                  </p>
 
-              <div className="flex gap-3 pt-2">
-                <Button variant="outline" onClick={reset} className="flex-1 h-11 text-[13px]">
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                  Reescanear
-                </Button>
-                <Button variant="primary" onClick={handleConfirm} className="flex-1 h-11 text-[13px] font-semibold">
-                  <Check className="h-4 w-4 mr-1.5" />
-                  Usar dados
-                </Button>
-              </div>
-            </motion.div>
-          )}
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*,.heic,.heif,.jpg,.jpeg,.png"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handleSelectedFile}
+                  />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,.heic,.heif,.jpg,.jpeg,.png"
+                    className="hidden"
+                    onChange={handleSelectedFile}
+                  />
+                </AiModalCard>
+              </motion.div>
+            )}
 
-          {step === "error" && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-5 pt-12"
-            >
-              <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
-                <X className="h-7 w-7 text-destructive" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-medium text-foreground mb-1">Não conseguimos ler o rótulo com clareza.</p>
-                <p className="text-xs text-muted-foreground max-w-[260px]">{errorMsg}</p>
-                {supportCode && (
-                  <p className="text-[10px] text-muted-foreground mt-2">Código do suporte / Request ID: {supportCode}</p>
+            {step === "scanning" && (
+              <motion.div
+                key="scanning"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                {imagePreview && (
+                  <AiModalCard className="p-0 overflow-hidden">
+                    <img src={imagePreview} alt="Label" className="w-full aspect-[3/4] max-h-[260px] object-cover" />
+                  </AiModalCard>
                 )}
-              </div>
-              <div className="flex flex-col gap-2 w-full">
-                <Button
-                  onClick={() => {
-                    if (lastBase64) {
-                      runScan(lastBase64);
-                      return;
-                    }
-                    reset();
-                  }}
-                  variant="secondary"
-                  className="h-11 px-6 text-[13px]"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                  Tentar novamente
-                </Button>
-                <Button
-                  onClick={() => fileInputRef.current?.click()}
-                  variant="ghost"
-                  className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
-                >
-                  <Upload className="h-3.5 w-3.5 mr-1.5" />
-                  Usar outra foto
-                </Button>
-                <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md">
-                  Cadastrar manualmente
-                </Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <AiModalCard>
+                  <AiProgressiveLoader
+                    steps={[
+                      "Processando imagem…",
+                      "Lendo rótulo com inteligência Sommelyx…",
+                      "Extraindo informações…",
+                      "Verificando dados…",
+                    ]}
+                    interval={2500}
+                  />
+                </AiModalCard>
+              </motion.div>
+            )}
+
+            {step === "preview" && scannedData && (
+              <motion.div
+                key="preview"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                {imagePreview && (
+                  <AiModalCard className="p-0 overflow-hidden">
+                    <img src={imagePreview} alt="Label" className="w-full h-40 object-cover" />
+                  </AiModalCard>
+                )}
+
+                <AiStatusCard
+                  icon={resultStatus.icon}
+                  title={resultStatus.title}
+                  description={resultStatus.description}
+                  warning={resultStatus.warning}
+                  toneClassName={resultStatus.tone}
+                />
+
+                {resultRows.length > 0 && (
+                  <AiModalCard className="space-y-2">
+                    {resultRows}
+                  </AiModalCard>
+                )}
+
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={reset} className="flex-1 h-11 text-[13px]">
+                    <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                    Reescanear
+                  </Button>
+                  <Button variant="primary" onClick={handleConfirm} className="flex-1 h-11 text-[13px] font-semibold">
+                    <Check className="h-4 w-4 mr-1.5" />
+                    Usar dados
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {step === "error" && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <AiStatusCard
+                  icon={<X className="h-4 w-4 text-destructive" />}
+                  title="Não conseguimos ler o rótulo com clareza."
+                  description={errorMsg}
+                  warning={supportCode ? `Código do suporte / Request ID: ${supportCode}` : undefined}
+                  toneClassName="bg-destructive/10 text-destructive ring-destructive/20"
+                />
+                <div className="flex flex-col gap-2 w-full">
+                  <Button
+                    onClick={() => {
+                      if (lastBase64) {
+                        runScan(lastBase64);
+                        return;
+                      }
+                      reset();
+                    }}
+                    variant="secondary"
+                    className="h-11 px-6 text-[13px]"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                    Tentar novamente
+                  </Button>
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="ghost"
+                    className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
+                  >
+                    <Upload className="h-3.5 w-3.5 mr-1.5" />
+                    Usar outra foto
+                  </Button>
+                  <Button onClick={() => handleClose(false)} variant="ghost" className="h-11 text-[13px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md">
+                    Cadastrar manualmente
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </SheetContent>
     </Sheet>
   );

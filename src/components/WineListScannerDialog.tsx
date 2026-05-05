@@ -1,21 +1,20 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, RotateCcw, X } from "@/icons/lucide";
+import { Camera, Upload, RotateCcw, X, Check, Sparkles } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { analyzeWineList, buildUserProfile, normalizeWineListResponse, type WineListAnalysis, type WineListItem, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { getAttachmentErrorMessage, prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
 import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
+import { AiModalHeader, AiModalCard, AiStatusCard } from "@/components/ai-flow/ModalLayout";
 import {
-  PairingSheetHero,
   PairingLoadingState,
   PairingErrorState,
   SectionHeader,
-  FallbackAnalysisBadge,
 } from "@/components/pairing/shared";
 
 interface WineListScannerDialogProps {
@@ -378,6 +377,21 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       bestValue: typeof normalizedResults.bestValue === "string" ? normalizedResults.bestValue : null,
       fallback: Boolean(normalizedResults.fallback),
     };
+    const resultStatus = safeResults.fallback
+      ? {
+          icon: <Sparkles className="h-4 w-4 text-amber-700" />,
+          title: "Leitura parcial",
+          tone: "bg-amber-50 text-amber-900 ring-amber-200",
+          description: "Conseguimos ler parte da carta.",
+          warning: "Revise os dados antes de salvar.",
+        }
+      : {
+          icon: <Check className="h-4 w-4 text-success" />,
+          title: "Leitura completa",
+          tone: "bg-success/10 text-success ring-success/20",
+          description: "A carta foi lida com segurança.",
+          warning: null,
+        };
 
     try {
       return (
@@ -386,27 +400,29 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className="space-y-2 pt-1"
+          className="space-y-4 pt-1"
         >
-          <div className="rounded-2xl border border-border/30 bg-background/55 px-3.5 py-2.5">
-            <div className="flex items-center justify-between gap-3">
-              <SectionHeader icon="wine" label={`${filteredWines.length} vinhos encontrados${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
-              <Button variant="ghost" size="sm" onClick={reset} className="px-2 font-medium text-[10px]">
-                <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
-              </Button>
-            </div>
-
-            {safeResults.fallback && (
-              <div className="mt-2 rounded-xl border border-primary/10 bg-primary/5 px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <FallbackAnalysisBadge />
-                  <span className="text-[11px] font-medium text-muted-foreground">
-                    Esta é uma análise rápida com base nos dados disponíveis.
-                  </span>
+          {attachmentPreview?.url && (
+            <AiModalCard className="p-0 overflow-hidden">
+              <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
+                <img src={attachmentPreview.url} alt={attachmentPreview.fileName} className="h-full w-full object-cover" />
+              </div>
+              <div className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-semibold text-foreground truncate">{attachmentPreview.fileName}</p>
+                  <p className="text-[11px] text-muted-foreground">{attachmentPreview.isPdf ? "PDF" : "Imagem"}</p>
                 </div>
               </div>
-            )}
-          </div>
+            </AiModalCard>
+          )}
+
+          <AiStatusCard
+            icon={resultStatus.icon}
+            title={resultStatus.title}
+            description={resultStatus.description}
+            warning={resultStatus.warning}
+            toneClassName={resultStatus.tone}
+          />
 
           {/* Filter pills */}
           {availableTypes.length > 1 && (
@@ -439,7 +455,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             </div>
           )}
 
-          <div className="rounded-2xl border border-border/30 bg-background/50 px-3.5 py-3 space-y-2">
+          <AiModalCard className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 Refinar a leitura
@@ -503,10 +519,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 ))}
               </div>
             </div>
-          </div>
+          </AiModalCard>
 
           {safeResults.wines.length === 0 ? (
-            <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
+            <AiModalCard className="text-center space-y-2">
               <p className="text-sm font-medium text-foreground">
                 {safeResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
               </p>
@@ -525,7 +541,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   Enviar outro arquivo
                 </Button>
               </div>
-            </div>
+            </AiModalCard>
           ) : (
             <>
               {refinedWines.length === 0 ? (
@@ -587,19 +603,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-border/50">
-        <SheetHeader className="sr-only">
-          <SheetTitle>Analisar Carta de Vinhos</SheetTitle>
-        </SheetHeader>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-border/50">
+        <div className="px-4 pt-4 sm:px-5">
+          <AiModalHeader
+            icon={<Sparkles className="h-5 w-5" />}
+            title="Analisar Carta"
+            description="Envie a carta de vinhos e descubra as melhores escolhas para você"
+          />
+        </div>
 
-        <PairingSheetHero
-          icon="sparkles"
-          title="Analisar Carta"
-          subtitle="Envie a carta de vinhos e descubra as melhores escolhas para você"
-          compact
-        />
-
-        <AnimatePresence mode="wait">
+        <div className="px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4 sm:px-5">
+          <AnimatePresence mode="wait">
           {step === "capture" && (
             <motion.div
               key="capture"
@@ -607,79 +621,81 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              className="space-y-5"
+              className="space-y-4"
             >
-              {/* Drag & drop zone */}
-              <div
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.dataset.dragging = "true";
-                }}
-                onDragLeave={(e) => {
-                  e.currentTarget.dataset.dragging = "false";
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.dataset.dragging = "false";
-                  const file = e.dataTransfer.files?.[0];
-                  if (file) handleFile(file);
-                }}
-                onClick={() => fileInputRef.current?.click()}
-                role="button"
-                tabIndex={0}
-                className="group relative flex flex-col items-center justify-center gap-3 rounded-[20px] py-9 px-5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01]"
-                style={{
-                  background: "rgba(255,255,255,0.78)",
-                  border: "1.5px dashed rgba(123,30,43,0.22)",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  boxShadow: "0 8px 24px -16px rgba(123,30,43,0.14), inset 0 1px 0 rgba(255,255,255,0.7)",
-                }}
-              >
+              <AiModalCard className="space-y-4">
+                {/* Drag & drop zone */}
                 <div
-                  className="flex h-16 w-16 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.dataset.dragging = "true";
+                  }}
+                  onDragLeave={(e) => {
+                    e.currentTarget.dataset.dragging = "false";
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.dataset.dragging = "false";
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleFile(file);
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  role="button"
+                  tabIndex={0}
+                  className="group relative flex flex-col items-center justify-center gap-3 rounded-[20px] py-9 px-5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01]"
                   style={{
-                    background: "linear-gradient(135deg, rgba(123,30,43,0.10) 0%, rgba(200,169,106,0.10) 100%)",
-                    border: "1px solid rgba(123,30,43,0.14)",
-                    boxShadow: "0 6px 18px -10px rgba(123,30,43,0.20), inset 0 1px 0 rgba(255,255,255,0.6)",
+                    background: "rgba(255,255,255,0.78)",
+                    border: "1.5px dashed rgba(123,30,43,0.22)",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                    boxShadow: "0 8px 24px -16px rgba(123,30,43,0.14), inset 0 1px 0 rgba(255,255,255,0.7)",
                   }}
                 >
-                  <Camera className="h-7 w-7 text-[#7B1E2B]" strokeWidth={1.75} />
-                </div>
-                <div className="text-center max-w-[300px]">
-                  <p
-                    className="text-[16px] font-semibold tracking-[-0.01em] text-[#1A1713]"
-                    style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                  <div
+                    className="flex h-16 w-16 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(123,30,43,0.10) 0%, rgba(200,169,106,0.10) 100%)",
+                      border: "1px solid rgba(123,30,43,0.14)",
+                      boxShadow: "0 6px 18px -10px rgba(123,30,43,0.20), inset 0 1px 0 rgba(255,255,255,0.6)",
+                    }}
                   >
-                    Fotografe ou envie a carta
-                  </p>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.6)]">
-                    Arraste uma imagem ou PDF aqui, ou escolha uma das opções abaixo. A inteligência Sommelyx avalia cada rótulo para você.
-                  </p>
+                    <Camera className="h-7 w-7 text-[#7B1E2B]" strokeWidth={1.75} />
+                  </div>
+                  <div className="text-center max-w-[300px]">
+                    <p
+                      className="text-[16px] font-semibold tracking-[-0.01em] text-[#1A1713]"
+                      style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                    >
+                      Fotografe ou envie a carta
+                    </p>
+                    <p className="mt-1 text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.6)]">
+                      Arraste uma imagem ou PDF aqui, ou escolha uma das opções abaixo. A inteligência Sommelyx avalia cada rótulo para você.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-2.5">
-                <Button
-                  variant="primary"
-                  onClick={() => cameraInputRef.current?.click()}
-                  className="w-full h-14 text-[15px]"
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Tirar foto
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-12 text-[14px]"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Escolher imagem ou PDF
-                </Button>
-              </div>
+                <div className="flex flex-col gap-2.5">
+                  <Button
+                    variant="primary"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="w-full h-14 text-[15px]"
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Tirar foto
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-12 text-[14px]"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Escolher imagem ou PDF
+                  </Button>
+                </div>
 
-              <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              </AiModalCard>
             </motion.div>
           )}
 
@@ -702,7 +718,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               onClose={() => handleClose(false)}
             />
           )}
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       </SheetContent>
     </Sheet>
   );

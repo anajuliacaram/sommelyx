@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Search, Loader2, Wine as WineIcon, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { generateWinePairing, analyzeWineList, buildUserProfile, normalizePairingResponse, normalizeWineListResponse, type GeneratedWinePairing, type WineListAnalysis, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
@@ -14,14 +14,12 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
+import { AiModalHeader, AiModalCard, AiStatusCard } from "@/components/ai-flow/ModalLayout";
 import {
   SectionHeader,
-  PairingSheetHero,
   PairingLoadingState,
   PairingErrorState,
   PremiumChoiceCard,
-  FallbackAnalysisBadge,
-  FallbackAnalysisNotice,
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -644,6 +642,21 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         fallback: Boolean(normalizedScanResults?.fallback),
         fallbackReason: typeof normalizedScanResults?.fallbackReason === "string" ? normalizedScanResults.fallbackReason : null,
       };
+      const resultStatus = safeScanResults.fallback
+        ? {
+            icon: <Sparkles className="h-4 w-4 text-amber-700" />,
+            title: "Leitura parcial",
+            tone: "bg-amber-50 text-amber-900 ring-amber-200",
+            description: "Conseguimos ler parte da carta.",
+            warning: "Revise os dados antes de salvar.",
+          }
+        : {
+            icon: <Check className="h-4 w-4 text-success" />,
+            title: "Leitura completa",
+            tone: "bg-success/10 text-success ring-success/20",
+            description: "A carta foi lida com segurança.",
+            warning: null,
+          };
 
       return (
         <motion.div
@@ -651,30 +664,51 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className="space-y-3"
+          className="space-y-4"
         >
-          <div className="surface-clarity p-4">
+          {preview?.url && (
+            <AiModalCard className="p-0 overflow-hidden">
+              <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
+                <img src={preview.url} alt={preview.fileName} className="h-full w-full object-cover" />
+              </div>
+              <div className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-semibold text-foreground truncate">{preview.fileName}</p>
+                  <p className="text-[11px] text-muted-foreground">{preview.isPdf ? "PDF" : "Imagem"}</p>
+                </div>
+              </div>
+            </AiModalCard>
+          )}
+
+          <AiStatusCard
+            icon={resultStatus.icon}
+            title={resultStatus.title}
+            description={resultStatus.description}
+            warning={resultStatus.warning}
+            toneClassName={resultStatus.tone}
+          />
+
+          <AiModalCard className="space-y-1.5">
             <p className="text-sm font-medium text-foreground">
               Prato: <span className="font-bold">{dish}</span>
             </p>
-          </div>
-
-          <div className="flex items-center gap-2 pb-2">
-            <Sparkles className="h-4 w-4 text-primary/70" />
-            <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-              Melhores opções da carta
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary/70" />
+              <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Melhores opções da carta
+              </span>
+            </div>
+          </AiModalCard>
 
           {safeScanResults.wines.length === 0 ? (
-            <div className="surface-clarity p-6 text-center space-y-2">
+            <AiModalCard className="text-center space-y-2">
               <p className="text-sm text-foreground/70 font-medium">
                 {safeScanResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
               </p>
               <p className="text-xs text-muted-foreground">
                 {safeScanResults.fallback ? "Tente novamente ou envie outro arquivo." : "Tente outra foto com melhor iluminação."}
               </p>
-            </div>
+            </AiModalCard>
           ) : (
             <ul className="space-y-3">
               {safeScanResults.wines.map((w, i) => {
@@ -790,19 +824,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-black/5">
-        <SheetHeader className="sr-only">
-          <SheetTitle>Harmonizar</SheetTitle>
-        </SheetHeader>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-black/5">
+        <div className="px-4 pt-4 sm:px-5">
+          <AiModalHeader
+            icon={<UtensilsCrossed className="h-5 w-5" />}
+            title="Harmonizar"
+            description="Encontre a combinação perfeita entre vinho e gastronomia"
+          />
+        </div>
 
-        <PairingSheetHero
-          icon="utensils"
-          title="Harmonizar"
-          subtitle="Encontre a combinação perfeita entre vinho e gastronomia"
-          compact
-        />
-
-        <div className="space-y-4">
+        <div className="space-y-4 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4 sm:px-5">
           {step !== "source" && (
             <Button
               variant="ghost"
@@ -817,7 +848,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
           <AnimatePresence mode="wait">
             {/* ── Step 1: Source Selection ── */}
-            {step === "source" && (
+          {step === "source" && (
               <motion.div
                 key="source"
                 initial={{ opacity: 0, y: 8 }}
@@ -1510,19 +1541,31 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="space-y-3"
+                className="space-y-4"
               >
-                {normalizedPairingResult.fallback && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <FallbackAnalysisBadge />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Sugestões simplificadas</span>
+                {preview?.url && (
+                  <AiModalCard className="p-0 overflow-hidden">
+                    <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
+                      <img src={preview.url} alt={preview.fileName} className="h-full w-full object-cover" />
                     </div>
-                    <FallbackAnalysisNotice />
-                  </div>
+                    <div className="flex items-center justify-between gap-3 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-foreground truncate">{preview.fileName}</p>
+                        <p className="text-[11px] text-muted-foreground">{preview.isPdf ? "PDF" : "Imagem"}</p>
+                      </div>
+                    </div>
+                  </AiModalCard>
                 )}
 
-                <div className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-3">
+                <AiStatusCard
+                  icon={normalizedPairingResult.fallback ? <Sparkles className="h-4 w-4 text-amber-700" /> : <Check className="h-4 w-4 text-success" />}
+                  title={normalizedPairingResult.fallback ? "Leitura parcial" : "Leitura completa"}
+                  description={normalizedPairingResult.fallback ? "Conseguimos ler parte da carta." : "A carta foi lida com segurança."}
+                  warning={normalizedPairingResult.fallback ? "Revise os dados antes de salvar." : null}
+                  toneClassName={normalizedPairingResult.fallback ? "bg-amber-50 text-amber-900 ring-amber-200" : "bg-success/10 text-success ring-success/20"}
+                />
+
+                <AiModalCard className="space-y-3">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary/65" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Análise</span>
@@ -1541,7 +1584,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       </div>
                     ))}
                   </div>
-                </div>
+                </AiModalCard>
 
                 <SectionHeader
                   icon="chef"
