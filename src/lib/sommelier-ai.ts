@@ -1375,7 +1375,20 @@ export async function analyzeWineList(
       { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
+    console.info("[sommelier-ai] request_started", {
+      flow: "analyze-wine-list",
+      fileName: analysis.fileName,
+      mimeType: analysis.mimeType,
+      textLength: text.length,
+      detectedCandidates: normalizedOcr.structured.candidates.length,
+    });
     const data = await request();
+    console.info("[sommelier-ai] response_received", {
+      flow: "analyze-wine-list",
+      fileName: analysis.fileName,
+      wineCount: Array.isArray((data as any)?.wines) ? (data as any).wines.length : 0,
+      fallback: Boolean((data as any)?.fallback),
+    });
     logTiming("analyze-wine-list", "edge_request", requestStartedAt, {
       fileName: analysis.fileName,
       textLength: text.length,
@@ -1383,6 +1396,14 @@ export async function analyzeWineList(
       fallback: Boolean((data as any)?.fallback),
     });
     const normalized = normalizeWineListResponse(data);
+    console.info("[sommelier-ai] response_normalized", {
+      flow: "analyze-wine-list",
+      fileName: analysis.fileName,
+      wineCount: normalized.wines.length,
+      fallback: Boolean(normalized.fallback),
+      topPick: normalized.topPick,
+      bestValue: normalized.bestValue,
+    });
     if (normalized.wines.length > 0) {
       logTiming("analyze-wine-list", "normalization", requestStartedAt, {
         fileName: analysis.fileName,
@@ -1390,6 +1411,12 @@ export async function analyzeWineList(
         fallback: normalized.fallback,
       });
       logTiming("analyze-wine-list", "total", totalStartedAt, {
+        fileName: analysis.fileName,
+        outcome: normalized.fallback ? "fallback" : "success",
+        wineCount: normalized.wines.length,
+      });
+      console.info("[sommelier-ai] request_finished", {
+        flow: "analyze-wine-list",
         fileName: analysis.fileName,
         outcome: normalized.fallback ? "fallback" : "success",
         wineCount: normalized.wines.length,
@@ -1433,6 +1460,14 @@ export async function analyzeWineList(
       })),
       fallback: true,
       fallbackReason: classified.message,
+    });
+    console.info("[sommelier-ai] request_finished", {
+      flow: "analyze-wine-list",
+      fileName: analysis.fileName,
+      outcome: "fallback",
+      code: classified.code,
+      type: classified.type,
+      wineCount: fallback.wines.length,
     });
     return fallback;
   }

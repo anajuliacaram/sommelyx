@@ -124,6 +124,37 @@ type FilterMode = "all" | "tinto" | "branco" | "rosé" | "espumante";
 type BodyPreference = "all" | "leve" | "encorpado";
 type PriceRange = "all" | "up-to-250" | "250-500" | "500-plus";
 
+const EMPTY_WINE_LIST_ANALYSIS: WineListAnalysis = {
+  wines: [],
+  topPick: null,
+  bestValue: null,
+  fallback: true,
+  fallbackReason: null,
+};
+
+function buildFallbackWineListAnalysis(attachment: WineListAnalysisTextInput, reason: string): WineListAnalysis {
+  const lines = String(attachment.text || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 6);
+
+  return normalizeWineListResponse({
+    wines: lines.map((line, index) => ({
+      name: line,
+      producer: "",
+      grape: "",
+      country: "",
+      region: "",
+      price: 0,
+      category: "red",
+      confidence: Math.max(0.2, 0.68 - index * 0.08),
+    })),
+    fallback: true,
+    fallbackReason: reason || "Não conseguimos interpretar completamente a carta.",
+  });
+}
+
 export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDialogProps) {
   const { data: wines } = useWines();
   const { toast } = useToast();
@@ -164,24 +195,42 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     requestBusyRef.current = true;
     setStep("scanning");
     setErrorMsg("");
+    const requestId = crypto.randomUUID();
+    console.info("[WineListScannerDialog] request_started", {
+      requestId,
+      fileName: attachment.fileName,
+      mimeType: attachment.mimeType,
+      hasText: Boolean(attachment.text),
+      textLength: attachment.text?.length || 0,
+    });
     try {
       const cellarWines = wines?.filter((w) => w.quantity > 0) || [];
       const profile = cellarWines.length >= 3 ? buildUserProfile(cellarWines) : undefined;
       console.info("[WineListScannerDialog] extraction_started", {
+        requestId,
         hasText: Boolean(attachment.text),
         mimeType: attachment.mimeType,
         fileName: attachment.fileName,
         textLength: attachment.text?.length || 0,
       });
       const data = await analyzeWineList(attachment, profile);
+      console.info("[WineListScannerDialog] response_received", {
+        requestId,
+        hasData: Boolean(data),
+        wineCount: Array.isArray((data as any)?.wines) ? (data as any).wines.length : 0,
+        fallback: Boolean((data as any)?.fallback),
+      });
       const normalized = normalizeWineListResponse(data);
-      console.info("[WineListScannerDialog] extraction_completed", {
-        winesExtracted: normalized.wines.length,
+      console.info("[WineListScannerDialog] response_normalized", {
+        requestId,
+        wineCount: normalized.wines.length,
+        fallback: Boolean(normalized.fallback),
         topPick: normalized.topPick,
         bestValue: normalized.bestValue,
       });
       setResults(normalized);
       console.info("[WineListScannerDialog] normalized_wines_ready", {
+        requestId,
         normalizedWineCount: normalized.wines.length,
         firstWine: normalized.wines[0]?.name || null,
       });
@@ -191,25 +240,43 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           duration: 2800,
         });
       }
+      console.info("[WineListScannerDialog] request_finished", {
+        requestId,
+        outcome: normalized.fallback ? "fallback" : "success",
+        wineCount: normalized.wines.length,
+      });
       setStep("results");
     } catch (err: any) {
-      console.error("[WineListScannerDialog] fatal_error", {
+      const code = String(err?.code || "");
+      const status = typeof err?.status === "number" ? err.status : undefined;
+      console.error("[WineListScannerDialog] request_failed", {
+        requestId,
         error: err?.message,
-        code: err?.code,
-        status: err?.status,
-        requestId: err?.requestId,
+        code,
+        status,
+        requestIdFromError: err?.requestId,
         functionName: err?.functionName,
         rawBody: err?.rawBody,
       });
       if (err?.requestId) {
         console.log("[WineListScannerDialog] requestId", err.requestId);
       }
-      if (err?.code === "EMPTY_EXTRACTION") {
-        setErrorMsg("PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.");
-      } else {
-        setErrorMsg(err.message || "Não conseguimos concluir a leitura da carta.");
-      }
-      setStep("error");
+      const fallback = buildFallbackWineListAnalysis(attachment, err?.message || "Não conseguimos interpretar completamente a carta.");
+      console.info("[WineListScannerDialog] response_normalized", {
+        requestId,
+        wineCount: fallback.wines.length,
+        fallback: true,
+        fallbackReason: fallback.fallbackReason,
+      });
+      console.info("[WineListScannerDialog] request_finished", {
+        requestId,
+        outcome: "fallback",
+        code,
+        status,
+        wineCount: fallback.wines.length,
+      });
+      setResults(fallback);
+      setStep("results");
     } finally {
       requestBusyRef.current = false;
     }
@@ -272,38 +339,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     }
   }, [runScan, toast]);
 
-  const normalizedResults = useMemo<WineListAnalysis>(() => {
-    const empty: WineListAnalysis = {
-      wines: [],
-      topPick: null,
-      bestValue: null,
-      fallback: true,
-      fallbackReason: null,
-    };
-
-    try {
-      const normalized = normalizeWineListResponse(results);
-      if (import.meta.env.DEV) {
-        console.info("[WineListScannerDialog] results_normalized", { raw: results, normalized });
-      }
-      return normalized;
-    } catch (error) {
-      console.error("[WineListScannerDialog] results_normalization_failed", {
-        raw: results,
-        normalized: empty,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      return empty;
-    }
-  }, [results]);
-
   const filteredWines = useMemo(() => {
-    return normalizedResults.wines.filter((w) => {
+    return (results ?? EMPTY_WINE_LIST_ANALYSIS).wines.filter((w) => {
       if (filterMode === "all") return true;
       return detectWineType(w.style) === filterMode;
     });
-  }, [normalizedResults, filterMode]);
+  }, [results, filterMode]);
 
   const refinedWines = useMemo(() => {
     const mealTokens = mealQuery
@@ -313,6 +354,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       .filter((token) => token.length > 2);
 
     const targetBody = bodyPreference === "all" ? null : bodyPreference;
+    const safeResults = results ?? EMPTY_WINE_LIST_ANALYSIS;
 
     const scoreWine = (wine: WineListItem) => {
       let score = wine.confidence * 100;
@@ -328,8 +370,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         .join(" ")
         .toLowerCase();
 
-      if (wine.name === normalizedResults.topPick) score += 60;
-      if (wine.name === normalizedResults.bestValue) score += 45;
+      if (wine.name === safeResults.topPick) score += 60;
+      if (wine.name === safeResults.bestValue) score += 45;
       if (selectedWineName && wine.name === selectedWineName) score += 80;
 
       if (mealTokens.length > 0) {
@@ -363,26 +405,27 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     };
 
     return [...filteredWines].sort((a, b) => scoreWine(b) - scoreWine(a));
-  }, [filteredWines, mealQuery, bodyPreference, priceRange, normalizedResults.bestValue, normalizedResults.topPick, selectedWineName]);
+  }, [filteredWines, mealQuery, bodyPreference, priceRange, results, selectedWineName]);
 
   const displayWines = refinedWines.slice(0, 100);
   const isTruncated = refinedWines.length > displayWines.length;
 
-  const availableTypes = [...new Set(normalizedResults.wines.map((w) => detectWineType(w.style)).filter((t) => t !== "unknown"))];
+  const availableTypes = [...new Set((results ?? EMPTY_WINE_LIST_ANALYSIS).wines.map((w) => detectWineType(w.style)).filter((t) => t !== "unknown"))];
 
   const renderResultsContent = () => {
     const safeResults = {
-      wines: Array.isArray(normalizedResults.wines) ? normalizedResults.wines : [],
-      topPick: typeof normalizedResults.topPick === "string" ? normalizedResults.topPick : null,
-      bestValue: typeof normalizedResults.bestValue === "string" ? normalizedResults.bestValue : null,
-      fallback: Boolean(normalizedResults.fallback),
+      wines: Array.isArray(results?.wines) ? results.wines : [],
+      topPick: typeof results?.topPick === "string" ? results.topPick : null,
+      bestValue: typeof results?.bestValue === "string" ? results.bestValue : null,
+      fallback: Boolean(results?.fallback),
+      fallbackReason: typeof results?.fallbackReason === "string" ? results.fallbackReason : null,
     };
     const resultStatus = safeResults.fallback
       ? {
           icon: <Sparkles className="h-4 w-4 text-amber-700" />,
           title: "Leitura parcial",
           tone: "bg-amber-50 text-amber-900 ring-amber-200",
-          description: "Conseguimos ler parte da carta.",
+          description: safeResults.fallbackReason || "Conseguimos ler parte da carta.",
           warning: "Revise os dados antes de salvar.",
         }
       : {
@@ -557,8 +600,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                       key={`${wine.name}-${i}`}
                       wine={wine}
                       index={i}
-                      isTopPick={wine.name === normalizedResults.topPick}
-                      isBestValue={wine.name === normalizedResults.bestValue}
+                      isTopPick={wine.name === safeResults.topPick}
+                      isBestValue={wine.name === safeResults.bestValue}
                       isSelected={selectedWineName === wine.name}
                       onChooseWine={() => setSelectedWineName(wine.name)}
                     />
@@ -580,7 +623,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         raw: results,
-        normalized: normalizedResults,
+        normalized: results ?? EMPTY_WINE_LIST_ANALYSIS,
       });
       return (
         <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
