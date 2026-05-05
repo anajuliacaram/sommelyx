@@ -2222,7 +2222,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         });
         const scanResult = await invokeEdgeFunction<any>(
           "scan-wine-label",
-          { imageBase64: prepared.imageBase64 },
+          {
+            imageBase64: prepared.imageBase64,
+            mimeType: prepared.mimeType,
+            fileName: prepared.fileName || file.name,
+          },
           { timeoutMs: 60_000, retries: 1 },
         );
         const winePayload = normalizeScanResult(scanResult);

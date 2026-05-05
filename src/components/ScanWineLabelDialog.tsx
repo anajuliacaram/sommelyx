@@ -366,6 +366,16 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     espumante: "Espumante", sobremesa: "Sobremesa", fortificado: "Fortificado",
   };
 
+  const hasMeaningfulScanValue = (value: unknown) => {
+    if (value == null) return false;
+    if (typeof value === "number") return Number.isFinite(value);
+    if (typeof value !== "string") return false;
+    const text = value.trim();
+    if (!text) return false;
+    const lowered = text.toLowerCase();
+    return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
+  };
+
   const resultRows = scannedData
     ? [
         hasMeaningfulScanValue(scannedData.name) ? <DataRow key="name" label="Nome" value={scannedData.name} /> : null,
@@ -406,15 +416,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           warning: null,
         };
 
-  const hasMeaningfulScanValue = (value: unknown) => {
-    if (value == null) return false;
-    if (typeof value === "number") return Number.isFinite(value);
-    if (typeof value !== "string") return false;
-    const text = value.trim();
-    if (!text) return false;
-    const lowered = text.toLowerCase();
-    return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
-  };
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
