@@ -448,13 +448,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           {attachmentPreview?.url && (
             <AiModalCard className="p-0 overflow-hidden">
               <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
-                <img src={attachmentPreview.url} alt={attachmentPreview.fileName} className="h-full w-full object-cover" />
-              </div>
-              <div className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-foreground truncate">{attachmentPreview.fileName}</p>
-                  <p className="text-[11px] text-muted-foreground">{attachmentPreview.isPdf ? "PDF" : "Imagem"}</p>
-                </div>
+                <img src={attachmentPreview.url} alt="Pré-visualização do arquivo analisado" className="h-full w-full object-cover" />
               </div>
             </AiModalCard>
           )}
