@@ -371,6 +371,220 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
   const availableTypes = [...new Set(normalizedResults.wines.map((w) => detectWineType(w.style)).filter((t) => t !== "unknown"))];
 
+  const renderResultsContent = () => {
+    const safeResults = {
+      wines: Array.isArray(normalizedResults.wines) ? normalizedResults.wines : [],
+      topPick: typeof normalizedResults.topPick === "string" ? normalizedResults.topPick : null,
+      bestValue: typeof normalizedResults.bestValue === "string" ? normalizedResults.bestValue : null,
+      fallback: Boolean(normalizedResults.fallback),
+    };
+
+    try {
+      return (
+        <motion.div
+          key="results"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="space-y-2 pt-1"
+        >
+          <div className="rounded-2xl border border-border/30 bg-background/55 px-3.5 py-2.5">
+            <div className="flex items-center justify-between gap-3">
+              <SectionHeader icon="wine" label={`${filteredWines.length} vinhos encontrados${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
+              <Button variant="ghost" size="sm" onClick={reset} className="px-2 font-medium text-[10px]">
+                <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
+              </Button>
+            </div>
+
+            {safeResults.fallback && (
+              <div className="mt-2 rounded-xl border border-primary/10 bg-primary/5 px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <FallbackAnalysisBadge />
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    Esta é uma análise rápida com base nos dados disponíveis.
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Filter pills */}
+          {availableTypes.length > 1 && (
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setFilterMode("all")}
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
+                style={{
+                  background: filterMode === "all" ? "rgba(110,30,42,0.12)" : "rgba(0,0,0,0.04)",
+                  color: filterMode === "all" ? "#5a1528" : "#888",
+                  border: `1px solid ${filterMode === "all" ? "rgba(110,30,42,0.2)" : "rgba(0,0,0,0.06)"}`,
+                }}
+              >
+                Todos
+              </button>
+              {availableTypes.map(type => (
+                <button
+                  key={type}
+                  onClick={() => setFilterMode(type as FilterMode)}
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
+                  style={{
+                    background: filterMode === type ? wineTypeConfig[type].badgeBg : "rgba(0,0,0,0.04)",
+                    color: filterMode === type ? wineTypeConfig[type].badgeText : "#888",
+                    border: `1px solid ${filterMode === type ? wineTypeConfig[type].badgeBorder : "rgba(0,0,0,0.06)"}`,
+                  }}
+                >
+                  {wineTypeConfig[type].label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="rounded-2xl border border-border/30 bg-background/50 px-3.5 py-3 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Refinar a leitura
+              </p>
+              {selectedWineName && (
+                <span className="text-[10px] font-semibold text-primary/80">
+                  Selecionado: {selectedWineName}
+                </span>
+              )}
+            </div>
+            <Input
+              value={mealQuery}
+              onChange={(e) => setMealQuery(e.target.value)}
+              placeholder="O que você vai comer?"
+              className="rounded-xl"
+            />
+            <div className="space-y-1.5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Corpo</p>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { key: "all", label: "Todos" },
+                  { key: "leve", label: "Leve" },
+                  { key: "encorpado", label: "Encorpado" },
+                ].map((option) => (
+                  <button
+                    key={option.key}
+                    onClick={() => setBodyPreference(option.key as BodyPreference)}
+                    className="h-8 rounded-full px-3 text-[10px] font-semibold transition-all"
+                    style={{
+                      background: bodyPreference === option.key ? "rgba(110,30,42,0.10)" : "rgba(0,0,0,0.035)",
+                      color: bodyPreference === option.key ? "#5a1528" : "#777",
+                      border: `1px solid ${bodyPreference === option.key ? "rgba(110,30,42,0.14)" : "rgba(0,0,0,0.05)"}`,
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Preço</p>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { key: "all", label: "Todos" },
+                  { key: "up-to-250", label: "Até R$250" },
+                  { key: "250-500", label: "R$250–500" },
+                  { key: "500-plus", label: "R$500+" },
+                ].map((option) => (
+                  <button
+                    key={option.key}
+                    onClick={() => setPriceRange(option.key as PriceRange)}
+                    className="h-8 rounded-full px-3 text-[10px] font-semibold transition-all"
+                    style={{
+                      background: priceRange === option.key ? "rgba(198,167,104,0.14)" : "rgba(0,0,0,0.035)",
+                      color: priceRange === option.key ? "#7B6528" : "#777",
+                      border: `1px solid ${priceRange === option.key ? "rgba(198,167,104,0.18)" : "rgba(0,0,0,0.05)"}`,
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {safeResults.wines.length === 0 ? (
+            <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                {safeResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {safeResults.fallback
+                  ? "Tente novamente ou envie outro arquivo."
+                  : "Tente outra foto ou envie um arquivo mais nítido."}
+              </p>
+              <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                <Button variant="outline" onClick={reset} className="flex-1">
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  Tentar novamente
+                </Button>
+                <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  Enviar outro arquivo
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {refinedWines.length === 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[13px] font-medium text-amber-800">
+                  Os dados foram importados, mas não puderam ser exibidos. Tente outra foto.
+                </div>
+              ) : null}
+
+              <div className="max-h-[52vh] overflow-y-auto pr-1 cellar-scroll">
+                <ul className="space-y-3">
+                  {displayWines.map((wine, i) => (
+                    <WineListCard
+                      key={`${wine.name}-${i}`}
+                      wine={wine}
+                      index={i}
+                      isTopPick={wine.name === normalizedResults.topPick}
+                      isBestValue={wine.name === normalizedResults.bestValue}
+                      isSelected={selectedWineName === wine.name}
+                      onChooseWine={() => setSelectedWineName(wine.name)}
+                    />
+                  ))}
+                </ul>
+              </div>
+
+              {isTruncated && (
+                <p className="text-[11px] font-medium text-muted-foreground">
+                  Mostrando 100 de {refinedWines.length} vinhos
+                </p>
+              )}
+            </>
+          )}
+        </motion.div>
+      );
+    } catch (error) {
+      console.error("[WineListScannerDialog] results_render_failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        raw: results,
+        normalized: normalizedResults,
+      });
+      return (
+        <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
+          <p className="text-sm font-medium text-foreground">Não conseguimos interpretar completamente a carta</p>
+          <p className="text-xs text-muted-foreground">Tente novamente ou envie outro arquivo.</p>
+          <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+            <Button variant="outline" onClick={reset} className="flex-1">
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+              Tentar novamente
+            </Button>
+            <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
+              <Upload className="h-3.5 w-3.5 mr-1.5" />
+              Enviar outro arquivo
+            </Button>
+          </div>
+        </div>
+      );
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-border/50">
@@ -479,185 +693,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           />
           )}
 
-          {step === "results" && (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="space-y-2 pt-1"
-            >
-              <div className="rounded-2xl border border-border/30 bg-background/55 px-3.5 py-2.5">
-                <div className="flex items-center justify-between gap-3">
-                  <SectionHeader icon="wine" label={`${filteredWines.length} vinhos encontrados${filterMode !== "all" ? ` (${filterMode})` : ""}`} />
-                  <Button variant="ghost" size="sm" onClick={reset} className="px-2 font-medium text-[10px]">
-                    <RotateCcw className="h-3 w-3 mr-1" /> Nova análise
-                  </Button>
-                </div>
-
-                {normalizedResults.fallback && (
-                  <div className="mt-2 rounded-xl border border-primary/10 bg-primary/5 px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <FallbackAnalysisBadge />
-                      <span className="text-[11px] font-medium text-muted-foreground">
-                        Esta é uma análise rápida com base nos dados disponíveis.
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Filter pills */}
-              {availableTypes.length > 1 && (
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() => setFilterMode("all")}
-                    className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
-                    style={{
-                      background: filterMode === "all" ? "rgba(110,30,42,0.12)" : "rgba(0,0,0,0.04)",
-                      color: filterMode === "all" ? "#5a1528" : "#888",
-                      border: `1px solid ${filterMode === "all" ? "rgba(110,30,42,0.2)" : "rgba(0,0,0,0.06)"}`,
-                    }}
-                  >
-                    Todos
-                  </button>
-                  {availableTypes.map(type => (
-                    <button
-                      key={type}
-                      onClick={() => setFilterMode(type as FilterMode)}
-                      className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
-                      style={{
-                        background: filterMode === type ? wineTypeConfig[type].badgeBg : "rgba(0,0,0,0.04)",
-                        color: filterMode === type ? wineTypeConfig[type].badgeText : "#888",
-                        border: `1px solid ${filterMode === type ? wineTypeConfig[type].badgeBorder : "rgba(0,0,0,0.06)"}`,
-                      }}
-                    >
-                      {wineTypeConfig[type].label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div className="rounded-2xl border border-border/30 bg-background/50 px-3.5 py-3 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Refinar a leitura
-                  </p>
-                  {selectedWineName && (
-                    <span className="text-[10px] font-semibold text-primary/80">
-                      Selecionado: {selectedWineName}
-                    </span>
-                  )}
-                </div>
-                <Input
-                  value={mealQuery}
-                  onChange={(e) => setMealQuery(e.target.value)}
-                  placeholder="O que você vai comer?"
-                  className="rounded-xl"
-                />
-                <div className="space-y-1.5">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Corpo</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      { key: "all", label: "Todos" },
-                      { key: "leve", label: "Leve" },
-                      { key: "encorpado", label: "Encorpado" },
-                    ].map((option) => (
-                      <button
-                        key={option.key}
-                        onClick={() => setBodyPreference(option.key as BodyPreference)}
-                        className="h-8 rounded-full px-3 text-[10px] font-semibold transition-all"
-                        style={{
-                          background: bodyPreference === option.key ? "rgba(110,30,42,0.10)" : "rgba(0,0,0,0.035)",
-                          color: bodyPreference === option.key ? "#5a1528" : "#777",
-                          border: `1px solid ${bodyPreference === option.key ? "rgba(110,30,42,0.14)" : "rgba(0,0,0,0.05)"}`,
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">Preço</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      { key: "all", label: "Todos" },
-                      { key: "up-to-250", label: "Até R$250" },
-                      { key: "250-500", label: "R$250–500" },
-                      { key: "500-plus", label: "R$500+" },
-                    ].map((option) => (
-                      <button
-                        key={option.key}
-                        onClick={() => setPriceRange(option.key as PriceRange)}
-                        className="h-8 rounded-full px-3 text-[10px] font-semibold transition-all"
-                        style={{
-                          background: priceRange === option.key ? "rgba(198,167,104,0.14)" : "rgba(0,0,0,0.035)",
-                          color: priceRange === option.key ? "#7B6528" : "#777",
-                          border: `1px solid ${priceRange === option.key ? "rgba(198,167,104,0.18)" : "rgba(0,0,0,0.05)"}`,
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {normalizedResults.wines.length === 0 ? (
-                <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
-                  <p className="text-sm font-medium text-foreground">
-                    {normalizedResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {normalizedResults.fallback
-                      ? "Tente novamente ou envie outro arquivo."
-                      : "Tente outra foto ou envie um arquivo mais nítido."}
-                  </p>
-                  <div className="flex flex-col gap-2 pt-2 sm:flex-row">
-                    <Button variant="outline" onClick={reset} className="flex-1">
-                      <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                      Tentar novamente
-                    </Button>
-                    <Button variant="secondary" onClick={() => fileInputRef.current?.click()} className="flex-1">
-                      <Upload className="h-3.5 w-3.5 mr-1.5" />
-                      Enviar outro arquivo
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {refinedWines.length === 0 ? (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[13px] font-medium text-amber-800">
-                      Os dados foram importados, mas não puderam ser exibidos. Tente outra foto.
-                    </div>
-                  ) : null}
-
-                  <div className="max-h-[52vh] overflow-y-auto pr-1 cellar-scroll">
-                    <ul className="space-y-3">
-                      {displayWines.map((wine, i) => (
-                        <WineListCard
-                          key={`${wine.name}-${i}`}
-                          wine={wine}
-                          index={i}
-                          isTopPick={wine.name === normalizedResults.topPick}
-                          isBestValue={wine.name === normalizedResults.bestValue}
-                          isSelected={selectedWineName === wine.name}
-                          onChooseWine={() => setSelectedWineName(wine.name)}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-
-                  {isTruncated && (
-                    <p className="text-[11px] font-medium text-muted-foreground">
-                      Mostrando 100 de {refinedWines.length} vinhos
-                    </p>
-                  )}
-                </>
-              )}
-            </motion.div>
-          )}
+          {step === "results" && renderResultsContent()}
 
           {step === "error" && (
             <PairingErrorState
