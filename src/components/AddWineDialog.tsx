@@ -21,12 +21,33 @@ import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { normalizeWineData } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
+import { normalizeStyleFamily } from "@/lib/sommelyx-data";
 
 interface AddWineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialScan?: boolean;
+  initialValues?: AddWinePrefillValues | null;
 }
+
+type AddWinePrefillValues = {
+  name?: string | null;
+  producer?: string | null;
+  vintage?: number | null;
+  style?: string | null;
+  country?: string | null;
+  region?: string | null;
+  grape?: string | null;
+  drinkFrom?: number | null;
+  drinkUntil?: number | null;
+  purchasePrice?: number | null;
+  estimatedPrice?: number | null;
+  foodPairing?: string | null;
+  cellarLocation?: string | null;
+  labelImagePreview?: string | null;
+  labelImageFile?: File | null;
+  labelImageBase64?: string | null;
+};
 
 const styles = [
   { value: "tinto", label: "Tinto" },
@@ -136,7 +157,7 @@ function suggestDrinkWindow(input: ScanSuggestionInput) {
   };
 }
 
-export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWineDialogProps) {
+export function AddWineDialog({ open, onOpenChange, initialScan = false, initialValues = null }: AddWineDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
 
@@ -163,6 +184,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
   const [labelImageFile, setLabelImageFile] = useState<File | null>(null);
   const [labelImageBase64, setLabelImageBase64] = useState<string | null>(null);
   const [aiPrefilledFields, setAiPrefilledFields] = useState<Record<string, boolean>>({});
+  const [scanPrefill, setScanPrefill] = useState<AddWinePrefillValues | null>(initialValues);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -191,6 +213,12 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
       setScanOpen(true);
     }
   }, [open, initialScan]);
+
+  useEffect(() => {
+    if (open && initialValues) {
+      setScanPrefill(initialValues);
+    }
+  }, [open, initialValues]);
 
   useEffect(() => {
     if (open && isCommercial) setMoreOpen(true);
@@ -267,6 +295,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     setLabelImagePreview(null); setLabelImageFile(null); setLabelImageBase64(null); setNoPriceInfo(false);
     setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
     setAiPrefilledFields({});
+    setScanPrefill(null);
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
@@ -281,89 +310,114 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false }: AddWi
     return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
   };
 
-  const handleScanComplete = (data: any) => {
-    const mappedData = normalizeScanResult(data);
-    console.log("SCAN_RESULT_MAPPED", mappedData);
-
+  const applyScanPrefill = useCallback((prefill: AddWinePrefillValues) => {
     const nextPrefilled: Record<string, boolean> = {};
 
-    if (isMeaningfulScanValue(mappedData.name)) {
-      setName(mappedData.name);
+    if (isMeaningfulScanValue(prefill.name)) {
+      setName(String(prefill.name));
       nextPrefilled.name = true;
     }
-    if (isMeaningfulScanValue(mappedData.producer)) {
-      setProducer(mappedData.producer || "");
+    if (isMeaningfulScanValue(prefill.producer)) {
+      setProducer(String(prefill.producer));
       nextPrefilled.producer = true;
     }
-    if (mappedData.vintage != null) {
-      setVintage(String(mappedData.vintage));
+    if (prefill.vintage != null) {
+      setVintage(String(prefill.vintage));
       nextPrefilled.vintage = true;
     }
-    if (isMeaningfulScanValue(mappedData.style)) {
-      setStyle(mappedData.style || "");
+    if (isMeaningfulScanValue(prefill.style)) {
+      const normalizedStyle = normalizeStyleFamily(String(prefill.style));
+      const styleValue = normalizedStyle === "rosé" ? "rose" : normalizedStyle || String(prefill.style).trim().toLowerCase();
+      setStyle(styleValue);
       nextPrefilled.style = true;
     }
-    if (isMeaningfulScanValue(mappedData.country)) {
-      setCountry(mappedData.country || "");
+    if (isMeaningfulScanValue(prefill.country)) {
+      setCountry(String(prefill.country));
       nextPrefilled.country = true;
     }
-    if (isMeaningfulScanValue(mappedData.region)) {
-      setRegion(mappedData.region || "");
+    if (isMeaningfulScanValue(prefill.region)) {
+      setRegion(String(prefill.region));
       nextPrefilled.region = true;
     }
-    if (isMeaningfulScanValue(mappedData.grape)) {
-      setGrape(mappedData.grape || "");
+    if (isMeaningfulScanValue(prefill.grape)) {
+      setGrape(String(prefill.grape));
       nextPrefilled.grape = true;
     }
-    if (isMeaningfulScanValue(mappedData.food_pairing)) {
-      setFoodPairing(mappedData.food_pairing);
+    if (isMeaningfulScanValue(prefill.foodPairing)) {
+      setFoodPairing(String(prefill.foodPairing));
       nextPrefilled.food_pairing = true;
     }
-    if (mappedData.drink_from != null) {
-      setDrinkFrom(String(mappedData.drink_from));
+    if (prefill.drinkFrom != null) {
+      setDrinkFrom(String(prefill.drinkFrom));
       nextPrefilled.drink_from = true;
     }
-    if (mappedData.drink_until != null) {
-      setDrinkUntil(String(mappedData.drink_until));
+    if (prefill.drinkUntil != null) {
+      setDrinkUntil(String(prefill.drinkUntil));
       nextPrefilled.drink_until = true;
     }
-    if (mappedData.purchase_price != null) {
-      setLastPaid(String(mappedData.purchase_price));
+    if (prefill.purchasePrice != null) {
+      setLastPaid(String(prefill.purchasePrice));
+      setNoPriceInfo(false);
       nextPrefilled.purchase_price = true;
     }
-    if (mappedData.estimated_price != null) {
-      setCurrentValue(String(mappedData.estimated_price));
-      nextPrefilled.estimated_price = true;
+    if (prefill.estimatedPrice != null) {
+      setCurrentValue(String(prefill.estimatedPrice));
+      nextPrefilled.current_value = true;
     }
-    if (isMeaningfulScanValue(mappedData.cellar_location)) {
-      setLocation({ manualLabel: mappedData.cellar_location || "" });
+    if (isMeaningfulScanValue(prefill.cellarLocation)) {
+      setLocation({ manualLabel: String(prefill.cellarLocation) });
       setNoLocationInfo(false);
       nextPrefilled.cellar_location = true;
     }
 
-    if (mappedData.labelImagePreview) setLabelImagePreview(String(mappedData.labelImagePreview));
-    if (mappedData.labelImageFile) setLabelImageFile(mappedData.labelImageFile);
-    if (mappedData.labelImageBase64) setLabelImageBase64(String(mappedData.labelImageBase64));
-    if (mappedData.purchase_price != null) {
-      setNoPriceInfo(false);
-    } else if (!isCommercial) {
-      setNoPriceInfo(true);
-    }
+    if (prefill.labelImagePreview) setLabelImagePreview(String(prefill.labelImagePreview));
+    if (prefill.labelImageFile) setLabelImageFile(prefill.labelImageFile);
+    if (prefill.labelImageBase64) setLabelImageBase64(String(prefill.labelImageBase64));
+
     setAiPrefilledFields(nextPrefilled);
 
-    if (
-      mappedData.country ||
-      mappedData.region ||
-      mappedData.grape ||
-      mappedData.food_pairing ||
-      mappedData.drink_from ||
-      mappedData.drink_until ||
-      mappedData.estimated_price ||
-      mappedData.purchase_price
-    ) {
+    if (Object.keys(nextPrefilled).length > 0) {
       setMoreOpen(true);
     }
-    toast({ title: isCommercial ? "Dados do vinho preenchidos!" : "🍷 Dados do rótulo preenchidos!" });
+    return nextPrefilled;
+  }, []);
+
+  useEffect(() => {
+    if (!scanPrefill) return;
+    applyScanPrefill(scanPrefill);
+  }, [scanPrefill, applyScanPrefill]);
+
+  const handleScanComplete = (data: any) => {
+    const mappedData = normalizeScanResult(data);
+    console.log("SCAN_RESULT_MAPPED", mappedData);
+
+    const prefill: AddWinePrefillValues = {
+      name: mappedData.name || null,
+      producer: mappedData.producer || null,
+      vintage: mappedData.vintage,
+      style: mappedData.style || null,
+      country: mappedData.country || null,
+      region: mappedData.region || null,
+      grape: mappedData.grape || null,
+      drinkFrom: mappedData.drink_from,
+      drinkUntil: mappedData.drink_until,
+      purchasePrice: mappedData.purchase_price,
+      estimatedPrice: mappedData.estimated_price,
+      foodPairing: mappedData.food_pairing,
+      cellarLocation: mappedData.cellar_location,
+    };
+
+    setScanPrefill({
+      ...prefill,
+      labelImagePreview: data?.labelImagePreview ?? null,
+      labelImageFile: data?.labelImageFile ?? null,
+      labelImageBase64: data?.labelImageBase64 ?? null,
+    });
+
+    const populatedCount = Object.values(prefill).filter((value) => value != null && value !== "").length;
+    if (populatedCount > 0) {
+      toast({ title: isCommercial ? "Dados do vinho aplicados" : "🍷 Dados do rótulo aplicados" });
+    }
   };
 
   const aiFieldStyle = (field: string) => aiPrefilledFields[field]
