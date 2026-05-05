@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { generateWinePairing, analyzeWineList, buildUserProfile, normalizeGeneratedWinePairingResponse, normalizeWineListResponse, type GeneratedWinePairing, type WineListAnalysis, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
+import { generateWinePairing, analyzeWineList, buildUserProfile, normalizePairingResponse, normalizeWineListResponse, type GeneratedWinePairing, type WineListAnalysis, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
 import { prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
@@ -182,7 +182,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar" });
       setError(null);
-      const normalized = normalizeGeneratedWinePairingResponse(result, dish || "prato");
+      const normalized = normalizePairingResponse(result, dish || "prato");
       setPairingResult(normalized);
       notifySuccess("Sugestões prontas", {
         description: normalized.fallback
@@ -222,7 +222,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:wine", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine" });
       setError(null);
-      const normalized = normalizeGeneratedWinePairingResponse(result, wine.name || "vinho");
+      const normalized = normalizePairingResponse(result, wine.name || "vinho");
       setPairingResult(normalized);
       notifySuccess("Harmonização pronta", {
         description: normalized.fallback
@@ -303,7 +303,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           wineCountry: resolvedWine.country,
         });
         if (!isLatest(reqId)) return;
-        const normalized = normalizeGeneratedWinePairingResponse(result, resolvedWine.name || "vinho");
+        const normalized = normalizePairingResponse(result, resolvedWine.name || "vinho");
         console.info("[DishToWineDialog] request:success", { id: reqId, kind: "deep-link", pairings: normalized.pairings.length });
         setError(null);
         setDeepLinkError(null);
@@ -497,7 +497,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           console.info("[DishToWineDialog] pairing_request_started", { step: "menu", retry: true, wineName: extWineName, sourceType: prepared.sourceType });
           const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
           if (!isLatest(retryId)) return;
-          const normalized = normalizeGeneratedWinePairingResponse(result, currentDishContext);
+          const normalized = normalizePairingResponse(result, currentDishContext);
           console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, pairings: normalized.pairings.length });
           setError(null);
           setPairingResult(normalized);
@@ -521,7 +521,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       console.info("[DishToWineDialog] pairing_request_started", { step: "menu", wineName: extWineName, sourceType: prepared.sourceType });
       const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
       if (!isLatest(reqId)) return;
-      const normalized = normalizeGeneratedWinePairingResponse(result, currentDishContext);
+      const normalized = normalizePairingResponse(result, currentDishContext);
       console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, pairings: normalized.pairings.length });
       setError(null);
       setPairingResult(normalized);
@@ -588,7 +588,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const normalizedPairingResult = useMemo<GeneratedWinePairing | null>(() => {
     if (!pairingResult) return null;
     try {
-      const normalized = normalizeGeneratedWinePairingResponse(pairingResult, dish || extWineName || selectedWine?.name || "prato");
+      const normalized = normalizePairingResponse(pairingResult, dish || extWineName || selectedWine?.name || "prato");
       if (import.meta.env.DEV) {
         console.info("[DishToWineDialog] pairing_result_normalized", {
           raw: pairingResult,
@@ -597,7 +597,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       }
       return normalized;
     } catch (error) {
-      const fallback = normalizeGeneratedWinePairingResponse(null, dish || extWineName || selectedWine?.name || "prato");
+      const fallback = normalizePairingResponse(null, dish || extWineName || selectedWine?.name || "prato");
       console.error("[DishToWineDialog] pairing_result_normalization_failed", {
         raw: pairingResult,
         normalized: fallback,
@@ -1492,9 +1492,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 {normalizedScanResults.wines.length === 0 ? (
                   <div className="surface-clarity p-6 text-center space-y-2">
                     <p className="text-sm text-foreground/70 font-medium">
-                      Não foi possível identificar vinhos na imagem.
+                      {normalizedScanResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
                     </p>
-                    <p className="text-xs text-muted-foreground">Tente outra foto com melhor iluminação.</p>
+                    <p className="text-xs text-muted-foreground">
+                      {normalizedScanResults.fallback ? "Tente novamente ou envie outro arquivo." : "Tente outra foto com melhor iluminação."}
+                    </p>
                   </div>
                 ) : (
                   <ul className="space-y-3">

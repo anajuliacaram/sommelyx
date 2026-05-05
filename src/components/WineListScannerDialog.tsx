@@ -606,8 +606,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
               {normalizedResults.wines.length === 0 ? (
                 <div className="rounded-2xl border border-border/30 bg-background/55 px-4 py-4 text-center space-y-2">
-                  <p className="text-sm font-medium text-foreground">Nenhum vinho identificado com segurança</p>
-                  <p className="text-xs text-muted-foreground">Tente outra foto ou envie um arquivo mais nítido.</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {normalizedResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {normalizedResults.fallback
+                      ? "Tente novamente ou envie outro arquivo."
+                      : "Tente outra foto ou envie um arquivo mais nítido."}
+                  </p>
                   <div className="flex flex-col gap-2 pt-2 sm:flex-row">
                     <Button variant="outline" onClick={reset} className="flex-1">
                       <RotateCcw className="h-3.5 w-3.5 mr-1.5" />

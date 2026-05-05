@@ -1267,6 +1267,10 @@ export function normalizeGeneratedWinePairingResponse(data: unknown, dish: strin
   return fallbackPairing(dish);
 }
 
+export function normalizePairingResponse(data: unknown, dish: string): GeneratedWinePairing {
+  return normalizeGeneratedWinePairingResponse(data, dish);
+}
+
 export async function generateWinePairing(input: WinePairingInput): Promise<GeneratedWinePairing> {
   const finalDish = normalizeWinePairingInput(input);
   console.log("dish:", finalDish);
