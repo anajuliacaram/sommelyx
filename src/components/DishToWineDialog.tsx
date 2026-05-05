@@ -635,6 +635,159 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
   const subModeTitle = source === "cellar" ? "Da minha adega" : "Adega externa";
 
+  const renderExternalScanResults = () => {
+    try {
+      const safeScanResults: WineListAnalysis = {
+        wines: Array.isArray(normalizedScanResults?.wines) ? normalizedScanResults.wines : [],
+        topPick: typeof normalizedScanResults?.topPick === "string" ? normalizedScanResults.topPick : null,
+        bestValue: typeof normalizedScanResults?.bestValue === "string" ? normalizedScanResults.bestValue : null,
+        fallback: Boolean(normalizedScanResults?.fallback),
+        fallbackReason: typeof normalizedScanResults?.fallbackReason === "string" ? normalizedScanResults.fallbackReason : null,
+      };
+
+      return (
+        <motion.div
+          key="scan-results"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="space-y-3"
+        >
+          <div className="surface-clarity p-4">
+            <p className="text-sm font-medium text-foreground">
+              Prato: <span className="font-bold">{dish}</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 pb-2">
+            <Sparkles className="h-4 w-4 text-primary/70" />
+            <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              Melhores opções da carta
+            </span>
+          </div>
+
+          {safeScanResults.wines.length === 0 ? (
+            <div className="surface-clarity p-6 text-center space-y-2">
+              <p className="text-sm text-foreground/70 font-medium">
+                {safeScanResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {safeScanResults.fallback ? "Tente novamente ou envie outro arquivo." : "Tente outra foto com melhor iluminação."}
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {safeScanResults.wines.map((w, i) => {
+                const tint = getStyleTint(w.style);
+                const meta = [w.grape, w.vintage ? `Safra ${w.vintage}` : null, w.region].filter(Boolean).join(" · ");
+                const compatColor = w.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
+                  w.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
+                  w.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
+                  w.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
+                  "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
+                return (
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08, duration: 0.3 }}
+                    className={cn(
+                      "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
+                      tint || "bg-card/60 border-border/30",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 space-y-0.5">
+                        <span className="text-[15px] font-bold text-foreground tracking-tight">{w.name}</span>
+                        {meta && <p className="text-[11px] text-muted-foreground/70">{meta}</p>}
+                      </div>
+                      {w.price != null && (
+                        <span className="shrink-0 text-[14px] font-bold text-foreground">
+                          R$ {w.price}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {w.compatibilityLabel && (
+                        <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", compatColor)}>
+                          {w.compatibilityLabel}
+                        </span>
+                      )}
+                      {w.highlight && (
+                        <span className={cn(
+                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                          w.highlight === "best-value"
+                            ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
+                            : w.highlight === "top-pick"
+                              ? "bg-primary/8 text-primary"
+                              : "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]"
+                        )}>
+                          {w.highlight === "best-value" ? "Melhor custo-benefício" : w.highlight === "top-pick" ? "Melhor escolha" : "Para experimentar"}
+                        </span>
+                      )}
+                    </div>
+                    {(w.body || w.acidity || w.tannin) && (
+                      <div className="flex flex-wrap gap-1">
+                        {w.body && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Corpo {w.body}</span>}
+                        {w.acidity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Acidez {w.acidity}</span>}
+                        {w.tannin && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Taninos {w.tannin}</span>}
+                      </div>
+                    )}
+                    <p className="text-[12.5px] text-foreground/65 leading-relaxed">{w.verdict}</p>
+                    {w.reasoning && (
+                      <p className="text-[12px] text-foreground/60 leading-relaxed">
+                        {w.reasoning}
+                      </p>
+                    )}
+                    {Array.isArray(w.comparativeLabels) && w.comparativeLabels.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {w.comparativeLabels.map((label, j) => (
+                          <span key={j} className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-[1px] text-[8px] font-semibold uppercase tracking-wider text-primary/70">
+                            {label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </motion.li>
+                );
+              })}
+            </ul>
+          )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setScanResults(null);
+              setPreview(null);
+              setStep("photo");
+            }}
+            className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
+          >
+            Enviar outra foto
+          </Button>
+        </motion.div>
+      );
+    } catch (error) {
+      console.error("[DishToWineDialog] scan_results_render_failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        raw: scanResults,
+        normalized: normalizedScanResults,
+      });
+      return (
+        <div className="surface-clarity p-6 text-center space-y-2">
+          <p className="text-sm text-foreground/70 font-medium">
+            Não conseguimos interpretar completamente a carta
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Tente novamente ou envie outro arquivo.
+          </p>
+        </div>
+      );
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={handleClose}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-black/5">
@@ -1468,134 +1621,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             )}
 
             {/* ── External Scan Results (dish → wine list photo) ── */}
-            {step === "scan-results" && normalizedScanResults && (
-              <motion.div
-                key="scan-results"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="space-y-3"
-              >
-                <div className="surface-clarity p-4">
-                  <p className="text-sm font-medium text-foreground">
-                    Prato: <span className="font-bold">{dish}</span>
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 pb-2">
-                  <Sparkles className="h-4 w-4 text-primary/70" />
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                    Melhores opções da carta
-                  </span>
-                </div>
-
-                {normalizedScanResults.wines.length === 0 ? (
-                  <div className="surface-clarity p-6 text-center space-y-2">
-                    <p className="text-sm text-foreground/70 font-medium">
-                      {normalizedScanResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {normalizedScanResults.fallback ? "Tente novamente ou envie outro arquivo." : "Tente outra foto com melhor iluminação."}
-                    </p>
-                  </div>
-                ) : (
-                  <ul className="space-y-3">
-                    {normalizedScanResults.wines.map((w, i) => {
-                      const tint = getStyleTint(w.style);
-                      const meta = [w.grape, w.vintage ? `Safra ${w.vintage}` : null, w.region].filter(Boolean).join(" · ");
-                      const compatColor = w.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
-                        w.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
-                        w.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
-                        w.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
-                        "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
-                      return (
-                        <motion.li
-                          key={i}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.08, duration: 0.3 }}
-                          className={cn(
-                            "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
-                            tint || "bg-card/60 border-border/30",
-                          )}
-                        >
-                          {/* Header: wine name + price */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0 space-y-0.5">
-                              <span className="text-[15px] font-bold text-foreground tracking-tight">{w.name}</span>
-                              {meta && <p className="text-[11px] text-muted-foreground/70">{meta}</p>}
-                            </div>
-                            {w.price != null && (
-                              <span className="shrink-0 text-[14px] font-bold text-foreground">
-                                R$ {w.price}
-                              </span>
-                            )}
-                          </div>
-                          {/* Badges: compatibility + highlight */}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {w.compatibilityLabel && (
-                              <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", compatColor)}>
-                                {w.compatibilityLabel}
-                              </span>
-                            )}
-                            {w.highlight && (
-                              <span className={cn(
-                                "inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                                w.highlight === "best-value"
-                                  ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
-                                  : w.highlight === "top-pick"
-                                  ? "bg-primary/8 text-primary"
-                                  : "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]"
-                              )}>
-                                {w.highlight === "best-value" ? "Melhor custo-benefício" : w.highlight === "top-pick" ? "Melhor escolha" : "Para experimentar"}
-                              </span>
-                            )}
-                          </div>
-                          {/* Wine structure pills */}
-                          {(w.body || w.acidity || w.tannin) && (
-                            <div className="flex flex-wrap gap-1">
-                              {w.body && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Corpo {w.body}</span>}
-                              {w.acidity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Acidez {w.acidity}</span>}
-                              {w.tannin && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Taninos {w.tannin}</span>}
-                            </div>
-                          )}
-                          {/* Verdict */}
-                          <p className="text-[12.5px] text-foreground/65 leading-relaxed">{w.verdict}</p>
-                          {w.reasoning && (
-                            <p className="text-[12px] text-foreground/60 leading-relaxed">
-                              {w.reasoning}
-                            </p>
-                          )}
-                          {/* Comparative labels */}
-                          {w.comparativeLabels && w.comparativeLabels.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {w.comparativeLabels.map((label, j) => (
-                                <span key={j} className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-[1px] text-[8px] font-semibold uppercase tracking-wider text-primary/70">
-                                  {label}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </motion.li>
-                      );
-                    })}
-                  </ul>
-                )}
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setScanResults(null);
-                    setPreview(null);
-                    setStep("photo");
-                  }}
-                  className="w-full h-10 text-[13px] font-medium text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200 rounded-xl"
-                >
-                  Enviar outra foto
-                </Button>
-              </motion.div>
-            )}
+            {step === "scan-results" && normalizedScanResults && renderExternalScanResults()}
           </AnimatePresence>
         </div>
       </SheetContent>
