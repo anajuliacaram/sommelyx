@@ -246,6 +246,7 @@ function normalizePairingsPayload(payload: unknown, mode: "wine-to-food" | "food
             tannin: "n/a",
             style: nonEmptyString(s.style) ? String(s.style).trim() : "elegante",
           },
+          decision_support: typeof s.decision_support === "object" && s.decision_support !== null ? s.decision_support : null,
         };
       })
     : [];
@@ -754,6 +755,8 @@ FLUXO OBRIGATÓRIO:
    - SOFISTICAÇÃO do vinho × SOFISTICAÇÃO do prato (não case rótulo premium com prato cotidiano)
 4. Aplique o critério de INTENÇÃO acima para ordenar (preço médio / mais barato / mais caro entre os compatíveis)
 5. Classifique honestamente cada sugestão
+6. Cada sugestão deve incluir decision_support com sensory_profile, pairing_logic, when_to_choose e confidence_explanation, para virar apoio à decisão em 4-5 linhas
+7. Evite descrições genéricas da uva; cite produtor, região, país, safra ou posicionamento quando houver
 
 JULGAMENTO HONESTO — use toda a escala:
 - Excelente escolha: harmonia excepcional
@@ -798,7 +801,8 @@ INSTRUÇÕES:
 4. Na explicação, cite o NOME do vinho e explique por que ESTE rótulo específico funciona (ou não) e por que se encaixa na intenção
 5. Em cada reason, mencione ao menos 1 aspecto que diferencia este rótulo de outro da mesma uva
 6. Use compatibilityLabel honestamente — nem tudo é "Excelente escolha"
-7. Sugira de 3 a 5 vinhos reais da adega, NA ORDEM dada, sem inventar categorias genéricas`;
+7. Sugira de 3 a 5 vinhos reais da adega, NA ORDEM dada, sem inventar categorias genéricas
+8. Para cada sugestão, inclua decision_support com sensory_profile, pairing_logic, when_to_choose e confidence_explanation em linguagem de sommelier`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
       return jsonResponse(req, { error: "Mode inválido" }, 400);
@@ -924,6 +928,45 @@ INSTRUÇÕES:
                         style: { type: "string" },
                       },
                       required: ["body", "acidity", "tannin", "style"],
+                      additionalProperties: false,
+                    },
+                    decision_support: {
+                      type: "object",
+                      description: "Bloco de apoio à decisão com leitura sommelier em 4-5 linhas",
+                      properties: {
+                        sensory_profile: {
+                          type: "object",
+                          properties: {
+                            aroma: { type: "string", description: "Aromas esperados deste rótulo, sem genericidade de uva" },
+                            palate: { type: "string", description: "Sensação de boca e evolução do vinho" },
+                            structure: { type: "string", description: "Leitura de corpo, acidez e tanino" },
+                          },
+                          required: ["aroma", "palate", "structure"],
+                          additionalProperties: false,
+                        },
+                        pairing_logic: {
+                          type: "object",
+                          properties: {
+                            fat_vs_acidity: { type: "string", description: "Como a acidez lida com gordura/untuosidade" },
+                            protein_vs_tannin: { type: "string", description: "Como tanino e proteína se equilibram" },
+                            intensity_balance: { type: "string", description: "Como o corpo do vinho sustenta a intensidade do prato" },
+                          },
+                          required: ["fat_vs_acidity", "protein_vs_tannin", "intensity_balance"],
+                          additionalProperties: false,
+                        },
+                        when_to_choose: {
+                          type: "object",
+                          properties: {
+                            ideal_scenario: { type: "string", description: "Melhor contexto para abrir este rótulo" },
+                            alternative_use: { type: "string", description: "Quando ele vira uma boa alternativa" },
+                          },
+                          required: ["ideal_scenario", "alternative_use"],
+                          additionalProperties: false,
+                        },
+                        confidence_explanation: { type: "string", description: "Por que a confiança é alta, média ou baixa" },
+                        confidence: { type: "string", enum: ["alta", "média", "baixa"] },
+                      },
+                      required: ["sensory_profile", "pairing_logic", "when_to_choose", "confidence_explanation", "confidence"],
                       additionalProperties: false,
                     },
                   },
@@ -1104,26 +1147,27 @@ INSTRUÇÕES:
           })),
         ),
       ).slice(0, 5);
-      return {
-        ...parsed,
-        suggestions: suggestions.map((item: any, index: number) => ({
-          wineName: item.dish,
-          style: safeFallback.suggestions[index]?.style || "tinto",
+        return {
+          ...parsed,
+          suggestions: suggestions.map((item: any, index: number) => ({
+            wineName: item.dish,
+            style: safeFallback.suggestions[index]?.style || "tinto",
           grape: safeFallback.suggestions[index]?.grape || "Blend",
           vintage: safeFallback.suggestions[index]?.vintage || 0,
           region: safeFallback.suggestions[index]?.region || "",
           country: safeFallback.suggestions[index]?.country || "",
           reason: item.reason,
           fromCellar: safeFallback.suggestions[index]?.fromCellar ?? true,
-          match: item.match,
-          harmony_type: item.harmony_type,
-          harmony_label: item.harmony_label,
-          compatibilityLabel: safeFallback.suggestions[index]?.compatibilityLabel || "Boa opção",
-          wineProfile: safeFallback.suggestions[index]?.wineProfile || null,
-        })),
-        dishProfile: parsed.dishProfile || safeFallback.dishProfile,
-        note: "análise simplificada",
-      };
+            match: item.match,
+            harmony_type: item.harmony_type,
+            harmony_label: item.harmony_label,
+            compatibilityLabel: safeFallback.suggestions[index]?.compatibilityLabel || "Boa opção",
+            wineProfile: safeFallback.suggestions[index]?.wineProfile || null,
+            decision_support: safeFallback.suggestions[index]?.decision_support || null,
+          })),
+          dishProfile: parsed.dishProfile || safeFallback.dishProfile,
+          note: "análise simplificada",
+        };
     };
     const finalPayload = parsedCount >= 5 ? parsed : mergeMinCount();
     const finalCount = mode === "wine-to-food"

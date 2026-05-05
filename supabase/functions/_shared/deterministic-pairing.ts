@@ -37,6 +37,7 @@ type SuggestionResult = {
   harmony_label: string;
   compatibilityLabel: string;
   wineProfile: Record<string, unknown>;
+  decision_support?: Record<string, unknown> | null;
   source?: "deterministic";
 };
 

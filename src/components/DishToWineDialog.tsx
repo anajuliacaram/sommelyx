@@ -1592,20 +1592,26 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                         </span>
                       </div>
                       <p className="text-[12.5px] leading-relaxed text-foreground/70">{p.why_it_works}</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                          Acidez {p.structure_match.acidity}
-                        </span>
-                        <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                          Tanino {p.structure_match.tannin}
-                        </span>
-                        <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                          Corpo {p.structure_match.body}
-                        </span>
-                        <span className="rounded-full bg-primary/[0.05] px-2 py-1 text-[10px] font-medium text-primary/70">
-                          {p.extra_tip}
-                        </span>
-                      </div>
+                      {p.decision_support ? (
+                        <div className="space-y-2 rounded-2xl border border-border/30 bg-background/45 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Leitura técnica</p>
+                          <p className="text-[12px] leading-relaxed text-foreground/72">
+                            <span className="font-semibold text-foreground/85">Sensorial:</span>{" "}
+                            Aroma {p.decision_support.sensory_profile.aroma} · Palato {p.decision_support.sensory_profile.palate} · Estrutura {p.decision_support.sensory_profile.structure}
+                          </p>
+                          <p className="text-[12px] leading-relaxed text-foreground/72">
+                            <span className="font-semibold text-foreground/85">Lógica:</span>{" "}
+                            {p.decision_support.pairing_logic.fat_vs_acidity} {p.decision_support.pairing_logic.protein_vs_tannin} {p.decision_support.pairing_logic.intensity_balance}
+                          </p>
+                          <p className="text-[12px] leading-relaxed text-foreground/72">
+                            <span className="font-semibold text-foreground/85">Quando abrir:</span>{" "}
+                            {p.decision_support.when_to_choose.ideal_scenario} {p.decision_support.when_to_choose.alternative_use}
+                          </p>
+                          <p className="text-[12px] leading-relaxed text-foreground/72">
+                            <span className="font-semibold text-foreground/85">Confiança:</span> {p.decision_support.confidence_explanation}
+                          </p>
+                        </div>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
