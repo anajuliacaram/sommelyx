@@ -12,6 +12,7 @@ import {
   PairingErrorState,
   FallbackAnalysisBadge,
   FallbackAnalysisNotice,
+  WineSuggestionCard,
 } from "@/components/pairing/shared";
 
 interface WinePairingPanelProps {
@@ -62,7 +63,7 @@ export function WinePairingPanel({
 
   if (!pairingResult && !loading) {
     return (
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         <div className="flex items-center gap-1.5">
           <UtensilsCrossed className="h-3.5 w-3.5 text-primary/70" />
           <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -120,10 +121,6 @@ export function WinePairingPanel({
             {pairingResult.fallback && (
               <FallbackAnalysisNotice />
             )}
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/10 bg-primary/[0.06] px-2.5 py-1 text-[10px] font-semibold text-primary/75">
-              <Sparkles className="h-3 w-3" />
-              Leitura concluída
-            </div>
             <div className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-3">
               <div className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5 text-primary/65" />
@@ -145,36 +142,17 @@ export function WinePairingPanel({
               </div>
             </div>
 
-            <ul className="space-y-2.5">
+            <ul className="space-y-4">
               {pairingResult.pairings.slice(0, 5).map((p, i) => (
-                <li key={i} className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary/55">Sugestão {i + 1}</p>
-                      <h4 className="mt-0.5 text-[15px] font-bold text-foreground tracking-tight">{p.wine}</h4>
-                    </div>
-                    <span className="shrink-0 inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-primary/70">
-                      {p.style}
-                    </span>
-                  </div>
-
-                  <p className="text-[12.5px] leading-relaxed text-foreground/70">{p.why_it_works}</p>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                      Acidez {p.structure_match.acidity}
-                    </span>
-                    <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                      Tanino {p.structure_match.tannin}
-                    </span>
-                    <span className="rounded-full bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                      Corpo {p.structure_match.body}
-                    </span>
-                    <span className="rounded-full bg-primary/[0.05] px-2 py-1 text-[10px] font-medium text-primary/70">
-                      {p.extra_tip}
-                    </span>
-                  </div>
-                </li>
+                <WineSuggestionCard
+                  key={i}
+                  index={i}
+                  wineName={p.wine}
+                  style={p.style}
+                  reason={p.why_it_works}
+                  structureMatch={p.structure_match}
+                  decisionSupport={p.decision_support || null}
+                />
               ))}
             </ul>
           </motion.div>

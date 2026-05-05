@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { cn } from "@/lib/utils";
 import { AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
+import type { WinePairingDecisionSupport } from "@/lib/sommelier-ai";
 import type { Recipe } from "@/lib/sommelier-ai";
 
 /* ═══════════════════════════════════════════════
@@ -151,15 +152,15 @@ export function FallbackAnalysisNotice({
   const confidenceConfig = {
     high: {
       label: "Alta confiança",
-      className: "bg-[rgba(31,122,87,0.10)] text-[hsl(152_42%_28%)] border-[rgba(31,122,87,0.14)]",
+      textClassName: "text-[hsl(152_42%_28%)]",
     },
     medium: {
       label: "Confiança média",
-      className: "bg-[rgba(198,167,104,0.12)] text-[#8B7730] border-[rgba(198,167,104,0.18)]",
+      textClassName: "text-[#8B7730]",
     },
     limited: {
       label: "Dados limitados",
-      className: "bg-[rgba(122,30,43,0.08)] text-[#7b1e2b] border-[rgba(122,30,43,0.14)]",
+      textClassName: "text-[#7b1e2b]",
     },
   }[confidence];
 
@@ -171,14 +172,11 @@ export function FallbackAnalysisNotice({
     >
       <div className="flex items-center gap-2">
         <FallbackAnalysisBadge />
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Análise rápida</span>
       </div>
       <p className="mt-2 text-[12.5px] leading-relaxed text-foreground/70">{message}</p>
-      <div className="mt-3">
-        <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em]", confidenceConfig.className)}>
-          {confidenceConfig.label}
-        </span>
-      </div>
+      <p className={cn("mt-3 text-[10.5px] font-semibold uppercase tracking-[0.12em]", confidenceConfig.textClassName)}>
+        {confidenceConfig.label}
+      </p>
     </div>
   );
 }
@@ -386,6 +384,111 @@ export function RecipeButton({ onClick }: { onClick: () => void }) {
       <BookOpen className="h-4 w-4" />
       Ver receita
     </Button>
+  );
+}
+
+export function WineSuggestionCard({
+  index,
+  wineName,
+  style,
+  reason,
+  structureMatch,
+  decisionSupport,
+  className,
+}: {
+  index: number;
+  wineName: string;
+  style?: string | null;
+  reason: string;
+  structureMatch: {
+    acidity: string;
+    tannin: string;
+    body: string;
+  };
+  decisionSupport?: WinePairingDecisionSupport | null;
+  className?: string;
+}) {
+  return (
+    <motion.li
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        "group list-none overflow-hidden rounded-[28px] border border-border/30 bg-white/72 shadow-[0_12px_32px_-26px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5",
+        className,
+      )}
+      style={{
+        backdropFilter: "blur(14px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(14px) saturate(1.08)",
+      }}
+    >
+      <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/70 via-[#C8A96A]/55 to-transparent" />
+      <div className="space-y-4 p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">Sugestão {index + 1}</p>
+            <h4 className="mt-1 text-[19px] font-semibold tracking-[-0.02em] leading-tight text-[#1A1713] sm:text-[22px]">
+              {wineName}
+            </h4>
+            {style ? (
+              <p className="mt-1.5 text-[12px] font-medium tracking-[0.01em] text-[#6B6258]">
+                {style}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="rounded-[22px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-4 sm:p-4.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
+            Por que este vinho
+          </p>
+          <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
+            {reason}
+          </p>
+        </div>
+
+        <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-4 sm:p-4.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
+            Características-chave
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Acidez", value: structureMatch.acidity },
+              { label: "Tanino", value: structureMatch.tannin },
+              { label: "Corpo", value: structureMatch.body },
+            ].map((item) => (
+              <div key={item.label} className="space-y-1 rounded-2xl border border-black/5 bg-white/65 px-3 py-3">
+                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
+                <p className="text-[13px] font-medium leading-6 text-[#2B231D]">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {decisionSupport ? (
+          <div className="space-y-2 rounded-[22px] border border-border/30 bg-background/45 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+              Leitura sommelier
+            </p>
+            <p className="text-[12.5px] leading-6 text-foreground/75">
+              <span className="font-semibold text-foreground/85">Sensorial:</span>{" "}
+              aroma {decisionSupport.sensory_profile.aroma}. Palato {decisionSupport.sensory_profile.palate}. Estrutura {decisionSupport.sensory_profile.structure}.
+            </p>
+            <p className="text-[12.5px] leading-6 text-foreground/75">
+              <span className="font-semibold text-foreground/85">Lógica:</span>{" "}
+              {decisionSupport.pairing_logic.fat_vs_acidity} {decisionSupport.pairing_logic.protein_vs_tannin} {decisionSupport.pairing_logic.intensity_balance}
+            </p>
+            <p className="text-[12.5px] leading-6 text-foreground/75">
+              <span className="font-semibold text-foreground/85">Quando abrir:</span>{" "}
+              {decisionSupport.when_to_choose.ideal_scenario} {decisionSupport.when_to_choose.alternative_use}
+            </p>
+            <p className="text-[12.5px] leading-6 text-foreground/75">
+              <span className="font-semibold text-foreground/85">Confiança:</span> {decisionSupport.confidence_explanation}
+            </p>
+          </div>
+        ) : null}
+      </div>
+    </motion.li>
   );
 }
 

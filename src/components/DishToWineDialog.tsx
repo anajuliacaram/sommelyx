@@ -20,6 +20,7 @@ import {
   PairingLoadingState,
   PairingErrorState,
   PremiumChoiceCard,
+  WineSuggestionCard,
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -704,15 +705,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               </p>
             </AiModalCard>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {safeScanResults.wines.map((w, i) => {
                 const tint = getStyleTint(w.style);
                 const meta = [w.grape, w.vintage ? `Safra ${w.vintage}` : null, w.region].filter(Boolean).join(" · ");
-                const compatColor = w.compatibilityLabel === "Excelente escolha" ? "bg-[hsl(152,32%,38%/0.12)] text-[hsl(152,42%,32%)]" :
-                  w.compatibilityLabel === "Alta compatibilidade" ? "bg-[hsl(152,32%,38%/0.10)] text-[hsl(152,32%,40%)]" :
-                  w.compatibilityLabel === "Escolha ousada" ? "bg-[hsl(270,60%,55%/0.10)] text-[hsl(270,60%,40%)]" :
-                  w.compatibilityLabel === "Pouco indicado" ? "bg-[hsl(0,72%,51%/0.10)] text-[hsl(0,72%,40%)]" :
-                  "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]";
+                const reasonText = w.verdict || w.reasoning || "Leitura técnica baseada no perfil da carta.";
+                const supportText = w.reasoning && w.verdict ? w.reasoning : null;
                 return (
                   <motion.li
                     key={i}
@@ -720,62 +718,66 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08, duration: 0.3 }}
                     className={cn(
-                      "rounded-2xl border p-4 space-y-2 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
+                      "rounded-[28px] border p-5 space-y-4 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
                       tint || "bg-card/60 border-border/30",
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 space-y-0.5">
-                        <span className="text-[15px] font-bold text-foreground tracking-tight">{w.name}</span>
-                        {meta && <p className="text-[11px] text-muted-foreground/70">{meta}</p>}
+                    <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/55 via-[#C8A96A]/40 to-transparent" />
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <h4 className="text-[19px] font-semibold tracking-[-0.02em] leading-tight text-foreground sm:text-[22px]">
+                          {w.name}
+                        </h4>
+                        {meta && <p className="text-[12px] font-medium leading-6 text-muted-foreground/75">{meta}</p>}
                       </div>
                       {w.price != null && (
-                        <span className="shrink-0 text-[14px] font-bold text-foreground">
+                        <span className="shrink-0 text-[16px] font-semibold tracking-tight text-foreground">
                           R$ {w.price}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {w.compatibilityLabel && (
-                        <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide", compatColor)}>
-                          {w.compatibilityLabel}
-                        </span>
-                      )}
-                      {w.highlight && (
-                        <span className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                          w.highlight === "best-value"
-                            ? "bg-[hsl(38,36%,52%/0.12)] text-[hsl(38,50%,35%)]"
-                            : w.highlight === "top-pick"
-                              ? "bg-primary/8 text-primary"
-                              : "bg-[hsl(348,55%,28%/0.10)] text-[hsl(348,45%,35%)]"
-                        )}>
-                          {w.highlight === "best-value" ? "Melhor custo-benefício" : w.highlight === "top-pick" ? "Melhor escolha" : "Para experimentar"}
-                        </span>
-                      )}
-                    </div>
-                    {(w.body || w.acidity || w.tannin) && (
-                      <div className="flex flex-wrap gap-1">
-                        {w.body && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Corpo {w.body}</span>}
-                        {w.acidity && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Acidez {w.acidity}</span>}
-                        {w.tannin && <span className="inline-flex items-center rounded-full bg-muted/30 px-1.5 py-[1px] text-[8px] font-semibold text-muted-foreground">Taninos {w.tannin}</span>}
-                      </div>
-                    )}
-                    <p className="text-[12.5px] text-foreground/65 leading-relaxed">{w.verdict}</p>
-                    {w.reasoning && (
-                      <p className="text-[12px] text-foreground/60 leading-relaxed">
-                        {w.reasoning}
+
+                    <div className="rounded-[22px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
+                        Por que entrou na seleção
                       </p>
-                    )}
-                    {Array.isArray(w.comparativeLabels) && w.comparativeLabels.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {w.comparativeLabels.map((label, j) => (
-                          <span key={j} className="inline-flex items-center rounded-full bg-primary/[0.06] px-2 py-[1px] text-[8px] font-semibold uppercase tracking-wider text-primary/70">
-                            {label}
-                          </span>
+                      <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
+                        {reasonText}
+                      </p>
+                      {supportText ? (
+                        <p className="mt-2 text-[12px] leading-6 text-[#5B5146]">
+                          {supportText}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
+                        Características-chave
+                      </p>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                        {[
+                          { label: "Corpo", value: w.body || "Não identificado" },
+                          { label: "Acidez", value: w.acidity || "Não identificada" },
+                          { label: "Tanino", value: w.tannin || "Não identificado" },
+                        ].map((item) => (
+                          <div key={item.label} className="space-y-1 rounded-2xl border border-black/5 bg-white/65 px-3 py-3">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
+                            <p className="text-[13px] font-medium leading-6 text-[#2B231D]">{item.value}</p>
+                          </div>
                         ))}
                       </div>
-                    )}
+                    </div>
+
+                    {Array.isArray(w.comparativeLabels) && w.comparativeLabels.length > 0 ? (
+                      <p className="text-[12px] leading-6 text-[#5B5146]">
+                        Leitura comparativa: {w.comparativeLabels.join(" · ")}
+                      </p>
+                    ) : null}
+
+                    <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                      {w.confidence ? `${Math.round(w.confidence * 100)}% de confiança` : "Confiança não informada"}
+                    </div>
                   </motion.li>
                 );
               })}
@@ -1579,40 +1581,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   count={Math.min(normalizedPairingResult.pairings.length, 5)}
                 />
 
-                <ul className="space-y-2.5">
+                <ul className="space-y-4">
                   {normalizedPairingResult.pairings.slice(0, 5).map((p, i) => (
-                    <li key={i} className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary/55">Sugestão {i + 1}</p>
-                          <h4 className="mt-0.5 text-[15px] font-bold text-foreground tracking-tight">{p.wine}</h4>
-                        </div>
-                        <span className="shrink-0 inline-flex items-center rounded-full bg-primary/[0.06] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-primary/70">
-                          {p.style}
-                        </span>
-                      </div>
-                      <p className="text-[12.5px] leading-relaxed text-foreground/70">{p.why_it_works}</p>
-                      {p.decision_support ? (
-                        <div className="space-y-2 rounded-2xl border border-border/30 bg-background/45 p-3">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Leitura técnica</p>
-                          <p className="text-[12px] leading-relaxed text-foreground/72">
-                            <span className="font-semibold text-foreground/85">Sensorial:</span>{" "}
-                            Aroma {p.decision_support.sensory_profile.aroma} · Palato {p.decision_support.sensory_profile.palate} · Estrutura {p.decision_support.sensory_profile.structure}
-                          </p>
-                          <p className="text-[12px] leading-relaxed text-foreground/72">
-                            <span className="font-semibold text-foreground/85">Lógica:</span>{" "}
-                            {p.decision_support.pairing_logic.fat_vs_acidity} {p.decision_support.pairing_logic.protein_vs_tannin} {p.decision_support.pairing_logic.intensity_balance}
-                          </p>
-                          <p className="text-[12px] leading-relaxed text-foreground/72">
-                            <span className="font-semibold text-foreground/85">Quando abrir:</span>{" "}
-                            {p.decision_support.when_to_choose.ideal_scenario} {p.decision_support.when_to_choose.alternative_use}
-                          </p>
-                          <p className="text-[12px] leading-relaxed text-foreground/72">
-                            <span className="font-semibold text-foreground/85">Confiança:</span> {p.decision_support.confidence_explanation}
-                          </p>
-                        </div>
-                      ) : null}
-                    </li>
+                    <WineSuggestionCard
+                      key={i}
+                      index={i}
+                      wineName={p.wine}
+                      style={p.style}
+                      reason={p.why_it_works}
+                      structureMatch={p.structure_match}
+                      decisionSupport={p.decision_support || null}
+                    />
                   ))}
                 </ul>
 

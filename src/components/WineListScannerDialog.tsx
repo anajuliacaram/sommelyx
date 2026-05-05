@@ -772,6 +772,10 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
 }) {
   const wineType = detectWineType(wine.style);
   const config = wineTypeConfig[wineType];
+  const spotlightLabels = [isTopPick ? "Melhor escolha" : null, isBestValue ? "Melhor custo-benefício" : null]
+    .filter((label): label is string => Boolean(label));
+  const reasonText = wine.verdict || wine.reasoning || "Leitura técnica baseada no perfil da carta.";
+  const supportText = wine.reasoning && wine.verdict ? wine.reasoning : null;
 
   return (
     <motion.li
@@ -779,86 +783,87 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.35 }}
       className={cn(
-        "list-none rounded-2xl overflow-hidden transition-all duration-250 hover:-translate-y-0.5 active:scale-[0.99]",
+        "list-none overflow-hidden rounded-[28px] transition-all duration-250 hover:-translate-y-0.5 active:scale-[0.99]",
         isSelected && "ring-1 ring-primary/25"
       )}
       style={{
-        background: "rgba(255,255,255,0.65)",
-        backdropFilter: "blur(12px) saturate(1.3)",
-        WebkitBackdropFilter: "blur(12px) saturate(1.3)",
+        background: "rgba(255,255,255,0.72)",
+        backdropFilter: "blur(14px) saturate(1.15)",
+        WebkitBackdropFilter: "blur(14px) saturate(1.15)",
         border: isSelected ? `1px solid ${config.badgeBorder}` : "1px solid rgba(255,255,255,0.5)",
         boxShadow: isSelected
-          ? `0 10px 26px -10px ${config.badgeText}22, 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)`
+          ? `0 10px 26px -10px ${config.badgeText}24, 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)`
           : "0 6px 24px -6px rgba(30,20,20,0.08), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
     >
-      <button type="button" onClick={onChooseWine} className="w-full p-4 text-left sm:p-5 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {isTopPick && (
-                <span
-                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em]"
-                  style={{
-                    background: "rgba(16,185,129,0.08)",
-                    color: "#0e7a5a",
-                    border: "1px solid rgba(16,185,129,0.16)",
-                  }}
-                >
-                  Melhor escolha
-                </span>
-              )}
-              {isBestValue && (
-                <span
-                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em]"
-                  style={{
-                    background: "rgba(245,158,11,0.08)",
-                    color: "#b45309",
-                    border: "1px solid rgba(245,158,11,0.16)",
-                  }}
-                >
-                  Melhor custo-benefício
+      <button type="button" onClick={onChooseWine} className="w-full p-5 text-left sm:p-6">
+        <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/55 via-[#C8A96A]/40 to-transparent" />
+        <div className="space-y-4 pt-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              {spotlightLabels.length > 0 ? (
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]/55">
+                  {spotlightLabels.join(" · ")}
+                </p>
+              ) : null}
+              <h4 className="mt-1 text-[19px] font-semibold tracking-[-0.02em] leading-tight text-[#1A1713] sm:text-[22px]">
+                {wine.name}
+              </h4>
+              <p className="mt-1.5 text-[12px] font-medium leading-6 text-[#6B6258]">
+                {[wine.producer, wine.region, wine.country].filter(Boolean).join(" · ") || "Origem e produtor não identificados"}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
+              {wine.price != null && (
+                <span className="text-[16px] font-semibold tracking-tight" style={{ color: "#1A1713" }}>
+                  R$ {wine.price.toFixed(0)}
                 </span>
               )}
             </div>
-            <h4 className="line-clamp-2 text-[16px] font-semibold tracking-[-0.01em] leading-snug" style={{ color: "#1A1A1A" }}>
-              {wine.name}
-            </h4>
-            <div className="flex flex-wrap gap-2 text-[12px] text-muted-foreground">
-              {wine.producer && <span>{wine.producer}</span>}
-              {wine.region && <span>• {wine.region}</span>}
-              {wine.country && <span>• {wine.country}</span>}
+          </div>
+
+          <div className="rounded-[22px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
+              Por que entrou na seleção
+            </p>
+            <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
+              {reasonText}
+            </p>
+            {supportText ? (
+              <p className="mt-2 text-[12px] leading-6 text-[#5B5146]">
+                {supportText}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
+              Características-chave
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {[
+                { label: "Corpo", value: wine.body || "Não identificado" },
+                { label: "Acidez", value: wine.acidity || "Não identificada" },
+                { label: "Tanino", value: wine.tannin || "Não identificado" },
+              ].map((item) => (
+                <div key={item.label} className="space-y-1 rounded-2xl border border-black/5 bg-white/65 px-3 py-3">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
+                  <p className="text-[13px] font-medium leading-6 text-[#2B231D]">{item.value}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col items-end gap-1">
-            {wine.price != null && (
-              <span className="text-[16px] font-bold tracking-tight" style={{ color: "#1A1A1A" }}>
-                R$ {wine.price.toFixed(0)}
-              </span>
-            )}
-            <span className="text-[10px] text-muted-foreground">{Math.round(wine.confidence * 100)}% de confiança</span>
+          {Array.isArray(wine.comparativeLabels) && wine.comparativeLabels.length > 0 ? (
+            <p className="text-[12px] leading-6 text-[#5B5146]">
+              Leitura comparativa: {wine.comparativeLabels.join(" · ")}
+            </p>
+          ) : null}
+
+          <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            {wine.confidence ? `${Math.round(wine.confidence * 100)}% de confiança` : "Confiança não informada"}
           </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {config.label && (
-            <span
-              className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold"
-              style={{
-                background: config.badgeBg,
-                color: config.badgeText,
-                border: `1px solid ${config.badgeBorder}`,
-              }}
-            >
-              {config.label}
-            </span>
-          )}
-        </div>
-
-        <div className="grid gap-1.5 text-[13px] text-muted-foreground sm:grid-cols-2">
-          <p><span className="font-semibold text-[#2A1F1A]">Produtor:</span> {wine.producer || "Não identificado"}</p>
-          <p><span className="font-semibold text-[#2A1F1A]">Origem:</span> {[wine.region, wine.country].filter(Boolean).join(", ") || "Não identificada"}</p>
         </div>
       </button>
     </motion.li>
