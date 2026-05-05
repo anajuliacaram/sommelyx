@@ -3,14 +3,12 @@ import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Loader2, Check, X, RotateCcw } from "@/icons/lucide";
+import { Camera, Upload, Check, X, RotateCcw } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
-import { notifySuccess } from "@/lib/feedback";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib/ai-attachments";
-import { FallbackAnalysisBadge, FallbackAnalysisNotice } from "@/components/pairing/shared";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { hasMeaningfulScanResult, normalizeScanResult, type CanonicalScanResult } from "@/lib/scan-normalizer";
@@ -28,6 +26,7 @@ interface ScanWineLabelDialogProps {
 }
 
 type ScanStep = "capture" | "scanning" | "preview" | "error";
+type ScanOutcome = "success_full" | "success_partial" | "error" | null;
 
 function isAcceptedMobileImage(file: File) {
   const mime = (file.type || "").toLowerCase();
@@ -44,6 +43,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const [errorMsg, setErrorMsg] = useState("");
   const [supportCode, setSupportCode] = useState<string | null>(null);
   const [lastBase64, setLastBase64] = useState<string | null>(null);
+  const [scanOutcome, setScanOutcome] = useState<ScanOutcome>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -64,6 +64,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setErrorMsg("");
     setSupportCode(null);
     setLastBase64(null);
+    setScanOutcome(null);
   };
 
   useEffect(() => {
@@ -131,6 +132,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
       );
       const normalizedWine = normalizeScanResult(data);
+      const isPartial = !hasMeaningfulScanResult(normalizedWine);
 
       console.info("[ScanWineLabelDialog] request_finished", {
         function: "scan-wine-label",
@@ -147,13 +149,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         device: getClientDeviceType(),
       });
       setScannedData(normalizedWine);
+      setScanOutcome(isPartial ? "success_partial" : "success_full");
       setStep("preview");
-      notifySuccess(hasMeaningfulScanResult(normalizedWine) ? "Rótulo identificado" : "Leitura parcial", {
-        description: hasMeaningfulScanResult(normalizedWine)
-          ? "Revise os dados antes de salvar."
-          : "Não conseguimos identificar tudo com segurança. Revise os campos antes de salvar.",
-          duration: 2400,
-      });
     } catch (err: unknown) {
       const e = err as any;
       const code = String(e?.code || "UNKNOWN");
@@ -259,12 +256,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       }
       setImagePreview(prepared.previewUrl || previewUrl);
       setLastBase64(prepared.imageBase64 || null);
-      if (prepared.wasOptimized) {
-        notifySuccess("Imagem otimizada automaticamente", {
-          description: "A foto foi convertida para JPEG antes do envio.",
-          duration: 1800,
-        });
-      }
       if (!prepared.imageBase64) {
         throw Object.assign(new Error("Não foi possível preparar a imagem."), { code: "IMAGE_PROCESSING_FAILED" });
       }
@@ -325,9 +316,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setSupportCode(null);
       const fallbackMessage = "Não conseguimos concluir a leitura do rótulo. Tente outra foto.";
       setErrorMsg(getAttachmentErrorMessage(err, fallbackMessage));
+      setScanOutcome("error");
       setStep("error");
     }
-  }, [navigate, runScan, toast]);
+  }, [navigate, runScan]);
 
   const handleSelectedFile = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -374,6 +366,46 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     espumante: "Espumante", sobremesa: "Sobremesa", fortificado: "Fortificado",
   };
 
+  const resultRows = scannedData
+    ? [
+        hasMeaningfulScanValue(scannedData.name) ? <DataRow key="name" label="Nome" value={scannedData.name} /> : null,
+        hasMeaningfulScanValue(scannedData.producer) ? <DataRow key="producer" label="Produtor" value={scannedData.producer} /> : null,
+        hasMeaningfulScanValue(scannedData.vintage) ? <DataRow key="vintage" label="Safra" value={String(scannedData.vintage)} /> : null,
+        hasMeaningfulScanValue(scannedData.style) ? <DataRow key="style" label="Estilo" value={styleLabels[scannedData.style] || scannedData.style} /> : null,
+        hasMeaningfulScanValue(scannedData.grape) ? <DataRow key="grape" label="Uva" value={scannedData.grape} /> : null,
+        hasMeaningfulScanValue(scannedData.country) ? <DataRow key="country" label="País" value={scannedData.country} /> : null,
+        hasMeaningfulScanValue(scannedData.region) ? <DataRow key="region" label="Região" value={scannedData.region} /> : null,
+        hasMeaningfulScanValue(scannedData.drink_from) && hasMeaningfulScanValue(scannedData.drink_until)
+          ? <DataRow key="drink_window" label="Janela de consumo" value={`${scannedData.drink_from} – ${scannedData.drink_until}`} />
+          : null,
+        hasMeaningfulScanValue(scannedData.food_pairing) ? <DataRow key="pairing" label="Harmonização" value={scannedData.food_pairing} /> : null,
+      ].filter(Boolean)
+    : [];
+
+  const resultStatus = scanOutcome === "success_partial"
+    ? {
+        icon: <Check className="h-4 w-4 text-amber-700" />,
+        title: "Leitura parcial",
+        tone: "bg-amber-50 text-amber-900 ring-amber-200",
+        description: "Conseguimos ler parte do rótulo.",
+        warning: "Revise os dados antes de salvar.",
+      }
+    : scanOutcome === "success_full"
+      ? {
+          icon: <Check className="h-4 w-4 text-success" />,
+          title: "Leitura completa",
+          tone: "bg-success/10 text-success ring-success/20",
+          description: "O rótulo foi lido com segurança.",
+          warning: null,
+        }
+      : {
+          icon: <X className="h-4 w-4 text-destructive" />,
+          title: "Falha",
+          tone: "bg-destructive/10 text-destructive ring-destructive/20",
+          description: "Não foi possível ler o rótulo.",
+          warning: null,
+        };
+
   const hasMeaningfulScanValue = (value: unknown) => {
     if (value == null) return false;
     if (typeof value === "number") return Number.isFinite(value);
@@ -383,24 +415,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     const lowered = text.toLowerCase();
     return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
   };
-  const isScanFallback = !hasMeaningfulScanResult(
-    scannedData ?? {
-      name: "",
-      producer: null,
-      country: null,
-      region: null,
-      grape: null,
-      vintage: null,
-      style: null,
-      drink_from: null,
-      drink_until: null,
-      estimated_price: null,
-      purchase_price: null,
-      food_pairing: null,
-      cellar_location: null,
-    },
-  );
-
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
@@ -502,66 +516,34 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-4 pt-4"
+              className="space-y-3 pt-3"
             >
               {imagePreview && (
-                <div className="w-full h-32 rounded-xl overflow-hidden border border-border/30">
+                <div className="w-full h-32 rounded-xl overflow-hidden border border-border/20">
                   <img src={imagePreview} alt="Label" className="w-full h-full object-cover" />
                 </div>
               )}
 
-              <div className="flex items-center gap-2 py-2">
-                <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center">
-                  <Check className="h-3.5 w-3.5 text-success" />
+              <div className={`rounded-2xl ring-1 px-4 py-3 ${resultStatus.tone}`}>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/70 ring-1 ring-black/5">
+                    {resultStatus.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-5">{resultStatus.title}</p>
+                    <p className="text-xs leading-5 opacity-80">{resultStatus.description}</p>
+                    {resultStatus.warning && (
+                      <p className="text-xs leading-5 mt-1 font-medium">{resultStatus.warning}</p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs font-medium text-success">
-                  {isScanFallback ? "Leitura parcial" : "Rótulo identificado com sucesso"}
-                </p>
               </div>
 
-              {isScanFallback && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <FallbackAnalysisBadge size="sm" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Leitura parcial</span>
-                  </div>
-                  <FallbackAnalysisNotice />
+              {resultRows.length > 0 && (
+                <div className="rounded-2xl border border-border/20 bg-white/55 px-4 py-3 space-y-2">
+                  {resultRows}
                 </div>
               )}
-
-              <div className="glass-card p-4 space-y-3">
-                {hasMeaningfulScanValue(scannedData.name) && (
-                  <DataRow label="Nome" value={scannedData.name} />
-                )}
-                {hasMeaningfulScanValue(scannedData.producer) && (
-                  <DataRow label="Produtor" value={scannedData.producer} />
-                )}
-                {hasMeaningfulScanValue(scannedData.vintage) && (
-                  <DataRow label="Safra" value={String(scannedData.vintage)} />
-                )}
-                {hasMeaningfulScanValue(scannedData.style) && (
-                  <DataRow label="Estilo" value={styleLabels[scannedData.style] || scannedData.style} />
-                )}
-                {hasMeaningfulScanValue(scannedData.grape) && (
-                  <DataRow label="Uva" value={scannedData.grape} />
-                )}
-                {hasMeaningfulScanValue(scannedData.country) && (
-                  <DataRow label="País" value={scannedData.country} />
-                )}
-                {hasMeaningfulScanValue(scannedData.region) && (
-                  <DataRow label="Região" value={scannedData.region} />
-                )}
-                {hasMeaningfulScanValue(scannedData.drink_from) && hasMeaningfulScanValue(scannedData.drink_until) && (
-                  <DataRow label="Janela de consumo" value={`${scannedData.drink_from} – ${scannedData.drink_until}`} />
-                )}
-                {hasMeaningfulScanValue(scannedData.food_pairing) && (
-                  <DataRow label="Harmonização" value={scannedData.food_pairing} />
-                )}
-              </div>
-
-              <p className="text-[10px] text-muted-foreground text-center">
-                Você poderá editar as informações antes de salvar
-              </p>
 
               <div className="flex gap-3 pt-2">
                 <Button variant="outline" onClick={reset} className="flex-1 h-11 text-[13px]">
