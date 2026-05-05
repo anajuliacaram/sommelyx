@@ -184,7 +184,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [labelImageFile, setLabelImageFile] = useState<File | null>(null);
   const [labelImageBase64, setLabelImageBase64] = useState<string | null>(null);
   const [aiPrefilledFields, setAiPrefilledFields] = useState<Record<string, boolean>>({});
-  const [scanPrefill, setScanPrefill] = useState<AddWinePrefillValues | null>(initialValues);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -213,12 +212,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       setScanOpen(true);
     }
   }, [open, initialScan]);
-
-  useEffect(() => {
-    if (open && initialValues) {
-      setScanPrefill(initialValues);
-    }
-  }, [open, initialValues]);
 
   useEffect(() => {
     if (open && isCommercial) setMoreOpen(true);
@@ -295,7 +288,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setLabelImagePreview(null); setLabelImageFile(null); setLabelImageBase64(null); setNoPriceInfo(false);
     setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
     setAiPrefilledFields({});
-    setScanPrefill(null);
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   };
@@ -382,14 +374,55 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     return nextPrefilled;
   }, []);
 
+  const hydrateScanPrefill = useCallback((prefill: AddWinePrefillValues, source: "scan" | "initialValues") => {
+    const appliedFields = applyScanPrefill(prefill);
+    const mappedFields = Object.keys(appliedFields);
+
+    console.info("[AddWineDialog] mapped_fields", {
+      source,
+      mappedFields,
+      populatedCount: mappedFields.length,
+      mappedValues: {
+        name: prefill.name ?? null,
+        producer: prefill.producer ?? null,
+        vintage: prefill.vintage ?? null,
+        country: prefill.country ?? null,
+        region: prefill.region ?? null,
+        grape: prefill.grape ?? null,
+      },
+    });
+
+    if (mappedFields.length > 0) {
+      console.info("[AddWineDialog] form_opened_with_data", {
+        source,
+        populatedFields: mappedFields,
+        populatedCount: mappedFields.length,
+        open,
+        isCommercial,
+      });
+    }
+
+    return appliedFields;
+  }, [applyScanPrefill, isCommercial, open]);
+
   useEffect(() => {
-    if (!scanPrefill) return;
-    applyScanPrefill(scanPrefill);
-  }, [scanPrefill, applyScanPrefill]);
+    if (!open || !initialValues) return;
+    hydrateScanPrefill(initialValues, "initialValues");
+  }, [hydrateScanPrefill, initialValues, open]);
 
   const handleScanComplete = (data: any) => {
     const mappedData = normalizeScanResult(data);
-    console.log("SCAN_RESULT_MAPPED", mappedData);
+    console.info("[AddWineDialog] scan_normalized", {
+      source: "scan-wine-label",
+      normalized: {
+        name: mappedData.name || null,
+        producer: mappedData.producer || null,
+        vintage: mappedData.vintage,
+        country: mappedData.country || null,
+        region: mappedData.region || null,
+        grape: mappedData.grape || null,
+      },
+    });
 
     const prefill: AddWinePrefillValues = {
       name: mappedData.name || null,
@@ -407,14 +440,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       cellarLocation: mappedData.cellar_location,
     };
 
-    setScanPrefill({
+    const appliedFields = hydrateScanPrefill({
       ...prefill,
       labelImagePreview: data?.labelImagePreview ?? null,
       labelImageFile: data?.labelImageFile ?? null,
       labelImageBase64: data?.labelImageBase64 ?? null,
-    });
+    }, "scan");
 
-    const populatedCount = Object.values(prefill).filter((value) => value != null && value !== "").length;
+    const populatedCount = Object.keys(appliedFields).length;
     if (populatedCount > 0) {
       toast({ title: isCommercial ? "Dados do vinho aplicados" : "🍷 Dados do rótulo aplicados" });
     }

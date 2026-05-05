@@ -50,15 +50,19 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const previewUrlRef = useRef<string | null>(null);
   const selectedFileRef = useRef<File | null>(null);
   const requestBusyRef = useRef(false);
+  const autoCommitRef = useRef(false);
+  const confirmBusyRef = useRef(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const reset = () => {
+  const reset = useCallback(() => {
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = null;
     }
     selectedFileRef.current = null;
+    autoCommitRef.current = false;
+    confirmBusyRef.current = false;
     setStep("capture");
     setImagePreview(null);
     setScannedData(null);
@@ -66,7 +70,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setSupportCode(null);
     setLastBase64(null);
     setScanOutcome(null);
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -91,6 +95,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   ) => {
     if (requestBusyRef.current) return;
     requestBusyRef.current = true;
+    autoCommitRef.current = false;
     setStep("scanning");
     setErrorMsg("");
     setSupportCode(null);
@@ -140,6 +145,24 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         success: true,
         status: 200,
         fileName: metadata?.fileName || null,
+      });
+      console.info("[ScanWineLabelDialog] scan_success", {
+        function: "scan-wine-label",
+        fileName: metadata?.fileName || null,
+        mimeType: metadata?.mimeType || null,
+        scanOutcome: isPartial ? "success_partial" : "success_full",
+        hasMeaningfulData: hasMeaningfulScanResult(normalizedWine),
+        mappedFields: Object.entries(normalizedWine)
+          .filter(([, value]) => {
+            if (value == null) return false;
+            if (typeof value === "number") return Number.isFinite(value);
+            if (typeof value !== "string") return false;
+            const text = value.trim();
+            if (!text) return false;
+            const lowered = text.toLowerCase();
+            return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
+          })
+          .map(([key]) => key),
       });
       console.info("SCAN_SUCCESS", {
         fileName: metadata?.fileName || null,
@@ -333,34 +356,51 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     [handleFile],
   );
 
-  const handleConfirm = async () => {
+  const handleConfirm = useCallback(async () => {
     if (!scannedData) return;
+    if (confirmBusyRef.current) return;
+    confirmBusyRef.current = true;
 
-    let labelImagePreview: string | null = imagePreview;
-    const selectedFile = selectedFileRef.current;
+    try {
+      let labelImagePreview: string | null = imagePreview;
+      const selectedFile = selectedFileRef.current;
 
-    if (selectedFile) {
-      try {
-        labelImagePreview = await new Promise<string | null>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(selectedFile);
-        });
-      } catch (err) {
-        console.warn("Failed to convert label image preview to data URL:", err);
+      if (selectedFile) {
+        try {
+          labelImagePreview = await new Promise<string | null>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(selectedFile);
+          });
+        } catch (err) {
+          console.warn("Failed to convert label image preview to data URL:", err);
+        }
       }
-    }
 
-    onScanComplete({
-      ...scannedData,
-      labelImagePreview,
-      labelImageFile: selectedFile,
-      labelImageBase64: lastBase64,
-    });
-    reset();
-    onOpenChange(false);
-  };
+      onScanComplete({
+        ...scannedData,
+        labelImagePreview,
+        labelImageFile: selectedFile,
+        labelImageBase64: lastBase64,
+      });
+      reset();
+      onOpenChange(false);
+    } finally {
+      confirmBusyRef.current = false;
+    }
+  }, [imagePreview, lastBase64, onOpenChange, onScanComplete, reset, scannedData]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (step !== "preview") return;
+    if (!scannedData) return;
+    if (autoCommitRef.current) return;
+    if (!hasMeaningfulScanResult(scannedData)) return;
+
+    autoCommitRef.current = true;
+    void handleConfirm();
+  }, [handleConfirm, open, scannedData, step]);
 
   const styleLabels: Record<string, string> = {
     tinto: "Tinto", branco: "Branco", rose: "Rosé",
