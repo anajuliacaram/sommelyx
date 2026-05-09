@@ -137,8 +137,23 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         },
         { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
       );
+      console.info("[ScanWineLabelDialog] response_received", {
+        function: "scan-wine-label",
+        fileName: metadata?.fileName || null,
+        mimeType: metadata?.mimeType || null,
+        fullJsonResponse: data,
+        responseKeys: data && typeof data === "object" ? Object.keys(data as Record<string, unknown>) : [],
+      });
       const normalizedWine = normalizeScanResult(data);
       const isPartial = !hasMeaningfulScanResult(normalizedWine);
+      console.info("[ScanWineLabelDialog] response_normalized", {
+        function: "scan-wine-label",
+        fileName: metadata?.fileName || null,
+        normalized: normalizedWine,
+        normalizedKeys: Object.entries(normalizedWine)
+          .filter(([, value]) => value != null && value !== "")
+          .map(([key]) => key),
+      });
 
       console.info("[ScanWineLabelDialog] request_finished", {
         function: "scan-wine-label",

@@ -50,6 +50,25 @@ type AddWinePrefillValues = {
   labelImageBase64?: string | null;
 };
 
+const ADD_WINE_FORM_FIELDS = [
+  "name",
+  "producer",
+  "vintage",
+  "style",
+  "country",
+  "region",
+  "grape",
+  "drinkFrom",
+  "drinkUntil",
+  "purchasePrice",
+  "estimatedPrice",
+  "foodPairing",
+  "cellarLocation",
+  "labelImagePreview",
+  "labelImageFile",
+  "labelImageBase64",
+] as const;
+
 const styles = [
   { value: "tinto", label: "Tinto" },
   { value: "branco", label: "Branco" },
@@ -450,11 +469,34 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   }, [hydrateScanPrefill, initialValues, open]);
 
   const handleScanComplete = (data: any) => {
-    console.info("[AddWineDialog] raw_scan_result", data);
+    const responseKeys = data && typeof data === "object" ? Object.keys(data as Record<string, unknown>) : [];
+    console.info("[AddWineDialog] raw_scan_result", {
+      fullJsonResponse: data,
+      responseKeys,
+    });
     const mappedData = mapScanResultToInitialValues(data);
     console.info("[AddWineDialog] scan_normalized", {
       source: "scan-wine-label",
-      normalized: {
+      normalized: mappedData,
+      normalizedKeys: Object.entries(mappedData)
+        .filter(([, value]) => value != null && value !== "")
+        .map(([key]) => key),
+      responseVsFormExpectedFields: {
+        expectedFields: ADD_WINE_FORM_FIELDS,
+        responseKeys,
+        mappedFields: Object.entries(mappedData)
+          .filter(([, value]) => value != null && value !== "")
+          .map(([key]) => key),
+        missingFromResponse: ADD_WINE_FORM_FIELDS.filter((field) => !responseKeys.includes(field)),
+      },
+    });
+
+    console.info("[AddWineDialog] mapped_fields", {
+      source: "scan-wine-label",
+      mappedFields: Object.entries(mappedData)
+        .filter(([, value]) => value != null && value !== "")
+        .map(([key]) => key),
+      mappedValues: {
         name: mappedData.name || null,
         producer: mappedData.producer || null,
         vintage: mappedData.vintage,
