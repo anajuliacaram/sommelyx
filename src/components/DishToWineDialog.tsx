@@ -797,7 +797,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className="space-y-4"
+          className="space-y-3 sm:space-y-4"
         >
           {preview?.url && (
             <AiModalCard className="p-0 overflow-hidden">
@@ -838,7 +838,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               </p>
             </AiModalCard>
           ) : (
-            <ul className="space-y-4">
+            <ul className="space-y-3 sm:space-y-4">
               {safeScanResults.wines.map((w, i) => {
                 const tint = getStyleTint(w.style);
                 const meta = [w.grape, w.vintage ? `Safra ${w.vintage}` : null, w.region].filter(Boolean).join(" · ");
@@ -851,7 +851,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08, duration: 0.3 }}
                     className={cn(
-                      "rounded-[24px] border p-5 space-y-4 cursor-default transition-all duration-200 hover:-translate-y-[1px]",
+                      "rounded-[24px] border p-4 sm:p-5 space-y-3 sm:space-y-4 cursor-default transition-all duration-200 hover:-translate-y-[1px]",
                       tint || "bg-[rgba(255,255,255,0.8)] border-[rgba(95,111,82,0.12)]",
                     )}
                   >
@@ -952,8 +952,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-black/5">
-        <div className="px-4 pt-4 sm:px-5">
+      <SheetContent className="w-full sm:max-w-lg h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-black/5">
+        <div className="flex h-full min-h-0 flex-col">
+        <div className="px-3 pt-3 sm:px-5 sm:pt-4">
           <AiModalHeader
             icon={<UtensilsCrossed className="h-5 w-5" />}
             title="Harmonizar"
@@ -961,7 +962,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           />
         </div>
 
-        <div className="space-y-4 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4 sm:px-5">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 sm:space-y-4 sm:px-5 sm:pb-[calc(16px+env(safe-area-inset-bottom))] sm:pt-4">
           {step !== "source" && (
             <Button
               variant="ghost"
@@ -982,13 +983,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3"
+                className="space-y-2.5 sm:space-y-3"
               >
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
                   De onde vem o vinho?
                 </p>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2 sm:space-y-2.5">
                   <PremiumChoiceCard
                     index={0}
                     icon={WineIcon}
@@ -1015,13 +1016,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3"
+                className="space-y-2.5 sm:space-y-3"
               >
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
                   {subModeTitle} — Como quer harmonizar?
                 </p>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2 sm:space-y-2.5">
                   <PremiumChoiceCard
                     index={0}
                     icon={ChefHat}
@@ -1051,7 +1052,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3.5"
+                className="space-y-3 sm:space-y-3.5"
               >
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
@@ -1076,7 +1077,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <AiModalActionButton
                   onClick={() => handleSearch()}
                   disabled={!dish.trim() || loading}
-                  className="w-full"
+                  className="w-full h-12"
                 >
                   {loading ? (
                     <>
@@ -1102,18 +1103,18 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 )}
 
                 {!loading && (
-                  <div className="space-y-2.5">
+                  <div className="space-y-2 sm:space-y-2.5">
                     <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                       Sugestões populares
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="hidden flex-wrap gap-2 sm:flex">
                       {popularDishes.map((d) => (
                         <Button
                           key={d}
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSearch(d)}
-                          className="h-11 rounded-2xl px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
+                          className="h-10 rounded-2xl px-3 text-[11px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
                         >
                           {d}
                         </Button>
@@ -1139,7 +1140,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3.5"
+                className="space-y-3 sm:space-y-3.5"
               >
                 <div className="space-y-1.5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
@@ -1150,7 +1151,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </p>
                 </div>
 
-                <div className="space-y-2.5">
+                  <div className="space-y-2 sm:space-y-2.5">
                   <PremiumChoiceCard
                     index={0}
                     icon={Heart}
@@ -1310,7 +1311,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3.5"
+                className="space-y-3 sm:space-y-3.5"
               >
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
@@ -1375,7 +1376,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 </div>
 
                 {/* Wine list */}
-                <ScrollArea className="h-[300px] -mx-1 px-1">
+                <ScrollArea className="h-[240px] sm:h-[300px] -mx-1 px-1">
                   <div className="space-y-1.5">
                     {filtered.map((w) => {
                       const isSelected = selectedWineId === w.id;
@@ -1494,7 +1495,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3.5"
+                className="space-y-3 sm:space-y-3.5"
               >
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
@@ -1516,7 +1517,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <AiModalActionButton
                   onClick={() => setStep("ext-menu-photo")}
                   disabled={!extWineName.trim()}
-                  className="w-full"
+                  className="w-full h-12"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Continuar — Enviar foto do cardápio
@@ -1531,9 +1532,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3.5"
+                className="space-y-3 sm:space-y-3.5"
               >
-                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
+                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 sm:p-3.5">
                   <p className="text-[12px] font-medium text-foreground">
                     Vinho: <span className="font-semibold">{extWineName}</span>
                   </p>
@@ -1560,12 +1561,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     onChange={handleMenuFileChange}
                   />
 
-                  <div className="flex flex-col gap-2.5 w-full">
+                  <div className="flex flex-col gap-2 w-full">
                     <AiModalActionButton
                       type="button"
                       variant="primary"
                       onClick={() => menuFileRef.current?.click()}
-                      className="w-full"
+                      className="w-full h-12"
                     >
                       <Camera className="h-4 w-4 mr-2" />
                       Tirar Foto
@@ -1574,7 +1575,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       type="button"
                       variant="secondary"
                       onClick={() => menuGalleryRef.current?.click()}
-                      className="w-full"
+                      className="w-full h-12"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
@@ -1607,9 +1608,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3.5"
+                className="space-y-3 sm:space-y-3.5"
               >
-                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3">
+                <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 sm:p-3.5">
                   <p className="text-[12px] font-medium text-foreground">
                     Prato: <span className="font-semibold">{dish}</span>
                   </p>
@@ -1636,12 +1637,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     onChange={handleFileChange}
                   />
 
-                  <div className="flex flex-col gap-2.5 w-full">
+                  <div className="flex flex-col gap-2 w-full">
                     <AiModalActionButton
                       type="button"
                       variant="primary"
                       onClick={() => fileRef.current?.click()}
-                      className="w-full"
+                      className="w-full h-12"
                     >
                       <Camera className="h-4 w-4 mr-2" />
                       Tirar Foto
@@ -1650,7 +1651,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       type="button"
                       variant="secondary"
                       onClick={() => fileGalleryRef.current?.click()}
-                      className="w-full"
+                      className="w-full h-12"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Escolher da Galeria ou PDF
@@ -1678,7 +1679,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-3 sm:space-y-4"
               >
                 {preview?.url && (
                   <AiModalCard className="p-0 overflow-hidden">
@@ -1696,7 +1697,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   toneClassName={normalizedPairingResult.fallback ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]" : "bg-[rgba(95,111,82,0.10)] text-[#57704B] ring-[rgba(95,111,82,0.18)]"}
                 />
 
-                <AiModalCard className="space-y-3">
+                <AiModalCard className="space-y-2.5 sm:space-y-3">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary/65" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Análise</span>
@@ -1723,7 +1724,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   count={Math.min(normalizedPairingResult.pairings.length, 5)}
                 />
 
-                <ul className="space-y-4">
+                <ul className="space-y-3 sm:space-y-4">
                   {normalizedPairingResult.pairings.slice(0, 5).map((p, i) => (
                     <WineSuggestionCard
                       key={i}
@@ -1780,6 +1781,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {step === "scan-results" && normalizedScanResults && renderExternalScanResults()}
           </AnimatePresence>
         </div>
+        </div>
       </SheetContent>
 
       {/* Recipe Modal */}
@@ -1791,7 +1793,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             onClose={() => setRecipeModal(null)}
             className="sm:max-w-md"
           >
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {recipeModal.recipe.description && (
                   <p className="text-sm text-black/70 leading-relaxed italic">{recipeModal.recipe.description}</p>
                 )}
