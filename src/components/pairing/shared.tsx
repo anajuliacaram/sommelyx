@@ -128,14 +128,14 @@ export function FallbackAnalysisBadge({ size = "md" }: { size?: "sm" | "md" }) {
         sizeClass,
       )}
       style={{
-        background: "linear-gradient(135deg, rgba(198,167,104,0.14) 0%, rgba(123,30,43,0.08) 100%)",
-        color: "#7b1e2b",
-        border: "1px solid rgba(123,30,43,0.16)",
-        boxShadow: "0 0 10px rgba(123,30,43,0.06)",
+        background: "linear-gradient(135deg, rgba(198,167,104,0.12) 0%, rgba(95,111,82,0.08) 100%)",
+        color: "#6B5A2A",
+        border: "1px solid rgba(198,167,104,0.18)",
+        boxShadow: "0 0 10px rgba(198,167,104,0.05)",
       }}
     >
       <Sparkles className="h-3 w-3 opacity-70" />
-      Análise rápida
+      Leitura assistida
     </span>
   );
 }
@@ -166,14 +166,14 @@ export function FallbackAnalysisNotice({
 
   return (
     <div
-      className={cn("rounded-2xl border border-[rgba(123,30,43,0.12)] bg-primary/[0.04] p-4", className)}
+      className={cn("rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4", className)}
       role="status"
       aria-live="polite"
     >
       <div className="flex items-center gap-2">
         <FallbackAnalysisBadge />
       </div>
-      <p className="mt-2 text-[12.5px] leading-relaxed text-foreground/70">{message}</p>
+      <p className="mt-2 text-[13px] leading-7 text-[#4A4338]">{message}</p>
       <p className={cn("mt-3 text-[10.5px] font-semibold uppercase tracking-[0.12em]", confidenceConfig.textClassName)}>
         {confidenceConfig.label}
       </p>
@@ -414,7 +414,7 @@ export function WineSuggestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group list-none overflow-hidden rounded-[28px] border border-border/30 bg-white/72 shadow-[0_12px_32px_-26px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5",
+        "group list-none overflow-hidden rounded-[24px] border border-border/30 bg-[rgba(255,255,255,0.78)] shadow-[0_12px_32px_-26px_rgba(0,0,0,0.16)] transition-all duration-200 hover:-translate-y-0.5",
         className,
       )}
       style={{

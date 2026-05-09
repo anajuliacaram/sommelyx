@@ -25,7 +25,6 @@ import { useWines } from "@/hooks/useWines";
 import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/lib/ai-attachments";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
-import { designSystem } from "@/styles/designSystem";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
 import { AiModalActionButton } from "@/components/ai-flow/ModalLayout";
@@ -2806,7 +2805,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[min(1180px,calc(100vw-1rem))] -translate-x-1/2 -translate-y-1/2 rounded-[28px] border-0 p-0 gap-0 overflow-hidden"
+        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[min(1180px,calc(100vw-1rem))] -translate-x-1/2 -translate-y-1/2 rounded-[24px] border-0 p-0 gap-0 overflow-hidden"
         style={{
           left: "50%",
           top: "50%",
@@ -2828,7 +2827,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           <div
             className="sticky top-0 z-30 flex items-center justify-between border-b border-white/40 px-5 py-4 pr-14 shrink-0"
             style={{
-              ...designSystem.glassCard,
               borderTopLeftRadius: 0,
               borderTopRightRadius: 0,
               borderBottomLeftRadius: 0,
@@ -3024,8 +3022,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       </div>
 
                       {importMode === "smart-pdf" ? (
-                        <div className="rounded-2xl border border-sky-200 bg-sky-50/80 px-4 py-3 text-[13px] text-sky-900">
-                          <p className="font-semibold">✔ Detectamos um catálogo complexo</p>
+                        <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] px-4 py-3 text-[13px] text-[#4A4338]">
+                          <p className="font-semibold text-[#7B6528]">✔ Detectamos um catálogo complexo</p>
                           <p>✔ Usando inteligência Sommelyx para interpretar produtores, vinhos e preços</p>
                           <p>✔ Você pode revisar e editar cada linha antes de importar</p>
                         </div>
@@ -3033,19 +3031,19 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
                       <div className="grid gap-3 shrink-0 sm:grid-cols-4">
                         {[
-                          { label: "Válidos", value: completeRowsCount, tone: "from-emerald-50 to-emerald-100 text-emerald-800" },
-                          { label: "Revisão", value: reviewRowsCount, tone: "from-amber-50 to-amber-100 text-amber-800" },
-                          { label: "Inválidos", value: invalidRowsCount, tone: "from-rose-50 to-rose-100 text-rose-700" },
-                          { label: "Duplicados", value: duplicateRowsCount, tone: "from-violet-50 to-violet-100 text-violet-700" },
+                          { label: "Válidos", value: completeRowsCount, tone: "from-[rgba(95,111,82,0.10)] to-[rgba(95,111,82,0.05)] text-[#2F4A2B]" },
+                          { label: "Revisão", value: reviewRowsCount, tone: "from-[rgba(198,167,104,0.12)] to-[rgba(198,167,104,0.05)] text-[#7B6528]" },
+                          { label: "Inválidos", value: invalidRowsCount, tone: "from-[rgba(180,80,80,0.10)] to-[rgba(180,80,80,0.04)] text-[#9B4444]" },
+                          { label: "Duplicados", value: duplicateRowsCount, tone: "from-[rgba(123,30,43,0.08)] to-[rgba(123,30,43,0.04)] text-[#7B1E2B]" },
                         ].map((card) => (
-                          <div key={card.label} className={cn("rounded-2xl border border-black/5 bg-gradient-to-br p-3 shadow-sm", card.tone)}>
+                          <div key={card.label} className={cn("rounded-[22px] border border-black/5 bg-gradient-to-br p-3 shadow-sm", card.tone)}>
                             <p className="text-[10px] font-bold uppercase tracking-[0.12em] opacity-70">{card.label}</p>
                             <p className="mt-1 text-2xl font-semibold tracking-tight">{card.value}</p>
                           </div>
                         ))}
                       </div>
 
-                      <div className="rounded-2xl border border-black/5 bg-[#FBFAF7] px-4 py-3 text-[13px] text-[#4A4338]">
+                      <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] px-4 py-3 text-[13px] text-[#4A4338]">
                         <p>✔ Cabeçalho detectado automaticamente{importSummary.headerDetected && typeof importSummary.headerRowIndex === "number" ? ` na linha ${importSummary.headerRowIndex + 1}` : ""}</p>
                         <p>✔ Coluna de preço detectada: {importSummary.priceColumn || "não identificada"}</p>
                         <p>✔ {importSummary.ignoredRows} linha(s) ignorada(s) por categoria ou vazio</p>
@@ -3057,7 +3055,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       </div>
 
                       {(enriching || processingTotal > 0) && (
-                        <div className="rounded-2xl border border-black/5 bg-[#FBFAF7] p-3 text-[12px] text-[#5F5F5F]">
+                        <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-3 text-[12px] text-[#5F5F5F]">
                           <div className="mb-2 flex items-center justify-between gap-3">
                             <span className="font-medium">
                               {enriching ? "Corrigindo automaticamente..." : "Processando importação"}
@@ -3202,13 +3200,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       )}
 
                       {importSourceConfidence < 0.7 && importSourceHeaders.length > 0 ? (
-                        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
+                        <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4">
                           <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
-                              <p className="text-[14px] font-semibold text-amber-900">
+                              <p className="text-[14px] font-semibold text-[#7B6528]">
                                 Precisamos de mapeamento manual
                               </p>
-                              <p className="text-[13px] text-amber-800">
+                              <p className="text-[13px] text-[#6B6258]">
                                 A confiança da leitura ficou baixa. Selecione as colunas manualmente para continuar.
                               </p>
                             </div>
@@ -3268,20 +3266,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                                 Clique em qualquer campo para editar · arraste as bordas das colunas · use Tab / Enter para avançar.
                               </p>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
-                                {completeRowsCount} válidos
-                              </span>
-                              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700">
-                                {reviewRowsCount} revisão
-                              </span>
-                              <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-semibold text-rose-700">
-                                {invalidRowsCount} inválidos
-                              </span>
-                              <span className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11px] font-semibold text-violet-700">
-                                {duplicateRowsCount} duplicados
-                              </span>
-                            </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-[rgba(95,111,82,0.16)] bg-[rgba(95,111,82,0.08)] px-3 py-1 text-[11px] font-semibold text-[#57704B]">
+                          {completeRowsCount} válidos
+                        </span>
+                        <span className="rounded-full border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.09)] px-3 py-1 text-[11px] font-semibold text-[#7B6528]">
+                          {reviewRowsCount} revisão
+                        </span>
+                        <span className="rounded-full border border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.08)] px-3 py-1 text-[11px] font-semibold text-[#7B1E2B]">
+                          {invalidRowsCount} inválidos
+                        </span>
+                        <span className="rounded-full border border-[rgba(115,95,145,0.16)] bg-[rgba(115,95,145,0.08)] px-3 py-1 text-[11px] font-semibold text-[#67557D]">
+                          {duplicateRowsCount} duplicados
+                        </span>
+                      </div>
                           </div>
 
                           <div className="border-b border-white/40 px-4 py-4">
@@ -3379,12 +3377,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                                       const confidence = (wine as DraftWine).confidence;
                                       const statusTone =
                                         displayStatus === "invalid"
-                                          ? "bg-rose-100 text-rose-700"
+                                          ? "bg-[rgba(123,30,43,0.10)] text-[#7B1E2B]"
                                           : displayStatus === "warning"
-                                            ? "bg-amber-100 text-amber-700"
+                                            ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528]"
                                             : displayStatus === "duplicate"
-                                              ? "bg-violet-100 text-violet-700"
-                                              : "bg-emerald-100 text-emerald-700";
+                                              ? "bg-[rgba(115,95,145,0.10)] text-[#67557D]"
+                                              : "bg-[rgba(95,111,82,0.10)] text-[#57704B]";
                                       const statusLabel =
                                         displayStatus === "invalid"
                                           ? "Inválido"
@@ -3397,14 +3395,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                                       const fieldRowClass = cn(
                                         "border-b border-white/40 transition-colors hover:bg-white/70",
                                         rowSelected && "bg-white/80",
-                                        displayStatus === "invalid" && "bg-rose-50/60",
-                                        displayStatus === "warning" && "bg-amber-50/60",
-                                        displayStatus === "duplicate" && "bg-violet-50/55",
-                                        displayStatus === "valid" && confidence < 0.8 && "bg-emerald-50/40",
+                                      displayStatus === "invalid" && "bg-[rgba(123,30,43,0.03)]",
+                                      displayStatus === "warning" && "bg-[rgba(198,167,104,0.05)]",
+                                      displayStatus === "duplicate" && "bg-[rgba(115,95,145,0.04)]",
+                                      displayStatus === "valid" && confidence < 0.8 && "bg-[rgba(95,111,82,0.04)]",
                                       );
                                       const textFieldClass = cn(
                                         "h-11 rounded-[12px] border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors placeholder:text-[#A39A90] focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none",
-                                        !wine.name?.trim() && "border-rose-300 bg-rose-50",
+                                        !wine.name?.trim() && "border-[rgba(123,30,43,0.22)] bg-[rgba(123,30,43,0.05)]",
                                       );
                                       const valueSelectClass = "h-11 rounded-[12px] border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none";
 
@@ -3477,12 +3475,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                                 const displayStatus = getDisplayRowStatus(wine as DraftWine);
                                 const statusTone =
                                   displayStatus === "invalid"
-                                    ? "bg-rose-100 text-rose-700"
+                                    ? "bg-[rgba(123,30,43,0.10)] text-[#7B1E2B]"
                                     : displayStatus === "warning"
-                                      ? "bg-amber-100 text-amber-700"
+                                      ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528]"
                                       : displayStatus === "duplicate"
-                                        ? "bg-violet-100 text-violet-700"
-                                        : "bg-emerald-100 text-emerald-700";
+                                        ? "bg-[rgba(115,95,145,0.10)] text-[#67557D]"
+                                        : "bg-[rgba(95,111,82,0.10)] text-[#57704B]";
                                 const statusLabel =
                                   displayStatus === "invalid"
                                     ? "Inválido"
@@ -3540,9 +3538,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                                             </p>
                                           </div>
                                           <div className="flex flex-col items-end gap-1">
-                                            <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold", statusTone)}>
-                                              {statusLabel}
-                                            </span>
+                                <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold", statusTone)}>
+                                  {statusLabel}
+                                </span>
                                             <span className="text-[10px] text-black/40">{rowStatus === "invalid" ? "Corrija antes de importar" : "Edite para continuar"}</span>
                                           </div>
                                         </div>
@@ -3564,7 +3562,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                                             )}
                                           >
                                             <Check className="h-3.5 w-3.5" />
-                                            {rowSelected ? "Selecionada" : "Selecionar"}
+                                              {rowSelected ? "Selecionada" : "Selecionar"}
                                           </button>
                                         </div>
                                       </div>
@@ -3675,7 +3673,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                           </div>
                         </div>
                       ) : (
-                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[13px] font-medium text-amber-800">
+                        <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4 text-[13px] font-medium text-[#6B6258]">
                           {importMode === "smart-pdf"
                             ? "Não conseguimos interpretar totalmente o catálogo PDF. Selecione manualmente as colunas para continuar."
                             : "Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."}
@@ -3785,9 +3783,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               </AlertDialogHeader>
               <div className="max-h-72 space-y-2 overflow-y-auto">
                 {importWarningRows.map((row) => (
-                  <div key={`${row.index}-${row.name}`} className="rounded-2xl border border-rose-200 bg-rose-50/80 px-3 py-2">
-                    <p className="text-sm font-semibold text-rose-900">{row.name}</p>
-                    <p className="text-xs text-rose-700">{row.issues.slice(0, 3).join(" · ")}</p>
+                  <div key={`${row.index}-${row.name}`} className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] px-3 py-2">
+                    <p className="text-sm font-semibold text-[#7B6528]">{row.name}</p>
+                    <p className="text-xs text-[#6B6258]">{row.issues.slice(0, 3).join(" · ")}</p>
                   </div>
                 ))}
               </div>

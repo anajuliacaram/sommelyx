@@ -452,7 +452,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     ? {
         icon: <Check className="h-4 w-4 text-amber-700" />,
         title: "Leitura parcial",
-        tone: "bg-amber-50 text-amber-900 ring-amber-200",
+        tone: "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]",
         description: "Conseguimos ler parte do rótulo.",
         warning: "Revise os dados antes de salvar.",
       }
@@ -460,14 +460,14 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       ? {
           icon: <Check className="h-4 w-4 text-success" />,
           title: "Leitura completa",
-          tone: "bg-success/10 text-success ring-success/20",
+          tone: "bg-[rgba(95,111,82,0.08)] text-[#2F4A2B] ring-[rgba(95,111,82,0.16)]",
           description: "O rótulo foi lido com segurança.",
           warning: null,
         }
       : {
           icon: <X className="h-4 w-4 text-destructive" />,
           title: "Falha",
-          tone: "bg-destructive/10 text-destructive ring-destructive/20",
+          tone: "bg-[rgba(180,80,80,0.08)] text-[#9B4444] ring-[rgba(180,80,80,0.16)]",
           description: "Não foi possível ler o rótulo.",
           warning: null,
         };

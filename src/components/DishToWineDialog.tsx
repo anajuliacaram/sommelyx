@@ -14,7 +14,7 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
 import {
   SectionHeader,
   PairingLoadingState,
@@ -741,14 +741,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         ? {
             icon: <Sparkles className="h-4 w-4 text-amber-700" />,
             title: "Leitura parcial",
-            tone: "bg-amber-50 text-amber-900 ring-amber-200",
+            tone: "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]",
             description: "Conseguimos ler parte da carta.",
             warning: "Revise os dados antes de salvar.",
           }
         : {
             icon: <Check className="h-4 w-4 text-success" />,
             title: "Leitura completa",
-            tone: "bg-success/10 text-success ring-success/20",
+            tone: "bg-[rgba(95,111,82,0.08)] text-[#2F4A2B] ring-[rgba(95,111,82,0.16)]",
             description: "A carta foi lida com segurança.",
             warning: null,
           };
@@ -778,12 +778,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           />
 
           <AiModalCard className="space-y-1.5">
-            <p className="text-sm font-medium text-foreground">
-              Prato: <span className="font-bold">{dish}</span>
+            <AiSectionLabel>Prato</AiSectionLabel>
+            <p className="text-[15px] font-semibold tracking-[-0.02em] text-[#1A1713]">
+              {dish}
             </p>
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary/70" />
-              <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#6B6258]">
                 Melhores opções da carta
               </span>
             </div>
@@ -791,10 +792,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
           {safeScanResults.wines.length === 0 ? (
             <AiModalCard className="text-center space-y-2">
-              <p className="text-sm text-foreground/70 font-medium">
+              <p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">
                 {safeScanResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[13.5px] leading-7 text-[#6B6B6B]">
                 {safeScanResults.fallback ? "Tente novamente ou envie outro arquivo." : "Tente outra foto com melhor iluminação."}
               </p>
             </AiModalCard>
@@ -812,34 +813,34 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08, duration: 0.3 }}
                     className={cn(
-                      "rounded-[28px] border p-5 space-y-4 cursor-default transition-all duration-200 hover:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]",
-                      tint || "bg-card/60 border-border/30",
+                      "rounded-[24px] border p-5 space-y-4 cursor-default transition-all duration-200 hover:-translate-y-[1px]",
+                      tint || "bg-[rgba(255,255,255,0.8)] border-[rgba(95,111,82,0.12)]",
                     )}
                   >
                     <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/55 via-[#C8A96A]/40 to-transparent" />
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 space-y-1">
-                        <h4 className="text-[19px] font-semibold tracking-[-0.02em] leading-tight text-foreground sm:text-[22px]">
+                        <h4 className="text-[20px] font-semibold tracking-[-0.03em] leading-tight text-[#1A1713] sm:text-[23px]">
                           {w.name}
                         </h4>
-                        {meta && <p className="text-[12px] font-medium leading-6 text-muted-foreground/75">{meta}</p>}
+                        {meta && <p className="text-[12.5px] font-medium leading-6 text-[#6B6258]">{meta}</p>}
                       </div>
                       {w.price != null && (
-                        <span className="shrink-0 text-[16px] font-semibold tracking-tight text-foreground">
+                        <span className="shrink-0 text-[17px] font-semibold tracking-tight text-[#1A1713]">
                           R$ {w.price}
                         </span>
                       )}
                     </div>
 
-                    <div className="rounded-[22px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
+                    <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">
                         Por que entrou na seleção
                       </p>
                       <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
                         {reasonText}
                       </p>
                       {supportText ? (
-                        <p className="mt-2 text-[12px] leading-6 text-[#5B5146]">
+                        <p className="mt-2 text-[12.5px] leading-6 text-[#5B5146]">
                           {supportText}
                         </p>
                       ) : null}
@@ -855,8 +856,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           { label: "Acidez", value: w.acidity || "Não identificada" },
                           { label: "Tanino", value: w.tannin || "Não identificado" },
                         ].map((item) => (
-                          <div key={item.label} className="space-y-1 rounded-2xl border border-black/5 bg-white/65 px-3 py-3">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
+                          <div key={item.label} className="space-y-1 rounded-2xl border border-black/5 bg-white/75 px-3 py-3">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#7A6B59]">{item.label}</p>
                             <p className="text-[13px] font-medium leading-6 text-[#2B231D]">{item.value}</p>
                           </div>
                         ))}
@@ -1654,7 +1655,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   title={normalizedPairingResult.fallback ? "Leitura parcial" : "Leitura completa"}
                   description={normalizedPairingResult.fallback ? "Conseguimos ler parte da carta." : "A carta foi lida com segurança."}
                   warning={normalizedPairingResult.fallback ? "Revise os dados antes de salvar." : null}
-                  toneClassName={normalizedPairingResult.fallback ? "bg-amber-50 text-amber-900 ring-amber-200" : "bg-success/10 text-success ring-success/20"}
+                  toneClassName={normalizedPairingResult.fallback ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]" : "bg-[rgba(95,111,82,0.10)] text-[#57704B] ring-[rgba(95,111,82,0.18)]"}
                 />
 
                 <AiModalCard className="space-y-3">
