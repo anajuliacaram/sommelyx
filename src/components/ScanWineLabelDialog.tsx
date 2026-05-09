@@ -154,6 +154,23 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           .filter(([, value]) => value != null && value !== "")
           .map(([key]) => key),
       });
+      console.info("[ScanWineLabelDialog] scan_normalized_result", {
+        function: "scan-wine-label",
+        fileName: metadata?.fileName || null,
+        normalizedResult: normalizedWine,
+        expectedFields: ["name", "producer", "country", "region", "grape", "vintage", "style", "drink_from", "drink_until", "estimated_price", "purchase_price", "food_pairing", "cellar_location"],
+        populatedFields: Object.entries(normalizedWine)
+          .filter(([, value]) => {
+            if (value == null) return false;
+            if (typeof value === "number") return Number.isFinite(value);
+            if (typeof value !== "string") return false;
+            const text = value.trim();
+            if (!text) return false;
+            const lowered = text.toLowerCase();
+            return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
+          })
+          .map(([key]) => key),
+      });
 
       console.info("[ScanWineLabelDialog] request_finished", {
         function: "scan-wine-label",

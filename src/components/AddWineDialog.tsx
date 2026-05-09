@@ -250,6 +250,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [estimating, setEstimating] = useState(false);
   const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
   const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingHydrationTraceRef = useRef<{ source: "scan" | "initialValues"; payload: AddWinePrefillValues } | null>(null);
+  const finalFormStateLoggedRef = useRef(false);
   const commercialCost = lastPaid ? Number(lastPaid) : null;
   const commercialSale = currentValue ? Number(currentValue) : null;
   const commercialMargin =
@@ -433,6 +435,15 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   }, []);
 
   const hydrateScanPrefill = useCallback((prefill: AddWinePrefillValues, source: "scan" | "initialValues") => {
+    pendingHydrationTraceRef.current = { source, payload: prefill };
+    finalFormStateLoggedRef.current = false;
+    console.info("[AddWineDialog] hydrate_input", {
+      source,
+      payload: prefill,
+      payloadKeys: Object.entries(prefill)
+        .filter(([, value]) => value != null && value !== "")
+        .map(([key]) => key),
+    });
     const appliedFields = applyScanPrefill(prefill);
     const mappedFields = Object.keys(appliedFields);
 
@@ -475,6 +486,30 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       appliedFields: mappedFields,
     });
 
+    console.info("[AddWineDialog] hydrated_fields", {
+      source,
+      payloadKeys: Object.entries(prefill)
+        .filter(([, value]) => value != null && value !== "")
+        .map(([key]) => key),
+      appliedFields: mappedFields,
+      appliedValues: {
+        name: prefill.name ?? null,
+        producer: prefill.producer ?? null,
+        vintage: prefill.vintage ?? null,
+        style: prefill.style ?? null,
+        country: prefill.country ?? null,
+        region: prefill.region ?? null,
+        grape: prefill.grape ?? null,
+        grapes: prefill.grapes ?? null,
+        drinkFrom: prefill.drinkFrom ?? null,
+        drinkUntil: prefill.drinkUntil ?? null,
+        purchasePrice: prefill.purchasePrice ?? null,
+        estimatedPrice: prefill.estimatedPrice ?? null,
+        foodPairing: prefill.foodPairing ?? null,
+        cellarLocation: prefill.cellarLocation ?? null,
+      },
+    });
+
     return appliedFields;
   }, [applyScanPrefill, isCommercial, open]);
 
@@ -484,8 +519,47 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     hydrateScanPrefill(initialValues, "initialValues");
   }, [hydrateScanPrefill, initialValues, open]);
 
+  useEffect(() => {
+    const pending = pendingHydrationTraceRef.current;
+    if (!open || !pending || finalFormStateLoggedRef.current === true) return;
+
+    const currentValues = {
+      name,
+      producer,
+      quantity,
+      vintage,
+      style,
+      country,
+      region,
+      grape,
+    };
+    const hasAnyPrefilledValue = Boolean(
+      name ||
+        producer ||
+        vintage ||
+        style ||
+        country ||
+        region ||
+        grape,
+    );
+    console.info("[AddWineDialog] final_form_state", {
+      source: pending.source,
+      payload: pending.payload,
+      formState: currentValues,
+      hasAnyPrefilledValue,
+      aiPrefilledFields,
+    });
+    finalFormStateLoggedRef.current = true;
+    pendingHydrationTraceRef.current = null;
+  }, [aiPrefilledFields, country, grape, name, open, pendingHydrationTraceRef.current, producer, quantity, region, style, vintage]);
+
   const handleScanComplete = (data: any) => {
     const responseKeys = data && typeof data === "object" ? Object.keys(data as Record<string, unknown>) : [];
+    console.info("[AddWineDialog] scan_callback_payload", {
+      fullJsonResponse: data,
+      responseKeys,
+      expectedFields: ["name", "producer", "vintage", "style", "country", "region", "grape", "drink_from", "drink_until", "purchase_price", "estimated_price", "food_pairing", "cellar_location"],
+    });
     console.info("[AddWineDialog] raw_scan_result", {
       fullJsonResponse: data,
       responseKeys,
