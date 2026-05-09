@@ -459,63 +459,72 @@ serve(async (req) => {
 
     if (mode === "cellar") {
       const cellarWines = Array.isArray(normalizedInput.cellar) ? normalizedInput.cellar.slice(0, 40) : [];
+      trace("CELLAR_MODE_ACTIVE", {
+        request_id: requestId,
+        cellar_count: cellarWines.length,
+      });
       if (cellarWines.length > 0) {
-        const rankedCellarEntries = rankCellarWinesByIntent(normalizedInput.dish, cellarWines as any[], normalizedIntent).slice(0, 5);
-        if (rankedCellarEntries.length > 0) {
-          const noStrongMatch = !rankedCellarEntries.some((entry) => entry.score >= 8);
-          const suggestions = rankedCellarEntries.map((entry, index) =>
-            {
-              const builtSuggestion = buildDishSpecificSuggestion(
-                normalizedInput.dish,
-                String(entry.wine.style || ""),
-                index,
-                entry.wine,
-                noStrongMatch,
-              );
-              const rawStyle = typeof entry.wine.style === "string" ? entry.wine.style.trim() : "";
-              return {
-                ...builtSuggestion,
-                style: rawStyle || builtSuggestion.style,
-                wineProfile: {
-                  ...builtSuggestion.wineProfile,
-                  style: rawStyle || builtSuggestion.wineProfile.style,
-                },
-              };
-            }
+        const rankedCellarEntries = rankCellarWinesByIntent(normalizedInput.dish, cellarWines as any[], normalizedIntent);
+        const selectedEntries = rankedCellarEntries.slice(0, 5);
+        const noStrongMatch = !selectedEntries.some((entry) => entry.score >= 8);
+        const suggestions = selectedEntries.map((entry, index) => {
+          const builtSuggestion = buildDishSpecificSuggestion(
+            normalizedInput.dish,
+            String(entry.wine.style || ""),
+            index,
+            entry.wine,
+            noStrongMatch,
           );
-
-          const cellarPayload = {
-            source: "deterministic" as const,
-            suggestions,
-            dishProfile: {
-              intensity: analyzeDish(normalizedInput.dish).intensity,
-              fat: analyzeDish(normalizedInput.dish).fat,
-              category: "cellar",
-              explanation: noStrongMatch
-                ? "Não há correspondência forte; mostramos os melhores vinhos reais da sua adega disponíveis para este prato."
-                : "Harmonização priorizando os vinhos reais da sua adega.",
+          const rawStyle = typeof entry.wine.style === "string" ? entry.wine.style.trim() : "";
+          return {
+            ...builtSuggestion,
+            style: rawStyle || builtSuggestion.style,
+            wineProfile: {
+              ...builtSuggestion.wineProfile,
+              style: rawStyle || builtSuggestion.wineProfile.style,
             },
           };
+        });
 
-          trace("pairings_deterministic_hit", {
-            request_id: requestId,
-            mode,
-            durationMs: elapsed(startTime),
-            source: cellarPayload.source,
-            cellar_count: cellarWines.length,
-            ranked_count: rankedCellarEntries.length,
-            no_strong_match: noStrongMatch,
-          });
-          await setCachedAiResponse("wine-pairings", cacheInput, cellarPayload);
-          await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 200, "deterministic_success", Date.now() - startTime, {
-            request_id: requestId,
-            mode,
-            source: cellarPayload.source,
-            input_size_bytes: inputSizeBytes,
-            error_type: null,
-          });
-          return jsonResponse(req, cellarPayload);
-        }
+        const cellarPayload = {
+          source: "deterministic" as const,
+          suggestions,
+          dishProfile: {
+            intensity: analyzeDish(normalizedInput.dish).intensity,
+            fat: analyzeDish(normalizedInput.dish).fat,
+            category: "cellar",
+            explanation: noStrongMatch
+              ? "Não há correspondência forte; mostramos os melhores vinhos reais da sua adega disponíveis para este prato."
+              : "Harmonização priorizando os vinhos reais da sua adega.",
+          },
+        };
+
+        trace("FALLBACK_USED", {
+          request_id: requestId,
+          mode,
+          fallback_used: false,
+          cellar_count: cellarWines.length,
+          ranked_count: selectedEntries.length,
+          no_strong_match: noStrongMatch,
+        });
+        trace("pairings_deterministic_hit", {
+          request_id: requestId,
+          mode,
+          durationMs: elapsed(startTime),
+          source: cellarPayload.source,
+          cellar_count: cellarWines.length,
+          ranked_count: selectedEntries.length,
+          no_strong_match: noStrongMatch,
+        });
+        await setCachedAiResponse("wine-pairings", cacheInput, cellarPayload);
+        await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 200, "deterministic_success", Date.now() - startTime, {
+          request_id: requestId,
+          mode,
+          source: cellarPayload.source,
+          input_size_bytes: inputSizeBytes,
+          error_type: null,
+        });
+        return jsonResponse(req, cellarPayload);
       }
 
       const safeFallback = buildBasicSafeSuggestionsForDish(normalizedInput.dish, normalizedInput.cellar);
@@ -524,6 +533,12 @@ serve(async (req) => {
         mode,
         count: safeFallback.suggestions.length,
         reason: cellarWines.length === 0 ? "no_cellar_wines" : "no_ranked_results",
+      });
+      trace("FALLBACK_USED", {
+        request_id: requestId,
+        mode,
+        fallback_used: true,
+        cellar_count: cellarWines.length,
       });
       await setCachedAiResponse("wine-pairings", cacheInput, safeFallback);
       await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 200, "deterministic_success", Date.now() - startTime, {
