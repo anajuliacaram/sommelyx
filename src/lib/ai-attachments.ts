@@ -52,6 +52,7 @@ export type AttachmentPrepErrorCode =
   | "IMAGE_DECODE_FAILED"
   | "IMAGE_PROCESSING_FAILED"
   | "IMAGE_TOO_LARGE"
+  | "IMAGE_OCR_LOW_QUALITY"
   | "INVALID_IMAGE"
   | "UNSUPPORTED_IMAGE_FORMAT"
   | "PDF_PARSE_FAILED"
@@ -137,6 +138,8 @@ export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi p
       return "Não conseguimos processar essa imagem. Tente outra foto mais nítida.";
     case "IMAGE_TOO_LARGE":
       return "A imagem ficou pesada demais depois do preparo. Tente uma foto mais leve.";
+    case "IMAGE_OCR_LOW_QUALITY":
+      return "Imagem com baixa qualidade para leitura";
     case "INVALID_IMAGE":
       return "Não conseguimos ler a imagem. Tente outra foto ou use a câmera.";
     case "UNSUPPORTED_IMAGE_FORMAT":
@@ -413,8 +416,8 @@ async function loadHtmlImage(file: File, mode: "object-url" | "data-url") {
 async function decodeImageFile(file: File) {
   const attempts: Array<{ path: "object-url" | "data-url" | "bitmap"; run: () => Promise<HTMLImageElement | ImageBitmap> }> = [
     { path: "object-url", run: () => loadHtmlImage(file, "object-url") },
-    { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
     { path: "bitmap", run: () => loadImageBitmap(file) },
+    { path: "data-url", run: () => loadHtmlImage(file, "data-url") },
   ];
 
   let lastError: unknown = null;
@@ -490,6 +493,14 @@ async function prepareImageAttachment(
     originalWidth: sourceWidth,
     originalHeight: sourceHeight,
   });
+  if (preprocessMode === "ocr" && sourceWidth < 800) {
+    throw createAttachmentError("IMAGE_OCR_LOW_QUALITY", "Imagem com baixa qualidade para leitura", {
+      fileName: file.name,
+      originalWidth: sourceWidth,
+      originalHeight: sourceHeight,
+      decodeMethod: decoded.path,
+    });
+  }
   const canvas = document.createElement("canvas");
   canvas.width = sourceWidth;
   canvas.height = sourceHeight;
@@ -815,9 +826,9 @@ async function extractImageOcrText(file: File) {
   console.info("[AI_PIPELINE] step: image_ocr_started", { fileName: file.name, mimeType: file.type || inferMimeType(file), sizeBytes: file.size });
   const prepared = await prepareImageAttachment(file, {
     tracePrefix: "wine_list_ocr_upload",
-    maxDimension: isLikelyMobileDevice() ? 1024 : 1180,
-    baseQuality: isLikelyMobileDevice() ? 0.92 : 0.92,
-    maxBase64Length: isLikelyMobileDevice() ? 1_050_000 : 1_350_000,
+    maxDimension: isLikelyMobileDevice() ? 1920 : 2048,
+    baseQuality: 0.9,
+    maxBase64Length: isLikelyMobileDevice() ? 1_650_000 : 1_900_000,
     preprocessMode: "ocr",
   });
   trace("ocr_image_prepared", {
@@ -825,6 +836,15 @@ async function extractImageOcrText(file: File) {
     mimeType: prepared.mimeType,
     imageBase64Length: prepared.imageBase64?.length || 0,
     previewLength: prepared.previewUrl?.length || 0,
+  });
+  console.info("[AI_PIPELINE] step: ocr_image_validation", {
+    fileName: file.name,
+    decode_method_used: prepared.decodePath,
+    final_dimensions: {
+      width: prepared.resizedWidth,
+      height: prepared.resizedHeight,
+    },
+    base64_size: prepared.finalBase64Length || prepared.imageBase64?.length || 0,
   });
 
   let data: any;

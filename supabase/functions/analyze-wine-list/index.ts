@@ -648,6 +648,15 @@ serve(async (req) => {
 
     const rawBody = await req.json().catch(() => null);
     const inputSizeBytes = new TextEncoder().encode(JSON.stringify(rawBody ?? {})).length;
+    trace("request_received", {
+      request_id: requestId,
+      image_size: inputSizeBytes,
+      input_size_bytes: inputSizeBytes,
+      mimeType: rawBody?.mimeType,
+      fileName: rawBody?.fileName,
+      hasImageBase64: Boolean(rawBody?.imageBase64),
+      hasExtractedText: Boolean(rawBody?.extractedText),
+    });
     trace("upload_received", {
       request_id: requestId,
       mimeType: rawBody?.mimeType,
@@ -678,6 +687,14 @@ serve(async (req) => {
 
     const { extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
     const textValidation = validateTextPayload(extractedText, 10_000);
+    trace("validation_result", {
+      request_id: requestId,
+      ok: textValidation.ok,
+      extractedTextLength: String(extractedText || "").length,
+      normalizedTextLength: textValidation.ok ? textValidation.text.length : 0,
+      mimeType,
+      fileName,
+    });
     if (!textValidation.ok) {
       return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
