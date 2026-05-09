@@ -69,7 +69,7 @@ function isSupportedOcrFile(file: File) {
 }
 
 export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWine }: DishToWineDialogProps) {
-  const { data: wines } = useWines();
+  const { data: wines, isLoading: winesLoading, isFetching: winesFetching, refetch: refetchWines } = useWines();
   const fileRef = useRef<HTMLInputElement>(null);
   const fileGalleryRef = useRef<HTMLInputElement>(null);
   const menuFileRef = useRef<HTMLInputElement>(null);
@@ -110,6 +110,37 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     const fn = lastRetryRef.current;
     if (fn) fn();
   }, []);
+
+  const resolveCellarWines = useCallback(async () => {
+    const currentWines = Array.isArray(wines) ? wines : [];
+    if (currentWines.length > 0) return currentWines;
+
+    if (import.meta.env.DEV) {
+      console.info("[DishToWineDialog] cellar_wines_refetch_requested", {
+        winesLoading,
+        winesFetching,
+        currentCount: currentWines.length,
+      });
+    }
+
+    try {
+      const refreshed = await refetchWines();
+      const nextWines = Array.isArray(refreshed.data) ? refreshed.data : [];
+      if (import.meta.env.DEV) {
+        console.info("[DishToWineDialog] cellar_wines_refetched", {
+          rowCount: nextWines.length,
+          wines: nextWines,
+        });
+      }
+      return nextWines;
+    } catch (error) {
+      console.error("[DishToWineDialog] cellar_wines_refetch_failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      return currentWines;
+    }
+  }, [refetchWines, wines, winesFetching, winesLoading]);
   const reset = () => {
     requestSeqRef.current += 1; // invalidate any in-flight requests
     setSource(null);
@@ -161,18 +192,34 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     if (!query) return;
     lastRetryRef.current = () => { handleSearchCellar(chosenIntent); };
     const reqId = nextRequestId();
+    const resolvedCellarWines = await resolveCellarWines();
+    const resolvedAvailableWines = resolvedCellarWines.filter((w) => w.quantity > 0);
+    const resolvedCellarPairingPayload = resolvedAvailableWines.map((w) => ({
+      id: w.id,
+      name: w.name,
+      style: w.style,
+      grape: w.grape,
+      region: w.region,
+      country: w.country,
+      producer: w.producer,
+      vintage: w.vintage,
+      purchase_price: w.purchase_price ?? null,
+      current_value: w.current_value ?? null,
+      quantity: w.quantity,
+    }));
+
     console.info("[DishToWineDialog] cellar_wines_before_request", {
       requestId: reqId,
-      winesLength: availableWines.length,
+      winesLength: resolvedAvailableWines.length,
       mode: "cellar",
       dish: query,
     });
-    if (availableWines.length > 0 && cellarPairingPayload.length === 0) {
+    if (resolvedAvailableWines.length > 0 && resolvedCellarPairingPayload.length === 0) {
       const error = new Error("Cellar wines were loaded but not included in the pairing payload.");
       console.error("[DishToWineDialog] cellar_payload_guard_failed", {
         requestId: reqId,
-        winesLength: availableWines.length,
-        payloadLength: cellarPairingPayload.length,
+        winesLength: resolvedAvailableWines.length,
+        payloadLength: resolvedCellarPairingPayload.length,
         mode: "cellar",
         error: error.message,
       });
@@ -180,14 +227,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setError("Não conseguimos usar os vinhos da sua adega agora. Tente novamente.");
       return;
     }
+    if (resolvedAvailableWines.length === 0) {
+      console.warn("[DishToWineDialog] cellar_wines_empty_after_refetch", {
+        requestId: reqId,
+        mode: "cellar",
+        winesLoading,
+        winesFetching,
+      });
+    }
     setLoading(true);
     setError(null);
     setPairingResult(null);
     try {
       const pairingRequestPayload = {
         userInputDish: query,
-        cellarWines: cellarPairingPayload,
-        userWines: cellarPairingPayload,
+        cellarWines: resolvedCellarPairingPayload,
+        userWines: resolvedCellarPairingPayload,
         intent: chosenIntent ?? intent,
         mode: "cellar",
       };
@@ -198,12 +253,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       });
       const result = await generateWinePairing({
         userInputDish: query,
-        cellarWines: cellarPairingPayload,
+        cellarWines: resolvedCellarPairingPayload,
         mode: "cellar",
         intent: chosenIntent ?? intent,
       });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
-      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar", winesLength: cellarPairingPayload.length });
+      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar", winesLength: resolvedCellarPairingPayload.length });
       setError(null);
       const normalized = normalizePairingResponse(result, dish || "prato");
       setPairingResult(normalized);
@@ -221,7 +276,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     } finally {
       if (isLatest(reqId)) setLoading(false);
     }
-  }, [dish, intent, nextRequestId, availableWines, cellarPairingPayload]);
+  }, [dish, intent, nextRequestId, resolveCellarWines, winesFetching, winesLoading]);
 
   // Search food pairings for a selected wine
   const handleSearchWinePairings = useCallback(async () => {

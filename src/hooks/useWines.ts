@@ -152,13 +152,33 @@ export function useWines() {
     queryKey: ["wines", user?.id ?? "demo"],
     queryFn: async () => {
       if (user) {
+        if (import.meta.env.DEV) {
+          console.info("[useWines] query_started", {
+            userId: user.id,
+            profileType: user.user_metadata?.profile_type ?? null,
+          });
+        }
         const { data, error } = await supabase
           .from("wines")
           .select("id,user_id,name,producer,country,region,grape,vintage,style,purchase_price,current_value,quantity,rating,drink_from,drink_until,cellar_location,food_pairing,tasting_notes,image_url,created_at,updated_at")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
         if (error) throw error;
+        if (import.meta.env.DEV) {
+          console.info("[useWines] raw_db_response", {
+            userId: user.id,
+            rowCount: Array.isArray(data) ? data.length : 0,
+            rows: data,
+          });
+        }
         const normalized = await Promise.all((data as Wine[]).map((wine) => normalizeFetchedWine(wine)));
+        if (import.meta.env.DEV) {
+          console.info("[useWines] normalized_result", {
+            userId: user.id,
+            rowCount: normalized.length,
+            wines: normalized,
+          });
+        }
         return normalized;
       }
       if (sommelyxData?.wines?.length) {
