@@ -902,7 +902,7 @@ function buildFallbackDishSuggestionStyle(dish: string): { style: string; explan
   const styles = rule?.styles || ["tinto", "branco", "rosé", "espumante", "fortificado"];
   return styles.slice(0, 5).map((style) => ({
     style,
-    explanation: rule?.explanation || "A leitura foi simplificada, então priorizamos equilíbrio entre corpo, acidez e intensidade do prato.",
+    explanation: rule?.explanation || "A leitura não encontrou correspondência forte, então priorizamos corpo, acidez, tanino e intensidade para manter o prato equilibrado.",
   }));
 }
 
@@ -922,16 +922,16 @@ function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): Win
     const baseSuggestion: WineSuggestion = {
       wineName: wine.name,
       style,
-      reason: `${wine.name} é uma alternativa segura para "${safeDish}". ${hint.explanation} O corpo e a acidez ajudam a manter o prato em equilíbrio.`,
+      reason: `${wine.name} é uma alternativa segura para "${safeDish}". ${hint.explanation} O perfil de ${style} traz ${styleAromaCue(style)} e conversa com corpo ${structure.body}, acidez ${structure.acidity} e tanino ${structure.tannin}.`,
       fromCellar: true,
       match: "bom",
       harmony_type: matchedRule?.styles?.includes(style) ? "equilíbrio" : "contraste",
-      harmony_label: matchedRule ? matchedRule.explanation : "harmonia simplificada",
+      harmony_label: matchedRule ? matchedRule.explanation : "melhor opção disponível",
       grape: wine.grape || undefined,
       vintage: wine.vintage || undefined,
       region: wine.region || undefined,
       country: wine.country || undefined,
-      compatibilityLabel: "Sugestão revisável",
+      compatibilityLabel: "Melhor opção disponível",
       wineProfile: null,
     };
     return {
@@ -944,14 +944,14 @@ function fallbackPairingsForDish(dish: string, cellarWines?: WineSummary[]): Win
     const style = hint.style;
     const structure = pairingStructureForStyle(style, safeDish);
     const baseSuggestion: WineSuggestion = {
-      wineName: `Sugestão padrão ${index + 1}`,
+      wineName: style === "tinto" ? "Tinto estruturado" : style === "branco" ? "Branco fresco" : style === "rosé" ? "Rosé vibrante" : style === "espumante" ? "Espumante incisivo" : "Fortificado intenso",
       style,
-      reason: `Baseado em "${safeDish}", a opção ${hint.style} preserva a leitura estrutural do prato. ${hint.explanation} Se quiser precisão maior, ajuste a escolha manualmente.`,
+      reason: `${hint.explanation} Para "${safeDish}", ${styleAromaCue(style)} e a estrutura ${structure.body}/${structure.acidity}/${structure.tannin} oferecem a melhor leitura disponível sem cair em uma sugestão genérica.`,
       fromCellar: false,
       match: index === 0 ? "perfeito" : index < 3 ? "muito bom" : "bom",
       harmony_type: "equilíbrio",
-      harmony_label: "análise simplificada",
-      compatibilityLabel: "Sugestão padrão",
+      harmony_label: "melhor opção disponível",
+      compatibilityLabel: index === 0 ? "Melhor opção disponível" : "Boa opção",
       wineProfile: null,
     };
 
@@ -1056,7 +1056,7 @@ function dishStructureFromAnalysis(dish: string): WinePairingAnalysisBlock {
     fat,
     acidity,
     texture: analysis.intensity === "leve" ? "delicada" : analysis.intensity === "forte" ? "estruturada" : "equilibrada",
-    flavor_profile: analysis.flavors.length > 0 ? analysis.flavors.join(", ") : "perfil equilibrado e pouco específico",
+    flavor_profile: analysis.flavors.length > 0 ? analysis.flavors.join(", ") : "leitura estrutural do prato",
     cooking_method: analysis.cooking || "não identificado",
   };
 }
@@ -1153,7 +1153,7 @@ function buildWinePairingReason(
   ]
     .map(normalizeDecisionSupportText)
     .filter((part) => part.length > 0);
-  const originText = origin.length > 0 ? ` O rótulo traz ${origin.join(" · ")}, o que diferencia esta leitura de um perfil genérico.` : "";
+  const originText = origin.length > 0 ? ` O rótulo traz ${origin.join(" · ")}, o que diferencia esta leitura de uma sugestão genérica.` : "";
   return `${baseReason}${originText} A combinação se apoia em corpo ${structure.body}, acidez ${structure.acidity} e tanino ${structure.tannin}.`;
 }
 
@@ -1280,7 +1280,7 @@ function buildGeneratedPairingsFromSuggestions(
         style: suggestion.style,
         why_it_works: buildWinePairingReason(suggestion, dish, structure_match),
         structure_match,
-        extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Você pode ajustar manualmente",
+        extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Melhor opção disponível",
         wineProfile: suggestion.wineProfile ?? null,
         decision_support: normalizeWineDecisionSupport(
           suggestion.decision_support,
@@ -1300,7 +1300,7 @@ function buildGeneratedPairingsFromSuggestions(
       style: suggestion.style,
       why_it_works: buildWinePairingReason(suggestion, dish, structure_match),
       structure_match,
-      extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Você pode ajustar manualmente",
+      extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Melhor opção disponível",
       wineProfile: suggestion.wineProfile ?? null,
       decision_support: normalizeWineDecisionSupport(
         suggestion.decision_support,
@@ -1328,16 +1328,16 @@ function buildGeneratedPairingsFromSuggestions(
     const index = merged.length;
     const style = ["tinto", "branco", "rosé", "espumante", "fortificado"][index % 5];
     pushSuggestion({
-      wine: `Sugestão padrão ${index + 1}`,
+      wine: style === "tinto" ? "Tinto estruturado" : style === "branco" ? "Branco fresco" : style === "rosé" ? "Rosé vibrante" : style === "espumante" ? "Espumante incisivo" : "Fortificado intenso",
       style,
-      why_it_works: `Baseado em "${dish}", esta opção preserva o equilíbrio entre corpo, acidez e intensidade do prato.`,
+      why_it_works: `Não há correspondência forte; esta é a melhor leitura disponível para "${dish}". O estilo ${style} traz ${styleAromaCue(style)} e mantém corpo ${pairingStructureForStyle(style, dish).body}, acidez ${pairingStructureForStyle(style, dish).acidity} e tanino ${pairingStructureForStyle(style, dish).tannin} em equilíbrio.`,
       structure_match: pairingStructureForStyle(style, dish),
-      extra_tip: "Você pode ajustar manualmente",
+      extra_tip: "Melhor opção disponível",
       decision_support: buildWineDecisionSupport(
         {
-          wineName: `Sugestão padrão ${index + 1}`,
+          wineName: style === "tinto" ? "Tinto estruturado" : style === "branco" ? "Branco fresco" : style === "rosé" ? "Rosé vibrante" : style === "espumante" ? "Espumante incisivo" : "Fortificado intenso",
           style,
-          reason: `Baseado em "${dish}", esta opção preserva o equilíbrio entre corpo, acidez e intensidade do prato.`,
+          reason: `Não há correspondência forte; esta é a melhor leitura disponível para "${dish}".`,
           fromCellar: false,
           match: "bom",
         },
@@ -1352,7 +1352,7 @@ function buildGeneratedPairingsFromSuggestions(
     analysis,
     pairings: merged.slice(0, 5),
     fallback: fallback || normalizedSuggestions.length === 0,
-    note: fallback || normalizedSuggestions.length === 0 ? "análise simplificada" : undefined,
+    note: fallback || normalizedSuggestions.length === 0 ? "Não há correspondência forte; exibimos as melhores opções disponíveis." : undefined,
   };
 }
 
@@ -1362,7 +1362,7 @@ function fallbackPairing(dish: string): GeneratedWinePairing {
       fat: "médio",
       acidity: "média",
       texture: "equilibrada",
-      flavor_profile: "genérico",
+      flavor_profile: "leitura estrutural do prato",
       cooking_method: "não identificado",
     },
     pairings: fallbackPairingsForDish(dish)
@@ -1375,7 +1375,7 @@ function fallbackPairing(dish: string): GeneratedWinePairing {
         extra_tip: suggestion.compatibilityLabel || suggestion.harmony_label || "Você pode ajustar manualmente",
       })),
     fallback: true,
-    note: "análise simplificada",
+    note: "Não há correspondência forte; exibimos as melhores opções disponíveis.",
   };
 }
 
@@ -1415,7 +1415,7 @@ export function normalizeGeneratedWinePairingResponse(data: unknown, dish: strin
           style: typeof pairing.style === "string" && pairing.style.trim().length > 0 ? pairing.style.trim() : "Médio corpo",
           why_it_works: typeof pairing.why_it_works === "string" && pairing.why_it_works.trim().length > 0
             ? pairing.why_it_works.trim()
-            : "Sugestão simplificada com base no equilíbrio do prato.",
+            : `Não há correspondência forte; esta é a melhor leitura disponível para "${dish}".`,
           structure_match: {
             acidity: typeof pairing.structure_match === "object" && pairing.structure_match !== null && typeof (pairing.structure_match as Record<string, unknown>).acidity === "string" && String((pairing.structure_match as Record<string, unknown>).acidity).trim().length > 0
               ? String((pairing.structure_match as Record<string, unknown>).acidity)
@@ -1429,7 +1429,7 @@ export function normalizeGeneratedWinePairingResponse(data: unknown, dish: strin
           },
           extra_tip: typeof pairing.extra_tip === "string" && pairing.extra_tip.trim().length > 0
             ? pairing.extra_tip.trim()
-            : "Você pode ajustar manualmente",
+            : "Melhor opção disponível",
         }))
         .filter((pairing) => pairing.wine.trim().length > 0)
     : [];
@@ -1456,17 +1456,17 @@ export function normalizeGeneratedWinePairingResponse(data: unknown, dish: strin
         tannin: strictPairings[index]?.structure_match.tannin || "médio",
         body: strictPairings[index]?.structure_match.body || "médio",
       },
-      extra_tip: strictPairings[index]?.extra_tip || "Você pode ajustar manualmente",
+      extra_tip: strictPairings[index]?.extra_tip || "Melhor opção disponível",
     }));
 
     while (normalized.length < 5) {
       const fallbackSuggestion = fallback.pairings[normalized.length];
       normalized.push(fallbackSuggestion || {
-        wine: `Sugestão padrão ${normalized.length + 1}`,
+        wine: ["Tinto estruturado", "Branco fresco", "Rosé vibrante", "Espumante incisivo", "Fortificado intenso"][normalized.length % 5],
         style: "Médio corpo",
-        why_it_works: `Baseado em "${dish}", esta opção preserva o equilíbrio entre corpo, acidez e intensidade do prato.`,
+        why_it_works: `Não há correspondência forte; esta é a melhor leitura disponível para "${dish}".`,
         structure_match: { acidity: "média", tannin: "médio", body: "médio" },
-        extra_tip: "Você pode ajustar manualmente",
+        extra_tip: "Melhor opção disponível",
       });
     }
 
@@ -1477,7 +1477,7 @@ export function normalizeGeneratedWinePairingResponse(data: unknown, dish: strin
       note: typeof payload.note === "string" && payload.note.trim().length > 0
         ? payload.note
         : Boolean(payload.fallback) || strictPairings.length < 5
-          ? "análise simplificada"
+          ? "Não há correspondência forte; exibimos as melhores opções disponíveis."
           : undefined,
     };
   }

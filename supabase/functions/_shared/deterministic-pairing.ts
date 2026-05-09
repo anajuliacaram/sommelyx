@@ -198,6 +198,8 @@ const COUNTRY_STYLE_HINTS: Record<string, string[]> = {
   uruguai: ["red", "white"],
 };
 
+const FALLBACK_STYLE_SEQUENCE = ["red", "white", "rose", "sparkling", "fortified"] as const;
+
 function normalizeText(value?: string | null) {
   return String(value ?? "")
     .toLowerCase()
@@ -250,6 +252,151 @@ function makeWineProfile(wine: WineLike, category: string) {
     country: wine.country || null,
     region: wine.region || null,
     grape,
+  };
+}
+
+function styleFlavorCue(style?: string | null) {
+  const normalizedStyle = normalizeText(style);
+  if (/\b(cabernet sauvignon|merlot|malbec|syrah|shiraz|tempranillo|sangiovese|nebbiolo|tannat|pinot noir|carmen[eé]re|tinto|red)\b/i.test(normalizedStyle)) {
+    return "fruta madura, especiarias secas e estrutura tânica";
+  }
+  if (/\b(chardonnay|sauvignon blanc|riesling|albari?o|alvarinho|pinot grigio|pinot gris|verdicchio|verdelho|moscato|branco|white)\b/i.test(normalizedStyle)) {
+    return "cítricos, fruta branca e acidez precisa";
+  }
+  if (/\b(ros[eé]|rose|grenache|garnacha)\b/i.test(normalizedStyle)) {
+    return "fruta vermelha fresca, textura leve e frescor";
+  }
+  if (/\b(champagne|prosecco|cava|franciacorta|cr[eé]mant|brut|espumante|sparkling)\b/i.test(normalizedStyle)) {
+    return "borbulha, maçã verde, tensão e limpeza de palato";
+  }
+  if (/\b(port|porto|sherry|madeira|marsala|fortificado|fortified)\b/i.test(normalizedStyle)) {
+    return "fruta seca, nozes, álcool integrado e doçura";
+  }
+  return "frescor, equilíbrio e leitura estrutural";
+}
+
+function styleDisplayName(style?: string | null) {
+  const normalizedStyle = normalizeText(style);
+  if (/\b(cabernet sauvignon|merlot|malbec|syrah|shiraz|tempranillo|sangiovese|nebbiolo|tannat|pinot noir|carmen[eé]re|tinto|red)\b/i.test(normalizedStyle)) return "Tinto estruturado";
+  if (/\b(chardonnay|sauvignon blanc|riesling|albari?o|alvarinho|pinot grigio|pinot gris|verdicchio|verdelho|moscato|branco|white)\b/i.test(normalizedStyle)) return "Branco fresco";
+  if (/\b(ros[eé]|rose|grenache|garnacha)\b/i.test(normalizedStyle)) return "Rosé vibrante";
+  if (/\b(champagne|prosecco|cava|franciacorta|cr[eé]mant|brut|espumante|sparkling)\b/i.test(normalizedStyle)) return "Espumante incisivo";
+  if (/\b(port|porto|sherry|madeira|marsala|fortificado|fortified)\b/i.test(normalizedStyle)) return "Fortificado intenso";
+  return "Opção técnica";
+}
+
+function pairingStructureForStyle(style?: string | null, dish?: string | null) {
+  const normalizedStyle = normalizeText(style);
+  const normalizedDish = normalizeText(dish);
+  const hasFattyDish = /gordura|creme|queijo|manteiga|costela|picanha|cordeiro|salm[aã]o|salmão/i.test(normalizedDish);
+  const hasDelicateDish = /salada|sushi|peixe|camar[aã]o|frango|frutos do mar|legumes/i.test(normalizedDish);
+
+  if (/\b(cabernet sauvignon|merlot|malbec|syrah|shiraz|tempranillo|sangiovese|nebbiolo|tannat|pinot noir|carmen[eé]re|tinto|red)\b/i.test(normalizedStyle)) {
+    return {
+      acidity: hasFattyDish ? "média a alta" : "média",
+      tannin: "médio a alto",
+      body: hasFattyDish ? "médio a encorpado" : "médio",
+    };
+  }
+
+  if (/\b(chardonnay|sauvignon blanc|riesling|albari?o|alvarinho|pinot grigio|pinot gris|verdicchio|verdelho|moscato|branco|white)\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "alta",
+      tannin: "baixo",
+      body: hasDelicateDish ? "leve a médio" : "médio",
+    };
+  }
+
+  if (/\b(ros[eé]|rose|grenache|garnacha)\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "média a alta",
+      tannin: "baixo",
+      body: "leve a médio",
+    };
+  }
+
+  if (/\b(champagne|prosecco|cava|franciacorta|cr[eé]mant|brut|espumante|sparkling)\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "alta",
+      tannin: "baixo",
+      body: "leve",
+    };
+  }
+
+  if (/\b(port|porto|sherry|madeira|marsala|fortificado|fortified)\b/i.test(normalizedStyle)) {
+    return {
+      acidity: "média",
+      tannin: "baixo",
+      body: "encorpado",
+    };
+  }
+
+  return {
+    acidity: hasFattyDish ? "média" : "média a alta",
+    tannin: "médio",
+    body: hasDelicateDish ? "leve a médio" : "médio",
+  };
+}
+
+function buildDishSpecificSuggestion(
+  dish: string,
+  style: string,
+  index: number,
+  wine?: WineLike | null,
+  noStrongMatch = false,
+): SuggestionResult {
+  const rule = pickDishRule(dish);
+  const displayName = wine?.name?.trim() || `${styleDisplayName(style)} ${index + 1}`;
+  const wineStyle = styleDisplayName(style);
+  const flavorCue = styleFlavorCue(style);
+  const originParts = [wine?.producer, wine?.region, wine?.country, wine?.vintage != null ? `safra ${wine.vintage}` : null]
+    .map((part) => normalizeText(part))
+    .filter((part) => part.length > 0);
+  const originText = originParts.length > 0
+    ? `O rótulo traz ${originParts.join(" · ")}, o que dá um recorte mais preciso que uma leitura genérica. `
+    : "";
+  const harmony = rule?.harmony_type || (normalizeText(style) === "sparkling" || normalizeText(style) === "fortified" ? "contraste" : "equilíbrio");
+  const structure = pairingStructureForStyle(style, dish);
+  const dishAnchor = rule?.explanation || "a estrutura do prato";
+  const explicitPrefix = noStrongMatch
+    ? `Não há correspondência forte com a adega; esta é a melhor opção disponível para "${dish}". `
+    : "";
+
+  return {
+    wineName: displayName,
+    style: wineStyle,
+    grape: wine?.grape || (normalizeText(style) === "red" ? "Blend" : normalizeText(style) === "white" ? "Blend" : wineStyle),
+    vintage: Number.isFinite(Number(wine?.vintage)) ? Number(wine!.vintage) : 0,
+    region: wine?.region || "",
+    country: wine?.country || "",
+    reason: `${explicitPrefix}${displayName} funciona com "${dish}" porque ${dishAnchor.toLowerCase()}. ${originText}Perfil aromático esperado: ${flavorCue}. A lógica é de ${harmony === "contraste" ? "contraste" : "complemento"}: corpo ${structure.body}, acidez ${structure.acidity} e tanino ${structure.tannin}.`,
+    fromCellar: Boolean(wine),
+    match: noStrongMatch ? "sem correspondência forte" : index === 0 ? "perfeito" : index === 1 ? "muito bom" : "bom",
+    harmony_type: harmony,
+    harmony_label: rule?.harmony_label || (noStrongMatch ? "melhor opção disponível" : "harmonia técnica"),
+    compatibilityLabel: noStrongMatch ? "Melhor opção disponível" : index === 0 ? "Excelente escolha" : index === 1 ? "Alta compatibilidade" : "Boa opção",
+    wineProfile: makeWineProfile(wine || { name: displayName }, normalizeText(style) in STYLE_ALIASES ? STYLE_ALIASES[normalizeText(style)] : "red"),
+    decision_support: {
+      sensory_profile: {
+        aroma: flavorCue,
+        palate: `Ataque ${structure.body === "encorpado" ? "amplo" : structure.body === "leve" ? "preciso" : "equilibrado"}, meio de boca ${structure.acidity.includes("alta") ? "vivo" : "redondo"} e final ${structure.tannin.includes("alto") ? "firme" : "polido"}.`,
+        structure: `Corpo ${structure.body}, acidez ${structure.acidity} e tanino ${structure.tannin}.`,
+      },
+      pairing_logic: {
+        fat_vs_acidity: `${structure.acidity} corta a gordura e refresca a boca.`,
+        protein_vs_tannin: `${structure.tannin} segura a proteína e evita aspereza.`,
+        intensity_balance: `${structure.body} acompanha a intensidade do prato sem achatar os sabores.`,
+      },
+      when_to_choose: {
+        ideal_scenario: `Escolha ideal quando "${dish}" vier na forma mais intensa ou clássica da receita.`,
+        alternative_use: `Alternativa segura para manter a lógica técnica sem depender de um rótulo específico.`,
+      },
+      confidence_explanation: noStrongMatch
+        ? "Confiança média porque a leitura estrutural é consistente, mas não há correspondência forte na adega."
+        : "Confiança alta ou média porque o estilo do vinho conversa diretamente com o prato.",
+      confidence: noStrongMatch ? "média" : "alta",
+    },
+    source: "deterministic",
   };
 }
 
@@ -452,28 +599,34 @@ export function buildDeterministicSuggestionsForDish(dish: string, userWines: Wi
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
 
-  if (ranked.length === 0) return null;
+  if (ranked.length === 0) {
+    const fallbackWines = userWines
+      .filter((wine) => wine?.name?.trim())
+      .slice(0, 5);
+
+    if (fallbackWines.length === 0) return null;
+
+    const suggestions: SuggestionResult[] = fallbackWines.map((wine, index) => {
+      const category = detectStyleCategory(wine);
+      const style = toPortugueseStyle(category === "unknown" ? "red" : category);
+      return buildDishSpecificSuggestion(dish, style, index, wine, true);
+    });
+
+    return {
+      source: "deterministic" as const,
+      suggestions,
+      dishProfile: {
+        intensity: rule.category === "carne" ? "alta" : rule.category === "mar" ? "leve" : "média",
+        fat: rule.category === "queijo" ? "alta" : "moderada",
+        category: rule.category,
+        explanation: `Não há correspondência forte na adega; mostramos as melhores opções disponíveis. ${rule.explanation}`,
+      },
+    };
+  }
 
   const suggestions: SuggestionResult[] = ranked.map(({ wine, category }, index) => {
     const style = toPortugueseStyle(category === "unknown" ? "red" : category);
-    const wineName = wine.name || `Vinho ${index + 1}`;
-    const reason = `${wineName} funciona com "${dish}" porque ${rule.explanation.toLowerCase()}`;
-    return {
-      wineName,
-      style,
-      grape: wine.grape || "Blend",
-      vintage: Number.isFinite(Number(wine.vintage)) ? Number(wine.vintage) : 0,
-      region: wine.region || "",
-      country: wine.country || "",
-      reason,
-      fromCellar: true,
-      match: index === 0 ? "perfeito" : index === 1 ? "muito bom" : "bom",
-      harmony_type: rule.harmony_type,
-      harmony_label: rule.harmony_label,
-      compatibilityLabel: index === 0 ? "Excelente escolha" : index === 1 ? "Alta compatibilidade" : "Boa opção",
-      wineProfile: makeWineProfile(wine, category === "unknown" ? "red" : category),
-      source: "deterministic",
-    };
+    return buildDishSpecificSuggestion(dish, style, index, wine, false);
   });
 
   return {
@@ -491,46 +644,38 @@ export function buildDeterministicSuggestionsForDish(dish: string, userWines: Wi
 export function buildBasicSafeSuggestionsForDish(dish: string, userWines: WineLike[]) {
   const base = buildDeterministicSuggestionsForDish(dish, userWines);
   if (base) return base;
-  const fallbackSuggestions = userWines.slice(0, 5).map((wine, index) => ({
-    wineName: wine.name || `Vinho ${index + 1}`,
-    style: toPortugueseStyle(detectStyleCategory(wine) === "unknown" ? "red" : detectStyleCategory(wine)),
-    grape: wine.grape || "Blend",
-    vintage: Number.isFinite(Number(wine.vintage)) ? Number(wine.vintage) : 0,
-    region: wine.region || "",
-    country: wine.country || "",
-    reason: `${wine.name || `Vinho ${index + 1}`} pode funcionar com "${dish}" por equilíbrio de corpo, acidez e intensidade.`,
-    fromCellar: true,
-    match: index === 0 ? "perfeito" : index === 1 ? "muito bom" : "bom",
-    harmony_type: "equilíbrio" as const,
-    harmony_label: "equilíbrio técnico",
-    compatibilityLabel: index === 0 ? "Excelente escolha" : index === 1 ? "Alta compatibilidade" : "Boa opção",
-    wineProfile: makeWineProfile(wine, detectStyleCategory(wine) === "unknown" ? "red" : detectStyleCategory(wine)),
-    source: "fallback" as const,
+  const rule = pickDishRule(dish);
+  const sourceWines = userWines.length > 0 ? userWines : FALLBACK_STYLE_SEQUENCE.map((style, index) => ({
+    name: `${styleDisplayName(style)} ${index + 1}`,
+    style,
+    grape: style === "red" ? "Blend" : style === "white" ? "Blend" : styleDisplayName(style),
+    country: null,
+    region: null,
+    producer: null,
+    vintage: null,
   }));
+  const fallbackSuggestions = sourceWines.slice(0, 5).map((wine, index) => {
+    const category = detectStyleCategory(wine);
+    const style = toPortugueseStyle(category === "unknown" ? normalizeText((wine as any).style) === "white" ? "white" : "red" : category);
+    return buildDishSpecificSuggestion(
+      dish,
+      style,
+      index,
+      wine,
+      userWines.length === 0 || Boolean(rule) === false,
+    );
+  });
 
   return {
     source: "fallback" as const,
-    suggestions: fallbackSuggestions.length > 0 ? fallbackSuggestions : [{
-      wineName: "Vinho da adega",
-      style: "tinto",
-      grape: "Blend",
-      vintage: 0,
-      region: "",
-      country: "",
-      reason: "Sugestão simplificada baseada em equilíbrio de corpo e acidez.",
-      fromCellar: true,
-      match: "bom",
-      harmony_type: "equilíbrio",
-      harmony_label: "equilíbrio técnico",
-      compatibilityLabel: "Boa opção",
-      wineProfile: makeWineProfile({ name: "Vinho da adega" }, "red"),
-      source: "fallback" as const,
-    }],
+    suggestions: fallbackSuggestions.slice(0, 5),
     dishProfile: {
       intensity: "média",
       fat: "moderada",
       category: "geral",
-      explanation: "Sugestão simplificada baseada em equilíbrio de corpo e acidez.",
+      explanation: rule
+        ? `Não há correspondência forte; mostramos as melhores opções disponíveis. ${rule.explanation}`
+        : "Não há correspondência forte; mostramos as melhores opções disponíveis com base em corpo, acidez e intensidade.",
     },
   };
 }
