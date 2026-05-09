@@ -69,6 +69,22 @@ const ADD_WINE_FORM_FIELDS = [
   "labelImageBase64",
 ] as const;
 
+const SCAN_PREFILL_FORM_FIELDS = [
+  "name",
+  "producer",
+  "vintage",
+  "style",
+  "country",
+  "region",
+  "grape",
+  "drink_from",
+  "drink_until",
+  "purchase_price",
+  "estimated_price",
+  "food_pairing",
+  "cellar_location",
+] as const;
+
 const styles = [
   { value: "tinto", label: "Tinto" },
   { value: "branco", label: "Branco" },
@@ -475,6 +491,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       responseKeys,
     });
     const mappedData = mapScanResultToInitialValues(data);
+    const meaningfulMappedFields = Object.entries(mappedData)
+      .filter(([key, value]) => SCAN_PREFILL_FORM_FIELDS.includes(key as (typeof SCAN_PREFILL_FORM_FIELDS)[number]) && value != null && value !== "")
+      .map(([key]) => key);
     console.info("[AddWineDialog] scan_normalized", {
       source: "scan-wine-label",
       normalized: mappedData,
@@ -484,18 +503,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       responseVsFormExpectedFields: {
         expectedFields: ADD_WINE_FORM_FIELDS,
         responseKeys,
-        mappedFields: Object.entries(mappedData)
-          .filter(([, value]) => value != null && value !== "")
-          .map(([key]) => key),
+        mappedFields: meaningfulMappedFields,
         missingFromResponse: ADD_WINE_FORM_FIELDS.filter((field) => !responseKeys.includes(field)),
       },
     });
 
     console.info("[AddWineDialog] mapped_fields", {
       source: "scan-wine-label",
-      mappedFields: Object.entries(mappedData)
-        .filter(([, value]) => value != null && value !== "")
-        .map(([key]) => key),
+      mappedFields: meaningfulMappedFields,
       mappedValues: {
         name: mappedData.name || null,
         producer: mappedData.producer || null,
@@ -531,7 +546,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       labelImageBase64: data?.labelImageBase64 ?? null,
     }, "scan");
 
-    const populatedCount = Object.keys(appliedFields).length;
+    const populatedCount = Object.keys(appliedFields).filter((field) => SCAN_PREFILL_FORM_FIELDS.includes(field as (typeof SCAN_PREFILL_FORM_FIELDS)[number])).length;
     if (populatedCount > 0) {
       toast({ title: isCommercial ? "Dados do vinho aplicados" : "🍷 Dados do rótulo aplicados" });
     }
