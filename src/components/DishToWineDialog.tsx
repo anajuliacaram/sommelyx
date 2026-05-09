@@ -161,27 +161,49 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     if (!query) return;
     lastRetryRef.current = () => { handleSearchCellar(chosenIntent); };
     const reqId = nextRequestId();
+    console.info("[DishToWineDialog] cellar_wines_before_request", {
+      requestId: reqId,
+      winesLength: availableWines.length,
+      mode: "cellar",
+      dish: query,
+    });
+    if (availableWines.length > 0 && cellarPairingPayload.length === 0) {
+      const error = new Error("Cellar wines were loaded but not included in the pairing payload.");
+      console.error("[DishToWineDialog] cellar_payload_guard_failed", {
+        requestId: reqId,
+        winesLength: availableWines.length,
+        payloadLength: cellarPairingPayload.length,
+        mode: "cellar",
+        error: error.message,
+      });
+      if (import.meta.env.DEV) throw error;
+      setError("Não conseguimos usar os vinhos da sua adega agora. Tente novamente.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setPairingResult(null);
     try {
+      const pairingRequestPayload = {
+        userInputDish: query,
+        cellarWines: cellarPairingPayload,
+        userWines: cellarPairingPayload,
+        intent: chosenIntent ?? intent,
+        mode: "cellar",
+      };
+      console.info("[DishToWineDialog] cellar_pairing_payload", {
+        requestId: reqId,
+        mode: "cellar",
+        payload: pairingRequestPayload,
+      });
       const result = await generateWinePairing({
         userInputDish: query,
-        cellarWines: wines?.filter((w) => w.quantity > 0)?.map((w) => ({
-          name: w.name,
-          style: w.style,
-          grape: w.grape,
-          region: w.region,
-          country: w.country,
-          producer: w.producer,
-          vintage: w.vintage,
-          purchase_price: w.purchase_price ?? null,
-          current_value: w.current_value ?? null,
-        })) ?? null,
+        cellarWines: cellarPairingPayload,
+        mode: "cellar",
         intent: chosenIntent ?? intent,
       });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
-      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar" });
+      console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar", winesLength: cellarPairingPayload.length });
       setError(null);
       const normalized = normalizePairingResponse(result, dish || "prato");
       setPairingResult(normalized);
@@ -199,7 +221,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     } finally {
       if (isLatest(reqId)) setLoading(false);
     }
-  }, [dish, wines, intent, nextRequestId]);
+  }, [dish, intent, nextRequestId, availableWines, cellarPairingPayload]);
 
   // Search food pairings for a selected wine
   const handleSearchWinePairings = useCallback(async () => {
@@ -662,6 +684,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
   const selectedWine = wines?.find((w) => w.id === selectedWineId);
   const availableWines = wines?.filter((w) => w.quantity > 0) || [];
+  const cellarPairingPayload = useMemo(
+    () => availableWines.map((w) => ({
+      id: w.id,
+      name: w.name,
+      style: w.style,
+      grape: w.grape,
+      region: w.region,
+      country: w.country,
+      producer: w.producer,
+      vintage: w.vintage,
+      purchase_price: w.purchase_price ?? null,
+      current_value: w.current_value ?? null,
+      quantity: w.quantity,
+    })),
+    [availableWines],
+  );
   const normalizedPairingResult = useMemo<GeneratedWinePairing | null>(() => {
     if (!pairingResult) return null;
     try {

@@ -309,6 +309,7 @@ export interface GeneratedWinePairing {
 export type WinePairingInput =
   | string
   | {
+      mode?: "cellar" | "external" | "dish_only" | "wine_to_food" | "food_to_wine" | null;
       userInputDish?: string | null;
       extractedDishFromImage?: string | null;
       ocrText?: string | null;
@@ -1507,33 +1508,55 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
       input?.wineVintage ||
       input?.wineCountry,
     );
+    const cellarWines = typeof input === "string"
+      ? undefined
+      : Array.isArray(input.cellarWines)
+        ? input.cellarWines
+        : undefined;
+    const requestMode = typeof input === "string"
+      ? "food-to-wine"
+      : hasWineContext
+        ? "wine-to-food"
+        : cellarWines?.length
+          ? "cellar"
+          : "food-to-wine";
     const requestPayload = typeof input === "string"
       ? {
-          mode: "food-to-wine",
+          mode: requestMode,
           dish: finalDish,
           intent: "everyday",
           cellarWines: undefined,
+          userWines: undefined,
         }
       : hasWineContext
         ? {
-            mode: "wine-to-food",
-            wineName: input.wineName,
-            wineStyle: input.wineStyle,
-            wineGrape: input.wineGrape,
-            wineRegion: input.wineRegion,
-            wineProducer: input.wineProducer,
-            wineVintage: input.wineVintage,
-            wineCountry: input.wineCountry,
-            dish: finalDish,
-            intent: input.intent,
-            cellarWines: input.cellarWines ?? undefined,
-          }
+          mode: requestMode,
+          wineName: input.wineName,
+          wineStyle: input.wineStyle,
+          wineGrape: input.wineGrape,
+          wineRegion: input.wineRegion,
+          wineProducer: input.wineProducer,
+          wineVintage: input.wineVintage,
+          wineCountry: input.wineCountry,
+          dish: finalDish,
+          intent: input.intent,
+          cellarWines: cellarWines,
+          userWines: cellarWines,
+        }
         : {
-            mode: "food-to-wine",
+            mode: requestMode,
             dish: finalDish,
             intent: input.intent ?? "everyday",
-            cellarWines: input.cellarWines ?? undefined,
+            cellarWines: cellarWines,
+            userWines: cellarWines,
           };
+
+    console.info("[generateWinePairing] request_payload", {
+      mode: requestMode,
+      hasWineContext,
+      cellarWinesCount: cellarWines?.length ?? 0,
+      payload: requestPayload,
+    });
 
     const response = await invokeEdgeFunction<any>(
       "wine-pairings",

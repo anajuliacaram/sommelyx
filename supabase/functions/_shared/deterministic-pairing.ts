@@ -260,7 +260,10 @@ export function shouldUseDeterministicPairing(wine: WineLike, dish?: string | nu
 }
 
 export function parseSommelierPairingInput(body: Record<string, unknown>) {
-  const mode = body.mode === "food-to-wine" ? "food-to-wine" : "wine-to-food";
+  const rawMode = typeof body.mode === "string" ? body.mode.trim() : "";
+  const mode = rawMode === "wine-to-food"
+    ? "wine-to-food"
+    : "food-to-wine";
   const wineName = typeof body.wineName === "string" ? body.wineName.trim() : "";
   const wineStyle = typeof body.wineStyle === "string" ? body.wineStyle.trim() : "";
   const wineGrape = typeof body.wineGrape === "string" ? body.wineGrape.trim() : "";
@@ -270,7 +273,11 @@ export function parseSommelierPairingInput(body: Record<string, unknown>) {
   const wineVintage = Number.isFinite(Number(body.wineVintage)) ? Number(body.wineVintage) : null;
   const dish = typeof body.dish === "string" ? body.dish.trim() : "";
   const intent = typeof body.intent === "string" ? body.intent.trim() : "";
-  const userWines = Array.isArray(body.userWines) ? body.userWines : [];
+  const userWines = Array.isArray(body.userWines)
+    ? body.userWines
+    : Array.isArray(body.cellarWines)
+      ? body.cellarWines
+      : [];
   return {
     mode,
     wineName,
