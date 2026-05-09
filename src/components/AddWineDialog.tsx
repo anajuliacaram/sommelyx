@@ -280,7 +280,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     return () => { if (estimateTimer.current) clearTimeout(estimateTimer.current); };
   }, [name, producer, vintage, style, country, region, grape, fetchEstimate, currentValueTouched, isCommercial]);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
     setCountry(""); setRegion(""); setGrape(""); setLastPaid(""); setLastPaidDate(new Date().toISOString().split("T")[0]); setCurrentValue(""); setLocation({});
     setNoLocationInfo(false);
@@ -290,7 +290,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setAiPrefilledFields({});
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
-  };
+  }, []);
 
   const isMeaningfulScanValue = (value: unknown) => {
     if (value == null) return false;
@@ -407,6 +407,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
   useEffect(() => {
     if (!open || !initialValues) return;
+    reset();
     hydrateScanPrefill(initialValues, "initialValues");
   }, [hydrateScanPrefill, initialValues, open]);
 
@@ -439,6 +440,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       foodPairing: mappedData.food_pairing,
       cellarLocation: mappedData.cellar_location,
     };
+
+    reset();
 
     const appliedFields = hydrateScanPrefill({
       ...prefill,

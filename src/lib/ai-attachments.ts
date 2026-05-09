@@ -601,7 +601,7 @@ async function prepareScanImageAttachment(file: File): Promise<PreparedAiAnalysi
   return await prepareImageAttachment(file, {
     tracePrefix: "scan_upload",
     maxDimension: 1024,
-    baseQuality: 0.72,
+    baseQuality: 0.92,
     maxBase64Length: 1_000_000,
   });
 }
@@ -816,7 +816,7 @@ async function extractImageOcrText(file: File) {
   const prepared = await prepareImageAttachment(file, {
     tracePrefix: "wine_list_ocr_upload",
     maxDimension: isLikelyMobileDevice() ? 1024 : 1180,
-    baseQuality: isLikelyMobileDevice() ? 0.76 : 0.82,
+    baseQuality: isLikelyMobileDevice() ? 0.92 : 0.92,
     maxBase64Length: isLikelyMobileDevice() ? 1_050_000 : 1_350_000,
     preprocessMode: "ocr",
   });
