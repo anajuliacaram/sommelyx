@@ -9,7 +9,7 @@ type WineLike = {
   quantity?: number | null;
 };
 
-export type PairingMode = "wine-to-food" | "food-to-wine";
+export type PairingMode = "wine-to-food" | "food-to-wine" | "cellar";
 
 type PairingResult = {
   dish: string;
@@ -39,6 +39,11 @@ type SuggestionResult = {
   wineProfile: Record<string, unknown>;
   decision_support?: Record<string, unknown> | null;
   source?: "deterministic";
+};
+
+export type RankedCellarWine = {
+  wine: WineLike;
+  score: number;
 };
 
 type CompatibilityResult = {
@@ -338,7 +343,7 @@ function pairingStructureForStyle(style?: string | null, dish?: string | null) {
   };
 }
 
-function buildDishSpecificSuggestion(
+export function buildDishSpecificSuggestion(
   dish: string,
   style: string,
   index: number,
@@ -408,8 +413,8 @@ export function shouldUseDeterministicPairing(wine: WineLike, dish?: string | nu
 
 export function parseSommelierPairingInput(body: Record<string, unknown>) {
   const rawMode = typeof body.mode === "string" ? body.mode.trim() : "";
-  const mode = rawMode === "wine-to-food"
-    ? "wine-to-food"
+  const mode = rawMode === "wine-to-food" || rawMode === "cellar"
+    ? rawMode
     : "food-to-wine";
   const wineName = typeof body.wineName === "string" ? body.wineName.trim() : "";
   const wineStyle = typeof body.wineStyle === "string" ? body.wineStyle.trim() : "";
@@ -523,6 +528,81 @@ export function buildBasicSafePairingsForWine(wine: WineLike) {
   };
 }
 
+function analyzeDish(dish: string) {
+  const lower = dish.toLowerCase();
+  const result = {
+    intensity: "média",
+    fat: "moderada",
+    protein: "",
+    cooking: "",
+    flavors: [] as string[],
+  };
+
+  if (lower.match(/grelhad|brasa|churras|assad|frit[oa]/)) {
+    result.cooking = "grelhado/assado";
+    result.intensity = "alta";
+  } else if (lower.match(/cozid|vapor|refogad/)) {
+    result.cooking = "cozido";
+  } else if (lower.match(/cru|tartare|ceviche/)) {
+    result.cooking = "cru";
+    result.intensity = "leve";
+  }
+
+  if (lower.match(/carne|picanha|costela|bife|cordeiro/)) {
+    result.protein = "vermelha";
+    result.fat = "alta";
+  } else if (lower.match(/frango|ave|peru/)) {
+    result.protein = "branca";
+    result.fat = "moderada";
+  } else if (lower.match(/peixe|salmão|atum|camarão|bacalhau/)) {
+    result.protein = "peixe";
+    result.fat = "leve";
+  } else if (lower.match(/ovo|omelete/)) {
+    result.protein = "ovo";
+    result.fat = "moderada";
+  } else if (lower.match(/queijo|fondue/)) {
+    result.protein = "laticínio";
+    result.fat = "alta";
+  }
+
+  if (lower.match(/molho|creme/)) result.flavors.push("molho cremoso");
+  if (lower.match(/tomate/)) result.flavors.push("acidez do tomate");
+  if (lower.match(/limão|cítric|vinagre/)) result.flavors.push("acidez cítrica");
+  if (lower.match(/pimenta|picante|apimentad/)) result.flavors.push("picância");
+
+  return result;
+}
+
+function scoreCellarWineForDish(wine: Record<string, unknown>, dish: string) {
+  const analysis = analyzeDish(dish);
+  const lowerDish = dish.toLowerCase();
+  const style = String(wine.style || "").toLowerCase();
+  const grape = String(wine.grape || "").toLowerCase();
+  const region = String(wine.region || "").toLowerCase();
+  const country = String(wine.country || "").toLowerCase();
+  let score = 0;
+
+  if (style === "tinto" && (analysis.protein === "vermelha" || analysis.fat === "alta")) score += 18;
+  if ((style === "branco" || style === "espumante" || style === "rosé") && (analysis.protein === "peixe" || analysis.fat === "leve")) score += 18;
+  if (style === "tinto" && analysis.intensity === "alta") score += 8;
+  if ((style === "branco" || style === "rosé" || style === "espumante") && analysis.intensity === "leve") score += 8;
+  if (grape && lowerDish.includes(grape)) score += 5;
+  if (region && lowerDish.includes(region)) score += 3;
+  if (country && lowerDish.includes(country)) score += 2;
+  if (analysis.flavors.some((flavor) => lowerDish.includes(flavor.split(" ")[0]))) score += 4;
+  if (String(wine.tannin || "").toLowerCase().includes("firm")) score += analysis.protein === "vermelha" ? 4 : 0;
+  if (String(wine.acidity || "").toLowerCase().includes("alta")) score += analysis.fat === "alta" ? 4 : 2;
+
+  return score;
+}
+
+function getWinePrice(wine: Record<string, unknown>): number | null {
+  const p = (wine as any).purchase_price ?? (wine as any).current_value;
+  if (p == null) return null;
+  const n = Number(p);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 function scoreCompatibility(target: WineLike, cellarWine: WineLike) {
   const targetCategory = detectStyleCategory(target);
   const cellarCategory = detectStyleCategory(cellarWine);
@@ -544,6 +624,62 @@ function scoreCompatibility(target: WineLike, cellarWine: WineLike) {
   if (targetCategory === "red" && cellarCategory === "red") score += 5;
 
   return Math.min(100, score);
+}
+
+export function rankCellarWinesByIntent(
+  dish: string,
+  wines: WineLike[],
+  intent: "everyday" | "value" | "special",
+): RankedCellarWine[] {
+  const scored = wines.map((wine) => ({ wine, score: scoreCellarWineForDish(wine as Record<string, unknown>, dish) }));
+  const compatible = scored.filter((entry) => entry.score >= 8);
+  const pool = compatible.length >= 3 ? compatible : scored;
+
+  const withPrices = pool.map((entry) => ({ ...entry, price: getWinePrice(entry.wine as Record<string, unknown>) }));
+  const pricedOnly = withPrices.filter((entry) => entry.price != null) as Array<RankedCellarWine & { price: number }>;
+
+  if (intent === "value") {
+    const sorted = [...pricedOnly].sort((a, b) => {
+      if (a.score < 8 && b.score >= 8) return 1;
+      if (b.score < 8 && a.score >= 8) return -1;
+      return a.price - b.price;
+    });
+    const noPrice = withPrices.filter((entry) => entry.price == null).sort((a, b) => b.score - a.score);
+    return [...sorted, ...noPrice].map((entry) => ({ wine: entry.wine, score: entry.score }));
+  }
+
+  if (intent === "special") {
+    const lowerDish = dish.toLowerCase();
+    const simpleDish = /pizza|macarr[aã]o|massa simples|ovo|arroz|strogon|sandu|hamb[uú]rguer|feij[aã]o|lasanha caseira|frango grelhado|salada/.test(lowerDish);
+    const median = pricedOnly.length > 0
+      ? [...pricedOnly].sort((a, b) => a.price - b.price)[Math.floor(pricedOnly.length / 2)].price
+      : 0;
+    const ceiling = simpleDish && median > 0 ? median * 2.5 : Infinity;
+
+    const sorted = [...pricedOnly].sort((a, b) => {
+      const aOver = a.price > ceiling ? 1 : 0;
+      const bOver = b.price > ceiling ? 1 : 0;
+      if (aOver !== bOver) return aOver - bOver;
+      return b.price - a.price;
+    });
+    const noPrice = withPrices.filter((entry) => entry.price == null).sort((a, b) => b.score - a.score);
+    return [...sorted, ...noPrice].map((entry) => ({ wine: entry.wine, score: entry.score }));
+  }
+
+  if (pricedOnly.length === 0) {
+    return pool.sort((a, b) => b.score - a.score).map((entry) => ({ wine: entry.wine, score: entry.score }));
+  }
+
+  const sortedByPrice = [...pricedOnly].sort((a, b) => a.price - b.price);
+  const median = sortedByPrice[Math.floor(sortedByPrice.length / 2)].price;
+  const sorted = [...pricedOnly].sort((a, b) => {
+    const da = Math.abs(a.price - median);
+    const db = Math.abs(b.price - median);
+    if (da !== db) return da - db;
+    return b.score - a.score;
+  });
+  const noPrice = withPrices.filter((entry) => entry.price == null).sort((a, b) => b.score - a.score);
+  return [...sorted, ...noPrice].map((entry) => ({ wine: entry.wine, score: entry.score }));
 }
 
 export function buildDeterministicTasteCompatibility(targetWine: WineLike, userCellar: WineLike[]): CompatibilityResult | null {

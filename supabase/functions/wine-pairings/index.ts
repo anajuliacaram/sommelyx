@@ -9,8 +9,10 @@ import {
   buildBasicSafeSuggestionsForDish,
   buildDeterministicPairingsForWine,
   buildDeterministicSuggestionsForDish,
+  buildDishSpecificSuggestion,
   normalizeSommelierPairingInput,
   parseSommelierPairingInput,
+  rankCellarWinesByIntent,
   shouldUseDeterministicPairing,
 } from "../_shared/deterministic-pairing.ts";
 
@@ -182,7 +184,7 @@ function nonEmptyString(value: unknown) {
   return !["undefined", "null", "nan", "n/a", "na", "none", "sem dado", "sem dados"].includes(normalized);
 }
 
-function normalizePairingsPayload(payload: unknown, mode: "wine-to-food" | "food-to-wine") {
+function normalizePairingsPayload(payload: unknown, mode: "wine-to-food" | "food-to-wine" | "cellar") {
   if (!payload || typeof payload !== "object") {
     return mode === "wine-to-food" ? { pairings: [] } : { suggestions: [] };
   }
@@ -335,99 +337,6 @@ function hasTechnicalLanguage(text?: string | null) {
   return TECHNICAL_PATTERNS.some((pattern) => pattern.test(text));
 }
 
-function scoreCellarWineForDish(wine: Record<string, unknown>, dish: string) {
-  const analysis = analyzeDish(dish);
-  const lowerDish = dish.toLowerCase();
-  const style = String(wine.style || "").toLowerCase();
-  const grape = String(wine.grape || "").toLowerCase();
-  const region = String(wine.region || "").toLowerCase();
-  const country = String(wine.country || "").toLowerCase();
-  let score = 0;
-
-  if (style === "tinto" && (analysis.protein === "vermelha" || analysis.fat === "alta")) score += 18;
-  if ((style === "branco" || style === "espumante" || style === "rosé") && (analysis.protein === "peixe" || analysis.fat === "leve")) score += 18;
-  if (style === "tinto" && analysis.intensity === "alta") score += 8;
-  if ((style === "branco" || style === "rosé" || style === "espumante") && analysis.intensity === "leve") score += 8;
-  if (grape && lowerDish.includes(grape)) score += 5;
-  if (region && lowerDish.includes(region)) score += 3;
-  if (country && lowerDish.includes(country)) score += 2;
-  if (analysis.flavors.some((flavor) => lowerDish.includes(flavor.split(" ")[0]))) score += 4;
-  if (String(wine.tannin || "").toLowerCase().includes("firm")) score += analysis.protein === "vermelha" ? 4 : 0;
-  if (String(wine.acidity || "").toLowerCase().includes("alta")) score += analysis.fat === "alta" ? 4 : 2;
-
-  return score;
-}
-
-function rankCellarWinesForDish(dish: string, wines: Record<string, unknown>[]) {
-  return [...wines].sort((a, b) => scoreCellarWineForDish(b, dish) - scoreCellarWineForDish(a, dish));
-}
-
-function getWinePrice(wine: Record<string, unknown>): number | null {
-  const p = (wine as any).purchase_price ?? (wine as any).current_value;
-  if (p == null) return null;
-  const n = Number(p);
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
-
-function rankCellarWinesByIntent(
-  dish: string,
-  wines: Record<string, unknown>[],
-  intent: "everyday" | "value" | "special",
-) {
-  // Score técnico primeiro — só vinhos com compatibilidade mínima entram
-  const scored = wines.map((w) => ({ wine: w, score: scoreCellarWineForDish(w, dish) }));
-  // Filtro de compatibilidade mínima (score >= 8 = pelo menos uma afinidade técnica clara)
-  const compatible = scored.filter((s) => s.score >= 8);
-  const pool = compatible.length >= 3 ? compatible : scored; // fallback se quase nada combina
-
-  const withPrices = pool.map((s) => ({ ...s, price: getWinePrice(s.wine) }));
-  const pricedOnly = withPrices.filter((s) => s.price != null) as Array<{ wine: Record<string, unknown>; score: number; price: number }>;
-
-  if (intent === "value") {
-    // Mais barato primeiro entre os compatíveis. Sem preço vai pro fim.
-    const sorted = [...pricedOnly].sort((a, b) => {
-      // primeiro só compatibilidade aceitável (score >= 8), depois preço asc
-      if (a.score < 8 && b.score >= 8) return 1;
-      if (b.score < 8 && a.score >= 8) return -1;
-      return a.price - b.price;
-    });
-    const noPrice = withPrices.filter((s) => s.price == null).sort((a, b) => b.score - a.score);
-    return [...sorted, ...noPrice].map((s) => s.wine);
-  }
-
-  if (intent === "special") {
-    // Mais caro primeiro, MAS com sanity check: se prato simples, evita topo de gama desproporcional
-    const lowerDish = dish.toLowerCase();
-    const simpleDish = /pizza|macarr[aã]o|massa simples|ovo|arroz|strogon|sandu|hamb[uú]rguer|feij[aã]o|lasanha caseira|frango grelhado|salada/.test(lowerDish);
-    const median = pricedOnly.length > 0
-      ? [...pricedOnly].sort((a, b) => a.price - b.price)[Math.floor(pricedOnly.length / 2)].price
-      : 0;
-    const ceiling = simpleDish && median > 0 ? median * 2.5 : Infinity;
-
-    const sorted = [...pricedOnly].sort((a, b) => {
-      const aOver = a.price > ceiling ? 1 : 0;
-      const bOver = b.price > ceiling ? 1 : 0;
-      if (aOver !== bOver) return aOver - bOver; // vinhos absurdamente caros pro prato vão pro fim
-      return b.price - a.price;
-    });
-    const noPrice = withPrices.filter((s) => s.price == null).sort((a, b) => b.score - a.score);
-    return [...sorted, ...noPrice].map((s) => s.wine);
-  }
-
-  // everyday — preço mediano
-  if (pricedOnly.length === 0) return pool.sort((a, b) => b.score - a.score).map((s) => s.wine);
-  const sortedByPrice = [...pricedOnly].sort((a, b) => a.price - b.price);
-  const median = sortedByPrice[Math.floor(sortedByPrice.length / 2)].price;
-  const sorted = [...pricedOnly].sort((a, b) => {
-    const da = Math.abs(a.price - median);
-    const db = Math.abs(b.price - median);
-    if (da !== db) return da - db;
-    return b.score - a.score;
-  });
-  const noPrice = withPrices.filter((s) => s.price == null).sort((a, b) => b.score - a.score);
-  return [...sorted, ...noPrice].map((s) => s.wine);
-}
-
 async function callAI(
   systemPrompt: string,
   userPrompt: string,
@@ -548,6 +457,85 @@ serve(async (req) => {
     }
     trace("pairings_cache_miss", { request_id: requestId, inputHash: cached.inputHash, degraded: cached.degraded, input_size_bytes: inputSizeBytes });
 
+    if (mode === "cellar") {
+      const cellarWines = Array.isArray(normalizedInput.cellar) ? normalizedInput.cellar.slice(0, 40) : [];
+      if (cellarWines.length > 0) {
+        const rankedCellarEntries = rankCellarWinesByIntent(normalizedInput.dish, cellarWines as any[], normalizedIntent).slice(0, 5);
+        if (rankedCellarEntries.length > 0) {
+          const noStrongMatch = !rankedCellarEntries.some((entry) => entry.score >= 8);
+          const suggestions = rankedCellarEntries.map((entry, index) =>
+            {
+              const builtSuggestion = buildDishSpecificSuggestion(
+                normalizedInput.dish,
+                String(entry.wine.style || ""),
+                index,
+                entry.wine,
+                noStrongMatch,
+              );
+              const rawStyle = typeof entry.wine.style === "string" ? entry.wine.style.trim() : "";
+              return {
+                ...builtSuggestion,
+                style: rawStyle || builtSuggestion.style,
+                wineProfile: {
+                  ...builtSuggestion.wineProfile,
+                  style: rawStyle || builtSuggestion.wineProfile.style,
+                },
+              };
+            }
+          );
+
+          const cellarPayload = {
+            source: "deterministic" as const,
+            suggestions,
+            dishProfile: {
+              intensity: analyzeDish(normalizedInput.dish).intensity,
+              fat: analyzeDish(normalizedInput.dish).fat,
+              category: "cellar",
+              explanation: noStrongMatch
+                ? "Não há correspondência forte; mostramos os melhores vinhos reais da sua adega disponíveis para este prato."
+                : "Harmonização priorizando os vinhos reais da sua adega.",
+            },
+          };
+
+          trace("pairings_deterministic_hit", {
+            request_id: requestId,
+            mode,
+            durationMs: elapsed(startTime),
+            source: cellarPayload.source,
+            cellar_count: cellarWines.length,
+            ranked_count: rankedCellarEntries.length,
+            no_strong_match: noStrongMatch,
+          });
+          await setCachedAiResponse("wine-pairings", cacheInput, cellarPayload);
+          await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 200, "deterministic_success", Date.now() - startTime, {
+            request_id: requestId,
+            mode,
+            source: cellarPayload.source,
+            input_size_bytes: inputSizeBytes,
+            error_type: null,
+          });
+          return jsonResponse(req, cellarPayload);
+        }
+      }
+
+      const safeFallback = buildBasicSafeSuggestionsForDish(normalizedInput.dish, normalizedInput.cellar);
+      trace("fallback_used", {
+        request_id: requestId,
+        mode,
+        count: safeFallback.suggestions.length,
+        reason: cellarWines.length === 0 ? "no_cellar_wines" : "no_ranked_results",
+      });
+      await setCachedAiResponse("wine-pairings", cacheInput, safeFallback);
+      await logToDb(supabaseUrl, serviceKey, userId, FUNCTION_NAME, 200, "deterministic_success", Date.now() - startTime, {
+        request_id: requestId,
+        mode,
+        source: safeFallback.source,
+        input_size_bytes: inputSizeBytes,
+        error_type: null,
+      });
+      return jsonResponse(req, safeFallback);
+    }
+
     const deterministicResult = mode === "wine-to-food"
       ? (shouldUseDeterministicPairing(normalizedInput.wine, normalizedInput.dish)
         ? buildDeterministicPairingsForWine(normalizedInput.wine)
@@ -661,6 +649,8 @@ OBRIGATÓRIO em CADA explicação:
     let systemPrompt: string;
     let userPrompt: string;
     const hasCellar = (userWines as any[] | undefined)?.length ? (userWines as any[]).length > 0 : false;
+    const normalizedIntent: "everyday" | "value" | "special" =
+      intent === "value" || intent === "special" ? intent : "everyday";
 
     if (mode === "wine-to-food") {
       systemPrompt = `Você é um sommelier de nível Master Sommelier com 25+ anos em restaurantes estrelados Michelin.
