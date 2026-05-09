@@ -755,12 +755,12 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
   isSelected: boolean;
   onChooseWine: () => void;
 }) {
-  const wineType = detectWineType(wine.style);
-  const config = wineTypeConfig[wineType];
-  const spotlightLabels = [isTopPick ? "Melhor escolha" : null, isBestValue ? "Melhor custo-benefício" : null]
-    .filter((label): label is string => Boolean(label));
-  const reasonText = wine.verdict || wine.reasoning || "Leitura técnica baseada no perfil da carta.";
-  const supportText = wine.reasoning && wine.verdict ? wine.reasoning : null;
+  const highlightTag = isTopPick ? "Melhor escolha" : isBestValue ? "Melhor custo-benefício" : wine.highlight === "top-pick" ? "Melhor escolha" : wine.highlight === "best-value" ? "Melhor custo-benefício" : null;
+  const originLine = [wine.producer, wine.region, wine.country].filter((value): value is string => Boolean(value && value.trim())).join(" · ");
+  const summarySource = wine.description || wine.verdict || wine.reasoning || null;
+  const summaryText = summarySource ? compactText(summarySource, 164) : null;
+  const whyText = compactText(wine.reasoning || wine.verdict || wine.description || "", 220);
+  const profileLine = buildProfileLine(wine);
 
   return (
     <motion.li
@@ -781,76 +781,71 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
           : "0 10px 24px -18px rgba(30,20,20,0.10), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.72)",
       }}
     >
-      <button type="button" onClick={onChooseWine} className="w-full p-5 text-left sm:p-6">
-        <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/55 via-[#C8A96A]/40 to-transparent" />
-        <div className="space-y-4 pt-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              {spotlightLabels.length > 0 ? (
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]/55">
-                  {spotlightLabels.join(" · ")}
-                </p>
-              ) : null}
-              <h4 className="mt-1 text-[19px] font-semibold tracking-[-0.02em] leading-tight text-[#1A1713] sm:text-[22px]">
-                {wine.name}
-              </h4>
-              <p className="mt-1.5 text-[12px] font-medium leading-6 text-[#6B6258]">
-                {[wine.producer, wine.region, wine.country].filter(Boolean).join(" · ") || "Origem e produtor não identificados"}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 flex-col items-end gap-1.5">
-              {wine.price != null && (
-                <span className="text-[16px] font-semibold tracking-tight" style={{ color: "#1A1713" }}>
-                  R$ {wine.price.toFixed(0)}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">
-              Por que entrou na seleção
-            </p>
-            <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
-              {reasonText}
-            </p>
-            {supportText ? (
-              <p className="mt-2 text-[12.5px] leading-6 text-[#5B5146]">
-                {supportText}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
-              Características-chave
-            </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              {[
-                { label: "Corpo", value: wine.body || "Não identificado" },
-                { label: "Acidez", value: wine.acidity || "Não identificada" },
-                { label: "Tanino", value: wine.tannin || "Não identificado" },
-              ].map((item) => (
-                <div key={item.label} className="space-y-1 rounded-2xl border border-black/5 bg-white/75 px-3 py-3">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#7A6B59]">{item.label}</p>
-                  <p className="text-[13px] font-medium leading-6 text-[#2B231D]">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {Array.isArray(wine.comparativeLabels) && wine.comparativeLabels.length > 0 ? (
-            <p className="text-[12px] leading-6 text-[#5B5146]">
-              Leitura comparativa: {wine.comparativeLabels.join(" · ")}
+      <button type="button" onClick={onChooseWine} className="w-full p-4 text-left sm:p-5">
+        <div className="space-y-3">
+          {highlightTag ? (
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]/60">
+              {highlightTag}
             </p>
           ) : null}
 
-          <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            {wine.confidence ? `${Math.round(wine.confidence * 100)}% de confiança` : "Confiança não informada"}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 space-y-1">
+              <h4 className="text-[20px] font-semibold tracking-[-0.03em] leading-tight text-[#1A1713] sm:text-[23px]">
+                {wine.name}
+              </h4>
+              {originLine ? (
+                <p className="text-[12.5px] font-medium leading-6 text-[#6B6258]">
+                  {originLine}
+                </p>
+              ) : null}
+              {summaryText ? (
+                <p className="text-[13.5px] leading-7 text-[#3F362F]">
+                  {summaryText}
+                </p>
+              ) : null}
+            </div>
+
+            {wine.price != null && (
+              <span className="shrink-0 text-[17px] font-semibold tracking-tight text-[#1A1713]">
+                R$ {wine.price.toFixed(0)}
+              </span>
+            )}
           </div>
+
+          {whyText ? (
+            <div className="rounded-[20px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-4 py-3.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">
+                Por que escolher
+              </p>
+              <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
+                {whyText}
+              </p>
+            </div>
+          ) : null}
+
+          {profileLine ? (
+            <p className="text-[12.5px] leading-6 text-[#5B5146]">
+              {profileLine}
+            </p>
+          ) : null}
         </div>
       </button>
     </motion.li>
   );
+}
+
+function compactText(value: string, maxLength: number) {
+  const trimmed = value.trim().replace(/\s+/g, " ");
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
+}
+
+function buildProfileLine(wine: WineListItem) {
+  const parts = [
+    wine.acidity ? `Acidez ${wine.acidity}` : null,
+    wine.body ? `Corpo ${wine.body}` : null,
+    wine.tannin ? `Taninos ${wine.tannin}` : null,
+  ].filter((value): value is string => Boolean(value));
+  return parts.length > 0 ? parts.join(" • ") : null;
 }
