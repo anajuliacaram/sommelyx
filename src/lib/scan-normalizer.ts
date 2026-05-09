@@ -42,12 +42,14 @@ function parseMaybeNumber(value: unknown) {
 
 export function normalizeScanResult(raw: unknown): CanonicalScanResult {
   const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const name = normalizeText(source.name) || normalizeText(source.wine_name);
+  const grape = normalizeText(source.grape) || normalizeText(source.grapes);
   return {
-    name: normalizeText(source.name),
+    name,
     producer: normalizeText(source.producer) || null,
     country: normalizeText(source.country) || null,
     region: normalizeText(source.region) || null,
-    grape: normalizeText(source.grape) || null,
+    grape: grape || null,
     vintage: parseMaybeNumber(source.vintage),
     style: normalizeText(source.style) || null,
     drink_from: parseMaybeNumber(source.drink_from),
