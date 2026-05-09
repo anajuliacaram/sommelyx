@@ -3454,9 +3454,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                                             </div>
                                           </td>
                                           {visibleColumns.filter((column) => column.key !== "name").map((column) => (
-                                            <React.Fragment key={`${index}-${column.key}`}>
+                                            <>
                                               {renderEditableCell(wine as DraftWine, index, column)}
-                                            </React.Fragment>
+                                            </>
                                           ))}
                                         </tr>
                                       );
