@@ -636,6 +636,29 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     return appliedFields;
   }, [applyScanPrefill, isCommercial, open]);
 
+  const getRenderedFieldValue = useCallback(
+    (field: keyof AddWinePrefillValues, currentValue: string) => {
+      if (isMeaningfulScanValue(currentValue)) return currentValue;
+      const pendingPayload = pendingHydrationTraceRef.current?.payload;
+      const fallbackValue = pendingPayload?.[field];
+      if (isMeaningfulScanValue(fallbackValue)) {
+        const rendered = String(fallbackValue);
+        if (import.meta.env.DEV) {
+          console.info("[AddWineDialog] field_render_snapshot", {
+            field,
+            currentValue,
+            fallbackValue,
+            rendered,
+            pendingSource: pendingHydrationTraceRef.current?.source ?? null,
+          });
+        }
+        return rendered;
+      }
+      return currentValue;
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!open || !initialValues) return;
     reset();
@@ -675,6 +698,30 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     finalFormStateLoggedRef.current = true;
     pendingHydrationTraceRef.current = null;
   }, [aiPrefilledFields, country, grape, name, open, pendingHydrationTraceRef.current, producer, quantity, region, style, vintage]);
+
+  if (import.meta.env.DEV) {
+    console.info("[AddWineDialog] render_snapshot", {
+      open,
+      success,
+      state: {
+        name,
+        producer,
+        quantity,
+        vintage,
+        style,
+        country,
+        region,
+        grape,
+        lastPaid,
+        currentValue,
+      },
+      pendingHydrationSource: pendingHydrationTraceRef.current?.source ?? null,
+      pendingHydrationKeys: pendingHydrationTraceRef.current ? Object.keys(pendingHydrationTraceRef.current.payload).filter((key) => {
+        const value = pendingHydrationTraceRef.current?.payload[key as keyof AddWinePrefillValues];
+        return value != null && value !== "";
+      }) : [],
+    });
+  }
 
   const handleScanComplete = (data: any) => {
     const responseKeys = data && typeof data === "object" ? Object.keys(data as Record<string, unknown>) : [];
@@ -1019,7 +1066,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       <label htmlFor="name" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
                       <input
                         id="name"
-                        value={name}
+                        value={getRenderedFieldValue("name", name)}
                         onChange={e => setName(e.target.value)}
                         placeholder="Ex: Malbec Reserva"
                         required
@@ -1031,7 +1078,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       <label htmlFor="producer" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Produtor</label>
                       <input
                         id="producer"
-                        value={producer}
+                        value={getRenderedFieldValue("producer", producer)}
                         onChange={e => setProducer(e.target.value)}
                         placeholder="Ex: Catena Zapata"
                         className="input-premium"
@@ -1055,7 +1102,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         <input
                           id="vintage"
                           type="number"
-                          value={vintage}
+                          value={getRenderedFieldValue("vintage", vintage)}
                           onChange={e => setVintage(e.target.value)}
                           placeholder="2020"
                         className="input-premium"
@@ -1065,8 +1112,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Estilo</label>
-                      <Select value={style} onValueChange={setStyle}>
-                        <SelectTrigger className="input-premium" style={{ color: style ? '#1F1F1F' : '#9A9A9A', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
+                      <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
+                        <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? '#1F1F1F' : '#9A9A9A', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
                           <SelectValue placeholder="Selecionar estilo..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border bg-white shadow-lg" style={{ borderColor: '#E5E2DC' }}>
@@ -1160,11 +1207,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">País</label>
-                          <input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="input-premium" style={aiFieldStyle("country")} />
+                          <input value={getRenderedFieldValue("country", country)} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="input-premium" style={aiFieldStyle("country")} />
                         </div>
                         <div>
                           <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Região</label>
-                          <input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="input-premium" style={aiFieldStyle("region")} />
+                          <input value={getRenderedFieldValue("region", region)} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="input-premium" style={aiFieldStyle("region")} />
                         </div>
                       </div>
                       {drinkFrom && drinkUntil && (
@@ -1174,7 +1221,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       )}
                       <div>
                         <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Uva</label>
-                        <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" style={aiFieldStyle("grape")} />
+                        <input value={getRenderedFieldValue("grape", grape)} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" style={aiFieldStyle("grape")} />
                       </div>
                       <div className="flex items-center gap-2 -mt-1">
                         <input
