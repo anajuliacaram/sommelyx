@@ -111,8 +111,64 @@ type ScanSuggestionInput = {
   confidence?: Record<string, number | null | undefined> | null;
 };
 
+type ScanFieldMapping = {
+  target: keyof AddWinePrefillValues;
+  sources: string[];
+};
+
+const SCAN_FIELD_MAPPINGS: ScanFieldMapping[] = [
+  { target: "name", sources: ["name", "wine_name", "wineName", "label_text", "full_text"] },
+  { target: "producer", sources: ["producer", "producer_name", "winery", "winemaker"] },
+  { target: "vintage", sources: ["vintage", "year", "vintage_year"] },
+  { target: "style", sources: ["style", "wine_style", "type"] },
+  { target: "country", sources: ["country", "pais", "país"] },
+  { target: "region", sources: ["region", "regiao", "região"] },
+  { target: "grape", sources: ["grape", "grapes", "varietal", "varieties"] },
+  { target: "drinkFrom", sources: ["drink_from"] },
+  { target: "drinkUntil", sources: ["drink_until"] },
+  { target: "purchasePrice", sources: ["purchase_price"] },
+  { target: "estimatedPrice", sources: ["estimated_price"] },
+  { target: "foodPairing", sources: ["food_pairing"] },
+  { target: "cellarLocation", sources: ["cellar_location"] },
+];
+
 function normalizeSuggestionText(value?: string | null) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function normalizeLabelText(value: unknown) {
+  if (typeof value !== "string") return "";
+  const text = value.trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  const lowered = text.toLowerCase();
+  if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
+    return "";
+  }
+  return text;
+}
+
+function pickFirstMeaningfulString(values: unknown[]) {
+  for (const value of values) {
+    const normalized = normalizeLabelText(value);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
+function getFirstDetectedString(source: Record<string, unknown>) {
+  const ignoredKeys = new Set([
+    "labelImagePreview",
+    "labelImageFile",
+    "labelImageBase64",
+    "imagePreview",
+    "imageBase64",
+  ]);
+  for (const [key, value] of Object.entries(source)) {
+    if (ignoredKeys.has(key)) continue;
+    const normalized = normalizeLabelText(value);
+    if (normalized) return normalized;
+  }
+  return "";
 }
 
 function suggestPurchasePrice(input: ScanSuggestionInput) {
@@ -195,15 +251,67 @@ function suggestDrinkWindow(input: ScanSuggestionInput) {
 
 function mapScanResultToInitialValues(result: any): AddWinePrefillValues {
   const normalized = normalizeScanResult(result);
+  const source = result && typeof result === "object" ? (result as Record<string, unknown>) : {};
+  const normalizedName = pickFirstMeaningfulString([
+    normalized.name,
+    source.name,
+    source.wine_name,
+    source.wineName,
+    source.label_text,
+    source.full_text,
+  ]);
+  const normalizedProducer = pickFirstMeaningfulString([
+    normalized.producer,
+    source.producer,
+    source.producer_name,
+    source.winery,
+    source.winemaker,
+  ]);
+  const fallbackVintage = parseInt(String(source.year ?? source.vintage_year ?? ""), 10);
+  const normalizedVintage = normalized.vintage ?? (Number.isFinite(fallbackVintage) ? fallbackVintage : null);
+  const normalizedStyle = pickFirstMeaningfulString([
+    normalized.style,
+    source.style,
+    source.wine_style,
+    source.type,
+  ]);
+  const normalizedCountry = pickFirstMeaningfulString([
+    normalized.country,
+    source.country,
+    source.pais,
+    source["país"],
+  ]);
+  const normalizedRegion = pickFirstMeaningfulString([
+    normalized.region,
+    source.region,
+    source.regiao,
+    source["região"],
+  ]);
+  const normalizedGrape = pickFirstMeaningfulString([
+    normalized.grape,
+    source.grape,
+    source.grapes,
+    source.varietal,
+    source.varieties,
+  ]);
+  const fallbackText = pickFirstMeaningfulString([
+    source.label_text,
+    source.full_text,
+    source.text,
+    source.description,
+    source.notes,
+    source.ocr_text,
+    getFirstDetectedString(source),
+  ]);
   const mappedData: AddWinePrefillValues = {
-    name: normalized.name || String(result?.name || result?.wine_name || "").trim() || null,
-    producer: normalized.producer || String(result?.producer || "").trim() || null,
-    vintage: normalized.vintage ?? null,
-    style: normalized.style || null,
-    country: normalized.country || String(result?.country || "").trim() || null,
-    region: normalized.region || String(result?.region || "").trim() || null,
-    grape: normalized.grape || String(result?.grape || result?.grapes || "").trim() || null,
-    grapes: String(result?.grapes || result?.grape || "").trim() || null,
+    name: normalizedName || fallbackText || "Vinho não identificado",
+    producer: normalizedProducer || null,
+    vintage: normalizedVintage,
+    style: normalizedStyle || null,
+    country: normalizedCountry || null,
+    region: normalizedRegion || null,
+    grape: normalizedGrape || null,
+    grapes: normalizedGrape || null,
     drinkFrom: normalized.drink_from ?? null,
     drinkUntil: normalized.drink_until ?? null,
     purchasePrice: normalized.purchase_price ?? null,
@@ -444,6 +552,18 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
         .filter(([, value]) => value != null && value !== "")
         .map(([key]) => key),
     });
+    const mappingTable = SCAN_FIELD_MAPPINGS.map((mapping) => ({
+      target: mapping.target,
+      sources: mapping.sources,
+      value: prefill[mapping.target],
+      applied: isMeaningfulScanValue(prefill[mapping.target]),
+      skipped: !isMeaningfulScanValue(prefill[mapping.target]),
+    }));
+    console.info("[AddWineDialog] field_mapping_table", {
+      source,
+      mappingTable,
+      skippedFields: mappingTable.filter((row) => row.skipped).map((row) => row.target),
+    });
     const appliedFields = applyScanPrefill(prefill);
     const mappedFields = Object.keys(appliedFields);
 
@@ -508,6 +628,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
         foodPairing: prefill.foodPairing ?? null,
         cellarLocation: prefill.cellarLocation ?? null,
       },
+      skippedFields: SCAN_FIELD_MAPPINGS
+        .map((mapping) => mapping.target)
+        .filter((field) => !mappedFields.includes(field)),
     });
 
     return appliedFields;
@@ -581,6 +704,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
         missingFromResponse: ADD_WINE_FORM_FIELDS.filter((field) => !responseKeys.includes(field)),
       },
     });
+    if (!mappedData.name && !mappedData.producer && !mappedData.vintage && !mappedData.style && !mappedData.country && !mappedData.region && !mappedData.grape) {
+      console.warn("[AddWineDialog] scan_mapping_fallback_used", {
+        source: "scan-wine-label",
+        fallbackApplied: true,
+        fallbackName: mappedData.name,
+      });
+    }
 
     console.info("[AddWineDialog] mapped_fields", {
       source: "scan-wine-label",
