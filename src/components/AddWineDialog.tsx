@@ -895,19 +895,19 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   return (
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]" style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto rounded-[24px] p-0 border border-black/[0.04] shadow-[0_26px_64px_rgba(0,0,0,0.10)]" style={{ background: "#FAF8F6", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
 
           <div className="px-6 py-6 flex h-full flex-col">
             <SheetHeader className="mb-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] shadow-[0_10px_28px_-18px_rgba(123,30,43,0.18)]">
                   <Wine className="h-5 w-5 text-[#7B1E2B]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <SheetTitle className="font-serif text-2xl font-semibold tracking-tight" style={{ color: '#1E1E1E' }}>
+                  <SheetTitle className="font-serif text-[20px] sm:text-[28px] font-semibold tracking-[-0.02em] leading-[1.15]" style={{ color: '#1A1713' }}>
                     {isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
                   </SheetTitle>
-                  <p className="mt-1 text-sm font-medium tracking-tight text-[#6B6B6B] leading-relaxed">
+                  <p className="mt-1.5 text-[14px] sm:text-[15px] font-medium leading-7 text-[rgba(58,51,39,0.68)]">
                     Complete manualmente ou use rótulo, escaneamento e CSV.
                   </p>
                 </div>
@@ -922,7 +922,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center justify-center py-12 gap-4"
                 >
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6F7F5B' }}>
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#6F7F5B,#7F8F67)' }}>
                     <Check className="h-7 w-7 text-white" />
                   </div>
                   <p className="text-[15px] font-medium" style={{ color: '#1F1F1F' }}>
@@ -930,7 +930,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </p>
                   {missingFields.length > 0 && (
                     <div
-                      className="w-full rounded-2xl border px-4 py-3 text-left"
+                      className="w-full rounded-[22px] border px-4 py-3 text-left shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)]"
                       style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
                     >
                       <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>
@@ -945,7 +945,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <Button
                       type="button"
                       variant="secondary"
-                      className="flex-1"
+                      className="flex-1 h-12 rounded-[18px] bg-white/82 border border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]"
                       onClick={() => { reset(); onOpenChange(false); }}
                     >
                       Concluir
@@ -953,7 +953,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <Button
                       type="button"
                       variant="primary"
-                      className="flex-1"
+                      className="flex-1 h-12 rounded-[18px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
                       onClick={() => reset()}
                     >
                       <Plus className="h-4 w-4" />
@@ -965,10 +965,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-5">
                   {/* Scan Label Card */}
                   <div
-                    className="group cursor-pointer glass-card p-5 flex items-center gap-4 transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[24px] border border-black/5 bg-white/82 p-5 flex items-center gap-4 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setScanOpen(true)}
                   >
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
+                    <div className="w-12 h-12 rounded-[18px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
                       <Camera className="h-5 w-5" style={{ color: '#6F7F5B' }} />
                     </div>
                     <div className="flex flex-col">
@@ -980,7 +980,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
 
                   {labelImagePreview && (
-                    <div className="glass-card p-3 flex items-center gap-3">
+                    <div className="rounded-[22px] border border-black/5 bg-white/82 p-3 flex items-center gap-3 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)]">
                       <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border border-[rgba(255,255,255,0.45)] bg-white/50">
                         <img
                           src={labelImagePreview}
@@ -999,10 +999,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                   {/* Import File Card */}
                   <div
-                    className="group cursor-pointer glass-card p-4 flex items-center gap-3.5 transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[24px] border border-black/5 bg-white/82 p-4 flex items-center gap-3.5 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setImportCsvOpen(true)}
                   >
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
+                    <div className="w-10 h-10 rounded-[18px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
                       <FileSpreadsheet className="h-4 w-4" style={{ color: '#C8A96A' }} />
                     </div>
                     <div className="flex flex-col">
@@ -1016,7 +1016,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   {/* Essential fields */}
                   <div className="space-y-4 pt-1">
                     <div>
-                      <label htmlFor="name" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
+                      <label htmlFor="name" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
                       <input
                         id="name"
                         value={name}
@@ -1028,7 +1028,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       />
                     </div>
                     <div>
-                      <label htmlFor="producer" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Produtor</label>
+                      <label htmlFor="producer" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Produtor</label>
                       <input
                         id="producer"
                         value={producer}
@@ -1040,7 +1040,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label htmlFor="qty" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Quantidade</label>
+                        <label htmlFor="qty" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Quantidade</label>
                         <input
                           id="qty"
                           type="number"
@@ -1051,7 +1051,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         />
                       </div>
                       <div>
-                        <label htmlFor="vintage" className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Safra</label>
+                        <label htmlFor="vintage" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Safra</label>
                         <input
                           id="vintage"
                           type="number"
@@ -1064,7 +1064,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Estilo</label>
+                      <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Estilo</label>
                       <Select value={style} onValueChange={setStyle}>
                         <SelectTrigger className="input-premium" style={{ color: style ? '#1F1F1F' : '#9A9A9A', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
                           <SelectValue placeholder="Selecionar estilo..." />
@@ -1077,9 +1077,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
 
                   {isCommercial ? (
-                      <div
-                      className="glass-card p-4 sm:p-5"
-                      >
+                    <div className="rounded-[24px] border border-black/5 bg-white/82 p-4 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] sm:p-5">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: '#6F7F5B' }}>
@@ -1103,7 +1101,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
-                          <label className="block text-[13px] font-semibold mb-1.5" style={{ color: '#2F2F2F' }}>
+                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">
                             Preço de custo (R$)
                           </label>
                           <Input
@@ -1118,7 +1116,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           />
                         </div>
                         <div>
-                          <label className="block text-[13px] font-semibold mb-1.5" style={{ color: '#2F2F2F' }}>
+                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">
                             Preço de venda (R$)
                           </label>
                           <div className="relative">
@@ -1161,11 +1159,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <CollapsibleContent className="space-y-4 pt-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>País</label>
+                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">País</label>
                           <input value={country} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="input-premium" style={aiFieldStyle("country")} />
                         </div>
                         <div>
-                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Região</label>
+                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Região</label>
                           <input value={region} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="input-premium" style={aiFieldStyle("region")} />
                         </div>
                       </div>
@@ -1175,7 +1173,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         </p>
                       )}
                       <div>
-                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Uva</label>
+                        <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Uva</label>
                         <input value={grape} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" style={aiFieldStyle("grape")} />
                       </div>
                       <div className="flex items-center gap-2 -mt-1">
@@ -1196,7 +1194,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                       {!isCommercial && (
                         <div>
-                          <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>
+                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">
                             Último valor pago (opcional)
                           </label>
                           <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
@@ -1237,14 +1235,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         />
                       </div>
                       <div>
-                        <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Harmonização</label>
+                        <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Harmonização</label>
                         <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
                       </div>
                       {!isCommercial && (
                         <>
                           <div>
                             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                              <label className="block text-[14px] font-medium" style={{ color: '#4A4A4A' }}>
+                              <label className="block text-[13px] font-semibold tracking-[-0.01em] text-[#4A4338]">
                                 Valor atual estimado (R$)
                               </label>
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
@@ -1273,23 +1271,23 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                             </p>
                           </div>
                           <div>
-                            <p className="text-[14px] font-medium mb-1" style={{ color: '#4A4A4A' }}>Janela de consumo sugerida</p>
+                            <p className="text-[13px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Janela de consumo sugerida</p>
                             <p className="text-[11px] leading-relaxed mb-3" style={{ color: '#6B6B6B' }}>
                               Referência de melhor expressão do vinho em condições ideais de guarda. Vinhos fora dessa janela não estão necessariamente ruins — o potencial real depende do armazenamento, da safra específica e das características da uva.
                             </p>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>A partir de</label>
+                                <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">A partir de</label>
                                 <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
                               </div>
                               <div>
-                                <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Até</label>
+                                <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Até</label>
                                 <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" style={aiFieldStyle("drink_until")} />
                               </div>
                             </div>
                           </div>
                           <div>
-                            <label className="block text-[14px] font-medium mb-1.5" style={{ color: '#4A4A4A' }}>Notas de degustação</label>
+                            <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Notas de degustação</label>
                             <Textarea
                               value={notes}
                               onChange={e => setNotes(e.target.value)}
@@ -1304,21 +1302,21 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </CollapsibleContent>
                   </Collapsible>
 
-                  <Button
-                    type="submit"
-                    disabled={!name.trim()}
-                    loading={addWine.isPending}
-                    loadingText="Salvando…"
-                    variant="primary"
-                    className="w-full"
-                  >
+                    <Button
+                      type="submit"
+                      disabled={!name.trim()}
+                      loading={addWine.isPending}
+                      loadingText="Salvando…"
+                      variant="primary"
+                      className="w-full h-12 rounded-[18px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
+                    >
                     <Plus className="h-4 w-4" />
                     {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
                   </Button>
 
                   {missingFields.length > 0 && (
                     <div
-                      className="rounded-2xl border px-4 py-3"
+                      className="rounded-[22px] border px-4 py-3 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)]"
                       style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
                     >
                       <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>

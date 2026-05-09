@@ -191,15 +191,19 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="items-end p-0 sm:items-center sm:p-4">
+      <DialogContent className="items-end p-0 bg-[#FAF8F6] shadow-[0_26px_64px_rgba(0,0,0,0.10)] sm:items-center sm:p-4">
         <DialogHeader>
           <div className="flex items-start gap-3.5 px-4 pt-4 sm:gap-4 sm:px-0 sm:pt-0">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_10px_28px_-18px_rgba(123,30,43,0.18)]">
               <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle>Registrar consumo</DialogTitle>
-              <DialogDescription>Registre uma degustação da sua adega ou externa</DialogDescription>
+              <DialogTitle className="font-serif text-[20px] sm:text-[28px] font-semibold tracking-[-0.02em] text-[#1A1713] leading-[1.15]">
+                Registrar consumo
+              </DialogTitle>
+              <DialogDescription className="mt-1.5 text-[14px] sm:text-[15px] font-medium leading-7 text-[rgba(58,51,39,0.68)]">
+                Registre uma degustação da sua adega ou externa
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -207,12 +211,32 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
         <div className="flex max-h-[calc(100dvh-5.5rem)] min-h-0 flex-col sm:max-h-[calc(90vh-6rem)]">
           <div className="flex-1 space-y-5 overflow-y-auto px-4 pb-4 pr-4 sm:px-0 sm:pb-0 sm:pr-1">
           <div className="space-y-2">
-            <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Origem</Label>
+            <Label className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B5B47] mb-2">Origem</Label>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1.5">
-              <Button type="button" variant={source === "cellar" ? "primary" : "secondary"} className="h-11 justify-center text-[13px] sm:flex-1" onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}>
+              <Button
+                type="button"
+                variant={source === "cellar" ? "primary" : "secondary"}
+                className={cn(
+                  "h-12 justify-center rounded-[18px] text-[14px] font-semibold transition-all duration-200 sm:flex-1",
+                  source === "cellar"
+                    ? "bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
+                    : "bg-white/82 text-[#4A4338] border border-black/5 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)] hover:bg-white",
+                )}
+                onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
+              >
                 Da minha adega
               </Button>
-              <Button type="button" variant={source === "external" ? "primary" : "secondary"} className="h-11 justify-center text-[13px] sm:flex-1" onClick={() => { setSource("external"); setSelectedWineId(""); setShowWinePicker(false); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}>
+              <Button
+                type="button"
+                variant={source === "external" ? "primary" : "secondary"}
+                className={cn(
+                  "h-12 justify-center rounded-[18px] text-[14px] font-semibold transition-all duration-200 sm:flex-1",
+                  source === "external"
+                    ? "bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
+                    : "bg-white/82 text-[#4A4338] border border-black/5 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)] hover:bg-white",
+                )}
+                onClick={() => { setSource("external"); setSelectedWineId(""); setShowWinePicker(false); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}
+              >
                 Consumo externo
               </Button>
             </div>
@@ -220,7 +244,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
           {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
             <div className="space-y-2">
-              <Label className="text-xs tracking-[0.12em] uppercase text-black/50">Selecionar vinho</Label>
+              <Label className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B5B47]">Selecionar vinho</Label>
 
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/40" />
@@ -228,9 +252,9 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   value={wineSearch}
                   onChange={(e) => setWineSearch(e.target.value)}
                   placeholder="Buscar por nome, produtor, uva, safra…"
-                  className="pl-9 rounded-xl"
+                  className="h-11 rounded-[18px] pl-9 bg-white/75 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.14)]"
                 />
-              </div>
+            </div>
 
               <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
                 {TYPE_FILTERS.map((f) => {
@@ -253,7 +277,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </div>
 
               <div
-                className="max-h-[300px] overflow-y-auto pr-1 rounded-[18px] border border-white/24 bg-white/76 shadow-[0_14px_30px_-26px_rgba(58,51,39,0.18)] backdrop-blur-md divide-y divide-black/5 cellar-scroll"
+                className="max-h-[300px] overflow-y-auto pr-1 rounded-[22px] border border-black/5 bg-white/82 shadow-[0_16px_34px_-26px_rgba(58,51,39,0.16)] backdrop-blur-md divide-y divide-black/5 cellar-scroll"
                 style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
               >
                 {filteredWines.length > 4 && (
@@ -274,11 +298,11 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                         key={w.id}
                         type="button"
                         onClick={() => handleSelectWine(w.id)}
-                        className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 text-left cursor-pointer transition-all duration-150",
-                          "hover:bg-muted/40 active:scale-[0.99]",
-                          selected && "bg-olive/10 border-l-2 border-olive/30",
-                        )}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 text-left cursor-pointer transition-all duration-150",
+                        "hover:bg-white/60 active:scale-[0.99]",
+                        selected && "bg-[rgba(123,30,43,0.05)] border-l-2 border-[#7B1E2B]/25",
+                      )}
                       >
                         <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", dotForWine(w.style))} />
                         <div className="min-w-0 flex-1">
@@ -299,68 +323,68 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           )}
 
           {source === "cellar" && selectedWine && !showWinePicker && (
-            <div className="rounded-2xl border border-black/10 bg-[rgba(123,30,43,0.04)] px-4 py-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-[#1C1C1C] truncate">{selectedWine.name}</p>
-                  <p className="text-[11.5px] text-black/55 truncate">
-                    {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
+              <div className="rounded-[22px] border border-black/5 bg-white/82 px-4 py-3 shadow-[0_12px_26px_-24px_rgba(0,0,0,0.16)]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-[#1C1C1C] truncate">{selectedWine.name}</p>
+                    <p className="text-[11.5px] text-black/55 truncate">
+                      {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
                   </p>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
-                  className="h-8 px-3 text-[11px] font-semibold text-[#7B1E2B]"
+                  className="h-9 rounded-full border border-black/5 bg-white/75 px-3 text-[11px] font-semibold text-[#7B1E2B] shadow-[0_10px_22px_-24px_rgba(0,0,0,0.14)] hover:bg-white"
                   onClick={() => setShowWinePicker(true)}
                 >
-                  Trocar vinho
+                Trocar vinho
                 </Button>
               </div>
             </div>
           )}
 
           <div className="space-y-3">
-            <div className="space-y-2">
-              <Label>Nome do vinho <span className="text-primary">*</span></Label>
-              <Input className="h-11 text-[14px]" value={wineName} onChange={(e) => setWineName(e.target.value)} placeholder="Ex: Château Margaux" disabled={source === "cellar" && !!selectedWineId} />
-            </div>
+              <div className="space-y-2">
+                <Label className="text-[13px] font-semibold text-[#4A4338]">Nome do vinho <span className="text-primary">*</span></Label>
+                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={wineName} onChange={(e) => setWineName(e.target.value)} placeholder="Ex: Château Margaux" disabled={source === "cellar" && !!selectedWineId} />
+              </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-2">
               <div className="space-y-2">
-                <Label>Produtor</Label>
-                <Input className="h-11 text-[14px]" value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
+                <Label className="text-[13px] font-semibold text-[#4A4338]">Produtor</Label>
+                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
               </div>
               <div className="space-y-2">
-                <Label>Safra</Label>
-                <Input className="h-11 text-[14px]" value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
+                <Label className="text-[13px] font-semibold text-[#4A4338]">Safra</Label>
+                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
               </div>
               <div className="space-y-2">
-                <Label>País</Label>
-                <Input className="h-11 text-[14px]" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
+                <Label className="text-[13px] font-semibold text-[#4A4338]">País</Label>
+                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
               </div>
               <div className="space-y-2">
-                <Label>Região</Label>
-                <Input className="h-11 text-[14px]" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
+                <Label className="text-[13px] font-semibold text-[#4A4338]">Região</Label>
+                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Uva / Blend</Label>
-              <Input className="h-11 text-[14px]" value={grape} onChange={(e) => setGrape(e.target.value)} placeholder="Ex: Cabernet Sauvignon, Merlot" disabled={source === "cellar" && !!selectedWineId} />
+              <Label className="text-[13px] font-semibold text-[#4A4338]">Uva / Blend</Label>
+              <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={grape} onChange={(e) => setGrape(e.target.value)} placeholder="Ex: Cabernet Sauvignon, Merlot" disabled={source === "cellar" && !!selectedWineId} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label className="flex items-center gap-1"><MapPin className="h-4 w-4 text-muted-foreground" />Local</Label>
-              <Input className="h-11 text-[14px]" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
+              <Label className="flex items-center gap-1 text-[13px] font-semibold text-[#4A4338]"><MapPin className="h-4 w-4 text-[#8E7A64]" />Local</Label>
+              <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
             </div>
             <div className="space-y-2">
-              <Label>Data</Label>
-              <Input className="h-11 text-[14px]" type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
+              <Label className="text-[13px] font-semibold text-[#4A4338]">Data</Label>
+              <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center gap-1"><Star className="h-4 w-4 text-muted-foreground" />Avaliação</Label>
+            <Label className="flex items-center gap-1 text-[13px] font-semibold text-[#4A4338]"><Star className="h-4 w-4 text-[#8E7A64]" />Avaliação</Label>
             <div className="flex gap-1.5 flex-wrap">
               {([
                 { value: 1, label: "Ruim" },
@@ -373,10 +397,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   key={opt.value}
                   type="button"
                   className={cn(
-                    "min-h-11 rounded-xl border px-3.5 py-2 text-[13px] font-medium transition-all duration-200",
+                    "min-h-12 rounded-[18px] border px-3.5 py-2 text-[14px] font-medium transition-all duration-200",
                     rating === opt.value
-                      ? "bg-[#7B1E2B] text-white border-[#7B1E2B] shadow-[0_8px_24px_rgba(123,30,43,0.18)]"
-                      : "bg-white text-[#333] border-black/10 hover:bg-[#F8F8F8]",
+                      ? "bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white border-[#7B1E2B] shadow-[0_12px_26px_-14px_rgba(123,30,43,0.42)]"
+                      : "bg-white/85 text-[#333] border-black/5 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.18)] hover:bg-white",
                   )}
                   onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
                 >
@@ -387,13 +411,13 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           </div>
 
           <div className="space-y-2">
-            <Label>Notas de degustação</Label>
-            <Textarea className="min-h-[104px] text-[14px]" value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} placeholder="Aromas, sabor, impressões..." rows={3} />
+            <Label className="text-[13px] font-semibold text-[#4A4338]">Notas de degustação</Label>
+            <Textarea className="min-h-[104px] rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} placeholder="Aromas, sabor, impressões..." rows={3} />
           </div>
           </div>
 
-          <div className="sticky bottom-0 border-t border-black/5 bg-[#F4F1EC]/96 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md sm:px-0 sm:pb-0">
-            <Button onClick={handleSubmit} disabled={addConsumption.isPending} variant="primary" className="h-12 w-full text-[14px] font-semibold">
+          <div className="sticky bottom-0 border-t border-black/5 bg-[#FAF8F6]/96 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md sm:px-0 sm:pb-0">
+            <Button onClick={handleSubmit} disabled={addConsumption.isPending} variant="primary" className="h-12 w-full text-[14px] font-semibold shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)]">
               {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
             </Button>
           </div>
