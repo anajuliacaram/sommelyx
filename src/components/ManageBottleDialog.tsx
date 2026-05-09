@@ -103,9 +103,19 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   };
 
   const handleScanComplete = (data: any) => {
-    const normalized = normalizeScanResult(data);
+    const raw = data && typeof data === "object" && "raw" in data && data.raw && typeof data.raw === "object"
+      ? data.raw
+      : data;
+    const normalizedSource = data && typeof data === "object" && "normalized" in data && data.normalized && typeof data.normalized === "object"
+      ? data.normalized
+      : raw;
+    const normalized = normalizeScanResult(normalizedSource);
 
-    console.log("SCAN_RESULT_MAPPED", normalized);
+    console.log("SCAN_RESULT_MAPPED", {
+      rawKeys: raw && typeof raw === "object" ? Object.keys(raw) : [],
+      normalizedKeys: Object.keys(normalized).filter((key) => normalized[key as keyof typeof normalized] != null && normalized[key as keyof typeof normalized] !== ""),
+      normalized,
+    });
 
     setExtWineName("");
     setExtProducer("");

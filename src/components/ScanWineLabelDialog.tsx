@@ -11,7 +11,7 @@ import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib/ai-attachments";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
-import { hasMeaningfulScanResult, normalizeScanResult, type CanonicalScanResult } from "@/lib/scan-normalizer";
+import { hasMeaningfulScanResult, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
 import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
@@ -20,10 +20,18 @@ interface ScannedWineData extends CanonicalScanResult {
   labelImageBase64?: string | null;
 }
 
+export interface ScanResultPayload {
+  raw: Record<string, unknown>;
+  normalized: NormalizedScanResult;
+  labelImagePreview?: string | null;
+  labelImageFile?: File | null;
+  labelImageBase64?: string | null;
+}
+
 interface ScanWineLabelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onScanComplete: (data: ScannedWineData) => void;
+  onScanComplete: (data: ScanResultPayload) => void;
 }
 
 type ScanStep = "capture" | "scanning" | "preview" | "error";
@@ -41,6 +49,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const [step, setStep] = useState<ScanStep>("capture");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [scannedData, setScannedData] = useState<ScannedWineData | null>(null);
+  const [scanPayload, setScanPayload] = useState<ScanResultPayload | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [supportCode, setSupportCode] = useState<string | null>(null);
   const [lastBase64, setLastBase64] = useState<string | null>(null);
@@ -66,6 +75,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setStep("capture");
     setImagePreview(null);
     setScannedData(null);
+    setScanPayload(null);
     setErrorMsg("");
     setSupportCode(null);
     setLastBase64(null);
@@ -128,7 +138,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         finalMimeType: metadata?.mimeType || null,
         device: getClientDeviceType(),
       });
-      const data = await invokeEdgeFunction<CanonicalScanResult>(
+      const data = await invokeEdgeFunction<Record<string, unknown>>(
         "scan-wine-label",
         {
           imageBase64: base64,
@@ -144,7 +154,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         fullJsonResponse: data,
         responseKeys: data && typeof data === "object" ? Object.keys(data as Record<string, unknown>) : [],
       });
-      const normalizedWine = normalizeScanResult(data);
+      const originalResponse = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+      const normalizedWine = normalizeScanResult(originalResponse);
       const isPartial = !hasMeaningfulScanResult(normalizedWine);
       console.info("[ScanWineLabelDialog] response_normalized", {
         function: "scan-wine-label",
@@ -205,6 +216,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         device: getClientDeviceType(),
       });
       setScannedData(normalizedWine);
+      setScanPayload({
+        raw: originalResponse,
+        normalized: normalizedWine,
+        labelImagePreview: null,
+        labelImageFile: null,
+        labelImageBase64: null,
+      });
       setScanOutcome(isPartial ? "success_partial" : "success_full");
       setStep("preview");
     } catch (err: unknown) {
@@ -411,7 +429,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       }
 
       onScanComplete({
-        ...scannedData,
+        raw: scanPayload?.raw ?? {},
+        normalized: scanPayload?.normalized ?? (scannedData as NormalizedScanResult),
         labelImagePreview,
         labelImageFile: selectedFile,
         labelImageBase64: lastBase64,
@@ -421,7 +440,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     } finally {
       confirmBusyRef.current = false;
     }
-  }, [imagePreview, lastBase64, onOpenChange, onScanComplete, reset, scannedData]);
+  }, [imagePreview, lastBase64, onOpenChange, onScanComplete, reset, scanPayload, scannedData]);
 
   useEffect(() => {
     if (!open) return;

@@ -14,6 +14,8 @@ export type CanonicalScanResult = {
   cellar_location: string | null;
 };
 
+export type NormalizedScanResult = CanonicalScanResult & Record<string, unknown>;
+
 function normalizeText(value: unknown) {
   if (typeof value !== "string") return "";
   const text = value.trim().replace(/\s+/g, " ");
@@ -40,11 +42,12 @@ function parseMaybeNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function normalizeScanResult(raw: unknown): CanonicalScanResult {
+export function normalizeScanResult(raw: unknown): NormalizedScanResult {
   const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const name = normalizeText(source.name) || normalizeText(source.wine_name);
   const grape = normalizeText(source.grape) || normalizeText(source.grapes);
   return {
+    ...source,
     name,
     producer: normalizeText(source.producer) || null,
     country: normalizeText(source.country) || null,

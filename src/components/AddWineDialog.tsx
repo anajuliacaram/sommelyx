@@ -111,6 +111,14 @@ type ScanSuggestionInput = {
   confidence?: Record<string, number | null | undefined> | null;
 };
 
+type ScanResultEnvelope = {
+  raw?: Record<string, unknown> | null;
+  normalized?: Record<string, unknown> | null;
+  labelImagePreview?: string | null;
+  labelImageFile?: File | null;
+  labelImageBase64?: string | null;
+};
+
 type ScanFieldMapping = {
   target: keyof AddWinePrefillValues;
   sources: string[];
@@ -249,11 +257,13 @@ function suggestDrinkWindow(input: ScanSuggestionInput) {
   };
 }
 
-function mapScanResultToInitialValues(result: any): AddWinePrefillValues {
-  const normalized = normalizeScanResult(result);
-  const source = result && typeof result === "object" ? (result as Record<string, unknown>) : {};
+function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unknown): AddWinePrefillValues {
+  const source = rawResult && typeof rawResult === "object" ? (rawResult as Record<string, unknown>) : {};
+  const normalizedSource = normalizedResult && typeof normalizedResult === "object" ? (normalizedResult as Record<string, unknown>) : {};
+  const normalized = normalizeScanResult(normalizedSource);
   const normalizedName = pickFirstMeaningfulString([
     normalized.name,
+    normalizedSource.name,
     source.name,
     source.wine_name,
     source.wineName,
@@ -262,6 +272,7 @@ function mapScanResultToInitialValues(result: any): AddWinePrefillValues {
   ]);
   const normalizedProducer = pickFirstMeaningfulString([
     normalized.producer,
+    normalizedSource.producer,
     source.producer,
     source.producer_name,
     source.winery,
@@ -271,24 +282,28 @@ function mapScanResultToInitialValues(result: any): AddWinePrefillValues {
   const normalizedVintage = normalized.vintage ?? (Number.isFinite(fallbackVintage) ? fallbackVintage : null);
   const normalizedStyle = pickFirstMeaningfulString([
     normalized.style,
+    normalizedSource.style,
     source.style,
     source.wine_style,
     source.type,
   ]);
   const normalizedCountry = pickFirstMeaningfulString([
     normalized.country,
+    normalizedSource.country,
     source.country,
     source.pais,
     source["país"],
   ]);
   const normalizedRegion = pickFirstMeaningfulString([
     normalized.region,
+    normalizedSource.region,
     source.region,
     source.regiao,
     source["região"],
   ]);
   const normalizedGrape = pickFirstMeaningfulString([
     normalized.grape,
+    normalizedSource.grape,
     source.grape,
     source.grapes,
     source.varietal,
@@ -542,12 +557,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     return nextPrefilled;
   }, []);
 
-  const hydrateScanPrefill = useCallback((prefill: AddWinePrefillValues, source: "scan" | "initialValues") => {
+  const hydrateScanPrefill = useCallback((prefill: AddWinePrefillValues, source: "scan" | "initialValues", scanMeta?: ScanResultEnvelope) => {
     pendingHydrationTraceRef.current = { source, payload: prefill };
     finalFormStateLoggedRef.current = false;
     console.info("[AddWineDialog] hydrate_input", {
       source,
       payload: prefill,
+      rawKeys: Object.keys(scanMeta?.raw ?? {}).filter((key) => key.trim().length > 0),
+      normalizedKeys: Object.keys(scanMeta?.normalized ?? {}).filter((key) => key.trim().length > 0),
       payloadKeys: Object.entries(prefill)
         .filter(([, value]) => value != null && value !== "")
         .map(([key]) => key),
@@ -579,6 +596,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
         region: prefill.region ?? null,
         grape: prefill.grape ?? null,
       },
+    });
+
+    console.info("[AddWineDialog] final_mapped_fields", {
+      source,
+      rawKeys: Object.keys(scanMeta?.raw ?? {}).filter((key) => key.trim().length > 0),
+      normalizedKeys: Object.keys(scanMeta?.normalized ?? {}).filter((key) => key.trim().length > 0),
+      finalMappedFields: mappedFields,
     });
 
     if (mappedFields.length > 0) {
@@ -662,7 +686,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   useEffect(() => {
     if (!open || !initialValues) return;
     reset();
-    hydrateScanPrefill(initialValues, "initialValues");
+    hydrateScanPrefill(initialValues, "initialValues", {
+      raw: initialValues as Record<string, unknown>,
+      normalized: initialValues as Record<string, unknown>,
+      labelImagePreview: initialValues.labelImagePreview ?? null,
+      labelImageFile: initialValues.labelImageFile ?? null,
+      labelImageBase64: initialValues.labelImageBase64 ?? null,
+    });
   }, [hydrateScanPrefill, initialValues, open]);
 
   useEffect(() => {
@@ -723,18 +753,33 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     });
   }
 
-  const handleScanComplete = (data: any) => {
-    const responseKeys = data && typeof data === "object" ? Object.keys(data as Record<string, unknown>) : [];
+  const handleScanComplete = (data: ScanResultEnvelope | any) => {
+    const rawScan = data && typeof data === "object" && "raw" in data && data.raw && typeof data.raw === "object"
+      ? (data.raw as Record<string, unknown>)
+      : data && typeof data === "object"
+        ? (data as Record<string, unknown>)
+        : {};
+    const normalizedScan = data && typeof data === "object" && "normalized" in data && data.normalized && typeof data.normalized === "object"
+      ? (data.normalized as Record<string, unknown>)
+      : rawScan;
+    const responseKeys = Object.keys(rawScan);
+    const normalizedKeys = Object.keys(normalizedScan);
     console.info("[AddWineDialog] scan_callback_payload", {
-      fullJsonResponse: data,
-      responseKeys,
+      raw: rawScan,
+      normalized: normalizedScan,
+      rawKeys: responseKeys,
+      normalizedKeys,
       expectedFields: ["name", "producer", "vintage", "style", "country", "region", "grape", "drink_from", "drink_until", "purchase_price", "estimated_price", "food_pairing", "cellar_location"],
     });
     console.info("[AddWineDialog] raw_scan_result", {
-      fullJsonResponse: data,
+      fullJsonResponse: rawScan,
       responseKeys,
     });
-    const mappedData = mapScanResultToInitialValues(data);
+    console.info("[AddWineDialog] normalized_scan_result", {
+      fullJsonResponse: normalizedScan,
+      normalizedKeys,
+    });
+    const mappedData = mapScanResultToInitialValues(rawScan, normalizedScan);
     const meaningfulMappedFields = Object.entries(mappedData)
       .filter(([key, value]) => SCAN_PREFILL_FORM_FIELDS.includes(key as (typeof SCAN_PREFILL_FORM_FIELDS)[number]) && value != null && value !== "")
       .map(([key]) => key);
@@ -747,6 +792,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       responseVsFormExpectedFields: {
         expectedFields: ADD_WINE_FORM_FIELDS,
         responseKeys,
+        normalizedKeys,
         mappedFields: meaningfulMappedFields,
         missingFromResponse: ADD_WINE_FORM_FIELDS.filter((field) => !responseKeys.includes(field)),
       },
@@ -795,7 +841,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       labelImagePreview: data?.labelImagePreview ?? null,
       labelImageFile: data?.labelImageFile ?? null,
       labelImageBase64: data?.labelImageBase64 ?? null,
-    }, "scan");
+    }, "scan", {
+      raw: rawScan,
+      normalized: normalizedScan,
+      labelImagePreview: data?.labelImagePreview ?? null,
+      labelImageFile: data?.labelImageFile ?? null,
+      labelImageBase64: data?.labelImageBase64 ?? null,
+    });
 
     const populatedCount = Object.keys(appliedFields).filter((field) => SCAN_PREFILL_FORM_FIELDS.includes(field as (typeof SCAN_PREFILL_FORM_FIELDS)[number])).length;
     if (populatedCount > 0) {
