@@ -2620,6 +2620,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const classifications = getRowClassifications(draftWines);
   const renderableRows = getRenderableRows(draftWines);
   const visibleDraftWines = renderableRows.slice(0, previewLimit);
+  const rowsForRender = visibleDraftWines.map(({ row, index }) => ({ row, index }));
   const isTruncatedPreview = renderableRows.length > visibleDraftWines.length;
   const allFieldsVisible = showAdvancedColumns;
   const rowStatuses = draftWines.map((row) => getImportStatus(row));
@@ -2630,6 +2631,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const identifiedRowsCount = completeRowsCount + reviewRowsCount;
   const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0;
   const isReviewStep = step === "preview" || step === "review";
+  const reviewTableVisible = isReviewStep && rowsForRender.length > 0;
+  console.log("[IMPORT] rows_for_render", rowsForRender);
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
     return Array.from(new Set(all.map((wine) => wine.producer).filter((value): value is string => !!value && value.trim().length > 1)))
@@ -2843,6 +2846,87 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         ) : null}
       </td>
     );
+  };
+
+  const renderMinimalReviewTable = () => {
+    try {
+      return (
+        <div className="flex-1 min-h-[320px] overflow-hidden rounded-[24px] border border-white/45 bg-white/70">
+          <div className="border-b border-black/5 px-4 py-4">
+            <p className="text-[16px] font-semibold tracking-tight text-[#2a1f1a]">Tabela mínima de revisão</p>
+            <p className="mt-1 text-[12px] text-[#6b5e55]">
+              Renderização forçada para garantir visibilidade das linhas antes da importação.
+            </p>
+          </div>
+
+          {rowsForRender.length === 0 ? (
+            <div className="flex h-full items-center justify-center px-6 py-10">
+              <div className="max-w-md rounded-[22px] border border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] px-5 py-4 text-center">
+                <p className="text-[15px] font-semibold text-[#7B1E2B]">Nenhuma linha chegou à tabela de revisão</p>
+                <p className="mt-1 text-[13px] leading-6 text-[#6B6258]">
+                  O arquivo foi analisado, mas as linhas não ficaram disponíveis para renderização.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="max-h-[520px] overflow-auto">
+              <table className="w-full min-w-[640px] border-collapse">
+                <thead>
+                  <tr className="border-b border-black/10 bg-black/5 text-left">
+                    <th className="px-4 py-3 text-[12px] font-semibold text-[#4A4338]">#</th>
+                    <th className="px-4 py-3 text-[12px] font-semibold text-[#4A4338]">Nome</th>
+                    <th className="px-4 py-3 text-[12px] font-semibold text-[#4A4338]">Produtor</th>
+                    <th className="px-4 py-3 text-[12px] font-semibold text-[#4A4338]">Safra</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rowsForRender.map(({ row, index }) => {
+                    console.log("[IMPORT] rendering_row", index, row);
+                    return (
+                      <tr key={`debug-row-${index}`} className="border-b border-black/5 align-top">
+                        <td className="px-4 py-3 text-[13px] text-[#6B6258]">{index + 1}</td>
+                        <td className="px-4 py-3">
+                          <Input
+                            value={row?.name ?? ""}
+                            onChange={(e) => updateWineRow(index, "name", e.target.value)}
+                            placeholder="—"
+                            className="h-11 rounded-[12px] border border-white/50 bg-white px-3 text-[13px] shadow-none"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            value={row?.producer ?? ""}
+                            onChange={(e) => updateWineRow(index, "producer", e.target.value)}
+                            placeholder="—"
+                            className="h-11 rounded-[12px] border border-white/50 bg-white px-3 text-[13px] shadow-none"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            value={row?.vintage != null ? String(row.vintage) : ""}
+                            onChange={(e) => updateWineRow(index, "vintage", e.target.value ? Number.parseInt(e.target.value, 10) : undefined)}
+                            placeholder="—"
+                            type="number"
+                            className="h-11 rounded-[12px] border border-white/50 bg-white px-3 text-[13px] shadow-none"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      );
+    } catch (error) {
+      console.error("[IMPORT] render_error", error);
+      return (
+        <div className="rounded-[22px] border border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] p-4 text-[13px] font-medium text-[#7B1E2B]">
+          Não conseguimos renderizar a tabela de revisão.
+        </div>
+      );
+    }
   };
 
   return (
@@ -3294,433 +3378,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       ) : null}
 
                       {draftWines.length > 0 ? (
-                        <div className="flex-1 min-h-[320px] overflow-hidden rounded-[24px] border border-white/45"
-                          style={{
-                            background: "rgba(255,255,255,0.62)",
-                            backdropFilter: "blur(14px)",
-                            WebkitBackdropFilter: "blur(14px)",
-                            boxShadow: "0 18px 48px rgba(40,25,15,0.08)",
-                          }}
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/40 px-4 py-4">
-                            <div className="min-w-0">
-                              <p className="text-[16px] font-semibold tracking-tight text-[#2a1f1a]">Tabela de revisão</p>
-                              <p className="mt-1 text-[12px] text-[#6b5e55]">
-                                Clique em qualquer campo para editar · arraste as bordas das colunas · use Tab / Enter para avançar.
-                              </p>
-                            </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-[rgba(95,111,82,0.16)] bg-[rgba(95,111,82,0.08)] px-3 py-1 text-[11px] font-semibold text-[#57704B]">
-                          {completeRowsCount} válidos
-                        </span>
-                        <span className="rounded-full border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.09)] px-3 py-1 text-[11px] font-semibold text-[#7B6528]">
-                          {reviewRowsCount} revisão
-                        </span>
-                        <span className="rounded-full border border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.08)] px-3 py-1 text-[11px] font-semibold text-[#7B1E2B]">
-                          {invalidRowsCount} inválidos
-                        </span>
-                        <span className="rounded-full border border-[rgba(115,95,145,0.16)] bg-[rgba(115,95,145,0.08)] px-3 py-1 text-[11px] font-semibold text-[#67557D]">
-                          {duplicateRowsCount} duplicados
-                        </span>
-                      </div>
-                          </div>
-
-                          <div className="border-b border-white/40 px-4 py-4">
-                            <div className="grid gap-3 lg:grid-cols-[1.4fr_0.8fr_0.8fr]">
-                              <div className="flex items-center gap-2 rounded-2xl border border-white/50 bg-white/70 px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
-                                <Input
-                                  value={bulkProducer}
-                                  onChange={(e) => setBulkProducer(e.target.value)}
-                                  placeholder="Preencher produtor"
-                                  disabled={!editMode}
-                                  className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-                                />
-                                <Button variant="secondary" size="sm" onClick={applyProducerToSelected} disabled={!editMode || !bulkProducer.trim() || selectedRows.length === 0}>
-                                  Aplicar aos selecionados
-                                </Button>
-                              </div>
-                              <div className="flex items-center gap-2 rounded-2xl border border-white/50 bg-white/70 px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
-                                <Input
-                                  value={bulkVintage}
-                                  onChange={(e) => setBulkVintage(e.target.value)}
-                                  placeholder="Preencher safra"
-                                  type="number"
-                                  disabled={!editMode}
-                                  className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-                                />
-                                <Button variant="secondary" size="sm" onClick={applyVintageToSelected} disabled={!editMode || !bulkVintage.trim() || selectedRows.length === 0}>
-                                  Aplicar aos selecionados
-                                </Button>
-                              </div>
-                              <div className="flex items-center gap-2 rounded-2xl border border-white/50 bg-white/70 px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
-                                <Input
-                                  value={bulkGrape}
-                                  onChange={(e) => setBulkGrape(e.target.value)}
-                                  placeholder="Preencher uva"
-                                  disabled={!editMode}
-                                  className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-                                />
-                                <Button variant="secondary" size="sm" onClick={applyGrapeToSelected} disabled={!editMode || !bulkGrape.trim() || selectedRows.length === 0}>
-                                  Aplicar aos selecionados
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex-1 min-h-0 overflow-hidden">
-                            {visibleDraftWines.length === 0 ? (
-                              <div className="flex h-full items-center justify-center px-6 py-10">
-                                <div className="max-w-md rounded-[22px] border border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] px-5 py-4 text-center">
-                                  <p className="text-[15px] font-semibold text-[#7B1E2B]">Não conseguimos renderizar a tabela de revisão</p>
-                                  <p className="mt-1 text-[13px] leading-6 text-[#6B6258]">
-                                    As linhas foram analisadas, mas nenhuma linha chegou à UI de revisão. Troque o arquivo ou reprocessse a leitura.
-                                  </p>
-                                </div>
-                              </div>
-                            ) : null}
-                            <div className="hidden md:block h-full min-h-0">
-                              <div ref={tableScrollRef} className="max-h-[460px] overflow-auto cellar-scroll">
-                                <table className="w-full min-w-[1260px] table-fixed border-separate border-spacing-0">
-                                  <colgroup>
-                                    <col style={{ width: 56 }} />
-                                    <col style={{ width: columnWidths.name }} />
-                                    {visibleColumns
-                                      .filter((column) => column.key !== "name")
-                                      .map((column) => (
-                                        <col key={column.key} style={{ width: columnWidths[column.key] || 160 }} />
-                                      ))}
-                                  </colgroup>
-                                  <thead className="sticky top-0 z-10 bg-white/90 backdrop-blur-md">
-                                    <tr className="border-b border-black/5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
-                                      <th className="px-3 py-3 text-left">
-                                        <button
-                                          type="button"
-                                          onClick={toggleAllRows}
-                                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/5 bg-white/70 hover:bg-white transition-colors"
-                                          aria-label={allRowsSelected ? "Deselecionar todas as linhas" : "Selecionar todas as linhas"}
-                                        >
-                                          {allRowsSelected ? <Check className="h-4 w-4 text-[#6b1f1f]" /> : <span className="h-3.5 w-3.5 rounded-[4px] border border-black/20" />}
-                                        </button>
-                                      </th>
-                                      {visibleColumns.map((column) => (
-                                        <th key={column.key} className="relative px-3 py-3 text-left align-bottom" style={{ width: columnWidths[column.key] }}>
-                                          <div className="flex items-center gap-2">
-                                            <span>{column.label}</span>
-                                            <button
-                                              type="button"
-                                              aria-label={`Redimensionar coluna ${column.label}`}
-                                              onMouseDown={(event) => startColumnResize(column.key, event)}
-                                              className="flex h-7 w-3 cursor-col-resize items-center justify-center text-black/20 hover:text-[#6b1f1f]"
-                                            >
-                                              <GripVertical className="h-3.5 w-3.5" />
-                                            </button>
-                                          </div>
-                                        </th>
-                                      ))}
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {visibleDraftWines.map(({ row: wine, index }) => {
-                                      const rowStatus = getImportStatus(wine as DraftWine);
-                                      const displayStatus = getDisplayRowStatus(wine as DraftWine);
-                                      const issues = getRowIssues(wine as DraftWine);
-                                      const rowHasError = rowStatus === "invalid";
-                                      const rowMissingPrice = wine.purchase_price == null && (wine as DraftWine).price == null;
-                                      const accent = accentForRow(wine as DraftWine);
-                                      const confidence = (wine as DraftWine).confidence;
-                                      const statusTone =
-                                        displayStatus === "invalid"
-                                          ? "bg-[rgba(123,30,43,0.10)] text-[#7B1E2B]"
-                                          : displayStatus === "warning"
-                                            ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528]"
-                                            : displayStatus === "duplicate"
-                                              ? "bg-[rgba(115,95,145,0.10)] text-[#67557D]"
-                                              : "bg-[rgba(95,111,82,0.10)] text-[#57704B]";
-                                      const statusLabel =
-                                        displayStatus === "invalid"
-                                          ? "Inválido"
-                                          : displayStatus === "warning"
-                                            ? "Revisar"
-                                            : displayStatus === "duplicate"
-                                              ? "Duplicado"
-                                              : "Válido";
-                                      const rowSelected = selectedSet.has(index);
-                                      const fieldRowClass = cn(
-                                        "border-b border-white/40 transition-colors hover:bg-white/70",
-                                        rowSelected && "bg-white/80",
-                                      displayStatus === "invalid" && "bg-[rgba(123,30,43,0.03)]",
-                                      displayStatus === "warning" && "bg-[rgba(198,167,104,0.05)]",
-                                      displayStatus === "duplicate" && "bg-[rgba(115,95,145,0.04)]",
-                                      displayStatus === "valid" && confidence < 0.8 && "bg-[rgba(95,111,82,0.04)]",
-                                      );
-                                      const textFieldClass = cn(
-                                        "h-11 rounded-[12px] border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors placeholder:text-[#A39A90] focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none",
-                                        !wine.name?.trim() && "border-[rgba(123,30,43,0.22)] bg-[rgba(123,30,43,0.05)]",
-                                      );
-                                      const valueSelectClass = "h-11 rounded-[12px] border border-transparent bg-[#F8F6F2] px-3 text-[13px] shadow-none transition-colors focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none";
-
-                                      return (
-                                        <tr key={`row-${index}`} className={fieldRowClass}>
-                                          <td className="px-3 py-3 align-top">
-                                            <button
-                                              type="button"
-                                              onClick={() => toggleRowSelection(index)}
-                                              className={cn(
-                                                "inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
-                                                rowSelected ? "border-[#6b1f1f] bg-[#6b1f1f] text-white" : "border-black/10 bg-white/70 text-transparent hover:text-black/30",
-                                              )}
-                                              aria-label={rowSelected ? "Desmarcar linha" : "Marcar linha"}
-                                            >
-                                              <Check className="h-4 w-4" strokeWidth={3} />
-                                            </button>
-                                          </td>
-                                          <td className="px-3 py-3 align-top" style={{ borderLeft: `4px solid ${rowHasError ? "#D88C7A" : accent.bar}` }}>
-                                            <div className="flex items-start gap-3 min-w-0">
-                                              <div className="mt-0.5 h-10 w-8 shrink-0 overflow-hidden rounded-lg border border-black/5 bg-[#F8F6F2]">
-                                                <WineLabelPreview
-                                                  wine={{
-                                                    name: wine.name || "Prévia do vinho",
-                                                    style: wine.type || wine.style || null,
-                                                    image_url: wine.image_url || null,
-                                                    fallback_image: buildGeneratedThumbnail({ ...wine, type: wine.type || wine.style }),
-                                                  }}
-                                                  alt={wine.name || "Prévia do vinho"}
-                                                  compact
-                                                  generated={!wine.image_url || isIllustrativeImage(wine.image_url)}
-                                                  className="h-full w-full rounded-lg"
-                                                  imageClassName="h-full w-full object-cover"
-                                                />
-                                              </div>
-                                              <div className="min-w-0 flex-1">
-                                                <Input
-                                                  value={wine.name || ""}
-                                                  onChange={(e) => updateWineRow(index, "name", e.target.value)}
-                                                  className={textFieldClass}
-                                                  onKeyDown={(event) => handleCellKeyDown(event, index, "name")}
-                                                  onClick={(e) => e.stopPropagation()}
-                                                  placeholder="Nome do vinho"
-                                                />
-                                                {duplicateRowsCount > 0 && (wine as DraftWine).duplicateWarning ? (
-                                                  <p className="mt-1 text-[11px] text-amber-700">{(wine as DraftWine).duplicateWarning}</p>
-                                                ) : null}
-                                              </div>
-                                            </div>
-                                          </td>
-                                          {visibleColumns.filter((column) => column.key !== "name").map((column) => renderEditableCell(wine as DraftWine, index, column))}
-                                        </tr>
-                                      );
-                                    })}
-                                    <tr ref={loadMoreRef}>
-                                      <td colSpan={visibleColumns.length + 1} className="h-8" />
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-
-                            <div className="md:hidden space-y-3 px-4 py-4">
-                              {visibleDraftWines.map(({ row: wine, index }) => {
-                                const rowStatus = getImportStatus(wine as DraftWine);
-                                const displayStatus = getDisplayRowStatus(wine as DraftWine);
-                                const statusTone =
-                                  displayStatus === "invalid"
-                                    ? "bg-[rgba(123,30,43,0.10)] text-[#7B1E2B]"
-                                    : displayStatus === "warning"
-                                      ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528]"
-                                      : displayStatus === "duplicate"
-                                        ? "bg-[rgba(115,95,145,0.10)] text-[#67557D]"
-                                        : "bg-[rgba(95,111,82,0.10)] text-[#57704B]";
-                                const statusLabel =
-                                  displayStatus === "invalid"
-                                    ? "Inválido"
-                                    : displayStatus === "warning"
-                                      ? "Revisar"
-                                      : displayStatus === "duplicate"
-                                        ? "Duplicado"
-                                        : "Válido";
-                                const rowSelected = selectedSet.has(index);
-                                const expanded = expandedRows.includes(index) || displayStatus !== "valid";
-                                const rowMissingPrice = wine.purchase_price == null && (wine as DraftWine).price == null;
-
-                                return (
-                                  <motion.div
-                                    key={`mobile-${index}`}
-                                    layout
-                                    className={cn(
-                                      "overflow-hidden rounded-[20px] border border-white/50 shadow-[0_12px_28px_rgba(0,0,0,0.06)]",
-                                      rowSelected ? "bg-white/90" : "bg-white/75",
-                                    )}
-                                    style={{
-                                      backdropFilter: "blur(12px)",
-                                      WebkitBackdropFilter: "blur(12px)",
-                                    }}
-                                  >
-                                    <button
-                                      type="button"
-                                      onClick={() => toggleRowSelection(index)}
-                                      className={cn(
-                                        "flex w-full items-start gap-3 border-b border-black/5 px-4 py-4 text-left",
-                                        expanded ? "rounded-t-[20px]" : "rounded-[20px]",
-                                      )}
-                                    >
-                                      <div className="h-12 w-9 shrink-0 overflow-hidden rounded-lg border border-black/5 bg-[#F8F6F2]">
-                                        <WineLabelPreview
-                                          wine={{
-                                            name: wine.name || "Prévia do vinho",
-                                            style: wine.type || wine.style || null,
-                                            image_url: wine.image_url || null,
-                                            fallback_image: buildGeneratedThumbnail({ ...wine, type: wine.type || wine.style }),
-                                          }}
-                                          alt={wine.name || "Prévia do vinho"}
-                                          compact
-                                          generated={!wine.image_url || isIllustrativeImage(wine.image_url)}
-                                          className="h-full w-full rounded-lg"
-                                          imageClassName="h-full w-full object-cover"
-                                        />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <div className="flex items-start justify-between gap-3">
-                                          <div className="min-w-0">
-                                            <p className="truncate text-[14px] font-semibold text-[#2a1f1a]">{wine.name || "Linha sem nome"}</p>
-                                            <p className="mt-0.5 text-[12px] text-[#6b5e55]">
-                                              {wine.producer || "Produtor pendente"} · {wine.country || "País pendente"}
-                                            </p>
-                                          </div>
-                                          <div className="flex flex-col items-end gap-1">
-                                <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold", statusTone)}>
-                                  {statusLabel}
-                                </span>
-                                            <span className="text-[10px] text-black/40">{rowStatus === "invalid" ? "Corrija antes de importar" : "Edite para continuar"}</span>
-                                          </div>
-                                        </div>
-                                        <div className="mt-3 flex flex-wrap items-center gap-2">
-                                          <button
-                                            type="button"
-                                            onClick={() => toggleExpandedRow(index)}
-                                            className="inline-flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1.5 text-[11px] font-medium text-[#4d423b]"
-                                          >
-                                            {expanded ? "Ocultar campos" : "Editar campos"}
-                                            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
-                                          </button>
-                                          <button
-                                            type="button"
-                                            onClick={() => toggleRowSelection(index)}
-                                            className={cn(
-                                              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors",
-                                              rowSelected ? "bg-[#6b1f1f] text-white" : "bg-[#6b1f1f]/8 text-[#6b1f1f]",
-                                            )}
-                                          >
-                                            <Check className="h-3.5 w-3.5" />
-                                              {rowSelected ? "Selecionada" : "Selecionar"}
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </button>
-
-                                    <AnimatePresence initial={false}>
-                                      {expanded ? (
-                                        <motion.div
-                                          initial={{ opacity: 0, height: 0 }}
-                                          animate={{ opacity: 1, height: "auto" }}
-                                          exit={{ opacity: 0, height: 0 }}
-                                          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                                          className="space-y-3 px-4 py-4"
-                                        >
-                                          <div className="grid gap-3 sm:grid-cols-2">
-                                            {[
-                                              { key: "producer" as const, label: "Produtor" },
-                                              { key: "country" as const, label: "País" },
-                                              { key: "region" as const, label: "Região" },
-                                              { key: "grape" as const, label: "Uva" },
-                                              { key: "vintage" as const, label: "Safra" },
-                                              { key: "purchase_price" as const, label: "Preço" },
-                                            ].map((field) => (
-                                              <div key={field.key} className="space-y-1.5">
-                                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">{field.label}</p>
-                                                {field.key === "country" ? (
-                                                  <Select
-                                                    value={wine.country || "__empty__"}
-                                                    onValueChange={(value) => updateWineRow(index, "country", value === "__empty__" ? undefined : value)}
-                                                  >
-                                                    <SelectTrigger className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none">
-                                                      <SelectValue placeholder="País" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                      <SelectItem value="__empty__">Em branco</SelectItem>
-                                                      {knownCountries.map((country) => (
-                                                        <SelectItem key={country} value={country}>
-                                                          {country}
-                                                        </SelectItem>
-                                                      ))}
-                                                    </SelectContent>
-                                                  </Select>
-                                                ) : field.key === "grape" ? (
-                                                  <Select
-                                                    value={wine.grape || "__empty__"}
-                                                    onValueChange={(value) => updateWineRow(index, "grape", value === "__empty__" ? undefined : value)}
-                                                  >
-                                                    <SelectTrigger className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none">
-                                                      <SelectValue placeholder="Uva" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                      <SelectItem value="__empty__">Em branco</SelectItem>
-                                                      {knownGrapes.map((grape) => (
-                                                        <SelectItem key={grape} value={grape}>
-                                                          {grape}
-                                                        </SelectItem>
-                                                      ))}
-                                                    </SelectContent>
-                                                  </Select>
-                                                ) : field.key === "vintage" ? (
-                                                  <Input
-                                                    value={wine.vintage ? String(wine.vintage) : ""}
-                                                    onChange={(e) => updateWineRow(index, "vintage", e.target.value ? Number.parseInt(e.target.value, 10) : undefined)}
-                                                    className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none"
-                                                    type="number"
-                                                    placeholder="Safra"
-                                                  />
-                                                ) : field.key === "purchase_price" ? (
-                                                  <Input
-                                                    value={formatPrice((wine as DraftWine).price ?? wine.purchase_price)}
-                                                    onChange={(e) => updateWineRow(index, "purchase_price", e.target.value ? Number.parseFloat(e.target.value) : undefined)}
-                                                    className={cn("h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none", rowMissingPrice && "border-amber-300")}
-                                                    type="number"
-                                                    step="0.01"
-                                                    placeholder="Preço"
-                                                  />
-                                                ) : (
-                                                  <Input
-                                                    value={field.key === "producer" ? wine.producer || "" : wine.region || ""}
-                                                    onChange={(e) => updateWineRow(index, field.key, e.target.value)}
-                                                    className="h-11 rounded-[12px] border border-white/50 bg-white/70 px-3 text-[13px] shadow-none"
-                                                    placeholder={field.label}
-                                                  />
-                                                )}
-                                              </div>
-                                            ))}
-                                          </div>
-
-                                          <div className="flex flex-wrap items-center gap-2">
-                                            <span className={cn("inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-semibold", statusTone)}>
-                                              {statusLabel}
-                                            </span>
-                                            {(wine as DraftWine).duplicateWarning ? (
-                                              <span className="inline-flex items-center rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-semibold text-violet-700">
-                                                {(wine as DraftWine).duplicateWarning}
-                                              </span>
-                                            ) : null}
-                                          </div>
-                                        </motion.div>
-                                      ) : null}
-                                    </AnimatePresence>
-                                  </motion.div>
-                                );
-                              })}
-                            </div>
-
-                            <div ref={loadMoreRef} className="h-8" aria-hidden="true" />
-                          </div>
-                        </div>
+                        renderMinimalReviewTable()
                       ) : (
                         <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4 text-[13px] font-medium text-[#6B6258]">
                           {importMode === "smart-pdf"
@@ -3816,7 +3474,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 onClick={handleImport}
                 variant="primary"
                 className="h-14 rounded-2xl px-5 text-[14px] font-semibold"
-                disabled={!canImport}
+                disabled={!canImport || !reviewTableVisible}
               >
                 <Upload className="h-4 w-4 mr-1.5" /> Importar {identifiedRowsCount} revisados
               </AiModalActionButton>
