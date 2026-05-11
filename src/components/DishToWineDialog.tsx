@@ -126,6 +126,15 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     if (fn) fn();
   }, []);
 
+  useEffect(() => {
+    console.info("[DishToWineDialog] step_state", {
+      step,
+      source,
+      subMode,
+      dish: dish.trim() || null,
+    });
+  }, [dish, source, step, subMode]);
+
   const resolveCellarWines = useCallback(async () => {
     const currentWines = Array.isArray(wines) ? wines : [];
     if (currentWines.length > 0) return currentWines;
@@ -487,7 +496,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     }
   }, [dish, nextRequestId]);
 
-  // Router: from "dish" step, cellar goes to intent picker; external runs text-only harmonization.
+  // Router: from "dish" step, cellar goes to intent picker; external advances to wine-list attachment.
   const handleSearch = useCallback((dishName?: string) => {
     const query = (dishName || dish).trim();
     if (!query.trim()) {
@@ -496,11 +505,30 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     }
     setDish(query);
     if (source === "cellar") {
+      console.info("[DishToWineDialog] step_transition", {
+        from: step,
+        to: "intent",
+        source,
+        reason: "dish_confirmed",
+        dish: query,
+      });
       setStep("intent");
     } else {
-      handleSearchExternal(query);
+      setError(null);
+      setPairingResult(null);
+      setScanResults(null);
+      setLastWineListAttachment(null);
+      setPreview(null);
+      console.info("[DishToWineDialog] step_transition", {
+        from: step,
+        to: "photo",
+        source,
+        reason: "dish_confirmed_external_attachment_required",
+        dish: query,
+      });
+      setStep("photo");
     }
-  }, [dish, source, handleSearchExternal]);
+  }, [dish, source, step]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1156,7 +1184,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <PairingErrorState
                     message={error}
                     onRetry={() => {
-                      if (dish.trim()) handleSearchExternal(dish);
+                      if (dish.trim()) handleSearch(dish);
                     }}
                     onClose={() => setError(null)}
                   />
