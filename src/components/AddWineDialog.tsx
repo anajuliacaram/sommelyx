@@ -18,7 +18,7 @@ import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
-import { normalizeWineData } from "@/lib/wine-normalization";
+import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
@@ -180,6 +180,51 @@ function getFirstDetectedString(source: Record<string, unknown>) {
   return "";
 }
 
+function sanitizeOcrLine(line: string) {
+  return line
+    .replace(/\s+/g, " ")
+    .replace(/[|•·]/g, " ")
+    .trim();
+}
+
+function splitOcrTextIntoLines(value: string) {
+  return value
+    .split(/\r?\n+/)
+    .map(sanitizeOcrLine)
+    .filter(Boolean);
+}
+
+function looksLikeProducerLine(line: string) {
+  const normalized = line.toLowerCase();
+  return /vinicola|vinícola|winery|bodega|cantina|producer|produtor|estate|vineyards|adega/.test(normalized);
+}
+
+function looksLikeNameLine(line: string) {
+  const normalized = line.toLowerCase();
+  if (normalized.length < 3) return false;
+  if (looksLikeProducerLine(line)) return false;
+  return (
+    /reserva|reserve|riserva|chianti|malbec|cabernet|merlot|pinot|syrah|shiraz|chardonnay|sauvignon|riesling|brut|rosso|bianco|gran|grand|cru|classico/.test(normalized) ||
+    /^[A-ZÀ-Ý0-9'’\-\s]{6,}$/.test(line)
+  );
+}
+
+function extractNameFromFullText(fullText: string) {
+  const lines = splitOcrTextIntoLines(fullText);
+  const bestNamedLine = lines.find(looksLikeNameLine);
+  if (bestNamedLine) return normalizeWineText(bestNamedLine) || bestNamedLine;
+  const firstMeaningful = lines.find((line) => line.length >= 5 && !looksLikeProducerLine(line));
+  return firstMeaningful ? normalizeWineText(firstMeaningful) || firstMeaningful : "";
+}
+
+function extractProducerFromFullText(fullText: string) {
+  const lines = splitOcrTextIntoLines(fullText);
+  const explicitProducer = lines.find(looksLikeProducerLine);
+  if (explicitProducer) return normalizeWineText(explicitProducer) || explicitProducer;
+  const fallback = lines.find((line) => !looksLikeNameLine(line) && line.length >= 4);
+  return fallback ? normalizeWineText(fallback) || fallback : "";
+}
+
 function suggestPurchasePrice(input: ScanSuggestionInput) {
   const style = normalizeSuggestionText(input.style);
   const grape = normalizeSuggestionText(input.grape);
@@ -262,22 +307,40 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
   const source = rawResult && typeof rawResult === "object" ? (rawResult as Record<string, unknown>) : {};
   const normalizedSource = normalizedResult && typeof normalizedResult === "object" ? (normalizedResult as Record<string, unknown>) : {};
   const normalized = normalizeScanResult(normalizedSource);
+  const rawLabelText = pickFirstMeaningfulString([
+    source.label_text,
+    source.labelText,
+    source.primary_text,
+  ]);
+  const rawFullText = pickFirstMeaningfulString([
+    source.full_text,
+    source.fullText,
+    source.ocr_text,
+    source.text,
+    source.description,
+    source.notes,
+  ]);
+  const extractedNameFromText = rawFullText ? extractNameFromFullText(rawFullText) : "";
+  const extractedProducerFromText = rawFullText ? extractProducerFromFullText(rawFullText) : "";
   const normalizedName = pickFirstMeaningfulString([
     normalized.name,
     normalizedSource.name,
+    source.wineName,
     source.name,
     source.wine_name,
-    source.wineName,
-    source.label_text,
-    source.full_text,
+    rawLabelText,
+    extractedNameFromText,
+    rawFullText,
   ]);
   const normalizedProducer = pickFirstMeaningfulString([
     normalized.producer,
     normalizedSource.producer,
     source.producer,
     source.producer_name,
+    source.producerName,
     source.winery,
     source.winemaker,
+    extractedProducerFromText,
   ]);
   const fallbackVintage = parseInt(String(source.year ?? source.vintage_year ?? ""), 10);
   const normalizedVintage = normalized.vintage ?? (Number.isFinite(fallbackVintage) ? fallbackVintage : null);
@@ -310,17 +373,8 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     source.varietal,
     source.varieties,
   ]);
-  const fallbackText = pickFirstMeaningfulString([
-    source.label_text,
-    source.full_text,
-    source.text,
-    source.description,
-    source.notes,
-    source.ocr_text,
-    getFirstDetectedString(source),
-  ]);
   const mappedData: AddWinePrefillValues = {
-    name: normalizedName || fallbackText || "Vinho não identificado",
+    name: normalizedName || getFirstDetectedString(source) || "",
     producer: normalizedProducer || null,
     vintage: normalizedVintage,
     style: normalizedStyle || null,
@@ -335,6 +389,10 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     foodPairing: normalized.food_pairing || null,
     cellarLocation: normalized.cellar_location || null,
   };
+
+  console.info("[SCAN] raw_response", source);
+  console.info("[SCAN] normalized", normalized);
+  console.info("[SCAN] final_form_values", mappedData);
 
   return mappedData;
 }
