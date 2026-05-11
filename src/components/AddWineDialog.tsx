@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ import { normalizeWineData } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
+import { AiModalActionButton, AiModalCard, AiModalHeader, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -997,21 +998,12 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto rounded-[24px] p-0 border border-black/[0.04] shadow-[0_26px_64px_rgba(0,0,0,0.10)]" style={{ background: "#FAF8F6", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
 
           <div className="px-6 py-6 flex h-full flex-col">
-            <SheetHeader className="mb-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] shadow-[0_10px_28px_-18px_rgba(123,30,43,0.18)]">
-                  <Wine className="h-5 w-5 text-[#7B1E2B]" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <SheetTitle className="font-serif text-[20px] sm:text-[28px] font-semibold tracking-[-0.02em] leading-[1.15]" style={{ color: '#1A1713' }}>
-                    {isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
-                  </SheetTitle>
-                  <p className="mt-1.5 text-[14px] sm:text-[15px] font-medium leading-7 text-[rgba(58,51,39,0.68)]">
-                    Complete manualmente ou use rótulo, escaneamento e CSV.
-                  </p>
-                </div>
-              </div>
-            </SheetHeader>
+            <AiModalHeader
+              className="mb-6"
+              icon={<Wine className="h-5 w-5 text-[#7B1E2B]" />}
+              title={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
+              description="Complete manualmente ou use rótulo, escaneamento e CSV."
+            />
 
             <AnimatePresence mode="wait">
               {success ? (
@@ -1112,8 +1104,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                   </div>
 
-                  {/* Essential fields */}
-                  <div className="space-y-4 pt-1">
+                  <AiModalCard className="space-y-4 pt-1">
+                    <div className="space-y-1">
+                      <AiSectionLabel>Essenciais</AiSectionLabel>
+                      <p className="text-[14px] leading-6 text-[#645E54]">
+                        Preencha os dados principais do vinho para manter a adega organizada com clareza editorial.
+                      </p>
+                    </div>
                     <div>
                       <label htmlFor="name" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
                       <input
@@ -1173,7 +1170,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
+                  </AiModalCard>
 
                   {isCommercial ? (
                     <div className="rounded-[24px] border border-black/5 bg-white/82 p-4 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] sm:p-5">
@@ -1248,15 +1245,22 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <CollapsibleTrigger asChild>
                       <button
                         type="button"
-                        className="w-full flex items-center justify-between text-[13px] font-semibold h-10 px-3 rounded-xl transition-colors duration-150 hover:bg-white/60"
-                        style={{ color: '#6F7F5B' }}
+                        className="w-full rounded-[24px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(248,244,237,0.66)_100%)] px-4 py-4 text-left shadow-[0_12px_30px_-24px_rgba(0,0,0,0.14)] backdrop-blur-[14px] transition-all duration-200 hover:-translate-y-px sm:px-5"
                       >
-                        Mais detalhes
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} style={{ color: '#6F7F5B' }} />
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <AiSectionLabel>Detalhes extras</AiSectionLabel>
+                            <p className="mt-1 text-[14px] leading-6 text-[#645E54]">
+                              Região, uva, valores e janela ideal para beber no mesmo ritmo visual do restante do modal.
+                            </p>
+                          </div>
+                          <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} style={{ color: '#6F7F5B' }} />
+                        </div>
                       </button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-4 pt-3">
-                      <div className="grid grid-cols-2 gap-3">
+                    <CollapsibleContent className="pt-3">
+                      <AiModalCard className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">País</label>
                           <input value={getRenderedFieldValue("country", country)} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="input-premium" style={aiFieldStyle("country")} />
@@ -1337,8 +1341,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Harmonização</label>
                         <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
                       </div>
-                      {!isCommercial && (
-                        <>
+                        {!isCommercial && (
+                          <>
                           <div>
                             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                               <label className="block text-[13px] font-semibold tracking-[-0.01em] text-[#4A4338]">
@@ -1396,12 +1400,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                               style={aiFieldStyle("tasting_notes")}
                             />
                           </div>
-                        </>
-                      )}
+                          </>
+                        )}
+                      </AiModalCard>
                     </CollapsibleContent>
                   </Collapsible>
 
-                    <Button
+                    <AiModalActionButton
                       type="submit"
                       disabled={!name.trim()}
                       loading={addWine.isPending}
@@ -1409,9 +1414,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       variant="primary"
                       className="w-full h-12 rounded-[18px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
                     >
-                    <Plus className="h-4 w-4" />
-                    {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
-                  </Button>
+                      <Plus className="h-4 w-4" />
+                      {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
+                    </AiModalActionButton>
 
                   {missingFields.length > 0 && (
                     <div

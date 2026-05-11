@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star, Search } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
+import { AiModalActionButton, AiModalCard, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
 
@@ -66,6 +67,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [wineSearch, setWineSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<WineTypeFilter>("all");
   const [showWinePicker, setShowWinePicker] = useState(false);
+  const fieldClassName =
+    "h-12 rounded-[18px] border border-black/5 bg-white/84 px-4 text-[14px] text-[#1F1F1F] shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)] transition-all duration-200 placeholder:text-[#8C8579] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/18 focus-visible:ring-offset-0";
+  const selectionCardClassName =
+    "flex min-h-[112px] flex-col justify-between rounded-[22px] border px-4 py-4 text-left shadow-[0_12px_28px_-24px_rgba(0,0,0,0.16)] transition-all duration-200 hover:-translate-y-px";
 
   useEffect(() => {
     if (open && preSelectedWine) {
@@ -191,235 +196,325 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="items-end p-0 bg-[#FAF8F6] shadow-[0_26px_64px_rgba(0,0,0,0.10)] sm:items-center sm:p-4">
-        <DialogHeader>
-          <div className="flex items-start gap-3.5 px-4 pt-4 sm:gap-4 sm:px-0 sm:pt-0">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_10px_28px_-18px_rgba(123,30,43,0.18)]">
-              <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <DialogTitle className="font-serif text-[20px] sm:text-[28px] font-semibold tracking-[-0.02em] text-[#1A1713] leading-[1.15]">
-                Registrar consumo
-              </DialogTitle>
-              <DialogDescription className="mt-1.5 text-[14px] sm:text-[15px] font-medium leading-7 text-[rgba(58,51,39,0.68)]">
-                Registre uma degustação da sua adega ou externa
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="flex max-h-[calc(100dvh-5.5rem)] min-h-0 flex-col sm:max-h-[calc(90vh-6rem)]">
-          <div className="flex-1 space-y-5 overflow-y-auto px-4 pb-4 pr-4 sm:px-0 sm:pb-0 sm:pr-1">
-          <div className="space-y-2">
-            <Label className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B5B47] mb-2">Origem</Label>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-1.5">
-              <Button
-                type="button"
-                variant={source === "cellar" ? "primary" : "secondary"}
-                className={cn(
-                  "h-12 justify-center rounded-[18px] text-[14px] font-semibold transition-all duration-200 sm:flex-1",
-                  source === "cellar"
-                    ? "bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
-                    : "bg-white/82 text-[#4A4338] border border-black/5 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)] hover:bg-white",
-                )}
-                onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
-              >
-                Da minha adega
-              </Button>
-              <Button
-                type="button"
-                variant={source === "external" ? "primary" : "secondary"}
-                className={cn(
-                  "h-12 justify-center rounded-[18px] text-[14px] font-semibold transition-all duration-200 sm:flex-1",
-                  source === "external"
-                    ? "bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
-                    : "bg-white/82 text-[#4A4338] border border-black/5 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)] hover:bg-white",
-                )}
-                onClick={() => { setSource("external"); setSelectedWineId(""); setShowWinePicker(false); setWineName(""); setProducer(""); setCountry(""); setRegion(""); setGrape(""); setStyle(""); setVintage(""); }}
-              >
-                Consumo externo
-              </Button>
-            </div>
-          </div>
-
-          {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
-            <div className="space-y-2">
-              <Label className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B5B47]">Selecionar vinho</Label>
-
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/40" />
-                <Input
-                  value={wineSearch}
-                  onChange={(e) => setWineSearch(e.target.value)}
-                  placeholder="Buscar por nome, produtor, uva, safra…"
-                  className="h-11 rounded-[18px] pl-9 bg-white/75 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.14)]"
-                />
-            </div>
-
-              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
-                {TYPE_FILTERS.map((f) => {
-                  const active = typeFilter === f.id;
-                  return (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setTypeFilter(f.id)}
-                      className={cn(
-                        "shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-all duration-200",
-                        f.pill,
-                        active ? "scale-[1.05] shadow-sm ring-1 ring-black/10" : "opacity-80 hover:opacity-100",
-                      )}
-                    >
-                      {f.label}
-                    </button>
-                  );
-                })}
+      <DialogContent className="items-end rounded-[24px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_26px_64px_rgba(0,0,0,0.10)] sm:items-center sm:p-4">
+        <div
+          className="flex w-full max-h-[calc(100dvh-2rem)] min-h-0 flex-col rounded-[24px] p-4 sm:max-h-[90vh] sm:p-6"
+          style={{ backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
+        >
+          <DialogHeader className="mb-6 text-left">
+            <div className="flex items-start gap-4 pr-12">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_10px_28px_-18px_rgba(123,30,43,0.18)]">
+                <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
               </div>
-
-              <div
-                className="max-h-[300px] overflow-y-auto pr-1 rounded-[22px] border border-black/5 bg-white/82 shadow-[0_16px_34px_-26px_rgba(58,51,39,0.16)] backdrop-blur-md divide-y divide-black/5 cellar-scroll"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
-              >
-                {filteredWines.length > 4 && (
-                  <div className="sticky top-0 z-10 bg-gradient-to-b from-white/95 to-white/70 backdrop-blur-sm px-3 py-1.5 text-[10.5px] tracking-[0.12em] uppercase text-[#7B1E2B]/70 font-medium border-b border-black/5">
-                    Role para ver todos os {filteredWines.length} vinhos ↓
-                  </div>
-                )}
-                {filteredWines.length === 0 ? (
-                  <div className="px-4 py-8 text-center">
-                    <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado na adega</p>
-                    <p className="text-xs text-black/50 mt-1">Use a busca ou ajuste os filtros para localizar a garrafa certa</p>
-                  </div>
-                ) : (
-                  filteredWines.map((w) => {
-                    const selected = selectedWineId === w.id;
-                    return (
-                      <button
-                        key={w.id}
-                        type="button"
-                        onClick={() => handleSelectWine(w.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 text-left cursor-pointer transition-all duration-150",
-                        "hover:bg-white/60 active:scale-[0.99]",
-                        selected && "bg-[rgba(123,30,43,0.05)] border-l-2 border-[#7B1E2B]/25",
-                      )}
-                      >
-                        <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", dotForWine(w.style))} />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[13.5px] font-semibold text-[#1C1C1C] truncate">{w.name}</p>
-                          <p className="text-[11.5px] text-black/55 truncate">
-                            {[w.grape, w.vintage, w.country].filter(Boolean).join(" · ") || w.producer || "—"}
-                          </p>
-                        </div>
-                        <span className="text-[11.5px] font-medium text-black/60 shrink-0">
-                          {w.quantity} gf{w.quantity !== 1 ? "s" : ""}
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1A1713] sm:text-[32px]">
+                  Registrar consumo
+                </DialogTitle>
+                <DialogDescription className="mt-1.5 text-[14px] font-medium leading-7 tracking-[-0.01em] text-[#6B6B6B] sm:text-[15px]">
+                  Registre uma garrafa da sua adega ou uma taça especial fora de casa com a mesma linguagem visual do restante da experiência.
+                </DialogDescription>
               </div>
             </div>
-          )}
+          </DialogHeader>
 
-          {source === "cellar" && selectedWine && !showWinePicker && (
-              <div className="rounded-[22px] border border-black/5 bg-white/82 px-4 py-3 shadow-[0_12px_26px_-24px_rgba(0,0,0,0.16)]">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-[#1C1C1C] truncate">{selectedWine.name}</p>
-                    <p className="text-[11.5px] text-black/55 truncate">
-                      {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+              <AiModalCard className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
+                <div className="space-y-1">
+                  <AiSectionLabel>Origem</AiSectionLabel>
+                  <p className="text-[14px] leading-6 text-[#645E54]">
+                    Escolha se este registro vem da sua adega pessoal ou de uma experiência externa.
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-9 rounded-full border border-black/5 bg-white/75 px-3 text-[11px] font-semibold text-[#7B1E2B] shadow-[0_10px_22px_-24px_rgba(0,0,0,0.14)] hover:bg-white"
-                  onClick={() => setShowWinePicker(true)}
-                >
-                Trocar vinho
-                </Button>
-              </div>
-            </div>
-          )}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    className={cn(
+                      selectionCardClassName,
+                      source === "cellar"
+                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] shadow-[0_18px_32px_-24px_rgba(123,30,43,0.28)]"
+                        : "border-black/5 bg-white/80 hover:bg-white/90",
+                    )}
+                    onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
+                  >
+                    <div>
+                      <p className="text-[16px] font-semibold tracking-[-0.02em] text-[#1A1713]">Minha adega</p>
+                      <p className="mt-1 text-[13px] leading-6 text-[#6B6B6B]">
+                        Selecione uma garrafa já cadastrada para registrar a abertura ou degustação.
+                      </p>
+                    </div>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]">
+                      {cellarWines.length} disponíveis
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      selectionCardClassName,
+                      source === "external"
+                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] shadow-[0_18px_32px_-24px_rgba(123,30,43,0.28)]"
+                        : "border-black/5 bg-white/80 hover:bg-white/90",
+                    )}
+                    onClick={() => {
+                      setSource("external");
+                      setSelectedWineId("");
+                      setShowWinePicker(false);
+                      setWineName("");
+                      setProducer("");
+                      setCountry("");
+                      setRegion("");
+                      setGrape("");
+                      setStyle("");
+                      setVintage("");
+                    }}
+                  >
+                    <div>
+                      <p className="text-[16px] font-semibold tracking-[-0.02em] text-[#1A1713]">Experiência externa</p>
+                      <p className="mt-1 text-[13px] leading-6 text-[#6B6B6B]">
+                        Registre um vinho descoberto em restaurante, viagem, jantar ou degustação.
+                      </p>
+                    </div>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]">
+                      Manual
+                    </span>
+                  </button>
+                </div>
+              </AiModalCard>
 
-          <div className="space-y-3">
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-[#4A4338]">Nome do vinho <span className="text-primary">*</span></Label>
-                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={wineName} onChange={(e) => setWineName(e.target.value)} placeholder="Ex: Château Margaux" disabled={source === "cellar" && !!selectedWineId} />
-              </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-2">
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-[#4A4338]">Produtor</Label>
-                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-[#4A4338]">Safra</Label>
-                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-[#4A4338]">País</Label>
-                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold text-[#4A4338]">Região</Label>
-                <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[13px] font-semibold text-[#4A4338]">Uva / Blend</Label>
-              <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={grape} onChange={(e) => setGrape(e.target.value)} placeholder="Ex: Cabernet Sauvignon, Merlot" disabled={source === "cellar" && !!selectedWineId} />
-            </div>
-          </div>
+              {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
+                <AiModalCard className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
+                  <div className="space-y-1">
+                    <AiSectionLabel>Selecionar garrafa</AiSectionLabel>
+                    <p className="text-[14px] leading-6 text-[#645E54]">
+                      Busque por nome, produtor, uva ou safra para encontrar rapidamente a garrafa certa.
+                    </p>
+                  </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1 text-[13px] font-semibold text-[#4A4338]"><MapPin className="h-4 w-4 text-[#8E7A64]" />Local</Label>
-              <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[13px] font-semibold text-[#4A4338]">Data</Label>
-              <Input className="h-12 rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
-            </div>
-          </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/40" />
+                    <Input
+                      value={wineSearch}
+                      onChange={(e) => setWineSearch(e.target.value)}
+                      placeholder="Buscar por nome, produtor, uva, safra…"
+                      className={cn(fieldClassName, "pl-10")}
+                    />
+                  </div>
 
-          <div className="space-y-2">
-            <Label className="flex items-center gap-1 text-[13px] font-semibold text-[#4A4338]"><Star className="h-4 w-4 text-[#8E7A64]" />Avaliação</Label>
-            <div className="flex gap-1.5 flex-wrap">
-              {([
-                { value: 1, label: "Ruim" },
-                { value: 2, label: "Regular" },
-                { value: 3, label: "Bom" },
-                { value: 4, label: "Muito bom" },
-                { value: 5, label: "Excelente" },
-              ] as const).map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={cn(
-                    "min-h-12 rounded-[18px] border px-3.5 py-2 text-[14px] font-medium transition-all duration-200",
-                    rating === opt.value
-                      ? "bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white border-[#7B1E2B] shadow-[0_12px_26px_-14px_rgba(123,30,43,0.42)]"
-                      : "bg-white/85 text-[#333] border-black/5 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.18)] hover:bg-white",
-                  )}
-                  onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
-                >
-                  {opt.label}
-                </button>
-              ))}
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {TYPE_FILTERS.map((f) => {
+                      const active = typeFilter === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => setTypeFilter(f.id)}
+                          className={cn(
+                            "shrink-0 rounded-full px-4 py-2 text-[12.5px] font-semibold transition-all duration-200",
+                            active
+                              ? "border border-[rgba(123,30,43,0.14)] bg-[rgba(123,30,43,0.10)] text-[#5A1528] shadow-[0_8px_18px_-16px_rgba(123,30,43,0.24)]"
+                              : "border border-black/5 bg-white/72 text-[#5F5F5F] hover:bg-white/92 hover:text-[#1A1713]",
+                          )}
+                        >
+                          {f.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div
+                    className="cellar-scroll max-h-[300px] divide-y divide-black/5 overflow-y-auto rounded-[22px] border border-black/5 bg-white/84 pr-1 shadow-[0_16px_34px_-26px_rgba(58,51,39,0.16)]"
+                    style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
+                  >
+                    {filteredWines.length > 4 ? (
+                      <div className="sticky top-0 z-10 border-b border-black/5 bg-gradient-to-b from-white/95 to-white/70 px-3 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#7B1E2B]/70 backdrop-blur-sm">
+                        Role para ver todos os {filteredWines.length} vinhos
+                      </div>
+                    ) : null}
+                    {filteredWines.length === 0 ? (
+                      <div className="px-4 py-8 text-center">
+                        <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado na adega</p>
+                        <p className="mt-1 text-xs text-black/50">Use a busca ou ajuste os filtros para localizar a garrafa certa.</p>
+                      </div>
+                    ) : (
+                      filteredWines.map((w) => {
+                        const selected = selectedWineId === w.id;
+                        return (
+                          <button
+                            key={w.id}
+                            type="button"
+                            onClick={() => handleSelectWine(w.id)}
+                            className={cn(
+                              "flex w-full items-center gap-3 px-3 py-3 text-left transition-all duration-150 hover:bg-white/60 active:scale-[0.99]",
+                              selected ? "border-l-2 border-[#7B1E2B]/25 bg-[rgba(123,30,43,0.05)]" : "",
+                            )}
+                          >
+                            <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", dotForWine(w.style))} />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-[#1C1C1C]">{w.name}</p>
+                              <p className="truncate text-[11.5px] text-black/55">
+                                {[w.grape, w.vintage, w.country].filter(Boolean).join(" · ") || w.producer || "Garrafa da adega"}
+                              </p>
+                            </div>
+                            <span className="shrink-0 text-[11.5px] font-medium text-black/60">
+                              {w.quantity} gf{w.quantity !== 1 ? "s" : ""}
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </AiModalCard>
+              )}
+
+              {source === "cellar" && selectedWine && !showWinePicker ? (
+                <AiModalCard className="px-4 py-4 sm:px-5 sm:py-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
+                      <p className="mt-2 truncate text-[18px] font-semibold tracking-[-0.02em] text-[#1A1713]">{selectedWine.name}</p>
+                      <p className="mt-1 truncate text-[13px] leading-6 text-[#6B6B6B]">
+                        {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-10 rounded-full border border-black/5 bg-white/75 px-3.5 text-[11px] font-semibold text-[#7B1E2B] shadow-[0_10px_22px_-24px_rgba(0,0,0,0.14)] hover:bg-white"
+                      onClick={() => setShowWinePicker(true)}
+                    >
+                      Trocar vinho
+                    </Button>
+                  </div>
+                </AiModalCard>
+              ) : null}
+
+              <AiModalCard className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
+                <div className="space-y-1">
+                  <AiSectionLabel>Dados do vinho</AiSectionLabel>
+                  <p className="text-[14px] leading-6 text-[#645E54]">
+                    Organize as informações essenciais do vinho e complete o contexto da degustação.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[13px] font-semibold text-[#4A4338]">
+                    Nome do vinho <span className="text-primary">*</span>
+                  </Label>
+                  <Input
+                    className={fieldClassName}
+                    value={wineName}
+                    onChange={(e) => setWineName(e.target.value)}
+                    placeholder="Ex: Château Margaux"
+                    disabled={source === "cellar" && !!selectedWineId}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-[13px] font-semibold text-[#4A4338]">Produtor</Label>
+                    <Input className={fieldClassName} value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[13px] font-semibold text-[#4A4338]">Safra</Label>
+                    <Input className={fieldClassName} value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[13px] font-semibold text-[#4A4338]">País</Label>
+                    <Input className={fieldClassName} value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[13px] font-semibold text-[#4A4338]">Região</Label>
+                    <Input className={fieldClassName} value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[13px] font-semibold text-[#4A4338]">Uva / Blend</Label>
+                  <Input
+                    className={fieldClassName}
+                    value={grape}
+                    onChange={(e) => setGrape(e.target.value)}
+                    placeholder="Ex: Cabernet Sauvignon, Merlot"
+                    disabled={source === "cellar" && !!selectedWineId}
+                  />
+                </div>
+              </AiModalCard>
+
+              <AiModalCard className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
+                <div className="space-y-1">
+                  <AiSectionLabel>Contexto da experiência</AiSectionLabel>
+                  <p className="text-[14px] leading-6 text-[#645E54]">
+                    Registre onde aconteceu, sua avaliação e as notas que fazem essa garrafa valer a lembrança.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1 text-[13px] font-semibold text-[#4A4338]">
+                      <MapPin className="h-4 w-4 text-[#8E7A64]" />
+                      Local
+                    </Label>
+                    <Input className={fieldClassName} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[13px] font-semibold text-[#4A4338]">Data</Label>
+                    <Input className={fieldClassName} type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1 text-[13px] font-semibold text-[#4A4338]">
+                    <Star className="h-4 w-4 text-[#8E7A64]" />
+                    Avaliação
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {([
+                      { value: 1, label: "Ruim" },
+                      { value: 2, label: "Regular" },
+                      { value: 3, label: "Bom" },
+                      { value: 4, label: "Muito bom" },
+                      { value: 5, label: "Excelente" },
+                    ] as const).map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={cn(
+                          "min-h-12 rounded-[18px] border px-4 py-2 text-[14px] font-medium transition-all duration-200",
+                          rating === opt.value
+                            ? "border-[#7B1E2B] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white shadow-[0_12px_26px_-14px_rgba(123,30,43,0.42)]"
+                            : "border-black/5 bg-white/85 text-[#333] shadow-[0_10px_22px_-24px_rgba(0,0,0,0.18)] hover:bg-white",
+                        )}
+                        onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[13px] font-semibold text-[#4A4338]">Notas de degustação</Label>
+                  <Textarea
+                    className="min-h-[112px] rounded-[18px] border border-black/5 bg-white/84 px-4 py-3 text-[14px] text-[#1F1F1F] shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)] placeholder:text-[#8C8579] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/18 focus-visible:ring-offset-0"
+                    value={tastingNotes}
+                    onChange={(e) => setTastingNotes(e.target.value)}
+                    placeholder="Aromas, textura, equilíbrio, final e o contexto que fez este vinho marcar o momento."
+                    rows={4}
+                  />
+                </div>
+              </AiModalCard>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label className="text-[13px] font-semibold text-[#4A4338]">Notas de degustação</Label>
-            <Textarea className="min-h-[104px] rounded-[18px] text-[14px] bg-white/80 border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]" value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} placeholder="Aromas, sabor, impressões..." rows={3} />
-          </div>
-          </div>
-
-          <div className="sticky bottom-0 border-t border-black/5 bg-[#FAF8F6]/96 px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md sm:px-0 sm:pb-0">
-            <Button onClick={handleSubmit} disabled={addConsumption.isPending} variant="primary" className="h-12 w-full text-[14px] font-semibold shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)]">
-              {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
-            </Button>
+            <div className="mt-4 border-t border-black/5 bg-[#FAF8F6]/96 pt-4 backdrop-blur-md">
+              <AiModalActionButton
+                onClick={handleSubmit}
+                disabled={addConsumption.isPending}
+                variant="primary"
+                className="w-full bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
+              >
+                {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
+              </AiModalActionButton>
+            </div>
           </div>
         </div>
       </DialogContent>
