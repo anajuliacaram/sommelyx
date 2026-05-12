@@ -2679,8 +2679,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const identifiedRowsCount = completeRowsCount + reviewRowsCount;
   const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0;
   const isReviewStep = step === "preview" || step === "review";
+  const showReviewTable = draftWines.length > 0;
   const reviewTableVisible = rowsForRender.length > 0;
+  console.log("draftWines:", draftWines);
   console.log("[IMPORT] rows_for_render", rowsForRender);
+  if (showReviewTable && !reviewTableVisible) {
+    throw new Error("REVIEW_TABLE_NOT_RENDERING");
+  }
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
     return Array.from(new Set(all.map((wine) => wine.producer).filter((value): value is string => !!value && value.trim().length > 1)))
@@ -2899,68 +2904,51 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const renderForcedReviewRows = () => {
     try {
       return (
-        <div className="flex-1 min-h-[320px] overflow-auto rounded-[24px] border border-white/45 bg-white/70">
-          <div className="border-b border-black/5 px-4 py-4">
-            <p className="text-[16px] font-semibold tracking-tight text-[#2a1f1a]">Linhas brutas para revisão</p>
-            <p className="mt-1 text-[12px] text-[#6b5e55]">
-              Renderização forçada sem componentes complexos. Se existem linhas, elas precisam aparecer aqui.
-            </p>
-          </div>
-
-          {rowsForRender.length === 0 ? (
-            <div className="flex h-full items-center justify-center px-6 py-10">
-              <div className="max-w-md rounded-[22px] border border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] px-5 py-4 text-center">
-                <p className="text-[15px] font-semibold text-[#7B1E2B]">Nenhuma linha chegou à tabela de revisão</p>
-                <p className="mt-1 text-[13px] leading-6 text-[#6B6258]">
-                  O arquivo foi analisado, mas as linhas não ficaram disponíveis para renderização.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3 px-4 py-4">
+        <div className="overflow-auto max-h-[500px] bg-white border border-black/10 rounded-xl">
+          <table className="min-w-full border-collapse">
+            <thead className="sticky top-0 bg-white">
+              <tr>
+                <th className="border-b border-black/10 px-4 py-3 text-left text-sm font-semibold text-[#2a1f1a]">Name</th>
+                <th className="border-b border-black/10 px-4 py-3 text-left text-sm font-semibold text-[#2a1f1a]">Producer</th>
+                <th className="border-b border-black/10 px-4 py-3 text-left text-sm font-semibold text-[#2a1f1a]">Vintage</th>
+              </tr>
+            </thead>
+            <tbody>
               {rowsForRender.map(({ row, index }) => {
-                console.log("[IMPORT] rendering_row", index, row);
+                console.log("rendering row:", row);
                 return (
-                  <div key={`debug-row-${index}`} className="rounded-[18px] border border-black/10 bg-white px-4 py-4">
-                    <div className="mb-3 text-[12px] font-semibold text-[#6B6258]">Linha {index + 1}</div>
-                    <div className="grid gap-3 md:grid-cols-3">
-                      <Input
+                  <tr key={index}>
+                    <td className="border-b border-black/5 px-4 py-3">
+                      <input
                         value={row?.name ?? ""}
                         onChange={(e) => updateWineRow(index, "name", e.target.value)}
-                        placeholder="Nome"
-                        className="h-11 rounded-[12px] border border-white/50 bg-white px-3 text-[13px] shadow-none"
+                        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm"
                       />
-                      <Input
+                    </td>
+                    <td className="border-b border-black/5 px-4 py-3">
+                      <input
                         value={row?.producer ?? ""}
                         onChange={(e) => updateWineRow(index, "producer", e.target.value)}
-                        placeholder="Produtor"
-                        className="h-11 rounded-[12px] border border-white/50 bg-white px-3 text-[13px] shadow-none"
+                        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm"
                       />
-                      <Input
-                        value={row?.vintage != null ? String(row.vintage) : ""}
+                    </td>
+                    <td className="border-b border-black/5 px-4 py-3">
+                      <input
+                        value={row?.vintage ?? ""}
                         onChange={(e) => updateWineRow(index, "vintage", e.target.value ? Number.parseInt(e.target.value, 10) : undefined)}
-                        placeholder="Safra"
-                        type="number"
-                        className="h-11 rounded-[12px] border border-white/50 bg-white px-3 text-[13px] shadow-none"
+                        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm"
                       />
-                    </div>
-                    <pre className="mt-3 overflow-auto rounded-[12px] bg-black/5 p-3 text-[11px] leading-5 text-[#4A4338]">
-                      {JSON.stringify(row ?? {}, null, 2)}
-                    </pre>
-                  </div>
+                    </td>
+                  </tr>
                 );
               })}
-            </div>
-          )}
+            </tbody>
+          </table>
         </div>
       );
     } catch (error) {
       console.error("[IMPORT] render_error", error);
-      return (
-        <div className="rounded-[22px] border border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] p-4 text-[13px] font-medium text-[#7B1E2B]">
-          Não conseguimos renderizar a tabela de revisão.
-        </div>
-      );
+      throw error;
     }
   };
 
@@ -3011,7 +2999,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               </div>
           </div>
 
-          {isReviewStep ? (
+          {showReviewTable ? (
             <div
               className="sticky top-[73px] z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/40 px-5 py-4"
               style={{
@@ -3474,7 +3462,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                {draftWines.length > 0 ? (
+                {showReviewTable ? (
                   <div className="px-6 pb-6">
                     {renderForcedReviewRows()}
                   </div>
@@ -3483,7 +3471,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             </div>
           </div>
 
-          {isReviewStep ? (
+          {showReviewTable ? (
             <div
               className="sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-white/45 px-4 py-4"
               style={{
