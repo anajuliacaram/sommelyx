@@ -157,8 +157,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       const originalResponse = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
       const normalizedWine = normalizeScanResult(originalResponse);
       const isPartial = !hasMeaningfulScanResult(normalizedWine);
-      console.info("[SCAN] raw_response", originalResponse);
-      console.info("[SCAN] normalized", normalizedWine);
+      console.info("[SCAN RAW]", originalResponse);
+      console.info("[SCAN NORMALIZED]", normalizedWine);
       console.info("[ScanWineLabelDialog] response_normalized", {
         function: "scan-wine-label",
         fileName: metadata?.fileName || null,

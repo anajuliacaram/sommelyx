@@ -217,6 +217,22 @@ function extractNameFromFullText(fullText: string) {
   return firstMeaningful ? normalizeWineText(firstMeaningful) || firstMeaningful : "";
 }
 
+function extractWineNameFromText(text?: string | null) {
+  if (!text) return "";
+  const lines = splitOcrTextIntoLines(text)
+    .map((line) =>
+      line
+        .replace(/\b(wine|vinho|dry|red|white|rosso|bianco)\b/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .filter(Boolean);
+  const bestLine = lines.find(looksLikeNameLine);
+  if (bestLine) return normalizeWineText(bestLine) || bestLine;
+  const firstTwo = lines.slice(0, 2).join(" ").trim();
+  return firstTwo ? normalizeWineText(firstTwo) || firstTwo : "";
+}
+
 function extractProducerFromFullText(fullText: string) {
   const lines = splitOcrTextIntoLines(fullText);
   const explicitProducer = lines.find(looksLikeProducerLine);
@@ -320,16 +336,20 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     source.description,
     source.notes,
   ]);
+  const firstOcrLine = splitOcrTextIntoLines(rawFullText)[0] || "";
   const extractedNameFromText = rawFullText ? extractNameFromFullText(rawFullText) : "";
   const extractedProducerFromText = rawFullText ? extractProducerFromFullText(rawFullText) : "";
+  const fallbackNameFromText = extractWineNameFromText(rawFullText || rawLabelText || firstOcrLine);
   const normalizedName = pickFirstMeaningfulString([
     normalized.name,
     normalizedSource.name,
     source.wineName,
-    source.name,
     source.wine_name,
+    source.name,
     rawLabelText,
+    fallbackNameFromText,
     extractedNameFromText,
+    firstOcrLine,
     rawFullText,
   ]);
   const normalizedProducer = pickFirstMeaningfulString([
@@ -374,7 +394,7 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     source.varieties,
   ]);
   const mappedData: AddWinePrefillValues = {
-    name: normalizedName || getFirstDetectedString(source) || "",
+    name: normalizedName || getFirstDetectedString(source) || "Vinho sem nome",
     producer: normalizedProducer || null,
     vintage: normalizedVintage,
     style: normalizedStyle || null,
@@ -390,8 +410,9 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     cellarLocation: normalized.cellar_location || null,
   };
 
-  console.info("[SCAN] raw_response", source);
-  console.info("[SCAN] normalized", normalized);
+  console.info("[SCAN RAW]", source);
+  console.info("[SCAN NORMALIZED]", normalized);
+  console.info("[FINAL NAME]", mappedData.name);
   console.info("[SCAN] final_form_values", mappedData);
 
   return mappedData;
