@@ -2667,9 +2667,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const visibleColumns = getVisibleColumns();
   const classifications = getRowClassifications(draftWines);
   const renderableRows = getRenderableRows(draftWines);
-  const visibleDraftWines = renderableRows.slice(0, previewLimit);
-  const rowsForRender = draftWines.map((row, index) => ({ row, index }));
-  const isTruncatedPreview = renderableRows.length > visibleDraftWines.length;
+  const visibleDraftWines = draftWines.slice(0, previewLimit);
+  const isTruncatedPreview = draftWines.length > visibleDraftWines.length;
   const allFieldsVisible = showAdvancedColumns;
   const rowStatuses = draftWines.map((row) => getImportStatus(row));
   const completeRowsCount = rowStatuses.filter((status) => status === "valid").length;
@@ -2680,12 +2679,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0;
   const isReviewStep = step === "preview" || step === "review";
   const showReviewTable = draftWines.length > 0;
-  const reviewTableVisible = rowsForRender.length > 0;
-  console.log("draftWines:", draftWines);
-  console.log("[IMPORT] rows_for_render", rowsForRender);
-  if (showReviewTable && !reviewTableVisible) {
-    throw new Error("REVIEW_TABLE_NOT_RENDERING");
-  }
+  const reviewTableVisible = draftWines.length > 0;
+  console.log("draftWines length:", draftWines.length);
+  console.log("draftWines data:", draftWines);
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
     return Array.from(new Set(all.map((wine) => wine.producer).filter((value): value is string => !!value && value.trim().length > 1)))
@@ -2752,6 +2748,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [draftWines.length, previewLimit, step]);
+
+  useEffect(() => {
+    if (!showReviewTable || typeof window === "undefined") return;
+    window.scrollTo(0, document.body.scrollHeight);
+  }, [showReviewTable, draftWines.length]);
 
   const commitField = (rowIndex: number, field: EditableField, rawValue: string) => {
     switch (field) {
@@ -2903,8 +2904,23 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const renderForcedReviewRows = () => {
     try {
+      if (draftWines.length === 0) {
+        return <div>No rows parsed</div>;
+      }
+      console.log("TABLE RENDERED");
       return (
-        <div className="overflow-auto max-h-[500px] bg-white border border-black/10 rounded-xl">
+        <div
+          className="block overflow-auto"
+          style={{
+            border: "3px solid red",
+            background: "white",
+            minHeight: "400px",
+            maxHeight: "500px",
+            overflow: "auto",
+            position: "relative",
+            zIndex: 9999,
+          }}
+        >
           <table className="min-w-full border-collapse">
             <thead className="sticky top-0 bg-white">
               <tr>
@@ -2914,7 +2930,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               </tr>
             </thead>
             <tbody>
-              {rowsForRender.map(({ row, index }) => {
+              {draftWines.map((row, index) => {
                 console.log("rendering row:", row);
                 return (
                   <tr key={index}>
@@ -3056,9 +3072,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             </div>
           ) : null}
 
-          <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4 sm:px-5 sm:pb-5">
+          <div className="block flex-1 min-h-[500px] overflow-visible px-4 pb-4 sm:px-5 sm:pb-5">
             <div
-              className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-white/45"
+              className="flex h-full min-h-[500px] flex-col overflow-visible rounded-[24px] border border-white/45"
               style={{
                 background: "rgba(255,255,255,0.62)",
                 backdropFilter: "blur(14px)",
@@ -3066,7 +3082,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 boxShadow: "0 18px 48px rgba(40,25,15,0.08)",
               }}
             >
-              <div className="flex-1 min-h-0 overflow-hidden">
+              <div className="block flex-1 min-h-[500px] overflow-visible">
                 <AnimatePresence mode="wait">
                   {step === "upload" && (
                     <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0 flex-col overflow-y-auto px-6 py-6">
@@ -3484,7 +3500,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <div className="flex items-center gap-2 text-[12px] font-medium">
                   <span>{visibleDraftWines.length} mostrados</span>
                   <span className="text-black/20">·</span>
-                  <span>{renderableRows.length} total</span>
+                  <span>{draftWines.length} total</span>
                   <span className="text-black/20">·</span>
                   <span className="text-emerald-700">{completeRowsCount} válidos</span>
                   <span className="text-black/20">·</span>
