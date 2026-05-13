@@ -9,6 +9,7 @@ import { INVALID_INPUT_ERROR, validateTextPayload } from "../_shared/payload-val
 
 const FUNCTION_NAME = "analyze-wine-list";
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+const MAX_TEXT_LENGTH = 30_000;
 const UserProfileSchema = z.object({
   topStyles: z.array(z.string()).optional(),
   topGrapes: z.array(z.string()).optional(),
@@ -18,7 +19,7 @@ const UserProfileSchema = z.object({
 
 const BodySchema = z.object({
   imageBase64: z.never().optional(),
-  extractedText: z.string().min(1).max(10_000),
+  extractedText: z.string().min(1).max(MAX_TEXT_LENGTH),
   mimeType: z.string().optional(),
   fileName: z.string().optional(),
   userProfile: UserProfileSchema,
@@ -322,6 +323,25 @@ function normalizeWineListPayload(payload: any) {
     if (!Number.isFinite(numeric)) return 0.35;
     return Math.max(0, Math.min(1, numeric));
   };
+  const normalizeTags = (value: unknown) => {
+    const canonical = [
+      { pattern: /top|melhor escolha|best pick|recomend/i, label: "Melhor escolha" },
+      { pattern: /value|custo|beneficio|benefício|preco|preço/i, label: "Melhor custo-benefício" },
+      { pattern: /guarda|cellar|age|aging/i, label: "Em guarda" },
+      { pattern: /beber agora|ready|drink now|agora/i, label: "Beber agora" },
+      { pattern: /icone|ícone|icon|premium|alta gama|high-end/i, label: "Ícone da carta" },
+      { pattern: /complex|complexidade/i, label: "Alta complexidade" },
+    ];
+    const input = Array.isArray(value) ? value : value ? [value] : [];
+    return Array.from(new Set(
+      input
+        .flatMap((tag) => String(tag).split(/[,;/|]+/))
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+        .map((tag) => canonical.find(({ pattern }) => pattern.test(tag))?.label || tag)
+        .filter((tag) => canonical.some(({ label }) => label === tag)),
+    ));
+  };
   const mapCategoryToStyle = (category: string) => {
     switch (category) {
       case "red":
@@ -355,24 +375,47 @@ function normalizeWineListPayload(payload: any) {
       const country = normalizeString(wine?.country) || null;
       const region = normalizeString(wine?.region) || null;
       const price = normalizePrice(wine?.price);
+      const vintageNumber = typeof wine?.vintage === "number" ? wine.vintage : Number(wine?.vintage ?? 0);
+      const vintage = Number.isInteger(vintageNumber) && vintageNumber >= 1900 && vintageNumber <= new Date().getFullYear() + 1 ? vintageNumber : null;
       const category = allowedCategories.has(String(wine?.category || "").toLowerCase())
         ? String(wine.category).toLowerCase()
         : "red";
       const confidence = normalizeConfidence(wine?.confidence);
 
       return {
-        name: name || "Vinho não identificado",
+        name,
         producer,
         grape,
         country,
         region,
         price,
+        vintage,
         category,
         confidence,
         style: mapCategoryToStyle(category),
+        description: normalizeString(wine?.description) || null,
+        verdict: normalizeString(wine?.verdict) || null,
+        reasoning: normalizeString(wine?.reasoning) || null,
+        compatibilityLabel: normalizeString(wine?.compatibilityLabel) || null,
+        highlight: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"].includes(String(wine?.highlight || ""))
+          ? String(wine.highlight)
+          : null,
+        body: normalizeString(wine?.body) || null,
+        acidity: normalizeString(wine?.acidity) || null,
+        tannin: normalizeString(wine?.tannin) || null,
+        occasion: normalizeString(wine?.occasion) || null,
+        comparativeLabels: normalizeTags(wine?.comparativeLabels ?? wine?.tags),
+        pairings: Array.isArray(wine?.pairings)
+          ? wine.pairings
+              .map((pairing: any) => ({
+                dish: normalizeString(pairing?.dish),
+                why: normalizeString(pairing?.why),
+              }))
+              .filter((pairing: any) => pairing.dish && pairing.why)
+          : [],
       };
     })
-    .filter((wine: any) => wine.name.trim().length > 0);
+    .filter((wine: any) => wine.name.trim().length > 0 && normalizeOcrValue(wine.name) !== "vinho nao identificado");
 
   const sorted = wines.sort((a: any, b: any) => {
     const confidenceDelta = b.confidence - a.confidence;
@@ -392,6 +435,80 @@ function normalizeWineListPayload(payload: any) {
     })[0]?.name || topPick;
 
   return { wines: sorted, topPick, bestValue };
+}
+
+function enrichGroundedWineList(wines: any[]) {
+  const priced = wines.filter((wine) => typeof wine.price === "number" && wine.price > 0);
+  const sortedByPrice = [...priced].sort((a, b) => a.price - b.price);
+  const medianPrice = sortedByPrice.length ? sortedByPrice[Math.floor(sortedByPrice.length / 2)].price : null;
+  const highestPrice = sortedByPrice.at(-1)?.price ?? null;
+  const currentYear = new Date().getFullYear();
+
+  const pairingByCategory: Record<string, Array<{ dish: string; why: string }>> = {
+    red: [
+      { dish: "Carnes grelhadas", why: "Estrutura e taninos sustentam proteína e caramelização." },
+      { dish: "Massas com ragu", why: "Corpo e acidez acompanham molho denso sem perder frescor." },
+    ],
+    white: [
+      { dish: "Peixes e frutos do mar", why: "Acidez e leveza preservam delicadeza e limpam o paladar." },
+      { dish: "Queijos frescos", why: "Frescor equilibra textura láctica e salinidade." },
+    ],
+    sparkling: [
+      { dish: "Entradas e frituras", why: "Borbulhas e acidez cortam gordura e renovam a boca." },
+      { dish: "Frutos do mar", why: "Tensão e textura acompanham salinidade com precisão." },
+    ],
+    rose: [
+      { dish: "Pratos mediterrâneos", why: "Fruta leve e acidez combinam com ervas, azeite e legumes." },
+      { dish: "Peixes grelhados", why: "Corpo moderado acompanha grelha sem dominar o prato." },
+    ],
+  };
+
+  return wines.map((wine, index) => {
+    const tags = new Set<string>(Array.isArray(wine.comparativeLabels) ? wine.comparativeLabels : []);
+    const price = typeof wine.price === "number" ? wine.price : null;
+    const category = String(wine.category || "red");
+    const age = typeof wine.vintage === "number" ? currentYear - wine.vintage : null;
+
+    if (index === 0) tags.add("Melhor escolha");
+    if (price != null && medianPrice != null && price <= medianPrice && wine.confidence >= 0.65) tags.add("Melhor custo-benefício");
+    if (price != null && highestPrice != null && price === highestPrice && priced.length > 1) tags.add("Ícone da carta");
+    if (age != null && age >= 4 && category === "red") tags.add("Beber agora");
+    if (age != null && age <= 3 && category === "red" && wine.confidence >= 0.75) tags.add("Em guarda");
+    if (wine.region || wine.producer || wine.grape === "Blend") tags.add("Alta complexidade");
+
+    const tagList = Array.from(tags).slice(0, 3);
+    const profileParts = [
+      wine.producer ? `produtor ${wine.producer}` : null,
+      wine.region || wine.country ? [wine.region, wine.country].filter(Boolean).join(", ") : null,
+      wine.grape ? `uva ${wine.grape}` : null,
+      price != null ? `R$ ${Math.round(price)}` : null,
+    ].filter(Boolean);
+    const description = wine.description || (
+      profileParts.length
+        ? `${wine.name} aparece na carta com ${profileParts.join(" · ")}.`
+        : `${wine.name} foi identificado no OCR da carta.`
+    );
+    const confidenceLabel = wine.confidence >= 0.82
+      ? "Alta confiança"
+      : wine.confidence >= 0.58
+        ? "Confiança média"
+        : "Baixa confiança";
+
+    return {
+      ...wine,
+      description,
+      verdict: wine.verdict || `${confidenceLabel}; revise campos incompletos antes de decidir.`,
+      reasoning: wine.reasoning || `Escolha baseada nos dados efetivamente lidos no OCR: ${profileParts.join(", ") || "nome/produtor ancorado na carta"}.`,
+      compatibilityLabel: wine.compatibilityLabel || (index === 0 ? "Excelente escolha" : wine.confidence >= 0.7 ? "Boa opção" : "Confirmar na carta"),
+      highlight: wine.highlight || (index === 0 ? "top-pick" : tagList.includes("Melhor custo-benefício") ? "best-value" : null),
+      body: wine.body || (category === "red" ? "médio/encorpado" : category === "sparkling" ? "leve" : "médio"),
+      acidity: wine.acidity || (category === "sparkling" || category === "white" ? "alta" : "média"),
+      tannin: wine.tannin || (category === "red" ? "presentes" : "n/a"),
+      occasion: wine.occasion || (tagList.includes("Ícone da carta") ? "serviço premium" : tagList.includes("Melhor custo-benefício") ? "boa compra" : "serviço à mesa"),
+      comparativeLabels: tagList,
+      pairings: wine.pairings?.length ? wine.pairings : pairingByCategory[category] || pairingByCategory.red,
+    };
+  });
 }
 
 function normalizeOcrValue(value?: string | number | null) {
@@ -464,36 +581,52 @@ function scoreOcrMatch(target: string, source: string) {
 function applyGroundedWineExtraction(payload: any, ocrText: string) {
   const normalized = normalizeWineListPayload(payload);
   const grounding = buildGroundingContext(ocrText);
+  const removed: Array<{ name: string; producer: string | null; reason: string }> = [];
   const filtered = normalized.wines
     .map((wine) => {
       const nameMatched = scoreOcrMatch(wine.name, grounding.normalizedText);
       const producerMatched = scoreOcrMatch(wine.producer, grounding.normalizedText);
       const priceMatched = normalizePriceTokens(wine.price).some((token) =>
-        grounding.lines.some((line) => line.includes(token))
+        grounding.normalizedLines.some((line) => line.includes(token))
       );
 
       if (!nameMatched && !producerMatched) {
+        removed.push({
+          name: wine.name,
+          producer: wine.producer,
+          reason: "name_and_producer_not_found_in_ocr",
+        });
         return null;
       }
 
       let confidence = Math.min(1, Math.max(0.15, Number(wine.confidence) || 0.35));
-      if (nameMatched && priceMatched) {
+      if (nameMatched && producerMatched && priceMatched) {
         confidence = Math.max(confidence, 0.9);
+      } else if ((nameMatched || producerMatched) && priceMatched) {
+        confidence = Math.max(Math.min(confidence, 0.82), 0.58);
+      } else if (nameMatched && producerMatched) {
+        confidence = Math.max(Math.min(confidence, 0.78), 0.58);
       } else if (nameMatched || producerMatched) {
-        confidence = Math.min(confidence, 0.68);
+        confidence = Math.min(confidence, 0.52);
       } else {
-        confidence = Math.min(confidence, 0.42);
+        confidence = Math.min(confidence, 0.35);
       }
 
       return {
         ...wine,
         confidence,
+        grounding: {
+          nameMatched,
+          producerMatched,
+          priceMatched,
+        },
       };
     })
     .filter((wine): wine is NonNullable<typeof wine> => Boolean(wine));
 
+  const enriched = enrichGroundedWineList(filtered);
   const grounded = normalizeWineListPayload({
-    wines: filtered,
+    wines: enriched,
     topPick: normalized.topPick,
     bestValue: normalized.bestValue,
   });
@@ -501,6 +634,7 @@ function applyGroundedWineExtraction(payload: any, ocrText: string) {
   return {
     grounded,
     candidateLineCount: grounding.likelyWineLines.length,
+    removed,
   };
 }
 
@@ -583,7 +717,7 @@ function buildFallbackPairings(style: string) {
 function buildFallbackWineListAnalysis(input: { extractedText?: string | null; fileName?: string | null }) {
   const source = [input.fileName, input.extractedText].filter(Boolean).join("\n").trim();
   const entries = splitFallbackEntries(source);
-  const wineLines = entries.length > 0 ? entries : [input.fileName || "Vinho não identificado"];
+  const wineLines = entries;
 
   const wines = wineLines.map((line, index) => {
     const style = inferFallbackStyle(line);
@@ -602,8 +736,8 @@ function buildFallbackWineListAnalysis(input: { extractedText?: string | null; f
 
   return {
     wines,
-    topPick: wines[0]?.name || "Vinho não identificado",
-    bestValue: wines[Math.min(1, wines.length - 1)]?.name || wines[0]?.name || "Vinho não identificado",
+    topPick: wines[0]?.name || null,
+    bestValue: wines[Math.min(1, wines.length - 1)]?.name || wines[0]?.name || null,
   };
 }
 
@@ -614,6 +748,10 @@ serve(async (req) => {
   const startTime = Date.now();
   let userId = "unknown";
   const requestId = crypto.randomUUID();
+  let isMenuMode = false;
+  let normalizedText = "";
+  let fileName: string | undefined;
+  let mode: "menu-for-wine" | undefined;
 
   try {
     const authorization = req.headers.get("Authorization");
@@ -685,8 +823,10 @@ serve(async (req) => {
       return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
 
-    const { extractedText, mimeType, fileName, userProfile, mode, wineName } = parsedBody.data;
-    const textValidation = validateTextPayload(extractedText, 10_000);
+    const { extractedText, mimeType, userProfile, wineName } = parsedBody.data;
+    fileName = parsedBody.data.fileName;
+    mode = parsedBody.data.mode;
+    const textValidation = validateTextPayload(extractedText, MAX_TEXT_LENGTH);
     trace("validation_result", {
       request_id: requestId,
       ok: textValidation.ok,
@@ -698,7 +838,13 @@ serve(async (req) => {
     if (!textValidation.ok) {
       return jsonResponse(req, { success: false, code: INVALID_INPUT_ERROR.code, message: INVALID_INPUT_ERROR.message, requestId, retryable: false }, 400);
     }
-    const normalizedText = textValidation.text;
+    normalizedText = textValidation.text;
+    console.info("[OCR RAW TEXT]", {
+      request_id: requestId,
+      fileName,
+      textLength: normalizedText.length,
+      preview: normalizedText.slice(0, 1200),
+    });
     trace("request_parsed", { request_id: requestId, mimeType, fileName, mode, wineName, extractedTextLength: normalizedText.length });
     trace("payload_validation_timing", {
       request_id: requestId,
@@ -707,7 +853,7 @@ serve(async (req) => {
       input_size_bytes: inputSizeBytes,
     });
 
-    const isMenuMode = mode === "menu-for-wine";
+    isMenuMode = mode === "menu-for-wine";
     const cacheInput = {
       mode,
       wineName,
@@ -927,11 +1073,12 @@ PROIBIDO:
                     grape: { type: "string" },
                     country: { type: "string" },
                     region: { type: "string" },
+                    vintage: { type: "number" },
                     price: { type: "number" },
                     category: { type: "string", enum: ["red", "white", "sparkling", "rose"] },
                     confidence: { type: "number" },
                   },
-                  required: ["name", "producer", "grape", "country", "region", "price", "category", "confidence"],
+                  required: ["name", "producer", "grape", "country", "region", "vintage", "price", "category", "confidence"],
                   additionalProperties: false,
                 },
               },
@@ -1012,16 +1159,18 @@ PROIBIDO:
           return jsonResponse(req, { success: false, code: "AI_UNAVAILABLE", message: "Service temporarily unavailable", requestId, retryable: true }, 502);
         }
         if (responseStatus === 422) {
-          const fallback = isMenuMode
-            ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
-            : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
           trace("parse_failed", { request_id: requestId, reason: "openai_parse_error_fallback" });
-          trace("response_fallback", {
-            request_id: requestId,
-            mode: isMenuMode ? "menu" : "wine-list",
-            count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
-          });
-          return jsonResponse(req, fallback);
+          if (isMenuMode) {
+            const fallback = normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
+            return jsonResponse(req, fallback);
+          }
+          return jsonResponse(req, {
+            success: false,
+            code: "AI_PARSE_ERROR",
+            message: "Não conseguimos extrair vinhos suficientes com confiança desta carta. Tente outra imagem mais nítida.",
+            requestId,
+            retryable: true,
+          }, 422);
         }
         return jsonResponse(req, { success: false, code: responseStatus === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", message: responseStatus === 504 ? "A análise demorou mais que o esperado. Tente novamente em instantes." : "Service temporarily unavailable", requestId, retryable: true }, responseStatus === 504 ? 408 : 502);
       }
@@ -1038,6 +1187,21 @@ PROIBIDO:
       }
 
       lastParsed = parsed;
+      if (!isMenuMode) {
+        console.info("[PARSED WINES]", {
+          request_id: requestId,
+          attempt: attempt + 1,
+          count: Array.isArray(parsed?.wines) ? parsed.wines.length : 0,
+          wines: Array.isArray(parsed?.wines)
+            ? parsed.wines.slice(0, 25).map((wine: any) => ({
+              name: wine?.name || null,
+              producer: wine?.producer || null,
+              price: wine?.price ?? null,
+              confidence: wine?.confidence ?? null,
+            }))
+            : [],
+        });
+      }
       trace("ai_response_received", { request_id: requestId, durationMs: elapsed(aiStartedAt), rawPreview: String(openaiResult.raw ? JSON.stringify(openaiResult.raw).slice(0, 500) : "").slice(0, 500) });
       const parseStartedAt = Date.now();
       trace("parse_started", { request_id: requestId });
@@ -1100,23 +1264,25 @@ PROIBIDO:
 
     if (!lastParsed) {
       trace("parse_failed", { request_id: requestId, reason: "no_parsed_output" });
-      const fallback = isMenuMode
-        ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
-        : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
-      trace("fallback_used", {
-        request_id: requestId,
-        reason: "no_parsed_output",
-        count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
-      });
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 200, "fallback_used", Date.now() - startTime, {
+      if (isMenuMode) {
+        const fallback = normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
+        return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: "NO_PARSED_OUTPUT", note: "análise simplificada" });
+      }
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 422, "parse_failed", Date.now() - startTime, {
         request_id: requestId,
         reason: "no_parsed_output",
         mode,
-        fallback: true,
+        fallback: false,
         input_size_bytes: inputSizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: "NO_PARSED_OUTPUT", note: "análise simplificada" });
+      return jsonResponse(req, {
+        success: false,
+        code: "AI_PARSE_ERROR",
+        message: "Não conseguimos extrair vinhos suficientes com confiança desta carta. Tente outra imagem mais nítida.",
+        requestId,
+        retryable: true,
+      }, 422);
     }
 
     const parsedCount = isMenuMode
@@ -1125,10 +1291,12 @@ PROIBIDO:
     let finalParsedCount = parsedCount;
 
     if (!isMenuMode) {
-      console.log("OCR_TEXT", normalizedText);
+      console.log("[OCR RAW TEXT]", normalizedText);
       const groundingResult = applyGroundedWineExtraction(lastParsed, normalizedText);
       const filteredWines = groundingResult.grounded.wines;
-      console.log("FILTERED_WINES", filteredWines);
+      console.log("[GROUNDED WINES]", filteredWines);
+      console.log("[FILTERED WINES]", filteredWines);
+      console.log("[REMOVED HALLUCINATIONS]", groundingResult.removed);
       lastParsed = groundingResult.grounded;
       validationResult.failures = validationResult.failures.filter((failure) =>
         !failure.startsWith("Esperados pelo menos 3 vinhos estruturados")
@@ -1136,9 +1304,6 @@ PROIBIDO:
 
       if (filteredWines.length === 0) {
         validationResult.failures.push("Nenhum vinho permaneceu ancorado no OCR");
-      }
-      if (filteredWines.length < 3) {
-        validationResult.failures.push(`Grounding insuficiente: ${filteredWines.length} vinhos ancorados para ${groundingResult.candidateLineCount} linhas candidatas`);
       }
       finalParsedCount = filteredWines.length;
       validationResult.passed = validationResult.failures.length === 0;
@@ -1170,27 +1335,32 @@ PROIBIDO:
 
     if (!validationResult.passed) {
       trace("parse_failed", { request_id: requestId, reason: "empty_or_invalid_extraction", failures: validationResult.failures.slice(0, 12) });
-      const fallback = isMenuMode
-        ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
-        : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
-      trace("fallback_used", {
-        request_id: requestId,
-        reason: "empty_or_invalid_extraction",
-        count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
-      });
-      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 200, "fallback_used", Date.now() - startTime, {
+      if (isMenuMode) {
+        const fallback = normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
+        return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: "EMPTY_OR_INVALID_EXTRACTION", note: "análise simplificada" });
+      }
+      await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 422, "parse_failed", Date.now() - startTime, {
         reason: "empty_or_invalid_extraction",
         validation_failures: validationResult.failures.slice(0, 12),
         mode,
-        fallback: true,
+        fallback: false,
         input_size_bytes: inputSizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: "EMPTY_OR_INVALID_EXTRACTION", note: "análise simplificada" });
+      return jsonResponse(req, {
+        success: false,
+        code: "LOW_CONFIDENCE_EXTRACTION",
+        message: "Não conseguimos extrair vinhos suficientes com confiança desta carta. Tente outra imagem mais nítida.",
+        requestId,
+        retryable: true,
+      }, 422);
     }
 
     trace("wines_extracted", { request_id: requestId, count: finalParsedCount, degraded: false });
     const normalized = isMenuMode ? normalizeMenuPayload(lastParsed) : normalizeWineListPayload(lastParsed);
+    if (!isMenuMode) {
+      console.log("[GROUNDED WINES]", normalized.wines);
+    }
     trace("extraction_completed", { request_id: requestId, count: isMenuMode ? normalized.dishes.length : normalized.wines.length });
     trace("parse_success", { request_id: requestId, mode, count: finalParsedCount, degraded: false });
     await setCachedAiResponse("analyze-wine-list", cacheInput, normalized);
@@ -1201,21 +1371,27 @@ PROIBIDO:
     const errMsg = e instanceof Error ? e.message : "Erro interno";
     const isAbort = errMsg.toLowerCase().includes("abort");
     console.error("analyze-wine-list error:", errMsg);
-    const fallback = isMenuMode
-      ? normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }))
-      : normalizeWineListPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
-    trace("fallback_used", {
+    if (isMenuMode) {
+      const fallback = normalizeMenuPayload(buildFallbackWineListAnalysis({ extractedText: normalizedText, fileName }));
+      return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: isAbort ? "TIMEOUT" : "INTERNAL_ERROR", note: "análise simplificada" });
+    }
+    trace("analysis_failed", {
       request_id: requestId,
       reason: isAbort ? "timeout" : "internal_error",
-      count: isMenuMode ? (fallback as any).dishes?.length || 0 : (fallback as any).wines?.length || 0,
     });
-    await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 200, "fallback_used", Date.now() - startTime, {
+    await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, isAbort ? 408 : 500, "analysis_failed", Date.now() - startTime, {
       reason: isAbort ? "timeout" : "internal_error",
       mode,
-      fallback: true,
+      fallback: false,
       input_size_bytes: inputSizeBytes,
       error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
     });
-    return jsonResponse(req, { ...fallback, fallback: true, fallbackReason: isAbort ? "TIMEOUT" : "INTERNAL_ERROR", note: "análise simplificada" });
+    return jsonResponse(req, {
+      success: false,
+      code: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
+      message: isAbort ? "A análise demorou mais que o esperado. Tente novamente em instantes." : "Não foi possível analisar esta carta.",
+      requestId,
+      retryable: true,
+    }, isAbort ? 408 : 500);
   }
 });

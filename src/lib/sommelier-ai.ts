@@ -187,33 +187,84 @@ function mapWineCategoryToStyle(category?: string | null) {
   }
 }
 
+const WINE_LIST_TAG_SYNONYMS: Array<{ pattern: RegExp; label: string }> = [
+  { pattern: /top|melhor escolha|best pick|recomend/i, label: "Melhor escolha" },
+  { pattern: /value|custo|beneficio|benefício|preco|preço/i, label: "Melhor custo-benefício" },
+  { pattern: /guarda|cellar|cellar-worthy|age|aging/i, label: "Em guarda" },
+  { pattern: /beber agora|ready|agora|drink now/i, label: "Beber agora" },
+  { pattern: /icone|ícone|icon|premium|alta gama|high-end/i, label: "Ícone da carta" },
+  { pattern: /complex|complexidade/i, label: "Alta complexidade" },
+];
+
+function normalizeWineListTags(value: unknown) {
+  const input = Array.isArray(value) ? value : value ? [value] : [];
+  const tags = input
+    .flatMap((tag) => String(tag).split(/[,;/|]+/))
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => WINE_LIST_TAG_SYNONYMS.find(({ pattern }) => pattern.test(tag))?.label || tag)
+    .filter((tag) => [
+      "Melhor escolha",
+      "Melhor custo-benefício",
+      "Em guarda",
+      "Beber agora",
+      "Ícone da carta",
+      "Alta complexidade",
+    ].includes(tag));
+  return Array.from(new Set(tags));
+}
+
+function normalizeWineListName(value: unknown) {
+  const text = String(value ?? "").trim().replace(/\s+/g, " ");
+  const lowered = text.toLowerCase();
+  if (!text) return "";
+  if (/^vinho sem nome\b/i.test(text)) return "";
+  if (["vinho não identificado", "vinho nao identificado", "não identificado", "nao identificado", "unknown", "unidentified", "n/a"].includes(lowered)) return "";
+  return text;
+}
+
 export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
   const source = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
   const normalizedWines: WineListItem[] = (Array.isArray(source.wines) ? source.wines : [])
     .map((wine: any, index) => {
-      const safeName = String(
+      void index;
+      const safeName = normalizeWineListName(
         wine?.name ??
         wine?.producer ??
         wine?.title ??
-        wine?.label ??
-        `Vinho sem nome ${index + 1}`,
-      ).trim();
+        wine?.label,
+      );
       const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence ?? 0);
       const category = ["red", "white", "sparkling", "rose"].includes(String(wine?.category || "").toLowerCase())
         ? String(wine.category).toLowerCase() as WineListItem["category"]
         : "red";
       const rawPrice = typeof wine?.price === "number" ? wine.price : Number(wine?.price ?? 0);
       const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
+      const rawVintage = typeof wine?.vintage === "number" ? wine.vintage : Number(wine?.vintage ?? 0);
+      const vintage = Number.isInteger(rawVintage) && rawVintage >= 1900 && rawVintage <= new Date().getFullYear() + 1 ? rawVintage : null;
       return {
-        name: safeName || `Vinho sem nome ${index + 1}`,
+        name: safeName,
         producer: String(wine?.producer ?? "").trim() || null,
         grape: String(wine?.grape ?? "").trim() || null,
         country: String(wine?.country ?? "").trim() || null,
         region: String(wine?.region ?? "").trim() || null,
         price,
+        vintage,
         category,
         confidence: Number.isFinite(confidence) ? Math.max(0, Math.min(1, confidence)) : 0.35,
         style: mapWineCategoryToStyle(category),
+        description: String(wine?.description ?? "").trim() || null,
+        pairings: Array.isArray(wine?.pairings) ? wine.pairings : [],
+        verdict: String(wine?.verdict ?? "").trim() || null,
+        compatibilityLabel: String(wine?.compatibilityLabel ?? "").trim() || null,
+        highlight: ["best-value", "top-pick", "adventurous", "lightest", "boldest", "most-complex", "easiest"].includes(String(wine?.highlight || ""))
+          ? wine.highlight
+          : null,
+        body: String(wine?.body ?? "").trim() || null,
+        acidity: String(wine?.acidity ?? "").trim() || null,
+        tannin: String(wine?.tannin ?? "").trim() || null,
+        occasion: String(wine?.occasion ?? "").trim() || null,
+        comparativeLabels: normalizeWineListTags(wine?.comparativeLabels ?? wine?.tags),
       };
     })
     .filter((wine): wine is WineListItem => Boolean(wine?.name?.trim()));
@@ -1683,38 +1734,15 @@ export async function analyzeWineList(
       code: classified.code,
       type: classified.type,
     });
-    const normalizedOcr = normalizeWineListOcrText(String(analysis.text || ""), {
-      fileName: analysis.fileName,
-      mimeType: analysis.mimeType,
-    });
-    const lines = normalizedOcr.cleanText
-      .split(/\n+/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .slice(0, 6);
-    const fallback = normalizeWineListResponse({
-      wines: lines.map((line, index) => ({
-        name: line,
-        producer: "",
-        grape: "",
-        country: "",
-        region: "",
-        price: 0,
-        category: "red",
-        confidence: Math.max(0.2, 0.68 - index * 0.08),
-      })),
-      fallback: true,
-      fallbackReason: classified.message,
-    });
     console.info("[sommelier-ai] request_finished", {
       flow: "analyze-wine-list",
       fileName: analysis.fileName,
       outcome: "fallback",
       code: classified.code,
       type: classified.type,
-      wineCount: fallback.wines.length,
+      wineCount: 0,
     });
-    return fallback;
+    throw createClassifiedError(classified, classified.code || "ANALYZE_WINE_LIST_FAILED");
   }
 }
 

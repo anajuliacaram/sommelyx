@@ -132,27 +132,22 @@ const EMPTY_WINE_LIST_ANALYSIS: WineListAnalysis = {
   fallbackReason: null,
 };
 
-function buildFallbackWineListAnalysis(attachment: WineListAnalysisTextInput, reason: string): WineListAnalysis {
-  const lines = String(attachment.text || "")
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 6);
+const CANONICAL_TAGS = [
+  "Melhor escolha",
+  "Melhor custo-benefício",
+  "Em guarda",
+  "Beber agora",
+  "Ícone da carta",
+  "Alta complexidade",
+] as const;
 
-  return normalizeWineListResponse({
-    wines: lines.map((line, index) => ({
-      name: line,
-      producer: "",
-      grape: "",
-      country: "",
-      region: "",
-      price: 0,
-      category: "red",
-      confidence: Math.max(0.2, 0.68 - index * 0.08),
-    })),
-    fallback: true,
-    fallbackReason: reason || "Não conseguimos interpretar completamente a carta.",
-  });
+function normalizeDisplayTags(tags?: string[] | null) {
+  const mapped = (tags || [])
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => CANONICAL_TAGS.find((canonical) => canonical.toLowerCase() === tag.toLowerCase()) || tag)
+    .filter((tag) => CANONICAL_TAGS.includes(tag as (typeof CANONICAL_TAGS)[number]));
+  return Array.from(new Set(mapped));
 }
 
 export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDialogProps) {
@@ -213,6 +208,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         fileName: attachment.fileName,
         textLength: attachment.text?.length || 0,
       });
+      console.info("[OCR RAW TEXT]", {
+        requestId,
+        fileName: attachment.fileName,
+        textLength: attachment.text?.length || 0,
+        preview: String(attachment.text || "").slice(0, 1200),
+      });
       const data = await analyzeWineList(attachment, profile);
       console.info("[WineListScannerDialog] response_received", {
         requestId,
@@ -221,6 +222,26 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         fallback: Boolean((data as any)?.fallback),
       });
       const normalized = normalizeWineListResponse(data);
+      console.info("[PARSED WINES]", {
+        requestId,
+        wineCount: Array.isArray((data as any)?.wines) ? (data as any).wines.length : 0,
+        wines: Array.isArray((data as any)?.wines) ? (data as any).wines.map((wine: any) => ({
+          name: wine?.name || null,
+          producer: wine?.producer || null,
+          price: wine?.price ?? null,
+          confidence: wine?.confidence ?? null,
+        })) : [],
+      });
+      console.info("[GROUNDED WINES]", {
+        requestId,
+        wineCount: normalized.wines.length,
+        wines: normalized.wines.map((wine) => ({
+          name: wine.name,
+          producer: wine.producer,
+          price: wine.price,
+          confidence: wine.confidence,
+        })),
+      });
       console.info("[WineListScannerDialog] response_normalized", {
         requestId,
         wineCount: normalized.wines.length,
@@ -261,22 +282,19 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       if (err?.requestId) {
         console.log("[WineListScannerDialog] requestId", err.requestId);
       }
-      const fallback = buildFallbackWineListAnalysis(attachment, err?.message || "Não conseguimos interpretar completamente a carta.");
-      console.info("[WineListScannerDialog] response_normalized", {
+      console.warn("[REMOVED HALLUCINATIONS]", {
         requestId,
-        wineCount: fallback.wines.length,
-        fallback: true,
-        fallbackReason: fallback.fallbackReason,
+        reason: "analysis_failed_no_client_fallback",
       });
       console.info("[WineListScannerDialog] request_finished", {
         requestId,
-        outcome: "fallback",
+        outcome: "error",
         code,
         status,
-        wineCount: fallback.wines.length,
+        wineCount: 0,
       });
-      setResults(fallback);
-      setStep("results");
+      setErrorMsg(err?.message || "Não conseguimos extrair vinhos confiáveis desta carta. Tente uma imagem/PDF mais nítido.");
+      setStep("error");
     } finally {
       requestBusyRef.current = false;
     }
@@ -340,10 +358,16 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   }, [runScan, toast]);
 
   const filteredWines = useMemo(() => {
-    return (results ?? EMPTY_WINE_LIST_ANALYSIS).wines.filter((w) => {
+    const filtered = (results ?? EMPTY_WINE_LIST_ANALYSIS).wines.filter((w) => {
       if (filterMode === "all") return true;
       return detectWineType(w.style) === filterMode;
     });
+    console.info("[FILTERED WINES]", {
+      filterMode,
+      count: filtered.length,
+      wines: filtered.map((wine) => wine.name),
+    });
+    return filtered;
   }, [results, filterMode]);
 
   const refinedWines = useMemo(() => {
@@ -408,6 +432,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   }, [filteredWines, mealQuery, bodyPreference, priceRange, results, selectedWineName]);
 
   const displayWines = refinedWines.slice(0, 100);
+  console.info("[FINAL UI WINES]", {
+    count: displayWines.length,
+    wines: displayWines.map((wine) => ({
+      name: wine.name,
+      tags: normalizeDisplayTags(wine.comparativeLabels),
+      confidence: wine.confidence,
+    })),
+  });
   const isTruncated = refinedWines.length > displayWines.length;
 
   const availableTypes = [...new Set((results ?? EMPTY_WINE_LIST_ANALYSIS).wines.map((w) => detectWineType(w.style)).filter((t) => t !== "unknown"))];
@@ -755,12 +787,17 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
   isSelected: boolean;
   onChooseWine: () => void;
 }) {
-  const highlightTag = isTopPick ? "Melhor escolha" : isBestValue ? "Melhor custo-benefício" : wine.highlight === "top-pick" ? "Melhor escolha" : wine.highlight === "best-value" ? "Melhor custo-benefício" : null;
+  const tags = normalizeDisplayTags([
+    ...(wine.comparativeLabels || []),
+    isTopPick || wine.highlight === "top-pick" ? "Melhor escolha" : "",
+    isBestValue || wine.highlight === "best-value" ? "Melhor custo-benefício" : "",
+  ]).slice(0, 4);
   const originLine = [wine.producer, wine.region, wine.country].filter((value): value is string => Boolean(value && value.trim())).join(" · ");
   const summarySource = wine.description || wine.verdict || wine.reasoning || null;
-  const summaryText = summarySource ? compactText(summarySource, 164) : null;
-  const whyText = compactText(wine.reasoning || wine.verdict || wine.description || "", 220);
+  const summaryText = summarySource ? compactText(summarySource, 138) : null;
+  const whyText = compactText(wine.reasoning || wine.verdict || wine.description || "", 180);
   const profileLine = buildProfileLine(wine);
+  const confidenceLabel = wine.confidence >= 0.82 ? "Alta" : wine.confidence >= 0.58 ? "Média" : "Baixa";
 
   return (
     <motion.li
@@ -781,17 +818,24 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
           : "0 10px 24px -18px rgba(30,20,20,0.10), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.72)",
       }}
     >
-      <button type="button" onClick={onChooseWine} className="w-full p-4 text-left sm:p-5">
-        <div className="space-y-3">
-          {highlightTag ? (
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]/60">
-              {highlightTag}
-            </p>
+      <button type="button" onClick={onChooseWine} className="w-full p-3.5 text-left sm:p-4">
+        <div className="space-y-2.5">
+          {tags.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.055)] px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           ) : null}
 
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1 space-y-1">
-              <h4 className="text-[20px] font-semibold tracking-[-0.03em] leading-tight text-[#1A1713] sm:text-[23px]">
+              <h4 className="text-[18px] font-semibold tracking-[-0.03em] leading-tight text-[#1A1713] sm:text-[20px]">
                 {wine.name}
               </h4>
               {originLine ? (
@@ -807,28 +851,33 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
             </div>
 
             {wine.price != null && (
-              <span className="shrink-0 text-[17px] font-semibold tracking-tight text-[#1A1713]">
+              <span className="shrink-0 rounded-full bg-white/65 px-2.5 py-1 text-[14px] font-semibold tracking-tight text-[#1A1713] ring-1 ring-black/5">
                 R$ {wine.price.toFixed(0)}
               </span>
             )}
           </div>
 
           {whyText ? (
-            <div className="rounded-[20px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-4 py-3.5">
+            <div className="rounded-[18px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-3.5 py-3">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">
                 Por que escolher
               </p>
-              <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
+              <p className="mt-1.5 text-[13px] leading-6 text-[#3F362F]">
                 {whyText}
               </p>
             </div>
           ) : null}
 
-          {profileLine ? (
-            <p className="text-[12.5px] leading-6 text-[#5B5146]">
-              {profileLine}
-            </p>
-          ) : null}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.04] pt-2">
+            {profileLine ? (
+              <p className="text-[11.5px] leading-5 text-[#5B5146]">
+                {profileLine}
+              </p>
+            ) : <span />}
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[#6B6258]">
+              Confiança {confidenceLabel}
+            </span>
+          </div>
         </div>
       </button>
     </motion.li>
