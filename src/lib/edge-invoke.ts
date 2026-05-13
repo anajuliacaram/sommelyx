@@ -172,6 +172,7 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
   if (code === "FILE_TOO_LARGE" || code === "IMAGE_TOO_LARGE") return "A imagem está muito grande. Tente uma foto mais leve.";
   if (code === "PDF_PARSE_FAILED") return "Não foi possível ler o PDF. Tente uma versão mais nítida ou uma imagem da carta.";
   if (code === "OCR_FAILED") return "Não foi possível aplicar OCR neste arquivo. Tente novamente com outra foto ou PDF.";
+  if (code === "OCR_LOW_CONFIDENCE" || code === "OCR_EMPTY") return "Não foi possível ler texto suficiente no rótulo. Tente outra foto mais nítida.";
   if (code === "EMPTY_EXTRACTION") return "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.";
   if (code === "AI_PARSE_ERROR" || code === "INVALID_AI_RESPONSE" || message.includes("INVALID_AI_RESPONSE") || message.includes("EMPTY_AI_RESPONSE")) {
     return "A resposta da IA veio em um formato inválido. Tente novamente em instantes.";

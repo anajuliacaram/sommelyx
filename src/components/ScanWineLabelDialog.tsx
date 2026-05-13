@@ -11,7 +11,7 @@ import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib/ai-attachments";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
-import { hasMeaningfulScanResult, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
+import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
 import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
@@ -43,6 +43,16 @@ function isAcceptedMobileImage(file: File) {
   const allowedMime = new Set(["image/jpeg", "image/jpg", "image/png", "image/heic", "image/heif"]);
   if (allowedMime.has(mime)) return true;
   return [".jpg", ".jpeg", ".png", ".heic", ".heif"].some((ext) => name.endsWith(ext));
+}
+
+function formatScanConfidence(result: { ocr_confidence?: unknown; ocrConfidence?: unknown }) {
+  const explicit = typeof result.ocr_confidence === "number"
+    ? result.ocr_confidence
+    : typeof result.ocrConfidence === "number"
+      ? result.ocrConfidence
+      : null;
+  if (explicit == null || !Number.isFinite(explicit)) return null;
+  return `${Math.round(Math.max(0, Math.min(1, explicit)) * 100)}%`;
 }
 
 export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: ScanWineLabelDialogProps) {
@@ -145,7 +155,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           mimeType: metadata?.mimeType,
           fileName: metadata?.fileName,
         },
-        { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
+        { timeoutMs: 30_000, retries: 1, retryOnAbort: true },
       );
       console.info("[ScanWineLabelDialog] response_received", {
         function: "scan-wine-label",
@@ -155,17 +165,37 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         responseKeys: data && typeof data === "object" ? Object.keys(data as Record<string, unknown>) : [],
       });
       const originalResponse = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+      console.info("[SCAN RAW OCR]", {
+        ocrText: originalResponse.ocr_text ?? originalResponse.ocrText ?? null,
+        ocrConfidence: originalResponse.ocr_confidence ?? originalResponse.ocrConfidence ?? null,
+      });
+      console.info("[SCAN AI RESPONSE]", originalResponse);
       const normalizedWine = normalizeScanResult(originalResponse);
-      const isPartial = !hasMeaningfulScanResult(normalizedWine);
-      console.info("[SCAN RAW]", originalResponse);
-      console.info("[SCAN NORMALIZED]", normalizedWine);
+      const meaningfulFields = getMeaningfulScanFields(normalizedWine);
+      const hasIdentifyingData = hasMeaningfulScanResult(normalizedWine);
+      const isPartial = !normalizedWine.name || meaningfulFields.length < 4;
+      console.info("[SCAN NORMALIZED DATA]", {
+        before: originalResponse,
+        after: normalizedWine,
+        meaningfulFields,
+        hasIdentifyingData,
+      });
+      if (!hasIdentifyingData) {
+        console.warn("[SCAN FAILURE REASON]", {
+          reason: "no_identifying_fields_after_normalization",
+          normalized: normalizedWine,
+          meaningfulFields,
+        });
+        setErrorMsg("Não foi possível identificar esse rótulo com segurança. Tente outra foto mais nítida ou cadastre manualmente.");
+        setScanOutcome("error");
+        setStep("error");
+        return;
+      }
       console.info("[ScanWineLabelDialog] response_normalized", {
         function: "scan-wine-label",
         fileName: metadata?.fileName || null,
         normalized: normalizedWine,
-        normalizedKeys: Object.entries(normalizedWine)
-          .filter(([, value]) => value != null && value !== "")
-          .map(([key]) => key),
+        normalizedKeys: meaningfulFields,
       });
       console.info("[ScanWineLabelDialog] scan_normalized_result", {
         function: "scan-wine-label",
@@ -196,18 +226,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         fileName: metadata?.fileName || null,
         mimeType: metadata?.mimeType || null,
         scanOutcome: isPartial ? "success_partial" : "success_full",
-        hasMeaningfulData: hasMeaningfulScanResult(normalizedWine),
-        mappedFields: Object.entries(normalizedWine)
-          .filter(([, value]) => {
-            if (value == null) return false;
-            if (typeof value === "number") return Number.isFinite(value);
-            if (typeof value !== "string") return false;
-            const text = value.trim();
-            if (!text) return false;
-            const lowered = text.toLowerCase();
-            return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
-          })
-          .map(([key]) => key),
+        hasMeaningfulData: hasIdentifyingData,
+        mappedFields: meaningfulFields,
       });
       console.info("SCAN_SUCCESS", {
         fileName: metadata?.fileName || null,
@@ -228,7 +248,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setScanOutcome(isPartial ? "success_partial" : "success_full");
       setStep("preview");
     } catch (err: unknown) {
-      const e = err as any;
+      const e = err as Partial<EdgeFunctionError> & { message?: string; status?: number; rawBody?: unknown };
       const code = String(e?.code || "UNKNOWN");
       const requestId = String(e?.debugId || e?.requestId || "");
       const debugPayload = {
@@ -262,6 +282,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       }
 
       let msg = "Não conseguimos analisar este rótulo.";
+      console.warn("[SCAN FAILURE REASON]", debugPayload);
       if (code === "NETWORK_ERROR") {
         msg = "Sem conexão com internet";
       } else if (code === "AI_TIMEOUT") {
@@ -274,8 +295,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         return;
       } else if (code === "AI_UNAVAILABLE") {
         msg = "Não conseguimos analisar este rótulo.";
-      } else if (code === "PARSE_ERROR") {
-        msg = "Não conseguimos analisar este rótulo.";
+      } else if (code === "OCR_FAILED" || code === "OCR_LOW_CONFIDENCE" || code === "OCR_EMPTY") {
+        msg = "Não foi possível ler texto suficiente no rótulo. Tente outra foto mais nítida.";
+      } else if (code === "PARSE_ERROR" || code === "LABEL_NOT_IDENTIFIED") {
+        msg = "Não foi possível identificar esse rótulo com segurança. Tente outra foto mais nítida.";
       }
 
       setErrorMsg(msg);
@@ -351,7 +374,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Image error:", err);
       if (err instanceof EdgeFunctionError) {
         console.error("[ScanWineLabelDialog] backend_failure", {
@@ -395,7 +418,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setScanOutcome("error");
       setStep("error");
     }
-  }, [navigate, runScan]);
+  }, [navigate, runScan, toast]);
 
   const handleSelectedFile = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -437,6 +460,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         labelImageFile: selectedFile,
         labelImageBase64: lastBase64,
       });
+      console.info("[SCAN APPLY STATE]", {
+        appliedFields: scanPayload?.normalized ? getMeaningfulScanFields(scanPayload.normalized) : getMeaningfulScanFields(scannedData),
+        normalized: scanPayload?.normalized ?? scannedData,
+      });
       reset();
       onOpenChange(false);
     } finally {
@@ -450,39 +477,31 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     if (!scannedData) return;
     if (autoCommitRef.current) return;
     if (!hasMeaningfulScanResult(scannedData)) return;
+    if (scanOutcome !== "success_full") return;
 
     autoCommitRef.current = true;
     void handleConfirm();
-  }, [handleConfirm, open, scannedData, step]);
+  }, [handleConfirm, open, scanOutcome, scannedData, step]);
 
   const styleLabels: Record<string, string> = {
     tinto: "Tinto", branco: "Branco", rose: "Rosé",
     espumante: "Espumante", sobremesa: "Sobremesa", fortificado: "Fortificado",
   };
 
-  const hasMeaningfulScanValue = (value: unknown) => {
-    if (value == null) return false;
-    if (typeof value === "number") return Number.isFinite(value);
-    if (typeof value !== "string") return false;
-    const text = value.trim();
-    if (!text) return false;
-    const lowered = text.toLowerCase();
-    return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
-  };
-
   const resultRows = scannedData
     ? [
-        hasMeaningfulScanValue(scannedData.name) ? <DataRow key="name" label="Nome" value={scannedData.name} /> : null,
-        hasMeaningfulScanValue(scannedData.producer) ? <DataRow key="producer" label="Produtor" value={scannedData.producer} /> : null,
-        hasMeaningfulScanValue(scannedData.vintage) ? <DataRow key="vintage" label="Safra" value={String(scannedData.vintage)} /> : null,
-        hasMeaningfulScanValue(scannedData.style) ? <DataRow key="style" label="Estilo" value={styleLabels[scannedData.style] || scannedData.style} /> : null,
-        hasMeaningfulScanValue(scannedData.grape) ? <DataRow key="grape" label="Uva" value={scannedData.grape} /> : null,
-        hasMeaningfulScanValue(scannedData.country) ? <DataRow key="country" label="País" value={scannedData.country} /> : null,
-        hasMeaningfulScanValue(scannedData.region) ? <DataRow key="region" label="Região" value={scannedData.region} /> : null,
-        hasMeaningfulScanValue(scannedData.drink_from) && hasMeaningfulScanValue(scannedData.drink_until)
+        isMeaningfulScanValue(scannedData.name) ? <DataRow key="name" label="Nome" value={scannedData.name} /> : null,
+        isMeaningfulScanValue(scannedData.producer) ? <DataRow key="producer" label="Produtor" value={scannedData.producer} /> : null,
+        isMeaningfulScanValue(scannedData.vintage) ? <DataRow key="vintage" label="Safra" value={String(scannedData.vintage)} /> : null,
+        isMeaningfulScanValue(scannedData.style) ? <DataRow key="style" label="Estilo" value={styleLabels[scannedData.style] || scannedData.style} /> : null,
+        isMeaningfulScanValue(scannedData.grape) ? <DataRow key="grape" label="Uva" value={scannedData.grape} /> : null,
+        isMeaningfulScanValue(scannedData.country) ? <DataRow key="country" label="País" value={scannedData.country} /> : null,
+        isMeaningfulScanValue(scannedData.region) ? <DataRow key="region" label="Região" value={scannedData.region} /> : null,
+        isMeaningfulScanValue(scannedData.drink_from) && isMeaningfulScanValue(scannedData.drink_until)
           ? <DataRow key="drink_window" label="Janela de consumo" value={`${scannedData.drink_from} – ${scannedData.drink_until}`} />
           : null,
-        hasMeaningfulScanValue(scannedData.food_pairing) ? <DataRow key="pairing" label="Harmonização" value={scannedData.food_pairing} /> : null,
+        isMeaningfulScanValue(scannedData.food_pairing) ? <DataRow key="pairing" label="Harmonização" value={scannedData.food_pairing} /> : null,
+        formatScanConfidence(scannedData) ? <DataRow key="confidence" label="Confiança OCR" value={formatScanConfidence(scannedData) as string} /> : null,
       ].filter(Boolean)
     : [];
 

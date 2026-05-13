@@ -9,7 +9,7 @@ import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-va
 
 const FUNCTION_NAME = "scan-wine-label";
 const MAX_IMAGE_SIZE = 1 * 1024 * 1024;
-const AI_TIMEOUT_MS = 12_000;
+const AI_TIMEOUT_MS = 24_000;
 const DEBUG_MODE = Deno.env.get("SCAN_WINE_LABEL_DEBUG") === "true";
 
 type FailPayload = {
@@ -60,48 +60,12 @@ function validationFailureToResponse(reason?: string) {
   }
 }
 
-function buildFallbackWine() {
-  return {
-    name: "Não identificado",
-    producer: null,
-    vintage: null,
-    style: null,
-    country: null,
-    region: null,
-    grape: null,
-    food_pairing: null,
-    cellar_location: null,
-    purchase_price: null,
-    estimated_price: null,
-    drink_from: null,
-    drink_until: null,
-  };
-}
-
-function buildFallbackConfidence() {
-  return {
-    name: 0.1,
-    producer: 0,
-    vintage: 0,
-    style: 0,
-    country: 0,
-    region: 0,
-    grape: 0,
-    food_pairing: 0,
-    tasting_notes: 0,
-    cellar_location: 0,
-    purchase_price: 0,
-    drink_from: 0,
-    drink_until: 0,
-  };
-}
-
 function extractCanonicalWineResponse(value: unknown) {
   const source = value && typeof value === "object" ? value as Record<string, unknown> : {};
   const wine = source.wine && typeof source.wine === "object" ? source.wine as Record<string, unknown> : source;
 
   return {
-    name: typeof wine.name === "string" ? wine.name.trim() : "Não identificado",
+    name: typeof wine.name === "string" ? wine.name.trim() : "",
     producer: typeof wine.producer === "string" ? wine.producer.trim() || null : null,
     country: typeof wine.country === "string" ? wine.country.trim() || null : null,
     region: typeof wine.region === "string" ? wine.region.trim() || null : null,
@@ -333,6 +297,31 @@ function normalizeForMatch(value: unknown) {
     .trim();
 }
 
+function normalizeOcrText(value: unknown) {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/\r/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\s+\n/g, "\n")
+    .replace(/\n\s+/g, "\n")
+    .trim();
+}
+
+function isGenericLabelValue(value: unknown) {
+  const normalized = normalizeForMatch(value);
+  return (
+    !normalized ||
+    normalized === "nao identificado" ||
+    normalized === "vinho nao identificado" ||
+    normalized === "vinho sem nome" ||
+    normalized === "wine without name" ||
+    normalized === "unidentified" ||
+    normalized === "unknown" ||
+    /^linha [a-z0-9]+$/.test(normalized)
+  );
+}
+
 const ARTIFACT_TOKENS = new Set([
   "huawei",
   "samsung",
@@ -400,6 +389,26 @@ function countWineAnchors(wine: Record<string, unknown>) {
   ].filter(Boolean).length;
 
   return { strongAnchors, weakAnchors };
+}
+
+function hasValidWineExtraction(wine: Record<string, unknown>) {
+  const hasName = typeof wine.name === "string" && wine.name.trim() && !isGenericLabelValue(wine.name) && !hasArtifactToken(wine.name);
+  const hasProducer = typeof wine.producer === "string" && wine.producer.trim() && !isGenericLabelValue(wine.producer) && !hasArtifactToken(wine.producer);
+  const strongAnchors = [
+    wine.country,
+    wine.region,
+    wine.grape,
+  ].filter((value) => {
+    return typeof value === "string" && value.trim() && !isGenericLabelValue(value) && !hasArtifactToken(value);
+  }).length;
+  const supportingAnchors = [
+    wine.vintage,
+    wine.style,
+  ].filter((value) => {
+    if (typeof value === "number") return Number.isFinite(value);
+    return typeof value === "string" && value.trim() && !isGenericLabelValue(value) && !hasArtifactToken(value);
+  }).length;
+  return Boolean(hasName || hasProducer || (strongAnchors >= 1 && strongAnchors + supportingAnchors >= 2));
 }
 
 function confidenceBucket(value: number) {
@@ -631,6 +640,24 @@ serve(async (req) => {
     );
     if (cached.hit && cached.payload) {
       console.log(`[${FUNCTION_NAME}] step: cache_hit request_id=${requestId} input_hash=${cached.inputHash}`);
+      const cachedWine = extractCanonicalWineResponse(cached.payload);
+      if (!hasValidWineExtraction(cachedWine)) {
+        console.warn(`[${FUNCTION_NAME}] [SCAN FAILURE REASON] request_id=${requestId} reason=cached_payload_invalid`);
+        await logAudit(userId, 422, "cached_payload_invalid", Date.now() - startTime, {
+          request_id: requestId,
+          file_name: payloadFileName,
+          image_mime: imageMime,
+          input_size_bytes: sizeBytes,
+          error_type: "LABEL_NOT_IDENTIFIED",
+        });
+        return fail(req, 422, {
+          success: false,
+          code: "LABEL_NOT_IDENTIFIED",
+          message: "Não foi possível identificar esse rótulo com segurança.",
+          requestId,
+          retryable: true,
+        });
+      }
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
         request_id: requestId,
         file_name: payloadFileName,
@@ -638,7 +665,7 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: null,
       });
-      return ok(req, extractCanonicalWineResponse(cached.payload), requestId);
+      return ok(req, cachedWine, requestId);
     }
     console.log(`[${FUNCTION_NAME}] step: cache_miss request_id=${requestId} input_hash=${cached.inputHash} degraded=${cached.degraded}`);
 
@@ -683,21 +710,99 @@ serve(async (req) => {
 
     console.info(`[${FUNCTION_NAME}] step: ai_request_started request_id=${requestId} model=${AI_MODEL} image_size_bytes=${sizeBytes}`);
 
+    const ocrPrompt =
+      `Você é um OCR técnico para rótulos de vinho.\n` +
+      `Transcreva SOMENTE texto realmente visível na imagem, preservando quebras de linha úteis.\n` +
+      `Ignore interface, notificações, nome de aparelho, marcas d'água e elementos fora do rótulo.\n` +
+      `Não corrija para marcas famosas, não complete palavras incertas e não invente texto.\n` +
+      `Se não houver texto legível, retorne ocr_text como string vazia e confidence baixo.`;
+
+    const ocrResult = await callOpenAIResponses<{ ocr_text: string; text_blocks: string[]; confidence: number }>({
+      functionName: `${FUNCTION_NAME}-ocr`,
+      requestId,
+      model: AI_MODEL,
+      timeoutMs: AI_TIMEOUT_MS,
+      temperature: 0,
+      instructions: ocrPrompt,
+      input: [
+        {
+          role: "user",
+          content: [
+            { type: "input_text", text: "Transcreva o texto visível no rótulo desta garrafa." },
+            { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}`, detail: "high" },
+          ],
+        },
+      ],
+      schema: {
+        type: "object",
+        properties: {
+          ocr_text: { type: "string" },
+          text_blocks: { type: "array", items: { type: "string" } },
+          confidence: { type: "number" },
+        },
+        required: ["ocr_text", "text_blocks", "confidence"],
+        additionalProperties: false,
+      },
+      maxOutputTokens: 700,
+    });
+
+    if (!ocrResult.ok) {
+      const status = ocrResult.status;
+      const timedOut = status === 504 || String(ocrResult.error).toLowerCase().includes("timeout");
+      const code = timedOut ? "AI_TIMEOUT" : "OCR_FAILED";
+      console.error(`[${FUNCTION_NAME}] [SCAN FAILURE REASON] request_id=${requestId} reason=ocr_failed code=${code} status=${status} preview=${sanitizePreview(ocrResult.raw || ocrResult.error)}`);
+      await logStep(userId, timedOut ? 408 : 502, "ocr_failed", Date.now() - startTime, requestId, {
+        ai_status: status,
+        ai_error: sanitizePreview(ocrResult.error),
+        ai_response_preview: sanitizePreview(ocrResult.raw),
+        input_size_bytes: sizeBytes,
+        error_type: code,
+      });
+      return fail(req, timedOut ? 408 : 502, {
+        success: false,
+        code,
+        message: timedOut ? "A análise demorou muito. Tente novamente." : "Não foi possível aplicar OCR neste rótulo.",
+        requestId,
+        retryable: true,
+      });
+    }
+
+    const ocrText = normalizeOcrText(ocrResult.parsed?.ocr_text);
+    const ocrConfidence = confidenceBucket(Number(ocrResult.parsed?.confidence));
+    console.info(`[${FUNCTION_NAME}] [SCAN RAW OCR] request_id=${requestId} confidence=${ocrConfidence} text=${DEBUG_MODE ? sanitizePreview(ocrText) : `[len=${ocrText.length}]`}`);
+
+    if (!ocrText || ocrText.length < 4 || ocrConfidence < 0.2) {
+      console.warn(`[${FUNCTION_NAME}] [SCAN FAILURE REASON] request_id=${requestId} reason=ocr_low_confidence confidence=${ocrConfidence} text_length=${ocrText.length}`);
+      await logStep(userId, 422, "ocr_low_confidence", Date.now() - startTime, requestId, {
+        ocr_confidence: ocrConfidence,
+        ocr_text_length: ocrText.length,
+        input_size_bytes: sizeBytes,
+        error_type: "OCR_LOW_CONFIDENCE",
+      });
+      return fail(req, 422, {
+        success: false,
+        code: "OCR_LOW_CONFIDENCE",
+        message: "Não foi possível ler texto suficiente no rótulo.",
+        requestId,
+        retryable: true,
+      });
+    }
+
     const systemPrompt =
-      `Você é um especialista em leitura de rótulos de vinho. Analise a imagem do rótulo e extraia SOMENTE informações que estejam EXPLICITAMENTE VISÍVEIS no rótulo.\n\n` +
+      `Você é um especialista em extração estruturada de rótulos de vinho a partir de OCR.\n\n` +
       `Regras CRÍTICAS:\n` +
-      `- Extraia APENAS texto que esteja impresso/escrito no rótulo da garrafa.\n` +
-      `- NÃO INFIRA, NÃO ADIVINHE, NÃO DEDUZA informações que não estejam escritas no rótulo.\n` +
-      `- Se o país NÃO está escrito no rótulo, retorne country como null. NÃO tente adivinhar baseado no nome do vinho ou produtor.\n` +
-      `- Se a região NÃO está escrita no rótulo, retorne region como null. NÃO tente adivinhar.\n` +
-      `- Se a uva NÃO está escrita no rótulo, retorne grape como null. NÃO associe "Malbec" automaticamente a "Mendoza" por exemplo.\n` +
+      `- Use o OCR fornecido como fonte primária e extraia APENAS informações ancoradas nele.\n` +
+      `- Use a imagem apenas para conferir leitura, nunca para inventar campos ausentes.\n` +
+      `- NÃO INFIRA, NÃO ADIVINHE, NÃO DEDUZA informações que não estejam escritas no OCR/rótulo.\n` +
+      `- Se o país NÃO está escrito, retorne country como null. NÃO tente adivinhar baseado no nome do vinho ou produtor.\n` +
+      `- Se a região NÃO está escrita, retorne region como null. NÃO tente adivinhar.\n` +
+      `- Se a uva NÃO está escrita, retorne grape como null. NÃO associe "Malbec" automaticamente a "Mendoza" por exemplo.\n` +
       `- Se mais de uma uva aparecer no rótulo, retorne grape como "Blend".\n` +
-      `- Se a safra NÃO está escrita no rótulo, retorne vintage como null.\n` +
-      `- Cada campo deve conter SOMENTE o que está literalmente visível na imagem.\n` +
-      `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado. Deduza APENAS pela cor visível da garrafa/líquido ou se estiver escrito.\n` +
-      `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc) — mas SOMENTE se estiver indicado no rótulo.\n` +
-      `- tasting_notes: 1-2 frases curtas em português (perfil esperado baseado no que está escrito no rótulo). Se não houver informação suficiente, retorne null.\n` +
-      `- food_pairing: 2-3 sugestões em português. Se não houver informação suficiente, retorne null.\n` +
+      `- Se a safra NÃO está escrita, retorne vintage como null.\n` +
+      `- "style" deve ser: tinto, branco, rose, espumante, sobremesa, fortificado. Use null se não estiver escrito ou visualmente claro.\n` +
+      `- País em português (França, Itália, Argentina, Portugal, Espanha, Chile etc) somente se estiver indicado no OCR/rótulo.\n` +
+      `- tasting_notes e food_pairing devem ser null, exceto se houver texto explícito no rótulo que sustente isso.\n` +
+      `- name pode ser string vazia se o nome do vinho não estiver legível; não use placeholders.\n` +
       `- Ignore totalmente texto de interface, screenshot, sistema, notificações, nome de aparelho, marcas de celular.\n` +
       `- Retorne APENAS JSON válido seguindo o schema abaixo (sem texto extra, sem markdown).\n` +
       `- É MELHOR retornar null do que retornar informação errada.\n\n` +
@@ -735,6 +840,7 @@ serve(async (req) => {
           role: "user",
           content: [
             { type: "input_text", text: "Analise este rótulo de vinho e extraia todas as informações possíveis." },
+            { type: "input_text", text: `OCR bruto do rótulo:\n${ocrText}` },
             { type: "input_image", image_url: `data:${imageMime};base64,${imageBase64}`, detail: "high" },
           ],
         },
@@ -746,7 +852,7 @@ serve(async (req) => {
             type: "object",
             properties: {
               name: { type: "string" },
-              producer: { type: "string" },
+              producer: { type: ["string", "null"] },
               vintage: { type: ["number", "null"] },
               style: { type: ["string", "null"] },
               country: { type: ["string", "null"] },
@@ -774,11 +880,11 @@ serve(async (req) => {
               "drink_from",
               "drink_until",
             ],
-            additionalProperties: true,
+            additionalProperties: false,
           },
         },
         required: ["wine"],
-        additionalProperties: true,
+        additionalProperties: false,
       },
       maxOutputTokens: 280,
     });
@@ -792,7 +898,7 @@ serve(async (req) => {
       const parseFailed = status === 422 || openaiResult.error === "INVALID_AI_RESPONSE" || openaiResult.error === "EMPTY_AI_RESPONSE";
       const code = timedOut ? "AI_TIMEOUT" : parseFailed ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE";
       console.error(`[${FUNCTION_NAME}] step: ai_failed request_id=${requestId} status=${status} final_error_code=${code} preview=${responsePreview}`);
-      await logStep(userId, timedOut ? 408 : 502, "fallback_used", durationMs, requestId, {
+      await logStep(userId, timedOut ? 408 : 502, "extraction_failed", durationMs, requestId, {
         ai_status: status,
         ai_error: sanitizePreview(openaiResult.error),
         ai_response_preview: responsePreview,
@@ -801,7 +907,13 @@ serve(async (req) => {
         step_failed: "ai_failed",
         error_code: code,
       });
-      return ok(req, buildFallbackWine(), requestId);
+      return fail(req, timedOut ? 408 : parseFailed ? 422 : 502, {
+        success: false,
+        code,
+        message: timedOut ? "A análise demorou muito. Tente novamente." : "Não foi possível extrair dados confiáveis deste rótulo.",
+        requestId,
+        retryable: true,
+      });
     }
 
     console.info(`[${FUNCTION_NAME}] step: ai_response_received request_id=${requestId} ok=true raw=${DEBUG_MODE ? sanitizePreview(openaiResult.raw) : "hidden"}`);
@@ -811,7 +923,7 @@ serve(async (req) => {
       parsedArgs = openaiResult.parsed?.wine ? (openaiResult.parsed.wine as Record<string, unknown>) : (openaiResult.parsed as Record<string, unknown>);
     } catch (parseError) {
       console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} final_error_code=AI_PARSE_ERROR`, parseError);
-      await logStep(userId, 422, "fallback_used", durationMs, requestId, {
+      await logStep(userId, 422, "extraction_failed", durationMs, requestId, {
         reason: "structured_parse_failed",
         error: sanitizePreview(parseError),
         raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
@@ -820,12 +932,18 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok(req, buildFallbackWine(), requestId);
+      return fail(req, 422, {
+        success: false,
+        code: "AI_PARSE_ERROR",
+        message: "Não foi possível interpretar a resposta da análise.",
+        requestId,
+        retryable: true,
+      });
     }
 
     if (!parsedArgs || typeof parsedArgs !== "object") {
       console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=no_structured_output final_error_code=AI_PARSE_ERROR`);
-      await logStep(userId, 422, "fallback_used", durationMs, requestId, {
+      await logStep(userId, 422, "extraction_failed", durationMs, requestId, {
         reason: "no_structured_output",
         raw_preview: DEBUG_MODE ? sanitizePreview(openaiResult.raw) : undefined,
         step_failed: "no_structured_output",
@@ -833,7 +951,13 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok(req, buildFallbackWine(), requestId);
+      return fail(req, 422, {
+        success: false,
+        code: "AI_PARSE_ERROR",
+        message: "Não foi possível interpretar a resposta da análise.",
+        requestId,
+        retryable: true,
+      });
     }
 
     const parsed = parsedArgs as Record<string, unknown>;
@@ -854,12 +978,11 @@ serve(async (req) => {
     const rawTastingNotes = typeof wine.tasting_notes === "string" ? wine.tasting_notes.trim() : null;
     const rawEstimatedPrice = normalizeNumber((wine as Record<string, unknown>).estimated_price);
     const rawPurchasePrice = normalizeNumber(wine.purchase_price);
-    const canonicalCountry = normalizeCountry(rawCountry) || inferCountryFromProducer(rawProducer);
+    const canonicalCountry = normalizeCountry(rawCountry);
     const normalizedRegion = rawRegion && !isAbsurdRegionValue(rawRegion) ? rawRegion : null;
     const normalizedGrape = normalizeGrape(rawGrape);
     const hasExplicitCountry = Boolean(rawCountry && normalizeCountry(rawCountry));
-    const hasMappedCountry = Boolean(!hasExplicitCountry && canonicalCountry && rawProducer);
-    const countryConfidence = hasExplicitCountry ? 0.92 : hasMappedCountry ? 0.82 : 0;
+    const countryConfidence = hasExplicitCountry ? 0.92 : 0;
     const regionConfidence = normalizedRegion ? 0.82 : 0;
     const grapeFieldConfidence = grapeConfidence(rawGrape, normalizedGrape);
 
@@ -877,6 +1000,8 @@ serve(async (req) => {
       cellar_location: typeof wine.cellar_location === "string" ? wine.cellar_location.trim() : null,
       drink_from: normalizeNumber(wine.drink_from),
       drink_until: normalizeNumber(wine.drink_until),
+      ocr_text: ocrText,
+      ocr_confidence: ocrConfidence,
     };
 
     const fieldConfidence = {
@@ -904,17 +1029,18 @@ serve(async (req) => {
     const hasAnyWineContext = hasNameSignal || strongAnchors + weakAnchors > 0;
     const regionExplicitlyInvalid = isAbsurdRegionValue(normalizedWine.region);
     const regionMissingButAllowed = !normalizedWine.region || normalizeForMatch(normalizedWine.region) === "";
+    const hasValidExtraction = hasValidWineExtraction(normalizedWine);
 
     if (
-      !hasNameSignal ||
       suspiciousName ||
       suspiciousProducer ||
       !hasEnoughWineContext ||
       !hasAnyWineContext ||
+      !hasValidExtraction ||
       regionExplicitlyInvalid
     ) {
-      console.error(`[${FUNCTION_NAME}] step: parse_failed request_id=${requestId} reason=insufficient_or_suspicious_label final_error_code=LABEL_NOT_IDENTIFIED`);
-      await logStep(userId, 422, "fallback_used", durationMs, requestId, {
+      console.error(`[${FUNCTION_NAME}] [SCAN FAILURE REASON] request_id=${requestId} reason=insufficient_or_suspicious_label final_error_code=LABEL_NOT_IDENTIFIED`);
+      await logStep(userId, 422, "extraction_failed", durationMs, requestId, {
         reason: "insufficient_or_suspicious_label",
         suspicious_name: suspiciousName,
         suspicious_producer: suspiciousProducer,
@@ -927,20 +1053,27 @@ serve(async (req) => {
         input_size_bytes: sizeBytes,
         error_type: "PARSE_ERROR",
       });
-      return ok(req, buildFallbackWine(), requestId);
+      return fail(req, 422, {
+        success: false,
+        code: "LABEL_NOT_IDENTIFIED",
+        message: "Não foi possível identificar esse rótulo com segurança.",
+        requestId,
+        retryable: true,
+      });
     }
 
     const normalizedNameKey = normalizeForMatch(normalizedWine.name);
     const isGenericLabelName =
-      !normalizedNameKey ||
       normalizedNameKey === "nao identificado" ||
       normalizedNameKey === "não identificado" ||
       normalizedNameKey === "unknown" ||
-      normalizedNameKey === "unidentified";
+      normalizedNameKey === "unidentified" ||
+      normalizedNameKey === "vinho sem nome" ||
+      normalizedNameKey === "wine without name";
 
-    if (isGenericLabelName || fieldConfidence.name < 0.5) {
-      console.error(`[${FUNCTION_NAME}] step: parse_succeeded_but_generic_name request_id=${requestId} name=${normalizedWine.name || "unknown"} final_error_code=LABEL_NOT_IDENTIFIED`);
-      await logStep(userId, 200, "fallback_used", durationMs, requestId, {
+    if (normalizedWine.name && (isGenericLabelName || fieldConfidence.name < 0.5)) {
+      console.error(`[${FUNCTION_NAME}] [SCAN FAILURE REASON] request_id=${requestId} reason=generic_or_low_confidence_name name=${normalizedWine.name || "unknown"} final_error_code=LABEL_NOT_IDENTIFIED`);
+      await logStep(userId, 422, "extraction_failed", durationMs, requestId, {
         reason: "generic_or_low_confidence_name",
         step_failed: "generic_or_low_confidence_name",
         error_code: "LABEL_NOT_IDENTIFIED",
@@ -948,9 +1081,21 @@ serve(async (req) => {
         error_type: "PARSE_ERROR",
         wine_name: normalizedWine.name || null,
       });
-      return ok(req, normalizedWine, requestId);
+      return fail(req, 422, {
+        success: false,
+        code: "LABEL_NOT_IDENTIFIED",
+        message: "Não foi possível identificar esse rótulo com segurança.",
+        requestId,
+        retryable: true,
+      });
     }
 
+    const finalWine = {
+      ...normalizedWine,
+      confidence: fieldConfidence,
+    };
+    console.info(`[${FUNCTION_NAME}] [SCAN AI RESPONSE] request_id=${requestId} parsed=${DEBUG_MODE ? sanitizePreview(wine) : "hidden"}`);
+    console.info(`[${FUNCTION_NAME}] [SCAN NORMALIZED DATA] request_id=${requestId} normalized=${DEBUG_MODE ? sanitizePreview(finalWine) : sanitizePreview({ name: finalWine.name, producer: finalWine.producer, country: finalWine.country, region: finalWine.region, grape: finalWine.grape, vintage: finalWine.vintage, style: finalWine.style, ocr_confidence: finalWine.ocr_confidence })}`);
     console.info(`[${FUNCTION_NAME}] final_output request_id=${requestId} wine_name=${normalizedWine.name} final_error_code=none`);
     await logStep(userId, 200, "success", durationMs, requestId, {
       wine_name: normalizedWine.name || "unknown",
@@ -962,9 +1107,9 @@ serve(async (req) => {
       error_type: null,
     });
 
-    await setCachedAiResponse(FUNCTION_NAME, cacheInput, normalizedWine, { userId });
+    await setCachedAiResponse(FUNCTION_NAME, cacheInput, finalWine, { userId });
 
-    return ok(req, normalizedWine, requestId);
+    return ok(req, finalWine, requestId);
   } catch (error) {
     const durationMs = Date.now() - startTime;
     const errMsg = error instanceof Error ? error.message : "unknown";
@@ -985,7 +1130,7 @@ serve(async (req) => {
       error_type: isAbort ? "AI_TIMEOUT" : isParseOrInferenceIssue ? "AI_PARSE_ERROR" : "AI_UNAVAILABLE",
     });
 
-    await logStep(userId, 200, "fallback_used", durationMs, requestId, {
+    await logStep(userId, isAbort ? 408 : 500, "failure", durationMs, requestId, {
       step_failed: isAbort ? "timeout" : isParseOrInferenceIssue ? "parse_or_inference_issue" : "internal_error",
       error_code: code,
       error: sanitizePreview(errMsg),
@@ -993,6 +1138,12 @@ serve(async (req) => {
       input_size_bytes: sizeBytes,
       error_type: code,
     });
-    return ok(req, buildFallbackWine(), requestId);
+    return fail(req, isAbort ? 408 : 500, {
+      success: false,
+      code,
+      message: isAbort ? "A análise demorou muito. Tente novamente." : "Não foi possível analisar este rótulo.",
+      requestId,
+      retryable: true,
+    });
   }
 });

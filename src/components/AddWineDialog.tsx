@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
-import { normalizeScanResult } from "@/lib/scan-normalizer";
+import { getMeaningfulScanFields, isMeaningfulScanValue, normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
 import { AiModalActionButton, AiModalCard, AiModalHeader, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
 
@@ -323,34 +323,12 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
   const source = rawResult && typeof rawResult === "object" ? (rawResult as Record<string, unknown>) : {};
   const normalizedSource = normalizedResult && typeof normalizedResult === "object" ? (normalizedResult as Record<string, unknown>) : {};
   const normalized = normalizeScanResult(normalizedSource);
-  const rawLabelText = pickFirstMeaningfulString([
-    source.label_text,
-    source.labelText,
-    source.primary_text,
-  ]);
-  const rawFullText = pickFirstMeaningfulString([
-    source.full_text,
-    source.fullText,
-    source.ocr_text,
-    source.text,
-    source.description,
-    source.notes,
-  ]);
-  const firstOcrLine = splitOcrTextIntoLines(rawFullText)[0] || "";
-  const extractedNameFromText = rawFullText ? extractNameFromFullText(rawFullText) : "";
-  const extractedProducerFromText = rawFullText ? extractProducerFromFullText(rawFullText) : "";
-  const fallbackNameFromText = extractWineNameFromText(rawFullText || rawLabelText || firstOcrLine);
   const normalizedName = pickFirstMeaningfulString([
     normalized.name,
     normalizedSource.name,
     source.wineName,
     source.wine_name,
     source.name,
-    rawLabelText,
-    fallbackNameFromText,
-    extractedNameFromText,
-    firstOcrLine,
-    rawFullText,
   ]);
   const normalizedProducer = pickFirstMeaningfulString([
     normalized.producer,
@@ -360,7 +338,6 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     source.producerName,
     source.winery,
     source.winemaker,
-    extractedProducerFromText,
   ]);
   const fallbackVintage = parseInt(String(source.year ?? source.vintage_year ?? ""), 10);
   const normalizedVintage = normalized.vintage ?? (Number.isFinite(fallbackVintage) ? fallbackVintage : null);
@@ -394,7 +371,7 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     source.varieties,
   ]);
   const mappedData: AddWinePrefillValues = {
-    name: normalizedName || getFirstDetectedString(source) || "Vinho sem nome",
+    name: normalizedName || null,
     producer: normalizedProducer || null,
     vintage: normalizedVintage,
     style: normalizedStyle || null,
@@ -410,10 +387,13 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     cellarLocation: normalized.cellar_location || null,
   };
 
-  console.info("[SCAN RAW]", source);
-  console.info("[SCAN NORMALIZED]", normalized);
-  console.info("[FINAL NAME]", mappedData.name);
-  console.info("[SCAN] final_form_values", mappedData);
+  console.info("[SCAN AI RESPONSE]", source);
+  console.info("[SCAN NORMALIZED DATA]", {
+    before: normalizedSource,
+    after: normalized,
+    meaningfulFields: getMeaningfulScanFields(normalized),
+  });
+  console.info("[SCAN FINAL FORM DATA]", mappedData);
 
   return mappedData;
 }
@@ -554,16 +534,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
   }, []);
-
-  const isMeaningfulScanValue = (value: unknown) => {
-    if (value == null) return false;
-    if (typeof value === "number") return Number.isFinite(value);
-    if (typeof value !== "string") return false;
-    const text = value.trim();
-    if (!text) return false;
-    const lowered = text.toLowerCase();
-    return !["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered);
-  };
 
   const applyScanPrefill = useCallback((prefill: AddWinePrefillValues) => {
     const nextPrefilled: Record<string, boolean> = {};
@@ -736,6 +706,19 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
         .map((mapping) => mapping.target)
         .filter((field) => !mappedFields.includes(field)),
     });
+    console.info("[SCAN APPLY STATE]", {
+      source,
+      appliedFields: mappedFields,
+      appliedValues: {
+        name: prefill.name ?? null,
+        producer: prefill.producer ?? null,
+        vintage: prefill.vintage ?? null,
+        style: prefill.style ?? null,
+        country: prefill.country ?? null,
+        region: prefill.region ?? null,
+        grape: prefill.grape ?? null,
+      },
+    });
 
     return appliedFields;
   }, [applyScanPrefill, isCommercial, open]);
@@ -833,7 +816,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     });
   }
 
-  const handleScanComplete = (data: ScanResultEnvelope | any) => {
+  const handleScanComplete = (data: ScanResultEnvelope | Record<string, unknown>) => {
     const rawScan = data && typeof data === "object" && "raw" in data && data.raw && typeof data.raw === "object"
       ? (data.raw as Record<string, unknown>)
       : data && typeof data === "object"
@@ -878,10 +861,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       },
     });
     if (!mappedData.name && !mappedData.producer && !mappedData.vintage && !mappedData.style && !mappedData.country && !mappedData.region && !mappedData.grape) {
-      console.warn("[AddWineDialog] scan_mapping_fallback_used", {
+      console.warn("[SCAN FAILURE REASON]", {
         source: "scan-wine-label",
-        fallbackApplied: true,
-        fallbackName: mappedData.name,
+        reason: "mapped_scan_payload_has_no_identifying_fields",
+        mappedData,
       });
     }
 
@@ -932,6 +915,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     const populatedCount = Object.keys(appliedFields).filter((field) => SCAN_PREFILL_FORM_FIELDS.includes(field as (typeof SCAN_PREFILL_FORM_FIELDS)[number])).length;
     if (populatedCount > 0) {
       toast({ title: isCommercial ? "Dados do vinho aplicados" : "🍷 Dados do rótulo aplicados" });
+    } else {
+      console.warn("[SCAN FAILURE REASON]", {
+        source: "scan-wine-label",
+        reason: "no_form_fields_applied",
+        raw: rawScan,
+        normalized: normalizedScan,
+      });
     }
   };
 
@@ -1065,9 +1055,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       setMissingFields(missing);
 
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Wine save error:", err);
-      toast({ title: isCommercial ? "Erro ao cadastrar vinho" : "Erro ao adicionar vinho", description: err?.message || "Tente novamente", variant: "destructive" });
+      toast({ title: isCommercial ? "Erro ao cadastrar vinho" : "Erro ao adicionar vinho", description: err instanceof Error ? err.message : "Tente novamente", variant: "destructive" });
     }
   };
 

@@ -16,14 +16,32 @@ export type CanonicalScanResult = {
 
 export type NormalizedScanResult = CanonicalScanResult & Record<string, unknown>;
 
+const USELESS_SCAN_TEXT = new Set([
+  "null",
+  "undefined",
+  "unknown",
+  "unidentified",
+  "não identificado",
+  "nao identificado",
+  "n/a",
+  "na",
+  "vinho não identificado",
+  "vinho nao identificado",
+  "vinho sem nome",
+  "wine without name",
+  "unidentified wine",
+  "linha x",
+]);
+
 function normalizeText(value: unknown) {
   if (typeof value !== "string") return "";
   const text = value.trim().replace(/\s+/g, " ");
   if (!text) return "";
   const lowered = text.toLowerCase();
-  if (["null", "undefined", "unknown", "unidentified", "não identificado", "nao identificado", "n/a", "na"].includes(lowered)) {
+  if (USELESS_SCAN_TEXT.has(lowered)) {
     return "";
   }
+  if (/^linha\s+[a-z0-9]+$/i.test(text)) return "";
   if (text.length === 1 && /[a-z0-9]/i.test(text)) return "";
   return text;
 }
@@ -42,61 +60,12 @@ function parseMaybeNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function splitTextLines(value: unknown) {
-  if (typeof value !== "string") return [] as string[];
-  return value
-    .split(/\r?\n+/)
-    .map((line) => normalizeText(line))
-    .filter((line): line is string => !!line);
-}
-
-function looksLikeWineLine(line: string) {
-  const normalized = line.toLowerCase();
-  return /reserva|reserve|riserva|chianti|malbec|cabernet|merlot|pinot|syrah|shiraz|chardonnay|sauvignon|riesling|brut|rosso|bianco|classico|gran|grand/i.test(normalized)
-    || /^[A-ZÀ-Ý0-9'’\-\s]{6,}$/.test(line);
-}
-
-function extractNameFromRawText(source: Record<string, unknown>) {
-  const primary = [
-    source.wineName,
-    source.wine_name,
-    source.label_text,
-    source.labelText,
-    source.primary_text,
-  ].map((value) => normalizeText(value)).find(Boolean);
-  if (primary) return primary;
-
-  const fullTextLines = splitTextLines(source.full_text || source.fullText || source.ocr_text || source.text);
-  const bestLine = fullTextLines.find(looksLikeWineLine);
-  if (bestLine) return bestLine;
-  return fullTextLines[0] || "";
-}
-
-function extractProducerFromRawText(source: Record<string, unknown>) {
-  const explicit = [
-    source.producer,
-    source.producer_name,
-    source.producerName,
-    source.winery,
-    source.winery_name,
-    source.winemaker,
-  ].map((value) => normalizeText(value)).find(Boolean);
-  if (explicit) return explicit;
-
-  const fullTextLines = splitTextLines(source.full_text || source.fullText || source.ocr_text || source.text);
-  return (
-    fullTextLines.find((line) => /vinicola|vinícola|winery|bodega|cantina|estate|vineyards|produtor|producer/i.test(line)) ||
-    ""
-  );
-}
-
 export function normalizeScanResult(raw: unknown): NormalizedScanResult {
   const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const name =
     normalizeText(source.name) ||
     normalizeText(source.wine_name) ||
-    normalizeText(source.wineName) ||
-    extractNameFromRawText(source);
+    normalizeText(source.wineName);
   const grape =
     normalizeText(source.grape) ||
     normalizeText(source.grapes) ||
@@ -105,7 +74,7 @@ export function normalizeScanResult(raw: unknown): NormalizedScanResult {
   return {
     ...source,
     name,
-    producer: normalizeText(source.producer) || normalizeText(source.producer_name) || normalizeText(source.producerName) || normalizeText(source.winery) || extractProducerFromRawText(source) || null,
+    producer: normalizeText(source.producer) || normalizeText(source.producer_name) || normalizeText(source.producerName) || normalizeText(source.winery) || null,
     country: normalizeText(source.country) || normalizeText(source.pais) || normalizeText(source["país"]) || normalizeText(source.origin) || null,
     region: normalizeText(source.region) || normalizeText(source.regiao) || normalizeText(source["região"]) || normalizeText(source.appellation) || null,
     grape: grape || null,
@@ -120,20 +89,46 @@ export function normalizeScanResult(raw: unknown): NormalizedScanResult {
   };
 }
 
+export function isMeaningfulScanValue(value: unknown) {
+  if (value == null) return false;
+  if (typeof value === "number") return Number.isFinite(value);
+  return Boolean(normalizeText(value));
+}
+
+export function getMeaningfulScanFields(result: Partial<CanonicalScanResult> & Record<string, unknown>) {
+  return ([
+    "name",
+    "producer",
+    "country",
+    "region",
+    "grape",
+    "vintage",
+    "style",
+    "drink_from",
+    "drink_until",
+    "estimated_price",
+    "purchase_price",
+    "food_pairing",
+    "cellar_location",
+  ] as const).filter((field) => isMeaningfulScanValue(result[field]));
+}
+
+export function hasIdentifyingScanResult(result: Partial<CanonicalScanResult> & Record<string, unknown>) {
+  const hasName = isMeaningfulScanValue(result.name);
+  const hasProducer = isMeaningfulScanValue(result.producer);
+  const strongAnchors = [
+    result.country,
+    result.region,
+    result.grape,
+  ].filter(isMeaningfulScanValue).length;
+  const supportingAnchors = [
+    result.vintage,
+    result.style,
+  ].filter(isMeaningfulScanValue).length;
+
+  return hasName || hasProducer || (strongAnchors >= 1 && strongAnchors + supportingAnchors >= 2);
+}
+
 export function hasMeaningfulScanResult(result: CanonicalScanResult) {
-  return Boolean(
-    result.name ||
-      result.producer ||
-      result.country ||
-      result.region ||
-      result.grape ||
-      result.vintage != null ||
-      result.style ||
-      result.drink_from != null ||
-      result.drink_until != null ||
-      result.estimated_price != null ||
-      result.purchase_price != null ||
-      result.food_pairing ||
-      result.cellar_location,
-  );
+  return hasIdentifyingScanResult(result);
 }
