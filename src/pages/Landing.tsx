@@ -108,11 +108,13 @@ export default function Landing() {
       <div className={`${designSystem.pageShell} ${designSystem.pageBackground}`}>
       <LandingBackground />
       <LandingHeader onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
-      <LandingHero onSignup={handleStartFreeClick} />
-      <LandingFeatures onSignup={handleStartFreeClick} />
-      <LandingShowcase />
-      <LandingAudience />
-      <LandingPricing onSignup={handleStartFreeClick} />
+      <main>
+        <LandingHero onSignup={handleStartFreeClick} />
+        <LandingFeatures onSignup={handleStartFreeClick} />
+        <LandingShowcase />
+        <LandingAudience />
+        <LandingPricing onSignup={handleStartFreeClick} />
+      </main>
       <LandingFooter onLogin={handleLoginClick} />
     </div>
   );
