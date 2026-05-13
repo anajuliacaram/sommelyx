@@ -2650,9 +2650,16 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       column.key === "country" ? "country-suggestions" :
       column.key === "grape" ? "grape-suggestions" :
       undefined;
+    const stickyNameColumn = column.key === "name";
 
     return (
-      <td key={column.key} className="border-b border-[#E8E1D7] px-2 py-2 align-top">
+      <td
+        key={column.key}
+        className={cn(
+          "border-b border-[#E8E1D7] px-1.5 py-1.5 align-top",
+          stickyNameColumn && "sticky left-[6.5rem] z-10 bg-white/95 shadow-[8px_0_16px_-18px_rgba(42,33,26,0.55)]",
+        )}
+      >
         <Input
           value={getFieldValue(row, column.key)}
           onChange={(event) => commitField(rowIndex, column.key, event.target.value)}
@@ -2665,7 +2672,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           list={listId}
           data-grid-cell={`${rowIndex}:${column.key}`}
           className={cn(
-            "h-10 rounded-xl border bg-[#FFFEFB] px-3 text-[13px] shadow-none transition-colors placeholder:text-[#B4AA9E] focus:border-[#B98C45] focus:bg-white focus-visible:ring-2 focus-visible:ring-[#B98C45]/15",
+            "h-9 rounded-lg border bg-[#FFFEFB] px-2.5 text-[13px] shadow-none transition-colors placeholder:text-[#B4AA9E] focus:border-[#B98C45] focus:bg-white focus-visible:ring-2 focus-visible:ring-[#B98C45]/15",
             error ? "border-[#D98A80]" : "border-transparent",
             column.align === "right" && "text-right",
           )}
@@ -2676,19 +2683,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const renderSpreadsheetTable = () => {
-    console.info("[TABLE RENDER START]", {
-      draftWinesLength: draftWines.length,
-      step,
-      visibleColumns: visibleColumns.map((column) => column.key),
-    });
-
     return (
-      <div className="overflow-hidden rounded-[24px] border border-[#E2D7CA] bg-[#FDFBF7] shadow-[0_18px_42px_rgba(54,36,22,0.08)]">
-        <div className="max-h-[min(58vh,620px)] overflow-auto" ref={tableScrollRef}>
-          <table className="min-w-[1120px] w-full border-separate border-spacing-0 text-left">
+      <div className="flex min-h-0 flex-1 overflow-hidden rounded-[22px] border border-[#DED1C2] bg-[#FDFBF7] shadow-[0_18px_42px_rgba(54,36,22,0.08)]">
+        <div className="h-full min-h-0 w-full overflow-auto scroll-smooth" ref={tableScrollRef}>
+          <table className="w-full min-w-[1320px] border-separate border-spacing-0 text-left">
             <thead className="sticky top-0 z-20">
               <tr className="bg-[#F3ECE2]/95 backdrop-blur">
-                <th className="w-12 border-b border-[#D9CDBC] px-3 py-3 text-center">
+                <th className="sticky left-0 z-30 w-12 border-b border-[#D9CDBC] bg-[#F3ECE2]/95 px-3 py-2 text-center backdrop-blur">
                   <input
                     type="checkbox"
                     checked={allRowsSelected}
@@ -2697,28 +2698,35 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     aria-label="Selecionar todos os vinhos"
                   />
                 </th>
-                <th className="w-14 border-b border-[#D9CDBC] px-2 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]">
+                <th className="sticky left-12 z-30 w-14 border-b border-[#D9CDBC] bg-[#F3ECE2]/95 px-2 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7A6F65] backdrop-blur">
                   #
                 </th>
                 {visibleColumns.map((column) => (
                   <th
                     key={column.key}
                     className={cn(
-                      "border-b border-[#D9CDBC] px-2 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]",
+                      "border-b border-[#D9CDBC] px-1.5 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]",
+                      column.key === "name" && "sticky left-[6.5rem] z-30 min-w-[260px] bg-[#F3ECE2]/95 backdrop-blur shadow-[8px_0_16px_-18px_rgba(42,33,26,0.55)]",
+                      column.key === "producer" && "min-w-[190px]",
+                      column.key === "vintage" && "min-w-[100px]",
+                      column.key === "country" && "min-w-[150px]",
+                      column.key === "region" && "min-w-[180px]",
+                      column.key === "grape" && "min-w-[170px]",
+                      column.key === "quantity" && "min-w-[110px]",
+                      column.key === "purchase_price" && "min-w-[130px]",
                       column.align === "right" && "text-right",
                     )}
                   >
                     {column.label}
                   </th>
                 ))}
-                <th className="w-24 border-b border-[#D9CDBC] px-3 py-3 text-right text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]">
+                <th className="w-28 border-b border-[#D9CDBC] px-3 py-2 text-right text-[10px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]">
                   Status
                 </th>
               </tr>
             </thead>
             <tbody>
               {draftWines.map((row, index) => {
-                console.info("[TABLE ROW]", { index, row });
                 const status = getDisplayRowStatus(row);
                 const selected = selectedSet.has(index);
                 return (
@@ -2729,7 +2737,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       selected && "bg-[#F9EFEF]",
                     )}
                   >
-                    <td className="border-b border-[#E8E1D7] px-3 py-2 text-center">
+                    <td className="sticky left-0 z-10 border-b border-[#E8E1D7] bg-white/95 px-3 py-1.5 text-center">
                       <input
                         type="checkbox"
                         checked={selected}
@@ -2738,14 +2746,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         aria-label={`Selecionar linha ${index + 1}`}
                       />
                     </td>
-                    <td className="border-b border-[#E8E1D7] px-2 py-2 text-[12px] font-semibold text-[#8A8075]">
+                    <td className="sticky left-12 z-10 border-b border-[#E8E1D7] bg-white/95 px-2 py-1.5 text-[12px] font-semibold text-[#8A8075]">
                       {index + 1}
                     </td>
                     {visibleColumns.map((column) => renderSpreadsheetInput(row, index, column))}
-                    <td className="border-b border-[#E8E1D7] px-3 py-2 text-right">
+                    <td className="border-b border-[#E8E1D7] px-3 py-1.5 text-right">
                       <span
                         className={cn(
-                          "inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em]",
+                          "inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]",
                           status === "valid" && "bg-emerald-50 text-emerald-700",
                           status === "warning" && "bg-amber-50 text-amber-700",
                           status === "invalid" && "bg-rose-50 text-rose-700",
@@ -2779,15 +2787,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[min(1180px,calc(100vw-1rem))] -translate-x-1/2 -translate-y-1/2 rounded-[24px] border-0 p-0 gap-0 overflow-hidden"
+        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[92vw] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-[26px] border-0 p-0 gap-0 overflow-hidden"
         style={{
           left: "50%",
           top: "50%",
           right: "auto",
           bottom: "auto",
           transform: "translate(-50%, -50%)",
-          width: "min(1180px, calc(100vw - 1rem))",
-          maxWidth: "1180px",
+          width: "min(92vw, 1760px)",
+          maxWidth: "1760px",
           maxHeight: "90vh",
           height: "90vh",
           background:
@@ -2799,7 +2807,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       >
         <div className="flex h-full min-h-0 flex-col">
           <div
-            className="sticky top-0 z-30 flex shrink-0 items-center justify-between border-b border-white/40 px-5 py-4 pr-14"
+            className="sticky top-0 z-30 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/40 px-4 py-3 pr-14"
             style={{
               borderTopLeftRadius: 0,
               borderTopRightRadius: 0,
@@ -2808,29 +2816,44 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               background: "rgba(255,255,255,0.60)",
             }}
           >
-            <div className="flex min-w-0 items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
                 <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0">
-                <SheetTitle className="text-[22px] font-semibold tracking-tight text-[#1E1E1E]">
+                <SheetTitle className="text-[20px] font-semibold tracking-tight text-[#1E1E1E]">
                   {hasDraftRows ? "Revise seus vinhos antes de importar" : "Importar planilha de vinhos"}
                 </SheetTitle>
-                <SheetDescription className="mt-1 text-[13px] font-medium leading-relaxed tracking-tight text-[#6B6B6B]">
+                <SheetDescription className="mt-0.5 text-[12px] font-medium leading-relaxed tracking-tight text-[#6B6B6B]">
                   {hasDraftRows
-                    ? "A tabela abaixo é editável e renderiza diretamente dos vinhos detectados."
+                    ? `${draftWines.length} linha(s) carregadas em uma área de revisão editável.`
                     : "Envie CSV, Excel, PDF, texto ou imagem para criar uma revisão editável."}
                 </SheetDescription>
               </div>
             </div>
+            {hasDraftRows ? (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {[
+                  { label: "Prontos", value: completeRowsCount, tone: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+                  { label: "Revisão", value: reviewRowsCount, tone: "bg-amber-50 text-amber-700 border-amber-100" },
+                  { label: "Corrigir", value: invalidRowsCount, tone: "bg-rose-50 text-rose-700 border-rose-100" },
+                  { label: "Duplicados", value: duplicateRowsCount + autoMergedDuplicates, tone: "bg-[#F4E7EA] text-[#7B1E2B] border-[#E9D3D8]" },
+                ].map((pill) => (
+                  <span key={pill.label} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold", pill.tone)}>
+                    <span className="text-[12px]">{pill.value}</span>
+                    {pill.label}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-3 sm:px-4">
             {hasDraftRows ? (
-              <div className="space-y-4">
+              <div className="flex min-h-0 flex-1 flex-col gap-2.5">
                 {step === "importing" ? (
-                  <div className="rounded-[22px] border border-[#E2D7CA] bg-white/75 p-4">
-                    <div className="mb-3 flex items-center justify-between gap-3 text-[13px] font-semibold text-[#2A211A]">
+                  <div className="shrink-0 rounded-2xl border border-[#E2D7CA] bg-white/75 px-3 py-2">
+                    <div className="mb-2 flex items-center justify-between gap-3 text-[12px] font-semibold text-[#2A211A]">
                       <span>Importando vinhos...</span>
                       <span>{importProgress}%</span>
                     </div>
@@ -2841,88 +2864,74 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 ) : null}
 
                 {step === "done" ? (
-                  <div className="rounded-[22px] border border-emerald-100 bg-emerald-50/80 p-4 text-[#2F4A2B]">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white">
-                        <Check className="h-5 w-5" />
+                  <div className="shrink-0 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-3 py-2 text-[#2F4A2B]">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white">
+                        <Check className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">{Math.max(0, draftWines.length - importErrors.length)} vinho(s) importado(s).</p>
-                        <p className="text-xs text-[#5F6F52]">A revisão permanece visível para conferência.</p>
+                        <p className="text-[13px] font-semibold">{Math.max(0, draftWines.length - importErrors.length)} vinho(s) importado(s).</p>
+                        <p className="text-[11px] text-[#5F6F52]">A revisão permanece visível para conferência.</p>
                       </div>
                     </div>
                   </div>
                 ) : null}
 
-                <div className="grid gap-3 sm:grid-cols-4">
-                  {[
-                    { label: "Prontos", value: completeRowsCount, tone: "text-[#2F4A2B] bg-[rgba(95,111,82,0.09)]" },
-                    { label: "Revisão", value: reviewRowsCount, tone: "text-[#7B6528] bg-[rgba(198,167,104,0.12)]" },
-                    { label: "Corrigir", value: invalidRowsCount, tone: "text-[#9B4444] bg-[rgba(180,80,80,0.10)]" },
-                    { label: "Duplicados", value: duplicateRowsCount + autoMergedDuplicates, tone: "text-[#7B1E2B] bg-[rgba(123,30,43,0.08)]" },
-                  ].map((card) => (
-                    <div key={card.label} className={cn("rounded-[20px] border border-white/55 p-3 shadow-sm", card.tone)}>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-70">{card.label}</p>
-                      <p className="mt-1 text-2xl font-semibold tracking-tight">{card.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-white/55 bg-white/70 p-3 shadow-sm">
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-9 rounded-full px-4 text-[12px]" disabled={step === "importing" || step === "done"}>
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/55 bg-white/70 px-3 py-2 shadow-sm">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-8 rounded-full px-3 text-[11px]" disabled={step === "importing" || step === "done"}>
                       {editMode ? "Bloquear edição" : "Editar dados"}
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={() => void autoFixImportedRows()} className="h-9 rounded-full px-4 text-[12px]" disabled={enriching || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={() => void autoFixImportedRows()} className="h-8 rounded-full px-3 text-[11px]" disabled={enriching || step === "importing" || step === "done"}>
                       Corrigir automaticamente
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={applyDefaultPrice} className="h-9 rounded-full px-4 text-[12px]" disabled={!editMode || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={applyDefaultPrice} className="h-8 rounded-full px-3 text-[11px]" disabled={!editMode || step === "importing" || step === "done"}>
                       Preço padrão
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={addBlankRow} className="h-9 rounded-full px-4 text-[12px]" disabled={!editMode || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={addBlankRow} className="h-8 rounded-full px-3 text-[11px]" disabled={!editMode || step === "importing" || step === "done"}>
                       + Linha
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={removeInvalidRows} className="h-9 rounded-full px-4 text-[12px] text-rose-700" disabled={!editMode || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={removeInvalidRows} className="h-8 rounded-full px-3 text-[11px] text-rose-700" disabled={!editMode || step === "importing" || step === "done"}>
                       Remover vazios
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={removeSelectedRows} className="h-9 rounded-full px-4 text-[12px]" disabled={!editMode || selectedRows.length === 0 || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={removeSelectedRows} className="h-8 rounded-full px-3 text-[11px]" disabled={!editMode || selectedRows.length === 0 || step === "importing" || step === "done"}>
                       Remover selecionados
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={reset} className="h-9 rounded-full px-4 text-[12px]" disabled={step === "importing"}>
+                    <Button variant="ghost" size="sm" onClick={reset} className="h-8 rounded-full px-3 text-[11px]" disabled={step === "importing"}>
                       <X className="mr-1 h-3.5 w-3.5" /> Trocar arquivo
                     </Button>
                   </div>
-                  <div className="text-[12px] font-medium text-[#6B6258]">
-                    {draftWines.length} linha(s) visíveis e editáveis
+                  <div className="rounded-full bg-[#F6EFE7] px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
+                    {selectedRows.length} selecionada(s)
                   </div>
                 </div>
 
-                <div className="grid gap-3 rounded-[22px] border border-white/55 bg-white/60 p-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
+                <div className="grid shrink-0 gap-2 rounded-2xl border border-white/55 bg-white/60 px-3 py-2 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]">
                   <div className="flex items-center gap-2">
-                    <Input value={bulkProducer} onChange={(e) => setBulkProducer(e.target.value)} placeholder="Produtor em massa" disabled={!editMode || step === "importing" || step === "done"} />
-                    <Button variant="secondary" size="sm" onClick={selectedRows.length > 0 ? applyProducerToSelected : applyBulkProducer} disabled={!editMode || !bulkProducer.trim() || step === "importing" || step === "done"}>
+                    <Input className="h-8 rounded-lg text-[12px]" value={bulkProducer} onChange={(e) => setBulkProducer(e.target.value)} placeholder="Produtor em massa" disabled={!editMode || step === "importing" || step === "done"} />
+                    <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={selectedRows.length > 0 ? applyProducerToSelected : applyBulkProducer} disabled={!editMode || !bulkProducer.trim() || step === "importing" || step === "done"}>
                       Aplicar
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input value={bulkVintage} onChange={(e) => setBulkVintage(e.target.value)} placeholder="Safra em massa" type="number" disabled={!editMode || step === "importing" || step === "done"} />
-                    <Button variant="secondary" size="sm" onClick={selectedRows.length > 0 ? applyVintageToSelected : applyBulkVintage} disabled={!editMode || !bulkVintage.trim() || step === "importing" || step === "done"}>
+                    <Input className="h-8 rounded-lg text-[12px]" value={bulkVintage} onChange={(e) => setBulkVintage(e.target.value)} placeholder="Safra em massa" type="number" disabled={!editMode || step === "importing" || step === "done"} />
+                    <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={selectedRows.length > 0 ? applyVintageToSelected : applyBulkVintage} disabled={!editMode || !bulkVintage.trim() || step === "importing" || step === "done"}>
                       Aplicar
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input value={bulkGrape} onChange={(e) => setBulkGrape(e.target.value)} placeholder="Uva em massa" disabled={!editMode || step === "importing" || step === "done"} />
-                    <Button variant="secondary" size="sm" onClick={selectedRows.length > 0 ? applyGrapeToSelected : applyBulkGrape} disabled={!editMode || !bulkGrape.trim() || step === "importing" || step === "done"}>
+                    <Input className="h-8 rounded-lg text-[12px]" value={bulkGrape} onChange={(e) => setBulkGrape(e.target.value)} placeholder="Uva em massa" disabled={!editMode || step === "importing" || step === "done"} />
+                    <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={selectedRows.length > 0 ? applyGrapeToSelected : applyBulkGrape} disabled={!editMode || !bulkGrape.trim() || step === "importing" || step === "done"}>
                       Aplicar
                     </Button>
                   </div>
-                  <Button variant="secondary" size="sm" onClick={applyBulkAll} disabled={!editMode || (!bulkProducer.trim() && !bulkVintage.trim() && !bulkGrape.trim()) || step === "importing" || step === "done"}>
+                  <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={applyBulkAll} disabled={!editMode || (!bulkProducer.trim() && !bulkVintage.trim() && !bulkGrape.trim()) || step === "importing" || step === "done"}>
                     Preencher vazios
                   </Button>
                 </div>
 
                 {(enriching || processingTotal > 0) ? (
-                  <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-3 text-[12px] text-[#5F5F5F]">
+                  <div className="shrink-0 rounded-2xl border border-black/5 bg-[#FBFAF7] px-3 py-2 text-[12px] text-[#5F5F5F]">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <span className="font-medium">{enriching ? "Corrigindo automaticamente..." : "Processando importação"}</span>
                       {processingTotal > 0 ? <span className="font-semibold text-[#7B1E2B]">{processingRows}/{processingTotal}</span> : null}
@@ -2936,7 +2945,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 ) : null}
 
                 {parseErrors.length > 0 ? (
-                  <div className="space-y-1.5 rounded-[20px] border border-amber-200 bg-amber-50 p-3">
+                  <div className="shrink-0 space-y-1 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2">
                     {parseErrors.map((error, index) => (
                       <p key={index} className="flex items-center gap-1.5 text-[12px] font-medium text-amber-800">
                         <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -2949,7 +2958,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 {renderSpreadsheetTable()}
 
                 {importSourceConfidence < 0.7 && importSourceHeaders.length > 0 ? (
-                  <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4">
+                  <div className="max-h-44 shrink-0 overflow-auto rounded-2xl border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="text-[14px] font-semibold text-[#7B6528]">Mapeamento manual disponível</p>
@@ -2959,9 +2968,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         Aplicar mapeamento
                       </Button>
                     </div>
-                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                       {importSourceHeaders.map((header) => (
-                        <div key={header} className="flex flex-col gap-2 rounded-xl border border-black/5 bg-white p-3">
+                        <div key={header} className="flex flex-col gap-2 rounded-xl border border-black/5 bg-white p-2">
                           <p className="truncate text-[12px] font-semibold text-[#1A1A1A]">{header}</p>
                           <Select
                             value={columnMapping[header] || "ignore"}
@@ -2996,7 +3005,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 ) : null}
 
                 {(mappingEntries.length > 0 || aiNotes) ? (
-                  <div className="rounded-[20px] border border-white/55 bg-white/60 p-3 text-[12px] text-[#6B6258]">
+                  <div className="shrink-0 rounded-2xl border border-white/55 bg-white/60 px-3 py-2 text-[11px] text-[#6B6258]">
                     {aiNotes ? <p className="mb-2 font-medium text-[#4A4338]">{aiNotes}</p> : null}
                     {mappingEntries.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">
@@ -3076,36 +3085,34 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
           {hasDraftRows ? (
             <div
-              className="sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-white/45 px-4 py-4"
+              className="sticky bottom-0 z-30 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-white/45 px-4 py-3"
               style={{
                 background: "rgba(255,255,255,0.68)",
                 backdropFilter: "blur(14px)",
                 WebkitBackdropFilter: "blur(14px)",
               }}
             >
-              <div className="flex flex-col gap-1 text-[#5F5F5F]">
-                <div className="flex items-center gap-2 text-[12px] font-medium">
-                  <span>{draftWines.length} total</span>
-                  <span className="text-black/20">·</span>
-                  <span className="text-emerald-700">{completeRowsCount} prontos</span>
-                  <span className="text-black/20">·</span>
-                  <span className="text-amber-700">{reviewRowsCount} revisão</span>
-                </div>
-                <div className="text-[12px]">
+              <div className="flex flex-wrap items-center gap-2 text-[12px] font-medium text-[#5F5F5F]">
+                <span className="rounded-full bg-white/70 px-2.5 py-1">{draftWines.length} total</span>
+                <span className="rounded-full bg-white/70 px-2.5 py-1">{selectedRows.length} selecionada(s)</span>
+                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">{completeRowsCount} prontos</span>
+                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">{reviewRowsCount} revisão</span>
+                <span className="rounded-full bg-rose-50 px-2.5 py-1 text-rose-700">{invalidRowsCount} corrigir</span>
+                <span className="text-[11px] font-normal text-[#7A6F65]">
                   {invalidRowsCount > 0
-                    ? `${invalidRowsCount} linha(s) sem nome ou quantidade válida.`
+                    ? "Corrija nome/quantidade antes de importar."
                     : "Linhas parciais podem ser importadas sem preencher campos opcionais."}
-                </div>
+                </span>
               </div>
               {step === "done" ? (
-                <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="h-14 rounded-2xl px-5 text-[14px] font-semibold">
+                <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="h-12 rounded-2xl px-5 text-[14px] font-semibold">
                   Fechar
                 </AiModalActionButton>
               ) : (
                 <AiModalActionButton
                   onClick={handleImport}
                   variant="primary"
-                  className="h-14 rounded-2xl px-5 text-[14px] font-semibold"
+                  className="h-12 rounded-2xl px-6 text-[14px] font-semibold shadow-[0_16px_36px_rgba(123,30,43,0.22)]"
                   disabled={!canImport}
                 >
                   <Upload className="mr-1.5 h-4 w-4" /> Importar {identifiedRowsCount} linha(s)
