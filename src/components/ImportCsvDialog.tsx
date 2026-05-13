@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Upload, Check, AlertTriangle, X, Sparkles, Loader2, ChevronDown, GripVertical } from "@/icons/lucide";
+import { Upload, Check, AlertTriangle, X, Sparkles, Loader2 } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 import { useWines } from "@/hooks/useWines";
 import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/lib/ai-attachments";
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
-import { WineLabelPreview } from "@/components/WineLabelPreview";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
 import { AiModalActionButton } from "@/components/ai-flow/ModalLayout";
@@ -97,7 +96,7 @@ type EditableField =
   | "drink_from"
   | "drink_until";
 
-type RowErrors = Partial<Record<"name" | "quantity" | "type", string>>;
+type RowErrors = Partial<Record<"name" | "quantity", string>>;
 
 type ColumnKind = "text" | "number" | "select";
 
@@ -110,32 +109,15 @@ interface ColumnDef {
   optional?: boolean;
 }
 
-const styleOptions = [
-  { value: "tinto", label: "Tinto" },
-  { value: "branco", label: "Branco" },
-  { value: "rose", label: "Rosé" },
-  { value: "espumante", label: "Espumante" },
-  { value: "sobremesa", label: "Sobremesa" },
-  { value: "fortificado", label: "Fortificado" },
-];
-
 const baseColumns: ColumnDef[] = [
   { key: "name", label: "Nome", kind: "text", placeholder: "Nome do vinho" },
   { key: "producer", label: "Produtor", kind: "text", placeholder: "Produtor", optional: true },
   { key: "vintage", label: "Safra", kind: "number", placeholder: "2020", optional: true },
-  { key: "style", label: "Estilo", kind: "select", placeholder: "Selecionar", optional: true },
-  { key: "quantity", label: "Quantidade", kind: "number", align: "right", placeholder: "1" },
-  { key: "purchase_price", label: "Varejo R$", kind: "number", align: "right", placeholder: "0,00", optional: true },
-  { key: "current_value", label: "Gôndola R$", kind: "number", align: "right", placeholder: "0,00", optional: true },
-];
-
-const advancedColumns: ColumnDef[] = [
   { key: "country", label: "País", kind: "text", placeholder: "País", optional: true },
   { key: "region", label: "Região", kind: "text", placeholder: "Região", optional: true },
-  { key: "grape", label: "Uva/Blend", kind: "text", placeholder: "Uva", optional: true },
-  { key: "cellar_location", label: "Localização", kind: "text", placeholder: "Adega", optional: true },
-  { key: "drink_from", label: "Beber de", kind: "number", placeholder: "2025", optional: true },
-  { key: "drink_until", label: "Beber até", kind: "number", placeholder: "2030", optional: true },
+  { key: "grape", label: "Uva", kind: "text", placeholder: "Uva", optional: true },
+  { key: "quantity", label: "Quantidade", kind: "number", align: "right", placeholder: "1" },
+  { key: "purchase_price", label: "Preço", kind: "number", align: "right", placeholder: "0,00", optional: true },
 ];
 
 export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
@@ -152,9 +134,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
   const [fileName, setFileName] = useState("");
   const [editMode, setEditMode] = useState(true);
-  const [showAdvancedColumns, setShowAdvancedColumns] = useState(true);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
   const [bulkProducer, setBulkProducer] = useState("");
   const [bulkVintage, setBulkVintage] = useState("");
   const [bulkGrape, setBulkGrape] = useState("");
@@ -163,7 +143,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [processingRows, setProcessingRows] = useState(0);
   const [processingTotal, setProcessingTotal] = useState(0);
   const [autoMergedDuplicates, setAutoMergedDuplicates] = useState(0);
-  const [previewLimit, setPreviewLimit] = useState(50);
   const [importWarningOpen, setImportWarningOpen] = useState(false);
   const [importWarningRows, setImportWarningRows] = useState<{ index: number; name: string; issues: string[] }[]>([]);
   const [importSourceRows, setImportSourceRows] = useState<ImportSourceRow[]>([]);
@@ -171,26 +150,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [importSourceConfidence, setImportSourceConfidence] = useState(1);
   const [importSummary, setImportSummary] = useState<ImportSummary>({ headerDetected: false, ignoredRows: 0 });
   const [importMode, setImportMode] = useState<"standard" | "smart-pdf" | "image">("standard");
-  const [columnWidths, setColumnWidths] = useState<Record<EditableField, number>>({
-    name: 280,
-    producer: 180,
-    vintage: 110,
-    style: 150,
-    quantity: 110,
-    purchase_price: 140,
-    current_value: 140,
-    country: 140,
-    region: 160,
-    grape: 160,
-    cellar_location: 160,
-    drink_from: 120,
-    drink_until: 120,
-  });
-  const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const resizeRef = useRef<{ field: EditableField; startX: number; startWidth: number } | null>(null);
 
   const { data: cellarWines } = useWines();
   const addWine = useAddWine();
@@ -377,8 +338,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const normalizeType = (value: unknown) => normalizeStyle(value);
 
-  const isIllustrativeImage = (value?: string | null) => !!value?.startsWith("data:image/svg+xml");
-
   const normalizeSearchText = (value?: string | null) =>
     (value || "")
       .trim()
@@ -469,7 +428,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
     const errors: string[] = [];
     if (!row.name?.trim()) errors.push("Nome obrigatório");
-    if (!type) errors.push("Tipo obrigatório");
     if (!row.quantity || row.quantity <= 0) errors.push("Quantidade precisa ser maior que 0");
     const status = row.status ?? (errors.length === 0 ? "valid" : errors.some((error) => error.includes("Nome")) ? "invalid" : "review");
 
@@ -706,37 +664,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       }
     });
 
-  const buildGeneratedThumbnail = (row: Pick<DraftWine, "name" | "producer" | "vintage" | "country" | "region" | "grape" | "style" | "type">) => {
-    const style = normalizeSearchText(row.type || row.style);
-    const tone =
-      style.includes("branco") ? ["#E8DDAA", "#B9984F"] :
-      style.includes("espum") ? ["#EDE0BC", "#C5A45D"] :
-      style.includes("rose") ? ["#DDA2B4", "#A34C68"] :
-      style.includes("fort") ? ["#C58A49", "#7D4D23"] :
-      ["#7B1E2B", "#4A101A"];
-    const name = (row.name || "Vinho").slice(0, 24);
-    const producer = (row.producer || "Sommelyx").slice(0, 24);
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="480" height="640" viewBox="0 0 480 640" fill="none">
-        <defs>
-          <linearGradient id="g" x1="40" y1="20" x2="440" y2="620" gradientUnits="userSpaceOnUse">
-            <stop stop-color="${tone[0]}" />
-            <stop offset="1" stop-color="${tone[1]}" />
-          </linearGradient>
-        </defs>
-        <rect width="480" height="640" rx="40" fill="url(#g)" />
-        <rect x="36" y="36" width="408" height="568" rx="30" fill="rgba(255,255,255,0.16)" />
-        <rect x="72" y="72" width="336" height="456" rx="24" fill="rgba(255,255,255,0.28)" />
-        <text x="240" y="258" text-anchor="middle" font-family="Georgia, serif" font-size="38" fill="#1B1417" font-weight="700">${name}</text>
-        <text x="240" y="312" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" fill="rgba(27,20,23,0.72)">${producer}</text>
-        <text x="240" y="372" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" fill="rgba(27,20,23,0.65)">${row.vintage || "Safra n/i"} · ${row.country || row.region || "Imagem ilustrativa"}</text>
-        <rect x="132" y="490" width="216" height="42" rx="21" fill="rgba(255,255,255,0.60)" />
-        <text x="240" y="518" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" fill="rgba(27,20,23,0.72)" font-weight="700">Prévia ilustrativa</text>
-      </svg>
-    `.trim();
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-  };
-
   const inferTypeFromText = (value?: string | null) => {
     const text = normalizeSearchText(value);
     if (!text) return undefined;
@@ -771,9 +698,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const enrichDraftRows = async (sourceRows: DraftWine[] = draftWines) => {
     setEnriching(true);
     try {
-      // Show advanced columns so the user sees enriched fields
-      setShowAdvancedColumns(true);
-
       // Identify rows that need enrichment (missing producer/country/region/grape/style)
       const rowsNeedingEnrichment = sourceRows
         .map((row, index) => ({ row, index }))
@@ -921,7 +845,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const normalized = normalizeDraftRows(deduped.rows);
       setDraftWines(normalized);
       setSelectedRows([]);
-      setShowAdvancedColumns(true);
       await enrichDraftRows(normalized);
     } catch (error) {
       console.error("Auto-fix error:", error);
@@ -1000,8 +923,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       if (!row.name?.trim()) {
         errors.name = "Nome obrigatório";
       }
-      if (!row.type?.trim() && !row.style?.trim()) {
-        errors.type = "Tipo obrigatório";
+      if (!row.quantity || row.quantity <= 0) {
+        errors.quantity = "Quantidade precisa ser maior que 0";
       }
       if (Object.keys(errors).length > 0) {
         nextErrors[index] = errors;
@@ -1067,31 +990,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     });
   };
 
-  const getVisibleColumns = () => (showAdvancedColumns ? [...baseColumns, ...advancedColumns] : baseColumns);
-
-  const startColumnResize = (field: EditableField, event: React.MouseEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const startWidth = columnWidths[field] || 140;
-    resizeRef.current = { field, startX: event.clientX, startWidth };
-
-    const onMove = (moveEvent: MouseEvent) => {
-      if (!resizeRef.current || resizeRef.current.field !== field) return;
-      const delta = moveEvent.clientX - resizeRef.current.startX;
-      const nextWidth = Math.max(92, Math.min(360, resizeRef.current.startWidth + delta));
-      setColumnWidths((current) => ({ ...current, [field]: nextWidth }));
-    };
-
-    const onUp = () => {
-      resizeRef.current = null;
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  };
-
   const yieldToBrowser = () => new Promise<void>((resolve) => {
     if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
       resolve();
@@ -1099,10 +997,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     }
     window.requestAnimationFrame(() => resolve());
   });
-
-  const toggleExpandedRow = (index: number) => {
-    setExpandedRows((current) => (current.includes(index) ? current.filter((row) => row !== index) : [...current, index]));
-  };
 
   const readTextFile = async (file: File) => {
     const buffer = await file.arrayBuffer();
@@ -1860,9 +1754,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setImportWarnings([]);
     setFileName("");
     setEditMode(true);
-    setShowAdvancedColumns(false);
     setSelectedRows([]);
-    setEditingRowIndex(null);
     setBulkProducer("");
     setBulkVintage("");
     setBulkGrape("");
@@ -1871,7 +1763,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setProcessingRows(0);
     setProcessingTotal(0);
     setAutoMergedDuplicates(0);
-    setPreviewLimit(50);
     setImportWarningOpen(false);
     setImportWarningRows([]);
     setImportSourceRows([]);
@@ -2068,7 +1959,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const focusNextCell = (rowIndex: number, field: EditableField) => {
-    const visibleFields = getVisibleColumns().map((column) => column.key);
+    const visibleFields = baseColumns.map((column) => column.key);
     const currentIndex = visibleFields.indexOf(field);
     if (currentIndex === -1) return;
     const nextField = visibleFields[currentIndex + 1];
@@ -2082,7 +1973,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const focusPreviousCell = (rowIndex: number, field: EditableField) => {
-    const visibleFields = getVisibleColumns().map((column) => column.key);
+    const visibleFields = baseColumns.map((column) => column.key);
     const currentIndex = visibleFields.indexOf(field);
     if (currentIndex === -1) return;
     const prevField = visibleFields[currentIndex - 1];
@@ -2115,29 +2006,25 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       duplicateCount?: number;
     },
   ) => {
+    console.info("[CSV NORMALIZED]", rows);
     const deduped = dedupeImportedRows(rows);
     setAutoMergedDuplicates(deduped.duplicateCount + (options?.duplicateCount ?? 0));
     const normalized = setParsedRows(deduped.rows);
+    console.info("[draftWines]", normalized);
     setColumnMapping(options?.mapping || {});
     setAiNotes(options?.notes || "");
     setParseErrors(options?.parseErrors || []);
     setEditMode(true);
-    setShowAdvancedColumns(false);
     setSelectedRows([]);
-    setEditingRowIndex(null);
     setBulkProducer("");
     setBulkVintage("");
     setBulkGrape("");
-    setPreviewLimit(50);
     return normalized;
   };
 
   const buildWinesFromMapping = (sourceRows: ImportSourceRow[], mapping: Record<string, string>) => {
     return mapSourceRowsToWines(sourceRows, mapping);
   };
-
-  const getRenderableRows = (rows: DraftWine[]) =>
-    rows.map((row, index) => ({ row, index }));
 
   const getDuplicateIndexes = (rows: DraftWine[]) => {
     const seen = new Map<string, number>();
@@ -2154,47 +2041,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return duplicates;
   };
 
-  const getRowClassifications = (rows: DraftWine[]) => {
-    const duplicateIndexes = getDuplicateIndexes(rows);
-    const completed: number[] = [];
-    const errors: number[] = [];
-    const duplicates: number[] = [];
-    const lowConfidence: number[] = [];
-
-    rows.forEach((row, index) => {
-      const hasValidName = !!row.name && row.name.trim().length >= 2;
-      const hasAttribute =
-        !!row.producer?.trim() ||
-        !!row.grape?.trim() ||
-        !!row.region?.trim() ||
-        !!row.country?.trim() ||
-        !!row.vintage ||
-        !!row.style?.trim() ||
-        !!row.type?.trim();
-      const missingRequired = !hasValidName || !row.type?.trim() || !row.quantity || row.quantity <= 0;
-
-      if (duplicateIndexes.has(index)) {
-        duplicates.push(index);
-        return;
-      }
-      if (missingRequired || !hasAttribute) {
-        errors.push(index);
-        return;
-      }
-      if (row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7)) {
-        lowConfidence.push(index);
-        return;
-      }
-      completed.push(index);
-    });
-
-    return { completed, errors, duplicates, lowConfidence };
-  };
-
   const getRowIssues = (row: DraftWine) => {
     const issues: string[] = [];
     if (!row.name?.trim()) issues.push("Nome obrigatório");
-    if (!row.type?.trim() && !row.style?.trim()) issues.push("Tipo precisa de revisão");
+    if (!row.quantity || row.quantity <= 0) issues.push("Quantidade precisa ser maior que 0");
     if (row.purchase_price == null && row.price == null) issues.push("Preço ausente");
     if (!row.producer?.trim()) issues.push("Produtor precisa de revisão");
     if (!row.country?.trim()) issues.push("País precisa de revisão");
@@ -2209,8 +2059,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const getImportStatus = (row: DraftWine) => {
     const hasName = !!row.name?.trim();
     if (!hasName) return "invalid" as const;
-    const hasType = !!row.type?.trim() || !!row.style?.trim();
-    const missingSecondary = !hasType || !row.producer?.trim() || !row.country?.trim() || !row.grape?.trim() || !row.vintage || (row.purchase_price == null && row.price == null);
+    if (!row.quantity || row.quantity <= 0) return "invalid" as const;
+    const missingSecondary = !row.producer?.trim() || !row.country?.trim() || !row.grape?.trim() || !row.vintage || (row.purchase_price == null && row.price == null);
     const lowConfidence = row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7);
     if (missingSecondary || lowConfidence) return "incomplete" as const;
     return "valid" as const;
@@ -2385,6 +2235,21 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
         setAnalysisStage("parsing");
         const local = parseCsvLocally(smartContent);
+        console.info("[CSV RAW FILE]", {
+          fileName: file.name,
+          fileType: file.type || "application/pdf",
+          fileSizeBytes: file.size,
+          textLength: smartContent.length,
+          preview: smartContent.slice(0, 4_000),
+        });
+        console.info("[CSV PARSED]", {
+          wines: local.wines,
+          headers: local.headers,
+          mapping: local.mapping,
+          sourceRows: local.sourceRows,
+          confidence: local.confidence,
+          successRate: local.successRate,
+        });
         setImportSourceRows(local.sourceRows);
         setImportSourceHeaders(local.headers);
         setImportSourceConfidence(Math.min(local.confidence, local.successRate));
@@ -2436,7 +2301,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         fileSizeBytes: file.size,
       });
       const raw = await fileToCsvLikeText(file);
-      console.log("[CSV RAW FILE TEXT]", raw);
+      console.info("[CSV RAW FILE]", {
+        fileName: file.name,
+        fileType: file.type || "unknown",
+        fileSizeBytes: file.size,
+        textLength: raw.length,
+        preview: raw.slice(0, 4_000),
+      });
       if (!raw || !raw.trim()) {
         setParseErrors(["Não conseguimos ler o conteúdo do arquivo. Verifique se ele contém dados de vinhos."]);
         setDraftWines([]);
@@ -2448,7 +2319,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       // ── 1) FAST PATH: local deterministic parser for CSV/TSV/spreadsheet exports ──
       setAnalysisStage("parsing");
       const local = parseCsvLocally(csvContent);
-      console.log("[CSV PARSED ROWS]", local.wines);
+      console.info("[CSV PARSED]", {
+        wines: local.wines,
+        headers: local.headers,
+        mapping: local.mapping,
+        sourceRows: local.sourceRows,
+        confidence: local.confidence,
+        successRate: local.successRate,
+      });
       setImportSourceRows(local.sourceRows);
       setImportSourceHeaders(local.headers);
       setImportSourceConfidence(Math.min(local.confidence, local.successRate));
@@ -2570,7 +2448,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
     for (let i = 0; i < draftWines.length; i++) {
       const w = draftWines[i];
-      const wineName = w.name?.trim() || `Linha ${i + 1}`;
+      const wineName = w.name?.trim();
+      if (!wineName) {
+        errors.push(`Linha ${i + 1}: nome obrigatório`);
+        continue;
+      }
       try {
         const inserted = await addWine.mutateAsync({
           name: wineName,
@@ -2641,13 +2523,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const handleImport = async () => {
     const invalidRows = draftWines
       .map((row, index) => ({ row, index, issues: getRowIssues(row) }))
-      .filter(({ row }) => getImportStatus(row) !== "valid");
+      .filter(({ row }) => getImportStatus(row) === "invalid");
 
     if (invalidRows.length > 0) {
       setImportWarningRows(
         invalidRows.slice(0, 8).map(({ row, index, issues }) => ({
           index,
-          name: row.name?.trim() || `Linha ${index + 1}`,
+          name: row.name?.trim() || "Nome ausente",
           issues,
         })),
       );
@@ -2664,24 +2546,16 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const mappingEntries = Object.entries(columnMapping);
-  const visibleColumns = getVisibleColumns();
-  const classifications = getRowClassifications(draftWines);
-  const renderableRows = getRenderableRows(draftWines);
-  const visibleDraftWines = draftWines.slice(0, previewLimit);
-  const isTruncatedPreview = draftWines.length > visibleDraftWines.length;
-  const allFieldsVisible = showAdvancedColumns;
+  const visibleColumns = baseColumns;
   const rowStatuses = draftWines.map((row) => getImportStatus(row));
   const completeRowsCount = rowStatuses.filter((status) => status === "valid").length;
   const reviewRowsCount = rowStatuses.filter((status) => status === "incomplete").length;
   const invalidRowsCount = rowStatuses.filter((status) => status === "invalid").length;
-  const duplicateRowsCount = classifications.duplicates.length;
+  const duplicateRowsCount = getDuplicateIndexes(draftWines).size;
   const identifiedRowsCount = completeRowsCount + reviewRowsCount;
-  const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0;
-  const isReviewStep = step === "preview" || step === "review";
-  const showReviewTable = draftWines.length > 0;
-  const reviewTableVisible = draftWines.length > 0;
-  console.log("draftWines length:", draftWines.length);
-  console.log("draftWines data:", draftWines);
+  const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0 && step !== "importing" && step !== "done";
+  const hasDraftRows = draftWines.length > 0;
+
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
     return Array.from(new Set(all.map((wine) => wine.producer).filter((value): value is string => !!value && value.trim().length > 1)))
@@ -2732,28 +2606,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       .sort((a, b) => a.localeCompare(b, "pt-BR"));
   }, [cellarWines, draftWines]);
 
-  useEffect(() => {
-    if (step !== "preview" && step !== "review") return;
-    const root = tableScrollRef.current;
-    const sentinel = loadMoreRef.current;
-    if (!root || !sentinel) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry?.isIntersecting) return;
-        setPreviewLimit((current) => Math.min(current + 50, draftWines.length));
-      },
-      { root, rootMargin: "220px 0px", threshold: 0.1 },
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [draftWines.length, previewLimit, step]);
-
-  useEffect(() => {
-    if (!showReviewTable || typeof window === "undefined") return;
-    window.scrollTo(0, document.body.scrollHeight);
-  }, [showReviewTable, draftWines.length]);
-
   const commitField = (rowIndex: number, field: EditableField, rawValue: string) => {
     switch (field) {
       case "style":
@@ -2790,170 +2642,129 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     }
   };
 
-  const renderEditableCell = (row: DraftWine, rowIndex: number, column: ColumnDef) => {
-    const error =
-      column.key === "style"
-        ? rowErrors[rowIndex]?.type
-        : rowErrors[rowIndex]?.[column.key as "name" | "quantity"];
-    const stateClass = error ? "border-[#E8B8B8] bg-white" : "border-transparent bg-[#F8F6F2]";
-    const sharedInputClass =
-      "w-full rounded-xl border border-transparent bg-[#F8F6F2] px-3 py-2 text-[14px] shadow-none transition-colors placeholder:text-[#A39A90] focus:border-[#C8A96A] focus:bg-white focus-visible:ring-0 focus-visible:outline-none";
-    const listId = column.key === "producer" ? "producer-suggestions" : column.key === "name" ? "wine-name-suggestions" : undefined;
+  const renderSpreadsheetInput = (row: DraftWine, rowIndex: number, column: ColumnDef) => {
+    const error = rowErrors[rowIndex]?.[column.key as "name" | "quantity"];
+    const listId =
+      column.key === "producer" ? "producer-suggestions" :
+      column.key === "name" ? "wine-name-suggestions" :
+      column.key === "country" ? "country-suggestions" :
+      column.key === "grape" ? "grape-suggestions" :
+      undefined;
 
     return (
-      <td key={column.key} className={cn("px-1.5 py-1.5 align-top", column.align === "right" && "text-right")}>
-        <div className={cn("rounded-xl border transition-colors", stateClass, error && "focus-within:ring-2 focus-within:ring-[#7B1E2B]/15")}>
-          {column.kind === "select" ? (
-            <Select
-              value={(row[column.key] as string | undefined) || ""}
-              onValueChange={(value) => updateWineRow(rowIndex, column.key, value || undefined)}
-              disabled={!editMode}
-            >
-              <SelectTrigger
-                className={cn(sharedInputClass, "justify-between")}
-                data-grid-cell={`${rowIndex}:${column.key}`}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    focusNextCell(rowIndex, column.key);
-                  }
-                }}
-              >
-                <SelectValue placeholder={column.placeholder || "Selecionar"} />
-              </SelectTrigger>
-              <SelectContent>
-                {styleOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : column.key === "name" ? (
-            <div className="flex items-stretch gap-2 p-1.5">
-              <div className="w-10 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-[#F8F6F2]">
-                <WineLabelPreview
-                  wine={{
-                    name: row.name || "Prévia do vinho",
-                    style: row.type || row.style || null,
-                    image_url: row.image_url || null,
-                    fallback_image: buildGeneratedThumbnail({ ...row, type: row.type || row.style }),
-                  }}
-                  alt={row.name || "Prévia do vinho"}
-                  compact
-                  generated={!row.image_url || isIllustrativeImage(row.image_url)}
-                  className="h-full w-full rounded-xl"
-                  imageClassName="h-full w-full object-cover"
-                />
-              </div>
-              <Input
-                value={getFieldValue(row, column.key)}
-                onChange={(event) => commitField(rowIndex, column.key, event.target.value)}
-                onKeyDown={(event) => handleCellKeyDown(event, rowIndex, column.key)}
-                placeholder={column.placeholder}
-                type={column.kind === "number" ? "number" : "text"}
-                min={column.kind === "number" ? 0 : undefined}
-                step={(column.key as string) === "purchase_price" ? "0.01" : undefined}
-                disabled={!editMode}
-                list={listId}
-                className={cn(sharedInputClass, column.align === "right" && "text-right")}
-                data-grid-cell={`${rowIndex}:${column.key}`}
-              />
-            </div>
-          ) : (
-            <Input
-              value={getFieldValue(row, column.key)}
-              onChange={(event) => commitField(rowIndex, column.key, event.target.value)}
-              onKeyDown={(event) => handleCellKeyDown(event, rowIndex, column.key)}
-              placeholder={column.placeholder}
-              type={column.kind === "number" ? "number" : "text"}
-              min={column.kind === "number" ? 0 : undefined}
-              step={column.key === "purchase_price" ? "0.01" : undefined}
-              disabled={!editMode}
-              list={listId}
-              className={cn(
-                sharedInputClass,
-                column.align === "right" && "text-right",
-              )}
-              data-grid-cell={`${rowIndex}:${column.key}`}
-            />
+      <td key={column.key} className="border-b border-[#E8E1D7] px-2 py-2 align-top">
+        <Input
+          value={getFieldValue(row, column.key)}
+          onChange={(event) => commitField(rowIndex, column.key, event.target.value)}
+          onKeyDown={(event) => handleCellKeyDown(event, rowIndex, column.key)}
+          placeholder={column.placeholder}
+          type={column.kind === "number" ? "number" : "text"}
+          min={column.kind === "number" ? 0 : undefined}
+          step={column.key === "purchase_price" ? "0.01" : undefined}
+          disabled={!editMode || step === "importing" || step === "done"}
+          list={listId}
+          data-grid-cell={`${rowIndex}:${column.key}`}
+          className={cn(
+            "h-10 rounded-xl border bg-[#FFFEFB] px-3 text-[13px] shadow-none transition-colors placeholder:text-[#B4AA9E] focus:border-[#B98C45] focus:bg-white focus-visible:ring-2 focus-visible:ring-[#B98C45]/15",
+            error ? "border-[#D98A80]" : "border-transparent",
+            column.align === "right" && "text-right",
           )}
-        </div>
-        {column.key === "name" && row.duplicateWarning ? (
-          <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="text-[10px] font-medium text-amber-700">{row.duplicateWarning}</p>
-            {row.duplicateIndexes?.length ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-[10px]"
-                onClick={() => mergeDraftRows(rowIndex, row.duplicateIndexes![0])}
-              >
-                Mesclar
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-        {error ? (
-          <p className={cn("mt-1 text-[10px] font-medium text-[#B4534A]")}>{error}</p>
-        ) : null}
+        />
+        {error ? <p className="mt-1 text-[10px] font-medium text-[#B4534A]">{error}</p> : null}
       </td>
     );
   };
 
-  const renderForcedReviewRows = () => {
-    try {
-      if (draftWines.length === 0) {
-        return <div>No rows parsed</div>;
-      }
-      console.log("TABLE RENDERED");
-      return (
-        <div
-          className="block overflow-auto"
-          style={{
-            border: "3px solid red",
-            background: "white",
-            minHeight: "400px",
-            maxHeight: "500px",
-            overflow: "auto",
-            position: "relative",
-            zIndex: 9999,
-          }}
-        >
-          <table className="min-w-full border-collapse">
-            <thead className="sticky top-0 bg-white">
-              <tr>
-                <th className="border-b border-black/10 px-4 py-3 text-left text-sm font-semibold text-[#2a1f1a]">Name</th>
-                <th className="border-b border-black/10 px-4 py-3 text-left text-sm font-semibold text-[#2a1f1a]">Producer</th>
-                <th className="border-b border-black/10 px-4 py-3 text-left text-sm font-semibold text-[#2a1f1a]">Vintage</th>
+  const renderSpreadsheetTable = () => {
+    console.info("[TABLE RENDER START]", {
+      draftWinesLength: draftWines.length,
+      step,
+      visibleColumns: visibleColumns.map((column) => column.key),
+    });
+
+    return (
+      <div className="overflow-hidden rounded-[24px] border border-[#E2D7CA] bg-[#FDFBF7] shadow-[0_18px_42px_rgba(54,36,22,0.08)]">
+        <div className="max-h-[min(58vh,620px)] overflow-auto" ref={tableScrollRef}>
+          <table className="min-w-[1120px] w-full border-separate border-spacing-0 text-left">
+            <thead className="sticky top-0 z-20">
+              <tr className="bg-[#F3ECE2]/95 backdrop-blur">
+                <th className="w-12 border-b border-[#D9CDBC] px-3 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={allRowsSelected}
+                    onChange={toggleAllRows}
+                    className="h-4 w-4 rounded border-[#CDBFAE] accent-[#7B1E2B]"
+                    aria-label="Selecionar todos os vinhos"
+                  />
+                </th>
+                <th className="w-14 border-b border-[#D9CDBC] px-2 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]">
+                  #
+                </th>
+                {visibleColumns.map((column) => (
+                  <th
+                    key={column.key}
+                    className={cn(
+                      "border-b border-[#D9CDBC] px-2 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]",
+                      column.align === "right" && "text-right",
+                    )}
+                  >
+                    {column.label}
+                  </th>
+                ))}
+                <th className="w-24 border-b border-[#D9CDBC] px-3 py-3 text-right text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A6F65]">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {draftWines.map((row, index) => {
-                console.log("rendering row:", row);
+                console.info("[TABLE ROW]", { index, row });
+                const status = getDisplayRowStatus(row);
+                const selected = selectedSet.has(index);
                 return (
-                  <tr key={index}>
-                    <td className="border-b border-black/5 px-4 py-3">
+                  <tr
+                    key={`${index}-${row.name || "row"}`}
+                    className={cn(
+                      "group bg-white/80 transition-colors hover:bg-[#FFF8ED]",
+                      selected && "bg-[#F9EFEF]",
+                    )}
+                  >
+                    <td className="border-b border-[#E8E1D7] px-3 py-2 text-center">
                       <input
-                        value={row?.name ?? ""}
-                        onChange={(e) => updateWineRow(index, "name", e.target.value)}
-                        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm"
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => toggleRowSelection(index)}
+                        className="h-4 w-4 rounded border-[#CDBFAE] accent-[#7B1E2B]"
+                        aria-label={`Selecionar linha ${index + 1}`}
                       />
                     </td>
-                    <td className="border-b border-black/5 px-4 py-3">
-                      <input
-                        value={row?.producer ?? ""}
-                        onChange={(e) => updateWineRow(index, "producer", e.target.value)}
-                        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm"
-                      />
+                    <td className="border-b border-[#E8E1D7] px-2 py-2 text-[12px] font-semibold text-[#8A8075]">
+                      {index + 1}
                     </td>
-                    <td className="border-b border-black/5 px-4 py-3">
-                      <input
-                        value={row?.vintage ?? ""}
-                        onChange={(e) => updateWineRow(index, "vintage", e.target.value ? Number.parseInt(e.target.value, 10) : undefined)}
-                        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm"
-                      />
+                    {visibleColumns.map((column) => renderSpreadsheetInput(row, index, column))}
+                    <td className="border-b border-[#E8E1D7] px-3 py-2 text-right">
+                      <span
+                        className={cn(
+                          "inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em]",
+                          status === "valid" && "bg-emerald-50 text-emerald-700",
+                          status === "warning" && "bg-amber-50 text-amber-700",
+                          status === "invalid" && "bg-rose-50 text-rose-700",
+                          status === "duplicate" && "bg-[#F4E7EA] text-[#7B1E2B]",
+                        )}
+                      >
+                        {status === "valid" ? "Pronto" : status === "invalid" ? "Corrigir" : status === "duplicate" ? "Duplicado" : "Revisar"}
+                      </span>
+                      {row.duplicateWarning && row.duplicateIndexes?.length ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-1 h-7 px-2 text-[10px] text-[#7B1E2B]"
+                          onClick={() => mergeDraftRows(index, row.duplicateIndexes![0])}
+                        >
+                          Mesclar
+                        </Button>
+                      ) : null}
                     </td>
                   </tr>
                 );
@@ -2961,11 +2772,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             </tbody>
           </table>
         </div>
-      );
-    } catch (error) {
-      console.error("[IMPORT] render_error", error);
-      throw error;
-    }
+      </div>
+    );
   };
 
   return (
@@ -2991,7 +2799,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       >
         <div className="flex h-full min-h-0 flex-col">
           <div
-            className="sticky top-0 z-30 flex items-center justify-between border-b border-white/40 px-5 py-4 pr-14 shrink-0"
+            className="sticky top-0 z-30 flex shrink-0 items-center justify-between border-b border-white/40 px-5 py-4 pr-14"
             style={{
               borderTopLeftRadius: 0,
               borderTopRightRadius: 0,
@@ -3000,494 +2808,273 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               background: "rgba(255,255,255,0.60)",
             }}
           >
-              <div className="flex items-start gap-4 min-w-0">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
-                  <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
-                </div>
-                <div className="min-w-0">
-                  <SheetTitle className="text-[22px] font-semibold tracking-tight text-[#1E1E1E]">
-                    Revise seus vinhos antes de importar
-                  </SheetTitle>
-                  <SheetDescription className="mt-1 text-[13px] font-medium leading-relaxed tracking-tight text-[#6B6B6B]">
-                    Clique em qualquer campo para editar, corrigir duplicados e confiar nos dados antes da importação.
-                  </SheetDescription>
-                </div>
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
+                <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
               </div>
-          </div>
-
-          {showReviewTable ? (
-            <div
-              className="sticky top-[73px] z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/40 px-5 py-4"
-              style={{
-                background: "rgba(255,255,255,0.64)",
-                backdropFilter: "blur(14px)",
-                WebkitBackdropFilter: "blur(14px)",
-              }}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-9 rounded-full px-4 text-[12px]">
-                  {editMode ? "Bloquear edição" : "Editar dados"}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void autoFixImportedRows()}
-                  className="h-9 rounded-full px-4 text-[12px]"
-                  disabled={enriching || draftWines.length === 0}
-                >
-                  ✨ Corrigir automaticamente
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={applyBulkAll}
-                  className="h-9 rounded-full px-4 text-[12px]"
-                  disabled={!editMode || (!bulkProducer.trim() && !bulkVintage.trim() && !bulkGrape.trim())}
-                >
-                  Preencher vazios
-                </Button>
-                <Button variant="secondary" size="sm" onClick={removeInvalidRows} className="h-9 rounded-full px-4 text-[12px]" disabled={draftWines.length === 0}>
-                  Remover vazios
-                </Button>
-                <Button variant="secondary" size="sm" onClick={removeSelectedRows} className="h-9 rounded-full px-4 text-[12px]" disabled={selectedRows.length === 0}>
-                  Mesclar / remover selecionados
-                </Button>
-                <Button variant="ghost" size="sm" onClick={reset} className="h-9 rounded-full px-4 text-[12px]">
-                  <X className="h-3.5 w-3.5 mr-1" /> Trocar arquivo
-                </Button>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-white/50 bg-white/70 px-3 py-1.5 text-[12px] text-[#5F5F5F] shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> {completeRowsCount} válidos
-                </span>
-                <span className="text-black/20">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" /> {reviewRowsCount} revisão
-                </span>
-                <span className="text-black/20">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" /> {invalidRowsCount} inválidos
-                </span>
+              <div className="min-w-0">
+                <SheetTitle className="text-[22px] font-semibold tracking-tight text-[#1E1E1E]">
+                  {hasDraftRows ? "Revise seus vinhos antes de importar" : "Importar planilha de vinhos"}
+                </SheetTitle>
+                <SheetDescription className="mt-1 text-[13px] font-medium leading-relaxed tracking-tight text-[#6B6B6B]">
+                  {hasDraftRows
+                    ? "A tabela abaixo é editável e renderiza diretamente dos vinhos detectados."
+                    : "Envie CSV, Excel, PDF, texto ou imagem para criar uma revisão editável."}
+                </SheetDescription>
               </div>
             </div>
-          ) : null}
+          </div>
 
-          <div className="block flex-1 min-h-[500px] overflow-visible px-4 pb-4 sm:px-5 sm:pb-5">
-            <div
-              className="flex h-full min-h-[500px] flex-col overflow-visible rounded-[24px] border border-white/45"
-              style={{
-                background: "rgba(255,255,255,0.62)",
-                backdropFilter: "blur(14px)",
-                WebkitBackdropFilter: "blur(14px)",
-                boxShadow: "0 18px 48px rgba(40,25,15,0.08)",
-              }}
-            >
-              <div className="block flex-1 min-h-[500px] overflow-visible">
-                <AnimatePresence mode="wait">
-                  {step === "upload" && (
-                    <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0 flex-col overflow-y-auto px-6 py-6">
-                      <div
-                        className={cn(
-                          "border-2 border-dashed rounded-xl p-10 text-center transition-colors",
-                          loading ? "cursor-wait opacity-80" : "cursor-pointer hover:border-primary/30",
-                        )}
-                        style={{ borderColor: "rgba(143,45,86,0.15)" }}
-                        onClick={() => { if (!loading) fileRef.current?.click(); }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={handleDrop}
-                      >
-                        <Upload className="h-8 w-8 mx-auto mb-3" style={{ color: "#8F2D56" }} />
-                        <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
-                          Arraste um documento ou clique para selecionar
-                        </p>
-                        <p className="mt-1 text-xs" style={{ color: "#9CA3AF" }}>
-                          CSV, Excel, PDF, Word e TXT para cadastro em lote
-                        </p>
-                      </div>
-                      <input
-                        ref={fileRef}
-                        type="file"
-                        accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,.doc,.docx,.rtf,image/*,text/plain,text/csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        className="hidden"
-                        onChange={(e) => { if (e.target.files?.[0]) void handleFile(e.target.files[0]); }}
-                      />
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+            {hasDraftRows ? (
+              <div className="space-y-4">
+                {step === "importing" ? (
+                  <div className="rounded-[22px] border border-[#E2D7CA] bg-white/75 p-4">
+                    <div className="mb-3 flex items-center justify-between gap-3 text-[13px] font-semibold text-[#2A211A]">
+                      <span>Importando vinhos...</span>
+                      <span>{importProgress}%</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-black/5">
+                      <div className="h-full rounded-full gradient-wine transition-all" style={{ width: `${importProgress}%` }} />
+                    </div>
+                  </div>
+                ) : null}
 
-                      <div className="mt-5 rounded-xl border border-black/5 bg-white p-4" style={{ background: "rgba(143,45,86,0.04)" }}>
-                        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold" style={{ color: "#8F2D56" }}>
-                          <Sparkles className="h-3.5 w-3.5" /> Sommelyx Inteligente
-                        </p>
-                        <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>
-                          Não se preocupe com a ordem ou nome das colunas. O Sommelyx analisa o conteúdo e mapeia automaticamente os dados - nome do vinho, produtor, safra, preço, quantidade e mais.
-                        </p>
+                {step === "done" ? (
+                  <div className="rounded-[22px] border border-emerald-100 bg-emerald-50/80 p-4 text-[#2F4A2B]">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white">
+                        <Check className="h-5 w-5" />
                       </div>
-                    </motion.div>
-                  )}
+                      <div>
+                        <p className="text-sm font-semibold">{Math.max(0, draftWines.length - importErrors.length)} vinho(s) importado(s).</p>
+                        <p className="text-xs text-[#5F6F52]">A revisão permanece visível para conferência.</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
 
-                  {step === "analyzing" && (
-                    <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0 items-center justify-center px-6 py-6 text-center">
-                      <div className="relative mx-auto mb-5 h-16 w-16">
-                        <div
-                          className="absolute inset-0 rounded-2xl animate-pulse"
-                          style={{ background: "linear-gradient(135deg, rgba(143,45,86,0.15), rgba(196,69,105,0.1))" }}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader2 className="h-7 w-7 animate-spin" style={{ color: "#8F2D56" }} />
-                        </div>
+                <div className="grid gap-3 sm:grid-cols-4">
+                  {[
+                    { label: "Prontos", value: completeRowsCount, tone: "text-[#2F4A2B] bg-[rgba(95,111,82,0.09)]" },
+                    { label: "Revisão", value: reviewRowsCount, tone: "text-[#7B6528] bg-[rgba(198,167,104,0.12)]" },
+                    { label: "Corrigir", value: invalidRowsCount, tone: "text-[#9B4444] bg-[rgba(180,80,80,0.10)]" },
+                    { label: "Duplicados", value: duplicateRowsCount + autoMergedDuplicates, tone: "text-[#7B1E2B] bg-[rgba(123,30,43,0.08)]" },
+                  ].map((card) => (
+                    <div key={card.label} className={cn("rounded-[20px] border border-white/55 p-3 shadow-sm", card.tone)}>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-70">{card.label}</p>
+                      <p className="mt-1 text-2xl font-semibold tracking-tight">{card.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-white/55 bg-white/70 p-3 shadow-sm">
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-9 rounded-full px-4 text-[12px]" disabled={step === "importing" || step === "done"}>
+                      {editMode ? "Bloquear edição" : "Editar dados"}
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={() => void autoFixImportedRows()} className="h-9 rounded-full px-4 text-[12px]" disabled={enriching || step === "importing" || step === "done"}>
+                      Corrigir automaticamente
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={applyDefaultPrice} className="h-9 rounded-full px-4 text-[12px]" disabled={!editMode || step === "importing" || step === "done"}>
+                      Preço padrão
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={addBlankRow} className="h-9 rounded-full px-4 text-[12px]" disabled={!editMode || step === "importing" || step === "done"}>
+                      + Linha
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={removeInvalidRows} className="h-9 rounded-full px-4 text-[12px] text-rose-700" disabled={!editMode || step === "importing" || step === "done"}>
+                      Remover vazios
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={removeSelectedRows} className="h-9 rounded-full px-4 text-[12px]" disabled={!editMode || selectedRows.length === 0 || step === "importing" || step === "done"}>
+                      Remover selecionados
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={reset} className="h-9 rounded-full px-4 text-[12px]" disabled={step === "importing"}>
+                      <X className="mr-1 h-3.5 w-3.5" /> Trocar arquivo
+                    </Button>
+                  </div>
+                  <div className="text-[12px] font-medium text-[#6B6258]">
+                    {draftWines.length} linha(s) visíveis e editáveis
+                  </div>
+                </div>
+
+                <div className="grid gap-3 rounded-[22px] border border-white/55 bg-white/60 p-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
+                  <div className="flex items-center gap-2">
+                    <Input value={bulkProducer} onChange={(e) => setBulkProducer(e.target.value)} placeholder="Produtor em massa" disabled={!editMode || step === "importing" || step === "done"} />
+                    <Button variant="secondary" size="sm" onClick={selectedRows.length > 0 ? applyProducerToSelected : applyBulkProducer} disabled={!editMode || !bulkProducer.trim() || step === "importing" || step === "done"}>
+                      Aplicar
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input value={bulkVintage} onChange={(e) => setBulkVintage(e.target.value)} placeholder="Safra em massa" type="number" disabled={!editMode || step === "importing" || step === "done"} />
+                    <Button variant="secondary" size="sm" onClick={selectedRows.length > 0 ? applyVintageToSelected : applyBulkVintage} disabled={!editMode || !bulkVintage.trim() || step === "importing" || step === "done"}>
+                      Aplicar
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input value={bulkGrape} onChange={(e) => setBulkGrape(e.target.value)} placeholder="Uva em massa" disabled={!editMode || step === "importing" || step === "done"} />
+                    <Button variant="secondary" size="sm" onClick={selectedRows.length > 0 ? applyGrapeToSelected : applyBulkGrape} disabled={!editMode || !bulkGrape.trim() || step === "importing" || step === "done"}>
+                      Aplicar
+                    </Button>
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={applyBulkAll} disabled={!editMode || (!bulkProducer.trim() && !bulkVintage.trim() && !bulkGrape.trim()) || step === "importing" || step === "done"}>
+                    Preencher vazios
+                  </Button>
+                </div>
+
+                {(enriching || processingTotal > 0) ? (
+                  <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-3 text-[12px] text-[#5F5F5F]">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <span className="font-medium">{enriching ? "Corrigindo automaticamente..." : "Processando importação"}</span>
+                      {processingTotal > 0 ? <span className="font-semibold text-[#7B1E2B]">{processingRows}/{processingTotal}</span> : null}
+                    </div>
+                    {processingTotal > 0 ? (
+                      <div className="h-2 overflow-hidden rounded-full bg-black/5">
+                        <div className="h-full rounded-full gradient-wine transition-all" style={{ width: `${Math.min(100, Math.round((processingRows / Math.max(processingTotal, 1)) * 100))}%` }} />
                       </div>
-                      <div className="mx-auto mb-4 h-2 w-full max-w-md overflow-hidden rounded-full bg-black/5">
-                        <motion.div
-                          className="h-full w-1/3 rounded-full gradient-wine"
-                          animate={{ x: ["-20%", "220%"] }}
-                          transition={{ duration: 1.25, repeat: Infinity, ease: "linear" }}
-                        />
-                      </div>
-                      <p className="text-[15px] font-semibold" style={{ color: "#0F0F14" }}>
-                        {analysisStage === "processing"
-                          ? "Processando arquivo..."
-                          : analysisStage === "extracting"
-                            ? "Extraindo dados..."
-                            : analysisStage === "parsing"
-                              ? "Organizando os vinhos..."
-                              : "Sommelyx está analisando…"}
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {parseErrors.length > 0 ? (
+                  <div className="space-y-1.5 rounded-[20px] border border-amber-200 bg-amber-50 p-3">
+                    {parseErrors.map((error, index) => (
+                      <p key={index} className="flex items-center gap-1.5 text-[12px] font-medium text-amber-800">
+                        <AlertTriangle className="h-4 w-4 shrink-0" />
+                        {error}
                       </p>
-                      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: "#9CA3AF" }}>
-                        {importMode === "smart-pdf"
-                          ? (
-                            <>
-                              {analysisStage === "processing"
-                                ? "Preparando a leitura do arquivo"
-                                : analysisStage === "extracting"
-                                  ? "Extraindo texto e blocos do arquivo"
-                                  : "Interpretando o catálogo"}
-                            </>
-                          )
-                          : (
-                            <>
-                              {analysisStage === "processing"
-                                ? "Preparando o arquivo"
-                                : analysisStage === "extracting"
-                                  ? "Extraindo dados"
-                                  : "Identificando colunas e organizando os dados"}
-                            </>
-                          )}
-                      </p>
-                    </motion.div>
-                  )}
+                    ))}
+                  </div>
+                ) : null}
 
-                  {isReviewStep && (
-                    <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0 flex-col gap-4 px-6 py-6">
-                      <div className="flex flex-wrap items-start justify-between gap-3 shrink-0">
-                        <div>
-                          <p className="text-sm font-semibold tracking-tight" style={{ color: "#0F0F14" }}>
-                            Revise seus vinhos antes de importar
-                          </p>
-                          <p className="mt-1 text-xs text-black/50">
-                            Clique em qualquer campo para editar · {draftWines.length} vinho(s) carregado(s)
-                          </p>
-                        </div>
+                {renderSpreadsheetTable()}
+
+                {importSourceConfidence < 0.7 && importSourceHeaders.length > 0 ? (
+                  <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[14px] font-semibold text-[#7B6528]">Mapeamento manual disponível</p>
+                        <p className="text-[13px] text-[#6B6258]">A confiança ficou baixa. Ajuste colunas sem esconder a tabela já carregada.</p>
                       </div>
-
-                      {importMode === "smart-pdf" ? (
-                        <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] px-4 py-3 text-[13px] text-[#4A4338]">
-                          <p className="font-semibold text-[#7B6528]">✔ Detectamos um catálogo complexo</p>
-                          <p>✔ Usando inteligência Sommelyx para interpretar produtores, vinhos e preços</p>
-                          <p>✔ Você pode revisar e editar cada linha antes de importar</p>
+                      <Button variant="secondary" size="sm" onClick={applyManualMapping} disabled={importSourceHeaders.length === 0 || step === "importing" || step === "done"}>
+                        Aplicar mapeamento
+                      </Button>
+                    </div>
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      {importSourceHeaders.map((header) => (
+                        <div key={header} className="flex flex-col gap-2 rounded-xl border border-black/5 bg-white p-3">
+                          <p className="truncate text-[12px] font-semibold text-[#1A1A1A]">{header}</p>
+                          <Select
+                            value={columnMapping[header] || "ignore"}
+                            onValueChange={(value) =>
+                              setColumnMapping((current) => ({
+                                ...current,
+                                [header]: value === "ignore" ? "" : value,
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecionar coluna" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ignore">Ignorar coluna</SelectItem>
+                              <SelectItem value="name">Nome do vinho</SelectItem>
+                              <SelectItem value="producer">Produtor</SelectItem>
+                              <SelectItem value="vintage">Safra</SelectItem>
+                              <SelectItem value="country">País</SelectItem>
+                              <SelectItem value="region">Região</SelectItem>
+                              <SelectItem value="grape">Uva</SelectItem>
+                              <SelectItem value="quantity">Quantidade</SelectItem>
+                              <SelectItem value="purchase_price">Preço</SelectItem>
+                              <SelectItem value="style">Tipo</SelectItem>
+                              <SelectItem value="cellar_location">Localização</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                      ) : null}
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
 
-                      <div className="grid gap-3 shrink-0 sm:grid-cols-4">
-                        {[
-                          { label: "Válidos", value: completeRowsCount, tone: "from-[rgba(95,111,82,0.10)] to-[rgba(95,111,82,0.05)] text-[#2F4A2B]" },
-                          { label: "Revisão", value: reviewRowsCount, tone: "from-[rgba(198,167,104,0.12)] to-[rgba(198,167,104,0.05)] text-[#7B6528]" },
-                          { label: "Inválidos", value: invalidRowsCount, tone: "from-[rgba(180,80,80,0.10)] to-[rgba(180,80,80,0.04)] text-[#9B4444]" },
-                          { label: "Duplicados", value: duplicateRowsCount, tone: "from-[rgba(123,30,43,0.08)] to-[rgba(123,30,43,0.04)] text-[#7B1E2B]" },
-                        ].map((card) => (
-                          <div key={card.label} className={cn("rounded-[22px] border border-black/5 bg-gradient-to-br p-3 shadow-sm", card.tone)}>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] opacity-70">{card.label}</p>
-                            <p className="mt-1 text-2xl font-semibold tracking-tight">{card.value}</p>
-                          </div>
+                {(mappingEntries.length > 0 || aiNotes) ? (
+                  <div className="rounded-[20px] border border-white/55 bg-white/60 p-3 text-[12px] text-[#6B6258]">
+                    {aiNotes ? <p className="mb-2 font-medium text-[#4A4338]">{aiNotes}</p> : null}
+                    {mappingEntries.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {mappingEntries.map(([from, to]) => (
+                          <span key={from} className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-medium">
+                            {from} {"->"} {to}
+                          </span>
                         ))}
                       </div>
-
-                      <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] px-4 py-3 text-[13px] text-[#4A4338]">
-                        <p>✔ Cabeçalho detectado automaticamente{importSummary.headerDetected && typeof importSummary.headerRowIndex === "number" ? ` na linha ${importSummary.headerRowIndex + 1}` : ""}</p>
-                        <p>✔ Coluna de preço detectada: {importSummary.priceColumn || "não identificada"}</p>
-                        <p>✔ {importSummary.ignoredRows} linha(s) ignorada(s) por categoria ou vazio</p>
-                        <p>✔ {completeRowsCount + reviewRowsCount} vinhos prontos para revisão</p>
-                        {invalidRowsCount > 0 ? <p>⚠️ {invalidRowsCount} vinhos precisam de atenção</p> : null}
-                        {duplicateRowsCount + autoMergedDuplicates > 0 ? (
-                          <p>🔁 {duplicateRowsCount + autoMergedDuplicates} duplicado(s) combinados ou sinalizados</p>
-                        ) : null}
-                      </div>
-
-                      {(enriching || processingTotal > 0) && (
-                        <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-3 text-[12px] text-[#5F5F5F]">
-                          <div className="mb-2 flex items-center justify-between gap-3">
-                            <span className="font-medium">
-                              {enriching ? "Corrigindo automaticamente..." : "Processando importação"}
-                            </span>
-                            {processingTotal > 0 ? (
-                              <span className="font-semibold text-[#7B1E2B]">
-                                Processando {processingRows}/{processingTotal}
-                              </span>
-                            ) : null}
-                          </div>
-                          {processingTotal > 0 ? (
-                            <div className="h-2 overflow-hidden rounded-full bg-black/5">
-                              <div
-                                className="h-full rounded-full gradient-wine transition-all"
-                                style={{ width: `${Math.min(100, Math.round((processingRows / Math.max(processingTotal, 1)) * 100))}%` }}
-                              />
-                            </div>
-                          ) : null}
-                        </div>
-                      )}
-
-                      <div className="flex flex-wrap gap-2 shrink-0">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => void autoFixImportedRows()}
-                          className="h-9 text-[12px] px-3"
-                          disabled={enriching || draftWines.length === 0}
-                        >
-                          ✨ Corrigir automaticamente
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={applyDefaultPrice}
-                          className="h-9 text-[12px] px-3"
-                          disabled={draftWines.length === 0}
-                        >
-                          Aplicar preço padrão
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={removeInvalidRows}
-                          className="h-9 text-[12px] px-3 text-rose-700 hover:bg-rose-50"
-                          disabled={draftWines.length === 0}
-                        >
-                          Remover inválidos
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={addBlankRow}
-                          className="h-9 text-[12px] px-3"
-                          disabled={!editMode}
-                        >
-                          + Adicionar linha
-                        </Button>
-                      </div>
-
-                      <div className="grid gap-3 shrink-0 lg:grid-cols-[1fr_1fr_1fr_auto]">
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={bulkProducer}
-                            onChange={(e) => setBulkProducer(e.target.value)}
-                            placeholder="Produtor em massa"
-                            disabled={!editMode}
-                          />
-                          <Button variant="secondary" size="sm" onClick={applyBulkProducer} disabled={!editMode || !bulkProducer.trim()}>
-                            Aplicar produtor
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={bulkVintage}
-                            onChange={(e) => setBulkVintage(e.target.value)}
-                            placeholder="Safra em massa"
-                            type="number"
-                            disabled={!editMode}
-                          />
-                          <Button variant="secondary" size="sm" onClick={applyBulkVintage} disabled={!editMode || !bulkVintage.trim()}>
-                            Aplicar safra
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={bulkGrape}
-                            onChange={(e) => setBulkGrape(e.target.value)}
-                            placeholder="Uva em massa"
-                            disabled={!editMode}
-                          />
-                          <Button variant="secondary" size="sm" onClick={applyBulkGrape} disabled={!editMode || !bulkGrape.trim()}>
-                            Aplicar uva
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-2 justify-start lg:justify-end">
-                          <Button variant="secondary" size="sm" onClick={() => void autoFixImportedRows()} disabled={enriching || draftWines.length === 0}>
-                            Reprocessar leitura
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={reset} className="h-9 text-[12px] px-3">
-                            <X className="h-3.5 w-3.5 mr-1" /> Trocar
-                          </Button>
-                        </div>
-                      </div>
-
-                      {mappingEntries.length > 0 && (
-                        <div className="rounded-xl border border-black/5 bg-white p-3">
-                          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-black/50">
-                            Mapeamento Sommelyx
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {mappingEntries.map(([from, to]) => (
-                              <span
-                                key={from}
-                                className="inline-flex items-center rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-medium text-[#5F5F5F]"
-                              >
-                                {from} → {to}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {aiNotes && (
-                        <div className="rounded-xl border border-black/5 bg-white p-3">
-                          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-black/50">
-                            Observações Sommelyx
-                          </p>
-                          <p className="text-[11px] leading-relaxed" style={{ color: "#6B7280" }}>{aiNotes}</p>
-                        </div>
-                      )}
-
-                      {parseErrors.length > 0 && (
-                        <div className="space-y-1.5 rounded-xl border border-amber-200 bg-amber-50 p-3.5">
-                          {parseErrors.map((e, i) => (
-                            <p key={i} className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: "#b45309" }}>
-                              <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: "#d97706" }} />
-                              {e}
-                            </p>
-                          ))}
-                        </div>
-                      )}
-
-                      {importSourceConfidence < 0.7 && importSourceHeaders.length > 0 ? (
-                        <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4">
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                              <p className="text-[14px] font-semibold text-[#7B6528]">
-                                Precisamos de mapeamento manual
-                              </p>
-                              <p className="text-[13px] text-[#6B6258]">
-                                A confiança da leitura ficou baixa. Selecione as colunas manualmente para continuar.
-                              </p>
-                            </div>
-                            <Button variant="secondary" size="sm" onClick={applyManualMapping} disabled={importSourceHeaders.length === 0}>
-                              Aplicar mapeamento
-                            </Button>
-                          </div>
-                          <div className="mt-4 grid gap-3 md:grid-cols-2">
-                            {importSourceHeaders.map((header) => (
-                              <div key={header} className="flex flex-col gap-2 rounded-xl border border-black/5 bg-white p-3">
-                                <p className="truncate text-[12px] font-semibold text-[#1A1A1A]">{header}</p>
-                                <Select
-                                  value={columnMapping[header] || "ignore"}
-                                  onValueChange={(value) =>
-                                    setColumnMapping((current) => ({
-                                      ...current,
-                                      [header]: value === "ignore" ? "" : value,
-                                    }))
-                                  }
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Selecionar coluna" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="ignore">Ignorar coluna</SelectItem>
-                                    <SelectItem value="name">Nome do vinho</SelectItem>
-                                    <SelectItem value="producer">Produtor</SelectItem>
-                                    <SelectItem value="vintage">Safra</SelectItem>
-                                    <SelectItem value="style">Tipo</SelectItem>
-                                    <SelectItem value="country">País</SelectItem>
-                                    <SelectItem value="region">Região</SelectItem>
-                                    <SelectItem value="grape">Uva</SelectItem>
-                                    <SelectItem value="quantity">Quantidade</SelectItem>
-                                    <SelectItem value="purchase_price">Preço</SelectItem>
-                                    <SelectItem value="cellar_location">Localização</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {draftWines.length === 0 ? (
-                        <div className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4 text-[13px] font-medium text-[#6B6258]">
-                          {importMode === "smart-pdf"
-                            ? "Não conseguimos interpretar totalmente o catálogo PDF. Selecione manualmente as colunas para continuar."
-                            : "Não conseguimos interpretar totalmente o arquivo. Selecione manualmente as colunas para continuar."}
-                        </div>
-                      ) : null}
-                    </motion.div>
-                  )}
-
-                  {step === "importing" && (
-                    <motion.div key="importing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0 items-center justify-center px-6 py-6 text-center">
-                      <div>
-                        <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-black/5">
-                          <motion.div className="h-full rounded-full gradient-wine" style={{ width: `${importProgress}%` }} />
-                        </div>
-                        <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>Importando... {importProgress}%</p>
-                        <p className="mt-1 text-xs" style={{ color: "#9CA3AF" }}>Não feche esta janela</p>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {step === "done" && (
-                    <motion.div key="done" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex h-full min-h-0 items-center justify-center px-6 py-6 text-center">
-                      <div>
-                        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full gradient-wine glow-wine">
-                          <Check className="h-7 w-7 text-primary-foreground" />
-                        </div>
-                        <p className="text-sm font-medium" style={{ color: "#0F0F14" }}>
-                          {draftWines.length - importErrors.length} vinho(s) importado(s) com sucesso!
-                        </p>
-                        {importErrors.length > 0 && (
-                          <p className="mt-2 text-xs" style={{ color: "#f59e0b" }}>
-                            {importErrors.length} linha(s) não puderam ser importadas
-                          </p>
-                        )}
-                        {importWarnings.length > 0 && (
-                          <p className="mt-1.5 text-xs" style={{ color: "#6B7280" }}>
-                            {importWarnings.length} aviso(s) de localização
-                          </p>
-                        )}
-                        {importErrors.length > 0 && (
-                          <div className="mt-4 max-h-36 overflow-y-auto rounded-xl border border-amber-200 bg-amber-50 p-3 text-left">
-                            {importErrors.slice(0, 5).map((error, idx) => (
-                              <p key={idx} className="text-[11px] leading-relaxed" style={{ color: "#b45309" }}>
-                                • {error}
-                              </p>
-                            ))}
-                            {importErrors.length > 5 && (
-                              <p className="mt-1.5 text-[10px]" style={{ color: "#9CA3AF" }}>
-                                ...e mais {importErrors.length - 5} erro(s)
-                              </p>
-                            )}
-                          </div>
-                        )}
-                        <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="mt-5 w-full sm:w-auto">
-                          Fechar
-                        </AiModalActionButton>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                {showReviewTable ? (
-                  <div className="px-6 pb-6">
-                    {renderForcedReviewRows()}
+                    ) : null}
                   </div>
                 ) : null}
               </div>
-            </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                {step === "analyzing" ? (
+                  <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-[520px] items-center justify-center text-center">
+                    <div>
+                      <div className="relative mx-auto mb-5 h-16 w-16">
+                        <div className="absolute inset-0 rounded-2xl bg-[rgba(143,45,86,0.14)] animate-pulse" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Loader2 className="h-7 w-7 animate-spin text-[#8F2D56]" />
+                        </div>
+                      </div>
+                      <p className="text-[15px] font-semibold text-[#0F0F14]">
+                        {analysisStage === "processing" ? "Processando arquivo..." : analysisStage === "extracting" ? "Extraindo dados..." : analysisStage === "parsing" ? "Organizando os vinhos..." : "Normalizando dados..."}
+                      </p>
+                      <p className="mt-1.5 text-[13px] text-[#8A8075]">A prévia será exibida assim que existirem vinhos detectados.</p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[520px]">
+                    <div
+                      className={cn(
+                        "rounded-[26px] border-2 border-dashed p-10 text-center transition-colors",
+                        loading ? "cursor-wait opacity-80" : "cursor-pointer hover:border-[#8F2D56]/35",
+                      )}
+                      style={{ borderColor: "rgba(143,45,86,0.15)", background: "rgba(255,255,255,0.62)" }}
+                      onClick={() => { if (!loading) fileRef.current?.click(); }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleDrop}
+                    >
+                      <Upload className="mx-auto mb-3 h-8 w-8 text-[#8F2D56]" />
+                      <p className="text-sm font-semibold text-[#0F0F14]">Arraste um documento ou clique para selecionar</p>
+                      <p className="mt-1 text-xs text-[#8A8075]">CSV, Excel, PDF, Word, TXT ou imagem para cadastro em lote</p>
+                    </div>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept=".csv,.txt,.tsv,.xls,.xlsx,.ods,.pdf,.doc,.docx,.rtf,image/*,text/plain,text/csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                      className="hidden"
+                      onChange={(e) => { if (e.target.files?.[0]) void handleFile(e.target.files[0]); }}
+                    />
+                    <div className="mt-5 rounded-[22px] border border-black/5 p-4" style={{ background: "rgba(143,45,86,0.04)" }}>
+                      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-[#8F2D56]">
+                        <Sparkles className="h-3.5 w-3.5" /> Importação inteligente
+                      </p>
+                      <p className="text-[12px] leading-relaxed text-[#6B6258]">
+                        A leitura aceita cabeçalhos em português ou inglês e, se houver linhas detectadas, a planilha editável aparece imediatamente.
+                      </p>
+                    </div>
+                    {parseErrors.length > 0 ? (
+                      <div className="mt-4 space-y-1.5 rounded-[20px] border border-amber-200 bg-amber-50 p-3">
+                        {parseErrors.map((error, index) => (
+                          <p key={index} className="flex items-center gap-1.5 text-[12px] font-medium text-amber-800">
+                            <AlertTriangle className="h-4 w-4 shrink-0" />
+                            {error}
+                          </p>
+                        ))}
+                      </div>
+                    ) : null}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            )}
           </div>
 
-          {showReviewTable ? (
+          {hasDraftRows ? (
             <div
               className="sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-white/45 px-4 py-4"
               style={{
@@ -3498,28 +3085,32 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             >
               <div className="flex flex-col gap-1 text-[#5F5F5F]">
                 <div className="flex items-center gap-2 text-[12px] font-medium">
-                  <span>{visibleDraftWines.length} mostrados</span>
-                  <span className="text-black/20">·</span>
                   <span>{draftWines.length} total</span>
                   <span className="text-black/20">·</span>
-                  <span className="text-emerald-700">{completeRowsCount} válidos</span>
+                  <span className="text-emerald-700">{completeRowsCount} prontos</span>
                   <span className="text-black/20">·</span>
                   <span className="text-amber-700">{reviewRowsCount} revisão</span>
                 </div>
                 <div className="text-[12px]">
                   {invalidRowsCount > 0
-                    ? `${invalidRowsCount} linha(s) precisam de correção antes de importar.`
-                    : "Tudo está editável e pronto antes da importação."}
+                    ? `${invalidRowsCount} linha(s) sem nome ou quantidade válida.`
+                    : "Linhas parciais podem ser importadas sem preencher campos opcionais."}
                 </div>
               </div>
-              <AiModalActionButton
-                onClick={handleImport}
-                variant="primary"
-                className="h-14 rounded-2xl px-5 text-[14px] font-semibold"
-                disabled={!canImport || !reviewTableVisible}
-              >
-                <Upload className="h-4 w-4 mr-1.5" /> Importar {identifiedRowsCount} revisados
-              </AiModalActionButton>
+              {step === "done" ? (
+                <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="h-14 rounded-2xl px-5 text-[14px] font-semibold">
+                  Fechar
+                </AiModalActionButton>
+              ) : (
+                <AiModalActionButton
+                  onClick={handleImport}
+                  variant="primary"
+                  className="h-14 rounded-2xl px-5 text-[14px] font-semibold"
+                  disabled={!canImport}
+                >
+                  <Upload className="mr-1.5 h-4 w-4" /> Importar {identifiedRowsCount} linha(s)
+                </AiModalActionButton>
+              )}
             </div>
           ) : null}
           <AlertDialog open={importWarningOpen} onOpenChange={setImportWarningOpen}>
@@ -3563,6 +3154,16 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           <datalist id="wine-name-suggestions">
             {knownWineNames.map((name) => (
               <option key={name} value={name} />
+            ))}
+          </datalist>
+          <datalist id="country-suggestions">
+            {knownCountries.map((country) => (
+              <option key={country} value={country} />
+            ))}
+          </datalist>
+          <datalist id="grape-suggestions">
+            {knownGrapes.map((grape) => (
+              <option key={grape} value={grape} />
             ))}
           </datalist>
         </div>
