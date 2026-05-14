@@ -497,6 +497,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         <section className="grid gap-3 xl:grid-cols-2 2xl:grid-cols-3">
           {displayWines.map((wine, index) => {
             const cellarMatch = matchedCellarMap.get(wine.name) || null;
+            const isFeatured = index === 0 || wine.name === safeResults.topPick;
             return (
               <WineListCard
                 key={`${wine.name}-${index}`}
@@ -505,6 +506,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 isTopPick={wine.name === safeResults.topPick}
                 isBestValue={wine.name === safeResults.bestValue}
                 isSelected={selectedWineName === wine.name}
+                isFeatured={isFeatured}
                 cellarMatch={cellarMatch}
                 onSelect={() => setSelectedWineName(wine.name)}
                 onSave={() => openSaveDialog(wine)}
@@ -748,14 +750,14 @@ function WorkspaceRail({
 }) {
   return (
     <aside
-      className="overflow-hidden rounded-[30px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(244,237,228,0.78)_100%)] shadow-[0_20px_42px_-34px_rgba(34,21,13,0.28)] backdrop-blur-xl"
+      className="overflow-hidden rounded-[30px] border border-[rgba(255,255,255,0.58)] bg-[linear-gradient(180deg,rgba(255,255,255,0.90)_0%,rgba(245,238,229,0.82)_58%,rgba(234,227,216,0.84)_100%)] shadow-[0_24px_52px_-36px_rgba(34,21,13,0.30)] backdrop-blur-xl"
       style={{
         backdropFilter: "blur(18px) saturate(1.06)",
         WebkitBackdropFilter: "blur(18px) saturate(1.06)",
       }}
     >
       <div className="flex max-h-full flex-col xl:sticky xl:top-0">
-        <div className="space-y-4 border-b border-[rgba(24,21,17,0.08)] px-4 pb-4 pt-4 sm:px-5">
+        <div className="space-y-4 border-b border-[rgba(24,21,17,0.07)] px-4 pb-4 pt-4 sm:px-5">
           <div className="space-y-1.5">
             <AiModalEyebrow>{step === "results" ? "Curadoria pronta" : "Entrada"}</AiModalEyebrow>
             <p className="font-serif text-[24px] leading-none tracking-[-0.05em] text-[#181511]">
@@ -768,9 +770,9 @@ function WorkspaceRail({
             </p>
           </div>
 
-          <div className="rounded-[20px] border border-[rgba(24,21,17,0.07)] bg-[rgba(255,255,255,0.72)] p-2.5">
+          <div className="rounded-[22px] border border-[rgba(24,21,17,0.05)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(249,245,238,0.78)_100%)] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
             <div className="flex items-center gap-3">
-              <div className="flex h-[60px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-black/5 bg-[#F6F0E8]">
+              <div className="flex h-[60px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-white/65 bg-[#F6F0E8] shadow-[0_10px_18px_-16px_rgba(43,29,18,0.30)]">
                 {attachmentPreview?.url ? (
                   <img src={attachmentPreview.url} alt="Carta analisada" className="h-full w-full object-cover object-top" />
                 ) : (
@@ -908,6 +910,7 @@ function WineListCard({
   isTopPick,
   isBestValue,
   isSelected,
+  isFeatured,
   cellarMatch,
   onSelect,
   onSave,
@@ -921,6 +924,7 @@ function WineListCard({
   isTopPick: boolean;
   isBestValue: boolean;
   isSelected: boolean;
+  isFeatured: boolean;
   cellarMatch: Wine | null;
   onSelect: () => void;
   onSave: () => void;
@@ -943,17 +947,23 @@ function WineListCard({
     <motion.article
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.28 }}
+      transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden rounded-[22px] border transition-all duration-200 hover:-translate-y-[1px]",
-        isSelected ? "border-[rgba(123,30,43,0.18)] bg-white/92 shadow-[0_18px_36px_-28px_rgba(123,30,43,0.24)]" : "border-[rgba(95,111,82,0.10)] bg-white/82 shadow-[0_12px_26px_-24px_rgba(27,19,14,0.20)]",
+        "overflow-hidden rounded-[22px] transition-all duration-300 hover:-translate-y-[2px]",
+        isFeatured && "xl:col-span-2 2xl:col-span-2",
+        isSelected
+          ? "border border-[rgba(123,30,43,0.16)] bg-[rgba(255,255,255,0.94)] shadow-[0_24px_44px_-34px_rgba(123,30,43,0.24)]"
+          : isFeatured
+            ? "border border-[rgba(198,167,104,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(249,245,238,0.86)_100%)] shadow-[0_24px_48px_-36px_rgba(56,34,22,0.24)]"
+            : "border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.82)] shadow-[0_16px_32px_-30px_rgba(27,19,14,0.24)]",
       )}
       style={{
-        backdropFilter: "blur(14px) saturate(1.06)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.06)",
+        backdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
+        WebkitBackdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
+        boxShadow: isFeatured && !isSelected ? "0 28px 56px -42px rgba(189,154,85,0.34), inset 0 1px 0 rgba(255,255,255,0.74)" : undefined,
       }}
     >
-      <button type="button" onClick={onSelect} className="w-full px-3.5 py-3.5 text-left">
+      <button type="button" onClick={onSelect} className={cn("w-full text-left", isFeatured ? "px-4 py-4" : "px-3.5 py-3.5")}>
         <div className="space-y-2.5">
           <div className="flex items-start justify-between gap-2.5">
             {tags.length > 0 ? (
@@ -985,11 +995,11 @@ function WineListCard({
 
           <div className="space-y-1.5">
             <div className="min-w-0 flex-1">
-              <h4 className="font-serif text-[19px] leading-[1.02] tracking-[-0.04em] text-[#181511]">
+              <h4 className={cn("font-serif leading-[1.01] tracking-[-0.045em] text-[#181511]", isFeatured ? "text-[23px]" : "text-[19px]")}>
                 {wine.name}
               </h4>
               {originLine ? (
-                <p className="mt-0.5 text-[11.5px] font-medium leading-5 text-[#6B6258]">
+                <p className={cn("mt-0.5 font-medium leading-5 text-[#6B6258]", isFeatured ? "text-[12px]" : "text-[11.5px]")}>
                   {originLine}
                 </p>
               ) : null}
@@ -997,7 +1007,7 @@ function WineListCard({
           </div>
 
           {descriptorLine ? (
-            <p className="text-[12px] leading-5 text-[#433A32]">
+            <p className={cn("leading-5 text-[#433A32]", isFeatured ? "text-[12.5px]" : "text-[12px]")}>
               {descriptorLine}
             </p>
           ) : null}
@@ -1016,9 +1026,12 @@ function WineListCard({
           ) : null}
 
           {pairingLine ? (
-            <p className="text-[11.5px] leading-5 text-[#5B4F44]">
-              Harmoniza com: {pairingLine}
-            </p>
+            <div className={cn("flex items-start gap-2", isFeatured && "pt-0.5")}>
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[rgba(123,30,43,0.55)]" />
+              <p className="text-[11.5px] leading-5 text-[#5B4F44]">
+                {pairingLine}
+              </p>
+            </div>
           ) : null}
 
           <div className="flex flex-wrap gap-1 border-t border-black/5 pt-2">
