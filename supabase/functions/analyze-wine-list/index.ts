@@ -614,6 +614,10 @@ function applyGroundedWineExtraction(payload: any, ocrText: string) {
   const normalized = normalizeWineListPayload(payload);
   const grounding = buildGroundingContext(ocrText);
   const removed: Array<{ name: string; producer: string | null; reason: string }> = [];
+  console.info(`[${FUNCTION_NAME}] grounding_started`, {
+    candidate_count: normalized.wines.length,
+    likely_wine_lines: grounding.likelyWineLines.length,
+  });
   const filtered = normalized.wines
     .map((wine) => {
       const nameMatched = scoreOcrMatch(wine.name, grounding.normalizedText);
@@ -621,6 +625,15 @@ function applyGroundedWineExtraction(payload: any, ocrText: string) {
       const priceMatched = normalizePriceTokens(wine.price).some((token) =>
         grounding.normalizedLines.some((line) => line.includes(token))
       );
+      console.info(`[${FUNCTION_NAME}] grounding_candidate`, {
+        wine_name: wine.name,
+        producer: wine.producer,
+        price: wine.price,
+        confidence_before: wine.confidence,
+        name_matched: nameMatched,
+        producer_matched: producerMatched,
+        price_matched: priceMatched,
+      });
 
       if (!nameMatched && !producerMatched) {
         removed.push({
@@ -1261,6 +1274,13 @@ PROIBIDO:
         }
       } else {
         validationResult = validateStructuredWineList(lastParsed, likelyMultipleEntries);
+        console.info(`[${FUNCTION_NAME}] structured_validation`, {
+          request_id: requestId,
+          attempt: attempt + 1,
+          require_multiple: likelyMultipleEntries,
+          parsed_wines: Array.isArray(lastParsed?.wines) ? lastParsed.wines.length : 0,
+          failures: validationResult.failures,
+        });
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
@@ -1320,6 +1340,14 @@ PROIBIDO:
         validationResult = { passed: true, failures: [] };
       }
       finalParsedCount = filteredWines.length;
+      console.info(`[${FUNCTION_NAME}] grounding_result`, {
+        request_id: requestId,
+        original_count: ungroundedNormalized.wines.length,
+        grounded_count: filteredWines.length,
+        removed_count: groundingResult.removed.length,
+        removed: groundingResult.removed.slice(0, 12),
+        validation_failures_after_grounding: validationResult.failures,
+      });
 
       if (filteredWines.length === 0 && ungroundedNormalized.wines.length > 0) {
         const degraded = {
@@ -1328,6 +1356,16 @@ PROIBIDO:
           fallbackReason: "OCR_GROUNDING_LOW_CONFIDENCE",
           note: "análise simplificada",
         };
+        console.warn(`[${FUNCTION_NAME}] fallback_reason=ocr_grounding_removed_all_candidates`, {
+          request_id: requestId,
+          original_count: ungroundedNormalized.wines.length,
+          removed_count: groundingResult.removed.length,
+          wines: ungroundedNormalized.wines.map((wine: any) => ({
+            name: wine?.name,
+            producer: wine?.producer,
+            confidence: wine?.confidence,
+          })).slice(0, 12),
+        });
         trace("fallback_used", {
           request_id: requestId,
           mode,

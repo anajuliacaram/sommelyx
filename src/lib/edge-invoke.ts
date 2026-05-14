@@ -513,6 +513,19 @@ export async function invokeEdgeFunction<T>(
             ? false
             : rawMessage.includes("demorou") || isTransportFailure || isSdkRelayError(rawMessage);
 
+      console.warn("[EDGE_REQUEST_FAILURE_CLASSIFIED]", {
+        function: name,
+        requestId,
+        attempt,
+        message: rawMessage,
+        isTransportFailure,
+        isAbort,
+        isLongRunning,
+        retryable,
+        code: err instanceof EdgeFunctionError ? err.code : undefined,
+        status: err instanceof EdgeFunctionError ? err.status : undefined,
+      });
+
       if (attempt < retries && retryable) {
         console.warn("[EDGE_REQUEST_RETRY]", {
           function: name,

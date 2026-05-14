@@ -1550,6 +1550,64 @@ export function normalizePairingResponse(data: unknown, dish: string): Generated
   return normalizeGeneratedWinePairingResponse(data, dish);
 }
 
+export function adaptMenuAnalysisToGeneratedWinePairing(
+  data: MenuAnalysis,
+  wineName: string,
+): GeneratedWinePairing {
+  const dishes = Array.isArray(data?.dishes) ? data.dishes : [];
+  const firstDish = dishes[0];
+  const sharedStructure = {
+    acidity: data?.wineProfile?.acidity?.trim() || "média",
+    tannin: data?.wineProfile?.tannin?.trim() || "médio",
+    body: data?.wineProfile?.body?.trim() || "médio",
+  };
+
+  const pairings = dishes
+    .filter((dish): dish is MenuDishItem => Boolean(dish) && typeof dish === "object" && typeof dish.name === "string" && typeof dish.reason === "string")
+    .map((dish) => ({
+      wine: dish.name.trim(),
+      style: dish.compatibilityLabel?.trim() || dish.harmony_label?.trim() || "Harmonização sugerida",
+      why_it_works: dish.reason.trim(),
+      structure_match: sharedStructure,
+      extra_tip:
+        dish.harmony_label?.trim() ||
+        dish.compatibilityLabel?.trim() ||
+        (dish.highlight === "top-pick" ? "Melhor escolha do cardápio" : dish.highlight === "best-value" ? "Boa relação custo-benefício" : "Boa opção para este vinho"),
+    }))
+    .filter((pairing) => pairing.wine.length > 0 && pairing.why_it_works.length > 0);
+
+  console.info("[sommelier-ai] menu_analysis_adapted", {
+    wineName,
+    fallback: Boolean(data?.fallback),
+    dishCount: dishes.length,
+    pairingCount: pairings.length,
+    fallbackReason: data?.fallbackReason ?? null,
+  });
+
+  return {
+    analysis: {
+      acidity: data?.wineProfile?.acidity?.trim() || "média",
+      fat: firstDish?.dish_profile?.highlight?.trim() || "equilíbrio com pratos compatíveis",
+      texture: firstDish?.dish_profile?.texture?.trim() || data?.wineProfile?.body?.trim() || "média",
+      flavor_profile: data?.wineProfile?.summary?.trim() || data?.summary?.trim() || `Selecionamos pratos com melhor afinidade para ${wineName}.`,
+      cooking_method:
+        firstDish?.recipe?.description?.trim() ||
+        firstDish?.harmony_type?.trim() ||
+        firstDish?.compatibilityLabel?.trim() ||
+        "preparos com melhor afinidade para o vinho",
+    },
+    pairings: pairings.length > 0 ? pairings : [{
+      wine: "Nenhum prato identificado com segurança",
+      style: "Revisão necessária",
+      why_it_works: data?.summary?.trim() || `Não foi possível identificar pratos suficientes para ${wineName}.`,
+      structure_match: sharedStructure,
+      extra_tip: "Tente outro arquivo com texto mais nítido",
+    }],
+    fallback: Boolean(data?.fallback),
+    note: data?.summary?.trim() || undefined,
+  };
+}
+
 export async function generateWinePairing(input: WinePairingInput): Promise<GeneratedWinePairing> {
   const finalDish = normalizeWinePairingInput(input);
   const requestId = typeof input === "string" ? undefined : input.requestId;
