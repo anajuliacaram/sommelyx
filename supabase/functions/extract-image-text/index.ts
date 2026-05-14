@@ -68,7 +68,7 @@ serve(async (req) => {
     const authorization = req.headers.get("Authorization");
     if (!authorization) {
       await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_authorization", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-      return jsonResponse(req, 401, { success: false, code: "AUTH_REQUIRED", message: "Authorization header missing", requestId, retryable: false });
+      return jsonResponse(req, 401, { success: false, code: "AUTH_REQUIRED", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false });
     }
 
     const supabase = createClient(
@@ -86,7 +86,7 @@ serve(async (req) => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user?.id) {
       await logAudit(userId, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-      return jsonResponse(req, 401, { success: false, code: "AUTH_INVALID", message: "Invalid auth token", requestId, retryable: false });
+      return jsonResponse(req, 401, { success: false, code: "AUTH_REQUIRED", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false });
     }
 
     userId = user.id;

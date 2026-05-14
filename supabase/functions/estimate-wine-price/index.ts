@@ -11,14 +11,21 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
+  const startedAt = Date.now();
+
+  const errorResponse = (status: number, code: string, message: string, retryable = false) =>
+    new Response(JSON.stringify({ success: false, code, message, requestId, retryable }), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
   try {
     // Authenticate request
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.warn("[estimate-wine-price] auth_missing", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
     const supabaseAuth = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -28,20 +35,15 @@ Deno.serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.warn("[estimate-wine-price] auth_invalid", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
 
     const body = await req.json();
     const { name, producer, vintage, style, country, region, grape } = body;
 
     if (!name || typeof name !== "string" || name.trim().length < 2) {
-      return new Response(
-        JSON.stringify({ error: "Nome do vinho é obrigatório" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return errorResponse(400, "INVALID_REQUEST", "Nome do vinho é obrigatório.");
     }
 
     const cacheInput = {
@@ -65,8 +67,11 @@ Deno.serve(async (req) => {
     if (!rateLimit.allowed) {
       return new Response(
         JSON.stringify({
-          error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-          code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+          success: false,
+          code: rateLimit.degraded ? "AI_UNAVAILABLE" : "RATE_LIMIT",
+          message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+          requestId,
+          retryable: true,
         }),
         { status: rateLimit.degraded ? 503 : 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -97,17 +102,14 @@ REGRAS:
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const openaiModel = Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini";
-    console.log(`[estimate-wine-price] openai_key=${maskSecret(openaiKey)} model=${openaiModel}`);
+    console.log(`[estimate-wine-price] request_id=${requestId} openai_key=${maskSecret(openaiKey)} model=${openaiModel} attachment_type=none ocr_length=0 retries=0`);
     if (!openaiKey) {
-      return new Response(
-        JSON.stringify({ error: "OPENAI_API_KEY not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return errorResponse(500, "AI_UNAVAILABLE", "Serviço de IA indisponível.", true);
     }
 
     const result = await callOpenAIResponses<any>({
       functionName: "estimate-wine-price",
-      requestId: crypto.randomUUID(),
+      requestId,
       apiKey: openaiKey,
       model: openaiModel,
       timeoutMs: 10_000,
@@ -127,25 +129,20 @@ REGRAS:
       maxOutputTokens: 200,
     });
     if (!result.ok) {
-      if (result.status === 422) {
-        return new Response(
-          JSON.stringify({ error: "INVALID_AI_RESPONSE" }),
-          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      console.warn("[estimate-wine-price] ai_failed", { request_id: requestId, status: result.status, latency_ms: Date.now() - startedAt, retryable: result.status === 429 || result.status >= 500 });
+      if (result.status === 429) {
+        return errorResponse(429, "RATE_LIMIT", "Muitas requisições. Tente novamente em instantes.", true);
       }
-      return new Response(
-        JSON.stringify({ error: "Erro ao estimar preço." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      if (result.status === 422) {
+        return errorResponse(422, "PARSE_ERROR", "A resposta da IA veio em um formato inválido. Tente novamente.", true);
+      }
+      return errorResponse(result.status === 504 ? 408 : 502, result.status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", result.status === 504 ? "A estimativa demorou muito. Tente novamente." : "Erro ao estimar preço.", true);
     }
     const parsed = result.parsed;
     const price = Number(parsed.estimated_price);
 
     if (!Number.isFinite(price) || price < 0) {
-      return new Response(
-        JSON.stringify({ error: "Preço estimado inválido" }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return errorResponse(422, "PARSE_ERROR", "A resposta da IA veio em um formato inválido. Tente novamente.", true);
     }
 
     const response = {
@@ -154,15 +151,13 @@ REGRAS:
       reasoning: parsed.reasoning || "",
     };
     await setCachedAiResponse("estimate-wine-price", cacheInput, response, { userId: claimsData.claims.sub });
+    console.log("[estimate-wine-price] success", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
     return new Response(
       JSON.stringify(response),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("estimate-wine-price error:", err);
-    return new Response(
-      JSON.stringify({ error: "Erro interno" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    console.error("[estimate-wine-price] fatal_error", { request_id: requestId, latency_ms: Date.now() - startedAt, error: err instanceof Error ? err.message : String(err), retryable: true });
+    return errorResponse(500, "AI_UNAVAILABLE", "Erro ao estimar preço.", true);
   }
 });

@@ -12,8 +12,8 @@ const MAX_CHUNKS = 5;
 const PROCESSING_TIMEOUT_MS = 10_000;
 const FUNCTION_NAME = "parse-csv-wines";
 
-function errorResponse(code: string, message: string, retryable = false) {
-  return { error: message, code, retryable };
+function errorResponse(code: string, message: string, requestId: string, retryable = false) {
+  return { success: false, code, message, requestId, retryable };
 }
 
 async function logAudit(
@@ -48,6 +48,7 @@ serve(async (req) => {
 
   const startTime = Date.now();
   const deadlineAt = startTime + PROCESSING_TIMEOUT_MS;
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
   let userId = "anonymous";
   let inputSizeBytes = 0;
 
@@ -55,10 +56,11 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: 0,
         error_type: "AUTH_REQUIRED",
       });
-      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+      return new Response(JSON.stringify(errorResponse("AUTH_REQUIRED", "Sessão expirada. Faça login novamente.", requestId)), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -67,7 +69,7 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      return new Response(JSON.stringify({ error: "Erro interno de configuração.", code: "CONFIG_ERROR" }), {
+      return new Response(JSON.stringify(errorResponse("AI_UNAVAILABLE", "Serviço temporariamente indisponível.", requestId, true)), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -77,7 +79,7 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }), {
+      return new Response(JSON.stringify(errorResponse("AUTH_REQUIRED", "Sessão expirada. Faça login novamente.", requestId)), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -87,7 +89,7 @@ serve(async (req) => {
 
     const { csvContent, fileName, fileType, parseMode, textBlocks, ocrUsed } = await req.json();
     if (!csvContent || typeof csvContent !== "string") {
-      return new Response(JSON.stringify(errorResponse("INVALID_CSV", "O conteúdo CSV está ausente ou inválido.")), {
+      return new Response(JSON.stringify(errorResponse("INVALID_CSV", "O conteúdo CSV está ausente ou inválido.", requestId)), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -97,10 +99,11 @@ serve(async (req) => {
     inputSizeBytes = rawBytes.length;
     if (rawBytes.length > MAX_CSV_SIZE) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: inputSizeBytes,
         error_type: "FILE_TOO_LARGE",
       });
-      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.", requestId)), {
         status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -111,23 +114,25 @@ serve(async (req) => {
     const detectedRows = Math.max(0, lines.length - 1);
     if (detectedRows > MAX_ROWS) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: inputSizeBytes,
         error_type: "FILE_TOO_LARGE",
       });
-      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.", requestId)), {
         status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const isSmartPdf = parseMode === "smart-pdf" || fileType === "application/pdf";
     console.info(`[${FUNCTION_NAME}] request_received`, {
+      request_id: requestId,
       user_id: userId,
       fileName,
       fileType,
       input_size_bytes: inputSizeBytes,
       parseMode: isSmartPdf ? "smart-pdf" : "structured",
     });
-    console.log(`[${FUNCTION_NAME}] mode=${isSmartPdf ? "smart-pdf" : "structured"} input_chars=${normalized.length} input_lines=${lines.length} ocr_used=${ocrUsed ? "true" : "false"}`);
+    console.log(`[${FUNCTION_NAME}] request_id=${requestId} mode=${isSmartPdf ? "smart-pdf" : "structured"} input_chars=${normalized.length} input_lines=${lines.length} ocr_used=${ocrUsed ? "true" : "false"} attachment_type=${fileType || "csv"} ocr_length=${normalized.length} model=gpt-4o-mini timeout_source=none retryable=false retries=1`);
 
     const supportedFileTypes = new Set([
       "text/csv",
@@ -139,7 +144,7 @@ serve(async (req) => {
       "application/vnd.oasis.opendocument.spreadsheet",
     ]);
     if (fileType && typeof fileType === "string" && !supportedFileTypes.has(fileType)) {
-      return new Response(JSON.stringify(errorResponse("UNSUPPORTED_FILE_TYPE", "Este formato ainda não é suportado. Envie JPG, PNG, PDF ou CSV.")), {
+      return new Response(JSON.stringify(errorResponse("UNSUPPORTED_FILE_TYPE", "Este formato ainda não é suportado. Envie JPG, PNG, PDF ou CSV.", requestId)), {
         status: 415,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -155,6 +160,7 @@ serve(async (req) => {
     const cached = await getCachedAiResponse<any>("parse-csv-wines", cacheInput, { userId });
     if (cached.hit && cached.payload) {
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
+        request_id: requestId,
         cached: true,
         rowCount: detectedRows,
         input_size_bytes: inputSizeBytes,
@@ -169,6 +175,7 @@ serve(async (req) => {
     const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
     if (!rateLimit.allowed) {
       await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startTime, {
+        request_id: requestId,
         scope: rateLimit.scope,
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
@@ -176,7 +183,7 @@ serve(async (req) => {
         input_size_bytes: inputSizeBytes,
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
-      return new Response(JSON.stringify(errorResponse(rateLimit.degraded ? "AI_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED", rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.", true)), {
+      return new Response(JSON.stringify(errorResponse(rateLimit.degraded ? "AI_UNAVAILABLE" : "RATE_LIMIT", rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.", requestId, true)), {
         status: rateLimit.degraded ? 503 : 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": rateLimit.degraded ? "30" : "60" },
       });
@@ -219,10 +226,11 @@ serve(async (req) => {
 
     if (Date.now() > deadlineAt) {
       await logAudit(userId, 408, "fallback_used", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: inputSizeBytes,
         error_type: "AI_TIMEOUT",
       });
-      return new Response(JSON.stringify(errorResponse("AI_TIMEOUT", "A leitura demorou mais que o esperado. Tente novamente.", true)), {
+      return new Response(JSON.stringify(errorResponse("AI_TIMEOUT", "A leitura demorou mais que o esperado. Tente novamente.", requestId, true)), {
         status: 408,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -230,10 +238,11 @@ serve(async (req) => {
 
     if (chunks.length === 0) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: inputSizeBytes,
         error_type: "FILE_TOO_LARGE",
       });
-      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.", requestId)), {
         status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -409,9 +418,8 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
     async function callAiOnce(chunkText: string): Promise<{ result?: any; errorStatus?: number; transientError?: boolean }> {
-      const requestId = crypto.randomUUID();
       try {
-        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=openai model=gpt-4o-mini`);
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} provider=openai model=gpt-4o-mini chunk_chars=${chunkText.length}`);
         const result = await callOpenAIResponses<any>({
           functionName: FUNCTION_NAME,
           requestId,
@@ -443,7 +451,7 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
       } catch (err) {
         const message = err instanceof Error ? err.message : "unknown";
         const isAbort = message.toLowerCase().includes("abort");
-        console.log(`[${FUNCTION_NAME}] request_id=${requestId} error=${message}`);
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} duration_ms=${Date.now() - startTime} retryable=${isAbort} timeout_source=${isAbort ? "openai" : "none"} error=${message}`);
         return { errorStatus: isAbort ? 504 : 500, transientError: isAbort };
       }
     }
@@ -462,7 +470,7 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
     }
 
     if (chunks.length > MAX_CHUNKS) {
-      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.")), {
+      return new Response(JSON.stringify(errorResponse("FILE_TOO_LARGE", "O arquivo está muito pesado. Envie uma versão menor.", requestId)), {
         status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -509,12 +517,13 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
           : status === 408 ? "Tempo excedido"
           : failures.includes(422) ? "INVALID_AI_RESPONSE" : "Não foi possível extrair dados do arquivo.";
       await logAudit(userId, status, "ai_error", Date.now() - startTime, {
+        request_id: requestId,
         failures,
         chunks: chunks.length,
         input_size_bytes: inputSizeBytes,
         error_type: status === 429 ? "RATE_LIMIT_EXCEEDED" : status === 408 ? "AI_TIMEOUT" : "PARSE_ERROR",
       });
-      return new Response(JSON.stringify({ error: message }), {
+      return new Response(JSON.stringify(errorResponse(status === 429 ? "RATE_LIMIT" : status === 408 ? "AI_TIMEOUT" : failures.includes(422) ? "PARSE_ERROR" : "AI_UNAVAILABLE", message, requestId, true)), {
         status,
         headers: { ...corsHeaders, "Content-Type": "application/json", ...(status === 429 ? { "Retry-After": "60" } : {}) },
       });
@@ -571,9 +580,10 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
     };
 
     const rejectedRows = Math.max(0, allWines.length - result.wines.length);
-    console.log(`[${FUNCTION_NAME}] parsed_wines=${result.wines.length} rejected_rows=${rejectedRows} chunks=${chunks.length}`);
+    console.log(`[${FUNCTION_NAME}] request_id=${requestId} parsed_wines=${result.wines.length} rejected_rows=${rejectedRows} chunks=${chunks.length} latency_ms=${Date.now() - startTime}`);
 
     await logAudit(userId, 200, "success", Date.now() - startTime, {
+      request_id: requestId,
       wines_extracted: result.wines.length,
       csv_lines: lines.length,
       chunks: chunks.length,
@@ -591,11 +601,12 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
   } catch (err) {
     console.error("parse-csv-wines error:", err);
     await logAudit(userId, 500, "internal_error", Date.now() - startTime, {
+      request_id: requestId,
       error: err instanceof Error ? err.message : "unknown",
       input_size_bytes: inputSizeBytes,
       error_type: "INTERNAL_ERROR",
     });
-      return new Response(JSON.stringify(errorResponse("INVALID_CSV", "Não conseguimos ler este arquivo CSV.")), {
+      return new Response(JSON.stringify(errorResponse("INVALID_CSV", "Não conseguimos ler este arquivo CSV.", requestId)), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

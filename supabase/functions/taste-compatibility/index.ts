@@ -11,13 +11,20 @@ serve(async (req) => {
   const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
+  const startedAt = Date.now();
+
+  const errorResponse = (status: number, code: string, message: string, retryable = false) =>
+    new Response(JSON.stringify({ success: false, code, message, requestId, retryable }), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Autenticação necessária" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.warn("[taste-compatibility] auth_missing", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
@@ -28,14 +35,12 @@ serve(async (req) => {
     );
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Sessão inválida" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.warn("[taste-compatibility] auth_invalid", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
 
     const AI_MODEL = "gpt-4o-mini";
-    console.log(`[taste-compatibility] provider=openai model=${AI_MODEL}`);
+    console.log(`[taste-compatibility] request_id=${requestId} provider=openai model=${AI_MODEL} attachment_type=none ocr_length=0 retries=0`);
 
     const body = await req.json();
     const { targetWine, userCellar } = body;
@@ -58,6 +63,7 @@ serve(async (req) => {
     };
     const cached = await getCachedAiResponse<any>("taste-compatibility", cacheInput, { userId: user.id });
     if (cached.hit && cached.payload) {
+      console.log("[taste-compatibility] success", { request_id: requestId, latency_ms: Date.now() - startedAt, source: "cache", retryable: false });
       return new Response(JSON.stringify(cached.payload), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -85,6 +91,7 @@ serve(async (req) => {
     );
     if (deterministic) {
       await setCachedAiResponse("taste-compatibility", cacheInput, deterministic, { userId: user.id });
+      console.log("[taste-compatibility] success", { request_id: requestId, latency_ms: Date.now() - startedAt, source: "deterministic", retryable: false });
       return new Response(JSON.stringify(deterministic), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -93,8 +100,11 @@ serve(async (req) => {
     const rateLimit = await checkRateLimit(user.id, "taste-compatibility");
     if (!rateLimit.allowed) {
       return new Response(JSON.stringify({
-        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        success: false,
+        code: rateLimit.degraded ? "AI_UNAVAILABLE" : "RATE_LIMIT",
+        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        requestId,
+        retryable: true,
       }), {
         status: rateLimit.degraded ? 503 : 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -102,6 +112,7 @@ serve(async (req) => {
     }
 
     if (!targetWine || !userCellar?.length) {
+      console.log("[taste-compatibility] success", { request_id: requestId, latency_ms: Date.now() - startedAt, source: "insufficient_data", retryable: false });
       return new Response(JSON.stringify({ compatibility: null, label: "Sem dados suficientes" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -159,7 +170,7 @@ Vinho a avaliar:
 
     const result = await callOpenAIResponses<any>({
       functionName: "taste-compatibility",
-      requestId: crypto.randomUUID(),
+      requestId,
       apiKey: "",
       model: AI_MODEL,
       timeoutMs: 10_000,
@@ -180,40 +191,27 @@ Vinho a avaliar:
     });
 
     if (!result.ok) {
+      console.warn("[taste-compatibility] ai_failed", { request_id: requestId, status: result.status, latency_ms: Date.now() - startedAt, retryable: result.status === 429 || result.status >= 500 });
       if (result.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return errorResponse(429, "RATE_LIMIT", "Muitas requisições. Tente novamente em instantes.", true);
       }
       if (result.status === 422) {
-        return new Response(JSON.stringify({ error: "INVALID_AI_RESPONSE" }), {
-          status: 422,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return errorResponse(422, "PARSE_ERROR", "A resposta da IA veio em um formato inválido. Tente novamente.", true);
       }
-      return new Response(JSON.stringify({ error: "Não foi possível calcular a compatibilidade agora." }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(result.status === 504 ? 408 : 502, result.status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", result.status === 504 ? "A análise demorou muito. Tente novamente." : "Não foi possível calcular a compatibilidade agora.", true);
     }
 
     const parsed = result.parsed;
 
     await setCachedAiResponse("taste-compatibility", cacheInput, parsed, { userId: user.id });
+    console.log("[taste-compatibility] success", { request_id: requestId, latency_ms: Date.now() - startedAt, source: "openai", retryable: false });
 
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "Erro interno";
-    console.error("taste-compatibility error:", errMsg);
-    const sanitizedMsg = /api_key|lovable|config|supabase/i.test(errMsg)
-      ? "Não foi possível calcular a compatibilidade agora."
-      : errMsg;
-    return new Response(JSON.stringify({ error: sanitizedMsg }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("[taste-compatibility] fatal_error", { request_id: requestId, latency_ms: Date.now() - startedAt, error: errMsg, retryable: true });
+    return errorResponse(500, "AI_UNAVAILABLE", "Não foi possível calcular a compatibilidade agora.", true);
   }
 });

@@ -112,6 +112,7 @@ async function callOpenAIChatFallback<T>({
   maxOutputTokens,
 }: CallOptions<Record<string, unknown>>): Promise<{ ok: true; parsed: T; raw: any } | { ok: false; status: number; error: string; raw?: any }> {
   const openaiKey = apiKey?.trim() || Deno.env.get("OPENAI_API_KEY")?.trim() || "";
+  const resolvedModel = model?.trim() || "gpt-4o-mini";
   if (!openaiKey) {
     return { ok: false, status: 500, error: "OPENAI_API_KEY ausente." };
   }
@@ -129,7 +130,7 @@ async function callOpenAIChatFallback<T>({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: model?.trim() || "gpt-4o-mini",
+        model: resolvedModel,
         messages: [
           { role: "system", content: `${instructions}\n\nResponda somente em JSON válido seguindo o schema abaixo:\n${previewJson(schema, 1200)}` },
           ...mapInputToMessages(input),
@@ -147,7 +148,7 @@ async function callOpenAIChatFallback<T>({
         : typeof json?.error === "string"
           ? json.error
           : `OpenAI fallback request failed with status ${response.status}`;
-      console.log(`[${functionName}] request_id=${requestId} fallback=chat status=${response.status} duration_ms=${Date.now() - startedAt} error=${String(message).slice(0, 300)}`);
+      console.log(`[${functionName}] request_id=${requestId} fallback=chat model=${resolvedModel} status=${response.status} duration_ms=${Date.now() - startedAt} retryable=${response.status === 429 || response.status >= 500} timeout_source=${response.status === 504 ? "openai_chat_fallback" : "none"} error=${String(message).slice(0, 300)}`);
       return { ok: false, status: response.status, error: String(message), raw: json ?? text };
     }
 
@@ -158,12 +159,12 @@ async function callOpenAIChatFallback<T>({
       return { ok: false, status: 422, error: "INVALID_AI_RESPONSE", raw: json ?? text };
     }
 
-    console.log(`[${functionName}] request_id=${requestId} fallback=chat status=${response.status} duration_ms=${Date.now() - startedAt} parsed=ok`);
+    console.log(`[${functionName}] request_id=${requestId} fallback=chat model=${resolvedModel} status=${response.status} duration_ms=${Date.now() - startedAt} retryable=false timeout_source=none parsed=ok`);
     return { ok: true, parsed: parsed as T, raw: json };
   } catch (error) {
     const message = error instanceof Error ? error.message : "OpenAI fallback request failed";
     const isAbort = message.toLowerCase().includes("abort");
-    console.log(`[${functionName}] request_id=${requestId} fallback=chat duration_ms=${Date.now() - startedAt} error=${message}`);
+    console.log(`[${functionName}] request_id=${requestId} fallback=chat model=${resolvedModel} duration_ms=${Date.now() - startedAt} retryable=true timeout_source=${isAbort ? "openai_chat_fallback" : "none"} error=${message}`);
     return { ok: false, status: isAbort ? 504 : 500, error: isAbort ? "TIMEOUT" : message };
   } finally {
     clearTimeout(timeout);

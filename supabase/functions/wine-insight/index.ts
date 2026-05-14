@@ -10,13 +10,20 @@ serve(async (req) => {
   const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
+  const startedAt = Date.now();
+
+  const errorResponse = (status: number, code: string, message: string, retryable = false) =>
+    new Response(JSON.stringify({ success: false, code, message, requestId, retryable }), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Autenticação necessária" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.warn("[wine-insight] auth_missing", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
@@ -27,23 +34,18 @@ serve(async (req) => {
     );
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Sessão inválida" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.warn("[wine-insight] auth_invalid", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
 
     const AI_MODEL = "gpt-4o-mini";
-    console.log(`[wine-insight] provider=openai model=${AI_MODEL}`);
+    console.log(`[wine-insight] request_id=${requestId} provider=openai model=${AI_MODEL} attachment_type=none ocr_length=0 retries=0`);
 
     const body = await req.json();
     const { alertType, wineName, style, grape, region, country, vintage, drinkFrom, drinkUntil } = body;
 
     if (!alertType || !wineName) {
-      return new Response(JSON.stringify({ error: "alertType e wineName são obrigatórios" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, "INVALID_REQUEST", "Dados insuficientes para gerar a análise.");
     }
 
     const cacheInput = {
@@ -67,8 +69,11 @@ serve(async (req) => {
     const rateLimit = await checkRateLimit(user.id, "wine-insight");
     if (!rateLimit.allowed) {
       return new Response(JSON.stringify({
-        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        success: false,
+        code: rateLimit.degraded ? "AI_UNAVAILABLE" : "RATE_LIMIT",
+        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        requestId,
+        retryable: true,
       }), {
         status: rateLimit.degraded ? 503 : 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -121,15 +126,12 @@ Safra: ${vintage || "Não informada"}
 
 Análise pedida: avalie tecnicamente o estado provável — perda de fruta primária, evolução de terciários, risco de oxidação ou madeirização conforme a uva e o estilo. Seja honesto: ainda vale beber, está no limite, ou já passou? Recomendação: ação concreta (abrir em até X semanas, servir ligeiramente mais frio para mascarar oxidação, usar em redução culinária, etc.).`;
     } else {
-      return new Response(JSON.stringify({ error: "alertType deve ser 'drink_now' ou 'past_peak'" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, "INVALID_REQUEST", "Tipo de análise inválido.");
     }
 
     const result = await callOpenAIResponses<any>({
       functionName: "wine-insight",
-      requestId: crypto.randomUUID(),
+      requestId,
       apiKey: "",
       model: AI_MODEL,
       timeoutMs: 10_000,
@@ -149,39 +151,26 @@ Análise pedida: avalie tecnicamente o estado provável — perda de fruta prim�
     });
 
     if (!result.ok) {
+      console.warn("[wine-insight] ai_failed", { request_id: requestId, status: result.status, latency_ms: Date.now() - startedAt, retryable: result.status === 429 || result.status >= 500 });
       if (result.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em instantes." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return errorResponse(429, "RATE_LIMIT", "Muitas requisições. Tente novamente em instantes.", true);
       }
       if (result.status === 422) {
-        return new Response(JSON.stringify({ error: "INVALID_AI_RESPONSE" }), {
-          status: 422,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return errorResponse(422, "PARSE_ERROR", "A resposta da IA veio em um formato inválido. Tente novamente.", true);
       }
-      return new Response(JSON.stringify({ error: "Não foi possível gerar a análise agora." }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(result.status === 504 ? 408 : 502, result.status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", result.status === 504 ? "A análise demorou muito. Tente novamente." : "Não foi possível gerar a análise agora.", true);
     }
 
     const parsed = result.parsed;
 
     await setCachedAiResponse("wine-insight", cacheInput, parsed, { userId: user.id });
+    console.log("[wine-insight] success", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : "Erro interno";
-    console.error("wine-insight error:", errMsg);
-    const sanitizedMsg = /api_key|lovable|config|supabase/i.test(errMsg)
-      ? "Não foi possível gerar a análise agora. Tente novamente."
-      : errMsg;
-    return new Response(JSON.stringify({ error: sanitizedMsg }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("[wine-insight] fatal_error", { request_id: requestId, latency_ms: Date.now() - startedAt, error: errMsg, retryable: true });
+    return errorResponse(500, "AI_UNAVAILABLE", "Não foi possível gerar a análise agora. Tente novamente.", true);
   }
 });

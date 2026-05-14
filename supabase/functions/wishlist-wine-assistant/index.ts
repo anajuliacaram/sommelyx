@@ -124,23 +124,28 @@ serve(async (req) => {
 
   const startTime = Date.now();
   const deadlineAt = startTime + MAX_TOTAL_DURATION_MS;
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
   let userId = "anonymous";
   let inputSizeBytes = 0;
   let safeQueryForError = "";
   let hasImageInput = false;
+
+  const errorResponse = (status: number, code: string, message: string, retryable = false) =>
+    new Response(JSON.stringify({ success: false, code, message, requestId, retryable }), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
 
   try {
     const authorization = req.headers.get("Authorization");
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: 0,
         error_type: "AUTH_REQUIRED",
       });
-      return new Response(JSON.stringify({ error: "AUTH_REQUIRED" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
 
     const supabase = createClient(
@@ -159,34 +164,27 @@ serve(async (req) => {
     if (error || !user) {
       console.error("AUTH ERROR:", error);
       await logAudit("anonymous", 401, "unauthorized", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: 0,
         error_type: "AUTH_REQUIRED",
       });
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(401, "AUTH_REQUIRED", "Sessão expirada. Faça login novamente.");
     }
 
     userId = user.id;
 
     if (Date.now() > deadlineAt) {
       await logAudit(userId, 408, "fallback_used", Date.now() - startTime, {
+        request_id: requestId,
         input_size_bytes: inputSizeBytes,
         error_type: "AI_TIMEOUT",
       });
-      return new Response(JSON.stringify({ error: "Tempo excedido", code: "TIMEOUT" }), {
-        status: 408,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(408, "AI_TIMEOUT", "Tempo excedido. Tente novamente.", true);
     }
 
     const rawBody = await req.json().catch(() => null);
     if (!rawBody || typeof rawBody !== "object") {
-      return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, INVALID_INPUT_ERROR.code, INVALID_INPUT_ERROR.message);
     }
 
     const { query, imageBase64 } = rawBody as Record<string, unknown>;
@@ -197,83 +195,70 @@ serve(async (req) => {
       new TextEncoder().encode(safeQuery).length +
       (typeof imageBase64 === "string" ? imageBase64.length : 0);
     console.info(`[${FUNCTION_NAME}] request_received`, {
+      request_id: requestId,
       user_id: userId,
       input_size_bytes: inputSizeBytes,
       has_image: typeof imageBase64 === "string",
       query_length: safeQuery.length,
+      attachment_type: typeof imageBase64 === "string" ? "image/jpeg" : "text",
+      ocr_length: safeQuery.length,
+      model: "gpt-4o-mini",
+      retries: 0,
+      timeout_source: "none",
+      retryable: false,
     });
     if (safeQuery.length > MAX_QUERY_LENGTH) {
-      return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, INVALID_INPUT_ERROR.code, INVALID_INPUT_ERROR.message);
     }
 
     if (!safeQuery && (!imageBase64 || typeof imageBase64 !== "string")) {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        request_id: requestId,
         reason: "missing_input",
         input_size_bytes: inputSizeBytes,
         error_type: "INVALID_INPUT",
       });
-      return new Response(JSON.stringify({ error: "Informe um texto ou imagem." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, "INVALID_REQUEST", "Informe um texto ou imagem.");
     }
 
     if (typeof imageBase64 === "string") {
       const validation = validateImagePayload(imageBase64, "image/jpeg", { maxBytes: MAX_IMAGE_SIZE });
       if (!validation.ok) {
         await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+          request_id: requestId,
           reason: validation.reason,
           input_size_bytes: inputSizeBytes,
           error_type: validation.reason === "invalid_base64" ? "INVALID_IMAGE_BASE64" : "INVALID_IMAGE",
         });
-        return new Response(JSON.stringify({
-          error: INVALID_INPUT_ERROR.message,
-          code: INVALID_INPUT_ERROR.code,
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return errorResponse(400, INVALID_INPUT_ERROR.code, INVALID_INPUT_ERROR.message);
       }
     }
 
     const queryValidation = validateTextPayload(safeQuery, MAX_QUERY_LENGTH);
     if (safeQuery && !queryValidation.ok) {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        request_id: requestId,
         reason: "query_too_large",
         input_size_bytes: inputSizeBytes,
         error_type: "INVALID_INPUT",
       });
-      return new Response(JSON.stringify({
-        error: INVALID_INPUT_ERROR.message,
-        code: INVALID_INPUT_ERROR.code,
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, INVALID_INPUT_ERROR.code, INVALID_INPUT_ERROR.message);
     }
 
     if (Date.now() > deadlineAt) {
-      return new Response(JSON.stringify({ error: "Tempo excedido", code: "TIMEOUT" }), {
-        status: 408,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(408, "AI_TIMEOUT", "Tempo excedido. Tente novamente.", true);
     }
 
     const safeImage = typeof imageBase64 === "string" ? validateImagePayload(imageBase64, "image/jpeg", { maxBytes: MAX_IMAGE_SIZE }) : null;
     const normalizedImageBase64 = safeImage?.ok ? safeImage.base64 : null;
     if (typeof imageBase64 === "string" && !normalizedImageBase64) {
       await logAudit(userId, 400, "validation_error", Date.now() - startTime, {
+        request_id: requestId,
         reason: "invalid_image",
         input_size_bytes: inputSizeBytes,
         error_type: "INVALID_IMAGE",
       });
-      return new Response(JSON.stringify({ error: INVALID_INPUT_ERROR.message, code: INVALID_INPUT_ERROR.code }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, INVALID_INPUT_ERROR.code, INVALID_INPUT_ERROR.message);
     }
 
     const cacheInput = {
@@ -283,6 +268,7 @@ serve(async (req) => {
     const cached = await getCachedAiResponse<AssistantResult>("wishlist-wine-assistant", cacheInput, { userId });
     if (cached.hit && cached.payload) {
       await logAudit(userId, 200, "cache_hit", Date.now() - startTime, {
+        request_id: requestId,
         cached: true,
         input_size_bytes: inputSizeBytes,
         error_type: null,
@@ -296,6 +282,7 @@ serve(async (req) => {
     const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
     if (!rateLimit.allowed) {
       await logAudit(userId, rateLimit.degraded ? 503 : 429, "rate_limited", Date.now() - startTime, {
+        request_id: requestId,
         scope: rateLimit.scope,
         current_count: rateLimit.currentCount,
         reset_at: rateLimit.resetAt,
@@ -304,8 +291,10 @@ serve(async (req) => {
         error_type: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
       });
       return new Response(JSON.stringify({
-        error: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
-        code: rateLimit.degraded ? "AI_RATE_LIMIT_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED",
+        success: false,
+        code: rateLimit.degraded ? "AI_UNAVAILABLE" : "RATE_LIMIT",
+        message: rateLimit.degraded ? "Serviço temporariamente indisponível." : "Limite de uso atingido.",
+        requestId,
         retryable: true,
       }), {
         status: rateLimit.degraded ? 503 : 429,
@@ -315,17 +304,15 @@ serve(async (req) => {
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
     const openaiModel = "gpt-4o-mini";
-    console.log(`[wishlist-wine-assistant] openai_key=${maskSecret(openaiKey)} model=${openaiModel}`);
+    console.log(`[wishlist-wine-assistant] request_id=${requestId} openai_key=${maskSecret(openaiKey)} model=${openaiModel} attachment_type=${normalizedImageBase64 ? "image/jpeg" : "text"} ocr_length=${safeQuery.length} retries=0`);
     if (!openaiKey) {
       await logAudit(userId, 500, "internal_error", Date.now() - startTime, {
+        request_id: requestId,
         reason: "missing_api_key",
         input_size_bytes: inputSizeBytes,
         error_type: "AI_UNAVAILABLE",
       });
-      return new Response(JSON.stringify({ error: "Erro de configuração do serviço." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(500, "AI_UNAVAILABLE", "Serviço de IA indisponível.", true);
     }
 
     const messages: Array<Record<string, unknown>> = [
@@ -380,7 +367,7 @@ Regras:
     {
       const result = await callOpenAIResponses<any>({
         functionName: FUNCTION_NAME,
-        requestId: crypto.randomUUID(),
+        requestId,
         model: openaiModel,
         timeoutMs: 10_000,
         temperature: 0.2,
@@ -437,36 +424,33 @@ Regras:
       if (!result.ok) {
         if (result.status === 429) {
           await logAudit(userId, 429, "ai_error", Date.now() - startTime, {
+            request_id: requestId,
             reason: "ai_rate_limit",
             input_size_bytes: inputSizeBytes,
             error_type: "RATE_LIMIT_EXCEEDED",
           });
-          return new Response(JSON.stringify({ error: "Muitas requisições. Tente novamente em alguns segundos." }), {
+          return new Response(JSON.stringify({ success: false, code: "RATE_LIMIT", message: "Muitas requisições. Tente novamente em alguns segundos.", requestId, retryable: true }), {
             status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
           });
         }
         if (result.status === 422) {
           await logAudit(userId, 422, "ai_error", Date.now() - startTime, {
+            request_id: requestId,
             ai_status: result.status,
             reason: "invalid_ai_response",
             input_size_bytes: inputSizeBytes,
             error_type: "PARSE_ERROR",
           });
-          return new Response(JSON.stringify({ error: "INVALID_AI_RESPONSE" }), {
-            status: 422,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return errorResponse(422, "PARSE_ERROR", "A resposta da IA veio em um formato inválido. Tente novamente.", true);
         }
         await logAudit(userId, 502, "ai_error", Date.now() - startTime, {
+          request_id: requestId,
           ai_status: result.status,
           input_size_bytes: inputSizeBytes,
           error_type: "AI_UNAVAILABLE",
         });
-        return new Response(JSON.stringify({ error: "Serviço de IA indisponível." }), {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return errorResponse(result.status === 504 ? 408 : 502, result.status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", result.status === 504 ? "A análise demorou muito. Tente novamente." : "Serviço de IA indisponível.", true);
       }
 
       parsed = result.parsed;
@@ -497,12 +481,14 @@ Regras:
     await setCachedAiResponse("wishlist-wine-assistant", cacheInput, result, { userId });
 
     await logAudit(userId, 200, "success", Date.now() - startTime, {
+      request_id: requestId,
       query: safeQuery || "image_only",
       found_image: !!imageUrl,
       wine_name: result.wine_name,
       input_size_bytes: inputSizeBytes,
       error_type: null,
     });
+    console.log("[wishlist-wine-assistant] success", { request_id: requestId, latency_ms: Date.now() - startTime, found_image: !!imageUrl, retryable: false });
 
     return new Response(JSON.stringify({ suggestion: result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -512,19 +498,15 @@ Regras:
     const isAbort = errMsg.toLowerCase().includes("abort");
     const sanitizedMsg = isAbort
       ? "A análise demorou mais que o esperado. Tente novamente."
-      : /api_key|lovable|config|supabase/i.test(errMsg)
-        ? "Erro interno no serviço. Tente novamente."
-        : errMsg;
+      : "Serviço de IA indisponível. Tente novamente.";
     await logAudit(userId, isAbort ? 504 : 500, "internal_error", Date.now() - startTime, {
+      request_id: requestId,
       message: errMsg,
       input_size_bytes: inputSizeBytes,
       error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE",
       has_image_input: hasImageInput,
       query: safeQueryForError || null,
     });
-    return new Response(JSON.stringify({ error: sanitizedMsg }), {
-      status: isAbort ? 504 : 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(isAbort ? 408 : 500, isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE", sanitizedMsg, true);
   }
 });
