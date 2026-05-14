@@ -318,12 +318,22 @@ export async function invokeEdgeFunction<T>(
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
-      const session = await resolveSession(attempt > 0);
+      let session = await resolveSession(attempt > 0);
       const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
-      console.log("AUTH_TOKEN_PRESENT", Boolean(session?.access_token));
+      console.info("[EDGE_AUTH_STATE]", {
+        function: name,
+        requestId,
+        attempt,
+        hasAuthToken: Boolean(session?.access_token),
+      });
 
       if (!session?.access_token) {
-        console.warn("[edge-invoke] auth_missing", { function: name, requestId });
+        console.warn("[EDGE_AUTH_MISSING]", { function: name, requestId, attempt, action: "refresh_session" });
+        session = await resolveSession(true);
+      }
+
+      if (!session?.access_token) {
+        console.warn("[EDGE_AUTH_MISSING]", { function: name, requestId, attempt, action: "fail" });
         throw new EdgeFunctionError("Sua sessão expirou. Faça login novamente.", {
           status: 401,
           code: "AUTH_REQUIRED",
@@ -333,7 +343,7 @@ export async function invokeEdgeFunction<T>(
       }
 
       if (import.meta.env.DEV) {
-        console.log("[edge-invoke] request", {
+        console.log("[EDGE_REQUEST_START]", {
           function: name,
           url,
           requestId,
@@ -361,13 +371,17 @@ export async function invokeEdgeFunction<T>(
           signal: controller.signal,
         });
         if (import.meta.env.DEV) {
-          console.log("EDGE STATUS:", response.status);
+          console.log("[EDGE_RESPONSE_STATUS]", {
+            function: name,
+            requestId,
+            status: response.status,
+          });
         }
 
         const text = await response.text();
         const parsedBody = parseTextResponse(text);
         if (import.meta.env.DEV) {
-          console.log("[edge-invoke] response_body", {
+          console.log("[EDGE_RESPONSE_BODY]", {
             function: name,
             requestId,
             status: response.status,
@@ -377,7 +391,12 @@ export async function invokeEdgeFunction<T>(
 
         if (!response.ok) {
           if (import.meta.env.DEV) {
-            console.error("EDGE ERROR:", text);
+            console.error("[EDGE_RESPONSE_ERROR]", {
+              function: name,
+              requestId,
+              status: response.status,
+              body: sanitizeForLog(parsedBody),
+            });
           }
           const parsed = parseErrorBody(parsedBody, response.status);
 
@@ -416,7 +435,7 @@ export async function invokeEdgeFunction<T>(
           });
         }
         if (import.meta.env.DEV) {
-          console.log("[edge-invoke] response", {
+          console.log("[EDGE_REQUEST_SUCCESS]", {
             function: name,
             requestId,
             durationMs: Date.now() - startedAt,
@@ -447,7 +466,7 @@ export async function invokeEdgeFunction<T>(
             : rawMessage.includes("demorou") || isTransportFailure || isSdkRelayError(rawMessage);
 
       if (attempt < retries && retryable) {
-        console.warn("[edge-invoke] retry", {
+        console.warn("[EDGE_REQUEST_RETRY]", {
           function: name,
           requestId,
           attempt,
@@ -458,7 +477,7 @@ export async function invokeEdgeFunction<T>(
         continue;
       }
 
-      console.error("[edge-invoke] failure", {
+      console.error("[EDGE_REQUEST_FAILED]", {
         function: name,
         requestId,
         durationMs: Date.now() - startedAt,

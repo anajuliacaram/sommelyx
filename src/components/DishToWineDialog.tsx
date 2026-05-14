@@ -558,6 +558,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setLoading(true);
     setError(null);
     setScanResults(null);
+    setPreview({
+      url: null,
+      fileName: file.name,
+      isPdf: file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"),
+    });
     try {
       const prepared = await prepareWineListAnalysisTextAttachment(file);
       console.info("[DishToWineDialog] file_validated", { step: "wine-list", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, textLength: prepared.text?.length || 0 });
@@ -632,8 +637,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setStep("photo");
     } finally {
       if (isLatest(reqId)) setLoading(false);
+      e.target.value = "";
     }
-    e.target.value = "";
   };
 
   const handleMenuFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -664,6 +669,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setLoading(true);
     setError(null);
     setPairingResult(null);
+    setPreview({
+      url: null,
+      fileName: file.name,
+      isPdf: file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"),
+    });
     try {
       const prepared = await prepareWineListAnalysisTextAttachment(file);
       console.info("[DishToWineDialog] file_validated", { step: "menu", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, textLength: prepared.text?.length || 0 });
@@ -736,8 +746,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setStep("ext-menu-photo");
     } finally {
       if (isLatest(reqId)) setLoading(false);
+      e.target.value = "";
     }
-    e.target.value = "";
   };
 
   const goBack = () => {
@@ -1671,8 +1681,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </div>
 
-                {error && lastMenuAttachment && (
-                  <PairingErrorState message={error} onRetry={runRetry} onClose={() => setStep("ext-wine-input")} />
+                {error && (
+                  <PairingErrorState
+                    message={error}
+                    onRetry={() => (lastMenuAttachment ? runRetry() : menuGalleryRef.current?.click())}
+                    onClose={() => setError(null)}
+                  />
                 )}
               </motion.div>
             )}
@@ -1747,8 +1761,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </div>
 
-                {error && lastWineListAttachment && (
-                  <PairingErrorState message={error} onRetry={runRetry} onClose={() => setStep("dish")} />
+                {error && (
+                  <PairingErrorState
+                    message={error}
+                    onRetry={() => (lastWineListAttachment ? runRetry() : fileGalleryRef.current?.click())}
+                    onClose={() => setError(null)}
+                  />
                 )}
               </motion.div>
             )}
@@ -1850,7 +1868,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 key="wine-results-error"
                 message={error}
                 onRetry={runRetry}
-                onClose={() => handleClose(false)}
+                onClose={() => {
+                  setError(null);
+                  setStep("select-wine");
+                }}
               />
             )}
 

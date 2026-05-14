@@ -350,7 +350,7 @@ async function callAI(
     functionName: "wine-pairings",
     requestId: crypto.randomUUID(),
     model: "gpt-4o-mini",
-    timeoutMs: 12_000,
+    timeoutMs: 45_000,
     temperature: 0.35,
     instructions: systemPrompt,
     input: [
@@ -999,7 +999,7 @@ INSTRUÇÕES:
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const aiAttemptStartedAt = Date.now();
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 12_000);
+      const timeout = setTimeout(() => controller.abort(), 45_000);
 
       const retryHint = attempt > 0
         ? `\n\n⚠️ ATENÇÃO: Sua resposta anterior foi REJEITADA pela validação anti-genericidade. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nREESSCREVA com mais especificidade sobre "${wineName}". Cite o nome do vinho, mencione produtor/região/posicionamento.`
@@ -1235,8 +1235,20 @@ INSTRUÇÕES:
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", isAbort ? 504 : 500, "internal_error", Date.now() - startTime, { error: errMsg, aborted: isAbort, input_size_bytes: 0, error_type: isAbort ? "AI_TIMEOUT" : "AI_UNAVAILABLE" });
     if (isAbort) {
-      return jsonResponse(req, { error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
+      return jsonResponse(req, {
+        success: false,
+        code: "AI_TIMEOUT",
+        message: "A harmonização demorou mais que o esperado. Tente novamente.",
+        requestId,
+        retryable: true,
+      }, 504);
     }
-    return jsonResponse(req, { error: "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes." }, 500);
+    return jsonResponse(req, {
+      success: false,
+      code: "AI_UNAVAILABLE",
+      message: "Não conseguimos completar a análise agora. Verifique sua conexão e tente novamente em instantes.",
+      requestId,
+      retryable: true,
+    }, 500);
   }
 });

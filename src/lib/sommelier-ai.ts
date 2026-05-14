@@ -2,8 +2,8 @@ import { invokeEdgeFunction, EdgeFunctionError } from "@/lib/edge-invoke";
 import { normalizeWineListOcrText } from "@/lib/wine-ocr-normalization";
 
 const ANALYSIS_FALLBACK_MESSAGE = "Não conseguimos concluir a leitura agora. Verifique sua conexão e tente novamente em instantes.";
-const ANALYZE_WINE_LIST_TIMEOUT_MS = 12_000;
-const PAIRING_TIMEOUT_MS = 10_000;
+const ANALYZE_WINE_LIST_TIMEOUT_MS = 75_000;
+const PAIRING_TIMEOUT_MS = 60_000;
 
 function nowMs() {
   if (typeof performance !== "undefined" && typeof performance.now === "function") {
@@ -1621,8 +1621,17 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
     const normalized = normalizeGeneratedWinePairingResponse(parsed ?? response, finalDish);
     return normalized;
   } catch (error) {
-    console.warn("[generateWinePairing] fallback used", error);
-    return fallbackPairing(finalDish);
+    const classified = classifyError(error);
+    console.error("[PAIRING_REQUEST_FAILED]", {
+      dish: finalDish,
+      type: classified.type,
+      code: classified.code,
+      status: classified.status,
+      requestId: classified.requestId,
+      retryable: classified.retryable,
+      message: classified.message,
+    });
+    throw createClassifiedError(classified, classified.code || "PAIRING_REQUEST_FAILED");
   }
 }
 
@@ -1642,6 +1651,20 @@ export async function analyzeWineList(
       mimeType: analysis.mimeType,
     });
     const text = normalizedOcr.normalizedText.trim();
+    if (text.length < 20) {
+      console.warn("[WINE_LIST_ANALYZE_FAILED]", {
+        fileName: analysis.fileName,
+        mimeType: analysis.mimeType,
+        reason: "empty_ocr_text",
+        textLength: text.length,
+      });
+      throw createClassifiedError({
+        type: "empty",
+        message: "Não foi possível ler texto suficiente neste arquivo. Tente uma foto/PDF mais nítido.",
+        code: "EMPTY_EXTRACTION",
+        retryable: true,
+      }, "EMPTY_EXTRACTION");
+    }
     console.info("[sommelier-ai] pairing_request_started", {
       mode: "external-wine-list",
       hasText: Boolean(text),
@@ -1668,7 +1691,7 @@ export async function analyzeWineList(
           structuredJson: normalizedOcr.structuredJson,
         },
       },
-      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
+      { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
     );
     const requestStartedAt = nowMs();
     console.info("[sommelier-ai] request_started", {
@@ -1886,7 +1909,7 @@ export async function getTasteCompatibility(
           quantity: w.quantity,
         })),
       },
-      { timeoutMs: 12_000, retries: 1 },
+      { timeoutMs: 45_000, retries: 1 },
     );
     if (data && (data as any).fallback === true) {
       return data;
@@ -1928,7 +1951,7 @@ export async function getWineInsight(wine: {
         drinkFrom: wine.drinkFrom,
         drinkUntil: wine.drinkUntil,
       },
-      { timeoutMs: 12_000, retries: 1 },
+      { timeoutMs: 45_000, retries: 1 },
     );
     const requestStartedAt = nowMs();
     const data = await request();

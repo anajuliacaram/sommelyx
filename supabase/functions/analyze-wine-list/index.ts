@@ -1111,7 +1111,7 @@ PROIBIDO:
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const aiStartedAt = Date.now();
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 25_000);
+      const timeout = setTimeout(() => controller.abort(), 45_000);
 
       const retryHint = attempt > 0
         ? `\n\n⚠️ A resposta anterior não trouxe vinhos suficientes de forma estruturada. Problemas detectados:\n${validationResult.failures.map(f => `- ${f}`).join("\n")}\n\nReextraia a carta. Se houver várias linhas de vinhos, devolva vários objetos em "wines". Não colapse em um único item.`
@@ -1128,7 +1128,7 @@ PROIBIDO:
         functionName: "analyze-wine-list",
         requestId: crypto.randomUUID(),
         model: "gpt-4o-mini",
-        timeoutMs: 12_000,
+        timeoutMs: 45_000,
         temperature: 0.2,
         instructions: systemPrompt,
         input: [{

@@ -166,6 +166,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const requestBusyRef = useRef(false);
+  const prepareBusyRef = useRef(false);
 
   const reset = () => {
     setStep("capture");
@@ -301,7 +302,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   }, [wines]);
 
   const handleFile = useCallback(async (file: File) => {
-    if (requestBusyRef.current) return;
+    if (requestBusyRef.current || prepareBusyRef.current) return;
+    prepareBusyRef.current = true;
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     console.info("[WineListScannerDialog] upload_received", {
       fileName: file.name,
@@ -311,10 +313,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     });
     if (!isSupportedUploadFile(file)) {
       toast({ title: "Envie uma imagem ou PDF válido", variant: "destructive" });
+      prepareBusyRef.current = false;
       return;
     }
 
     setStep("scanning");
+    setErrorMsg("");
+    setAttachmentPreview({
+      url: null,
+      fileName: file.name,
+      isPdf,
+    });
     try {
       const prepared = await prepareWineListAnalysisTextAttachment(file);
       console.info("[WineListScannerDialog] attachment_prepared", {
@@ -354,6 +363,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       });
       setErrorMsg(getAttachmentErrorMessage(error, "Não conseguimos concluir a leitura desse arquivo."));
       setStep("error");
+    } finally {
+      prepareBusyRef.current = false;
     }
   }, [runScan, toast]);
 
@@ -769,7 +780,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             <PairingErrorState
               message={errorMsg}
               onRetry={() => (lastAttachment ? runScan(lastAttachment) : reset())}
-              onClose={() => handleClose(false)}
+              onClose={() => {
+                setErrorMsg("");
+                setStep("capture");
+              }}
             />
           )}
           </AnimatePresence>

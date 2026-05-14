@@ -88,6 +88,7 @@ const MAX_PDF_PAGES_FOR_TEXT = 10;
 const MAX_PDF_PAGES_FOR_RENDER = 2;
 const MIN_PDF_TEXT_LENGTH = 120;
 const MAX_EXTRACTED_TEXT_LENGTH = 12000;
+const OCR_EDGE_TIMEOUT_MS = 60_000;
 
 let pdfJsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
 const attachmentPreparationCache = new Map<string, Promise<PreparedAiAnalysisAttachment>>();
@@ -805,7 +806,7 @@ async function extractPdfOcrText(file: File) {
         fileName: file.name,
         mimeType: inferMimeType(file),
       },
-      { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
+      { timeoutMs: OCR_EDGE_TIMEOUT_MS, retries: 1, retryOnAbort: false },
     );
   } catch (error) {
     const err: any = createAttachmentError(
@@ -856,7 +857,7 @@ async function extractImageOcrText(file: File) {
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       },
-      { timeoutMs: 12_000, retries: 1, retryOnAbort: true },
+      { timeoutMs: OCR_EDGE_TIMEOUT_MS, retries: 1, retryOnAbort: false },
     );
   } catch (error) {
     const err: any = createAttachmentError(
