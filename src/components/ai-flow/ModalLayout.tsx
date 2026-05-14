@@ -3,6 +3,83 @@ import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+export function AiModalShell({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={cn("flex h-full min-h-0 flex-col", className)}>{children}</div>;
+}
+
+export function AiModalHeaderBar({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "sticky top-0 z-20 shrink-0 border-b border-white/45 px-4 py-4 sm:px-5 sm:py-4",
+        className,
+      )}
+      style={{
+        background: "linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.62) 100%)",
+        backdropFilter: "blur(16px) saturate(1.06)",
+        WebkitBackdropFilter: "blur(16px) saturate(1.06)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function AiModalBody({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(18px+env(safe-area-inset-bottom))] pt-4 sm:px-5 sm:pb-[calc(20px+env(safe-area-inset-bottom))] sm:pt-4",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function AiModalFooterBar({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "sticky bottom-0 z-20 shrink-0 border-t border-white/45 px-4 py-3 sm:px-5 sm:py-3.5",
+        className,
+      )}
+      style={{
+        background: "linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.74) 100%)",
+        backdropFilter: "blur(16px) saturate(1.06)",
+        WebkitBackdropFilter: "blur(16px) saturate(1.06)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function AiModalHeader({
   icon,
   title,
@@ -37,6 +114,25 @@ export function AiModalHeader({
   );
 }
 
+export function AiToolbarSurface({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-[22px] border border-white/50 bg-white/60 px-3 py-2.5 shadow-[0_10px_26px_rgba(54,36,22,0.045)] backdrop-blur-xl",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function AiModalCard({
   children,
   className,
@@ -59,6 +155,39 @@ export function AiModalCard({
     >
       {children}
     </div>
+  );
+}
+
+const metricToneClasses = {
+  neutral: "border-white/60 bg-white/72 text-[#5F5F5F]",
+  success: "border-emerald-100 bg-emerald-50/90 text-emerald-700",
+  warning: "border-amber-100 bg-amber-50/90 text-amber-700",
+  danger: "border-rose-100 bg-rose-50/90 text-rose-700",
+  accent: "border-[#E9D3D8] bg-[#F4E7EA] text-[#7B1E2B]",
+} as const;
+
+export function AiMetricPill({
+  label,
+  value,
+  tone = "neutral",
+  className,
+}: {
+  label: string;
+  value: ReactNode;
+  tone?: keyof typeof metricToneClasses;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]",
+        metricToneClasses[tone],
+        className,
+      )}
+    >
+      <span className="text-[12px] font-semibold">{value}</span>
+      {label}
+    </span>
   );
 }
 

@@ -12,7 +12,7 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -532,18 +532,19 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
-        className="w-full sm:max-w-md overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
+        className="w-full sm:max-w-md h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
         style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
       >
-        <div className="px-4 pt-4 sm:px-5">
+        <AiModalShell>
+        <AiModalHeaderBar>
           <AiModalHeader
             icon={<Camera className="h-5 w-5" />}
             title="Escanear Rótulo"
             description="Fotografe ou envie uma imagem do rótulo para preencher os dados automaticamente."
           />
-        </div>
+        </AiModalHeaderBar>
 
-        <div className="px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4 sm:px-5">
+        <AiModalBody>
           <AnimatePresence mode="wait">
             {step === "capture" && (
               <motion.div
@@ -721,7 +722,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </AiModalBody>
+        </AiModalShell>
       </SheetContent>
     </Sheet>
   );

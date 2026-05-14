@@ -26,7 +26,7 @@ import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
-import { AiModalActionButton } from "@/components/ai-flow/ModalLayout";
+import { AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalFooterBar, AiToolbarSurface, AiMetricPill } from "@/components/ai-flow/ModalLayout";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -2929,17 +2929,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           boxShadow: "0 30px 80px rgba(40,25,15,0.14)",
         }}
       >
-        <div className="flex h-full min-h-0 flex-col">
-          <div
-            className="sticky top-0 z-30 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/40 px-4 py-3 pr-14"
-            style={{
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              background: "rgba(255,255,255,0.60)",
-            }}
-          >
+        <AiModalShell>
+          <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3 pr-14">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
                 <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
@@ -2958,21 +2949,23 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             {hasDraftRows ? (
               <div className="flex flex-wrap items-center gap-1.5">
                 {[
-                  { label: "Prontos", value: completeRowsCount, tone: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-                  { label: "Revisão", value: reviewRowsCount, tone: "bg-amber-50 text-amber-700 border-amber-100" },
-                  { label: "Corrigir", value: invalidRowsCount, tone: "bg-rose-50 text-rose-700 border-rose-100" },
-                  { label: "Duplicados", value: duplicateRowsCount + autoMergedDuplicates, tone: "bg-[#F4E7EA] text-[#7B1E2B] border-[#E9D3D8]" },
+                  { label: "Prontos", value: completeRowsCount, tone: "success" as const },
+                  { label: "Revisão", value: reviewRowsCount, tone: "warning" as const },
+                  { label: "Corrigir", value: invalidRowsCount, tone: "danger" as const },
+                  { label: "Duplicados", value: duplicateRowsCount + autoMergedDuplicates, tone: "accent" as const },
                 ].map((pill) => (
-                  <span key={pill.label} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]", pill.tone)}>
-                    <span className="text-[12px] font-semibold">{pill.value}</span>
-                    {pill.label}
-                  </span>
+                  <AiMetricPill
+                    key={pill.label}
+                    label={pill.label}
+                    value={pill.value}
+                    tone={pill.tone}
+                  />
                 ))}
               </div>
             ) : null}
-          </div>
+          </AiModalHeaderBar>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-3 sm:px-4">
+          <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-3 sm:px-4">
             {hasDraftRows ? (
               <div className="flex min-h-0 flex-1 flex-col gap-2.5">
                 {step === "importing" ? (
@@ -3001,7 +2994,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                <div className="grid shrink-0 gap-2 rounded-2xl border border-white/50 bg-white/60 px-3 py-2 shadow-[0_10px_26px_rgba(54,36,22,0.045)] backdrop-blur xl:grid-cols-[minmax(280px,1fr)_auto]">
+                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[minmax(280px,1fr)_auto]">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <div className="relative min-w-[260px] flex-1">
                       <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8A8075]/70" />
@@ -3048,9 +3041,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       </Button>
                     ) : null}
                   </div>
-                </div>
+                </AiToolbarSurface>
 
-                <div className="flex shrink-0 flex-wrap items-center gap-1.5 rounded-2xl border border-white/40 bg-white/40 px-3 py-2 backdrop-blur">
+                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center gap-1.5 border-white/40 bg-white/40 shadow-none">
                   <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A8075]">Vazios</span>
                   {emptyFieldOptions.map((field) => (
                     <button
@@ -3085,9 +3078,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       <X className="h-3 w-3" />
                     </button>
                   ))}
-                </div>
+                </AiToolbarSurface>
 
-                <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/50 bg-white/60 px-3 py-2 shadow-[0_8px_20px_rgba(54,36,22,0.035)] backdrop-blur">
+                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" disabled={step === "importing" || step === "done"}>
                       {editMode ? "Bloquear edição" : "Editar dados"}
@@ -3114,10 +3107,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   <div className="rounded-full bg-white/60 px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
                     {selectedRows.length} selecionada(s) · {filteredRowIndexes.length} filtrada(s)
                   </div>
-                </div>
+                </AiToolbarSurface>
 
                 {selectedRows.length > 0 ? (
-                  <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#E5D4D8] bg-white/70 px-3 py-2 text-[12px] text-[#4A4338] shadow-[0_10px_24px_rgba(123,30,43,0.055)] backdrop-blur">
+                  <AiToolbarSurface className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-[#E5D4D8] bg-white/70 text-[12px] text-[#4A4338] shadow-[0_10px_24px_rgba(123,30,43,0.055)]">
                     <span className="inline-flex items-center gap-2 font-semibold">
                       <span className="h-2 w-2 rounded-full bg-[#7B1E2B]" />
                       {selectedRows.length} linha(s) selecionada(s)
@@ -3130,10 +3123,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         Remover selecionadas
                       </Button>
                     </div>
-                  </div>
+                  </AiToolbarSurface>
                 ) : null}
 
-                <div className="grid shrink-0 gap-2 rounded-2xl border border-white/50 bg-white/50 px-3 py-2 shadow-[0_8px_20px_rgba(54,36,22,0.035)] backdrop-blur xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
+                <AiToolbarSurface className="grid shrink-0 gap-2 bg-white/50 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
                   <Select value={bulkTargetField} onValueChange={(value) => setBulkTargetField(value as BulkTargetField)}>
                     <SelectTrigger className="h-8 rounded-lg border-white/70 bg-white/75 text-[12px] focus:ring-[#B98C45]/20">
                       <SelectValue placeholder="Campo" />
@@ -3180,7 +3173,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   >
                     Aplicar ({bulkScopeCount})
                   </Button>
-                </div>
+                </AiToolbarSurface>
 
                 {(enriching || processingTotal > 0) ? (
                   <div className="shrink-0 rounded-2xl border border-black/5 bg-[#FBFAF7] px-3 py-2 text-[12px] text-[#5F5F5F]">
@@ -3333,24 +3326,17 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 )}
               </AnimatePresence>
             )}
-          </div>
+          </AiModalBody>
 
           {hasDraftRows ? (
-            <div
-              className="sticky bottom-0 z-30 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-white/50 px-4 py-3"
-              style={{
-                background: "rgba(255,255,255,0.68)",
-                backdropFilter: "blur(14px)",
-                WebkitBackdropFilter: "blur(14px)",
-              }}
-            >
+            <AiModalFooterBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
               <div className="flex flex-wrap items-center gap-2 text-[12px] font-medium text-[#5F5F5F]">
-                <span className="rounded-full bg-white/70 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">{draftWines.length} total</span>
-                <span className="rounded-full bg-white/70 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">{filteredRowIndexes.length} visíveis</span>
-                <span className="rounded-full bg-white/70 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">{selectedRows.length} selecionada(s)</span>
-                <span className="rounded-full bg-emerald-50/90 px-2.5 py-1 text-emerald-700">{completeRowsCount} prontos</span>
-                <span className="rounded-full bg-amber-50/90 px-2.5 py-1 text-amber-700">{reviewRowsCount} revisão</span>
-                <span className="rounded-full bg-rose-50/90 px-2.5 py-1 text-rose-700">{invalidRowsCount} corrigir</span>
+                <AiMetricPill label="total" value={draftWines.length} />
+                <AiMetricPill label="visíveis" value={filteredRowIndexes.length} />
+                <AiMetricPill label="selecionadas" value={selectedRows.length} />
+                <AiMetricPill label="prontos" value={completeRowsCount} tone="success" />
+                <AiMetricPill label="revisão" value={reviewRowsCount} tone="warning" />
+                <AiMetricPill label="corrigir" value={invalidRowsCount} tone="danger" />
                 <span className="text-[11px] font-normal text-[#7A6F65]">
                   {invalidRowsCount > 0
                     ? "Corrija nome/quantidade antes de importar."
@@ -3371,7 +3357,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   <Upload className="mr-1.5 h-4 w-4" /> Importar {identifiedRowsCount} linha(s)
                 </AiModalActionButton>
               )}
-            </div>
+            </AiModalFooterBar>
           ) : null}
           <AlertDialog open={importWarningOpen} onOpenChange={setImportWarningOpen}>
             <AlertDialogContent>
@@ -3426,7 +3412,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               <option key={grape} value={grape} />
             ))}
           </datalist>
-        </div>
+        </AiModalShell>
       </SheetContent>
     </Sheet>
   );

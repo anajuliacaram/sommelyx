@@ -14,7 +14,7 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody } from "@/components/ai-flow/ModalLayout";
 import {
   SectionHeader,
   PairingLoadingState,
@@ -1065,16 +1065,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent className="w-full sm:max-w-lg h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-black/5">
-        <div className="flex h-full min-h-0 flex-col">
-        <div className="px-3 pt-3 sm:px-5 sm:pt-4">
+        <AiModalShell>
+        <AiModalHeaderBar className="px-3 py-3.5 sm:px-5 sm:py-4">
           <AiModalHeader
             icon={<UtensilsCrossed className="h-5 w-5" />}
             title="Harmonizar"
             description="Encontre a combinação perfeita entre vinho e gastronomia"
           />
-        </div>
+        </AiModalHeaderBar>
 
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 sm:space-y-4 sm:px-5 sm:pb-[calc(16px+env(safe-area-inset-bottom))] sm:pt-4">
+        <AiModalBody className="space-y-3 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 sm:space-y-4 sm:px-5 sm:pb-[calc(16px+env(safe-area-inset-bottom))] sm:pt-4">
           {step !== "source" && (
             <Button
               variant="ghost"
@@ -1913,8 +1913,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {/* ── External Scan Results (dish → wine list photo) ── */}
             {step === "scan-results" && normalizedScanResults && renderExternalScanResults()}
           </AnimatePresence>
-        </div>
-        </div>
+        </AiModalBody>
+        </AiModalShell>
       </SheetContent>
 
       {/* Recipe Modal */}

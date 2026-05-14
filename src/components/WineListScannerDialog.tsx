@@ -10,7 +10,7 @@ import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiFilterChip, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiFilterChip, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody } from "@/components/ai-flow/ModalLayout";
 import {
   PairingLoadingState,
   PairingErrorState,
@@ -668,16 +668,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0 border-border/50">
-        <div className="px-4 pt-4 sm:px-5">
+      <SheetContent className="w-full sm:max-w-lg h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-black/5">
+        <AiModalShell>
+        <AiModalHeaderBar>
           <AiModalHeader
             icon={<Sparkles className="h-5 w-5" />}
             title="Analisar Carta"
             description="Envie a carta de vinhos e descubra as melhores escolhas para você"
           />
-        </div>
+        </AiModalHeaderBar>
 
-        <div className="px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4 sm:px-5">
+        <AiModalBody>
           <AnimatePresence mode="wait">
           {step === "capture" && (
             <motion.div
@@ -787,7 +788,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             />
           )}
           </AnimatePresence>
-        </div>
+        </AiModalBody>
+        </AiModalShell>
       </SheetContent>
     </Sheet>
   );
