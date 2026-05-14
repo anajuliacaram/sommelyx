@@ -128,20 +128,20 @@ serve(async (req) => {
   const corsHeaders = createCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const requestId = crypto.randomUUID();
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
   const startedAt = Date.now();
   let userId = "anonymous";
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
     await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "missing_authorization", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-    return jsonResponse(req, { error: "AUTH_REQUIRED" }, 401);
+    return jsonResponse(req, { success: false, code: "AUTH_REQUIRED", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false }, 401);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
   if (!supabaseUrl || !supabaseAnonKey) {
-    return jsonResponse(req, { error: "CONFIG_ERROR" }, 500);
+    return jsonResponse(req, { success: false, code: "AI_UNAVAILABLE", message: "Serviço temporariamente indisponível.", requestId, retryable: true }, 500);
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -155,7 +155,7 @@ serve(async (req) => {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
     await logAudit("anonymous", 401, "unauthorized", Date.now() - startedAt, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-    return jsonResponse(req, { error: "AUTH_INVALID" }, 401);
+    return jsonResponse(req, { success: false, code: "AUTH_INVALID", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false }, 401);
   }
 
   userId = user.id;

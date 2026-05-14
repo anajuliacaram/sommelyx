@@ -454,7 +454,7 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let userId = "anonymous";
-  const requestId = crypto.randomUUID();
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
   let sizeBytes = 0;
   let imageMime = "";
   let imageBase64 = "";

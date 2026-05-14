@@ -806,7 +806,17 @@ async function extractPdfOcrText(file: File) {
         fileName: file.name,
         mimeType: inferMimeType(file),
       },
-      { timeoutMs: OCR_EDGE_TIMEOUT_MS, retries: 1, retryOnAbort: false },
+      {
+        timeoutMs: OCR_EDGE_TIMEOUT_MS,
+        retries: 1,
+        retryOnAbort: false,
+        metadata: {
+          flow: "pdf-ocr",
+          attachmentType: "pdf",
+          ocrLength: 0,
+          model: "gpt-4o-mini",
+        },
+      },
     );
   } catch (error) {
     const err: any = createAttachmentError(
@@ -857,7 +867,17 @@ async function extractImageOcrText(file: File) {
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
       },
-      { timeoutMs: OCR_EDGE_TIMEOUT_MS, retries: 1, retryOnAbort: false },
+      {
+        timeoutMs: OCR_EDGE_TIMEOUT_MS,
+        retries: 1,
+        retryOnAbort: false,
+        metadata: {
+          flow: "image-ocr",
+          attachmentType: prepared.mimeType || "image",
+          ocrLength: 0,
+          model: "gpt-4o-mini",
+        },
+      },
     );
   } catch (error) {
     const err: any = createAttachmentError(

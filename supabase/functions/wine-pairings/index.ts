@@ -341,6 +341,7 @@ async function callAI(
   systemPrompt: string,
   userPrompt: string,
   tools: unknown[],
+  requestId = crypto.randomUUID(),
 ) {
   const schema = (tools?.[0] as any)?.function?.parameters || {};
   const startedAt = Date.now();
@@ -348,7 +349,7 @@ async function callAI(
 
   const result = await callOpenAIResponses<any>({
     functionName: "wine-pairings",
-    requestId: crypto.randomUUID(),
+    requestId,
     model: "gpt-4o-mini",
     timeoutMs: 45_000,
     temperature: 0.35,
@@ -382,7 +383,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const startTime = Date.now();
-  const requestId = crypto.randomUUID();
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
   let userId = "unknown";
 
   try {
@@ -390,7 +391,7 @@ serve(async (req) => {
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-      return jsonResponse(req, { error: "AUTH_REQUIRED" }, 401);
+      return jsonResponse(req, { success: false, code: "AUTH_REQUIRED", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false }, 401);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -411,7 +412,7 @@ serve(async (req) => {
     if (error || !validatedUserId) {
       console.error("AUTH ERROR:", error);
       await logToDb(supabaseUrl, serviceKey, "unknown", FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-      return jsonResponse(req, { error: "AUTH_INVALID" }, 401);
+      return jsonResponse(req, { success: false, code: "AUTH_INVALID", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false }, 401);
     }
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId, durationMs: elapsed(startTime) });
@@ -421,7 +422,7 @@ serve(async (req) => {
       body = await req.json();
     } catch {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { input_size_bytes: 0, error_type: "PARSE_ERROR" });
-      return jsonResponse(req, { error: "Corpo da requisição inválido" }, 400);
+      return jsonResponse(req, { success: false, code: "INVALID_REQUEST_BODY", message: "Requisição inválida.", requestId, retryable: false }, 400);
     }
     const inputSizeBytes = new TextEncoder().encode(JSON.stringify(body ?? {})).length;
     const parsedInput = parseSommelierPairingInput(body);
@@ -429,6 +430,7 @@ serve(async (req) => {
     const { mode, wineName, wineStyle, wineGrape, wineRegion, dish, userWines, intent, wineProducer, wineVintage, wineCountry } = parsedInput;
     trace("request_validation", {
       request_id: requestId,
+      client_request_id: body?.clientRequestId || req.headers.get("X-Client-Request-Id") || null,
       mode,
       hasDish: Boolean(dish),
       hasWineName: Boolean(wineName),
@@ -1009,6 +1011,7 @@ INSTRUÇÕES:
         systemPrompt,
         userPrompt + retryHint,
         tools,
+        requestId,
       );
 
       clearTimeout(timeout);

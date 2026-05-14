@@ -170,6 +170,7 @@ export interface WineListAnalysisTextInput {
   text: string;
   mimeType?: string;
   fileName?: string;
+  requestId?: string;
 }
 
 function mapWineCategoryToStyle(category?: string | null) {
@@ -376,6 +377,7 @@ export type WinePairingInput =
       wineCountry?: string | null;
       cellarWines?: WineSummary[] | null;
       intent?: PairingIntent;
+      requestId?: string;
     };
 
 // ── Error Classification ──
@@ -405,6 +407,9 @@ function classifyError(err: unknown): ClassifiedError {
   }
   if (status === 408 || code === "AI_TIMEOUT" || lower.includes("tempo limite") || lower.includes("timeout") || lower.includes("demorou mais") || lower.includes("tempo de resposta excedido") || lower.includes("signal is aborted") || lower.includes("abort")) {
     return { type: "timeout", message: "Tempo excedido. Tente novamente em instantes.", code: code ?? "AI_TIMEOUT", status, requestId, retryable };
+  }
+  if (status === 429 || code === "RATE_LIMIT" || code === "AI_RATE_LIMIT") {
+    return { type: "ai_fail", message: "Muitas requisições. Aguarde um momento e tente novamente.", code: code ?? "RATE_LIMIT", status, requestId, retryable };
   }
   if (code === "INVALID_FILE_TYPE" || code === "FILE_INVALID" || lower.includes("tipo de arquivo inválido")) {
     return { type: "invalid_file", message: "Tipo de arquivo inválido. Envie uma imagem ou PDF compatível.", code: code ?? "INVALID_FILE_TYPE", status, requestId, retryable };
@@ -438,8 +443,8 @@ function classifyError(err: unknown): ClassifiedError {
       retryable: false,
     };
   }
-  if (code === "EMPTY_EXTRACTION") {
-    return { type: "empty", message: "PDF não contém texto legível. Tente outro arquivo ou uma imagem da carta.", code, status, requestId, retryable };
+  if (code === "EMPTY_EXTRACTION" || code === "OCR_EMPTY" || code === "IMAGE_OCR_EMPTY") {
+    return { type: "empty", message: "Não foi possível ler texto suficiente neste arquivo. Tente uma foto/PDF mais nítido.", code, status, requestId, retryable };
   }
   if (code === "OCR_FAILED" || code === "PDF_PARSE_FAILED") {
     return { type: "ai_fail", message: "Não foi possível ler o PDF. Tente um arquivo mais nítido ou uma imagem da carta.", code, status, requestId, retryable };
@@ -1547,6 +1552,7 @@ export function normalizePairingResponse(data: unknown, dish: string): Generated
 
 export async function generateWinePairing(input: WinePairingInput): Promise<GeneratedWinePairing> {
   const finalDish = normalizeWinePairingInput(input);
+  const requestId = typeof input === "string" ? undefined : input.requestId;
   console.log("dish:", finalDish);
 
   try {
@@ -1612,7 +1618,17 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
     const response = await invokeEdgeFunction<any>(
       "wine-pairings",
       requestPayload,
-      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
+      {
+        timeoutMs: PAIRING_TIMEOUT_MS,
+        retries: 1,
+        metadata: {
+          flow: "wine-pairing",
+          attachmentType: "text",
+          ocrLength: finalDish.length,
+          model: "gpt-4o-mini",
+        },
+        requestId,
+      },
     );
     console.log("ai_response:", response);
     const parsed = safeParse<GeneratedWinePairing>(JSON.stringify(response));
@@ -1691,7 +1707,17 @@ export async function analyzeWineList(
           structuredJson: normalizedOcr.structuredJson,
         },
       },
-      { timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS, retries: 1 },
+      {
+        timeoutMs: ANALYZE_WINE_LIST_TIMEOUT_MS,
+        retries: 1,
+        metadata: {
+          flow: "analyze-wine-list",
+          attachmentType: analysis.mimeType || "text",
+          ocrLength: text.length,
+          model: "gpt-4o-mini",
+        },
+        requestId: analysis.requestId,
+      },
     );
     const requestStartedAt = nowMs();
     console.info("[sommelier-ai] request_started", {
@@ -1809,7 +1835,17 @@ export async function analyzeMenuForWine(
           structuredJson: normalizedOcr.structuredJson,
         },
       },
-      { timeoutMs: PAIRING_TIMEOUT_MS, retries: 1 },
+      {
+        timeoutMs: PAIRING_TIMEOUT_MS,
+        retries: 1,
+        metadata: {
+          flow: "analyze-menu-for-wine",
+          attachmentType: analysis.mimeType || "text",
+          ocrLength: text.length,
+          model: "gpt-4o-mini",
+        },
+        requestId: analysis.requestId,
+      },
     );
     const requestStartedAt = nowMs();
     const data = await request();

@@ -215,7 +215,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         textLength: attachment.text?.length || 0,
         preview: String(attachment.text || "").slice(0, 1200),
       });
-      const data = await analyzeWineList(attachment, profile);
+      const data = await analyzeWineList({ ...attachment, requestId }, profile);
       console.info("[WineListScannerDialog] response_received", {
         requestId,
         hasData: Boolean(data),

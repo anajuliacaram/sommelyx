@@ -216,7 +216,7 @@ export async function callOpenAIResponses<T>({
   const resolvedModel = model?.trim() || "gpt-4o-mini";
   const startedAt = Date.now();
 
-  console.log(`[${functionName}] request_id=${requestId} provider=openai model=${resolvedModel} key=${maskSecret(openaiKey)} timeout_ms=${timeoutMs}`);
+  console.log(`[${functionName}] request_id=${requestId} provider=openai model=${resolvedModel} key=${maskSecret(openaiKey)} timeout_ms=${timeoutMs} timeout_source=openai retryable=true`);
 
   if (!openaiKey) {
     return { ok: false, status: 500, error: "OPENAI_API_KEY ausente." };
@@ -260,7 +260,7 @@ export async function callOpenAIResponses<T>({
         : typeof json?.error === "string"
           ? json.error
           : `OpenAI request failed with status ${response.status}`;
-      console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} duration_ms=${Date.now() - startedAt} error=${String(message).slice(0, 300)}`);
+      console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} status=${response.status} duration_ms=${Date.now() - startedAt} retryable=${response.status === 429 || response.status >= 500} timeout_source=${response.status === 504 ? "openai" : "none"} error=${String(message).slice(0, 300)}`);
       const fallback = await callOpenAIChatFallback<T>({
         functionName,
         requestId,
@@ -322,7 +322,7 @@ export async function callOpenAIResponses<T>({
   } catch (error) {
     const message = error instanceof Error ? error.message : "OpenAI request failed";
     const isAbort = message.toLowerCase().includes("abort");
-    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} duration_ms=${Date.now() - startedAt} error=${message}`);
+    console.log(`[${functionName}] request_id=${requestId} model=${resolvedModel} duration_ms=${Date.now() - startedAt} retryable=true timeout_source=${isAbort ? "openai" : "none"} error=${message}`);
     const fallback = await callOpenAIChatFallback<T>({
       functionName,
       requestId,

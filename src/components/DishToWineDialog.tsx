@@ -263,15 +263,18 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setError(null);
     setPairingResult(null);
     try {
+      const edgeRequestId = crypto.randomUUID();
       const pairingRequestPayload = {
         userInputDish: query,
         cellarWines: resolvedCellarPairingPayload,
         userWines: resolvedCellarPairingPayload,
         intent: chosenIntent ?? intent,
         mode: "cellar",
+        requestId: edgeRequestId,
       };
       console.info("[DishToWineDialog] cellar_pairing_payload", {
         requestId: reqId,
+        edgeRequestId,
         mode: "cellar",
         payload: pairingRequestPayload,
       });
@@ -280,6 +283,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         cellarWines: resolvedCellarPairingPayload,
         mode: "cellar",
         intent: chosenIntent ?? intent,
+        requestId: edgeRequestId,
       });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar", winesLength: resolvedCellarPairingPayload.length });
@@ -312,6 +316,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     setError(null);
     setPairingResult(null);
     try {
+      const edgeRequestId = crypto.randomUUID();
       const result = await generateWinePairing({
         wineName: wine.name,
         wineStyle: wine.style,
@@ -320,6 +325,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         wineProducer: wine.producer,
         wineVintage: wine.vintage,
         wineCountry: wine.country,
+        requestId: edgeRequestId,
       });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:wine", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine" });
@@ -388,8 +394,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       lastRetryRef.current = () => { runDeepLink(); };
       const reqId = nextRequestId();
       setLoading(true);
+      const edgeRequestId = crypto.randomUUID();
       console.info("[DishToWineDialog] deep_link_payload", {
         id: reqId,
+        edgeRequestId,
         wineId: resolvedWine.id,
         wineName: resolvedWine.name,
         source: "insight",
@@ -403,6 +411,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           wineProducer: resolvedWine.producer,
           wineVintage: resolvedWine.vintage,
           wineCountry: resolvedWine.country,
+          requestId: edgeRequestId,
         });
         if (!isLatest(reqId)) return;
         const normalized = normalizePairingResponse(result, resolvedWine.name || "vinho");
@@ -460,7 +469,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     });
 
     try {
-      const result = await generateWinePairing(query);
+      const edgeRequestId = crypto.randomUUID();
+      const result = await generateWinePairing({ userInputDish: query, mode: "dish_only", requestId: edgeRequestId });
       if (!isLatest(reqId)) return;
       const normalized = normalizePairingResponse(result, query);
       console.info("[DishToWineDialog] pairing_request_completed", {
@@ -570,6 +580,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         text: prepared.text,
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
+        requestId: crypto.randomUUID(),
       };
       console.info("[DishToWineDialog] backend_called", {
         step: "wine-list",
@@ -587,12 +598,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         setStep("scanning");
         const retryId = nextRequestId();
         setLoading(true);
-        setError(null);
-        setScanResults(null);
+          setError(null);
+          setScanResults(null);
         try {
+          const retryPayload = { ...payload, requestId: crypto.randomUUID() };
           console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", retry: true, fileName: prepared.fileName, sourceType: prepared.sourceType });
           const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
-          const result = await analyzeWineList(payload, profile);
+          const result = await analyzeWineList(retryPayload, profile);
           if (!isLatest(retryId)) return;
           const normalized = normalizeWineListResponse(result);
           console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", retry: true, wines: normalized.wines.length });
@@ -681,6 +693,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         text: prepared.text,
         mimeType: prepared.mimeType,
         fileName: prepared.fileName,
+        requestId: crypto.randomUUID(),
       };
       console.info("[DishToWineDialog] backend_called", {
         step: "menu",
@@ -701,8 +714,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         setError(null);
         setPairingResult(null);
         try {
+          const edgeRequestId = crypto.randomUUID();
           console.info("[DishToWineDialog] pairing_request_started", { step: "menu", retry: true, wineName: extWineName, sourceType: prepared.sourceType });
-          const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
+          const result = await generateWinePairing({ userInputDish: payload.text || extWineName || "prato não especificado", mode: "dish_only", requestId: edgeRequestId });
           if (!isLatest(retryId)) return;
           const normalized = normalizePairingResponse(result, currentDishContext);
           console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, pairings: normalized.pairings.length });
@@ -726,7 +740,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       };
 
       console.info("[DishToWineDialog] pairing_request_started", { step: "menu", wineName: extWineName, sourceType: prepared.sourceType });
-      const result = await generateWinePairing(payload.text || extWineName || "prato não especificado");
+      const result = await generateWinePairing({ userInputDish: payload.text || extWineName || "prato não especificado", mode: "dish_only", requestId: payload.requestId });
       if (!isLatest(reqId)) return;
       const normalized = normalizePairingResponse(result, currentDishContext);
       console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, pairings: normalized.pairings.length });

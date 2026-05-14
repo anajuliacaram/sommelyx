@@ -1,9 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
+import { aiDebugGroup, aiDebugLog } from "@/lib/ai-debug";
 
 type InvokeOptions = {
   timeoutMs?: number;
   retries?: number;
   retryOnAbort?: boolean;
+  requestId?: string;
+  metadata?: {
+    attachmentType?: string;
+    ocrLength?: number;
+    model?: string;
+    flow?: string;
+  };
 };
 
 type CacheEntry = {
@@ -141,6 +149,8 @@ function normalizeEdgeCode(code?: string, status?: number) {
   if (value === "TIMEOUT" || value === "REQUEST_TIMEOUT" || value === "ABORTED") {
     return "AI_TIMEOUT";
   }
+  if (value === "AI_RATE_LIMIT" || value === "RATE_LIMITED") return "RATE_LIMIT";
+  if (value === "INVALID_REQUEST_BODY") return "INVALID_REQUEST";
   if (value === "SERVICE_UNAVAILABLE" || value === "EDGE_FAILED" || value === "AI_UNAVAILABLE") {
     return "AI_UNAVAILABLE";
   }
@@ -155,8 +165,10 @@ function classifyEdgeError(message: string, status?: number, code?: string): str
   const normalizedCode = normalizeEdgeCode(code, status);
   if (normalizedCode === "AUTH_REQUIRED") return "Sessão expirada. Faça login novamente.";
   if (normalizedCode === "AI_TIMEOUT") return "A análise demorou muito. Tente novamente.";
+  if (normalizedCode === "RATE_LIMIT") return "Muitas requisições. Aguarde um momento e tente novamente.";
   if (normalizedCode === "NETWORK_ERROR") return "Sem conexão com internet";
   if (normalizedCode === "AI_UNAVAILABLE") return "Não conseguimos analisar no momento. Tente novamente.";
+  if (normalizedCode === "INVALID_REQUEST") return "Não foi possível enviar a solicitação. Tente novamente.";
   if (normalizedCode === "INVALID_IMAGE") return "Imagem inválida ou ilegível.";
   if (normalizedCode === "PARSE_ERROR") return "Não conseguimos analisar este rótulo.";
   if (code === "FILE_INVALID") return "Arquivo inválido. Envie uma imagem ou PDF legível.";
@@ -298,12 +310,24 @@ function sanitizeForLog(value: unknown): unknown {
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
-  { timeoutMs = 45_000, retries = 1, retryOnAbort = true }: InvokeOptions = {},
+  { timeoutMs = 45_000, retries = 1, retryOnAbort = true, requestId: providedRequestId, metadata }: InvokeOptions = {},
 ): Promise<T> {
-  const requestId = crypto.randomUUID();
+  const requestId = providedRequestId || crypto.randomUUID();
   const startedAt = Date.now();
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
   const cacheKey = getCacheKey(name, body);
+  const endDebugGroup = aiDebugGroup(`[AI_EDGE] ${name} ${requestId}`, {
+    event: "start",
+    function: name,
+    requestId,
+    timeoutMs,
+    retries,
+    retryOnAbort,
+    attachmentType: metadata?.attachmentType,
+    ocrLength: metadata?.ocrLength,
+    model: metadata?.model,
+    flow: metadata?.flow,
+  });
   if (name !== "scan-wine-label") {
     const cached = readEdgeCache<T>(cacheKey);
     if (cached !== null) {
@@ -312,14 +336,25 @@ export async function invokeEdgeFunction<T>(
         requestId,
         durationMs: 0,
       });
+      aiDebugLog("cache_hit", { function: name, requestId, latencyMs: 0 });
+      endDebugGroup();
       return cached;
     }
   }
 
-  for (let attempt = 0; attempt <= retries; attempt += 1) {
+  try {
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
       let session = await resolveSession(attempt > 0);
       const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
+      aiDebugLog("request_attempt", {
+        function: name,
+        requestId,
+        attempt,
+        hasAuthToken: Boolean(session?.access_token),
+        timeoutMs,
+        retryOnAbort,
+      });
       console.info("[EDGE_AUTH_STATE]", {
         function: name,
         requestId,
@@ -337,6 +372,8 @@ export async function invokeEdgeFunction<T>(
         throw new EdgeFunctionError("Sua sessão expirou. Faça login novamente.", {
           status: 401,
           code: "AUTH_REQUIRED",
+          requestId,
+          debugId: requestId,
           retryable: false,
           functionName: name,
         });
@@ -366,8 +403,12 @@ export async function invokeEdgeFunction<T>(
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
+            "X-Client-Request-Id": requestId,
           },
-          body: JSON.stringify(body),
+          body: JSON.stringify({
+            ...body,
+            clientRequestId: requestId,
+          }),
           signal: controller.signal,
         });
         if (import.meta.env.DEV) {
@@ -442,6 +483,13 @@ export async function invokeEdgeFunction<T>(
             wrapped: isEdgeEnvelopeSuccess<T>(parsedBody),
           });
         }
+        aiDebugLog("request_success", {
+          function: name,
+          requestId,
+          attempt,
+          latencyMs: Date.now() - startedAt,
+          status: response.status,
+        });
         return unwrapped;
       } finally {
         clearTimeout(timeout);
@@ -486,6 +534,16 @@ export async function invokeEdgeFunction<T>(
         rawBody: err instanceof EdgeFunctionError ? sanitizeForLog(err.rawBody) : undefined,
         message: rawMessage || toErrorMessage(err),
       });
+      aiDebugLog("request_failure", {
+        function: name,
+        requestId,
+        attempt,
+        latencyMs: Date.now() - startedAt,
+        code: err instanceof EdgeFunctionError ? err.code : undefined,
+        status: err instanceof EdgeFunctionError ? err.status : undefined,
+        retryable,
+        message: rawMessage || toErrorMessage(err),
+      });
       if (err instanceof EdgeFunctionError) throw err;
       const abortFailure = isAbortErrorMessage(rawMessage);
       const isTransport = isTransportErrorMessage(rawMessage) || isSdkRelayError(rawMessage);
@@ -502,4 +560,12 @@ export async function invokeEdgeFunction<T>(
   }
 
   throw new EdgeFunctionError("Não foi possível completar a solicitação.");
+  } finally {
+    aiDebugLog("request_finally", {
+      function: name,
+      requestId,
+      latencyMs: Date.now() - startedAt,
+    });
+    endDebugGroup();
+  }
 }

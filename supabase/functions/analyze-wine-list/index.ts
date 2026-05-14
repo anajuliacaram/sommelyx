@@ -747,7 +747,7 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let userId = "unknown";
-  const requestId = crypto.randomUUID();
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
   let isMenuMode = false;
   let normalizedText = "";
   let fileName: string | undefined;
@@ -758,7 +758,7 @@ serve(async (req) => {
     if (Deno.env.get("EDGE_DEBUG") === "true") console.log("AUTH HEADER:", !!authorization);
     if (!authorization) {
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "missing_or_invalid_authorization_header", input_size_bytes: 0, error_type: "AUTH_REQUIRED" });
-      return jsonResponse(req, { error: "AUTH_REQUIRED" }, 401);
+      return jsonResponse(req, { success: false, code: "AUTH_REQUIRED", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false }, 401);
     }
 
     const supabase = createClient(
@@ -778,7 +778,7 @@ serve(async (req) => {
     if (error || !validatedUserId) {
       console.error("AUTH ERROR:", error);
       await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 401, "unauthorized", Date.now() - startTime, { request_id: requestId, reason: "invalid_token", input_size_bytes: 0, error_type: "AUTH_INVALID" });
-      return jsonResponse(req, { error: "AUTH_INVALID" }, 401);
+      return jsonResponse(req, { success: false, code: "AUTH_INVALID", message: "Sessão expirada. Faça login novamente.", requestId, retryable: false }, 401);
     }
     userId = validatedUserId;
     trace("auth_ok", { request_id: requestId, user_id: userId });
@@ -788,6 +788,7 @@ serve(async (req) => {
     const inputSizeBytes = new TextEncoder().encode(JSON.stringify(rawBody ?? {})).length;
     trace("request_received", {
       request_id: requestId,
+      client_request_id: rawBody?.clientRequestId || req.headers.get("X-Client-Request-Id") || null,
       image_size: inputSizeBytes,
       input_size_bytes: inputSizeBytes,
       mimeType: rawBody?.mimeType,
@@ -1126,7 +1127,7 @@ PROIBIDO:
 
       const openaiResult = await callOpenAIResponses<any>({
         functionName: "analyze-wine-list",
-        requestId: crypto.randomUUID(),
+        requestId,
         model: "gpt-4o-mini",
         timeoutMs: 45_000,
         temperature: 0.2,
@@ -1149,6 +1150,9 @@ PROIBIDO:
           mode: isMenuMode ? "menu" : "wine-list",
           status: responseStatus,
           durationMs: elapsed(aiStartedAt),
+          model: "gpt-4o-mini",
+          timeout_source: responseStatus === 504 ? "openai" : null,
+          retryable: responseStatus === 429 || responseStatus === 504 || responseStatus >= 500,
           body: responseBodyPreview ? String(responseBodyPreview).slice(0, 240) : null,
         });
 

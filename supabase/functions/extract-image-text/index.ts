@@ -9,7 +9,7 @@ import { INVALID_INPUT_ERROR, validateImagePayload } from "../_shared/payload-va
 
 
 const FUNCTION_NAME = "extract-image-text";
-const AI_TIMEOUT_MS = 12_000;
+const AI_TIMEOUT_MS = 45_000;
 
 const BodySchema = z.object({
   imageBase64: z.string().min(64),
@@ -62,7 +62,7 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let userId = "unknown";
-  const requestId = crypto.randomUUID();
+  const requestId = req.headers.get("X-Client-Request-Id") || crypto.randomUUID();
 
   try {
     const authorization = req.headers.get("Authorization");
@@ -100,7 +100,17 @@ serve(async (req) => {
 
     const fileName = parsedBody.data.fileName || "image";
     const inputSizeBytes = typeof parsedBody.data.imageBase64 === "string" ? parsedBody.data.imageBase64.length : 0;
-    console.info(`[${FUNCTION_NAME}] request_received`, { request_id: requestId, user_id: userId, fileName, mimeType: parsedBody.data.mimeType || "image/jpeg", input_size_bytes: inputSizeBytes });
+    console.info(`[${FUNCTION_NAME}] request_received`, {
+      request_id: requestId,
+      client_request_id: rawBody?.clientRequestId || req.headers.get("X-Client-Request-Id") || null,
+      user_id: userId,
+      fileName,
+      mimeType: parsedBody.data.mimeType || "image/jpeg",
+      input_size_bytes: inputSizeBytes,
+      attachment_type: parsedBody.data.mimeType || "image/jpeg",
+      model: Deno.env.get("OPENAI_MODEL")?.trim() || "gpt-4o-mini",
+      timeout_ms: AI_TIMEOUT_MS,
+    });
     const validation = validateImagePayload(parsedBody.data.imageBase64, parsedBody.data.mimeType || "image/jpeg", { maxBytes: 1 * 1024 * 1024 });
     if (!validation.ok) {
       await logAudit(userId, 400, "invalid_input", Date.now() - startTime, {
