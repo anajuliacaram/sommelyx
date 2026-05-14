@@ -115,13 +115,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const [deepLinkError, setDeepLinkError] = useState<string | null>(null);
   const lastRetryRef = useRef<(() => void) | null>(null);
   const requestSeqRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
   const nextRequestId = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
     requestSeqRef.current += 1;
     const id = requestSeqRef.current;
     console.info("[DishToWineDialog] request:start", { id, t: Date.now() });
     return id;
   }, []);
   const isLatest = (id: number) => id === requestSeqRef.current;
+  const currentSignal = () => abortRef.current?.signal;
   const runRetry = useCallback(() => {
     const fn = lastRetryRef.current;
     if (fn) fn();
@@ -142,6 +146,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
     const timeout = window.setTimeout(() => {
       requestSeqRef.current += 1;
+      abortRef.current?.abort();
       setLoading(false);
       setDeepLinkLoading(false);
       setError("A harmonização demorou mais que o esperado. Tente novamente.");
@@ -188,6 +193,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   }, [refetchWines, wines, winesFetching, winesLoading]);
   const reset = () => {
     requestSeqRef.current += 1; // invalidate any in-flight requests
+    abortRef.current?.abort();
+    abortRef.current = null;
     setSource(null);
     setSubMode(null);
     setStep("source");
@@ -305,6 +312,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         mode: "cellar",
         intent: chosenIntent ?? intent,
         requestId: edgeRequestId,
+        signal: currentSignal(),
       });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:cellar", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "cellar", winesLength: resolvedCellarPairingPayload.length });
@@ -347,6 +355,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         wineVintage: wine.vintage,
         wineCountry: wine.country,
         requestId: edgeRequestId,
+        signal: currentSignal(),
       });
       if (!isLatest(reqId)) { console.info("[DishToWineDialog] stale:wine", { id: reqId }); return; }
       console.info("[DishToWineDialog] request:success", { id: reqId, kind: "wine" });
@@ -433,6 +442,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           wineVintage: resolvedWine.vintage,
           wineCountry: resolvedWine.country,
           requestId: edgeRequestId,
+          signal: currentSignal(),
         });
         if (!isLatest(reqId)) return;
         const normalized = normalizePairingResponse(result, resolvedWine.name || "vinho");
@@ -491,7 +501,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
     try {
       const edgeRequestId = crypto.randomUUID();
-      const result = await generateWinePairing({ userInputDish: query, mode: "dish_only", requestId: edgeRequestId });
+      const result = await generateWinePairing({ userInputDish: query, mode: "dish_only", requestId: edgeRequestId, signal: currentSignal() });
       if (!isLatest(reqId)) return;
       const normalized = normalizePairingResponse(result, query);
       console.info("[DishToWineDialog] pairing_request_completed", {
@@ -622,7 +632,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setError(null);
           setScanResults(null);
         try {
-          const retryPayload = { ...payload, requestId: crypto.randomUUID() };
+          const retryPayload = { ...payload, requestId: crypto.randomUUID(), signal: currentSignal() };
           console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", retry: true, fileName: prepared.fileName, sourceType: prepared.sourceType });
           const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
           const result = await analyzeWineList(retryPayload, profile);
@@ -650,7 +660,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
       const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
       console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", fileName: prepared.fileName, sourceType: prepared.sourceType });
-      const result = await analyzeWineList(payload, profile);
+      const result = await analyzeWineList({ ...payload, signal: currentSignal() }, profile);
       if (!isLatest(reqId)) return;
       const normalized = normalizeWineListResponse(result);
       console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", id: reqId, wines: normalized.wines.length });
@@ -745,7 +755,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         try {
           const edgeRequestId = crypto.randomUUID();
           console.info("[DishToWineDialog] pairing_request_started", { step: "menu", retry: true, wineName: extWineName, sourceType: prepared.sourceType });
-          const result = await analyzeMenuForWine({ ...payload, requestId: edgeRequestId }, extWineName);
+          const result = await analyzeMenuForWine({ ...payload, requestId: edgeRequestId, signal: currentSignal() }, extWineName);
           if (!isLatest(retryId)) return;
           const normalized = normalizePairingResponse(adaptMenuAnalysisToGeneratedWinePairing(result, extWineName), currentDishContext);
           console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, pairings: normalized.pairings.length });
@@ -769,7 +779,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       };
 
       console.info("[DishToWineDialog] pairing_request_started", { step: "menu", wineName: extWineName, sourceType: prepared.sourceType });
-      const result = await analyzeMenuForWine(payload, extWineName);
+      const result = await analyzeMenuForWine({ ...payload, signal: currentSignal() }, extWineName);
       if (!isLatest(reqId)) return;
       const normalized = normalizePairingResponse(adaptMenuAnalysisToGeneratedWinePairing(result, extWineName), currentDishContext);
       console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, pairings: normalized.pairings.length });
@@ -900,14 +910,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const currentDishContext = dish || extWineName || selectedWine?.name || "prato";
   const loadingSteps = requestMode === "dish_only"
     ? [
-        "Lendo peso, gordura e intensidade do prato…",
-        "Comparando acidez, corpo e taninos…",
-        "Escolhendo as melhores garrafas…",
+        "Analisando prato",
+        "Comparando estrutura",
+        "Preparando harmonização",
       ]
     : [
-        "Lendo os rótulos visíveis…",
-        "Separando as escolhas mais promissoras…",
-        "Organizando a recomendação final…",
+        "Lendo carta",
+        "Selecionando destaques",
+        "Preparando recomendação",
       ];
   const loadingSubtitle = requestMode === "dish_only"
     ? `Harmonização para ${dish}`
@@ -1691,9 +1701,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {step === "ext-menu-scanning" && (
               <PairingLoadingState
                 steps={[
-                  "Lendo os pratos visíveis…",
-                  "Comparando peso, acidez e gordura…",
-                  "Escolhendo as melhores combinações…",
+                  "Lendo menu",
+                  "Comparando estrutura",
+                  "Preparando combinações",
                 ]}
                 subtitle={`Vinho: ${extWineName}`}
               />
@@ -1840,9 +1850,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {step === "wine-results" && deepLinkLoading && !pairingResult && (
               <PairingLoadingState
                 steps={[
-                  "Lendo o perfil da garrafa…",
-                  "Comparando corpo, acidez e textura…",
-                  "Escolhendo os melhores pratos…",
+                  "Lendo garrafa",
+                  "Comparando estrutura",
+                  "Preparando pratos",
                 ]}
                 subtitle={selectedWine?.name || initialWine?.name || "Vinho selecionado"}
               />

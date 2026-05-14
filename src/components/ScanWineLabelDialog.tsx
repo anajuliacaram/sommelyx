@@ -77,10 +77,24 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const requestBusyRef = useRef(false);
   const autoCommitRef = useRef(false);
   const confirmBusyRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const requestSeqRef = useRef(0);
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const beginRequest = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    requestSeqRef.current += 1;
+    return requestSeqRef.current;
+  }, []);
+
+  const isLatestRequest = useCallback((id: number) => id === requestSeqRef.current, []);
+
   const reset = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    requestSeqRef.current += 1;
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = null;
@@ -97,6 +111,18 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setLastBase64(null);
     setScanOutcome(null);
   }, []);
+
+  useEffect(() => {
+    if (step !== "scanning") return;
+    const timeout = window.setTimeout(() => {
+      abortRef.current?.abort();
+      requestBusyRef.current = false;
+      setErrorMsg("A leitura demorou mais que o esperado. Tente novamente.");
+      setScanOutcome("error");
+      setStep("error");
+    }, 75_000);
+    return () => window.clearTimeout(timeout);
+  }, [step]);
 
   useEffect(() => {
     return () => {
@@ -120,6 +146,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     },
   ) => {
     if (requestBusyRef.current) return;
+    const requestSeq = beginRequest();
     requestBusyRef.current = true;
     autoCommitRef.current = false;
     setStep("scanning");
@@ -161,8 +188,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           mimeType: metadata?.mimeType,
           fileName: metadata?.fileName,
         },
-        { timeoutMs: 30_000, retries: 1, retryOnAbort: true },
+        { timeoutMs: 30_000, retries: 1, retryOnAbort: true, signal: abortRef.current?.signal },
       );
+      if (!isLatestRequest(requestSeq)) return;
       console.info("[ScanWineLabelDialog] response_received", {
         function: "scan-wine-label",
         fileName: metadata?.fileName || null,
@@ -254,6 +282,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setScanOutcome(isPartial ? "success_partial" : "success_full");
       setStep("preview");
     } catch (err: unknown) {
+      if (!isLatestRequest(requestSeq)) return;
       const e = err as Partial<EdgeFunctionError> & { message?: string; status?: number; rawBody?: unknown };
       const code = String(e?.code || "UNKNOWN");
       const requestId = String(e?.debugId || e?.requestId || "");
@@ -310,12 +339,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setErrorMsg(msg);
       setStep("error");
     } finally {
-      requestBusyRef.current = false;
+      if (isLatestRequest(requestSeq)) requestBusyRef.current = false;
     }
-  }, [navigate]);
+  }, [beginRequest, isLatestRequest, navigate]);
 
   const handleFile = useCallback(async (file: File) => {
     if (requestBusyRef.current) return;
+    const prepareSeq = beginRequest();
     logFileRequestStart("SCAN_FILE_SELECTED", file, { source: "label_scan" });
     if (!isAcceptedMobileImage(file)) {
       toast({ title: "Selecione uma imagem válida", variant: "destructive" });
@@ -339,6 +369,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
     try {
       const prepared = await prepareWineLabelScanAttachment(file);
+      if (!isLatestRequest(prepareSeq)) return;
       console.info("[ScanWineLabelDialog] attachment_prepared", {
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
@@ -381,6 +412,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
         fileName: prepared.fileName,
       });
     } catch (err: unknown) {
+      if (!isLatestRequest(prepareSeq)) return;
       console.error("Image error:", err);
       if (err instanceof EdgeFunctionError) {
         console.error("[ScanWineLabelDialog] backend_failure", {
@@ -424,7 +456,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       setScanOutcome("error");
       setStep("error");
     }
-  }, [navigate, runScan, toast]);
+  }, [beginRequest, isLatestRequest, navigate, runScan, toast]);
 
   const handleSelectedFile = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -595,9 +627,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <AiModalCard>
                   <AiProgressiveLoader
                     steps={[
-                      "Lendo rótulo…",
-                      "Separando dados confiáveis…",
-                      "Preparando revisão…",
+                      "Lendo rótulo",
+                      "Organizando dados",
+                      "Preparando revisão",
                     ]}
                     interval={2200}
                   />

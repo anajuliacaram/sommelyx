@@ -191,6 +191,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [importMode, setImportMode] = useState<"standard" | "smart-pdf" | "image">("standard");
   const fileRef = useRef<HTMLInputElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const requestSeqRef = useRef(0);
 
   const { data: cellarWines } = useWines();
   const addWine = useAddWine();
@@ -1856,6 +1858,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const reset = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    requestSeqRef.current += 1;
     setStep("upload");
     setDraftWines([]);
     setColumnMapping({});
@@ -1888,6 +1893,19 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setImportSummary({ headerDetected: false, ignoredRows: 0 });
     setImportMode("standard");
   };
+
+  useEffect(() => {
+    if (!loading || !["analyzing", "importing"].includes(step)) return;
+    const timeout = window.setTimeout(() => {
+      abortRef.current?.abort();
+      requestSeqRef.current += 1;
+      setLoading(false);
+      setEnriching(false);
+      setParseErrors(["A operação demorou mais que o esperado. Tente novamente com um arquivo menor ou divida em partes."]);
+      setStep("preview");
+    }, step === "importing" ? 120_000 : 90_000);
+    return () => window.clearTimeout(timeout);
+  }, [loading, step]);
 
   const updateWineRow = (index: number, field: EditableField, value: string | number | undefined) => {
     syncRows((current) =>
@@ -2237,12 +2255,16 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const handleFile = async (file: File) => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    requestSeqRef.current += 1;
+    const requestSeq = requestSeqRef.current;
     setFileName(file.name);
     setStep("analyzing");
     setLoading(true);
     setImportMode("standard");
     setAnalysisStage("processing");
-    setAiNotes("Processando arquivo...");
+    setAiNotes("Lendo arquivo");
     logFileRequestStart("IMPORT_START", file, { flow: "spreadsheet_import" });
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     const isPdfFile = file.type === "application/pdf" || ext === "pdf";
@@ -2282,8 +2304,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             mimeType: prepared.mimeType,
             fileName: prepared.fileName || file.name,
           },
-          { timeoutMs: 60_000, retries: 1 },
+          { timeoutMs: 60_000, retries: 1, signal: abortRef.current?.signal },
         );
+        if (requestSeq !== requestSeqRef.current) return;
         const winePayload = normalizeScanResult(scanResult);
         setAnalysisStage("normalizing");
         const imported = normalizeImportedWines([winePayload].filter(Boolean));
@@ -2306,7 +2329,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       if (isPdfFile) {
         setImportMode("smart-pdf");
         setAnalysisStage("processing");
-        setAiNotes("Processando arquivo...");
+        setAiNotes("Lendo arquivo");
         console.info("IMPORT_PDF_START", {
           fileName: file.name,
           fileType: file.type || "unknown",
@@ -2346,8 +2369,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           return;
         }
         if (pdfPayload.ocrUsed) {
-          setAiNotes("Detectamos um catálogo visual. Aplicando leitura inteligente (OCR)...");
-          setParseErrors(["Detectamos um catálogo visual. Aplicando leitura inteligente (OCR)..."]);
+          setAiNotes("Lendo catálogo visual");
+          setParseErrors(["Lendo catálogo visual. Revise os itens ao final."]);
         }
 
         setAnalysisStage("parsing");
@@ -2521,6 +2544,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setImportSourceConfidence(local.successRate);
       return;
     } catch (err: any) {
+      if (requestSeq !== requestSeqRef.current) return;
       console.error("Import parse error:", err);
       console.error("[ImportCsvDialog] preparation_failed", {
         fileName: file.name,
@@ -2545,7 +2569,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       setDraftWines([]);
       setStep("preview");
     } finally {
-      setLoading(false);
+      if (requestSeq === requestSeqRef.current) setLoading(false);
     }
   };
 
@@ -3374,7 +3398,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         </div>
                       </div>
                       <p className="text-[14px] font-semibold text-[#1A1713]">
-                        {analysisStage === "processing" ? "Processando arquivo..." : analysisStage === "extracting" ? "Extraindo dados..." : analysisStage === "parsing" ? "Organizando os vinhos..." : "Normalizando dados..."}
+                        {analysisStage === "processing" ? "Lendo arquivo" : analysisStage === "extracting" ? "Extraindo dados" : analysisStage === "parsing" ? "Organizando vinhos" : "Preparando revisão"}
                       </p>
                     </div>
                   </motion.div>

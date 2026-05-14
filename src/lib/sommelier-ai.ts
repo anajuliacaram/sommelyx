@@ -172,6 +172,7 @@ export interface WineListAnalysisTextInput {
   mimeType?: string;
   fileName?: string;
   requestId?: string;
+  signal?: AbortSignal;
 }
 
 type RawWineListCandidate = {
@@ -470,6 +471,7 @@ export type WinePairingInput =
       cellarWines?: WineSummary[] | null;
       intent?: PairingIntent;
       requestId?: string;
+      signal?: AbortSignal;
     };
 
 // ── Error Classification ──
@@ -1722,6 +1724,7 @@ export function adaptMenuAnalysisToGeneratedWinePairing(
 export async function generateWinePairing(input: WinePairingInput): Promise<GeneratedWinePairing> {
   const finalDish = normalizeWinePairingInput(input);
   const requestId = typeof input === "string" ? undefined : input.requestId;
+  const signal = typeof input === "string" ? undefined : input.signal;
   console.log("dish:", finalDish);
 
   try {
@@ -1797,6 +1800,7 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
           model: "gpt-4o-mini",
         },
         requestId,
+        signal,
       },
     );
     console.log("ai_response:", response);
@@ -1886,6 +1890,7 @@ export async function analyzeWineList(
           model: "gpt-4o-mini",
         },
         requestId: analysis.requestId,
+        signal: analysis.signal,
       },
     );
     const requestStartedAt = nowMs();
@@ -2026,6 +2031,7 @@ export async function analyzeMenuForWine(
           model: "gpt-4o-mini",
         },
         requestId: analysis.requestId,
+        signal: analysis.signal,
       },
     );
     const requestStartedAt = nowMs();

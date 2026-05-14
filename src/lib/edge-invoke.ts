@@ -6,6 +6,7 @@ type InvokeOptions = {
   retries?: number;
   retryOnAbort?: boolean;
   requestId?: string;
+  signal?: AbortSignal;
   metadata?: {
     attachmentType?: string;
     ocrLength?: number;
@@ -275,6 +276,37 @@ function parseTextResponse(text: string) {
   }
 }
 
+function createAbortError(requestId: string, functionName: string) {
+  return new EdgeFunctionError("Solicitação cancelada.", {
+    status: 499,
+    code: "ABORTED",
+    requestId,
+    debugId: requestId,
+    retryable: false,
+    functionName,
+  });
+}
+
+function abortSignalAny(signals: AbortSignal[]) {
+  const active = signals.filter(Boolean);
+  if (active.length === 0) return undefined;
+  const controller = new AbortController();
+  const abort = () => {
+    if (!controller.signal.aborted) controller.abort();
+  };
+  for (const signal of active) {
+    if (signal.aborted) {
+      abort();
+      break;
+    }
+    signal.addEventListener("abort", abort, { once: true });
+  }
+  return {
+    signal: controller.signal,
+    cleanup: () => active.forEach((signal) => signal.removeEventListener("abort", abort)),
+  };
+}
+
 function sanitizeForLog(value: unknown): unknown {
   if (value == null) return value;
 
@@ -310,7 +342,7 @@ function sanitizeForLog(value: unknown): unknown {
 export async function invokeEdgeFunction<T>(
   name: string,
   body: Record<string, unknown>,
-  { timeoutMs = 45_000, retries = 1, retryOnAbort = true, requestId: providedRequestId, metadata }: InvokeOptions = {},
+  { timeoutMs = 45_000, retries = 1, retryOnAbort = true, requestId: providedRequestId, signal, metadata }: InvokeOptions = {},
 ): Promise<T> {
   const requestId = providedRequestId || crypto.randomUUID();
   const startedAt = Date.now();
@@ -345,6 +377,7 @@ export async function invokeEdgeFunction<T>(
   try {
     for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
+      if (signal?.aborted) throw createAbortError(requestId, name);
       let session = await resolveSession(attempt > 0);
       const url = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
       aiDebugLog("request_attempt", {
@@ -394,8 +427,9 @@ export async function invokeEdgeFunction<T>(
         });
       }
 
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      const timeoutController = new AbortController();
+      const combinedSignal = abortSignalAny([timeoutController.signal, ...(signal ? [signal] : [])]);
+      const timeout = setTimeout(() => timeoutController.abort(), timeoutMs);
 
       try {
         const response = await fetch(url, {
@@ -409,7 +443,7 @@ export async function invokeEdgeFunction<T>(
             ...body,
             clientRequestId: requestId,
           }),
-          signal: controller.signal,
+          signal: combinedSignal?.signal ?? timeoutController.signal,
         });
         if (import.meta.env.DEV) {
           console.log("[EDGE_RESPONSE_STATUS]", {
@@ -493,8 +527,10 @@ export async function invokeEdgeFunction<T>(
         return unwrapped;
       } finally {
         clearTimeout(timeout);
+        combinedSignal?.cleanup();
       }
     } catch (err) {
+      if (signal?.aborted) throw createAbortError(requestId, name);
       const rawMessage = err instanceof Error ? err.message : "";
       // Do NOT retry transport errors (Failed to fetch / abort) for long-running calls:
       // the request likely already reached the function and is processing server-side.

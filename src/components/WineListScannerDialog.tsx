@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo, type ComponentProps } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect, type ComponentProps } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Camera,
@@ -244,8 +244,22 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const requestBusyRef = useRef(false);
   const prepareBusyRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const requestSeqRef = useRef(0);
+
+  const beginRequest = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    requestSeqRef.current += 1;
+    return requestSeqRef.current;
+  }, []);
+
+  const isLatestRequest = useCallback((id: number) => id === requestSeqRef.current, []);
 
   const reset = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    requestSeqRef.current += 1;
     setStep("capture");
     setAttachmentPreview(null);
     setResults(null);
@@ -261,15 +275,29 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     onOpenChange(value);
   };
 
+  useEffect(() => {
+    if (step !== "scanning") return;
+    const timeout = window.setTimeout(() => {
+      abortRef.current?.abort();
+      requestBusyRef.current = false;
+      prepareBusyRef.current = false;
+      setErrorMsg("A leitura demorou mais que o esperado. Tente novamente.");
+      setStep("error");
+    }, 90_000);
+    return () => window.clearTimeout(timeout);
+  }, [step]);
+
   const runScan = useCallback(async (attachment: WineListAnalysisTextInput) => {
     if (requestBusyRef.current) return;
+    const requestSeq = beginRequest();
     requestBusyRef.current = true;
     setStep("scanning");
     setErrorMsg("");
     const requestId = crypto.randomUUID();
     try {
       const profile = cellarWines.length >= 3 ? buildUserProfile(cellarWines) : undefined;
-      const data = await analyzeWineList({ ...attachment, requestId }, profile);
+      const data = await analyzeWineList({ ...attachment, requestId, signal: abortRef.current?.signal }, profile);
+      if (!isLatestRequest(requestSeq)) return;
       const normalized = normalizeWineListResponse(data);
       setResults(normalized);
       if (normalized.wines.length > 0) {
@@ -280,15 +308,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       }
       setStep("results");
     } catch (err: unknown) {
+      if (!isLatestRequest(requestSeq)) return;
       setErrorMsg(err instanceof Error && err.message ? err.message : "Não conseguimos extrair vinhos confiáveis desta carta. Tente uma imagem ou PDF mais nítido.");
       setStep("error");
     } finally {
-      requestBusyRef.current = false;
+      if (isLatestRequest(requestSeq)) requestBusyRef.current = false;
     }
-  }, [cellarWines]);
+  }, [beginRequest, cellarWines, isLatestRequest]);
 
   const handleFile = useCallback(async (file: File) => {
     if (requestBusyRef.current || prepareBusyRef.current) return;
+    const prepareSeq = beginRequest();
     prepareBusyRef.current = true;
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
@@ -304,6 +334,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
     try {
       const prepared = await prepareWineListAnalysisTextAttachment(file);
+      if (!isLatestRequest(prepareSeq)) return;
       const payload: WineListAnalysisTextInput = {
         text: prepared.text,
         mimeType: prepared.mimeType,
@@ -318,12 +349,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       setLastAttachment(payload);
       await runScan(payload);
     } catch (error) {
+      if (!isLatestRequest(prepareSeq)) return;
       setErrorMsg(getAttachmentErrorMessage(error, "Não conseguimos concluir a leitura desse arquivo."));
       setStep("error");
     } finally {
       prepareBusyRef.current = false;
     }
-  }, [runScan, toast]);
+  }, [beginRequest, isLatestRequest, runScan, toast]);
 
   const matchedCellarMap = useMemo(() => {
     const entries = (Array.isArray((results ?? EMPTY_WINE_LIST_ANALYSIS).wines) ? (results ?? EMPTY_WINE_LIST_ANALYSIS).wines : [])
@@ -596,9 +628,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     {step === "scanning" && (
                       <PairingLoadingState
                         steps={[
-                          "Lendo os rótulos visíveis…",
-                          "Separando preço, origem e estilo…",
-                          "Escolhendo os melhores destaques…",
+                          "Lendo carta",
+                          "Organizando rótulos",
+                          "Preparando destaques",
                         ]}
                         subtitle="Curadoria da carta"
                       />
