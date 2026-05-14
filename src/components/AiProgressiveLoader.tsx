@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2 } from "@/icons/lucide";
+import { Wine } from "@/icons/lucide";
 
 interface AiProgressiveLoaderProps {
   steps: string[];
@@ -27,33 +27,12 @@ export function AiProgressiveLoader({ steps, interval = 2500, subtitle }: AiProg
   }, [steps]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Animated icon */}
-      <div className="relative w-14 h-14">
-        <div className="absolute inset-0 rounded-2xl bg-primary/8 animate-pulse" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[rgba(123,30,43,0.07)] text-primary/70">
+          <Wine className="h-5 w-5" />
         </div>
-      </div>
-
-      {/* Step indicator dots */}
-      <div className="flex items-center gap-1.5">
-        {steps.map((_, i) => (
-          <div
-            key={i}
-            className="h-1 rounded-full transition-all duration-500"
-            style={{
-              width: i === currentStep ? 16 : 6,
-              backgroundColor: i <= currentStep
-                ? 'hsl(var(--primary))'
-                : 'hsl(var(--muted-foreground) / 0.15)',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Animated step text */}
-      <div className="text-center min-h-[40px] flex flex-col items-center justify-center">
+        <div className="min-h-[40px] min-w-0 flex flex-col justify-center">
         <AnimatePresence mode="wait">
           <motion.p
             key={currentStep}
@@ -61,7 +40,7 @@ export function AiProgressiveLoader({ steps, interval = 2500, subtitle }: AiProg
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.25 }}
-            className="text-sm font-medium text-foreground"
+            className="text-[15px] font-semibold leading-snug text-foreground"
           >
             {steps[currentStep]}
           </motion.p>
@@ -69,6 +48,14 @@ export function AiProgressiveLoader({ steps, interval = 2500, subtitle }: AiProg
         {subtitle && (
           <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
         )}
+        </div>
+      </div>
+      <div className="h-px w-full overflow-hidden rounded-full bg-black/5">
+        <motion.div
+          className="h-full bg-[linear-gradient(90deg,#7B1E2B,#C8A96A)]"
+          animate={{ width: `${Math.max(18, ((currentStep + 1) / Math.max(steps.length, 1)) * 100)}%` }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        />
       </div>
     </div>
   );

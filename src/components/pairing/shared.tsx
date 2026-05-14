@@ -305,24 +305,11 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[26px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.86)_0%,rgba(247,242,235,0.76)_100%)] p-5 shadow-[0_18px_40px_-30px_rgba(33,20,12,0.18)] sm:p-6"
+      className="rounded-[20px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.72)_100%)] p-4 shadow-[0_18px_40px_-30px_rgba(33,20,12,0.16)] sm:p-5"
     >
-      <div className="grid gap-5 lg:grid-cols-[120px_minmax(0,1fr)] lg:items-center">
-        <div
-          className="relative flex h-24 w-24 items-center justify-center rounded-[28px]"
-          style={{
-            background: "linear-gradient(135deg, rgba(123,35,48,0.08) 0%, rgba(123,35,48,0.03) 100%)",
-            border: "1px solid rgba(123,35,48,0.08)",
-            boxShadow: "0 12px 34px -18px rgba(123,35,48,0.12)",
-          }}
-        >
-          <div className="absolute inset-0 rounded-[28px] animate-pulse" style={{ background: "rgba(123,35,48,0.04)" }} />
-          <Sparkles className="relative z-10 h-8 w-8 text-primary/55" />
-        </div>
-        <div className="space-y-3">
+      <div className="space-y-3">
           {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
           <AiProgressiveLoader steps={steps} interval={2200} />
-        </div>
       </div>
     </motion.div>
   );
@@ -414,7 +401,7 @@ export function WineSuggestionCard({
   className?: string;
 }) {
   const summaryText = cleanAiPresentationText(reason, {
-    maxLength: 180,
+    maxLength: 210,
     fallback: buildPresentationStructureLine([
       style,
       `Acidez ${structureMatch.acidity}`,
@@ -422,9 +409,14 @@ export function WineSuggestionCard({
       `Taninos ${structureMatch.tannin}`,
     ]) || "Curadoria da casa",
   });
-  const aromaText = cleanAiPresentationText(decisionSupport?.sensory_profile.aroma, { maxLength: 90 });
-  const palateText = cleanAiPresentationText(decisionSupport?.sensory_profile.palate, { maxLength: 90 });
-  const momentText = cleanAiPresentationText(decisionSupport?.when_to_choose.ideal_scenario, { maxLength: 90 });
+  const aromaText = cleanAiPresentationText(decisionSupport?.sensory_profile.aroma, { maxLength: 80 });
+  const palateText = cleanAiPresentationText(decisionSupport?.sensory_profile.palate, { maxLength: 80 });
+  const momentText = cleanAiPresentationText(decisionSupport?.when_to_choose.ideal_scenario, { maxLength: 80 });
+  const structureText = buildPresentationStructureLine([
+    `corpo ${structureMatch.body}`,
+    `acidez ${structureMatch.acidity}`,
+    `tanino ${structureMatch.tannin}`,
+  ]);
 
   return (
     <motion.li
@@ -432,7 +424,7 @@ export function WineSuggestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group list-none overflow-hidden rounded-[24px] border border-border/30 bg-[rgba(255,255,255,0.86)] shadow-[0_18px_34px_-28px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5",
+        "group list-none overflow-hidden rounded-[18px] border border-border/25 bg-[rgba(255,255,255,0.84)] shadow-[0_14px_28px_-26px_rgba(0,0,0,0.16)] transition-all duration-200 hover:-translate-y-0.5",
         className,
       )}
       style={{
@@ -440,70 +432,26 @@ export function WineSuggestionCard({
         WebkitBackdropFilter: "blur(14px) saturate(1.08)",
       }}
     >
-      <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/70 via-[#C8A96A]/55 to-transparent" />
-      <div className="space-y-3 p-[18px] sm:p-5">
-        <div className="flex items-start justify-between gap-3">
+      <div className="space-y-3 p-4 sm:p-[18px]">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7B1E2B] text-[12px] font-semibold text-white">
+            {index + 1}
+          </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">Sugestão {index + 1}</p>
-            <h4 className="mt-1 text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[20px]">
+            <h4 className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[20px]">
               {wineName}
             </h4>
             {style ? <p className="mt-1 text-[12px] font-medium text-[#6B6258]">{style}</p> : null}
           </div>
-          <div className="grid shrink-0 gap-1 text-right">
-            <span className="rounded-full bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]">
-              Curadoria
-            </span>
-          </div>
         </div>
 
-        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.7fr)_minmax(240px,1fr)]">
-          <div className="rounded-[20px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-3.5 sm:p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
-              Perfil
-            </p>
-            <p className="mt-2 text-[13px] leading-6 text-[#3F362F]">
-              {summaryText}
-            </p>
-            {decisionSupport ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {aromaText ? (
-                  <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
-                    {aromaText}
-                  </span>
-                ) : null}
-                {palateText ? (
-                  <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
-                    {palateText}
-                  </span>
-                ) : null}
-                {momentText ? (
-                  <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
-                    {momentText}
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="rounded-[20px] border border-black/5 bg-[#FBFAF7] p-3.5 sm:p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
-              Estrutura
-            </p>
-            <div className="mt-3 grid gap-2">
-              {[
-                { label: "Acidez", value: structureMatch.acidity },
-                { label: "Tanino", value: structureMatch.tannin },
-                { label: "Corpo", value: structureMatch.body },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between gap-2 rounded-[16px] border border-black/5 bg-white/70 px-3 py-2">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
-                  <p className="text-[12px] font-medium text-[#2B231D]">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <p className="text-[13.5px] leading-6 text-[#3F362F]">{summaryText}</p>
+        {structureText ? <p className="text-[12.5px] leading-5 text-[#6B6258]">{structureText}</p> : null}
+        {[aromaText, palateText, momentText].filter(Boolean).length > 0 ? (
+          <p className="text-[12px] leading-5 text-[#5B5146]">
+            {[aromaText, palateText, momentText].filter(Boolean).join(" · ")}
+          </p>
+        ) : null}
       </div>
     </motion.li>
   );

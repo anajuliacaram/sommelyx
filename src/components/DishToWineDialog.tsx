@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UtensilsCrossed, Search, Loader2, Wine as WineIcon, Sparkles, Camera, Upload, ArrowLeft, ChefHat, FileText, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
+import { UtensilsCrossed, Search, Loader2, Wine as WineIcon, Sparkles, Camera, Upload, ArrowLeft, ChefHat, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -15,10 +15,9 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
-import { buildPresentationStructureLine, cleanAiPresentationText, getAiPresentationStatus, hasAiPresentationValue } from "@/lib/ai-presentation";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AiModalSidebarCard, AiModalEyebrow, AiModalKeyValue, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
+import { buildPresentationStructureLine, cleanAiPresentationText } from "@/lib/ai-presentation";
+import { AiModalHeader, AiModalCard, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 import {
-  SectionHeader,
   PairingLoadingState,
   PairingErrorState,
   PremiumChoiceCard,
@@ -881,20 +880,20 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const currentDishContext = dish || extWineName || selectedWine?.name || "prato";
   const loadingSteps = requestMode === "dish_only"
     ? [
-        "Interpretando o prato…",
-        "Buscando harmonizações…",
-        "Montando sugestões…",
+        "Lendo peso, gordura e intensidade do prato…",
+        "Comparando acidez, corpo e taninos…",
+        "Escolhendo as melhores garrafas…",
       ]
     : [
-        "Lendo imagem…",
-        "Interpretando carta…",
-        "Gerando análise…",
+        "Lendo os rótulos visíveis…",
+        "Separando as escolhas mais promissoras…",
+        "Organizando a recomendação final…",
       ];
   const loadingSubtitle = requestMode === "dish_only"
-    ? `Gerando harmonização para: ${dish}`
+    ? `Harmonização para ${dish}`
     : dish.trim()
-      ? `Prato: ${dish}`
-      : "Imagem enviada";
+      ? `Carta para ${dish}`
+      : "Leitura da carta";
 
   const subModeTitle = source === "cellar" ? "Da minha adega" : "Adega externa";
 
@@ -907,23 +906,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         fallback: Boolean(normalizedScanResults?.fallback),
         fallbackReason: typeof normalizedScanResults?.fallbackReason === "string" ? normalizedScanResults.fallbackReason : null,
       };
-      const scanStatus = getAiPresentationStatus("menu", safeScanResults.fallback);
-      const resultStatus = safeScanResults.fallback
-        ? {
-            icon: <Sparkles className="h-4 w-4 text-amber-700" />,
-            title: scanStatus.title,
-            tone: "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]",
-            description: scanStatus.description,
-            warning: null,
-          }
-        : {
-            icon: <Check className="h-4 w-4 text-success" />,
-            title: scanStatus.title,
-            tone: "bg-[rgba(95,111,82,0.08)] text-[#2F4A2B] ring-[rgba(95,111,82,0.16)]",
-            description: scanStatus.description,
-            warning: null,
-          };
-
       return (
         <motion.div
           key="scan-results"
@@ -932,34 +914,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           exit={{ opacity: 0 }}
           className="space-y-3 sm:space-y-4"
         >
-          {preview?.url && (
-            <AiModalCard className="p-0 overflow-hidden">
-              <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
-                <img src={preview.url} alt="Pré-visualização do arquivo analisado" className="h-full w-full object-cover" />
-              </div>
-            </AiModalCard>
-          )}
-
-          <AiStatusCard
-            icon={resultStatus.icon}
-            title={resultStatus.title}
-            description={resultStatus.description}
-            warning={resultStatus.warning}
-            toneClassName={resultStatus.tone}
-          />
-
-          <AiModalCard className="space-y-1.5">
-            <AiSectionLabel>Prato</AiSectionLabel>
-            <p className="text-[15px] font-semibold tracking-[-0.02em] text-[#1A1713]">
-              {dish}
-            </p>
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary/70" />
-              <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#6B6258]">
-                Melhores opções da carta
-              </span>
+          <div className="border-b border-[rgba(24,21,17,0.08)] pb-3">
+            <div>
+              <p className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
+                Melhores vinhos para {dish}
+              </p>
+              <p className="mt-1 text-[12.5px] text-[#6B6258]">
+                {safeScanResults.wines.length} sugestões ranqueadas da carta enviada.
+              </p>
             </div>
-          </AiModalCard>
+          </div>
 
           {safeScanResults.wines.length === 0 ? (
             <AiModalCard className="text-center space-y-2">
@@ -971,9 +935,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               </p>
             </AiModalCard>
           ) : (
-            <ul className="space-y-3 sm:space-y-4">
+            <ul className="space-y-2.5 sm:space-y-3">
               {safeScanResults.wines.map((w, i) => {
-                const highlightTag = w.highlight === "top-pick" ? "Melhor escolha" : w.highlight === "best-value" ? "Melhor custo-benefício" : null;
+                const highlightTag = i === 0 || w.highlight === "top-pick" ? "Melhor escolha" : w.highlight === "best-value" ? "Mais segura" : i === 1 ? "Boa alternativa" : i === 2 ? "Mais aventureira" : null;
                 const originLine = [w.producer, w.region, w.country].filter((value): value is string => Boolean(value && value.trim())).join(" · ");
                 const summaryText = cleanAiPresentationText(w.description || w.verdict || w.reasoning || "", { maxLength: 132 });
                 const whyText = cleanAiPresentationText(w.reasoning || w.verdict || w.description || "", { maxLength: 156 });
@@ -985,11 +949,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08, duration: 0.3 }}
                     className={cn(
-                      "rounded-[24px] border p-4 sm:p-5 space-y-3 cursor-default transition-all duration-200 hover:-translate-y-[1px]",
+                      "rounded-[18px] border p-3.5 sm:p-4 space-y-2.5 cursor-default transition-all duration-200 hover:-translate-y-[1px]",
                       "bg-[rgba(255,255,255,0.82)] border-[rgba(95,111,82,0.12)]",
                     )}
                   >
-                    <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/55 via-[#C8A96A]/40 to-transparent" />
                     <div className="space-y-3">
                       {highlightTag ? (
                         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]/60">
@@ -998,7 +961,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       ) : null}
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1 space-y-1">
-                          <h4 className="text-[20px] font-semibold tracking-[-0.03em] leading-tight text-[#1A1713] sm:text-[23px]">
+                          <h4 className="text-[17px] font-semibold tracking-[-0.025em] leading-tight text-[#1A1713] sm:text-[18px]">
                             {w.name}
                           </h4>
                           {originLine ? (
@@ -1018,9 +981,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       </div>
 
                       {whyText ? (
-                        <div className="rounded-[20px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-4 py-3.5">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">À mesa</p>
-                          <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
+                        <div className="rounded-[14px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-3 py-2.5">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">Por que harmoniza</p>
+                          <p className="mt-1.5 text-[13px] leading-6 text-[#3F362F]">
                             {whyText}
                           </p>
                         </div>
@@ -1079,60 +1042,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     }
   };
 
-  const sidebarTitle =
-    selectedWine?.name ||
-    extWineName ||
-    dish ||
-    (source === "cellar" ? "Minha adega" : source === "external" ? "Adega externa" : "Fluxo de harmonização");
-
-  const sidebarDescription =
-    step === "results" || step === "wine-results" || step === "ext-menu-results" || step === "scan-results"
-      ? "O contexto e o arquivo ficam visíveis aqui enquanto as recomendações ocupam a área principal."
-      : "Escolha o caminho, defina o contexto e avance sem perder espaço vertical para blocos repetidos.";
-
-  const sidebarContent = (
-    <>
-      <AiModalSidebarCard className="space-y-3">
-        <div className="space-y-1.5">
-          <AiModalEyebrow>Curadoria em andamento</AiModalEyebrow>
-          <p className="text-[18px] font-semibold tracking-[-0.03em] text-[#1A1713]">{sidebarTitle}</p>
-          <p className="text-[12.5px] leading-5 text-[#6B6258]">{sidebarDescription}</p>
-        </div>
-
-        {preview?.url ? (
-          <div className="overflow-hidden rounded-[20px] border border-black/5 bg-white/72">
-            <img src={preview.url} alt="Pré-visualização do arquivo analisado" className="h-48 w-full object-cover" />
-          </div>
-        ) : (
-          <div className="flex h-40 items-center justify-center rounded-[20px] border border-dashed border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.04)] text-center">
-            <div className="space-y-2 px-6">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/75">
-                <FileText className="h-5 w-5 text-[#7B1E2B]" />
-              </div>
-              <p className="text-[12px] font-medium text-[#5E564C]">A carta ou o cardápio aparecem aqui após o envio.</p>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <AiModalKeyValue label="Origem" value={source === "cellar" ? "Minha adega" : source === "external" ? "Adega externa" : "—"} />
-          <AiModalKeyValue label="Modo" value={subMode === "by-dish" ? "Prato → vinho" : subMode === "by-wine" ? "Vinho → prato" : "Escolha"} />
-          <AiModalKeyValue label="Etapa" value={step.replaceAll("-", " ")} />
-        </div>
-      </AiModalSidebarCard>
-
-      {(step === "results" || step === "wine-results" || step === "ext-menu-results" || step === "scan-results") && normalizedPairingResult ? (
-        <AiModalSidebarCard className="space-y-3">
-          <AiModalEyebrow>Resumo rápido</AiModalEyebrow>
-          <AiModalKeyValue label="Sugestões" value={Math.min(normalizedPairingResult.pairings.length, 5)} />
-          <AiModalKeyValue label="Tom" value={normalizedPairingResult.analysis.flavor_profile} />
-          <AiModalKeyValue label="Estrutura" value={normalizedPairingResult.analysis.texture} />
-          <AiModalKeyValue label="Preparo" value={normalizedPairingResult.analysis.cooking_method} />
-        </AiModalSidebarCard>
-      ) : null}
-    </>
-  );
-
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Harmonizar">
@@ -1142,12 +1051,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           <AiModalHeader
             icon={<UtensilsCrossed className="h-5 w-5" />}
             title="Harmonizar"
-            description="Encontre a combinação certa com menos etapas visuais, mais contexto acima da dobra e uma curadoria muito mais escaneável."
+            description="Escolha o vinho certo para o prato, ou o prato certo para a garrafa."
           />
         </AiModalHeaderBar>
 
         <AiModalBody>
-          <AiModalSplitLayout sidebar={sidebarContent}>
+          <AiModalSplitLayout>
           <div className="space-y-3 sm:space-y-4">
           {step !== "source" && (
             <Button
@@ -1205,7 +1114,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 className="space-y-2.5 sm:space-y-3"
               >
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
-                  {subModeTitle} — Como quer harmonizar?
+                  {subModeTitle}
                 </p>
 
                 <div className="space-y-2 sm:space-y-2.5">
@@ -1695,7 +1604,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     <Input
                       value={extWineName}
                       onChange={(e) => setExtWineName(e.target.value)}
-                      placeholder="Nome do vinho (ex: Malbec Catena Zapata)…"
+                      placeholder="Nome do vinho no rótulo…"
                       className="pl-9 h-11 text-sm"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && extWineName.trim()) {
@@ -1791,9 +1700,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {step === "ext-menu-scanning" && (
               <PairingLoadingState
                 steps={[
-                  "Lendo imagem…",
-                  "Interpretando carta…",
-                  "Gerando análise…",
+                  "Lendo os pratos visíveis…",
+                  "Comparando peso, acidez e gordura…",
+                  "Escolhendo as melhores combinações…",
                 ]}
                 subtitle={`Vinho: ${extWineName}`}
               />
@@ -1883,64 +1792,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0 }}
                 className="space-y-3 sm:space-y-4"
               >
-                {preview?.url && (
-                  <AiModalCard className="p-0 overflow-hidden">
-                    <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
-                      <img src={preview.url} alt="Pré-visualização do arquivo analisado" className="h-full w-full object-cover" />
-                    </div>
-                  </AiModalCard>
-                )}
-
-                {(() => {
-                  const pairingStatus = getAiPresentationStatus("pairing", normalizedPairingResult.fallback);
-                  return (
-                <AiStatusCard
-                  icon={normalizedPairingResult.fallback ? <Sparkles className="h-4 w-4 text-amber-700" /> : <Check className="h-4 w-4 text-success" />}
-                  title={pairingStatus.title}
-                  description={pairingStatus.description}
-                  warning={null}
-                  toneClassName={normalizedPairingResult.fallback ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]" : "bg-[rgba(95,111,82,0.10)] text-[#57704B] ring-[rgba(95,111,82,0.18)]"}
-                />
-                  );
-                })()}
-
-                {[
-                  ["Acidez", normalizedPairingResult.analysis.acidity],
-                  ["Gordura", normalizedPairingResult.analysis.fat],
-                  ["Textura", normalizedPairingResult.analysis.texture],
-                  ["Perfil", normalizedPairingResult.analysis.flavor_profile],
-                  ["Preparo", normalizedPairingResult.analysis.cooking_method],
-                ].some(([, value]) => hasAiPresentationValue(value)) && (
-                  <AiModalCard className="space-y-2.5 sm:space-y-3">
-                    <div className="flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary/65" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Leitura do prato</span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {[
-                        ["Acidez", normalizedPairingResult.analysis.acidity],
-                        ["Gordura", normalizedPairingResult.analysis.fat],
-                        ["Textura", normalizedPairingResult.analysis.texture],
-                        ["Perfil", normalizedPairingResult.analysis.flavor_profile],
-                        ["Preparo", normalizedPairingResult.analysis.cooking_method],
-                      ]
-                        .map(([label, value]) => [label, cleanAiPresentationText(value)] as const)
-                        .filter(([, value]) => value.length > 0)
-                        .map(([label, value]) => (
-                          <div key={label} className="rounded-xl border border-[rgba(0,0,0,0.05)] bg-white/55 p-3">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-                            <p className="mt-1 text-[12.5px] leading-relaxed text-foreground/75">{value}</p>
-                          </div>
-                        ))}
-                    </div>
-                  </AiModalCard>
-                )}
-
-                <SectionHeader
-                  icon="chef"
-                  label={step === "wine-results" ? "Pratos sugeridos" : "Harmonizações"}
-                  count={Math.min(normalizedPairingResult.pairings.length, 5)}
-                />
+                <div className="border-b border-[rgba(24,21,17,0.08)] pb-3">
+                  <p className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
+                    {step === "wine-results" ? "Melhores pratos" : "Melhores harmonizações"}
+                  </p>
+                  <p className="mt-1 text-[12.5px] leading-5 text-[#6B6258]">
+                    {Math.min(normalizedPairingResult.pairings.length, 5)} escolhas ranqueadas por estrutura e contexto.
+                  </p>
+                </div>
 
                 <ul className="space-y-3 sm:space-y-4">
                   {normalizedPairingResult.pairings.slice(0, 5).map((p, i) => (
@@ -1990,9 +1849,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {step === "wine-results" && deepLinkLoading && !pairingResult && (
               <PairingLoadingState
                 steps={[
-                  "Carregando o vinho selecionado…",
-                  "Consultando harmonizações…",
-                  "Buscando detalhes e receitas…",
+                  "Lendo o perfil da garrafa…",
+                  "Comparando corpo, acidez e textura…",
+                  "Escolhendo os melhores pratos…",
                 ]}
                 subtitle={selectedWine?.name || initialWine?.name || "Vinho selecionado"}
               />

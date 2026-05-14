@@ -135,52 +135,22 @@ export function AiModalHeader({
 }
 
 export function AiModalSplitLayout({
-  sidebar,
   children,
-  sidebarClassName,
   contentClassName,
   className,
 }: {
-  sidebar?: ReactNode;
   children: ReactNode;
-  sidebarClassName?: string;
   contentClassName?: string;
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "grid min-h-0 flex-1 gap-3.5 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)]",
+        "grid min-h-0 flex-1 grid-cols-1 gap-3.5",
         className,
       )}
     >
-      {sidebar ? (
-        <aside className={cn("min-h-0 xl:overflow-hidden", sidebarClassName)}>
-          <div className="flex max-h-full flex-col gap-3 xl:sticky xl:top-0 xl:overflow-y-auto xl:pr-1">
-            {sidebar}
-          </div>
-        </aside>
-      ) : null}
       <section className={cn("min-h-0 overflow-y-auto pr-1", contentClassName)}>{children}</section>
-    </div>
-  );
-}
-
-export function AiModalSidebarCard({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-[18px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(246,240,232,0.72)_100%)] px-3.5 py-3.5 shadow-[0_12px_28px_-24px_rgba(33,20,12,0.18)] backdrop-blur-xl sm:px-4 sm:py-4",
-        className,
-      )}
-    >
-      {children}
     </div>
   );
 }

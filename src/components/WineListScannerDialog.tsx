@@ -7,10 +7,6 @@ import {
   Check,
   Sparkles,
   Search,
-  SlidersHorizontal,
-  FileText,
-  ChevronDown,
-  ChevronUp,
   Heart,
   GlassWater,
   Eye,
@@ -32,7 +28,7 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { useAddWishlist } from "@/hooks/useBusinessData";
 import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
-import { buildPresentationStructureLine, getAiPresentationStatus } from "@/lib/ai-presentation";
+import { buildPresentationStructureLine } from "@/lib/ai-presentation";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { cn } from "@/lib/utils";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
@@ -43,11 +39,7 @@ import {
   AiModalShell,
   AiModalHeaderBar,
   AiModalBody,
-  AiToolbarSurface,
   AiModalSplitLayout,
-  AiModalEyebrow,
-  AiModalKeyValue,
-  AiMetricPill,
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
 } from "@/components/ai-flow/ModalLayout";
@@ -65,7 +57,6 @@ interface WineListScannerDialogProps {
 type ScanStep = "capture" | "scanning" | "results" | "error";
 type WineType = "tinto" | "branco" | "rosé" | "espumante" | "unknown";
 type FilterMode = "all" | "tinto" | "branco" | "rosé" | "espumante";
-type FocusFilter = "all" | "drink-now" | "cellaring" | "premium" | "best-value";
 
 const EMPTY_WINE_LIST_ANALYSIS: WineListAnalysis = {
   wines: [],
@@ -81,14 +72,6 @@ const TYPE_PILLS: Array<{ key: FilterMode; label: string }> = [
   { key: "branco", label: "Brancos" },
   { key: "rosé", label: "Rosés" },
   { key: "espumante", label: "Espumantes" },
-];
-
-const FOCUS_PILLS: Array<{ key: FocusFilter; label: string }> = [
-  { key: "all", label: "Tudo" },
-  { key: "drink-now", label: "Beber agora" },
-  { key: "cellaring", label: "Guarda" },
-  { key: "premium", label: "Premium" },
-  { key: "best-value", label: "Best value" },
 ];
 
 const CANONICAL_TAGS = [
@@ -204,20 +187,6 @@ function buildCurationNote(wine: WineListItem | null | undefined, options: { isT
   return null;
 }
 
-function getCardRhythmClass(index: number, isFeatured: boolean) {
-  return "";
-}
-
-function matchesFocusFilter(wine: WineListItem, isTopPick: boolean, isBestValue: boolean, filter: FocusFilter) {
-  const tags = buildStatusTags(wine, isTopPick, isBestValue);
-  if (filter === "all") return true;
-  if (filter === "drink-now") return tags.includes("Beber agora");
-  if (filter === "cellaring") return tags.includes("Guarda");
-  if (filter === "premium") return tags.includes("Premium") || tags.includes("Alta complexidade") || tags.includes("Seleção da casa");
-  if (filter === "best-value") return tags.includes("Best value");
-  return true;
-}
-
 function findCellarMatch(wine: WineListItem, cellarWines: Wine[]) {
   const candidate = normalizeWineSearchText([wine.name, wine.producer, wine.vintage].filter(Boolean).join(" "));
   const fallback = normalizeWineSearchText(wine.name);
@@ -260,10 +229,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const [errorMsg, setErrorMsg] = useState("");
   const [lastAttachment, setLastAttachment] = useState<WineListAnalysisTextInput | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
-  const [focusFilter, setFocusFilter] = useState<FocusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedWineName, setSelectedWineName] = useState<string | null>(null);
-  const [previewExpanded, setPreviewExpanded] = useState(false);
   const [prefillWine, setPrefillWine] = useState<AddWineInitialValues | null>(null);
   const [editWine, setEditWine] = useState<Wine | null>(null);
   const [pairingWine, setPairingWine] = useState<Wine | null>(null);
@@ -280,10 +247,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     setErrorMsg("");
     setLastAttachment(null);
     setFilterMode("all");
-    setFocusFilter("all");
     setSearchQuery("");
     setSelectedWineName(null);
-    setPreviewExpanded(false);
   };
 
   const handleClose = (value: boolean) => {
@@ -371,7 +336,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     return resultWines
       .filter((wine) => {
         if (filterMode !== "all" && detectWineType(wine.style) !== filterMode) return false;
-        if (!matchesFocusFilter(wine, wine.name === safeResults.topPick, wine.name === safeResults.bestValue, focusFilter)) return false;
         if (!query) return true;
         const haystack = normalizeWineSearchText([
           wine.name,
@@ -395,15 +359,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         if (b.name === safeResults.bestValue && a.name !== safeResults.bestValue) return 1;
         return b.confidence - a.confidence;
       });
-  }, [results, filterMode, focusFilter, searchQuery, matchedCellarMap, selectedWineName]);
+  }, [results, filterMode, searchQuery, matchedCellarMap, selectedWineName]);
 
   const safeResults = results ?? EMPTY_WINE_LIST_ANALYSIS;
   const displayWines = refinedWines.slice(0, 100);
   const isTruncated = refinedWines.length > displayWines.length;
   const resultWines = Array.isArray(safeResults.wines) ? safeResults.wines.filter((wine): wine is WineListItem => Boolean(wine?.name)) : [];
-  const pricedWines = resultWines.filter((wine) => typeof wine.price === "number");
-  const avgPrice = pricedWines.length > 0 ? pricedWines.reduce((sum, wine) => sum + (wine.price || 0), 0) / pricedWines.length : null;
-  const cellarMatches = resultWines.filter((wine) => matchedCellarMap.get(wine.name)).length;
   const availableTypes = [...new Set(resultWines.map((wine) => detectWineType(wine.style)).filter((type) => type !== "unknown"))] as WineType[];
 
   const openSaveDialog = (wine: WineListItem) => {
@@ -437,27 +398,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     }
   };
 
-  const sidebarContent = (
-    <WorkspaceRail
-      step={step}
-      attachmentPreview={attachmentPreview}
-      previewExpanded={previewExpanded}
-      setPreviewExpanded={setPreviewExpanded}
-      safeResults={safeResults}
-      pricedWines={pricedWines.length}
-      cellarMatches={cellarMatches}
-      avgPrice={avgPrice}
-      availableTypes={availableTypes}
-      filterMode={filterMode}
-      setFilterMode={setFilterMode}
-      focusFilter={focusFilter}
-      setFocusFilter={setFocusFilter}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
-      onReset={reset}
-    />
-  );
-
   const renderResultsContent = () => {
     if (safeResults.wines.length === 0) {
       return (
@@ -481,21 +421,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       );
     }
 
-    const leadWine = displayWines[0];
-    const trailingWines = displayWines.slice(1);
-    const topPickLabel = safeResults.topPick ? safeResults.topPick : "Primeira escolha";
-    const companionHighlights = displayWines
-      .slice(1, 3)
-      .map((wine, index) => ({
-        name: wine.name,
-        note: buildCurationNote(wine, {
-          isTopPick: wine.name === safeResults.topPick,
-          isBestValue: wine.name === safeResults.bestValue,
-          isFeatured: false,
-          index: index + 1,
-        }),
-      }));
-
     return (
       <motion.div
         key="results"
@@ -505,102 +430,53 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         className="space-y-4"
       >
         <section className="space-y-3">
-          <div className="flex flex-col gap-3 border-b border-[rgba(24,21,17,0.08)] pb-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="border-b border-[rgba(24,21,17,0.08)] pb-3">
             <div>
-              <AiModalEyebrow className="mb-2">Workspace</AiModalEyebrow>
               <p className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
                 {displayWines.length} rótulos para decidir
               </p>
-              <p className="mt-1.5 max-w-[38rem] text-[12.5px] leading-5 text-[#6B6258]">
-                {getAiPresentationStatus("menu", safeResults.fallback).description}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5">
-              <AiMetricPill label="carta" value={safeResults.wines.length} tone="accent" className="text-[10px]" />
-              <AiMetricPill label="preço" value={pricedWines.length} className="text-[10px]" />
-              <AiMetricPill label="adega" value={cellarMatches} tone={cellarMatches > 0 ? "success" : "neutral"} className="text-[10px]" />
-              {avgPrice ? <AiMetricPill label="médio" value={formatPrice(avgPrice)} className="text-[10px]" /> : null}
+              {safeResults.topPick ? (
+                <p className="mt-1 text-[12.5px] leading-5 text-[#6B6258]">
+                  Primeiro destaque: {safeResults.topPick}
+                </p>
+              ) : null}
             </div>
           </div>
         </section>
 
-        {leadWine ? (
-          <section className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(220px,0.8fr)] xl:items-start">
-            <WineListCard
-              key={`${leadWine.name}-lead`}
-              wine={leadWine}
-              index={0}
-              isTopPick={leadWine.name === safeResults.topPick}
-              isBestValue={leadWine.name === safeResults.bestValue}
-              isSelected={selectedWineName === leadWine.name}
-              isFeatured
-              rhythmClassName="xl:mr-2"
-              curationNote={buildCurationNote(leadWine, {
-                isTopPick: leadWine.name === safeResults.topPick,
-                isBestValue: leadWine.name === safeResults.bestValue,
-                isFeatured: true,
-                index: 0,
-              })}
-              cellarMatch={matchedCellarMap.get(leadWine.name) || null}
-              onSelect={() => setSelectedWineName(leadWine.name)}
-              onSave={() => openSaveDialog(leadWine)}
-              onWishlist={() => void saveToWishlist(leadWine)}
-              onPair={() => {
-                const cellarMatch = matchedCellarMap.get(leadWine.name) || null;
-                if (cellarMatch) setPairingWine(cellarMatch);
-              }}
-              onView={() => {
-                const cellarMatch = matchedCellarMap.get(leadWine.name) || null;
-                if (cellarMatch) setEditWine(cellarMatch);
-              }}
-              onConsume={() => {
-                const cellarMatch = matchedCellarMap.get(leadWine.name) || null;
-                if (cellarMatch) setConsumptionWine({
-                  id: cellarMatch.id,
-                  name: cellarMatch.name,
-                  producer: cellarMatch.producer,
-                  country: cellarMatch.country,
-                  region: cellarMatch.region,
-                  grape: cellarMatch.grape,
-                  style: cellarMatch.style,
-                  vintage: cellarMatch.vintage,
-                });
-              }}
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#6B6258]/55" />
+            <Input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Buscar rótulo, produtor, região"
+              className="h-9 rounded-[12px] border-white/70 bg-white/80 pl-9 text-[12.5px] shadow-none"
             />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {TYPE_PILLS.filter((pill) => pill.key === "all" || availableTypes.includes(pill.key as WineType)).map((pill) => {
+              const active = filterMode === pill.key;
+              return (
+                <button
+                  key={pill.key}
+                  type="button"
+                  onClick={() => setFilterMode(pill.key)}
+                  className={cn(
+                    "h-8 rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors",
+                    active ? "bg-[#7B1E2B]/10 text-[#5A1528]" : "bg-white/50 text-[#62584F] hover:bg-white",
+                  )}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            <div className="space-y-4 px-1 pt-1 xl:pt-4">
-              <div className="space-y-1.5">
-                <AiModalEyebrow className="mb-0">Seleção</AiModalEyebrow>
-                <p className="font-serif text-[18px] leading-[1.1] tracking-[-0.04em] text-[#1A1713]">
-                  {topPickLabel}
-                </p>
-              </div>
-
-              {companionHighlights.length > 0 ? (
-                <div className="space-y-3 border-l border-[rgba(123,30,43,0.10)] pl-4">
-                  {companionHighlights.map((highlight) => (
-                    <div key={highlight.name} className="space-y-0.5">
-                      <p className="font-serif text-[15px] leading-tight tracking-[-0.03em] text-[#1A1713]">
-                        {highlight.name}
-                      </p>
-                      {highlight.note ? (
-                        <p className="text-[10.5px] uppercase tracking-[0.14em] text-[#7A6C60]">
-                          {highlight.note}
-                        </p>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        {trailingWines.length > 0 ? (
-          <section className="grid gap-x-3 gap-y-3.5 xl:grid-cols-2 2xl:grid-cols-3">
-            {trailingWines.map((wine, offsetIndex) => {
-              const index = offsetIndex + 1;
+        {displayWines.length > 0 ? (
+          <section className="space-y-2.5">
+            {displayWines.map((wine, index) => {
               const cellarMatch = matchedCellarMap.get(wine.name) || null;
               const isFeatured = wine.name === safeResults.topPick;
               return (
@@ -611,12 +487,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   isTopPick={wine.name === safeResults.topPick}
                   isBestValue={wine.name === safeResults.bestValue}
                   isSelected={selectedWineName === wine.name}
-                  isFeatured={isFeatured}
-                  rhythmClassName={getCardRhythmClass(index, isFeatured)}
+                  isFeatured={false}
+                  rhythmClassName=""
                   curationNote={buildCurationNote(wine, {
                     isTopPick: wine.name === safeResults.topPick,
                     isBestValue: wine.name === safeResults.bestValue,
-                    isFeatured,
+                    isFeatured: false,
                     index,
                   })}
                   cellarMatch={cellarMatch}
@@ -661,12 +537,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               <AiModalHeader
                   icon={<Sparkles className="h-5 w-5" />}
                   title="Analisar Carta"
-                  description="Leia a carta, filtre rótulos e siga para salvar ou harmonizar sem sair do fluxo."
+                  description="Leia os rótulos visíveis, encontre os destaques e decida com rapidez."
                 />
               </AiModalHeaderBar>
 
               <AiModalBody>
-                <AiModalSplitLayout sidebar={sidebarContent} sidebarClassName="lg:pr-1" contentClassName="pb-1">
+                <AiModalSplitLayout contentClassName="pb-1">
                   <AnimatePresence mode="wait">
                     {step === "capture" && (
                       <motion.div
@@ -724,14 +600,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             </div>
                           </div>
 
-                          <AiToolbarSurface className="space-y-2.5 border-[rgba(123,30,43,0.08)] bg-[rgba(255,255,255,0.72)] shadow-none">
-                            <div className="grid gap-2 sm:grid-cols-3">
-                              <AiModalKeyValue label="Entrega" value="seleção editorial" />
-                              <AiModalKeyValue label="Ideal para" value="foto nítida ou PDF" />
-                              <AiModalKeyValue label="Formato" value="leitura sommelier" />
-                            </div>
-                          </AiToolbarSurface>
-
                           <div className="grid gap-2.5 sm:grid-cols-2">
                             <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="w-full">
                               <Camera className="mr-2 h-4 w-4" />
@@ -752,11 +620,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     {step === "scanning" && (
                       <PairingLoadingState
                         steps={[
-                          "Lendo a carta…",
-                          "Identificando rótulos…",
-                          "Organizando a seleção…",
+                          "Lendo os rótulos visíveis…",
+                          "Separando preço, origem e estilo…",
+                          "Escolhendo os melhores destaques…",
                         ]}
-                        subtitle="Análise da carta"
+                        subtitle="Curadoria da carta"
                       />
                     )}
 
@@ -803,221 +671,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   );
 }
 
-function StatTile({
-  label,
-  value,
-  accent = "neutral",
-}: {
-  label: string;
-  value: string | number;
-  accent?: "neutral" | "green" | "amber";
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-[16px] px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.58)]",
-        accent === "green" && "bg-[linear-gradient(180deg,rgba(235,245,238,0.88)_0%,rgba(229,240,231,0.78)_100%)] text-emerald-950",
-        accent === "amber" && "bg-[linear-gradient(180deg,rgba(249,242,229,0.90)_0%,rgba(245,236,219,0.82)_100%)] text-amber-950",
-        accent === "neutral" && "bg-[rgba(255,255,255,0.52)] text-[#1A1713]",
-      )}
-    >
-      <p className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(72,60,46,0.46)]">{label}</p>
-      <p className="mt-1 font-serif text-[19px] tracking-[-0.04em]">{value}</p>
-    </div>
-  );
-}
-
-function WorkspaceRail({
-  step,
-  attachmentPreview,
-  previewExpanded,
-  setPreviewExpanded,
-  safeResults,
-  pricedWines,
-  cellarMatches,
-  avgPrice,
-  availableTypes,
-  filterMode,
-  setFilterMode,
-  focusFilter,
-  setFocusFilter,
-  searchQuery,
-  setSearchQuery,
-  onReset,
-}: {
-  step: ScanStep;
-  attachmentPreview: { url?: string | null; fileName: string; isPdf: boolean } | null;
-  previewExpanded: boolean;
-  setPreviewExpanded: (value: boolean | ((value: boolean) => boolean)) => void;
-  safeResults: WineListAnalysis;
-  pricedWines: number;
-  cellarMatches: number;
-  avgPrice: number | null;
-  availableTypes: WineType[];
-  filterMode: FilterMode;
-  setFilterMode: (value: FilterMode) => void;
-  focusFilter: FocusFilter;
-  setFocusFilter: (value: FocusFilter) => void;
-  searchQuery: string;
-  setSearchQuery: (value: string) => void;
-  onReset: () => void;
-}) {
-  return (
-    <aside
-      className="overflow-hidden rounded-[30px] border border-[rgba(255,255,255,0.42)] bg-[linear-gradient(180deg,rgba(252,250,246,0.90)_0%,rgba(246,239,230,0.82)_52%,rgba(233,226,215,0.80)_100%)] shadow-[0_28px_62px_-42px_rgba(34,21,13,0.24)] backdrop-blur-xl"
-      style={{
-        backdropFilter: "blur(18px) saturate(1.06)",
-        WebkitBackdropFilter: "blur(18px) saturate(1.06)",
-      }}
-    >
-      <div className="flex max-h-full flex-col xl:sticky xl:top-0">
-        <div className="space-y-4 px-4 pb-4 pt-4 sm:px-5">
-          <div className="space-y-1.5">
-            <AiModalEyebrow>{step === "results" ? "Curadoria pronta" : "Entrada"}</AiModalEyebrow>
-            <p className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#181511]">
-              {step === "results" ? "Carta analisada" : "Analisar Carta"}
-            </p>
-            <p className="text-[12px] leading-5 text-[#6B6258]">
-              {step === "results"
-                ? "Filtros e contexto ficam sempre à mão."
-                : "Envie uma carta nítida para extrair os rótulos."}
-            </p>
-          </div>
-
-          <div className="rounded-[22px] bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(248,243,235,0.74)_100%)] p-2.5 shadow-[0_18px_34px_-30px_rgba(42,30,22,0.18),inset_0_1px_0_rgba(255,255,255,0.78)]">
-            <div className="flex items-center gap-3">
-              <div className="flex h-[60px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-[#F6F0E8] shadow-[0_14px_24px_-18px_rgba(43,29,18,0.24)]">
-                {attachmentPreview?.url ? (
-                  <img src={attachmentPreview.url} alt="Carta analisada" className="h-full w-full object-cover object-top" />
-                ) : (
-                  <FileText className="h-4 w-4 text-[#7B1E2B]" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[12.5px] font-semibold text-[#1A1713]">
-                  {step === "results" ? `${safeResults.wines.length} vinhos encontrados` : attachmentPreview?.fileName || "Aguardando arquivo"}
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#6B6258]">
-                  {safeResults.fallback ? "Seleção inicial" : step === "results" ? "Curadoria pronta" : attachmentPreview?.isPdf ? "PDF" : "Imagem"}
-                </p>
-                {attachmentPreview?.url ? (
-                  <button
-                    type="button"
-                    onClick={() => setPreviewExpanded((value) => !value)}
-                    className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6A5847] transition-opacity duration-300 hover:opacity-80"
-                  >
-                    {previewExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                    {previewExpanded ? "Recolher" : "Expandir"}
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
-            {attachmentPreview?.url && previewExpanded ? (
-              <div className="mt-2.5 overflow-hidden rounded-[16px] shadow-[0_12px_28px_-24px_rgba(44,30,20,0.26)]">
-                <img src={attachmentPreview.url} alt="Carta ampliada" className="h-[220px] w-full object-cover object-top" />
-              </div>
-            ) : null}
-          </div>
-
-          {step === "results" ? (
-            <div className="grid grid-cols-2 gap-2">
-              <StatTile label="Leitura" value={safeResults.fallback ? "Inicial" : "Pronta"} accent={safeResults.fallback ? "amber" : "green"} />
-              <StatTile label="Rótulos" value={safeResults.wines.length} />
-              <StatTile label="Com preço" value={pricedWines} />
-              <StatTile label="Na adega" value={cellarMatches} />
-            </div>
-          ) : null}
-        </div>
-
-        {step === "results" ? (
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3.5 py-3 sm:px-4">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4 text-[#7B1E2B]" />
-                <AiModalEyebrow className="mb-0">Refinar</AiModalEyebrow>
-              </div>
-
-              <Input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Buscar produtor, região, prato"
-                className="h-9 rounded-[14px] border-white/40 bg-[rgba(255,255,255,0.62)] px-3 text-[12px] shadow-[inset_0_1px_2px_rgba(42,33,26,0.03)]"
-              />
-
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[rgba(72,60,46,0.52)]">Tipo</p>
-                <div className="flex flex-wrap gap-1">
-                  {TYPE_PILLS.filter((pill) => pill.key === "all" || availableTypes.includes(pill.key as WineType)).map((pill) => (
-                    <DensePill
-                      key={pill.key}
-                      active={filterMode === pill.key}
-                      onClick={() => setFilterMode(pill.key)}
-                    >
-                      {pill.label}
-                    </DensePill>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[rgba(72,60,46,0.52)]">Curadoria</p>
-                <div className="flex flex-wrap gap-1">
-                  {FOCUS_PILLS.map((pill) => (
-                    <DensePill
-                      key={pill.key}
-                      active={focusFilter === pill.key}
-                      onClick={() => setFocusFilter(pill.key)}
-                    >
-                      {pill.label}
-                    </DensePill>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <AiModalKeyValue label="Top pick" value={safeResults.topPick || "—"} />
-              <AiModalKeyValue label="Best value" value={safeResults.bestValue || "—"} />
-              <AiModalKeyValue label="Preço médio" value={avgPrice ? formatPrice(avgPrice) : "—"} />
-            </div>
-
-            <AiModalActionButton variant="secondary" onClick={onReset} className="h-9 w-full rounded-[14px] border-0 bg-[rgba(255,255,255,0.48)] px-4 text-[11px] shadow-none">
-              <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-              Nova análise
-            </AiModalActionButton>
-          </div>
-        ) : null}
-      </div>
-    </aside>
-  );
-}
-
-function DensePill({
-  active,
-  children,
-  onClick,
-}: {
-  active: boolean;
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex h-7 items-center rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-[0.09em] transition-all duration-300",
-        active
-          ? "bg-[rgba(123,30,43,0.08)] text-[#5A1528] shadow-[inset_0_1px_0_rgba(255,255,255,0.58)]"
-          : "bg-[rgba(255,255,255,0.38)] text-[#62584F] hover:bg-[rgba(255,255,255,0.58)] hover:text-[#1A1713]",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 function WineListCard({
   wine,
   index,
@@ -1056,25 +709,20 @@ function WineListCard({
   const descriptorLine = buildDescriptorLine(wine);
   const pairingLine = buildPairingLine(wine);
   const priceLabel = formatPrice(wine.price);
-  const structurePills = [
-    wine.acidity ? `Acidez ${wine.acidity}` : null,
-    wine.body ? `Corpo ${wine.body}` : null,
-    wine.tannin ? `Tanino ${wine.tannin}` : null,
-  ].filter(Boolean) as string[];
   return (
     <motion.article
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden rounded-[18px] transition-all duration-200 hover:-translate-y-[1px]",
+        "overflow-hidden rounded-[14px] transition-all duration-200 hover:-translate-y-[1px]",
         isFeatured && "xl:col-span-1",
         rhythmClassName,
         isSelected
           ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)] shadow-[0_24px_44px_-36px_rgba(123,30,43,0.18)]"
           : isFeatured
             ? "bg-[linear-gradient(180deg,rgba(255,252,247,0.88)_0%,rgba(248,242,234,0.82)_100%)] shadow-[0_22px_44px_-38px_rgba(56,34,22,0.18)]"
-            : "bg-[rgba(255,255,255,0.72)] shadow-[0_14px_28px_-28px_rgba(27,19,14,0.16)]",
+            : "bg-[rgba(255,255,255,0.68)] shadow-[0_10px_22px_-24px_rgba(27,19,14,0.13)]",
       )}
       style={{
         backdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
@@ -1092,88 +740,55 @@ function WineListCard({
             onSelect();
           }
         }}
-        className="w-full px-3.5 py-3.5 text-left"
+        className="w-full px-3.5 py-3 text-left"
       >
-        <div className="space-y-2.5">
-          {curationNote ? (
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[rgba(91,79,68,0.72)]">
-              {curationNote}
-            </p>
-          ) : null}
-
-          <div className="flex items-start justify-between gap-2.5">
+        <div className="grid gap-3 sm:grid-cols-[32px_minmax(0,1fr)_auto] sm:items-start">
+          <div className="flex items-center gap-2 sm:block">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1A1713] text-[11px] font-semibold text-white">
+              {index + 1}
+            </span>
+            {curationNote ? (
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(91,79,68,0.68)] sm:mt-2">
+                {curationNote}
+              </p>
+            ) : null}
+          </div>
+          <div className="min-w-0 space-y-1.5">
+            <div className="flex items-start justify-between gap-2 sm:hidden">
+              <h4 className="text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#181511]">{wine.name}</h4>
+              {priceLabel ? <span className="shrink-0 text-[14px] font-semibold tracking-[-0.02em] text-[#181511]">{priceLabel}</span> : null}
+            </div>
+            <h4 className="hidden text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#181511] sm:block">
+              {wine.name}
+            </h4>
+            {originLine ? (
+              <p className="text-[12px] font-medium leading-5 text-[#6B6258]">{originLine}</p>
+            ) : null}
+            {descriptorLine ? (
+              <p className="text-[12.5px] leading-5 text-[#433A32]">{descriptorLine}</p>
+            ) : null}
+            {pairingLine ? (
+              <p className="text-[11.5px] leading-5 text-[#5B4F44]">{pairingLine}</p>
+            ) : null}
             {tags.length > 0 ? (
-              <div className="flex min-w-0 flex-1 flex-wrap gap-1">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={cn(
-                      "rounded-full px-2 py-[5px] text-[9px] font-semibold uppercase tracking-[0.1em]",
-                      tag === "Best value" && "bg-[rgba(95,111,82,0.10)] text-[#35533A]",
-                      tag === "Premium" && "bg-[rgba(198,167,104,0.14)] text-[#7B6528]",
-                      tag === "Beber agora" && "bg-[rgba(61,97,54,0.10)] text-[#35533A]",
-                      tag === "Guarda" && "bg-[rgba(55,66,120,0.10)] text-[#374278]",
-                      !["Best value", "Premium", "Beber agora", "Guarda"].includes(tag) && "bg-[rgba(123,30,43,0.08)] text-[#7B1E2B]",
-                    )}
-                  >
+              <div className="flex flex-wrap gap-1 pt-0.5">
+                {tags.slice(0, 1).map((tag) => (
+                  <span key={tag} className="rounded-full bg-[rgba(123,30,43,0.07)] px-2 py-[4px] text-[9px] font-semibold uppercase tracking-[0.08em] text-[#7B1E2B]">
                     {tag}
                   </span>
                 ))}
               </div>
-            ) : <span />}
-
+            ) : null}
+          </div>
+          <div className="flex flex-wrap items-center gap-1 sm:max-w-[210px] sm:justify-end">
             {priceLabel ? (
-              <span className="shrink-0 text-[14px] font-semibold tracking-[-0.02em] text-[#181511]">
+              <span className="hidden shrink-0 pr-1 text-[14px] font-semibold tracking-[-0.02em] text-[#181511] sm:inline">
                 {priceLabel}
               </span>
             ) : null}
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="min-w-0 flex-1">
-              <h4 className={cn("font-semibold leading-tight tracking-[-0.02em] text-[#181511]", isFeatured ? "text-[17px]" : "text-[16px]")}>
-                {wine.name}
-              </h4>
-              {originLine ? (
-                <p className={cn("mt-0.5 font-medium leading-5 text-[#6B6258]", isFeatured ? "text-[12px]" : "text-[11.5px]")}>
-                  {originLine}
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          {descriptorLine ? (
-            <p className={cn("leading-5 text-[#433A32]", isFeatured ? "text-[12.5px]" : "text-[12px]")}>
-              {descriptorLine}
-            </p>
-          ) : null}
-
-          {structurePills.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {structurePills.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full bg-[rgba(255,255,255,0.38)] px-2 py-[5px] text-[9px] font-medium uppercase tracking-[0.1em] text-[#51473F] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          {pairingLine ? (
-            <div className={cn("flex items-start gap-2", isFeatured && "pt-0.5")}>
-              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[rgba(123,30,43,0.55)]" />
-              <p className="text-[11.5px] leading-5 text-[#5B4F44]">
-                {pairingLine}
-              </p>
-            </div>
-          ) : null}
-
-          <div className="flex flex-wrap gap-1 pt-1.5">
             <ActionPill label={cellarMatch ? "Na adega" : "Salvar"} icon={Check} onClick={onSave} disabled={Boolean(cellarMatch)} disabledReason="Esse vinho já existe na sua adega." />
             <ActionPill label="Wishlist" icon={Heart} onClick={onWishlist} />
-            <ActionPill label="Pair" icon={UtensilsCrossed} onClick={onPair} disabled={!cellarMatch} disabledReason="Salve na adega para harmonizar por garrafa." />
+            <ActionPill label="Harmonizar" icon={UtensilsCrossed} onClick={onPair} disabled={!cellarMatch} disabledReason="Salve na adega para harmonizar por garrafa." />
             <ActionPill label="Ver" icon={Eye} onClick={onView} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
             <ActionPill label="Registrar" icon={GlassWater} onClick={onConsume} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
           </div>

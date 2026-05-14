@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star, Search } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
-import { AiModalActionButton, AiModalCard, AiSectionLabel, AiModalSplitLayout, AiModalSidebarCard, AiModalEyebrow, AiModalKeyValue } from "@/components/ai-flow/ModalLayout";
+import { AiModalActionButton, AiModalCard, AiSectionLabel, AiModalSplitLayout } from "@/components/ai-flow/ModalLayout";
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
 
@@ -194,36 +194,6 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
     }
   };
 
-  const sidebarContent = (
-    <>
-      <AiModalSidebarCard className="space-y-3">
-        <div className="space-y-1.5">
-          <AiModalEyebrow>Registro guiado</AiModalEyebrow>
-          <p className="text-[18px] font-semibold tracking-[-0.03em] text-[#1A1713]">
-            {selectedWine?.name || wineName || (source === "cellar" ? "Selecione uma garrafa" : "Experiência externa")}
-          </p>
-          <p className="text-[12.5px] leading-5 text-[#645E54]">
-            O contexto principal fica visível ao lado enquanto você completa o registro sem perder espaço para a ficha.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <AiModalKeyValue label="Origem" value={source === "cellar" ? "Minha adega" : "Experiência externa"} />
-          <AiModalKeyValue label="Data" value={consumedAt || "Hoje"} />
-          <AiModalKeyValue label="Avaliação" value={rating > 0 ? `${rating}/5` : "Ainda não avaliado"} />
-        </div>
-      </AiModalSidebarCard>
-
-      <AiModalSidebarCard className="space-y-3">
-        <AiModalEyebrow>Destaques</AiModalEyebrow>
-        <AiModalKeyValue label="Produtor" value={producer || "Adicionar depois"} />
-        <AiModalKeyValue label="Região" value={[region, country].filter(Boolean).join(" · ") || "Adicionar depois"} />
-        <AiModalKeyValue label="Perfil" value={grape || style || "Adicionar depois"} />
-        <AiModalKeyValue label="Notas" value={tastingNotes.trim() ? "Registradas" : "Opcional"} />
-      </AiModalSidebarCard>
-    </>
-  );
-
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
       <DialogContent
@@ -251,7 +221,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           </DialogHeader>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            <AiModalSplitLayout sidebar={sidebarContent}>
+            <AiModalSplitLayout>
             <div className="space-y-4 overflow-y-auto pr-1">
               <AiModalCard className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
                 <div className="space-y-1">

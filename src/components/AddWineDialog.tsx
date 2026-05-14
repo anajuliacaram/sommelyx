@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
-import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
+import { normalizeWineData, normalizeWineSearchText, normalizeWineText } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
 import { getMeaningfulScanFields, isMeaningfulScanValue, normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
@@ -49,6 +49,7 @@ type AddWinePrefillValues = {
   labelImagePreview?: string | null;
   labelImageFile?: File | null;
   labelImageBase64?: string | null;
+  confidence?: Record<string, number | null | undefined> | null;
 };
 
 const ADD_WINE_FORM_FIELDS = [
@@ -95,23 +96,6 @@ const styles = [
   { value: "fortificado", label: "Fortificado" },
 ];
 
-type ScanSuggestionInput = {
-  name?: string | null;
-  producer?: string | null;
-  vintage?: number | null;
-  style?: string | null;
-  country?: string | null;
-  region?: string | null;
-  grape?: string | null;
-  drink_from?: number | null;
-  drink_until?: number | null;
-  purchase_price?: number | null;
-  labelImagePreview?: string | null;
-  labelImageFile?: File | null;
-  labelImageBase64?: string | null;
-  confidence?: Record<string, number | null | undefined> | null;
-};
-
 type ScanResultEnvelope = {
   raw?: Record<string, unknown> | null;
   normalized?: Record<string, unknown> | null;
@@ -141,10 +125,6 @@ const SCAN_FIELD_MAPPINGS: ScanFieldMapping[] = [
   { target: "cellarLocation", sources: ["cellar_location"] },
 ];
 
-function normalizeSuggestionText(value?: string | null) {
-  return typeof value === "string" ? value.trim().toLowerCase() : "";
-}
-
 function normalizeLabelText(value: unknown) {
   if (typeof value !== "string") return "";
   const text = value.trim().replace(/\s+/g, " ");
@@ -162,6 +142,64 @@ function pickFirstMeaningfulString(values: unknown[]) {
     if (normalized) return normalized;
   }
   return "";
+}
+
+function normalizeConfidenceValue(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  return value > 1 ? value / 100 : value;
+}
+
+function getScanConfidence(source: Record<string, unknown>, normalizedSource: Record<string, unknown>, field: string) {
+  const confidenceSource =
+    (normalizedSource.confidence && typeof normalizedSource.confidence === "object" ? normalizedSource.confidence : null) ||
+    (source.confidence && typeof source.confidence === "object" ? source.confidence : null);
+  if (!confidenceSource) return null;
+  const confidence = confidenceSource as Record<string, unknown>;
+  return normalizeConfidenceValue(confidence[field] ?? confidence[field.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)]);
+}
+
+function getRawOcrText(source: Record<string, unknown>, normalizedSource: Record<string, unknown>) {
+  return normalizeWineSearchText(
+    [
+      source.full_text,
+      source.label_text,
+      source.ocr_text,
+      source.text,
+      normalizedSource.full_text,
+      normalizedSource.label_text,
+      normalizedSource.ocr_text,
+      normalizedSource.text,
+    ]
+      .filter((value): value is string => typeof value === "string")
+      .join(" "),
+  );
+}
+
+function keepOnlyConfidentScanValue(
+  value: string | number | null | undefined,
+  field: string,
+  source: Record<string, unknown>,
+  normalizedSource: Record<string, unknown>,
+  rawOcrText: string,
+) {
+  if (value == null || value === "") return "";
+  const confidence = getScanConfidence(source, normalizedSource, field);
+  if (confidence != null) return confidence >= 0.72 ? String(value) : "";
+  const normalizedValue = normalizeWineSearchText(String(value));
+  if (normalizedValue && rawOcrText.includes(normalizedValue)) return value;
+  return "";
+}
+
+function keepOnlyConfidentScanNumber(
+  value: number | null | undefined,
+  field: string,
+  source: Record<string, unknown>,
+  normalizedSource: Record<string, unknown>,
+  rawOcrText: string,
+) {
+  if (value == null || !Number.isFinite(value)) return null;
+  const kept = keepOnlyConfidentScanValue(value, field, source, normalizedSource, rawOcrText);
+  return kept ? value : null;
 }
 
 function getFirstDetectedString(source: Record<string, unknown>) {
@@ -241,84 +279,6 @@ function extractProducerFromFullText(fullText: string) {
   return fallback ? normalizeWineText(fallback) || fallback : "";
 }
 
-function suggestPurchasePrice(input: ScanSuggestionInput) {
-  const style = normalizeSuggestionText(input.style);
-  const grape = normalizeSuggestionText(input.grape);
-  const country = normalizeSuggestionText(input.country);
-  const region = normalizeSuggestionText(input.region);
-  const producer = normalizeSuggestionText(input.producer);
-  const name = normalizeSuggestionText(input.name);
-
-  let price = 78;
-
-  if (style.includes("espum")) price = 120;
-  else if (style.includes("fort")) price = 150;
-  else if (style.includes("sobrem")) price = 110;
-  else if (style.includes("branc")) price = 85;
-  else if (style.includes("rose")) price = 82;
-  else if (style.includes("tint")) price = 95;
-
-  if (country.includes("fran")) price += 18;
-  else if (country.includes("ital")) price += 14;
-  else if (country.includes("port")) price += 10;
-  else if (country.includes("argentin") || country.includes("chil")) price += 6;
-
-  if (region.includes("barolo") || region.includes("bordeaux") || region.includes("burg")) price += 20;
-  else if (region.includes("mendoza") || region.includes("douro") || region.includes("tosc")) price += 8;
-
-  if (producer && /catena|antinori|ruffino|gaja|chateau|château|vega|almaviva|quintarelli/i.test(producer)) price += 15;
-  if (grape && /nebbiolo|tannat|cabernet|syrah|sangiovese|riesling|chardonnay/i.test(grape)) price += 6;
-  if (name && /reserve|reserva|gran|grand|cru|riserva|selection|seleção/i.test(name)) price += 10;
-
-  if (typeof input.vintage === "number") {
-    const currentYear = new Date().getFullYear();
-    const age = Math.max(0, currentYear - input.vintage);
-    if (age > 10) price += 12;
-    else if (age > 5) price += 8;
-    else if (age <= 2) price -= 4;
-  }
-
-  return Math.max(30, Math.round(price / 5) * 5);
-}
-
-function suggestDrinkWindow(input: ScanSuggestionInput) {
-  const style = normalizeSuggestionText(input.style);
-  const grape = normalizeSuggestionText(input.grape);
-  const currentYear = new Date().getFullYear();
-
-  let startOffset = 0;
-  let span = 5;
-
-  if (style.includes("espum")) {
-    startOffset = 0;
-    span = 3;
-  } else if (style.includes("branc") || style.includes("rose")) {
-    startOffset = 0;
-    span = 4;
-  } else if (style.includes("sobrem") || style.includes("fort")) {
-    startOffset = 0;
-    span = 10;
-  } else if (style.includes("tint")) {
-    startOffset = 1;
-    span = 6;
-  }
-
-  if (/nebbiolo|tannat|cabernet|sangiovese|syrah|tempranillo/i.test(grape)) {
-    span += 2;
-  } else if (/riesling|chardonnay|sauvignon|pinot grigio|alvarinho/i.test(grape)) {
-    span = Math.max(3, span - 1);
-  }
-
-  const baseYear = typeof input.vintage === "number" ? input.vintage : currentYear;
-  const from = baseYear + startOffset;
-  const until = from + span;
-
-  return {
-    from,
-    until,
-  };
-}
-
 function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unknown): AddWinePrefillValues {
   const source = rawResult && typeof rawResult === "object" ? (rawResult as Record<string, unknown>) : {};
   const normalizedSource = normalizedResult && typeof normalizedResult === "object" ? (normalizedResult as Record<string, unknown>) : {};
@@ -370,21 +330,41 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
     source.varietal,
     source.varieties,
   ]);
+  const rawOcrText = getRawOcrText(source, normalizedSource);
+  const confidentStyle = keepOnlyConfidentScanValue(normalizedStyle, "style", source, normalizedSource, rawOcrText);
+  const confidentCountry = keepOnlyConfidentScanValue(normalizedCountry, "country", source, normalizedSource, rawOcrText);
+  const confidentRegion = keepOnlyConfidentScanValue(normalizedRegion, "region", source, normalizedSource, rawOcrText);
+  const confidentGrape = keepOnlyConfidentScanValue(normalizedGrape, "grape", source, normalizedSource, rawOcrText);
+  const confidentName = keepOnlyConfidentScanValue(normalizedName, "name", source, normalizedSource, rawOcrText);
+  const confidentProducer = keepOnlyConfidentScanValue(normalizedProducer, "producer", source, normalizedSource, rawOcrText);
+  const confidentVintage = keepOnlyConfidentScanNumber(normalizedVintage, "vintage", source, normalizedSource, rawOcrText);
+  const confidentPurchasePrice = keepOnlyConfidentScanNumber(normalized.purchase_price, "purchase_price", source, normalizedSource, rawOcrText);
+  const confidentEstimatedPrice = keepOnlyConfidentScanNumber(normalized.estimated_price, "estimated_price", source, normalizedSource, rawOcrText);
+  const confidentDrinkFrom = keepOnlyConfidentScanNumber(normalized.drink_from, "drink_from", source, normalizedSource, rawOcrText);
+  const confidentDrinkUntil = keepOnlyConfidentScanNumber(normalized.drink_until, "drink_until", source, normalizedSource, rawOcrText);
+  const confidentFoodPairing = keepOnlyConfidentScanValue(normalized.food_pairing || "", "food_pairing", source, normalizedSource, rawOcrText);
+  const confidentCellarLocation = keepOnlyConfidentScanValue(normalized.cellar_location || "", "cellar_location", source, normalizedSource, rawOcrText);
   const mappedData: AddWinePrefillValues = {
-    name: normalizedName || null,
-    producer: normalizedProducer || null,
-    vintage: normalizedVintage,
-    style: normalizedStyle || null,
-    country: normalizedCountry || null,
-    region: normalizedRegion || null,
-    grape: normalizedGrape || null,
-    grapes: normalizedGrape || null,
-    drinkFrom: normalized.drink_from ?? null,
-    drinkUntil: normalized.drink_until ?? null,
-    purchasePrice: normalized.purchase_price ?? null,
-    estimatedPrice: normalized.estimated_price ?? null,
-    foodPairing: normalized.food_pairing || null,
-    cellarLocation: normalized.cellar_location || null,
+    name: confidentName || null,
+    producer: confidentProducer || null,
+    vintage: confidentVintage,
+    style: confidentStyle || null,
+    country: confidentCountry || null,
+    region: confidentRegion || null,
+    grape: confidentGrape || null,
+    grapes: confidentGrape || null,
+    drinkFrom: confidentDrinkFrom,
+    drinkUntil: confidentDrinkUntil,
+    purchasePrice: confidentPurchasePrice,
+    estimatedPrice: confidentEstimatedPrice,
+    foodPairing: confidentFoodPairing || null,
+    cellarLocation: confidentCellarLocation || null,
+    confidence:
+      (normalizedSource.confidence && typeof normalizedSource.confidence === "object"
+        ? (normalizedSource.confidence as Record<string, number | null | undefined>)
+        : source.confidence && typeof source.confidence === "object"
+          ? (source.confidence as Record<string, number | null | undefined>)
+          : null),
   };
 
   console.info("[SCAN AI RESPONSE]", source);
@@ -432,6 +412,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [importCsvOpen, setImportCsvOpen] = useState(false);
   const [estimating, setEstimating] = useState(false);
   const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
+  const [scanHydrated, setScanHydrated] = useState(false);
   const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingHydrationTraceRef = useRef<{ source: "scan" | "initialValues"; payload: AddWinePrefillValues } | null>(null);
   const finalFormStateLoggedRef = useRef(false);
@@ -483,19 +464,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
           setCurrentValue(String(data.estimated_price));
         }
         setEstimateConfidence(data.confidence || "media");
-      } else {
-        // Fallback to heuristic
-        const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
-        if (isCommercial || !currentValueTouched) {
-          setCurrentValue(String(fallback));
-        }
-        setEstimateConfidence(null);
       }
     } catch {
-      const fallback = suggestPurchasePrice({ name: n, producer: p, vintage: v ? parseInt(v) : null, style: s, country: c, region: r, grape: g });
-      if (isCommercial || !currentValueTouched) {
-        setCurrentValue(String(fallback));
-      }
       setEstimateConfidence(null);
     } finally {
       setEstimating(false);
@@ -504,24 +474,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
   useEffect(() => {
     if (!name.trim()) return;
-    if (!isCommercial && !currentValueTouched) {
-      const fallback = suggestPurchasePrice({
-        name,
-        producer,
-        vintage: vintage ? parseInt(vintage) : null,
-        style,
-        country,
-        region,
-        grape,
-      });
-      setCurrentValue(String(fallback));
-    }
+    if (scanHydrated) return;
     if (estimateTimer.current) clearTimeout(estimateTimer.current);
     estimateTimer.current = setTimeout(() => {
       fetchEstimate(name, producer, vintage, style, country, region, grape);
     }, 1200);
     return () => { if (estimateTimer.current) clearTimeout(estimateTimer.current); };
-  }, [name, producer, vintage, style, country, region, grape, fetchEstimate, currentValueTouched, isCommercial]);
+  }, [name, producer, vintage, style, country, region, grape, fetchEstimate, scanHydrated]);
 
   const reset = useCallback(() => {
     setName(""); setProducer(""); setQuantity("1"); setVintage(""); setStyle("");
@@ -530,6 +489,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setLabelImagePreview(null); setLabelImageFile(null); setLabelImageBase64(null); setNoPriceInfo(false);
     setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
+    setScanHydrated(false);
     setAiPrefilledFields({});
     setMissingFields([]);
     setMoreOpen(false); setSuccess(false);
@@ -537,6 +497,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
   const applyScanPrefill = useCallback((prefill: AddWinePrefillValues) => {
     const nextPrefilled: Record<string, boolean> = {};
+    setScanHydrated(true);
 
     if (isMeaningfulScanValue(prefill.name)) {
       setName(String(prefill.name));
@@ -724,23 +685,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   }, [applyScanPrefill, isCommercial, open]);
 
   const getRenderedFieldValue = useCallback(
-    (field: keyof AddWinePrefillValues, currentValue: string) => {
+    (_field: keyof AddWinePrefillValues, currentValue: string) => {
       if (isMeaningfulScanValue(currentValue)) return currentValue;
-      const pendingPayload = pendingHydrationTraceRef.current?.payload;
-      const fallbackValue = pendingPayload?.[field];
-      if (isMeaningfulScanValue(fallbackValue)) {
-        const rendered = String(fallbackValue);
-        if (import.meta.env.DEV) {
-          console.info("[AddWineDialog] field_render_snapshot", {
-            field,
-            currentValue,
-            fallbackValue,
-            rendered,
-            pendingSource: pendingHydrationTraceRef.current?.source ?? null,
-          });
-        }
-        return rendered;
-      }
       return currentValue;
     },
     [],
@@ -1064,14 +1010,27 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   return (
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto rounded-[24px] p-0 border border-black/[0.04] shadow-[0_26px_64px_rgba(0,0,0,0.10)]" style={{ background: "#FAF8F6", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
+      <SheetContent
+        className="w-full sm:max-w-xl overflow-y-auto rounded-[20px] p-0 border border-black/[0.04] shadow-[0_26px_64px_rgba(0,0,0,0.10)]"
+        style={{
+          background: "#FAF8F6",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          height: "auto",
+          maxHeight: "92dvh",
+          top: "50%",
+          bottom: "auto",
+          transform: "translateY(-50%)",
+        }}
+      >
+          <SheetTitle className="sr-only">{isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}</SheetTitle>
 
-          <div className="px-6 py-6 flex h-full flex-col">
+          <div className="px-3.5 py-3.5 flex h-auto flex-col sm:px-4">
             <AiModalHeader
-              className="mb-6"
+              className="mb-3"
               icon={<Wine className="h-5 w-5 text-[#7B1E2B]" />}
               title={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
-              description="Complete manualmente ou use rótulo, escaneamento e CSV."
+              description="Cadastro rápido com rótulo, planilha ou preenchimento manual."
             />
 
             <AnimatePresence mode="wait">
@@ -1122,18 +1081,18 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit} className="space-y-5">
+                <motion.form key="form" onSubmit={handleSubmit} className="space-y-2.5">
                   {/* Scan Label Card */}
                   <div
-                    className="group cursor-pointer rounded-[24px] border border-black/5 bg-white/82 p-5 flex items-center gap-4 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[16px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setScanOpen(true)}
                   >
-                    <div className="w-12 h-12 rounded-[18px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
-                      <Camera className="h-5 w-5" style={{ color: '#6F7F5B' }} />
+                    <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
+                      <Camera className="h-4.5 w-4.5" style={{ color: '#6F7F5B' }} />
                     </div>
                     <div className="flex flex-col">
                       <p className="text-[14px] font-semibold" style={{ color: '#1F1F1F' }}>Escanear foto do rótulo</p>
-                      <p className="text-[12px] mt-0.5" style={{ color: '#6B6B6B' }}>
+                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6B6B' }}>
                         Use câmera ou fototeca para ler a garrafa
                       </p>
                     </div>
@@ -1159,10 +1118,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                   {/* Import File Card */}
                   <div
-                    className="group cursor-pointer rounded-[24px] border border-black/5 bg-white/82 p-4 flex items-center gap-3.5 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[16px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setImportCsvOpen(true)}
                   >
-                    <div className="w-10 h-10 rounded-[18px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
+                    <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
                       <FileSpreadsheet className="h-4 w-4" style={{ color: '#C8A96A' }} />
                     </div>
                     <div className="flex flex-col">
@@ -1173,39 +1132,36 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                   </div>
 
-                  <AiModalCard className="space-y-4 pt-1">
-                    <div className="space-y-1">
+                  <AiModalCard className="space-y-2.5 px-3 py-3">
+                    <div className="space-y-0.5">
                       <AiSectionLabel>Essenciais</AiSectionLabel>
-                      <p className="text-[14px] leading-6 text-[#645E54]">
-                        Preencha os dados principais do vinho para manter a adega organizada com clareza editorial.
-                      </p>
                     </div>
                     <div>
-                      <label htmlFor="name" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
+                      <label htmlFor="name" className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
                       <input
                         id="name"
                         value={getRenderedFieldValue("name", name)}
-                        onChange={e => setName(e.target.value)}
-                        placeholder="Ex: Malbec Reserva"
+                        onChange={e => { setScanHydrated(false); setName(e.target.value); }}
+                        placeholder="Nome no rótulo"
                         required
                         className="input-premium"
                         style={aiFieldStyle("name")}
                       />
                     </div>
                     <div>
-                      <label htmlFor="producer" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Produtor</label>
+                      <label htmlFor="producer" className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Produtor</label>
                       <input
                         id="producer"
                         value={getRenderedFieldValue("producer", producer)}
-                        onChange={e => setProducer(e.target.value)}
-                        placeholder="Ex: Catena Zapata"
+                        onChange={e => { setScanHydrated(false); setProducer(e.target.value); }}
+                        placeholder="Produtor no rótulo"
                         className="input-premium"
                         style={aiFieldStyle("producer")}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <div>
-                        <label htmlFor="qty" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Quantidade</label>
+                        <label htmlFor="qty" className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Quantidade</label>
                         <input
                           id="qty"
                           type="number"
@@ -1216,7 +1172,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         />
                       </div>
                       <div>
-                        <label htmlFor="vintage" className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Safra</label>
+                        <label htmlFor="vintage" className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Safra</label>
                         <input
                           id="vintage"
                           type="number"
@@ -1229,7 +1185,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Estilo</label>
+                      <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Estilo</label>
                       <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
                         <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? '#1F1F1F' : '#9A9A9A', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
                           <SelectValue placeholder="Selecionar estilo..." />
@@ -1314,29 +1270,29 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <CollapsibleTrigger asChild>
                       <button
                         type="button"
-                        className="w-full rounded-[24px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(248,244,237,0.66)_100%)] px-4 py-4 text-left shadow-[0_12px_30px_-24px_rgba(0,0,0,0.14)] backdrop-blur-[14px] transition-all duration-200 hover:-translate-y-px sm:px-5"
+                        className="w-full rounded-[16px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(248,244,237,0.66)_100%)] px-3 py-2.5 text-left shadow-[0_12px_30px_-24px_rgba(0,0,0,0.14)] backdrop-blur-[14px] transition-all duration-200 hover:-translate-y-px sm:px-3.5"
                       >
                         <div className="flex items-center justify-between gap-4">
                           <div>
                             <AiSectionLabel>Detalhes extras</AiSectionLabel>
-                            <p className="mt-1 text-[14px] leading-6 text-[#645E54]">
-                              Região, uva, valores e janela ideal para beber no mesmo ritmo visual do restante do modal.
+                            <p className="mt-0.5 text-[12px] leading-5 text-[#645E54]">
+                              Origem, uva, valores e guarda.
                             </p>
                           </div>
                           <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} style={{ color: '#6F7F5B' }} />
                         </div>
                       </button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-3">
-                      <AiModalCard className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
+                    <CollapsibleContent className="pt-2.5">
+                      <AiModalCard className="space-y-3 px-3 py-3">
+                        <div className="grid grid-cols-2 gap-2.5">
                         <div>
-                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">País</label>
-                          <input value={getRenderedFieldValue("country", country)} onChange={e => setCountry(e.target.value)} placeholder="Argentina" className="input-premium" style={aiFieldStyle("country")} />
+                          <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">País</label>
+                          <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País no rótulo" className="input-premium" style={aiFieldStyle("country")} />
                         </div>
                         <div>
-                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Região</label>
-                          <input value={getRenderedFieldValue("region", region)} onChange={e => setRegion(e.target.value)} placeholder="Mendoza" className="input-premium" style={aiFieldStyle("region")} />
+                          <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Região</label>
+                          <input value={getRenderedFieldValue("region", region)} onChange={e => { setScanHydrated(false); setRegion(e.target.value); }} placeholder="Região no rótulo" className="input-premium" style={aiFieldStyle("region")} />
                         </div>
                       </div>
                       {drinkFrom && drinkUntil && (
@@ -1345,8 +1301,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         </p>
                       )}
                       <div>
-                        <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Uva</label>
-                        <input value={getRenderedFieldValue("grape", grape)} onChange={e => setGrape(e.target.value)} placeholder="Malbec" className="input-premium" style={aiFieldStyle("grape")} />
+                        <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Uva</label>
+                        <input value={getRenderedFieldValue("grape", grape)} onChange={e => { setScanHydrated(false); setGrape(e.target.value); }} placeholder="Uva no rótulo" className="input-premium" style={aiFieldStyle("grape")} />
                       </div>
                       <div className="flex items-center gap-2 -mt-1">
                         <input
@@ -1366,7 +1322,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                       {!isCommercial && (
                         <div>
-                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">
+                          <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">
                             Último valor pago (opcional)
                           </label>
                           <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
@@ -1407,14 +1363,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         />
                       </div>
                       <div>
-                        <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Harmonização</label>
+                        <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Harmonização</label>
                         <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
                       </div>
                         {!isCommercial && (
                           <>
                           <div>
-                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                              <label className="block text-[13px] font-semibold tracking-[-0.01em] text-[#4A4338]">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <label className="block text-[12px] font-semibold tracking-[-0.01em] text-[#4A4338]">
                                 Valor atual estimado (R$)
                               </label>
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
@@ -1435,11 +1391,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                             </p>
                           </div>
                           <div>
-                            <p className="text-[13px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Janela de consumo sugerida</p>
-                            <p className="text-[11px] leading-relaxed mb-3" style={{ color: '#6B6B6B' }}>
+                            <p className="text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Janela de consumo</p>
+                            <p className="text-[11px] leading-relaxed mb-2" style={{ color: '#6B6B6B' }}>
                               Referência de melhor expressão do vinho em condições ideais de guarda. Vinhos fora dessa janela não estão necessariamente ruins — o potencial real depende do armazenamento, da safra específica e das características da uva.
                             </p>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2.5">
                               <div>
                                 <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">A partir de</label>
                                 <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
@@ -1451,7 +1407,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                             </div>
                           </div>
                           <div>
-                            <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">Notas de degustação</label>
+                            <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Notas de degustação</label>
                             <Textarea
                               value={notes}
                               onChange={e => setNotes(e.target.value)}

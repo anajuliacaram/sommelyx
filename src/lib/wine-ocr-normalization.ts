@@ -27,23 +27,6 @@ export interface NormalizedWineOcrResult {
   normalizedText: string;
 }
 
-const COUNTRY_MAP: Array<{ key: string; country: string }> = [
-  { key: "casa valduga", country: "Brasil" },
-  { key: "catena zapata", country: "Argentina" },
-  { key: "concha y toro", country: "Chile" },
-  { key: "veuve clicquot", country: "França" },
-  { key: "moet chandon", country: "França" },
-  { key: "moët & chandon", country: "França" },
-  { key: "cloudy bay", country: "Nova Zelândia" },
-  { key: "sassicaia", country: "Itália" },
-  { key: "tenuta san guido", country: "Itália" },
-  { key: "almaviva", country: "Chile" },
-  { key: "pizzato", country: "Brasil" },
-  { key: "salton", country: "Brasil" },
-  { key: "miolo", country: "Brasil" },
-  { key: "salentein", country: "Argentina" },
-];
-
 const COUNTRY_NAMES = [
   "Argentina",
   "Brasil",
@@ -183,14 +166,6 @@ function mergeContinuationLines(lines: string[]) {
   return { lines: merged, mergedCount };
 }
 
-function inferCountryFromProducer(text: string, producer?: string | null) {
-  const haystack = normalizeSearch(`${text} ${producer || ""}`);
-  for (const entry of COUNTRY_MAP) {
-    if (haystack.includes(entry.key)) return entry.country;
-  }
-  return null;
-}
-
 function inferExplicitCountry(text: string) {
   const haystack = normalizeSearch(text);
   const match = COUNTRY_NAMES.find((country) => haystack.includes(normalizeSearch(country)));
@@ -239,7 +214,7 @@ function inferName(line: string, producer?: string | null) {
 
 function scoreCandidate(candidate: WineOcrCandidate) {
   let score = 0.2;
-  if (candidate.name?.trim()) score += 0.25;
+  if (candidate.name?.trim()) score += 0.2;
   if (candidate.producer?.trim()) score += 0.15;
   if (candidate.vintage) score += 0.1;
   if (candidate.country?.trim()) score += 0.08;
@@ -270,7 +245,7 @@ export function normalizeWineListOcrText(rawText: string, options?: { fileName?:
     }
     const price = inferPrice(text);
     const producer = inferProducer(text);
-    const country = inferExplicitCountry(text) || inferCountryFromProducer(text, producer);
+    const country = inferExplicitCountry(text);
     const vintage = inferVintage(text);
     const grape = inferGrape(text);
     const style =
@@ -295,7 +270,7 @@ export function normalizeWineListOcrText(rawText: string, options?: { fileName?:
       sourceLines: [...block],
     };
     candidate.confidence = scoreCandidate(candidate);
-    if (candidate.name && candidate.confidence >= 0.45) {
+    if (candidate.name && candidate.confidence >= 0.6) {
       candidates.push(candidate);
       candidateBlocks.push(text);
     }
