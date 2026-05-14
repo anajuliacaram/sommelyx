@@ -99,6 +99,11 @@ type EditableField =
 type RowErrors = Partial<Record<"name" | "quantity", string>>;
 
 type ColumnKind = "text" | "number" | "select";
+type StatusFilter = "all" | "ready" | "review" | "invalid" | "duplicates" | "low_confidence";
+type EmptyFilterField = "producer" | "vintage" | "grape" | "country" | "region" | "quantity" | "purchase_price";
+type BulkTargetField = "producer" | "vintage" | "grape" | "country" | "region" | "quantity" | "purchase_price";
+type BulkMode = "fill_empty" | "replace";
+type BulkScope = "selected" | "filtered" | "all";
 
 interface ColumnDef {
   key: EditableField;
@@ -120,6 +125,26 @@ const baseColumns: ColumnDef[] = [
   { key: "purchase_price", label: "Preço", kind: "number", align: "right", placeholder: "0,00", optional: true },
 ];
 
+const emptyFieldOptions: Array<{ key: EmptyFilterField; label: string }> = [
+  { key: "producer", label: "Produtor" },
+  { key: "vintage", label: "Safra" },
+  { key: "grape", label: "Uva" },
+  { key: "country", label: "País" },
+  { key: "region", label: "Região" },
+  { key: "quantity", label: "Qtd." },
+  { key: "purchase_price", label: "Preço" },
+];
+
+const bulkFieldOptions: Array<{ key: BulkTargetField; label: string; kind: "text" | "number" }> = [
+  { key: "producer", label: "Produtor", kind: "text" },
+  { key: "vintage", label: "Safra", kind: "number" },
+  { key: "grape", label: "Uva", kind: "text" },
+  { key: "country", label: "País", kind: "text" },
+  { key: "region", label: "Região", kind: "text" },
+  { key: "quantity", label: "Quantidade", kind: "number" },
+  { key: "purchase_price", label: "Preço", kind: "number" },
+];
+
 export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
@@ -135,9 +160,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const [fileName, setFileName] = useState("");
   const [editMode, setEditMode] = useState(true);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [bulkProducer, setBulkProducer] = useState("");
-  const [bulkVintage, setBulkVintage] = useState("");
-  const [bulkGrape, setBulkGrape] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [emptyFieldFilters, setEmptyFieldFilters] = useState<EmptyFilterField[]>([]);
+  const [bulkTargetField, setBulkTargetField] = useState<BulkTargetField>("producer");
+  const [bulkValue, setBulkValue] = useState("");
+  const [bulkMode, setBulkMode] = useState<BulkMode>("fill_empty");
+  const [bulkScope, setBulkScope] = useState<BulkScope>("selected");
   const [enriching, setEnriching] = useState(false);
   const [loading, setLoading] = useState(false);
   const [processingRows, setProcessingRows] = useState(0);
@@ -1755,9 +1784,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setFileName("");
     setEditMode(true);
     setSelectedRows([]);
-    setBulkProducer("");
-    setBulkVintage("");
-    setBulkGrape("");
+    setSearchQuery("");
+    setStatusFilter("all");
+    setEmptyFieldFilters([]);
+    setBulkTargetField("producer");
+    setBulkValue("");
+    setBulkMode("fill_empty");
+    setBulkScope("selected");
     setEnriching(false);
     setLoading(false);
     setProcessingRows(0);
@@ -1802,18 +1835,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       logImportRows("rows_for_review_ui", draftWines);
     }
   }, [draftWines, step]);
-
-  const applyBulkProducer = () => {
-    const value = bulkProducer.trim();
-    if (!value) return;
-    syncRows((current) => current.map((row) => ({ ...row, producer: value })));
-  };
-
-  const applyBulkVintage = () => {
-    const value = Number.parseInt(bulkVintage, 10);
-    if (!Number.isFinite(value)) return;
-    syncRows((current) => current.map((row) => ({ ...row, vintage: value })));
-  };
 
   const getRowStatus = (row: DraftWine) => {
     const hasName = !!row.name?.trim();
@@ -1863,33 +1884,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return suffix ? `${title} · ${suffix}` : title;
   };
 
-  const applyBulkAll = () => {
-    const producer = bulkProducer.trim();
-    const vintage = Number.parseInt(bulkVintage, 10);
-    const grape = bulkGrape.trim();
-    const hasProducer = producer.length > 0;
-    const hasVintage = Number.isFinite(vintage);
-    const hasGrape = grape.length > 0;
-    if (!hasProducer && !hasVintage && !hasGrape) return;
-    syncRows((current) =>
-      current.map((row) => ({
-        ...row,
-        producer: hasProducer ? producer : row.producer,
-        vintage: hasVintage ? vintage : row.vintage,
-        grape: hasGrape ? grape : row.grape,
-      })),
-    );
-  };
-
-  const applyBulkGrape = () => {
-    const value = bulkGrape.trim();
-    if (!value) return;
-    syncRows((current) => current.map((row) => ({ ...row, grape: value })));
-  };
-
   const selectedSet = new Set(selectedRows);
   const rowErrors = useMemo(() => computeRowErrors(draftWines), [draftWines]);
-  const allRowsSelected = draftWines.length > 0 && selectedRows.length === draftWines.length;
 
   const toggleRowSelection = (index: number) => {
     setSelectedRows((current) =>
@@ -1898,31 +1894,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const toggleAllRows = () => {
-    setSelectedRows((current) => (current.length === draftWines.length ? [] : draftWines.map((_, index) => index)));
-  };
-
-  const applyProducerToSelected = () => {
-    const value = bulkProducer.trim();
-    if (!value || selectedRows.length === 0) return;
-    syncRows((current) =>
-      current.map((row, index) => (selectedSet.has(index) ? { ...row, producer: value } : row)),
-    );
-  };
-
-  const applyVintageToSelected = () => {
-    const value = Number.parseInt(bulkVintage, 10);
-    if (!Number.isFinite(value) || selectedRows.length === 0) return;
-    syncRows((current) =>
-      current.map((row, index) => (selectedSet.has(index) ? { ...row, vintage: value } : row)),
-    );
-  };
-
-  const applyGrapeToSelected = () => {
-    const value = bulkGrape.trim();
-    if (!value || selectedRows.length === 0) return;
-    syncRows((current) =>
-      current.map((row, index) => (selectedSet.has(index) ? { ...row, grape: value } : row)),
-    );
+    if (filteredRowIndexes.length === 0) return;
+    setSelectedRows((current) => {
+      const visibleSet = new Set(filteredRowIndexes);
+      const allVisibleSelected = filteredRowIndexes.every((index) => current.includes(index));
+      if (allVisibleSelected) {
+        return current.filter((index) => !visibleSet.has(index));
+      }
+      return Array.from(new Set([...current, ...filteredRowIndexes])).sort((a, b) => a - b);
+    });
   };
 
   const getFieldValue = (row: DraftWine, field: EditableField) => {
@@ -2016,9 +1996,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     setParseErrors(options?.parseErrors || []);
     setEditMode(true);
     setSelectedRows([]);
-    setBulkProducer("");
-    setBulkVintage("");
-    setBulkGrape("");
+    setSearchQuery("");
+    setStatusFilter("all");
+    setEmptyFieldFilters([]);
+    setBulkTargetField("producer");
+    setBulkValue("");
+    setBulkMode("fill_empty");
+    setBulkScope("selected");
     return normalized;
   };
 
@@ -2072,6 +2056,29 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (status === "invalid") return "invalid";
     if (status === "incomplete") return "warning";
     return "valid";
+  };
+
+  const isLowConfidenceRow = (row: DraftWine) =>
+    row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7);
+
+  const isRowMissingField = (row: DraftWine, field: EmptyFilterField | BulkTargetField) => {
+    if (field === "purchase_price") return row.purchase_price == null && row.price == null;
+    const value = row[field as keyof DraftWine];
+    return value === undefined || value === null || value === "";
+  };
+
+  const parseBulkValue = (field: BulkTargetField, value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    if (field === "vintage" || field === "quantity") {
+      const parsed = Number.parseInt(trimmed, 10);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    if (field === "purchase_price") {
+      const parsed = Number.parseFloat(trimmed.replace(",", "."));
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return trimmed;
   };
 
   const applyManualMapping = () => {
@@ -2547,14 +2554,58 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const mappingEntries = Object.entries(columnMapping);
   const visibleColumns = baseColumns;
+  const duplicateIndexes = useMemo(() => getDuplicateIndexes(draftWines), [draftWines]);
   const rowStatuses = draftWines.map((row) => getImportStatus(row));
   const completeRowsCount = rowStatuses.filter((status) => status === "valid").length;
   const reviewRowsCount = rowStatuses.filter((status) => status === "incomplete").length;
   const invalidRowsCount = rowStatuses.filter((status) => status === "invalid").length;
-  const duplicateRowsCount = getDuplicateIndexes(draftWines).size;
+  const duplicateRowsCount = draftWines.filter((row, index) => duplicateIndexes.has(index) || !!row.duplicateWarning).length;
+  const lowConfidenceRowsCount = draftWines.filter((row) => isLowConfidenceRow(row)).length;
   const identifiedRowsCount = completeRowsCount + reviewRowsCount;
   const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0 && step !== "importing" && step !== "done";
   const hasDraftRows = draftWines.length > 0;
+  const normalizedSearchQuery = normalizeSearchText(searchQuery);
+  const filteredRowIndexes = useMemo(() => {
+    return draftWines
+      .map((row, index) => ({ row, index }))
+      .filter(({ row, index }) => {
+        if (normalizedSearchQuery) {
+          const searchable = normalizeSearchText([
+            row.name,
+            row.producer,
+            row.grape,
+            row.country,
+            row.region,
+            row.vintage ? String(row.vintage) : "",
+          ].filter(Boolean).join(" "));
+          if (!searchable.includes(normalizedSearchQuery)) return false;
+        }
+
+        if (statusFilter === "ready" && getImportStatus(row) !== "valid") return false;
+        if (statusFilter === "review" && getImportStatus(row) !== "incomplete") return false;
+        if (statusFilter === "invalid" && getImportStatus(row) !== "invalid") return false;
+        if (statusFilter === "duplicates" && !duplicateIndexes.has(index) && !row.duplicateWarning) return false;
+        if (statusFilter === "low_confidence" && !isLowConfidenceRow(row)) return false;
+
+        if (emptyFieldFilters.length > 0 && !emptyFieldFilters.every((field) => isRowMissingField(row, field))) {
+          return false;
+        }
+
+        return true;
+      })
+      .map(({ index }) => index);
+  }, [draftWines, duplicateIndexes, emptyFieldFilters, normalizedSearchQuery, statusFilter]);
+  const filteredRows = filteredRowIndexes.map((index) => ({ row: draftWines[index], index }));
+  const allRowsSelected = filteredRowIndexes.length > 0 && filteredRowIndexes.every((index) => selectedSet.has(index));
+  const bulkTarget = bulkFieldOptions.find((field) => field.key === bulkTargetField) || bulkFieldOptions[0];
+  const bulkScopeCount =
+    bulkScope === "selected" ? selectedRows.length :
+    bulkScope === "filtered" ? filteredRowIndexes.length :
+    draftWines.length;
+  const activeFilterCount =
+    (normalizedSearchQuery ? 1 : 0) +
+    (statusFilter !== "all" ? 1 : 0) +
+    emptyFieldFilters.length;
 
   const knownProducers = useMemo(() => {
     const all = [...(cellarWines ?? []), ...draftWines];
@@ -2605,6 +2656,61 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return Array.from(new Set(values.map((value) => normalizeText(value)).filter((value): value is string => !!value && value.length > 1)))
       .sort((a, b) => a.localeCompare(b, "pt-BR"));
   }, [cellarWines, draftWines]);
+
+  const toggleEmptyFieldFilter = (field: EmptyFilterField) => {
+    setEmptyFieldFilters((current) =>
+      current.includes(field) ? current.filter((item) => item !== field) : [...current, field],
+    );
+  };
+
+  const clearOperationalFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setEmptyFieldFilters([]);
+  };
+
+  const clearVisibleSelection = () => {
+    if (filteredRowIndexes.length === 0) return;
+    const visibleSet = new Set(filteredRowIndexes);
+    setSelectedRows((current) => current.filter((index) => !visibleSet.has(index)));
+  };
+
+  const applyBulkOperation = () => {
+    const nextValue = parseBulkValue(bulkTargetField, bulkValue);
+    if (nextValue === undefined) {
+      toast({
+        title: "Informe um valor válido",
+        description: "Preencha o valor que será aplicado nas linhas escolhidas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const targetIndexes =
+      bulkScope === "selected" ? selectedRows :
+      bulkScope === "filtered" ? filteredRowIndexes :
+      draftWines.map((_, index) => index);
+    if (targetIndexes.length === 0) {
+      toast({
+        title: "Nenhuma linha para aplicar",
+        description: "Selecione linhas ou ajuste o escopo da ação em massa.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const targetSet = new Set(targetIndexes);
+    syncRows((current) =>
+      current.map((row, index) => {
+        if (!targetSet.has(index)) return row;
+        if (bulkMode === "fill_empty" && !isRowMissingField(row, bulkTargetField)) return row;
+        if (bulkTargetField === "purchase_price") {
+          return { ...row, purchase_price: nextValue as number, price: nextValue as number };
+        }
+        return { ...row, [bulkTargetField]: nextValue };
+      }),
+    );
+  };
 
   const commitField = (rowIndex: number, field: EditableField, rawValue: string) => {
     switch (field) {
@@ -2726,7 +2832,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               </tr>
             </thead>
             <tbody>
-              {draftWines.map((row, index) => {
+              {filteredRows.length === 0 ? (
+                <tr>
+                  <td colSpan={visibleColumns.length + 3} className="px-6 py-12 text-center">
+                    <p className="text-sm font-semibold text-[#4A4338]">Nenhuma linha encontrada</p>
+                    <p className="mt-1 text-xs text-[#8A8075]">Ajuste a busca ou remova filtros para voltar à revisão completa.</p>
+                  </td>
+                </tr>
+              ) : null}
+              {filteredRows.map(({ row, index }) => {
                 const status = getDisplayRowStatus(row);
                 const selected = selectedSet.has(index);
                 return (
@@ -2877,6 +2991,89 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
+                <div className="grid shrink-0 gap-2 rounded-2xl border border-white/55 bg-white/70 px-3 py-2 shadow-sm xl:grid-cols-[minmax(280px,1fr)_auto]">
+                  <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                    <Input
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="Buscar por vinho, produtor, uva, país, região ou safra"
+                      className="h-8 min-w-[260px] flex-1 rounded-full border-white/70 bg-white/80 px-3 text-[12px] shadow-none focus-visible:ring-[#B98C45]/20"
+                    />
+                    {[
+                      { key: "all" as StatusFilter, label: "Todos", count: draftWines.length },
+                      { key: "ready" as StatusFilter, label: "Ready", count: completeRowsCount },
+                      { key: "review" as StatusFilter, label: "Review", count: reviewRowsCount },
+                      { key: "invalid" as StatusFilter, label: "Invalid", count: invalidRowsCount },
+                      { key: "duplicates" as StatusFilter, label: "Duplicados", count: duplicateRowsCount },
+                      { key: "low_confidence" as StatusFilter, label: "Baixa confiança", count: lowConfidenceRowsCount },
+                    ].map((filter) => (
+                      <button
+                        key={filter.key}
+                        type="button"
+                        onClick={() => setStatusFilter(filter.key)}
+                        className={cn(
+                          "inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-[11px] font-semibold transition-colors",
+                          statusFilter === filter.key
+                            ? "border-[#7B1E2B]/20 bg-[#7B1E2B] text-white shadow-[0_8px_18px_rgba(123,30,43,0.18)]"
+                            : "border-white/70 bg-white/75 text-[#6B6258] hover:bg-white",
+                        )}
+                      >
+                        {filter.label}
+                        <span className={cn("rounded-full px-1.5 py-0.5 text-[10px]", statusFilter === filter.key ? "bg-white/20" : "bg-black/5")}>
+                          {filter.count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-start gap-2 xl:justify-end">
+                    <span className="rounded-full bg-[#F6EFE7] px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
+                      {filteredRowIndexes.length} visíveis
+                    </span>
+                    {activeFilterCount > 0 ? (
+                      <Button type="button" variant="ghost" size="sm" className="h-8 rounded-full px-3 text-[11px]" onClick={clearOperationalFilters}>
+                        Limpar filtros
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap items-center gap-1.5 rounded-2xl border border-white/45 bg-white/45 px-3 py-2">
+                  <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A8075]">Vazios</span>
+                  {emptyFieldOptions.map((field) => (
+                    <button
+                      key={field.key}
+                      type="button"
+                      onClick={() => toggleEmptyFieldFilter(field.key)}
+                      className={cn(
+                        "h-7 rounded-full border px-2.5 text-[11px] font-semibold transition-colors",
+                        emptyFieldFilters.includes(field.key)
+                          ? "border-[#C8A96A]/40 bg-[#F8EED7] text-[#7B6528]"
+                          : "border-white/70 bg-white/65 text-[#6B6258] hover:bg-white",
+                      )}
+                    >
+                      {field.label}
+                    </button>
+                  ))}
+                  {searchQuery.trim() ? (
+                    <button type="button" onClick={() => setSearchQuery("")} className="inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-medium text-[#6B6258]">
+                      Busca: {searchQuery.trim().slice(0, 24)}
+                      <X className="h-3 w-3" />
+                    </button>
+                  ) : null}
+                  {statusFilter !== "all" ? (
+                    <button type="button" onClick={() => setStatusFilter("all")} className="inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-medium text-[#6B6258]">
+                      Status: {statusFilter === "ready" ? "Ready" : statusFilter === "review" ? "Review" : statusFilter === "invalid" ? "Invalid" : statusFilter === "duplicates" ? "Duplicados" : "Baixa confiança"}
+                      <X className="h-3 w-3" />
+                    </button>
+                  ) : null}
+                  {emptyFieldFilters.map((field) => (
+                    <button key={field} type="button" onClick={() => toggleEmptyFieldFilter(field)} className="inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-[11px] font-medium text-[#6B6258]">
+                      Sem {emptyFieldOptions.find((item) => item.key === field)?.label.toLowerCase()}
+                      <X className="h-3 w-3" />
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/55 bg-white/70 px-3 py-2 shadow-sm">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-8 rounded-full px-3 text-[11px]" disabled={step === "importing" || step === "done"}>
@@ -2902,31 +3099,70 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </Button>
                   </div>
                   <div className="rounded-full bg-[#F6EFE7] px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
-                    {selectedRows.length} selecionada(s)
+                    {selectedRows.length} selecionada(s) · {filteredRowIndexes.length} filtrada(s)
                   </div>
                 </div>
 
-                <div className="grid shrink-0 gap-2 rounded-2xl border border-white/55 bg-white/60 px-3 py-2 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]">
-                  <div className="flex items-center gap-2">
-                    <Input className="h-8 rounded-lg text-[12px]" value={bulkProducer} onChange={(e) => setBulkProducer(e.target.value)} placeholder="Produtor em massa" disabled={!editMode || step === "importing" || step === "done"} />
-                    <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={selectedRows.length > 0 ? applyProducerToSelected : applyBulkProducer} disabled={!editMode || !bulkProducer.trim() || step === "importing" || step === "done"}>
-                      Aplicar
-                    </Button>
+                {selectedRows.length > 0 ? (
+                  <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#7B1E2B]/10 bg-[#F8EDEF]/80 px-3 py-2 text-[12px] text-[#6B2430]">
+                    <span className="font-semibold">{selectedRows.length} linha(s) selecionada(s)</span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Button variant="secondary" size="sm" className="h-8 rounded-full px-3 text-[11px]" onClick={clearVisibleSelection}>
+                        Limpar seleção visível
+                      </Button>
+                      <Button variant="secondary" size="sm" className="h-8 rounded-full px-3 text-[11px] text-rose-700" onClick={removeSelectedRows} disabled={!editMode || step === "importing" || step === "done"}>
+                        Remover selecionadas
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Input className="h-8 rounded-lg text-[12px]" value={bulkVintage} onChange={(e) => setBulkVintage(e.target.value)} placeholder="Safra em massa" type="number" disabled={!editMode || step === "importing" || step === "done"} />
-                    <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={selectedRows.length > 0 ? applyVintageToSelected : applyBulkVintage} disabled={!editMode || !bulkVintage.trim() || step === "importing" || step === "done"}>
-                      Aplicar
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Input className="h-8 rounded-lg text-[12px]" value={bulkGrape} onChange={(e) => setBulkGrape(e.target.value)} placeholder="Uva em massa" disabled={!editMode || step === "importing" || step === "done"} />
-                    <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={selectedRows.length > 0 ? applyGrapeToSelected : applyBulkGrape} disabled={!editMode || !bulkGrape.trim() || step === "importing" || step === "done"}>
-                      Aplicar
-                    </Button>
-                  </div>
-                  <Button variant="secondary" size="sm" className="h-8 text-[11px]" onClick={applyBulkAll} disabled={!editMode || (!bulkProducer.trim() && !bulkVintage.trim() && !bulkGrape.trim()) || step === "importing" || step === "done"}>
-                    Preencher vazios
+                ) : null}
+
+                <div className="grid shrink-0 gap-2 rounded-2xl border border-white/55 bg-white/60 px-3 py-2 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
+                  <Select value={bulkTargetField} onValueChange={(value) => setBulkTargetField(value as BulkTargetField)}>
+                    <SelectTrigger className="h-8 rounded-lg bg-white/80 text-[12px]">
+                      <SelectValue placeholder="Campo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {bulkFieldOptions.map((field) => (
+                        <SelectItem key={field.key} value={field.key}>{field.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    className="h-8 rounded-lg text-[12px]"
+                    value={bulkValue}
+                    onChange={(event) => setBulkValue(event.target.value)}
+                    placeholder={`Valor para ${bulkTarget.label.toLowerCase()}`}
+                    type={bulkTarget.kind === "number" ? "number" : "text"}
+                    disabled={!editMode || step === "importing" || step === "done"}
+                  />
+                  <Select value={bulkMode} onValueChange={(value) => setBulkMode(value as BulkMode)}>
+                    <SelectTrigger className="h-8 rounded-lg bg-white/80 text-[12px]">
+                      <SelectValue placeholder="Modo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fill_empty">Preencher vazios</SelectItem>
+                      <SelectItem value="replace">Substituir existentes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={bulkScope} onValueChange={(value) => setBulkScope(value as BulkScope)}>
+                    <SelectTrigger className="h-8 rounded-lg bg-white/80 text-[12px]">
+                      <SelectValue placeholder="Escopo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="selected">Selecionadas</SelectItem>
+                      <SelectItem value="filtered">Filtradas</SelectItem>
+                      <SelectItem value="all">Todas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="h-8 text-[11px]"
+                    onClick={applyBulkOperation}
+                    disabled={!editMode || !bulkValue.trim() || bulkScopeCount === 0 || step === "importing" || step === "done"}
+                  >
+                    Aplicar ({bulkScopeCount})
                   </Button>
                 </div>
 
@@ -3094,6 +3330,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             >
               <div className="flex flex-wrap items-center gap-2 text-[12px] font-medium text-[#5F5F5F]">
                 <span className="rounded-full bg-white/70 px-2.5 py-1">{draftWines.length} total</span>
+                <span className="rounded-full bg-white/70 px-2.5 py-1">{filteredRowIndexes.length} visíveis</span>
                 <span className="rounded-full bg-white/70 px-2.5 py-1">{selectedRows.length} selecionada(s)</span>
                 <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">{completeRowsCount} prontos</span>
                 <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">{reviewRowsCount} revisão</span>
