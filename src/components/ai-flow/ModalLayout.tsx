@@ -12,13 +12,13 @@ export const AI_MODAL_CARD_BORDER = "rgba(58,51,39,0.08)";
 export const AI_MODAL_SOFT_SURFACE = "rgba(255,251,244,0.58)";
 
 export const AI_MODAL_CARD_CLASSNAME =
-  "rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] shadow-none";
+  "rounded-[14px] border border-[rgba(58,51,39,0.05)] bg-transparent shadow-none";
 
 export const AI_MODAL_ACTION_TILE_CLASSNAME =
-  "rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] shadow-none transition-all duration-180 hover:-translate-y-px hover:bg-[rgba(255,251,244,0.84)]";
+  "rounded-[14px] border border-[rgba(58,51,39,0.06)] bg-transparent shadow-none transition-all duration-180 hover:bg-[rgba(255,251,244,0.42)]";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "left-1/2 top-1/2 right-auto bottom-auto h-[92dvh] max-h-[92dvh] w-[94vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border-0 p-0 gap-0";
+  "left-1/2 top-1/2 right-auto bottom-auto h-[88dvh] max-h-[88dvh] w-[94vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border-0 p-0 gap-0";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   left: "50%",
@@ -26,10 +26,10 @@ export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   right: "auto",
   bottom: "auto",
   transform: "translate(-50%, -50%)",
-  width: "min(94vw, 880px)",
+  width: "min(94vw, 840px)",
   maxWidth: "880px",
-  maxHeight: "92dvh",
-  height: "92dvh",
+  maxHeight: "88dvh",
+  height: "88dvh",
   background: "linear-gradient(180deg, rgba(246,240,232,0.98) 0%, rgba(242,234,224,0.98) 100%)",
   backdropFilter: "blur(18px) saturate(1.06)",
   WebkitBackdropFilter: "blur(18px) saturate(1.06)",
@@ -40,7 +40,7 @@ export const AI_MODAL_DIALOG_CONTENT_CLASSNAME =
   "items-center overflow-hidden rounded-[20px] border border-[rgba(58,51,39,0.06)] p-0 shadow-[0_22px_52px_rgba(38,24,18,0.12)] sm:max-w-[880px]";
 
 export const AI_MODAL_DIALOG_CONTENT_STYLE: CSSProperties = {
-  background: "linear-gradient(180deg, rgba(246,240,232,0.98) 0%, rgba(241,232,221,0.98) 100%)",
+  background: "linear-gradient(180deg, rgba(246,240,232,0.98) 0%, rgba(242,234,224,0.98) 100%)",
   backdropFilter: "blur(18px) saturate(1.06)",
   WebkitBackdropFilter: "blur(18px) saturate(1.06)",
 };
@@ -95,7 +95,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 overflow-hidden px-3.5 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3 sm:px-4 sm:pb-[calc(16px+env(safe-area-inset-bottom))] sm:pt-3.5",
+        "min-h-0 flex-1 overflow-hidden px-3.5 pb-[calc(12px+env(safe-area-inset-bottom))] pt-2.5 sm:px-4 sm:pb-[calc(14px+env(safe-area-inset-bottom))] sm:pt-3",
         className,
       )}
     >
@@ -174,7 +174,7 @@ export function AiModalSplitLayout({
   return (
     <div
       className={cn(
-        "grid min-h-0 flex-1 grid-cols-1 gap-3",
+        "grid min-h-0 flex-1 grid-cols-1 gap-2.5",
         className,
       )}
     >
@@ -224,7 +224,7 @@ export function AiToolbarSurface({
   return (
     <div
       className={cn(
-        "rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-3 py-2 shadow-none backdrop-blur-xl",
+        "rounded-[14px] border border-[rgba(58,51,39,0.05)] bg-transparent px-0 py-1.5 shadow-none",
         className,
       )}
     >
@@ -243,14 +243,12 @@ export function AiModalCard({
   return (
     <div
       className={cn(
-        "rounded-[14px] border px-3 py-3 shadow-none sm:px-3.5 sm:py-3.5",
+        "rounded-[14px] border px-0 py-2 shadow-none sm:px-0 sm:py-2.5",
         className,
       )}
       style={{
-        background: AI_MODAL_CARD_SURFACE,
-        borderColor: AI_MODAL_CARD_BORDER,
-        backdropFilter: "blur(16px) saturate(1.08)",
-        WebkitBackdropFilter: "blur(16px) saturate(1.08)",
+        background: "transparent",
+        borderColor: "rgba(58,51,39,0.05)",
       }}
     >
       {children}
@@ -357,16 +355,16 @@ export function AiUploadPanel({
         }
       }}
       className={cn(
-        "group flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[14px] border border-dashed border-[rgba(123,30,43,0.16)] bg-[rgba(255,251,244,0.70)] px-4 py-5 text-center shadow-none transition-all duration-180 hover:-translate-y-px hover:bg-[rgba(255,251,244,0.84)] data-[dragging=true]:bg-[rgba(255,251,244,0.88)] sm:py-6",
+        "group flex cursor-pointer items-center justify-start gap-3 rounded-[14px] border border-dashed border-[rgba(123,30,43,0.14)] bg-transparent px-3 py-3 text-left shadow-none transition-all duration-180 hover:bg-[rgba(255,251,244,0.42)] data-[dragging=true]:bg-[rgba(255,251,244,0.50)]",
         className,
       )}
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)] text-[#7B1E2B] transition-transform duration-180 group-hover:scale-105">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.08)] bg-transparent text-[#7B1E2B] transition-transform duration-180 group-hover:scale-105">
         {icon}
       </div>
       <div className="max-w-[320px]">
-        <p className="text-[16.5px] font-semibold tracking-[-0.018em] text-[#1A1713]">{title}</p>
-        {description ? <p className="mt-1 text-[12.5px] leading-5 text-[#6B6258]">{description}</p> : null}
+        <p className="text-[14px] font-semibold tracking-[-0.012em] text-[#1A1713]">{title}</p>
+        {description ? <p className="mt-0.5 text-[12px] leading-5 text-[#6B6258]">{description}</p> : null}
       </div>
       {children}
     </div>
@@ -388,7 +386,7 @@ export function AiStatusCard({
 }) {
   return (
     <div
-      className={cn("rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-3 py-3 shadow-none sm:px-3.5 sm:py-3.5", toneClassName)}
+      className={cn("rounded-[14px] border border-[rgba(58,51,39,0.05)] bg-transparent px-3 py-3 shadow-none sm:px-3.5 sm:py-3.5", toneClassName)}
       style={{
         backdropFilter: "blur(10px) saturate(1.04)",
         WebkitBackdropFilter: "blur(10px) saturate(1.04)",

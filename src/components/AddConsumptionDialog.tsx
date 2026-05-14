@@ -83,7 +83,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [showWinePicker, setShowWinePicker] = useState(false);
   const fieldClassName = AI_MODAL_FIELD_CLASSNAME;
   const selectionCardClassName =
-    "flex min-h-[74px] flex-col justify-between rounded-[14px] border px-3 py-2.5 text-left shadow-none transition-all duration-200 hover:-translate-y-px";
+    "flex min-h-[64px] flex-col justify-between rounded-[14px] border px-3 py-2.5 text-left shadow-none transition-all duration-200";
 
   useEffect(() => {
     if (open && preSelectedWine) {
@@ -236,8 +236,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     className={cn(
                       selectionCardClassName,
                       source === "cellar"
-                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)]"
-                        : "border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] hover:bg-[rgba(255,251,244,0.86)]",
+                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.05)]"
+                        : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)]",
                     )}
                     onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
                   >
@@ -256,8 +256,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     className={cn(
                       selectionCardClassName,
                       source === "external"
-                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)]"
-                        : "border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] hover:bg-[rgba(255,251,244,0.86)]",
+                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.05)]"
+                        : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)]",
                     )}
                     onClick={() => {
                       setSource("external");

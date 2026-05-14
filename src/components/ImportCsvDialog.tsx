@@ -2872,10 +2872,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       <td
         key={column.key}
         className={cn(
-          "border-b border-[#EEE6DC] px-1.5 py-1.5 align-top transition-colors duration-150",
+          "border-b border-[rgba(58,51,39,0.07)] px-1.5 py-1.5 align-top transition-colors duration-150",
           stickyNameColumn && [
-            "sticky left-[6.5rem] z-10 shadow-[10px_0_18px_-22px_rgba(42,33,26,0.45)]",
-            selected ? "bg-[#FBF1F2]/95" : "bg-white/95 group-hover:bg-[#FFF9EF]/95",
+            "sticky left-[6.5rem] z-10",
+            selected ? "bg-[rgba(123,30,43,0.05)]" : "bg-[#F6F0E8] group-hover:bg-[rgba(255,251,244,0.42)]",
           ],
         )}
       >
@@ -2891,7 +2891,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           list={listId}
           data-grid-cell={`${rowIndex}:${column.key}`}
           className={cn(
-            "h-8 rounded-lg border bg-transparent px-2.5 text-[13px] shadow-none transition-all duration-150 placeholder:text-[#B7ADA1] hover:bg-white/70 focus:border-[#B98C45]/50 focus:bg-white focus-visible:ring-2 focus-visible:ring-[#B98C45]/20",
+            "h-8 rounded-[10px] border bg-transparent px-2.5 text-[13px] shadow-none transition-all duration-150 placeholder:text-[#B7ADA1] hover:bg-[rgba(255,251,244,0.45)] focus:border-[#7B1E2B]/20 focus:bg-transparent focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/10",
             error ? "border-[#D98A80]" : "border-transparent",
             column.align === "right" && "text-right",
           )}
@@ -2903,12 +2903,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const renderSpreadsheetTable = () => {
     return (
-      <div className="flex min-h-0 flex-1 overflow-hidden rounded-[22px] border border-[#E6DACE] bg-[rgba(255,252,248,0.82)] shadow-[0_16px_32px_-24px_rgba(54,36,22,0.22)]">
+      <div className="flex min-h-0 flex-1 overflow-hidden rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-transparent shadow-none">
         <div className="h-full min-h-0 w-full overflow-auto scroll-smooth" ref={tableScrollRef}>
           <table className="w-full min-w-[1320px] border-separate border-spacing-0 text-left">
             <thead className="sticky top-0 z-20">
-              <tr className="bg-[rgba(247,241,232,0.9)] backdrop-blur-xl">
-                <th className="sticky left-0 z-30 w-12 border-b border-[#E3D6C7] bg-[rgba(247,241,232,0.9)] px-3 py-2 text-center backdrop-blur-xl">
+              <tr className="bg-[#F6F0E8] backdrop-blur-xl">
+                <th className="sticky left-0 z-30 w-12 border-b border-[rgba(58,51,39,0.08)] bg-[#F6F0E8] px-3 py-2 text-center backdrop-blur-xl">
                   <input
                     type="checkbox"
                     checked={allRowsSelected}
@@ -2917,15 +2917,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     aria-label="Selecionar todos os vinhos"
                   />
                 </th>
-                <th className="sticky left-12 z-30 w-14 border-b border-[#E3D6C7] bg-[rgba(247,241,232,0.9)] px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65] backdrop-blur-xl">
+                <th className="sticky left-12 z-30 w-14 border-b border-[rgba(58,51,39,0.08)] bg-[#F6F0E8] px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65] backdrop-blur-xl">
                   #
                 </th>
                 {visibleColumns.map((column) => (
                   <th
                     key={column.key}
                     className={cn(
-                      "border-b border-[#DDD0BF] px-1.5 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65]",
-                      column.key === "name" && "sticky left-[6.5rem] z-30 min-w-[260px] bg-[rgba(247,241,232,0.9)] backdrop-blur-xl shadow-[10px_0_18px_-22px_rgba(42,33,26,0.45)]",
+                      "border-b border-[rgba(58,51,39,0.08)] px-1.5 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65]",
+                      column.key === "name" && "sticky left-[6.5rem] z-30 min-w-[260px] bg-[#F6F0E8] backdrop-blur-xl",
                       column.key === "producer" && "min-w-[190px]",
                       column.key === "vintage" && "min-w-[100px]",
                       column.key === "country" && "min-w-[150px]",
@@ -2939,7 +2939,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     {column.label}
                   </th>
                 ))}
-                <th className="w-28 border-b border-[#DDD0BF] px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65]">
+                <th className="w-28 border-b border-[rgba(58,51,39,0.08)] px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65]">
                   Status
                 </th>
               </tr>
@@ -2961,13 +2961,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   <tr
                     key={`${index}-${row.name || "row"}`}
                     className={cn(
-                      "group bg-white/80 transition-colors duration-150 hover:bg-[#FFF9EF]",
-                      selected && "bg-[#FBF1F2] shadow-[inset_3px_0_0_rgba(123,30,43,0.36)]",
+                      "group bg-transparent transition-colors duration-150 hover:bg-[rgba(255,251,244,0.42)]",
+                      selected && "bg-[rgba(123,30,43,0.05)]",
                     )}
                   >
                     <td className={cn(
-                      "sticky left-0 z-10 border-b border-[#EEE6DC] px-3 py-1.5 text-center transition-colors duration-150",
-                      selected ? "bg-[#FBF1F2]/95" : "bg-white/95 group-hover:bg-[#FFF9EF]/95",
+                      "sticky left-0 z-10 border-b border-[rgba(58,51,39,0.07)] px-3 py-1.5 text-center transition-colors duration-150",
+                      selected ? "bg-[rgba(123,30,43,0.05)]" : "bg-[#F6F0E8] group-hover:bg-[rgba(255,251,244,0.42)]",
                     )}>
                       <input
                         type="checkbox"
@@ -2978,13 +2978,13 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       />
                     </td>
                     <td className={cn(
-                      "sticky left-12 z-10 border-b border-[#EEE6DC] px-2 py-1.5 text-[12px] font-medium text-[#8A8075] transition-colors duration-150",
-                      selected ? "bg-[#FBF1F2]/95 text-[#7B1E2B]" : "bg-white/95 group-hover:bg-[#FFF9EF]/95",
+                      "sticky left-12 z-10 border-b border-[rgba(58,51,39,0.07)] px-2 py-1.5 text-[12px] font-medium text-[#8A8075] transition-colors duration-150",
+                      selected ? "bg-[rgba(123,30,43,0.05)] text-[#7B1E2B]" : "bg-[#F6F0E8] group-hover:bg-[rgba(255,251,244,0.42)]",
                     )}>
                       {index + 1}
                     </td>
                     {visibleColumns.map((column) => renderSpreadsheetInput(row, index, column, selected))}
-                    <td className="border-b border-[#EEE6DC] px-3 py-1.5 text-right">
+                    <td className="border-b border-[rgba(58,51,39,0.07)] px-3 py-1.5 text-right">
                       <span
                         className={cn(
                           "inline-flex rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.11em]",
@@ -3022,23 +3022,28 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
         className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
-        style={AI_MODAL_SHEET_CONTENT_STYLE}
+        style={{
+          ...AI_MODAL_SHEET_CONTENT_STYLE,
+          width: hasDraftRows ? "min(94vw, 840px)" : "min(94vw, 620px)",
+          height: hasDraftRows ? "88dvh" : "auto",
+          maxHeight: "88dvh",
+        }}
         aria-label="Importar planilha de vinhos"
       >
         <AiModalShell>
-          <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3 pr-14">
+          <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3 pr-12">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#7b1e2b]/10 bg-[rgba(123,30,43,0.08)]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.08)] bg-transparent">
                 <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0">
-                <SheetTitle className="text-[20px] font-semibold tracking-tight text-[#1E1E1E]">
-                  {hasDraftRows ? "Revise seus vinhos antes de importar" : "Importar planilha de vinhos"}
+                <SheetTitle className="text-[20px] font-semibold leading-tight tracking-[-0.018em] text-[#1A1713]">
+                  {hasDraftRows ? "Revisar importação" : "Importar vinhos"}
                 </SheetTitle>
-                <SheetDescription className="mt-0.5 text-[12px] font-medium leading-relaxed tracking-tight text-[#6B6B6B]">
+                <SheetDescription className="mt-0.5 text-[12px] font-medium leading-5 tracking-tight text-[#6B6258]">
                   {hasDraftRows
-                    ? `${draftWines.length} linha(s) carregadas em uma área de revisão editável.`
-                    : "Envie CSV, Excel, PDF, texto ou imagem para criar uma revisão editável."}
+                    ? `${draftWines.length} linha(s) carregadas.`
+                    : "CSV, Excel, PDF, texto ou imagem."}
                 </SheetDescription>
               </div>
             </div>
@@ -3061,11 +3066,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             ) : null}
           </AiModalHeaderBar>
 
-          <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-2.5 sm:px-4">
+          <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-2 sm:px-4">
             {hasDraftRows ? (
               <div className="flex min-h-0 flex-1 flex-col gap-2.5">
                 {step === "importing" ? (
-                  <div className="shrink-0 rounded-2xl border border-[#E2D7CA] bg-white/75 px-3 py-2">
+                  <div className="shrink-0 border-b border-[rgba(58,51,39,0.07)] px-1 py-2">
                     <div className="mb-2 flex items-center justify-between gap-3 text-[12px] font-semibold text-[#2A211A]">
                       <span>Importando vinhos...</span>
                       <span>{importProgress}%</span>
@@ -3077,7 +3082,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 ) : null}
 
                 {step === "done" ? (
-                  <div className="shrink-0 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-3 py-2 text-[#2F4A2B]">
+                  <div className="shrink-0 border-b border-emerald-100 px-1 py-2 text-[#2F4A2B]">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white">
                         <Check className="h-4 w-4" />
@@ -3090,7 +3095,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[minmax(280px,1fr)_auto]">
+                <AiToolbarSurface className="grid shrink-0 gap-2 border-b border-[rgba(58,51,39,0.06)] pb-2 xl:grid-cols-[minmax(280px,1fr)_auto]">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <div className="relative min-w-[260px] flex-1">
                       <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8A8075]/70" />
@@ -3098,7 +3103,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         placeholder="Buscar por vinho, produtor, uva, país, região ou safra"
-                        className="h-9 rounded-[16px] border-white/75 bg-white/82 pl-8 pr-3 text-[12px] shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)] transition-all duration-150 placeholder:text-[#A99E91] hover:bg-white focus:border-[#B98C45]/30 focus:bg-white focus-visible:ring-[#B98C45]/20"
+                        className="h-9 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent pl-8 pr-3 text-[12px] shadow-none transition-all duration-150 placeholder:text-[#A99E91] focus:border-[#7B1E2B]/20 focus-visible:ring-[#7B1E2B]/10"
                       />
                     </div>
                     {[
@@ -3116,19 +3121,19 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         className={cn(
                           "inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-[11px] font-semibold transition-all duration-150",
                           statusFilter === filter.key
-                            ? "border-[#7B1E2B]/20 bg-[#F8EDEF] text-[#7B1E2B] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(123,30,43,0.08)]"
-                            : "border-white/70 bg-white/60 text-[#6B6258] hover:-translate-y-px hover:bg-white hover:text-[#4A4338]",
+                            ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.07)] text-[#7B1E2B]"
+                            : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#4A4338]",
                         )}
                       >
                         {filter.label}
-                        <span className={cn("rounded-full px-1.5 py-0.5 text-[10px]", statusFilter === filter.key ? "bg-white/70 text-[#7B1E2B]" : "bg-black/5")}>
+                        <span className={cn("rounded-full px-1.5 py-0.5 text-[10px]", statusFilter === filter.key ? "bg-[rgba(255,251,244,0.52)] text-[#7B1E2B]" : "bg-[rgba(58,51,39,0.05)]")}>
                           {filter.count}
                         </span>
                       </button>
                     ))}
                   </div>
                   <div className="flex items-center justify-start gap-2 xl:justify-end">
-                    <span className="rounded-full bg-white/60 px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
+                    <span className="rounded-full bg-transparent px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
                       {filteredRowIndexes.length} visíveis
                     </span>
                     {activeFilterCount > 0 ? (
@@ -3139,7 +3144,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 </AiToolbarSurface>
 
-                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center gap-1.5 border-white/40 bg-white/40 shadow-none">
+                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center gap-1.5">
                   <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A8075]">Vazios</span>
                   {emptyFieldOptions.map((field) => (
                     <button
@@ -3149,27 +3154,27 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       className={cn(
                         "h-7 rounded-full border px-2.5 text-[11px] font-semibold transition-all duration-150",
                         emptyFieldFilters.includes(field.key)
-                          ? "border-[#C8A96A]/40 bg-[#FAF0DA] text-[#7B6528] shadow-[0_6px_14px_rgba(123,101,40,0.06)]"
-                          : "border-white/70 bg-white/60 text-[#6B6258] hover:-translate-y-px hover:bg-white hover:text-[#4A4338]",
+                          ? "border-[#C8A96A]/32 bg-[rgba(198,167,104,0.10)] text-[#7B6528]"
+                          : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#4A4338]",
                       )}
                     >
                       {field.label}
                     </button>
                   ))}
                   {searchQuery.trim() ? (
-                    <button type="button" onClick={() => setSearchQuery("")} className="inline-flex h-7 items-center gap-1 rounded-full border border-white/70 bg-white/70 px-2.5 text-[11px] font-medium text-[#6B6258] transition-all duration-150 hover:bg-white">
+                    <button type="button" onClick={() => setSearchQuery("")} className="inline-flex h-7 items-center gap-1 rounded-full border border-[rgba(58,51,39,0.06)] bg-transparent px-2.5 text-[11px] font-medium text-[#6B6258] transition-all duration-150 hover:bg-[rgba(255,251,244,0.42)]">
                       Busca: {searchQuery.trim().slice(0, 24)}
                       <X className="h-3 w-3" />
                     </button>
                   ) : null}
                   {statusFilter !== "all" ? (
-                    <button type="button" onClick={() => setStatusFilter("all")} className="inline-flex h-7 items-center gap-1 rounded-full border border-white/70 bg-white/70 px-2.5 text-[11px] font-medium text-[#6B6258] transition-all duration-150 hover:bg-white">
+                    <button type="button" onClick={() => setStatusFilter("all")} className="inline-flex h-7 items-center gap-1 rounded-full border border-[rgba(58,51,39,0.06)] bg-transparent px-2.5 text-[11px] font-medium text-[#6B6258] transition-all duration-150 hover:bg-[rgba(255,251,244,0.42)]">
                       Status: {statusFilter === "ready" ? "Ready" : statusFilter === "review" ? "Review" : statusFilter === "invalid" ? "Invalid" : statusFilter === "duplicates" ? "Duplicados" : "Baixa confiança"}
                       <X className="h-3 w-3" />
                     </button>
                   ) : null}
                   {emptyFieldFilters.map((field) => (
-                    <button key={field} type="button" onClick={() => toggleEmptyFieldFilter(field)} className="inline-flex h-7 items-center gap-1 rounded-full border border-white/70 bg-white/70 px-2.5 text-[11px] font-medium text-[#6B6258] transition-all duration-150 hover:bg-white">
+                    <button key={field} type="button" onClick={() => toggleEmptyFieldFilter(field)} className="inline-flex h-7 items-center gap-1 rounded-full border border-[rgba(58,51,39,0.06)] bg-transparent px-2.5 text-[11px] font-medium text-[#6B6258] transition-all duration-150 hover:bg-[rgba(255,251,244,0.42)]">
                       Sem {emptyFieldOptions.find((item) => item.key === field)?.label.toLowerCase()}
                       <X className="h-3 w-3" />
                     </button>
@@ -3200,7 +3205,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       <X className="mr-1 h-3.5 w-3.5" /> Trocar arquivo
                     </Button>
                   </div>
-                  <div className="rounded-full bg-white/60 px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
+                  <div className="rounded-full bg-transparent px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
                     {selectedRows.length} selecionada(s) · {filteredRowIndexes.length} filtrada(s)
                   </div>
                 </AiToolbarSurface>
@@ -3222,9 +3227,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </AiToolbarSurface>
                 ) : null}
 
-                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
+                <AiToolbarSurface className="grid shrink-0 gap-2 border-t border-[rgba(58,51,39,0.06)] pt-2 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
                   <Select value={bulkTargetField} onValueChange={(value) => setBulkTargetField(value as BulkTargetField)}>
-                    <SelectTrigger className="h-8 rounded-lg border-white/70 bg-white/75 text-[12px] focus:ring-[#B98C45]/20">
+                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
                       <SelectValue placeholder="Campo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -3234,7 +3239,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </SelectContent>
                   </Select>
                   <Input
-                    className="h-8 rounded-lg border-white/70 bg-white/75 text-[12px] shadow-none transition-all duration-150 focus:border-[#B98C45]/30 focus-visible:ring-[#B98C45]/20"
+                    className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] shadow-none transition-all duration-150 focus:border-[#7B1E2B]/20 focus-visible:ring-[#7B1E2B]/10"
                     value={bulkValue}
                     onChange={(event) => setBulkValue(event.target.value)}
                     placeholder={`Valor para ${bulkTarget.label.toLowerCase()}`}
@@ -3242,7 +3247,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     disabled={!editMode || step === "importing" || step === "done"}
                   />
                   <Select value={bulkMode} onValueChange={(value) => setBulkMode(value as BulkMode)}>
-                    <SelectTrigger className="h-8 rounded-lg border-white/70 bg-white/75 text-[12px] focus:ring-[#B98C45]/20">
+                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
                       <SelectValue placeholder="Modo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -3251,7 +3256,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </SelectContent>
                   </Select>
                   <Select value={bulkScope} onValueChange={(value) => setBulkScope(value as BulkScope)}>
-                    <SelectTrigger className="h-8 rounded-lg border-white/70 bg-white/75 text-[12px] focus:ring-[#B98C45]/20">
+                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
                       <SelectValue placeholder="Escopo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -3263,7 +3268,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-8 rounded-lg text-[11px] transition-all duration-150 hover:-translate-y-px"
+                    className="h-8 rounded-[12px] text-[11px] transition-all duration-150"
                     onClick={applyBulkOperation}
                     disabled={!editMode || !bulkValue.trim() || bulkScopeCount === 0 || step === "importing" || step === "done"}
                   >
@@ -3272,7 +3277,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </AiToolbarSurface>
 
                 {(enriching || processingTotal > 0) ? (
-                  <div className="shrink-0 rounded-2xl border border-black/5 bg-[#FBFAF7] px-3 py-2 text-[12px] text-[#5F5F5F]">
+                  <div className="shrink-0 border-y border-[rgba(58,51,39,0.06)] px-1 py-2 text-[12px] text-[#5F5F5F]">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <span className="font-medium">{enriching ? "Corrigindo automaticamente..." : "Processando importação"}</span>
                       {processingTotal > 0 ? <span className="font-semibold text-[#7B1E2B]">{processingRows}/{processingTotal}</span> : null}
@@ -3286,7 +3291,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 ) : null}
 
                 {parseErrors.length > 0 ? (
-                  <div className="shrink-0 space-y-1 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2">
+                  <div className="shrink-0 space-y-1 border-y border-amber-200 px-1 py-2">
                     {parseErrors.map((error, index) => (
                       <p key={index} className="flex items-center gap-1.5 text-[12px] font-medium text-amber-800">
                         <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -3299,11 +3304,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 {renderSpreadsheetTable()}
 
                 {importSourceConfidence < 0.7 && importSourceHeaders.length > 0 ? (
-                  <div className="max-h-44 shrink-0 overflow-auto rounded-2xl border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-3">
+                  <div className="max-h-40 shrink-0 overflow-auto border-t border-[rgba(198,167,104,0.18)] pt-2">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-[14px] font-semibold text-[#7B6528]">Mapeamento manual disponível</p>
-                        <p className="text-[13px] text-[#6B6258]">A confiança ficou baixa. Ajuste colunas sem esconder a tabela já carregada.</p>
+                        <p className="text-[13px] font-semibold text-[#7B6528]">Mapeamento manual</p>
                       </div>
                       <Button variant="secondary" size="sm" onClick={applyManualMapping} disabled={importSourceHeaders.length === 0 || step === "importing" || step === "done"}>
                         Aplicar mapeamento
@@ -3311,7 +3315,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </div>
                     <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                       {importSourceHeaders.map((header) => (
-                        <div key={header} className="flex flex-col gap-2 rounded-xl border border-black/5 bg-white p-2">
+                        <div key={header} className="flex flex-col gap-2 rounded-[12px] border border-[rgba(58,51,39,0.06)] bg-transparent p-2">
                           <p className="truncate text-[12px] font-semibold text-[#1A1A1A]">{header}</p>
                           <Select
                             value={columnMapping[header] || "ignore"}
@@ -3345,13 +3349,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                {(mappingEntries.length > 0 || aiNotes) ? (
-                  <div className="shrink-0 rounded-2xl border border-white/50 bg-white/60 px-3 py-2 text-[11px] text-[#6B6258]">
-                    {aiNotes ? <p className="mb-2 font-medium text-[#4A4338]">{aiNotes}</p> : null}
+                {mappingEntries.length > 0 ? (
+                  <div className="shrink-0 px-1 py-1 text-[11px] text-[#6B6258]">
                     {mappingEntries.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">
                         {mappingEntries.map(([from, to]) => (
-                          <span key={from} className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-medium">
+                          <span key={from} className="rounded-full bg-[rgba(58,51,39,0.05)] px-2 py-0.5 text-[10px] font-medium">
                             {from} {"->"} {to}
                           </span>
                         ))}
@@ -3363,35 +3366,36 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             ) : (
               <AnimatePresence mode="wait">
                 {step === "analyzing" ? (
-                  <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-[320px] items-center justify-center text-center">
+                  <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-[220px] items-center justify-center text-center">
                     <div>
-                      <div className="relative mx-auto mb-5 h-16 w-16">
-                        <div className="absolute inset-0 rounded-2xl bg-[rgba(143,45,86,0.14)] animate-pulse" />
+                      <div className="relative mx-auto mb-4 h-10 w-10">
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader2 className="h-7 w-7 animate-spin text-[#8F2D56]" />
+                          <Loader2 className="h-5 w-5 animate-spin text-[#7B1E2B]" />
                         </div>
                       </div>
-                      <p className="text-[15px] font-semibold text-[#0F0F14]">
+                      <p className="text-[14px] font-semibold text-[#1A1713]">
                         {analysisStage === "processing" ? "Processando arquivo..." : analysisStage === "extracting" ? "Extraindo dados..." : analysisStage === "parsing" ? "Organizando os vinhos..." : "Normalizando dados..."}
                       </p>
-                      <p className="mt-1.5 text-[13px] text-[#8A8075]">A prévia será exibida assim que existirem vinhos detectados.</p>
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[320px]">
+                  <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[210px]">
                     <div
                       className={cn(
-                        "rounded-[18px] border border-dashed p-6 text-center transition-colors sm:p-7",
-                        loading ? "cursor-wait opacity-80" : "cursor-pointer hover:border-[#8F2D56]/40",
+                        "flex items-center gap-3 rounded-[14px] border border-dashed border-[rgba(123,30,43,0.14)] px-3 py-3 text-left transition-colors",
+                        loading ? "cursor-wait opacity-80" : "cursor-pointer hover:bg-[rgba(255,251,244,0.42)]",
                       )}
-                      style={{ borderColor: "rgba(143,45,86,0.15)", background: "rgba(255,255,255,0.62)" }}
                       onClick={() => { if (!loading) fileRef.current?.click(); }}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={handleDrop}
                     >
-                      <Upload className="mx-auto mb-3 h-8 w-8 text-[#8F2D56]" />
-                      <p className="text-sm font-semibold text-[#0F0F14]">Arraste um documento ou clique para selecionar</p>
-                      <p className="mt-1 text-xs text-[#8A8075]">CSV, Excel, PDF, Word, TXT ou imagem para cadastro em lote</p>
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.08)]">
+                        <Upload className="h-4.5 w-4.5 text-[#7B1E2B]" />
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-semibold text-[#1A1713]">Selecionar arquivo</p>
+                        <p className="mt-0.5 text-[12px] leading-5 text-[#6B6258]">CSV, Excel, PDF, texto ou imagem</p>
+                      </div>
                     </div>
                     <input
                       ref={fileRef}
@@ -3400,16 +3404,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       className="hidden"
                       onChange={(e) => { if (e.target.files?.[0]) void handleFile(e.target.files[0]); }}
                     />
-                    <div className="mt-5 rounded-[22px] border border-black/5 p-4" style={{ background: "rgba(143,45,86,0.04)" }}>
-                      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-[#8F2D56]">
-                        <Sparkles className="h-3.5 w-3.5" /> Importação inteligente
-                      </p>
-                      <p className="text-[12px] leading-relaxed text-[#6B6258]">
-                        A leitura aceita cabeçalhos em português ou inglês e, se houver linhas detectadas, a planilha editável aparece imediatamente.
-                      </p>
-                    </div>
                     {parseErrors.length > 0 ? (
-                      <div className="mt-4 space-y-1.5 rounded-[20px] border border-amber-200 bg-amber-50 p-3">
+                      <div className="mt-3 space-y-1.5 border-t border-amber-200 pt-3">
                         {parseErrors.map((error, index) => (
                           <p key={index} className="flex items-center gap-1.5 text-[12px] font-medium text-amber-800">
                             <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -3440,14 +3436,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </span>
               </div>
               {step === "done" ? (
-                <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="h-12 rounded-2xl px-5 text-[14px] font-semibold transition-all duration-150 hover:-translate-y-px">
+              <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="h-10 rounded-[12px] px-5 text-[13px] font-semibold transition-all duration-150">
                   Fechar
                 </AiModalActionButton>
               ) : (
                 <AiModalActionButton
                   onClick={handleImport}
                   variant="primary"
-                  className="h-11 rounded-[16px] px-6 text-[14px] font-semibold shadow-[0_14px_32px_rgba(123,30,43,0.18)] transition-all duration-150 hover:-translate-y-px hover:shadow-[0_18px_38px_rgba(123,30,43,0.22)] active:translate-y-0"
+                  className="h-10 rounded-[12px] px-5 text-[13px] font-semibold shadow-none transition-all duration-150 active:translate-y-0"
                   disabled={!canImport}
                 >
                   <Upload className="mr-1.5 h-4 w-4" /> Importar {identifiedRowsCount} linha(s)
@@ -3465,7 +3461,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               </AlertDialogHeader>
               <div className="max-h-72 space-y-2 overflow-y-auto">
                 {importWarningRows.map((row) => (
-                  <div key={`${row.index}-${row.name}`} className="rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] px-3 py-2">
+                  <div key={`${row.index}-${row.name}`} className="rounded-[14px] border border-[rgba(198,167,104,0.18)] bg-transparent px-3 py-2">
                     <p className="text-sm font-semibold text-[#7B6528]">{row.name}</p>
                     <p className="text-xs text-[#6B6258]">{row.issues.slice(0, 3).join(" · ")}</p>
                   </div>

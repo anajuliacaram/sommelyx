@@ -206,7 +206,7 @@ export const matchDotColor: Record<string, string> = {
 export function MatchDot({ match }: { match: string }) {
   return (
     <div className={cn(
-      "w-2.5 h-2.5 rounded-full shrink-0 ring-[2.5px] ring-white/70 shadow-sm",
+      "w-2.5 h-2.5 rounded-full shrink-0",
       matchDotColor[match] || "bg-primary/40",
     )} />
   );
@@ -277,7 +277,7 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className={cn("flex items-center gap-2.5 px-3 py-2", AI_MODAL_CARD_CLASSNAME)}>
+    <div className="flex items-center gap-2.5 border-b border-[rgba(58,51,39,0.06)] px-0 pb-2">
       <div className="flex h-8 w-8 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)]">
         <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
       </div>
@@ -301,7 +301,7 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={cn("p-3", AI_MODAL_CARD_CLASSNAME)}
+      className="border-y border-[rgba(58,51,39,0.06)] px-0 py-3"
     >
       <div className="space-y-2.5">
           {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
@@ -329,7 +329,7 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className={cn("px-4 py-4 text-center", AI_MODAL_CARD_CLASSNAME)}
+      className="border-y border-[rgba(58,51,39,0.06)] px-3 py-4 text-center"
     >
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-[13px]"
         style={{
@@ -420,7 +420,7 @@ export function WineSuggestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group list-none overflow-hidden transition-all duration-200 hover:-translate-y-px",
+        "group list-none overflow-hidden transition-all duration-200",
         AI_MODAL_ACTION_TILE_CLASSNAME,
         className,
       )}
@@ -547,16 +547,16 @@ export function PremiumChoiceCard({
       transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.985 }}
-      className="group w-full rounded-[14px] p-3 text-left transition-all duration-200"
+      className="group w-full rounded-[14px] border-b border-[rgba(58,51,39,0.06)] p-2.5 text-left transition-all duration-200"
       style={{
-        background: selected ? "rgba(123,30,43,0.06)" : "rgba(255,251,244,0.70)",
-        border: `1px solid ${selected ? accentColor : "rgba(58,51,39,0.08)"}`,
+        background: selected ? "rgba(123,30,43,0.05)" : "transparent",
+        borderColor: selected ? `${accentColor}26` : "rgba(58,51,39,0.06)",
         boxShadow: "none",
       }}
     >
       <div className="flex items-center gap-2.5">
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] transition-all duration-200 group-hover:scale-105"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px] transition-all duration-200 group-hover:scale-105"
           style={{
             background: selected ? `${accentColor}1A` : "rgba(123,30,43,0.07)",
             border: `1px solid ${selected ? `${accentColor}33` : "rgba(123,30,43,0.10)"}`,

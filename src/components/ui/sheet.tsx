@@ -63,7 +63,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
       >
         {children}
         <SheetPrimitive.Close asChild>
-          <ModalCloseButton className="absolute right-4 top-4 z-50" label="Fechar modal" />
+          <ModalCloseButton className="absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>
