@@ -70,7 +70,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const fieldClassName =
     "h-10 rounded-[12px] border border-black/5 bg-white/78 px-3 text-[13px] text-[#1F1F1F] shadow-none transition-all duration-200 placeholder:text-[#8C8579] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/16 focus-visible:ring-offset-0";
   const selectionCardClassName =
-    "flex min-h-[78px] flex-col justify-between rounded-[14px] border px-3 py-2.5 text-left shadow-[0_10px_22px_-24px_rgba(0,0,0,0.14)] transition-all duration-200 hover:-translate-y-px";
+    "flex min-h-[74px] flex-col justify-between rounded-[14px] border px-3 py-2.5 text-left shadow-none transition-all duration-200 hover:-translate-y-px";
 
   useEffect(() => {
     if (open && preSelectedWine) {
@@ -197,7 +197,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
       <DialogContent
-        className="items-center overflow-hidden rounded-[20px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_24px_64px_rgba(38,24,18,0.14)] sm:max-w-[880px]"
+        className="items-center overflow-hidden rounded-[20px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_22px_52px_rgba(38,24,18,0.12)] sm:max-w-[880px]"
         aria-label="Registrar consumo"
       >
         <div
@@ -206,7 +206,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
         >
           <DialogHeader className="mb-3 text-left">
             <div className="flex items-start gap-3 pr-10">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] bg-[linear-gradient(135deg,rgba(123,30,43,0.10),rgba(200,169,106,0.08))] text-[#7B1E2B] shadow-[0_10px_24px_-20px_rgba(123,30,43,0.16)]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] bg-[linear-gradient(135deg,rgba(123,30,43,0.10),rgba(200,169,106,0.08))] text-[#7B1E2B]">
                 <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0 flex-1">
@@ -233,7 +233,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     className={cn(
                       selectionCardClassName,
                       source === "cellar"
-                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] shadow-[0_18px_32px_-24px_rgba(123,30,43,0.28)]"
+                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)]"
                         : "border-black/5 bg-white/80 hover:bg-white/90",
                     )}
                     onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
@@ -253,7 +253,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     className={cn(
                       selectionCardClassName,
                       source === "external"
-                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)] shadow-[0_18px_32px_-24px_rgba(123,30,43,0.28)]"
+                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)]"
                         : "border-black/5 bg-white/80 hover:bg-white/90",
                     )}
                     onClick={() => {
@@ -504,7 +504,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 onClick={handleSubmit}
                 disabled={addConsumption.isPending}
                 variant="primary"
-                className="h-11 w-full rounded-[14px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-[0_12px_28px_-18px_rgba(123,30,43,0.38)]"
+                className="h-11 w-full rounded-[14px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
               >
                 {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
               </AiModalActionButton>

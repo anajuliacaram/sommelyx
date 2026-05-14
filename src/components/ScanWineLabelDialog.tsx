@@ -12,8 +12,7 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalSplitLayout, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
-import { getAiPresentationStatus } from "@/lib/ai-presentation";
+import { AiModalHeader, AiModalCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalSplitLayout, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -495,31 +494,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       ].filter(Boolean)
     : [];
 
-  const successStatus = getAiPresentationStatus("label", scanOutcome === "success_partial");
-  const resultStatus = scanOutcome === "success_partial"
-    ? {
-        icon: <Check className="h-4 w-4 text-amber-700" />,
-        title: successStatus.title,
-        tone: "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]",
-        description: successStatus.description,
-        warning: null,
-      }
-    : scanOutcome === "success_full"
-      ? {
-          icon: <Check className="h-4 w-4 text-success" />,
-          title: successStatus.title,
-          tone: "bg-[rgba(95,111,82,0.08)] text-[#2F4A2B] ring-[rgba(95,111,82,0.16)]",
-          description: successStatus.description,
-          warning: null,
-        }
-      : {
-          icon: <X className="h-4 w-4 text-destructive" />,
-          title: "Nova captura",
-          tone: "bg-[rgba(180,80,80,0.08)] text-[#9B4444] ring-[rgba(180,80,80,0.16)]",
-          description: "Vale uma nova foto para revelar melhor o rótulo.",
-          warning: null,
-        };
-
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
@@ -533,7 +507,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           <AiModalHeader
             icon={<Camera className="h-5 w-5" />}
             title="Escanear Rótulo"
-            description="Fotografe o rótulo e receba uma ficha enxuta, elegante e pronta para salvar."
+            description="Leia apenas o que estiver claro no rótulo."
           />
         </AiModalHeaderBar>
 
@@ -546,18 +520,18 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-3"
               >
-                <AiModalCard className="space-y-4">
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
-                    <div className="space-y-3">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[rgba(123,30,43,0.14)] bg-[linear-gradient(135deg,rgba(123,30,43,0.10)_0%,rgba(200,169,106,0.10)_100%)] shadow-[0_8px_20px_-14px_rgba(123,30,43,0.24)]">
-                      <Camera className="h-7 w-7 text-[#7B1E2B]" />
+                <AiModalCard className="space-y-3">
+                  <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_200px] lg:items-center">
+                    <div className="space-y-2.5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.07)]">
+                      <Camera className="h-5 w-5 text-[#7B1E2B]" />
                     </div>
-                    <div className="space-y-1.5">
-                      <h3 className="text-[20px] font-semibold tracking-[-0.02em] text-[#1A1713]">Fotografe o rótulo</h3>
-                      <p className="max-w-[38rem] text-[13px] leading-6 text-[rgba(58,51,39,0.62)]">
-                        Tire uma foto nítida do rótulo frontal da garrafa. A Sommelyx preenche os principais dados automaticamente.
+                    <div className="space-y-1">
+                      <h3 className="text-[17px] font-semibold tracking-[-0.018em] text-[#1A1713]">Fotografe o rótulo</h3>
+                      <p className="max-w-[34rem] text-[12.5px] leading-5 text-[rgba(58,51,39,0.62)]">
+                        Se algum dado não estiver legível, ele ficará em branco.
                       </p>
                     </div>
                   </div>
@@ -570,7 +544,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                     className="w-full"
                   >
                     <Camera className="h-4 w-4 mr-2" />
-                    Tirar Foto
+                    Tirar foto
                   </AiModalActionButton>
                   <AiModalActionButton
                     variant="secondary"
@@ -578,7 +552,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                     className="w-full"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Escolher da Fototeca
+                    Fototeca
                   </AiModalActionButton>
                 </div>
 
@@ -607,14 +581,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-3"
               >
                 <AiModalCard>
                   <AiProgressiveLoader
                     steps={[
-                      "Processando imagem…",
-                      "Lendo produtor e safra…",
-                      "Organizando a ficha…",
+                      "Lendo rótulo…",
+                      "Separando dados confiáveis…",
                       "Preparando revisão…",
                     ]}
                     interval={2200}
@@ -629,18 +602,14 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-3"
               >
-                <AiStatusCard
-                  icon={resultStatus.icon}
-                  title={resultStatus.title}
-                  description={resultStatus.description}
-                  warning={resultStatus.warning}
-                  toneClassName={resultStatus.tone}
-                />
-
                 {resultRows.length > 0 && (
                   <AiModalCard className="space-y-2">
+                    <div className="border-b border-black/5 pb-2">
+                      <p className="text-[14.5px] font-semibold tracking-[-0.01em] text-[#1A1713]">Dados encontrados</p>
+                      <p className="mt-0.5 text-[11.5px] text-[#6B6258]">Revise antes de aplicar.</p>
+                    </div>
                     {resultRows}
                   </AiModalCard>
                 )}
@@ -664,15 +633,17 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-3"
               >
-                <AiStatusCard
-                  icon={<X className="h-4 w-4 text-destructive" />}
-                  title="Nova captura"
-                  description={errorMsg}
-                  warning={undefined}
-                  toneClassName="bg-destructive/10 text-destructive ring-destructive/20"
-                />
+                <AiModalCard className="space-y-1.5 border-destructive/15 bg-destructive/5">
+                  <div className="flex items-start gap-2.5">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                    <div>
+                      <p className="text-[14px] font-semibold text-[#1A1713]">Nova captura</p>
+                      <p className="text-[12.5px] leading-5 text-[#6B6258]">{errorMsg}</p>
+                    </div>
+                  </div>
+                </AiModalCard>
                 <div className="flex w-full flex-col gap-2">
                 <AiModalActionButton
                   onClick={() => {
@@ -713,9 +684,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <span className="shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
-      <span className="text-right text-[13.5px] font-medium text-foreground">{value}</span>
+    <div className="flex items-start justify-between gap-3 py-0.5">
+      <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</span>
+      <span className="text-right text-[12.5px] font-medium leading-5 text-foreground">{value}</span>
     </div>
   );
 }

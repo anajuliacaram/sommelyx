@@ -103,7 +103,7 @@ export function CompatibilityBadge({ label, size = "md" }: { label?: string | nu
 
   return (
     <span
-      className={cn("inline-flex items-center font-bold tracking-wide rounded-full whitespace-nowrap", sizeClass)}
+      className={cn("inline-flex items-center font-semibold tracking-[0.02em] rounded-full whitespace-nowrap", sizeClass)}
       style={{
         background: config.bg,
         color: config.text,
@@ -167,15 +167,15 @@ export function FallbackAnalysisNotice({
 
   return (
     <div
-      className={cn("rounded-[22px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-4", className)}
+      className={cn("rounded-[14px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-3", className)}
       role="status"
       aria-live="polite"
     >
       <div className="flex items-center gap-2">
         <FallbackAnalysisBadge />
       </div>
-      <p className="mt-2 text-[13px] leading-7 text-[#4A4338]">{message}</p>
-      <p className={cn("mt-3 text-[10.5px] font-semibold uppercase tracking-[0.12em]", confidenceConfig.textClassName)}>
+      <p className="mt-1.5 text-[12.5px] leading-5 text-[#4A4338]">{message}</p>
+      <p className={cn("mt-2 text-[10px] font-semibold uppercase tracking-[0.12em]", confidenceConfig.textClassName)}>
         {confidenceConfig.label}
       </p>
     </div>
@@ -251,7 +251,7 @@ export function PremiumResultCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={cn("list-none overflow-hidden rounded-[22px] transition-all duration-200 hover:-translate-y-0.5", extraClass)}
+      className={cn("list-none overflow-hidden rounded-[14px] transition-all duration-200 hover:-translate-y-0.5", extraClass)}
       style={{
         background: isHighlighted
           ? "rgba(255,255,255,0.92)"
@@ -262,12 +262,12 @@ export function PremiumResultCard({
           ? "1px solid rgba(0,0,0,0.05)"
           : "1px solid rgba(0,0,0,0.05)",
         boxShadow: isHighlighted
-          ? "0 14px 32px -20px rgba(44,20,31,0.16), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)"
-          : "0 10px 24px -18px rgba(30,20,20,0.10), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.62)",
+          ? "0 8px 22px -18px rgba(44,20,31,0.14), inset 0 1px 0 rgba(255,255,255,0.7)"
+          : "0 4px 14px -14px rgba(30,20,20,0.08), inset 0 1px 0 rgba(255,255,255,0.62)",
       }}
     >
       {accentColor && <div className="h-[2px] w-full" style={{ background: accentColor }} />}
-      <div className="space-y-3 p-4 sm:p-[18px]">
+      <div className="space-y-2.5 p-3 sm:p-3.5">
         {children}
       </div>
     </motion.li>
@@ -281,8 +281,8 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-3 rounded-[20px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-4 py-2.5 shadow-[0_14px_28px_-24px_rgba(54,36,22,0.2)]">
-      <div className="flex h-9 w-9 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12">
+    <div className="flex items-center gap-2.5 rounded-[14px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-3 py-2">
+      <div className="flex h-8 w-8 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12">
         <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
       </div>
       <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6B6B6B]">
@@ -305,9 +305,9 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[20px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.72)_100%)] p-4 shadow-[0_18px_40px_-30px_rgba(33,20,12,0.16)] sm:p-5"
+      className="rounded-[14px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.72)_100%)] p-3"
     >
-      <div className="space-y-3">
+      <div className="space-y-2.5">
           {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
           <AiProgressiveLoader steps={steps} interval={2200} />
       </div>
@@ -333,21 +333,21 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[24px] border border-[rgba(198,167,104,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.74)_100%)] px-5 py-6 text-center shadow-[0_16px_32px_-28px_rgba(54,36,22,0.18)]"
+      className="rounded-[14px] border border-[rgba(198,167,104,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.74)_100%)] px-4 py-4 text-center"
     >
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px]"
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-[13px]"
         style={{
           background: "linear-gradient(135deg, rgba(220,38,38,0.08) 0%, rgba(185,28,28,0.03) 100%)",
           border: "1px solid rgba(220,38,38,0.12)",
         }}
       >
-        <X className="h-7 w-7 text-destructive/60" />
+        <X className="h-5 w-5 text-destructive/60" />
       </div>
-      <div className="mt-4 space-y-1.5">
-        <p className="text-[16px] font-semibold text-[#1A1A1A]">Ainda não foi possível concluir</p>
+      <div className="mt-3 space-y-1">
+        <p className="text-[15px] font-semibold text-[#1A1A1A]">Ainda não foi possível concluir</p>
         <p className="mx-auto max-w-[360px] text-[13px] leading-relaxed text-[#6E665D]">{message}</p>
       </div>
-      <AiModalActions className="mx-auto mt-4 w-full max-w-[320px]">
+      <AiModalActions className="mx-auto mt-3 w-full max-w-[320px]">
         <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">
           <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
         </AiModalActionButton>
@@ -371,7 +371,7 @@ export function RecipeButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       variant="ghost"
-      className="recipe-button min-h-10 h-auto px-4 py-2.5 rounded-full bg-[rgba(160,60,60,0.08)] text-[#7a2e2e] border border-[rgba(122,46,46,0.10)] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424] hover:-translate-y-[1px] transition-all duration-200 shadow-[0_8px_20px_-16px_rgba(122,46,46,0.35)]"
+      className="recipe-button min-h-9 h-auto px-3 py-2 rounded-full bg-[rgba(160,60,60,0.08)] text-[#7a2e2e] border border-[rgba(122,46,46,0.10)] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424] hover:-translate-y-[1px] transition-all duration-200 shadow-none"
     >
       <BookOpen className="h-4 w-4" />
       Ver receita
@@ -424,7 +424,7 @@ export function WineSuggestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group list-none overflow-hidden rounded-[18px] border border-border/25 bg-[rgba(255,255,255,0.84)] shadow-[0_14px_28px_-26px_rgba(0,0,0,0.16)] transition-all duration-200 hover:-translate-y-0.5",
+        "group list-none overflow-hidden rounded-[14px] border border-border/25 bg-[rgba(255,255,255,0.84)] transition-all duration-200 hover:-translate-y-0.5",
         className,
       )}
       style={{
@@ -432,20 +432,20 @@ export function WineSuggestionCard({
         WebkitBackdropFilter: "blur(14px) saturate(1.08)",
       }}
     >
-      <div className="space-y-3 p-4 sm:p-[18px]">
-        <div className="flex items-start gap-3">
+      <div className="space-y-2.5 p-3 sm:p-3.5">
+        <div className="flex items-start gap-2.5">
           <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7B1E2B] text-[12px] font-semibold text-white">
             {index + 1}
           </span>
           <div className="min-w-0">
-            <h4 className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[20px]">
+            <h4 className="text-[16px] font-semibold leading-tight tracking-[-0.018em] text-[#1A1713] sm:text-[18px]">
               {wineName}
             </h4>
             {style ? <p className="mt-1 text-[12px] font-medium text-[#6B6258]">{style}</p> : null}
           </div>
         </div>
 
-        <p className="text-[13.5px] leading-6 text-[#3F362F]">{summaryText}</p>
+        <p className="text-[13px] leading-5 text-[#3F362F]">{summaryText}</p>
         {structureText ? <p className="text-[12.5px] leading-5 text-[#6B6258]">{structureText}</p> : null}
         {[aromaText, palateText, momentText].filter(Boolean).length > 0 ? (
           <p className="text-[12px] leading-5 text-[#5B5146]">
@@ -478,19 +478,19 @@ export function PairingSheetHero({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-      className={cn("flex items-start", compact ? "mb-3.5 gap-3" : "mb-6 gap-4")}
+      className={cn("flex items-start", compact ? "mb-3 gap-3" : "mb-4 gap-3")}
     >
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-[18px]",
-          compact ? "h-12 w-12" : "h-14 w-14",
+          "flex shrink-0 items-center justify-center rounded-[14px]",
+          compact ? "h-10 w-10" : "h-11 w-11",
         )}
         style={{
           background: "rgba(255,255,255,0.6)",
           backdropFilter: "blur(14px) saturate(1.1)",
           WebkitBackdropFilter: "blur(14px) saturate(1.1)",
           border: "1px solid rgba(255,255,255,0.55)",
-          boxShadow: "0 10px 28px -14px rgba(123,30,43,0.22), inset 0 1px 0 rgba(255,255,255,0.7)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
         }}
       >
         <Icon className={cn("text-[#7B1E2B]", compact ? "h-5.5 w-5.5" : "h-6 w-6")} strokeWidth={1.75} />
@@ -499,7 +499,7 @@ export function PairingSheetHero({
         <h2
           className={cn(
             "font-semibold tracking-[-0.02em] leading-[1.1] text-[#1A1713]",
-            compact ? "text-[26px]" : "text-[28px]",
+            compact ? "text-[22px]" : "text-[24px]",
           )}
           style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontWeight: 600 }}
         >
@@ -507,7 +507,7 @@ export function PairingSheetHero({
         </h2>
         <p
           className={cn(
-            "text-[14px] font-medium leading-snug text-[rgba(58,51,39,0.6)]",
+            "text-[12.5px] font-medium leading-snug text-[rgba(58,51,39,0.6)]",
             compact ? "mt-1" : "mt-1.5",
           )}
         >
@@ -550,18 +550,18 @@ export function PremiumChoiceCard({
       transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.985 }}
-      className="group w-full rounded-[18px] p-3.5 text-left transition-all duration-200"
+      className="group w-full rounded-[14px] p-3 text-left transition-all duration-200"
       style={{
         background: selected ? "rgba(123,30,43,0.05)" : "rgba(255,255,255,0.92)",
         border: `1px solid ${selected ? accentColor : "rgba(0,0,0,0.06)"}`,
         boxShadow: selected
-          ? `0 10px 26px -14px ${accentColor}33, inset 0 1px 0 rgba(255,255,255,0.7)`
-          : "0 4px 14px -10px rgba(58,51,39,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
+          ? `0 6px 18px -16px ${accentColor}33, inset 0 1px 0 rgba(255,255,255,0.7)`
+          : "inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] transition-all duration-200 group-hover:scale-105"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] transition-all duration-200 group-hover:scale-105"
           style={{
             background: selected ? `${accentColor}1A` : "rgba(123,30,43,0.07)",
             border: `1px solid ${selected ? `${accentColor}33` : "rgba(123,30,43,0.10)"}`,
@@ -570,8 +570,8 @@ export function PremiumChoiceCard({
           <IconCmp className="h-[18px] w-[18px]" strokeWidth={1.8} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[14px] font-semibold tracking-[-0.005em] text-[#1A1713]">{title}</p>
-          <p className="mt-0.5 text-[12px] leading-5 text-[rgba(58,51,39,0.64)]">{description}</p>
+          <p className="text-[13.5px] font-semibold tracking-[-0.005em] text-[#1A1713]">{title}</p>
+          <p className="mt-0.5 text-[11.5px] leading-4 text-[rgba(58,51,39,0.64)]">{description}</p>
         </div>
       </div>
     </motion.button>

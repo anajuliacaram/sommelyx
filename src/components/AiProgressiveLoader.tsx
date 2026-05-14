@@ -27,12 +27,12 @@ export function AiProgressiveLoader({ steps, interval = 2500, subtitle }: AiProg
   }, [steps]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[rgba(123,30,43,0.07)] text-primary/70">
-          <Wine className="h-5 w-5" />
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-[rgba(123,30,43,0.07)] text-primary/70">
+          <Wine className="h-4.5 w-4.5" />
         </div>
-        <div className="min-h-[40px] min-w-0 flex flex-col justify-center">
+        <div className="min-h-[36px] min-w-0 flex flex-col justify-center">
         <AnimatePresence mode="wait">
           <motion.p
             key={currentStep}
@@ -40,13 +40,13 @@ export function AiProgressiveLoader({ steps, interval = 2500, subtitle }: AiProg
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.25 }}
-            className="text-[15px] font-semibold leading-snug text-foreground"
+            className="text-[14px] font-semibold leading-snug text-foreground"
           >
             {steps[currentStep]}
           </motion.p>
         </AnimatePresence>
         {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+          <p className="mt-0.5 text-[11.5px] leading-4 text-muted-foreground">{subtitle}</p>
         )}
         </div>
       </div>

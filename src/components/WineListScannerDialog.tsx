@@ -427,12 +427,12 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
-        className="space-y-4"
+        className="space-y-3"
       >
-        <section className="space-y-3">
+        <section className="space-y-2.5">
           <div className="border-b border-[rgba(24,21,17,0.08)] pb-3">
             <div>
-              <p className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
+              <p className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
                 {displayWines.length} rótulos para decidir
               </p>
               {safeResults.topPick ? (
@@ -551,9 +551,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                        className="space-y-4"
+                        className="space-y-3"
                       >
-                        <AiModalCard className="space-y-4">
+                        <AiModalCard className="space-y-3">
                           <div
                             onDragOver={(event) => {
                               event.preventDefault();
@@ -571,30 +571,30 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             onClick={() => fileInputRef.current?.click()}
                             role="button"
                             tabIndex={0}
-                            className="group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[18px] px-4 py-6 transition-all duration-200 hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01] sm:py-7"
+                            className="group relative flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[14px] px-4 py-5 transition-all duration-200 hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01] sm:py-6"
                             style={{
                               background: "rgba(255,255,255,0.78)",
                               border: "1.5px dashed rgba(123,30,43,0.22)",
                               backdropFilter: "blur(10px)",
                               WebkitBackdropFilter: "blur(10px)",
-                              boxShadow: "0 8px 24px -16px rgba(123,30,43,0.14), inset 0 1px 0 rgba(255,255,255,0.7)",
+                              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
                             }}
                           >
                             <div
-                              className="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105"
+                              className="flex h-10 w-10 items-center justify-center rounded-[14px] transition-transform duration-200 group-hover:scale-105"
                               style={{
                                 background: "linear-gradient(135deg, rgba(123,30,43,0.10) 0%, rgba(200,169,106,0.10) 100%)",
                                 border: "1px solid rgba(123,30,43,0.14)",
-                                boxShadow: "0 6px 18px -10px rgba(123,30,43,0.20), inset 0 1px 0 rgba(255,255,255,0.6)",
+                                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
                               }}
                             >
                               <Camera className="h-5 w-5 text-[#7B1E2B]" strokeWidth={1.75} />
                             </div>
                             <div className="max-w-[320px] text-center">
-                              <p className="text-[18px] font-semibold tracking-[-0.02em] text-[#1A1713]">
+                              <p className="text-[17px] font-semibold tracking-[-0.02em] text-[#1A1713]">
                                 Fotografe ou envie a carta
                               </p>
-                              <p className="mt-1 text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.6)]">
+                              <p className="mt-1 text-[12.5px] leading-5 text-[rgba(58,51,39,0.6)]">
                                 A leitura extrai rótulos, preços e contexto para decidir rápido.
                               </p>
                             </div>
@@ -719,15 +719,15 @@ function WineListCard({
         isFeatured && "xl:col-span-1",
         rhythmClassName,
         isSelected
-          ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)] shadow-[0_24px_44px_-36px_rgba(123,30,43,0.18)]"
+          ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)]"
           : isFeatured
-            ? "bg-[linear-gradient(180deg,rgba(255,252,247,0.88)_0%,rgba(248,242,234,0.82)_100%)] shadow-[0_22px_44px_-38px_rgba(56,34,22,0.18)]"
-            : "bg-[rgba(255,255,255,0.68)] shadow-[0_10px_22px_-24px_rgba(27,19,14,0.13)]",
+            ? "bg-[linear-gradient(180deg,rgba(255,252,247,0.88)_0%,rgba(248,242,234,0.82)_100%)]"
+            : "bg-[rgba(255,255,255,0.68)]",
       )}
       style={{
         backdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
         WebkitBackdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
-        boxShadow: isFeatured && !isSelected ? "0 24px 52px -42px rgba(189,154,85,0.20), inset 0 1px 0 rgba(255,255,255,0.74)" : undefined,
+        boxShadow: isFeatured && !isSelected ? "inset 0 1px 0 rgba(255,255,255,0.74)" : undefined,
       }}
     >
       <div

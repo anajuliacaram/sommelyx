@@ -1011,7 +1011,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className="w-full sm:max-w-xl overflow-y-auto rounded-[20px] p-0 border border-black/[0.04] shadow-[0_26px_64px_rgba(0,0,0,0.10)]"
+        className="w-full sm:max-w-xl overflow-y-auto rounded-[20px] p-0 border border-black/[0.04] shadow-[0_22px_52px_rgba(38,24,18,0.12)]"
         style={{
           background: "#FAF8F6",
           backdropFilter: "blur(14px)",
@@ -1030,7 +1030,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
               className="mb-3"
               icon={<Wine className="h-5 w-5 text-[#7B1E2B]" />}
               title={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
-              description="Cadastro rápido com rótulo, planilha ou preenchimento manual."
+              description="Cadastre por rótulo, planilha ou manualmente."
             />
 
             <AnimatePresence mode="wait">
@@ -1039,7 +1039,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   key="success"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-12 gap-4"
+                  className="flex flex-col items-center justify-center gap-3 py-9"
                 >
                   <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#6F7F5B,#7F8F67)' }}>
                     <Check className="h-7 w-7 text-white" />
@@ -1049,7 +1049,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </p>
                   {missingFields.length > 0 && (
                     <div
-                      className="w-full rounded-[22px] border px-4 py-3 text-left shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)]"
+                      className="w-full rounded-[14px] border px-3 py-2.5 text-left"
                       style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
                     >
                       <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>
@@ -1060,11 +1060,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </p>
                     </div>
                   )}
-                  <div className="flex gap-3 w-full pt-2">
+                  <div className="flex gap-2 w-full pt-1">
                     <Button
                       type="button"
                       variant="secondary"
-                      className="flex-1 h-12 rounded-[18px] bg-white/82 border border-black/5 shadow-[0_10px_22px_-22px_rgba(0,0,0,0.16)]"
+                      className="h-10 flex-1 rounded-[12px] bg-white/82 border border-black/5 shadow-none"
                       onClick={() => { reset(); onOpenChange(false); }}
                     >
                       Concluir
@@ -1072,7 +1072,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <Button
                       type="button"
                       variant="primary"
-                      className="flex-1 h-12 rounded-[18px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
+                      className="h-10 flex-1 rounded-[12px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
                       onClick={() => reset()}
                     >
                       <Plus className="h-4 w-4" />
@@ -1084,7 +1084,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-2.5">
                   {/* Scan Label Card */}
                   <div
-                    className="group cursor-pointer rounded-[16px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[14px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setScanOpen(true)}
                   >
                     <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
@@ -1099,7 +1099,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
 
                   {labelImagePreview && (
-                    <div className="rounded-[22px] border border-black/5 bg-white/82 p-3 flex items-center gap-3 shadow-[0_10px_24px_-24px_rgba(0,0,0,0.14)]">
+                    <div className="rounded-[14px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5">
                       <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border border-[rgba(255,255,255,0.45)] bg-white/50">
                         <img
                           src={labelImagePreview}
@@ -1109,7 +1109,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                       <div className="min-w-0">
                         <p className="text-[13px] font-semibold truncate" style={{ color: '#1F1F1F' }}>Foto do rótulo analisada</p>
-                        <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: '#6B6B6B' }}>
+                        <p className="text-[11px] mt-0.5 leading-4" style={{ color: '#6B6B6B' }}>
                           A imagem fica como referência visual durante o cadastro.
                         </p>
                       </div>
@@ -1118,7 +1118,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                   {/* Import File Card */}
                   <div
-                    className="group cursor-pointer rounded-[16px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[14px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setImportCsvOpen(true)}
                   >
                     <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
@@ -1127,7 +1127,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <div className="flex flex-col">
                       <p className="text-[13px] font-semibold" style={{ color: '#1F1F1F' }}>Importar documento / planilha</p>
                       <p className="text-[11px] mt-0.5" style={{ color: '#6B6B6B' }}>
-                        CSV, PDF, Excel e outros arquivos para cadastro em lote
+                        CSV, PDF ou Excel para cadastro em lote
                       </p>
                     </div>
                   </div>
@@ -1198,14 +1198,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </AiModalCard>
 
                   {isCommercial ? (
-                    <div className="rounded-[24px] border border-black/5 bg-white/82 p-4 shadow-[0_14px_30px_-24px_rgba(0,0,0,0.14)] sm:p-5">
+                    <div className="rounded-[14px] border border-black/5 bg-white/82 p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: '#6F7F5B' }}>
                             Precificação comercial
-                          </p>
-                          <p className="mt-1 text-[12px] leading-relaxed" style={{ color: '#6B6B6B' }}>
-                            Custo e venda ficam separados para leitura rápida no estoque comercial.
                           </p>
                         </div>
                         {commercialMarginPct != null && (
@@ -1220,9 +1217,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           </div>
                         )}
                       </div>
-                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         <div>
-                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">
+                          <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">
                             Preço de custo (R$)
                           </label>
                           <Input
@@ -1237,7 +1234,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           />
                         </div>
                         <div>
-                          <label className="block text-[13px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">
+                          <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">
                             Preço de venda (R$)
                           </label>
                           <div className="relative">
@@ -1259,9 +1256,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           </div>
                         </div>
                       </div>
-                      <p className="mt-2 text-[11px] leading-relaxed" style={{ color: '#6B6B6B' }}>
-                        Venda acima do custo melhora a margem e deixa a operação mais clara para o time comercial.
-                      </p>
                     </div>
                   ) : null}
 
@@ -1270,7 +1264,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <CollapsibleTrigger asChild>
                       <button
                         type="button"
-                        className="w-full rounded-[16px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(248,244,237,0.66)_100%)] px-3 py-2.5 text-left shadow-[0_12px_30px_-24px_rgba(0,0,0,0.14)] backdrop-blur-[14px] transition-all duration-200 hover:-translate-y-px sm:px-3.5"
+                        className="w-full rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(248,244,237,0.66)_100%)] px-3 py-2 text-left backdrop-blur-[14px] transition-all duration-200 hover:-translate-y-px sm:px-3.5"
                       >
                         <div className="flex items-center justify-between gap-4">
                           <div>
@@ -1373,7 +1367,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                               <label className="block text-[12px] font-semibold tracking-[-0.01em] text-[#4A4338]">
                                 Valor atual estimado (R$)
                               </label>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.12)', color: '#6F7F5B' }}>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.10)', color: '#6F7F5B' }}>
                                 <Sparkles className="h-3 w-3" />
                                 {estimating ? "Estimando..." : "Estimativa Sommelyx"}
                               </span>
@@ -1386,15 +1380,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                                 </div>
                               )}
                             </div>
-                            <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
-                              Referência de mercado atual, estimada a partir do vinho, safra, uva e origem.
-                            </p>
                           </div>
                           <div>
                             <p className="text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">Janela de consumo</p>
-                            <p className="text-[11px] leading-relaxed mb-2" style={{ color: '#6B6B6B' }}>
-                              Referência de melhor expressão do vinho em condições ideais de guarda. Vinhos fora dessa janela não estão necessariamente ruins — o potencial real depende do armazenamento, da safra específica e das características da uva.
-                            </p>
                             <div className="grid grid-cols-2 gap-2.5">
                               <div>
                                 <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1.5 text-[#4A4338]">A partir de</label>
@@ -1413,7 +1401,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                               onChange={e => setNotes(e.target.value)}
                               placeholder="Aromas, sabores, impressões..."
                               rows={3}
-                              className="resize-none"
+                              className="min-h-[86px] resize-none rounded-[12px]"
                               style={aiFieldStyle("tasting_notes")}
                             />
                           </div>
@@ -1429,7 +1417,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       loading={addWine.isPending}
                       loadingText="Salvando…"
                       variant="primary"
-                      className="w-full h-12 rounded-[18px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-[0_12px_28px_-16px_rgba(123,30,43,0.42)]"
+                      className="h-11 w-full rounded-[14px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
                     >
                       <Plus className="h-4 w-4" />
                       {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
@@ -1437,7 +1425,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                   {missingFields.length > 0 && (
                     <div
-                      className="rounded-[22px] border px-4 py-3 shadow-[0_10px_22px_-24px_rgba(0,0,0,0.16)]"
+                      className="rounded-[14px] border px-3 py-2.5"
                       style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
                     >
                       <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>
