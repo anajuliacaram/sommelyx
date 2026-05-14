@@ -34,12 +34,12 @@ export function ModalBase({
       >
         <div
           className={cn(
-            "premium-modal-shell relative flex w-full max-w-lg flex-col overflow-hidden rounded-t-[24px] max-h-[calc(100dvh-8px)] sm:max-h-[90vh] sm:rounded-[24px]",
+            "premium-modal-shell relative flex w-full max-w-[1100px] flex-col overflow-hidden rounded-t-[24px] max-h-[calc(100dvh-8px)] sm:max-h-[92vh] sm:rounded-[28px]",
             className,
           )}
           style={undefined}
         >
-          <div className="shrink-0 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6">
+          <div className="shrink-0 px-5 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6">
             <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20 text-[#7B1E2B]">
               {icon}
@@ -66,7 +66,7 @@ export function ModalBase({
 
           <div
             className={cn(
-              "min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(16px+env(safe-area-inset-bottom))] sm:px-6 sm:pb-6",
+              "min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(18px+env(safe-area-inset-bottom))] sm:px-6 sm:pb-6",
               bodyClassName,
             )}
           >

@@ -15,7 +15,7 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AiModalSidebarCard, AiModalEyebrow, AiModalKeyValue, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 import {
   SectionHeader,
   PairingLoadingState,
@@ -1079,19 +1079,75 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     }
   };
 
+  const sidebarTitle =
+    selectedWine?.name ||
+    extWineName ||
+    dish ||
+    (source === "cellar" ? "Minha adega" : source === "external" ? "Adega externa" : "Fluxo de harmonização");
+
+  const sidebarDescription =
+    step === "results" || step === "wine-results" || step === "ext-menu-results" || step === "scan-results"
+      ? "O contexto e o arquivo ficam visíveis aqui enquanto as recomendações ocupam a área principal."
+      : "Escolha o caminho, defina o contexto e avance sem perder espaço vertical para blocos repetidos.";
+
+  const sidebarContent = (
+    <>
+      <AiModalSidebarCard className="space-y-3">
+        <div className="space-y-1.5">
+          <AiModalEyebrow>Curadoria em andamento</AiModalEyebrow>
+          <p className="text-[18px] font-semibold tracking-[-0.03em] text-[#1A1713]">{sidebarTitle}</p>
+          <p className="text-[12.5px] leading-5 text-[#6B6258]">{sidebarDescription}</p>
+        </div>
+
+        {preview?.url ? (
+          <div className="overflow-hidden rounded-[20px] border border-black/5 bg-white/72">
+            <img src={preview.url} alt="Pré-visualização do arquivo analisado" className="h-48 w-full object-cover" />
+          </div>
+        ) : (
+          <div className="flex h-40 items-center justify-center rounded-[20px] border border-dashed border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.04)] text-center">
+            <div className="space-y-2 px-6">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/75">
+                <FileText className="h-5 w-5 text-[#7B1E2B]" />
+              </div>
+              <p className="text-[12px] font-medium text-[#5E564C]">A carta ou o cardápio aparecem aqui após o envio.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <AiModalKeyValue label="Origem" value={source === "cellar" ? "Minha adega" : source === "external" ? "Adega externa" : "—"} />
+          <AiModalKeyValue label="Modo" value={subMode === "by-dish" ? "Prato → vinho" : subMode === "by-wine" ? "Vinho → prato" : "Escolha"} />
+          <AiModalKeyValue label="Etapa" value={step.replaceAll("-", " ")} />
+        </div>
+      </AiModalSidebarCard>
+
+      {(step === "results" || step === "wine-results" || step === "ext-menu-results" || step === "scan-results") && normalizedPairingResult ? (
+        <AiModalSidebarCard className="space-y-3">
+          <AiModalEyebrow>Resumo rápido</AiModalEyebrow>
+          <AiModalKeyValue label="Sugestões" value={Math.min(normalizedPairingResult.pairings.length, 5)} />
+          <AiModalKeyValue label="Tom" value={normalizedPairingResult.analysis.flavor_profile} />
+          <AiModalKeyValue label="Estrutura" value={normalizedPairingResult.analysis.texture} />
+          <AiModalKeyValue label="Preparo" value={normalizedPairingResult.analysis.cooking_method} />
+        </AiModalSidebarCard>
+      ) : null}
+    </>
+  );
+
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-lg h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-black/5">
+      <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE}>
         <AiModalShell>
-        <AiModalHeaderBar className="px-3 py-3.5 sm:px-5 sm:py-4">
+        <AiModalHeaderBar>
           <AiModalHeader
             icon={<UtensilsCrossed className="h-5 w-5" />}
             title="Harmonizar"
-            description="Encontre a combinação perfeita entre vinho e gastronomia"
+            description="Encontre a combinação certa com menos etapas visuais, mais contexto acima da dobra e uma curadoria muito mais escaneável."
           />
         </AiModalHeaderBar>
 
-        <AiModalBody className="space-y-3 px-3 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 sm:space-y-4 sm:px-5 sm:pb-[calc(16px+env(safe-area-inset-bottom))] sm:pt-4">
+        <AiModalBody>
+          <AiModalSplitLayout sidebar={sidebarContent}>
+          <div className="space-y-3 sm:space-y-4">
           {step !== "source" && (
             <Button
               variant="ghost"
@@ -1928,6 +1984,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             {/* ── External Scan Results (dish → wine list photo) ── */}
             {step === "scan-results" && normalizedScanResults && renderExternalScanResults()}
           </AnimatePresence>
+          </div>
+          </AiModalSplitLayout>
         </AiModalBody>
         </AiModalShell>
       </SheetContent>

@@ -304,20 +304,25 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-4 py-8 sm:py-10"
+      className="rounded-[26px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.86)_0%,rgba(247,242,235,0.76)_100%)] p-5 shadow-[0_18px_40px_-30px_rgba(33,20,12,0.18)] sm:p-6"
     >
-      <div
-        className="relative flex h-20 w-20 items-center justify-center rounded-3xl"
-        style={{
-          background: "linear-gradient(135deg, rgba(123,35,48,0.08) 0%, rgba(123,35,48,0.03) 100%)",
-          border: "1px solid rgba(123,35,48,0.08)",
-          boxShadow: "0 8px 32px -12px rgba(123,35,48,0.12)",
-        }}
-      >
-        <div className="absolute inset-0 rounded-3xl animate-pulse" style={{ background: "rgba(123,35,48,0.04)" }} />
-        <Sparkles className="h-8 w-8 text-primary/50 relative z-10" />
+      <div className="grid gap-5 lg:grid-cols-[120px_minmax(0,1fr)] lg:items-center">
+        <div
+          className="relative flex h-24 w-24 items-center justify-center rounded-[28px]"
+          style={{
+            background: "linear-gradient(135deg, rgba(123,35,48,0.08) 0%, rgba(123,35,48,0.03) 100%)",
+            border: "1px solid rgba(123,35,48,0.08)",
+            boxShadow: "0 12px 34px -18px rgba(123,35,48,0.12)",
+          }}
+        >
+          <div className="absolute inset-0 rounded-[28px] animate-pulse" style={{ background: "rgba(123,35,48,0.04)" }} />
+          <Sparkles className="relative z-10 h-8 w-8 text-primary/55" />
+        </div>
+        <div className="space-y-3">
+          {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
+          <AiProgressiveLoader steps={steps} interval={2200} />
+        </div>
       </div>
-      <AiProgressiveLoader steps={steps} interval={2800} subtitle={subtitle} />
     </motion.div>
   );
 }
@@ -340,7 +345,7 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[22px] border border-[rgba(198,167,104,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-5 py-7 text-center shadow-[0_16px_32px_-28px_rgba(54,36,22,0.18)]"
+      className="rounded-[24px] border border-[rgba(198,167,104,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.74)_100%)] px-5 py-6 text-center shadow-[0_16px_32px_-28px_rgba(54,36,22,0.18)]"
     >
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px]"
         style={{
@@ -351,8 +356,8 @@ export function PairingErrorState({
         <X className="h-7 w-7 text-destructive/60" />
       </div>
       <div className="mt-4 space-y-1.5">
-        <p className="text-[16px] font-semibold text-[#1A1A1A]">Não conseguimos concluir a leitura</p>
-        <p className="mx-auto max-w-[320px] text-[13px] leading-relaxed text-[#888]">{message}</p>
+        <p className="text-[16px] font-semibold text-[#1A1A1A]">Ainda não foi possível concluir</p>
+        <p className="mx-auto max-w-[360px] text-[13px] leading-relaxed text-[#6E665D]">{message}</p>
       </div>
       <AiModalActions className="mx-auto mt-4 w-full max-w-[320px]">
         <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">
@@ -413,7 +418,7 @@ export function WineSuggestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group list-none overflow-hidden rounded-[22px] border border-border/30 bg-[rgba(255,255,255,0.82)] shadow-[0_16px_32px_-28px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5",
+        "group list-none overflow-hidden rounded-[24px] border border-border/30 bg-[rgba(255,255,255,0.86)] shadow-[0_18px_34px_-28px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5",
         className,
       )}
       style={{
@@ -422,70 +427,63 @@ export function WineSuggestionCard({
       }}
     >
       <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/70 via-[#C8A96A]/55 to-transparent" />
-      <div className="space-y-3.5 p-[18px] sm:p-5">
+      <div className="space-y-3 p-[18px] sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">Sugestão {index + 1}</p>
             <h4 className="mt-1 text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[20px]">
               {wineName}
             </h4>
-            {style ? (
-              <p className="mt-1.5 text-[12px] font-medium tracking-[0.01em] text-[#6B6258]">
-                {style}
-              </p>
+            {style ? <p className="mt-1 text-[12px] font-medium text-[#6B6258]">{style}</p> : null}
+          </div>
+          <div className="grid shrink-0 gap-1 text-right">
+            <span className="rounded-full bg-[rgba(123,30,43,0.06)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]">
+              Curadoria
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.7fr)_minmax(240px,1fr)]">
+          <div className="rounded-[20px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-3.5 sm:p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
+              Direção
+            </p>
+            <p className="mt-2 text-[13px] leading-6 text-[#3F362F]">
+              {reason}
+            </p>
+            {decisionSupport ? (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
+                  Aroma: {decisionSupport.sensory_profile.aroma}
+                </span>
+                <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
+                  Palato: {decisionSupport.sensory_profile.palate}
+                </span>
+                <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
+                  Ocasião: {decisionSupport.when_to_choose.ideal_scenario}
+                </span>
+              </div>
             ) : null}
           </div>
-        </div>
 
-        <div className="rounded-[20px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-3.5 sm:p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
-            Por que este vinho
-          </p>
-          <p className="mt-2 text-[13px] leading-6 text-[#3F362F]">
-            {reason}
-          </p>
-        </div>
-
-        <div className="rounded-[20px] border border-black/5 bg-[#FBFAF7] p-3.5 sm:p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
-            Características-chave
-          </p>
-          <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
-            {[
-              { label: "Acidez", value: structureMatch.acidity },
-              { label: "Tanino", value: structureMatch.tannin },
-              { label: "Corpo", value: structureMatch.body },
-            ].map((item) => (
-              <div key={item.label} className="space-y-1 rounded-[18px] border border-black/5 bg-white/65 px-3 py-2.5">
-                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
-                <p className="text-[13px] font-medium leading-6 text-[#2B231D]">{item.value}</p>
-              </div>
-            ))}
+          <div className="rounded-[20px] border border-black/5 bg-[#FBFAF7] p-3.5 sm:p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
+              Estrutura
+            </p>
+            <div className="mt-3 grid gap-2">
+              {[
+                { label: "Acidez", value: structureMatch.acidity },
+                { label: "Tanino", value: structureMatch.tannin },
+                { label: "Corpo", value: structureMatch.body },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between gap-2 rounded-[16px] border border-black/5 bg-white/70 px-3 py-2">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
+                  <p className="text-[12px] font-medium text-[#2B231D]">{item.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-
-        {decisionSupport ? (
-          <div className="space-y-2 rounded-[20px] border border-border/30 bg-background/45 p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-              Leitura sommelier
-            </p>
-            <p className="text-[12.5px] leading-6 text-foreground/75">
-              <span className="font-semibold text-foreground/85">Sensorial:</span>{" "}
-              aroma {decisionSupport.sensory_profile.aroma}. Palato {decisionSupport.sensory_profile.palate}. Estrutura {decisionSupport.sensory_profile.structure}.
-            </p>
-            <p className="text-[12.5px] leading-6 text-foreground/75">
-              <span className="font-semibold text-foreground/85">Lógica:</span>{" "}
-              {decisionSupport.pairing_logic.fat_vs_acidity} {decisionSupport.pairing_logic.protein_vs_tannin} {decisionSupport.pairing_logic.intensity_balance}
-            </p>
-            <p className="text-[12.5px] leading-6 text-foreground/75">
-              <span className="font-semibold text-foreground/85">Quando abrir:</span>{" "}
-              {decisionSupport.when_to_choose.ideal_scenario} {decisionSupport.when_to_choose.alternative_use}
-            </p>
-            <p className="text-[12.5px] leading-6 text-foreground/75">
-              <span className="font-semibold text-foreground/85">Confiança:</span> {decisionSupport.confidence_explanation}
-            </p>
-          </div>
-        ) : null}
       </div>
     </motion.li>
   );
@@ -584,7 +582,7 @@ export function PremiumChoiceCard({
       transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.985 }}
-      className="group w-full text-left rounded-[18px] p-[18px] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
+      className="group w-full text-left rounded-[22px] p-[18px] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{
         background: selected ? "rgba(123,30,43,0.05)" : "rgba(255,255,255,0.92)",
         border: `1px solid ${selected ? accentColor : "rgba(0,0,0,0.06)"}`,
@@ -593,7 +591,7 @@ export function PremiumChoiceCard({
           : "0 4px 14px -10px rgba(58,51,39,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
     >
-      <div className="flex items-center gap-3.5">
+      <div className="flex items-center gap-4">
         <div
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-105"
           style={{
@@ -605,7 +603,7 @@ export function PremiumChoiceCard({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-semibold tracking-[-0.005em] text-[#1A1713]">{title}</p>
-          <p className="mt-0.5 text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.6)]">{description}</p>
+          <p className="mt-0.5 text-[12px] leading-5 text-[rgba(58,51,39,0.64)]">{description}</p>
         </div>
       </div>
     </motion.button>

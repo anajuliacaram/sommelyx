@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, RotateCcw, X, Check, Sparkles } from "@/icons/lucide";
+import { Camera, Upload, RotateCcw, X, Check, Sparkles, Search, SlidersHorizontal, FileText } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiFilterChip, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiFilterChip, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AiModalSidebarCard, AiModalEyebrow, AiModalKeyValue, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 import {
   PairingLoadingState,
   PairingErrorState,
@@ -456,6 +456,122 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
   const availableTypes = [...new Set((results ?? EMPTY_WINE_LIST_ANALYSIS).wines.map((w) => detectWineType(w.style)).filter((t) => t !== "unknown"))];
 
+  const sidebarContent = (
+    <>
+      <AiModalSidebarCard className="space-y-3">
+        <div className="space-y-1.5">
+          <AiModalEyebrow>{step === "results" ? "Carta em revisão" : "Entrada do arquivo"}</AiModalEyebrow>
+          <p className="text-[18px] font-semibold tracking-[-0.03em] text-[#1A1713]">
+            {attachmentPreview?.fileName || "Foto ou PDF da carta"}
+          </p>
+          <p className="text-[12.5px] leading-5 text-[#6B6258]">
+            {step === "results"
+              ? "A seleção, os filtros e o contexto ficam visíveis sem empurrar os rótulos para baixo."
+              : "Use uma foto nítida ou um PDF para receber uma leitura mais limpa e rápida de navegar."}
+          </p>
+        </div>
+
+        {attachmentPreview?.url ? (
+          <div className="overflow-hidden rounded-[20px] border border-black/5 bg-white/72">
+            <img src={attachmentPreview.url} alt="Pré-visualização do arquivo analisado" className="h-48 w-full object-cover" />
+          </div>
+        ) : (
+          <div className="flex h-40 items-center justify-center rounded-[20px] border border-dashed border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.04)] text-center">
+            <div className="space-y-2 px-6">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/75">
+                <FileText className="h-5 w-5 text-[#7B1E2B]" />
+              </div>
+              <p className="text-[12px] font-medium text-[#5E564C]">O preview aparece aqui assim que a carta for enviada.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <AiModalKeyValue label="Formato" value={attachmentPreview?.isPdf ? "PDF" : "Imagem"} />
+          <AiModalKeyValue label="Leitura" value={step === "results" ? `${results?.wines.length || 0} rótulos` : step === "scanning" ? "Em andamento" : "Aguardando"} />
+          <AiModalKeyValue label="Foco" value={selectedWineName || mealQuery || "Escolha livre"} />
+        </div>
+      </AiModalSidebarCard>
+
+      {step === "results" ? (
+        <AiModalSidebarCard className="space-y-3">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-[#7B1E2B]" />
+            <AiModalEyebrow className="mb-0">Refinar seleção</AiModalEyebrow>
+          </div>
+
+          {availableTypes.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              <AiFilterChip selected={filterMode === "all"} onClick={() => setFilterMode("all")}>
+                Todos
+              </AiFilterChip>
+              {availableTypes.map(type => (
+                <AiFilterChip
+                  key={type}
+                  selected={filterMode === type}
+                  onClick={() => setFilterMode(type as FilterMode)}
+                >
+                  {wineTypeConfig[type].label}
+                </AiFilterChip>
+              ))}
+            </div>
+          )}
+
+          <Input
+            value={mealQuery}
+            onChange={(e) => setMealQuery(e.target.value)}
+            placeholder="Prato ou ocasião"
+            className="h-10 rounded-[16px] border-white/70 bg-white/82 shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)]"
+          />
+
+          <div className="space-y-2">
+            <AiModalEyebrow className="mb-0">Corpo</AiModalEyebrow>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: "all", label: "Todos" },
+                { key: "leve", label: "Leve" },
+                { key: "encorpado", label: "Encorpado" },
+              ].map((option) => (
+                <AiFilterChip
+                  key={option.key}
+                  selected={bodyPreference === option.key}
+                  onClick={() => setBodyPreference(option.key as BodyPreference)}
+                >
+                  {option.label}
+                </AiFilterChip>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <AiModalEyebrow className="mb-0">Faixa de preço</AiModalEyebrow>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: "all", label: "Todos" },
+                { key: "up-to-250", label: "Até R$250" },
+                { key: "250-500", label: "R$250–500" },
+                { key: "500-plus", label: "R$500+" },
+              ].map((option) => (
+                <AiFilterChip
+                  key={option.key}
+                  selected={priceRange === option.key}
+                  onClick={() => setPriceRange(option.key as PriceRange)}
+                >
+                  {option.label}
+                </AiFilterChip>
+              ))}
+            </div>
+          </div>
+
+          <AiModalActionButton variant="secondary" onClick={reset} className="w-full">
+            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+            Nova análise
+          </AiModalActionButton>
+        </AiModalSidebarCard>
+      ) : null}
+    </>
+  );
+
   const renderResultsContent = () => {
     const safeResults = {
       wines: Array.isArray(results?.wines) ? results.wines : [],
@@ -489,14 +605,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           exit={{ opacity: 0 }}
           className="space-y-4 pt-1"
         >
-          {attachmentPreview?.url && (
-            <AiModalCard className="p-0 overflow-hidden">
-              <div className="aspect-[3/2] w-full overflow-hidden bg-muted/20">
-                <img src={attachmentPreview.url} alt="Pré-visualização do arquivo analisado" className="h-full w-full object-cover" />
-              </div>
-            </AiModalCard>
-          )}
-
           <AiStatusCard
             icon={resultStatus.icon}
             title={resultStatus.title}
@@ -504,80 +612,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             warning={resultStatus.warning}
             toneClassName={resultStatus.tone}
           />
-
-          {/* Filter pills */}
-          {availableTypes.length > 1 && (
-            <div className="flex flex-wrap gap-2">
-              <AiFilterChip selected={filterMode === "all"} onClick={() => setFilterMode("all")}>
-                Todos
-              </AiFilterChip>
-              {availableTypes.map(type => (
-                <AiFilterChip
-                  key={type}
-                  selected={filterMode === type}
-                  onClick={() => setFilterMode(type as FilterMode)}
-                >
-                  {wineTypeConfig[type].label}
-                </AiFilterChip>
-              ))}
-            </div>
-          )}
-
-          <AiToolbarSurface className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <AiSectionLabel>
-                Refinar a leitura
-              </AiSectionLabel>
-              {selectedWineName && (
-                <span className="text-[10px] font-semibold text-[#7B1E2B]">
-                  Selecionado: {selectedWineName}
-                </span>
-              )}
-            </div>
-            <Input
-              value={mealQuery}
-              onChange={(e) => setMealQuery(e.target.value)}
-              placeholder="O que você vai comer?"
-              className="h-10 rounded-[16px] border-white/70 bg-white/82 shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)]"
-            />
-            <div className="space-y-1.5">
-              <AiSectionLabel>Corpo</AiSectionLabel>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { key: "all", label: "Todos" },
-                  { key: "leve", label: "Leve" },
-                  { key: "encorpado", label: "Encorpado" },
-                ].map((option) => (
-                  <AiFilterChip
-                    key={option.key}
-                    selected={bodyPreference === option.key}
-                    onClick={() => setBodyPreference(option.key as BodyPreference)}
-                  >
-                    {option.label}
-                  </AiFilterChip>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <AiSectionLabel>Preço</AiSectionLabel>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { key: "all", label: "Todos" },
-                  { key: "up-to-250", label: "Até R$250" },
-                  { key: "250-500", label: "R$250–500" },
-                  { key: "500-plus", label: "R$500+" },
-                ].map((option) => (
-                  <AiFilterChip
-                    key={option.key}
-                    selected={priceRange === option.key}
-                    onClick={() => setPriceRange(option.key as PriceRange)}
-                  >
-                    {option.label}
-                  </AiFilterChip>
-                ))}
-              </div>
-            </div>
-          </AiToolbarSurface>
 
           {safeResults.wines.length === 0 ? (
             <AiModalCard className="p-0">
@@ -609,8 +643,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </AiToolbarSurface>
               ) : null}
 
-              <div className="max-h-[52vh] overflow-y-auto pr-1 cellar-scroll">
-                <ul className="space-y-3">
+              <SectionHeader icon="wine" label="Garrafas destacadas" count={refinedWines.length} />
+
+              <div className="pr-1">
+                <ul className="grid gap-3 xl:grid-cols-2 2xl:grid-cols-3">
                   {displayWines.map((wine, i) => (
                     <WineListCard
                       key={`${wine.name}-${i}`}
@@ -665,17 +701,18 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-full sm:max-w-lg h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-black/5">
+      <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE}>
         <AiModalShell>
         <AiModalHeaderBar>
           <AiModalHeader
             icon={<Sparkles className="h-5 w-5" />}
             title="Analisar Carta"
-            description="Envie a carta de vinhos e descubra as melhores escolhas para você"
+            description="Transforme a carta em uma seleção curta, elegante e pronta para decidir."
           />
         </AiModalHeaderBar>
 
         <AiModalBody>
+          <AiModalSplitLayout sidebar={sidebarContent} contentClassName="pb-1">
           <AnimatePresence mode="wait">
           {step === "capture" && (
             <motion.div
@@ -684,9 +721,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              className="space-y-3.5"
+              className="space-y-4"
             >
-              <AiModalCard className="space-y-3.5">
+              <AiModalCard className="space-y-4">
                 {/* Drag & drop zone */}
                 <div
                   onDragOver={(e) => {
@@ -737,7 +774,15 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2.5">
+                <AiToolbarSurface className="space-y-2.5 border-[rgba(123,30,43,0.08)] bg-[rgba(255,255,255,0.72)] shadow-none">
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <AiModalKeyValue label="Entrega" value="rótulos prontos para escolher" />
+                    <AiModalKeyValue label="Ideal para" value="foto nítida ou PDF" />
+                    <AiModalKeyValue label="Formato" value="curadoria sommelier" />
+                  </div>
+                </AiToolbarSurface>
+
+                <div className="grid gap-2.5 sm:grid-cols-2">
                   <AiModalActionButton
                     variant="primary"
                     onClick={() => cameraInputRef.current?.click()}
@@ -766,9 +811,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           <PairingLoadingState
             steps={[
               "Lendo imagem…",
-              "Interpretando carta…",
-              "Gerando análise…",
+              "Identificando produtores…",
+              "Organizando a seleção…",
             ]}
+            subtitle="Análise da carta"
           />
           )}
 
@@ -785,6 +831,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             />
           )}
           </AnimatePresence>
+          </AiModalSplitLayout>
         </AiModalBody>
         </AiModalShell>
       </SheetContent>

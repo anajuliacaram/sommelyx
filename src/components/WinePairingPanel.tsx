@@ -10,8 +10,6 @@ import {
   SectionHeader,
   PairingLoadingState,
   PairingErrorState,
-  FallbackAnalysisBadge,
-  FallbackAnalysisNotice,
   WineSuggestionCard,
 } from "@/components/pairing/shared";
 
@@ -141,17 +139,16 @@ export function WinePairingPanel({
           >
             {pairingResult.fallback && (
               <div className="flex items-center gap-2">
-                <FallbackAnalysisBadge />
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/60">Sugestões simplificadas</span>
+                <span className="rounded-full border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.10)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7B6528]">
+                  Curadoria assistida
+                </span>
+                <span className="text-[11px] font-medium text-[#6B6258]">Sugestões refinadas a partir do perfil do vinho.</span>
               </div>
-            )}
-            {pairingResult.fallback && (
-              <FallbackAnalysisNotice />
             )}
             <div className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-3">
               <div className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5 text-primary/65" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Análise</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Perfil do prato ideal</span>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[

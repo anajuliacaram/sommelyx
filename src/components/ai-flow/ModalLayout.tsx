@@ -1,7 +1,27 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode, CSSProperties } from "react";
 import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
+  "left-1/2 top-1/2 right-auto bottom-auto h-[92dvh] max-h-[92dvh] w-[96vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[30px] border-0 p-0 gap-0";
+
+export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
+  left: "50%",
+  top: "50%",
+  right: "auto",
+  bottom: "auto",
+  transform: "translate(-50%, -50%)",
+  width: "min(96vw, 1240px)",
+  maxWidth: "1240px",
+  maxHeight: "92dvh",
+  height: "92dvh",
+  background:
+    "linear-gradient(145deg, rgba(249,245,239,0.98) 0%, rgba(243,236,228,0.98) 48%, rgba(236,228,216,0.98) 100%)",
+  backdropFilter: "blur(18px) saturate(1.06)",
+  WebkitBackdropFilter: "blur(18px) saturate(1.06)",
+  boxShadow: "0 34px 88px rgba(38,24,18,0.16)",
+};
 
 export function AiModalShell({
   children,
@@ -23,13 +43,13 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 shrink-0 border-b border-white/50 px-4 py-3.5 sm:px-5 sm:py-4",
+        "sticky top-0 z-20 shrink-0 border-b border-white/55 px-5 py-4 sm:px-6 sm:py-4.5",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(250,247,242,0.84) 0%, rgba(250,247,242,0.72) 100%)",
-        backdropFilter: "blur(16px) saturate(1.06)",
-        WebkitBackdropFilter: "blur(16px) saturate(1.06)",
+        background: "linear-gradient(180deg, rgba(249,245,239,0.92) 0%, rgba(249,245,239,0.76) 100%)",
+        backdropFilter: "blur(18px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(18px) saturate(1.08)",
       }}
     >
       {children}
@@ -47,7 +67,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3.5 sm:px-5 sm:pb-[calc(18px+env(safe-area-inset-bottom))] sm:pt-4",
+        "min-h-0 flex-1 overflow-hidden px-5 pb-[calc(18px+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-[calc(22px+env(safe-area-inset-bottom))] sm:pt-5",
         className,
       )}
     >
@@ -66,13 +86,13 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "sticky bottom-0 z-20 shrink-0 border-t border-white/50 px-4 py-2.5 sm:px-5 sm:py-3",
+        "sticky bottom-0 z-20 shrink-0 border-t border-white/55 px-5 py-3 sm:px-6 sm:py-3.5",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(250,247,242,0.72) 0%, rgba(250,247,242,0.84) 100%)",
-        backdropFilter: "blur(16px) saturate(1.06)",
-        WebkitBackdropFilter: "blur(16px) saturate(1.06)",
+        background: "linear-gradient(180deg, rgba(249,245,239,0.76) 0%, rgba(249,245,239,0.92) 100%)",
+        backdropFilter: "blur(18px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(18px) saturate(1.08)",
       }}
     >
       {children}
@@ -92,25 +112,107 @@ export function AiModalHeader({
   className?: string;
   }) {
   return (
-    <SheetHeader className={cn("mb-0 flex flex-col gap-4 pr-14 sm:pr-16", className)}>
-      <div className="flex items-start gap-4">
+    <SheetHeader className={cn("mb-0 flex flex-col gap-3.5 pr-14 sm:pr-16", className)}>
+      <div className="flex items-start gap-4.5">
         {icon ? (
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_10px_28px_-18px_rgba(123,30,43,0.18)]">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,rgba(123,30,43,0.13),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_14px_34px_-22px_rgba(123,30,43,0.2)]">
             {icon}
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
-          <SheetTitle className="text-[28px] font-semibold tracking-[-0.03em] text-[#1A1713] sm:text-[32px]">
+          <SheetTitle className="text-[30px] font-semibold tracking-[-0.04em] text-[#1A1713] sm:text-[36px]">
             {title}
           </SheetTitle>
           {description ? (
-            <SheetDescription className="mt-1.5 max-w-[34rem] text-[14px] font-medium leading-7 tracking-[-0.01em] text-[#6B6B6B] sm:text-[15px]">
+            <SheetDescription className="mt-1.5 max-w-[42rem] text-[13px] font-medium leading-6 tracking-[-0.01em] text-[#6B6B6B] sm:text-[14px]">
               {description}
             </SheetDescription>
           ) : null}
         </div>
       </div>
     </SheetHeader>
+  );
+}
+
+export function AiModalSplitLayout({
+  sidebar,
+  children,
+  sidebarClassName,
+  contentClassName,
+  className,
+}: {
+  sidebar?: ReactNode;
+  children: ReactNode;
+  sidebarClassName?: string;
+  contentClassName?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "grid min-h-0 flex-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)]",
+        className,
+      )}
+    >
+      {sidebar ? (
+        <aside className={cn("min-h-0 xl:overflow-hidden", sidebarClassName)}>
+          <div className="flex max-h-full flex-col gap-3 xl:sticky xl:top-0 xl:overflow-y-auto xl:pr-1">
+            {sidebar}
+          </div>
+        </aside>
+      ) : null}
+      <section className={cn("min-h-0 overflow-y-auto pr-1", contentClassName)}>{children}</section>
+    </div>
+  );
+}
+
+export function AiModalSidebarCard({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-[24px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(246,240,232,0.76)_100%)] px-4 py-4 shadow-[0_16px_36px_-28px_rgba(33,20,12,0.2)] backdrop-blur-xl sm:px-5 sm:py-5",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function AiModalEyebrow({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <p className={cn("text-[10px] font-bold uppercase tracking-[0.16em] text-[rgba(72,60,46,0.52)]", className)}>
+      {children}
+    </p>
+  );
+}
+
+export function AiModalKeyValue({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex items-start justify-between gap-3", className)}>
+      <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.5)]">{label}</span>
+      <span className="text-right text-[12.5px] font-medium leading-5 text-[#241d18]">{value}</span>
+    </div>
   );
 }
 
@@ -147,10 +249,10 @@ export function AiModalCard({
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.76) 0%, rgba(248,244,237,0.68) 100%)",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(248,244,237,0.72) 100%)",
         borderColor: "rgba(95,111,82,0.12)",
-        backdropFilter: "blur(14px) saturate(1.06)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.06)",
+        backdropFilter: "blur(16px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(16px) saturate(1.08)",
       }}
     >
       {children}

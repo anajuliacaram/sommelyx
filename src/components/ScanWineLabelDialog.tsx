@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Check, X, RotateCcw } from "@/icons/lucide";
+import { Camera, Upload, Check, X, RotateCcw, FileText } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
@@ -12,7 +12,7 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AiModalSidebarCard, AiModalEyebrow, AiModalKeyValue, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -529,22 +529,58 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           warning: null,
         };
 
+  const sidebarContent = (
+    <AiModalSidebarCard className="space-y-3">
+      <div className="space-y-1.5">
+        <AiModalEyebrow>{step === "preview" ? "Rótulo em revisão" : "Escaneamento guiado"}</AiModalEyebrow>
+        <p className="text-[18px] font-semibold tracking-[-0.03em] text-[#1A1713]">
+          {scannedData?.name || "Leitura do rótulo"}
+        </p>
+        <p className="text-[12.5px] leading-5 text-[#6B6258]">
+          O contexto visual continua visível, mas a revisão principal fica compacta e muito mais fácil de escanear.
+        </p>
+      </div>
+
+      {imagePreview ? (
+        <div className="overflow-hidden rounded-[20px] border border-black/5 bg-white/72">
+          <img src={imagePreview} alt="Label" className="h-64 w-full object-cover" />
+        </div>
+      ) : (
+        <div className="flex h-56 items-center justify-center rounded-[20px] border border-dashed border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.04)] text-center">
+          <div className="space-y-2 px-6">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/75">
+              <FileText className="h-5 w-5 text-[#7B1E2B]" />
+            </div>
+            <p className="text-[12px] font-medium text-[#5E564C]">A foto do rótulo aparece aqui após o envio.</p>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <AiModalKeyValue label="Leitura" value={step === "preview" ? "Pronta para uso" : step === "scanning" ? "Processando" : "Aguardando"} />
+        <AiModalKeyValue label="Confiança OCR" value={scannedData ? formatScanConfidence(scannedData) || "Estável" : "—"} />
+        <AiModalKeyValue label="Campos úteis" value={scannedData ? getMeaningfulScanFields(scannedData).length : 0} />
+      </div>
+    </AiModalSidebarCard>
+  );
+
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
-        className="w-full sm:max-w-md h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
-        style={{ background: "rgba(250,247,242,0.78)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
+        className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+        style={AI_MODAL_SHEET_CONTENT_STYLE}
       >
         <AiModalShell>
         <AiModalHeaderBar>
           <AiModalHeader
             icon={<Camera className="h-5 w-5" />}
             title="Escanear Rótulo"
-            description="Fotografe ou envie uma imagem do rótulo para preencher os dados automaticamente."
+            description="Fotografe o rótulo e revise os campos essenciais em uma leitura curta, clara e pronta para salvar."
           />
         </AiModalHeaderBar>
 
         <AiModalBody>
+          <AiModalSplitLayout sidebar={sidebarContent}>
           <AnimatePresence mode="wait">
             {step === "capture" && (
               <motion.div
@@ -552,22 +588,29 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-3.5"
+                className="space-y-4"
               >
-                <AiModalCard className="space-y-3.5">
-                  <div className="flex flex-col items-center gap-4 text-center">
+                <AiModalCard className="space-y-4">
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
+                    <div className="space-y-3">
                     <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[rgba(123,30,43,0.14)] bg-[linear-gradient(135deg,rgba(123,30,43,0.10)_0%,rgba(200,169,106,0.10)_100%)] shadow-[0_8px_20px_-14px_rgba(123,30,43,0.24)]">
                       <Camera className="h-7 w-7 text-[#7B1E2B]" />
                     </div>
-                    <div className="space-y-1">
-                      <h3 className="text-[17px] font-semibold tracking-[-0.02em] text-[#1A1713]">Fotografe o rótulo</h3>
-                      <p className="max-w-[260px] text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.62)]">
+                    <div className="space-y-1.5">
+                      <h3 className="text-[20px] font-semibold tracking-[-0.02em] text-[#1A1713]">Fotografe o rótulo</h3>
+                      <p className="max-w-[38rem] text-[13px] leading-6 text-[rgba(58,51,39,0.62)]">
                         Tire uma foto nítida do rótulo frontal da garrafa. A Sommelyx preenche os principais dados automaticamente.
                       </p>
                     </div>
                   </div>
+                    <AiToolbarSurface className="space-y-2.5 shadow-none">
+                      <AiModalKeyValue label="Melhor uso" value="rótulo frontal" />
+                      <AiModalKeyValue label="Saída" value="nome, produtor, safra e estilo" />
+                      <AiModalKeyValue label="Revisão" value="compacta e editável" />
+                    </AiToolbarSurface>
+                  </div>
 
-                  <div className="flex w-full flex-col gap-2.5">
+                  <div className="grid w-full gap-2.5 sm:grid-cols-2">
                   <AiModalActionButton
                     variant="primary"
                     onClick={() => cameraInputRef.current?.click()}
@@ -617,20 +660,15 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 exit={{ opacity: 0 }}
                 className="space-y-4"
               >
-                {imagePreview && (
-                  <AiModalCard className="p-0 overflow-hidden">
-                    <img src={imagePreview} alt="Label" className="w-full aspect-[3/4] max-h-[260px] object-cover" />
-                  </AiModalCard>
-                )}
                 <AiModalCard>
                   <AiProgressiveLoader
                     steps={[
                       "Processando imagem…",
-                      "Lendo rótulo com inteligência Sommelyx…",
-                      "Extraindo informações…",
-                      "Verificando dados…",
+                      "Lendo produtor e safra…",
+                      "Organizando a ficha…",
+                      "Preparando revisão…",
                     ]}
-                    interval={2500}
+                    interval={2200}
                   />
                 </AiModalCard>
               </motion.div>
@@ -644,12 +682,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 exit={{ opacity: 0 }}
                 className="space-y-4"
               >
-                {imagePreview && (
-                  <AiModalCard className="p-0 overflow-hidden">
-                    <img src={imagePreview} alt="Label" className="w-full h-40 object-cover" />
-                  </AiModalCard>
-                )}
-
                 <AiStatusCard
                   icon={resultStatus.icon}
                   title={resultStatus.title}
@@ -664,7 +696,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   </AiModalCard>
                 )}
 
-                  <AiModalActions className="pt-1">
+                  <AiModalActions className="pt-1 sm:max-w-[26rem]">
                     <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
                       <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                       Reescanear
@@ -722,6 +754,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               </motion.div>
             )}
           </AnimatePresence>
+          </AiModalSplitLayout>
         </AiModalBody>
         </AiModalShell>
       </SheetContent>
