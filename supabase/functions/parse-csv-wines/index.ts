@@ -9,7 +9,7 @@ import { getCachedAiResponse, setCachedAiResponse, sha256Hex } from "../_shared/
 const MAX_CSV_SIZE = 1_000_000;
 const MAX_ROWS = 200;
 const MAX_CHUNKS = 5;
-const PROCESSING_TIMEOUT_MS = 10_000;
+const PROCESSING_TIMEOUT_MS = 25_000;
 const FUNCTION_NAME = "parse-csv-wines";
 
 function errorResponse(code: string, message: string, requestId: string, retryable = false) {
@@ -208,7 +208,7 @@ serve(async (req) => {
     } else {
       const header = lines[0] || "";
       const dataLines = lines.slice(1);
-      const CHUNK_SIZE = 120;
+      const CHUNK_SIZE = 60;
 
       if (lines.length <= CHUNK_SIZE + 1) {
         chunks.push(normalized);
@@ -389,17 +389,6 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
                 },
                 required: [
                   "name",
-                  "producer",
-                  "vintage",
-                  "style",
-                  "country",
-                  "region",
-                  "grape",
-                  "quantity",
-                  "purchase_price",
-                  "cellar_location",
-                  "drink_from",
-                  "drink_until",
                 ],
               },
             },
@@ -439,7 +428,7 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
             },
           ],
           schema: toolDef.function.parameters,
-          maxOutputTokens: 800,
+          maxOutputTokens: isSmartPdf ? 1800 : 1400,
         });
 
         if (!result.ok) {

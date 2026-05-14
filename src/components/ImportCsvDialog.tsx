@@ -345,6 +345,24 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return style;
   };
 
+  const hasReviewableWineContext = (row: {
+    producer?: string | null;
+    country?: string | null;
+    region?: string | null;
+    grape?: string | null;
+    vintage?: number | null;
+    style?: string | null;
+    type?: string | null;
+  }) => Boolean(
+    normalizeText(row.producer) ||
+    normalizeText(row.country) ||
+    normalizeText(row.region) ||
+    normalizeText(row.grape) ||
+    row.vintage ||
+    normalizeText(row.style) ||
+    normalizeText(row.type),
+  );
+
   const resolveParsedStatus = (row: {
     name?: string | null;
     producer?: string | null;
@@ -357,12 +375,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     type?: string | null;
   }): ParsedWine["status"] => {
     if (!normalizeText(row.name)) return "invalid";
-    const hasCoreFields =
-      !!normalizeText(row.producer) &&
-      !!normalizeText(row.country) &&
-      !!normalizeText(row.grape) &&
-      !!row.vintage;
-    return hasCoreFields ? "valid" : "review";
+    return hasReviewableWineContext(row) ? "valid" : "review";
   };
 
   const normalizeType = (value: unknown) => normalizeStyle(value);
@@ -388,6 +401,39 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const overlap = aTokens.filter((token) => bTokens.includes(token)).length;
     const denom = Math.max(aTokens.length, bTokens.length, 1);
     return overlap / denom;
+  };
+
+  const isLikelyDuplicateRow = (
+    left: {
+      name?: string | null;
+      producer?: string | null;
+      vintage?: number | null;
+    },
+    right: {
+      name?: string | null;
+      producer?: string | null;
+      vintage?: number | null;
+    },
+  ) => {
+    const leftName = normalizeSearchText(left.name);
+    const rightName = normalizeSearchText(right.name);
+    if (!leftName || !rightName) return false;
+
+    const exactName = leftName === rightName;
+    const nameSimilarity = similarityScore(left.name, right.name);
+    const producerSimilarity = similarityScore(left.producer, right.producer);
+    const sameVintage = Boolean(left.vintage && right.vintage && left.vintage === right.vintage);
+    const hasProducerContext = Boolean(normalizeText(left.producer) && normalizeText(right.producer));
+
+    if (exactName) {
+      return !hasProducerContext || producerSimilarity >= 0.32 || sameVintage;
+    }
+
+    if (hasProducerContext && nameSimilarity >= 0.82 && producerSimilarity >= 0.6) {
+      return true;
+    }
+
+    return sameVintage && nameSimilarity >= 0.9;
   };
 
   const scoreDraftRow = (row: DraftWine) => {
@@ -432,26 +478,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const duplicates = shouldCheckDuplicates
       ? sourceRows.filter((candidate, candidateIndex) => {
           if (candidateIndex === index) return false;
-          const nameSimilarity = similarityScore(candidate.name, row.name);
-          const producerSimilarity = similarityScore(candidate.producer, row.producer);
-          return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5);
+          return isLikelyDuplicateRow(candidate, row);
         })
       : [];
     const duplicateIndexes = shouldCheckDuplicates
       ? sourceRows
           .map((candidate, candidateIndex) => {
             if (candidateIndex === index) return null;
-            const nameSimilarity = similarityScore(candidate.name, row.name);
-            const producerSimilarity = similarityScore(candidate.producer, row.producer);
-            return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5) ? candidateIndex : null;
+            return isLikelyDuplicateRow(candidate, row) ? candidateIndex : null;
           })
           .filter((value): value is number => value !== null)
       : [];
     const cellarDuplicate = shouldCheckDuplicates
       ? cellarWines?.find((wine) => {
-          const nameSimilarity = similarityScore(wine.name, row.name);
-          const producerSimilarity = similarityScore(wine.producer, row.producer);
-          return nameSimilarity > 0.82 || (nameSimilarity > 0.68 && producerSimilarity > 0.5);
+          return isLikelyDuplicateRow(wine, row);
         })
       : null;
 
@@ -524,7 +564,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       const key = normalizeSearchText(`${row.name}|${row.producer || ""}|${row.vintage || ""}`);
       const existingIndex = merged.findIndex((candidate) =>
         normalizeSearchText(`${candidate.name}|${candidate.producer || ""}|${candidate.vintage || ""}`) === key ||
-        (similarityScore(candidate.name, row.name) > 0.92 && similarityScore(candidate.producer, row.producer) > 0.7)
+        isLikelyDuplicateRow(candidate, row)
       );
       if (existingIndex >= 0) {
         duplicateCount++;
@@ -2034,7 +2074,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (!row.country?.trim()) issues.push("País precisa de revisão");
     if (!row.grape?.trim()) issues.push("Uva precisa de revisão");
     if (!row.vintage) issues.push("Safra precisa de revisão");
-    if (row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7)) {
+    if (row.confidence < 0.45) {
       issues.push("Confiança baixa");
     }
     return issues;
@@ -2044,9 +2084,18 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const hasName = !!row.name?.trim();
     if (!hasName) return "invalid" as const;
     if (!row.quantity || row.quantity <= 0) return "invalid" as const;
-    const missingSecondary = !row.producer?.trim() || !row.country?.trim() || !row.grape?.trim() || !row.vintage || (row.purchase_price == null && row.price == null);
-    const lowConfidence = row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7);
-    if (missingSecondary || lowConfidence) return "incomplete" as const;
+    if (!hasReviewableWineContext(row)) return "incomplete" as const;
+    const contextCount = [
+      row.producer,
+      row.country,
+      row.region,
+      row.grape,
+      row.vintage,
+      row.style,
+      row.type,
+      row.purchase_price ?? row.price,
+    ].filter((value) => value !== undefined && value !== null && value !== "").length;
+    if (row.confidence < 0.45 && contextCount < 2) return "incomplete" as const;
     return "valid" as const;
   };
 
@@ -2059,7 +2108,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const isLowConfidenceRow = (row: DraftWine) =>
-    row.confidence < 0.7 || Object.values(row.fieldConfidence || {}).some((value) => value < 0.7);
+    row.confidence < 0.45;
 
   const isRowMissingField = (row: DraftWine, field: EmptyFilterField | BulkTargetField) => {
     if (field === "purchase_price") return row.purchase_price == null && row.price == null;

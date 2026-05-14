@@ -309,6 +309,38 @@ function isLenientWineListAnalysis(data: any): boolean {
   });
 }
 
+function validateStructuredWineList(data: any, requireMultiple = false) {
+  const failures: string[] = [];
+  const wines = Array.isArray(data?.wines) ? data.wines : [];
+
+  if (wines.length === 0) {
+    failures.push("Nenhum vinho extraído");
+    return { passed: false, failures };
+  }
+
+  for (const wine of wines) {
+    if (typeof wine?.name !== "string" || wine.name.trim().length < 2) {
+      failures.push("Vinho sem nome suficiente");
+    }
+    if (!["red", "white", "sparkling", "rose"].includes(String(wine?.category || ""))) {
+      failures.push(`Categoria inválida para ${wine?.name || "vinho"}`);
+    }
+    const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence);
+    if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1) {
+      failures.push(`Confidence inválido para ${wine?.name || "vinho"}`);
+    }
+  }
+
+  if (requireMultiple && wines.length < 3) {
+    failures.push(`Esperados pelo menos 3 vinhos estruturados, recebidos ${wines.length}`);
+  }
+
+  return {
+    passed: failures.length === 0,
+    failures,
+  };
+}
+
 function normalizeWineListPayload(payload: any) {
   const rawWines = Array.isArray(payload?.wines) ? payload.wines : [];
   const allowedCategories = new Set(["red", "white", "sparkling", "rose"]);
@@ -1228,27 +1260,7 @@ PROIBIDO:
           validationResult.passed = true;
         }
       } else {
-        const extractedWines = Array.isArray(lastParsed.wines) ? lastParsed.wines : [];
-        validationResult.failures = [];
-        if (extractedWines.length === 0) {
-          validationResult.failures.push("Nenhum vinho extraído");
-        }
-        for (const wine of extractedWines) {
-          if (typeof wine?.name !== "string" || wine.name.trim().length < 2) {
-            validationResult.failures.push("Vinho sem nome suficiente");
-          }
-          if (!["red", "white", "sparkling", "rose"].includes(String(wine?.category || ""))) {
-            validationResult.failures.push(`Categoria inválida para ${wine?.name || "vinho"}`);
-          }
-          const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence);
-          if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1) {
-            validationResult.failures.push(`Confidence inválido para ${wine?.name || "vinho"}`);
-          }
-        }
-        if (likelyMultipleEntries && extractedWines.length < 3) {
-          validationResult.failures.push(`Esperados pelo menos 3 vinhos estruturados, recebidos ${extractedWines.length}`);
-        }
-        validationResult.passed = validationResult.failures.length === 0;
+        validationResult = validateStructuredWineList(lastParsed, likelyMultipleEntries);
       }
 
       console.log(`Attempt ${attempt + 1}: validation ${validationResult.passed ? "PASSED" : "FAILED"} (${validationResult.failures.length} failures)`);
@@ -1296,21 +1308,45 @@ PROIBIDO:
 
     if (!isMenuMode) {
       console.log("[OCR RAW TEXT]", normalizedText);
+      const ungroundedNormalized = normalizeWineListPayload(lastParsed);
       const groundingResult = applyGroundedWineExtraction(lastParsed, normalizedText);
       const filteredWines = groundingResult.grounded.wines;
       console.log("[GROUNDED WINES]", filteredWines);
       console.log("[FILTERED WINES]", filteredWines);
       console.log("[REMOVED HALLUCINATIONS]", groundingResult.removed);
       lastParsed = groundingResult.grounded;
-      validationResult.failures = validationResult.failures.filter((failure) =>
-        !failure.startsWith("Esperados pelo menos 3 vinhos estruturados")
-      );
-
-      if (filteredWines.length === 0) {
-        validationResult.failures.push("Nenhum vinho permaneceu ancorado no OCR");
+      validationResult = validateStructuredWineList(lastParsed, false);
+      if (!validationResult.passed && isLenientWineListAnalysis(lastParsed)) {
+        validationResult = { passed: true, failures: [] };
       }
       finalParsedCount = filteredWines.length;
-      validationResult.passed = validationResult.failures.length === 0;
+
+      if (filteredWines.length === 0 && ungroundedNormalized.wines.length > 0) {
+        const degraded = {
+          ...ungroundedNormalized,
+          fallback: true,
+          fallbackReason: "OCR_GROUNDING_LOW_CONFIDENCE",
+          note: "análise simplificada",
+        };
+        trace("fallback_used", {
+          request_id: requestId,
+          mode,
+          count: ungroundedNormalized.wines.length,
+          reason: "ocr_grounding_removed_all_candidates",
+          removed_count: groundingResult.removed.length,
+        });
+        await logToDb(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "", userId, FUNCTION_NAME, 200, "success_with_warnings", Date.now() - startTime, {
+          request_id: requestId,
+          reason: "ocr_grounding_removed_all_candidates",
+          removed_count: groundingResult.removed.length,
+          original_count: ungroundedNormalized.wines.length,
+          mode,
+          input_size_bytes: inputSizeBytes,
+          error_type: "LOW_CONFIDENCE_EXTRACTION",
+        });
+        await setCachedAiResponse("analyze-wine-list", cacheInput, degraded);
+        return jsonResponse(req, degraded);
+      }
     }
 
     if (!validationResult.passed && !isMenuMode) {
