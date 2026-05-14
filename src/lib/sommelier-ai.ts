@@ -174,6 +174,33 @@ export interface WineListAnalysisTextInput {
   requestId?: string;
 }
 
+type RawWineListCandidate = {
+  name?: unknown;
+  producer?: unknown;
+  title?: unknown;
+  label?: unknown;
+  grape?: unknown;
+  country?: unknown;
+  region?: unknown;
+  price?: unknown;
+  vintage?: unknown;
+  category?: unknown;
+  confidence?: unknown;
+  style?: unknown;
+  description?: unknown;
+  pairings?: unknown;
+  verdict?: unknown;
+  compatibilityLabel?: unknown;
+  highlight?: unknown;
+  body?: unknown;
+  acidity?: unknown;
+  tannin?: unknown;
+  occasion?: unknown;
+  comparativeLabels?: unknown;
+  tags?: unknown;
+  sourceLines?: unknown;
+};
+
 function mapWineCategoryToStyle(category?: string | null) {
   switch ((category || "").toLowerCase()) {
     case "red":
@@ -187,6 +214,70 @@ function mapWineCategoryToStyle(category?: string | null) {
     default:
       return null;
   }
+}
+
+function inferWineCategoryFromStyle(style?: string | null): WineListItem["category"] | null {
+  const value = String(style || "").toLowerCase();
+  if (!value) return null;
+  if (/espumante|sparkling|champagne|prosecco|cava|brut/.test(value)) return "sparkling";
+  if (/branco|white/.test(value)) return "white";
+  if (/ros[eé]|rose|rosado/.test(value)) return "rose";
+  if (/tinto|red/.test(value)) return "red";
+  return null;
+}
+
+function buildLocalWineListFallbackFromText(rawText: string, fileName?: string): WineListAnalysis | null {
+  const normalizedOcr = normalizeWineListOcrText(rawText, { fileName });
+  const candidates = normalizedOcr.structured.candidates;
+  const rawCandidates = candidates.length > 0
+    ? candidates
+    : normalizedOcr.cleanText
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter((line) => line.length >= 4)
+        .slice(0, 20)
+        .map((line) => ({ name: line, confidence: 0.35, sourceLines: [line] }));
+
+  const wines = rawCandidates
+    .map((candidate: RawWineListCandidate, index) => {
+      const style = String(candidate.style || "").trim() || null;
+      const category = inferWineCategoryFromStyle(style) || "red";
+      const priceText = String(candidate.price || "").replace(/[^\d,.-]/g, "").replace(".", "").replace(",", ".");
+      const price = Number.parseFloat(priceText);
+      const sourceLines = Array.isArray(candidate.sourceLines) ? candidate.sourceLines : [];
+      return {
+        name: normalizeWineListName(candidate.name || sourceLines[0] || ""),
+        producer: candidate.producer || null,
+        grape: candidate.grape || null,
+        country: candidate.country || null,
+        region: candidate.region || null,
+        price: Number.isFinite(price) && price > 0 ? price : null,
+        vintage: candidate.vintage || null,
+        category,
+        confidence: Math.max(0.2, Math.min(0.72, Number(candidate.confidence || 0.35) - index * 0.02)),
+        style: style || mapWineCategoryToStyle(category),
+        description: null,
+        pairings: [],
+        verdict: null,
+        compatibilityLabel: null,
+        highlight: index === 0 ? "top-pick" : index === 1 ? "best-value" : null,
+        body: null,
+        acidity: null,
+        tannin: null,
+        occasion: null,
+        comparativeLabels: index === 0 ? ["Melhor escolha"] : index === 1 ? ["Melhor custo-benefício"] : [],
+      } satisfies WineListItem;
+    })
+    .filter((wine) => Boolean(wine.name));
+
+  if (wines.length === 0) return null;
+  return {
+    wines,
+    topPick: wines[0]?.name || null,
+    bestValue: wines[Math.min(1, wines.length - 1)]?.name || wines[0]?.name || null,
+    fallback: true,
+    fallbackReason: "LOCAL_OCR_FALLBACK",
+  };
 }
 
 const WINE_LIST_TAG_SYNONYMS: Array<{ pattern: RegExp; label: string }> = [
@@ -228,7 +319,7 @@ function normalizeWineListName(value: unknown) {
 export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
   const source = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
   const normalizedWines: WineListItem[] = (Array.isArray(source.wines) ? source.wines : [])
-    .map((wine: any, index) => {
+    .map((wine: RawWineListCandidate, index) => {
       void index;
       const safeName = normalizeWineListName(
         wine?.name ??
@@ -239,7 +330,7 @@ export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
       const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence ?? 0);
       const category = ["red", "white", "sparkling", "rose"].includes(String(wine?.category || "").toLowerCase())
         ? String(wine.category).toLowerCase() as WineListItem["category"]
-        : "red";
+        : inferWineCategoryFromStyle(wine?.style) || "red";
       const rawPrice = typeof wine?.price === "number" ? wine.price : Number(wine?.price ?? 0);
       const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
       const rawVintage = typeof wine?.vintage === "number" ? wine.vintage : Number(wine?.vintage ?? 0);
@@ -254,7 +345,7 @@ export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
         vintage,
         category,
         confidence: Number.isFinite(confidence) ? Math.max(0, Math.min(1, confidence)) : 0.35,
-        style: mapWineCategoryToStyle(category),
+        style: String(wine?.style ?? "").trim() || mapWineCategoryToStyle(category),
         description: String(wine?.description ?? "").trim() || null,
         pairings: Array.isArray(wine?.pairings) ? wine.pairings : [],
         verdict: String(wine?.verdict ?? "").trim() || null,
@@ -1869,6 +1960,18 @@ export async function analyzeWineList(
       type: classified.type,
       wineCount: 0,
     });
+    if (classified.type !== "auth" && classified.type !== "invalid_file") {
+      const fallback = buildLocalWineListFallbackFromText(String(analysis.text || ""), analysis.fileName);
+      if (fallback) {
+        console.info("[sommelier-ai] local_fallback_used", {
+          flow: "analyze-wine-list",
+          fileName: analysis.fileName,
+          code: classified.code,
+          wineCount: fallback.wines.length,
+        });
+        return fallback;
+      }
+    }
     throw createClassifiedError(classified, classified.code || "ANALYZE_WINE_LIST_FAILED");
   }
 }

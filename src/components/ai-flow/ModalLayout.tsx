@@ -4,7 +4,7 @@ import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "left-1/2 top-1/2 right-auto bottom-auto h-[92dvh] max-h-[92dvh] w-[96vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[30px] border-0 p-0 gap-0";
+  "left-1/2 top-1/2 right-auto bottom-auto h-[88dvh] max-h-[88dvh] w-[94vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[24px] border-0 p-0 gap-0";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   left: "50%",
@@ -12,15 +12,15 @@ export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   right: "auto",
   bottom: "auto",
   transform: "translate(-50%, -50%)",
-  width: "min(96vw, 1240px)",
-  maxWidth: "1240px",
-  maxHeight: "92dvh",
-  height: "92dvh",
+  width: "min(94vw, 920px)",
+  maxWidth: "920px",
+  maxHeight: "88dvh",
+  height: "88dvh",
   background:
     "linear-gradient(145deg, rgba(249,245,239,0.98) 0%, rgba(243,236,228,0.98) 48%, rgba(236,228,216,0.98) 100%)",
   backdropFilter: "blur(18px) saturate(1.06)",
   WebkitBackdropFilter: "blur(18px) saturate(1.06)",
-  boxShadow: "0 34px 88px rgba(38,24,18,0.16)",
+  boxShadow: "0 24px 64px rgba(38,24,18,0.14)",
 };
 
 export function AiModalShell({
@@ -43,7 +43,7 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 shrink-0 border-b border-white/55 px-5 py-4 sm:px-6 sm:py-4.5",
+        "sticky top-0 z-20 shrink-0 border-b border-white/55 px-4 py-3.5 sm:px-5 sm:py-4",
         className,
       )}
       style={{
@@ -67,7 +67,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 overflow-hidden px-5 pb-[calc(18px+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-[calc(22px+env(safe-area-inset-bottom))] sm:pt-5",
+        "min-h-0 flex-1 overflow-hidden px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3.5 sm:px-5 sm:pb-[calc(18px+env(safe-area-inset-bottom))] sm:pt-4",
         className,
       )}
     >
@@ -86,7 +86,7 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "sticky bottom-0 z-20 shrink-0 border-t border-white/55 px-5 py-3 sm:px-6 sm:py-3.5",
+        "sticky bottom-0 z-20 shrink-0 border-t border-white/55 px-4 py-3 sm:px-5",
         className,
       )}
       style={{
@@ -112,19 +112,19 @@ export function AiModalHeader({
   className?: string;
   }) {
   return (
-    <SheetHeader className={cn("mb-0 flex flex-col gap-3.5 pr-14 sm:pr-16", className)}>
-      <div className="flex items-start gap-4.5">
+    <SheetHeader className={cn("mb-0 flex flex-col gap-3 pr-12 sm:pr-14", className)}>
+      <div className="flex items-start gap-3.5">
         {icon ? (
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,rgba(123,30,43,0.13),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_14px_34px_-22px_rgba(123,30,43,0.2)]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.09))] text-[#7B1E2B] shadow-[0_10px_26px_-20px_rgba(123,30,43,0.2)]">
             {icon}
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
-          <SheetTitle className="text-[30px] font-semibold tracking-[-0.04em] text-[#1A1713] sm:text-[36px]">
+          <SheetTitle className="text-[21px] font-semibold tracking-[-0.02em] text-[#1A1713] sm:text-[24px]">
             {title}
           </SheetTitle>
           {description ? (
-            <SheetDescription className="mt-1.5 max-w-[42rem] text-[13px] font-medium leading-6 tracking-[-0.01em] text-[#6B6B6B] sm:text-[14px]">
+            <SheetDescription className="mt-1 max-w-[40rem] text-[12.5px] font-medium leading-5 tracking-[-0.005em] text-[#6B6B6B] sm:text-[13px]">
               {description}
             </SheetDescription>
           ) : null}
@@ -150,7 +150,7 @@ export function AiModalSplitLayout({
   return (
     <div
       className={cn(
-        "grid min-h-0 flex-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)]",
+        "grid min-h-0 flex-1 gap-3.5 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)]",
         className,
       )}
     >
@@ -176,7 +176,7 @@ export function AiModalSidebarCard({
   return (
     <div
       className={cn(
-        "rounded-[24px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(246,240,232,0.76)_100%)] px-4 py-4 shadow-[0_16px_36px_-28px_rgba(33,20,12,0.2)] backdrop-blur-xl sm:px-5 sm:py-5",
+        "rounded-[18px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(246,240,232,0.72)_100%)] px-3.5 py-3.5 shadow-[0_12px_28px_-24px_rgba(33,20,12,0.18)] backdrop-blur-xl sm:px-4 sm:py-4",
         className,
       )}
     >
@@ -226,7 +226,7 @@ export function AiToolbarSurface({
   return (
     <div
       className={cn(
-        "rounded-[20px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-3 py-2.5 shadow-[0_14px_28px_-24px_rgba(54,36,22,0.22)] backdrop-blur-xl",
+        "rounded-[16px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.76)_0%,rgba(247,242,235,0.68)_100%)] px-3 py-2.5 shadow-[0_10px_24px_-22px_rgba(54,36,22,0.18)] backdrop-blur-xl",
         className,
       )}
     >
@@ -245,7 +245,7 @@ export function AiModalCard({
   return (
     <div
       className={cn(
-        "rounded-[22px] border px-4 py-4 shadow-[0_16px_32px_-28px_rgba(0,0,0,0.18)] sm:px-5 sm:py-5",
+        "rounded-[18px] border px-3.5 py-3.5 shadow-[0_12px_28px_-24px_rgba(0,0,0,0.16)] sm:px-4 sm:py-4",
         className,
       )}
       style={{
@@ -315,7 +315,7 @@ export function AiModalActionButton({
     <Button
       {...props}
       className={cn(
-        "h-12 rounded-[16px] px-5 text-[14px] font-semibold tracking-[-0.01em] shadow-[0_12px_24px_-18px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_16px_28px_-18px_rgba(0,0,0,0.2)]",
+        "h-10 rounded-[14px] px-4 text-[13px] font-semibold tracking-[-0.005em] shadow-[0_10px_22px_-18px_rgba(0,0,0,0.16)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_14px_24px_-18px_rgba(0,0,0,0.18)]",
         className,
       )}
     />

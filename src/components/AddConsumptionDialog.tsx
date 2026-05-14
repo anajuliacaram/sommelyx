@@ -226,22 +226,22 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="items-center rounded-[30px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_30px_72px_rgba(0,0,0,0.12)] sm:max-w-[1180px]">
+      <DialogContent className="items-center overflow-hidden rounded-[24px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_24px_64px_rgba(38,24,18,0.14)] sm:max-w-[920px]">
         <div
-          className="flex w-full max-h-[92dvh] min-h-0 flex-col rounded-[30px] p-5 sm:p-6"
+          className="flex w-full max-h-[88dvh] min-h-0 flex-col rounded-[24px] p-4 sm:p-5"
           style={{ backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
         >
-          <DialogHeader className="mb-6 text-left">
-            <div className="flex items-start gap-4 pr-12">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_10px_28px_-18px_rgba(123,30,43,0.18)]">
+          <DialogHeader className="mb-4 text-left">
+            <div className="flex items-start gap-3.5 pr-12">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] bg-[linear-gradient(135deg,rgba(123,30,43,0.12),rgba(200,169,106,0.10))] text-[#7B1E2B] shadow-[0_10px_24px_-18px_rgba(123,30,43,0.18)]">
                 <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0 flex-1">
-                <DialogTitle className="font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1A1713] sm:text-[32px]">
+                <DialogTitle className="text-[21px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[24px]">
                   Registrar consumo
                 </DialogTitle>
-                <DialogDescription className="mt-1.5 text-[14px] font-medium leading-7 tracking-[-0.01em] text-[#6B6B6B] sm:text-[15px]">
-                  Registre uma garrafa da sua adega ou uma taça especial fora de casa com a mesma linguagem visual do restante da experiência.
+                <DialogDescription className="mt-1 text-[12.5px] font-medium leading-5 tracking-[-0.005em] text-[#6B6B6B] sm:text-[13px]">
+                  Registre uma garrafa da adega ou uma experiência externa com poucos campos e revisão rápida.
                 </DialogDescription>
               </div>
             </div>
@@ -537,7 +537,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
             </div>
             </AiModalSplitLayout>
 
-            <div className="mt-4 border-t border-black/5 bg-[#FAF8F6]/96 pt-4 backdrop-blur-md">
+            <div className="mt-3 border-t border-black/5 bg-[#FAF8F6]/96 pt-3 backdrop-blur-md">
               <AiModalActionButton
                 onClick={handleSubmit}
                 disabled={addConsumption.isPending}

@@ -26,7 +26,17 @@ import { prepareAiAnalysisAttachment, prepareSmartPdfImportAttachment } from "@/
 import { normalizeWineData, normalizeWineText } from "@/lib/wine-normalization";
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
-import { AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalFooterBar, AiToolbarSurface, AiMetricPill } from "@/components/ai-flow/ModalLayout";
+import {
+  AiModalActionButton,
+  AiModalShell,
+  AiModalHeaderBar,
+  AiModalBody,
+  AiModalFooterBar,
+  AiToolbarSurface,
+  AiMetricPill,
+  AI_MODAL_SHEET_CONTENT_CLASSNAME,
+  AI_MODAL_SHEET_CONTENT_STYLE,
+} from "@/components/ai-flow/ModalLayout";
 
 interface ImportCsvDialogProps {
   open: boolean;
@@ -3011,23 +3021,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className="left-1/2 top-1/2 right-auto bottom-auto h-[90vh] max-h-[90vh] w-[92vw] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-[26px] border-0 p-0 gap-0 overflow-hidden"
-        style={{
-          left: "50%",
-          top: "50%",
-          right: "auto",
-          bottom: "auto",
-          transform: "translate(-50%, -50%)",
-          width: "min(92vw, 1760px)",
-          maxWidth: "1760px",
-          maxHeight: "90vh",
-          height: "90vh",
-          background:
-            "linear-gradient(135deg, rgba(248,244,238,0.98) 0%, rgba(241,234,225,0.98) 42%, rgba(234,226,214,0.98) 100%)",
-          backdropFilter: "blur(18px) saturate(1.05)",
-          WebkitBackdropFilter: "blur(18px) saturate(1.05)",
-          boxShadow: "0 28px 72px rgba(40,25,15,0.14)",
-        }}
+        className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+        style={AI_MODAL_SHEET_CONTENT_STYLE}
       >
         <AiModalShell>
           <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3 pr-14">
@@ -3367,7 +3362,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             ) : (
               <AnimatePresence mode="wait">
                 {step === "analyzing" ? (
-                  <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-[520px] items-center justify-center text-center">
+                  <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-[320px] items-center justify-center text-center">
                     <div>
                       <div className="relative mx-auto mb-5 h-16 w-16">
                         <div className="absolute inset-0 rounded-2xl bg-[rgba(143,45,86,0.14)] animate-pulse" />
@@ -3382,10 +3377,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[520px]">
+                  <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[320px]">
                     <div
                       className={cn(
-                        "rounded-[26px] border-2 border-dashed p-10 text-center transition-colors",
+                        "rounded-[18px] border border-dashed p-6 text-center transition-colors sm:p-7",
                         loading ? "cursor-wait opacity-80" : "cursor-pointer hover:border-[#8F2D56]/40",
                       )}
                       style={{ borderColor: "rgba(143,45,86,0.15)", background: "rgba(255,255,255,0.62)" }}

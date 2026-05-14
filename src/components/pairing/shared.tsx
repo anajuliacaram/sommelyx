@@ -600,9 +600,9 @@ export function PremiumChoiceCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -1 }}
       whileTap={{ scale: 0.985 }}
-      className="group w-full text-left rounded-[22px] p-[18px] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
+      className="group w-full rounded-[18px] p-3.5 text-left transition-all duration-200"
       style={{
         background: selected ? "rgba(123,30,43,0.05)" : "rgba(255,255,255,0.92)",
         border: `1px solid ${selected ? accentColor : "rgba(0,0,0,0.06)"}`,
@@ -611,9 +611,9 @@ export function PremiumChoiceCard({
           : "0 4px 14px -10px rgba(58,51,39,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-105"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] transition-all duration-200 group-hover:scale-105"
           style={{
             background: selected ? `${accentColor}1A` : "rgba(123,30,43,0.07)",
             border: `1px solid ${selected ? `${accentColor}33` : "rgba(123,30,43,0.10)"}`,
@@ -622,7 +622,7 @@ export function PremiumChoiceCard({
           <IconCmp className="h-[18px] w-[18px]" strokeWidth={1.8} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-semibold tracking-[-0.005em] text-[#1A1713]">{title}</p>
+          <p className="text-[14px] font-semibold tracking-[-0.005em] text-[#1A1713]">{title}</p>
           <p className="mt-0.5 text-[12px] leading-5 text-[rgba(58,51,39,0.64)]">{description}</p>
         </div>
       </div>

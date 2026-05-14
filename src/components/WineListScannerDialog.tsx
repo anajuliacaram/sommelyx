@@ -67,12 +67,6 @@ type WineType = "tinto" | "branco" | "rosé" | "espumante" | "unknown";
 type FilterMode = "all" | "tinto" | "branco" | "rosé" | "espumante";
 type FocusFilter = "all" | "drink-now" | "cellaring" | "premium" | "best-value";
 
-const MODAL_STYLE = {
-  ...AI_MODAL_SHEET_CONTENT_STYLE,
-  width: "min(98vw, 1420px)",
-  maxWidth: "1420px",
-};
-
 const EMPTY_WINE_LIST_ANALYSIS: WineListAnalysis = {
   wines: [],
   topPick: null,
@@ -211,10 +205,6 @@ function buildCurationNote(wine: WineListItem | null | undefined, options: { isT
 }
 
 function getCardRhythmClass(index: number, isFeatured: boolean) {
-  if (isFeatured) return "";
-  if (index % 5 === 1) return "xl:translate-y-3";
-  if (index % 5 === 3) return "2xl:-translate-y-2";
-  if (index % 5 === 4) return "xl:translate-y-1";
   return "";
 }
 
@@ -319,8 +309,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         });
       }
       setStep("results");
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Não conseguimos extrair vinhos confiáveis desta carta. Tente uma imagem ou PDF mais nítido.");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error && err.message ? err.message : "Não conseguimos extrair vinhos confiáveis desta carta. Tente uma imagem ou PDF mais nítido.");
       setStep("error");
     } finally {
       requestBusyRef.current = false;
@@ -438,10 +428,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         description: compactText([wine.name, wine.producer].filter(Boolean).join(" · "), 80),
         duration: 2200,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Não foi possível salvar na wishlist",
-        description: error?.message || "Tente novamente em instantes.",
+        description: error instanceof Error && error.message ? error.message : "Tente novamente em instantes.",
         variant: "destructive",
       });
     }
@@ -518,7 +508,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           <div className="flex flex-col gap-3 border-b border-[rgba(24,21,17,0.08)] pb-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <AiModalEyebrow className="mb-2">Workspace</AiModalEyebrow>
-              <p className="font-serif text-[30px] leading-none tracking-[-0.05em] text-[#1A1713]">
+              <p className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
                 {displayWines.length} rótulos para decidir
               </p>
               <p className="mt-1.5 max-w-[38rem] text-[12.5px] leading-5 text-[#6B6258]">
@@ -664,18 +654,18 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     <>
       <TooltipProvider>
         <Sheet open={open} onOpenChange={handleClose}>
-          <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={MODAL_STYLE}>
+          <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE}>
             <AiModalShell>
               <AiModalHeaderBar>
               <AiModalHeader
                   icon={<Sparkles className="h-5 w-5" />}
                   title="Analisar Carta"
-                  description="Uma mesa de curadoria para descobrir os melhores rótulos da carta com velocidade e contexto."
+                  description="Leia a carta, filtre rótulos e siga para salvar ou harmonizar sem sair do fluxo."
                 />
               </AiModalHeaderBar>
 
               <AiModalBody>
-                <AiModalSplitLayout sidebar={sidebarContent} className="gap-5 xl:grid-cols-[304px_minmax(0,1fr)] 2xl:grid-cols-[328px_minmax(0,1fr)]" sidebarClassName="xl:pr-1" contentClassName="pb-1">
+                <AiModalSplitLayout sidebar={sidebarContent} sidebarClassName="lg:pr-1" contentClassName="pb-1">
                   <AnimatePresence mode="wait">
                     {step === "capture" && (
                       <motion.div
@@ -704,7 +694,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             onClick={() => fileInputRef.current?.click()}
                             role="button"
                             tabIndex={0}
-                            className="group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[22px] px-5 py-10 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01]"
+                            className="group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[18px] px-4 py-6 transition-all duration-200 hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01] sm:py-7"
                             style={{
                               background: "rgba(255,255,255,0.78)",
                               border: "1.5px dashed rgba(123,30,43,0.22)",
@@ -714,21 +704,21 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             }}
                           >
                             <div
-                              className="flex h-16 w-16 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105"
+                              className="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105"
                               style={{
                                 background: "linear-gradient(135deg, rgba(123,30,43,0.10) 0%, rgba(200,169,106,0.10) 100%)",
                                 border: "1px solid rgba(123,30,43,0.14)",
                                 boxShadow: "0 6px 18px -10px rgba(123,30,43,0.20), inset 0 1px 0 rgba(255,255,255,0.6)",
                               }}
                             >
-                              <Camera className="h-7 w-7 text-[#7B1E2B]" strokeWidth={1.75} />
+                              <Camera className="h-5 w-5 text-[#7B1E2B]" strokeWidth={1.75} />
                             </div>
                             <div className="max-w-[320px] text-center">
-                              <p className="font-serif text-[26px] font-semibold tracking-[-0.04em] text-[#1A1713]">
+                              <p className="text-[18px] font-semibold tracking-[-0.02em] text-[#1A1713]">
                                 Fotografe ou envie a carta
                               </p>
                               <p className="mt-1 text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.6)]">
-                                A leitura transforma a carta em uma seleção sofisticada, compacta e pronta para decidir.
+                                A leitura extrai rótulos, preços e contexto para decidir rápido.
                               </p>
                             </div>
                           </div>
@@ -883,13 +873,13 @@ function WorkspaceRail({
         <div className="space-y-4 px-4 pb-4 pt-4 sm:px-5">
           <div className="space-y-1.5">
             <AiModalEyebrow>{step === "results" ? "Curadoria pronta" : "Entrada"}</AiModalEyebrow>
-            <p className="font-serif text-[24px] leading-none tracking-[-0.05em] text-[#181511]">
+            <p className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#181511]">
               {step === "results" ? "Carta analisada" : "Analisar Carta"}
             </p>
             <p className="text-[12px] leading-5 text-[#6B6258]">
               {step === "results"
-                ? "Uma mesa lateral para navegar a seleção com calma e contexto."
-                : "Envie uma carta nítida para abrir um workspace de curadoria."}
+                ? "Filtros e contexto ficam sempre à mão."
+                : "Envie uma carta nítida para extrair os rótulos."}
             </p>
           </div>
 
@@ -931,7 +921,7 @@ function WorkspaceRail({
 
           {step === "results" ? (
             <div className="grid grid-cols-2 gap-2">
-              <StatTile label="Seleção" value={safeResults.fallback ? "Inicial" : "Pronta"} accent={safeResults.fallback ? "amber" : "green"} />
+              <StatTile label="Leitura" value={safeResults.fallback ? "Inicial" : "Pronta"} accent={safeResults.fallback ? "amber" : "green"} />
               <StatTile label="Rótulos" value={safeResults.wines.length} />
               <StatTile label="Com preço" value={pricedWines} />
               <StatTile label="Na adega" value={cellarMatches} />
@@ -940,7 +930,7 @@ function WorkspaceRail({
         </div>
 
         {step === "results" ? (
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-5">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3.5 py-3 sm:px-4">
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4 text-[#7B1E2B]" />
@@ -1076,8 +1066,8 @@ function WineListCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden rounded-[22px] transition-all duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px]",
-        isFeatured && "xl:col-span-2 2xl:col-span-2",
+        "overflow-hidden rounded-[18px] transition-all duration-200 hover:-translate-y-[1px]",
+        isFeatured && "xl:col-span-1",
         rhythmClassName,
         isSelected
           ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)] shadow-[0_24px_44px_-36px_rgba(123,30,43,0.18)]"
@@ -1101,7 +1091,7 @@ function WineListCard({
             onSelect();
           }
         }}
-        className={cn("w-full text-left", isFeatured ? "px-4 py-4" : "px-3.5 py-3.5")}
+        className="w-full px-3.5 py-3.5 text-left"
       >
         <div className="space-y-2.5">
           {curationNote ? (
@@ -1140,7 +1130,7 @@ function WineListCard({
 
           <div className="space-y-1.5">
             <div className="min-w-0 flex-1">
-              <h4 className={cn("font-serif leading-[1.01] tracking-[-0.045em] text-[#181511]", isFeatured ? "text-[23px]" : "text-[19px]")}>
+              <h4 className={cn("font-semibold leading-tight tracking-[-0.02em] text-[#181511]", isFeatured ? "text-[17px]" : "text-[16px]")}>
                 {wine.name}
               </h4>
               {originLine ? (
@@ -1213,7 +1203,7 @@ function ActionPill({
         if (!disabled) onClick();
       }}
       className={cn(
-        "inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition-all duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition-all duration-200",
         disabled
           ? "cursor-not-allowed bg-[rgba(255,255,255,0.28)] text-[#9A9086]"
           : "bg-[rgba(255,255,255,0.34)] text-[#433A32] shadow-[inset_0_1px_0_rgba(255,255,255,0.54)] hover:bg-[rgba(255,255,255,0.54)] hover:-translate-y-[1px]",
