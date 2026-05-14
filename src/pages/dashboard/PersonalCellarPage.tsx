@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useWineEvent, useWines, type Wine } from "@/hooks/useWines";
 import { useResolveWineImages } from "@/hooks/useResolveWineImages";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
+import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 const currentYear = new Date().getFullYear();
@@ -342,8 +343,8 @@ export default function PersonalCellarPage() {
           mobileHeader(filtered.length)
         ) : (
           <EditorialCard style={{ padding: "10px 12px 10px" }}>
-            <div className="flex flex-col gap-2">
-              <div className="grid gap-2.5 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
+            <div className="flex flex-col gap-1.5">
+              <div className="grid gap-2 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-2.5">
                 <div className="flex min-w-0 flex-col">
                   <Kicker>Adega</Kicker>
                   <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight tracking-[-0.04em]">
@@ -378,7 +379,7 @@ export default function PersonalCellarPage() {
               </div>
 
               <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <div className="flex min-w-max items-center gap-3">
+                <div className="flex min-w-max items-center gap-2.5">
                   <div className="flex items-center gap-2">
                     <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
                       <SelectTrigger
@@ -466,29 +467,42 @@ export default function PersonalCellarPage() {
             <p style={{ color: "rgba(58,51,39,0.5)" }}>Carregando adega…</p>
           </EditorialCard>
         ) : filtered.length === 0 ? (
-          <EditorialCard>
-            <div className="editorial-empty">
-              <p
-                className="font-serif text-[16px] font-semibold"
-                style={{
-                  fontFamily: "'Libre Baskerville', Georgia, serif",
-                  color: "rgba(58,51,39,0.7)",
-                }}
-              >
-                {wines.length === 0 ? "Sua adega está vazia" : "Nenhum vinho encontrado"}
-              </p>
-              <p className="mt-1 text-[12px]" style={{ color: "rgba(58,51,39,0.48)" }}>
-                {wines.length === 0
-                  ? "Adicione seu primeiro vinho para começar."
-                  : "Ajuste a busca ou filtros."}
-              </p>
-            </div>
-          </EditorialCard>
+          <PremiumEmptyState
+            icon={WineIcon}
+            title={wines.length === 0 ? "Sua adega está vazia" : "Nenhum vinho encontrado"}
+            description={
+              wines.length === 0
+                ? "Adicione seu primeiro vinho para começar a organizar a coleção e acompanhar janelas de consumo."
+                : "Ajuste a busca ou os filtros para encontrar outro rótulo."
+            }
+            primaryAction={
+              wines.length === 0
+                ? {
+                    label: "Adicionar vinho",
+                    onClick: () => setAddOpen(true),
+                  }
+                : undefined
+            }
+            secondaryAction={
+              wines.length > 0
+                ? {
+                    label: "Limpar busca",
+                    onClick: () => {
+                      setQuery("");
+                      setStyleFilter("todos");
+                      setCountryFilter("all");
+                      setDrinkWindowFilter("all");
+                    },
+                  }
+                : undefined
+            }
+            className="px-6 py-10 lg:py-12"
+          />
         ) : view === "grid" ? (
           <div
             className={isMobile
               ? "grid grid-cols-2 gap-2"
-              : "grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"}
+              : "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"}
           >
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
@@ -603,15 +617,15 @@ export default function PersonalCellarPage() {
                 <EditorialCard
                   key={w.id}
                   className="flex h-full flex-col"
-                  style={{ padding: 16, cursor: "pointer" }}
+                  style={{ padding: 14, cursor: "pointer" }}
                 >
                   <div className="flex min-h-0 flex-1 flex-col" onClick={() => setEditWine(w)}>
                     {showLabels && (
                       <WineLabelPreview
                         wine={w}
                         alt={w.name}
-                        className="mb-2.5 h-[176px] sm:h-[168px]"
-                        imageClassName="h-[176px] w-full object-contain sm:h-[168px]"
+                        className="mb-2 h-[168px] sm:h-[160px]"
+                        imageClassName="h-[168px] w-full object-contain sm:h-[160px]"
                         generated={false}
                         compact
                       />
@@ -655,14 +669,12 @@ export default function PersonalCellarPage() {
                     >
                       {[w.vintage, w.region, w.country].filter(Boolean).join(" · ")}
                     </p>
-                    <div className="mt-2.25 min-h-[34px]">
+                    <div className="mt-2 min-h-[34px]">
                       <DrinkWindow from={dw.from} until={dw.until} current={currentYear} estimated={dw.estimated} />
                     </div>
                   </div>
-                  <div
-                    className="mt-3 pt-0"
-                  >
-                    <div className="flex min-h-[84px] flex-col gap-2.5">
+                  <div className="mt-2.5 pt-0">
+                    <div className="flex min-h-[80px] flex-col gap-2">
                       <div className="flex min-h-[28px] flex-wrap items-center justify-between gap-x-3 gap-y-2">
                         <StyleBadge
                           style={w.style}

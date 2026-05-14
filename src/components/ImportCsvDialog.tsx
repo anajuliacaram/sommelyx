@@ -2764,7 +2764,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         className={cn(
           "border-b border-[#EEE6DC] px-1.5 py-1.5 align-top transition-colors duration-150",
           stickyNameColumn && [
-            "sticky left-[6.5rem] z-10 shadow-[10px_0_20px_-22px_rgba(42,33,26,0.75)]",
+            "sticky left-[6.5rem] z-10 shadow-[10px_0_18px_-22px_rgba(42,33,26,0.45)]",
             selected ? "bg-[#FBF1F2]/95" : "bg-white/95 group-hover:bg-[#FFF9EF]/95",
           ],
         )}
@@ -2793,12 +2793,12 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const renderSpreadsheetTable = () => {
     return (
-      <div className="flex min-h-0 flex-1 overflow-hidden rounded-[22px] border border-[#E3D8CB] bg-[#FDFBF8] shadow-[0_18px_44px_rgba(54,36,22,0.075)]">
+      <div className="flex min-h-0 flex-1 overflow-hidden rounded-[22px] border border-[#E6DACE] bg-[rgba(255,252,248,0.82)] shadow-[0_16px_32px_-24px_rgba(54,36,22,0.22)]">
         <div className="h-full min-h-0 w-full overflow-auto scroll-smooth" ref={tableScrollRef}>
           <table className="w-full min-w-[1320px] border-separate border-spacing-0 text-left">
             <thead className="sticky top-0 z-20">
-              <tr className="bg-[#F7F1E8]/95 backdrop-blur-xl">
-                <th className="sticky left-0 z-30 w-12 border-b border-[#DDD0BF] bg-[#F7F1E8]/95 px-3 py-2 text-center backdrop-blur-xl">
+              <tr className="bg-[rgba(247,241,232,0.9)] backdrop-blur-xl">
+                <th className="sticky left-0 z-30 w-12 border-b border-[#E3D6C7] bg-[rgba(247,241,232,0.9)] px-3 py-2 text-center backdrop-blur-xl">
                   <input
                     type="checkbox"
                     checked={allRowsSelected}
@@ -2807,7 +2807,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     aria-label="Selecionar todos os vinhos"
                   />
                 </th>
-                <th className="sticky left-12 z-30 w-14 border-b border-[#DDD0BF] bg-[#F7F1E8]/95 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65] backdrop-blur-xl">
+                <th className="sticky left-12 z-30 w-14 border-b border-[#E3D6C7] bg-[rgba(247,241,232,0.9)] px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65] backdrop-blur-xl">
                   #
                 </th>
                 {visibleColumns.map((column) => (
@@ -2815,7 +2815,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     key={column.key}
                     className={cn(
                       "border-b border-[#DDD0BF] px-1.5 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65]",
-                      column.key === "name" && "sticky left-[6.5rem] z-30 min-w-[260px] bg-[#F7F1E8]/95 backdrop-blur-xl shadow-[10px_0_20px_-22px_rgba(42,33,26,0.75)]",
+                      column.key === "name" && "sticky left-[6.5rem] z-30 min-w-[260px] bg-[rgba(247,241,232,0.9)] backdrop-blur-xl shadow-[10px_0_18px_-22px_rgba(42,33,26,0.45)]",
                       column.key === "producer" && "min-w-[190px]",
                       column.key === "vintage" && "min-w-[100px]",
                       column.key === "country" && "min-w-[150px]",
@@ -2923,10 +2923,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           maxHeight: "90vh",
           height: "90vh",
           background:
-            "linear-gradient(135deg, rgba(246,241,235,0.98) 0%, rgba(239,231,221,0.98) 42%, rgba(232,222,210,0.98) 100%)",
+            "linear-gradient(135deg, rgba(248,244,238,0.98) 0%, rgba(241,234,225,0.98) 42%, rgba(234,226,214,0.98) 100%)",
           backdropFilter: "blur(18px) saturate(1.05)",
           WebkitBackdropFilter: "blur(18px) saturate(1.05)",
-          boxShadow: "0 30px 80px rgba(40,25,15,0.14)",
+          boxShadow: "0 28px 72px rgba(40,25,15,0.14)",
         }}
       >
         <AiModalShell>
@@ -2965,7 +2965,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             ) : null}
           </AiModalHeaderBar>
 
-          <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-3 sm:px-4">
+          <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-2.5 sm:px-4">
             {hasDraftRows ? (
               <div className="flex min-h-0 flex-1 flex-col gap-2.5">
                 {step === "importing" ? (
@@ -3002,7 +3002,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         placeholder="Buscar por vinho, produtor, uva, país, região ou safra"
-                        className="h-8 rounded-full border-white/70 bg-white/75 pl-8 pr-3 text-[12px] shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)] transition-all duration-150 placeholder:text-[#A99E91] hover:bg-white focus:border-[#B98C45]/30 focus:bg-white focus-visible:ring-[#B98C45]/20"
+                        className="h-9 rounded-[16px] border-white/75 bg-white/82 pl-8 pr-3 text-[12px] shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)] transition-all duration-150 placeholder:text-[#A99E91] hover:bg-white focus:border-[#B98C45]/30 focus:bg-white focus-visible:ring-[#B98C45]/20"
                       />
                     </div>
                     {[
@@ -3110,7 +3110,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </AiToolbarSurface>
 
                 {selectedRows.length > 0 ? (
-                  <AiToolbarSurface className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-[#E5D4D8] bg-white/70 text-[12px] text-[#4A4338] shadow-[0_10px_24px_rgba(123,30,43,0.055)]">
+                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-[#E5D4D8] text-[12px] text-[#4A4338]">
                     <span className="inline-flex items-center gap-2 font-semibold">
                       <span className="h-2 w-2 rounded-full bg-[#7B1E2B]" />
                       {selectedRows.length} linha(s) selecionada(s)
@@ -3126,7 +3126,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </AiToolbarSurface>
                 ) : null}
 
-                <AiToolbarSurface className="grid shrink-0 gap-2 bg-white/50 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
+                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
                   <Select value={bulkTargetField} onValueChange={(value) => setBulkTargetField(value as BulkTargetField)}>
                     <SelectTrigger className="h-8 rounded-lg border-white/70 bg-white/75 text-[12px] focus:ring-[#B98C45]/20">
                       <SelectValue placeholder="Campo" />
@@ -3329,7 +3329,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           </AiModalBody>
 
           {hasDraftRows ? (
-            <AiModalFooterBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <AiModalFooterBar className="z-30 flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5">
               <div className="flex flex-wrap items-center gap-2 text-[12px] font-medium text-[#5F5F5F]">
                 <AiMetricPill label="total" value={draftWines.length} />
                 <AiMetricPill label="visíveis" value={filteredRowIndexes.length} />
@@ -3351,7 +3351,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <AiModalActionButton
                   onClick={handleImport}
                   variant="primary"
-                  className="h-12 rounded-2xl px-6 text-[14px] font-semibold shadow-[0_16px_36px_rgba(123,30,43,0.20)] transition-all duration-150 hover:-translate-y-px hover:shadow-[0_20px_42px_rgba(123,30,43,0.24)] active:translate-y-0"
+                  className="h-11 rounded-[16px] px-6 text-[14px] font-semibold shadow-[0_14px_32px_rgba(123,30,43,0.18)] transition-all duration-150 hover:-translate-y-px hover:shadow-[0_18px_38px_rgba(123,30,43,0.22)] active:translate-y-0"
                   disabled={!canImport}
                 >
                   <Upload className="mr-1.5 h-4 w-4" /> Importar {identifiedRowsCount} linha(s)

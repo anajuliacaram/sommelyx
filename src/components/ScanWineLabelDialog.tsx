@@ -12,7 +12,7 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -533,7 +533,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
         className="w-full sm:max-w-md h-[90dvh] max-h-[90dvh] overflow-hidden p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
-        style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+        style={{ background: "rgba(250,247,242,0.78)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
       >
         <AiModalShell>
         <AiModalHeaderBar>
@@ -552,22 +552,22 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
-                <AiModalCard className="space-y-4">
+                <AiModalCard className="space-y-3.5">
                   <div className="flex flex-col items-center gap-4 text-center">
-                    <div className="w-16 h-16 rounded-2xl gradient-wine flex items-center justify-center shadow-[0_8px_24px_hsl(var(--wine)/0.2)]">
-                      <Camera className="h-7 w-7 text-primary-foreground" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-[20px] border border-[rgba(123,30,43,0.14)] bg-[linear-gradient(135deg,rgba(123,30,43,0.10)_0%,rgba(200,169,106,0.10)_100%)] shadow-[0_8px_20px_-14px_rgba(123,30,43,0.24)]">
+                      <Camera className="h-7 w-7 text-[#7B1E2B]" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-base font-semibold text-foreground">Fotografe o rótulo</h3>
-                      <p className="text-xs text-muted-foreground max-w-[260px]">
-                        Tire uma foto nítida do rótulo frontal da garrafa. Nossa inteligência vai extrair todas as informações automaticamente.
+                      <h3 className="text-[17px] font-semibold tracking-[-0.02em] text-[#1A1713]">Fotografe o rótulo</h3>
+                      <p className="max-w-[260px] text-[12.5px] leading-relaxed text-[rgba(58,51,39,0.62)]">
+                        Tire uma foto nítida do rótulo frontal da garrafa. A Sommelyx preenche os principais dados automaticamente.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 w-full">
+                  <div className="flex w-full flex-col gap-2.5">
                   <AiModalActionButton
                     variant="primary"
                     onClick={() => cameraInputRef.current?.click()}
@@ -586,9 +586,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   </AiModalActionButton>
                 </div>
 
-                  <p className="text-[10px] leading-relaxed text-muted-foreground text-center max-w-[260px] mx-auto">
-                    Use câmera ou fototeca para ler apenas a foto do rótulo.
-                  </p>
+                  <AiToolbarSurface className="px-3.5 py-3 text-center text-[11.5px] leading-relaxed text-[#6B6258] shadow-none">
+                    Use câmera ou fototeca para enviar apenas a foto do rótulo, sem a garrafa inteira quando possível.
+                  </AiToolbarSurface>
 
                   <input
                     ref={cameraInputRef}
@@ -664,10 +664,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   </AiModalCard>
                 )}
 
-                <AiModalActions>
-                  <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
-                    <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                    Reescanear
+                  <AiModalActions className="pt-1">
+                    <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
+                      <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                      Reescanear
                   </AiModalActionButton>
                   <AiModalActionButton variant="primary" onClick={handleConfirm} className="flex-1">
                     <Check className="h-4 w-4 mr-1.5" />
@@ -692,7 +692,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   warning={supportCode ? `Código do suporte / Request ID: ${supportCode}` : undefined}
                   toneClassName="bg-destructive/10 text-destructive ring-destructive/20"
                 />
-                <div className="flex flex-col gap-2 w-full">
+                <div className="flex w-full flex-col gap-2">
                 <AiModalActionButton
                   onClick={() => {
                     if (lastBase64) {

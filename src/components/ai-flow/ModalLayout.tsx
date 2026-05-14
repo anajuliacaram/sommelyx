@@ -23,11 +23,11 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 shrink-0 border-b border-white/45 px-4 py-4 sm:px-5 sm:py-4",
+        "sticky top-0 z-20 shrink-0 border-b border-white/50 px-4 py-3.5 sm:px-5 sm:py-4",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.62) 100%)",
+        background: "linear-gradient(180deg, rgba(250,247,242,0.84) 0%, rgba(250,247,242,0.72) 100%)",
         backdropFilter: "blur(16px) saturate(1.06)",
         WebkitBackdropFilter: "blur(16px) saturate(1.06)",
       }}
@@ -47,7 +47,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(18px+env(safe-area-inset-bottom))] pt-4 sm:px-5 sm:pb-[calc(20px+env(safe-area-inset-bottom))] sm:pt-4",
+        "min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3.5 sm:px-5 sm:pb-[calc(18px+env(safe-area-inset-bottom))] sm:pt-4",
         className,
       )}
     >
@@ -66,11 +66,11 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "sticky bottom-0 z-20 shrink-0 border-t border-white/45 px-4 py-3 sm:px-5 sm:py-3.5",
+        "sticky bottom-0 z-20 shrink-0 border-t border-white/50 px-4 py-2.5 sm:px-5 sm:py-3",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.74) 100%)",
+        background: "linear-gradient(180deg, rgba(250,247,242,0.72) 0%, rgba(250,247,242,0.84) 100%)",
         backdropFilter: "blur(16px) saturate(1.06)",
         WebkitBackdropFilter: "blur(16px) saturate(1.06)",
       }}
@@ -124,7 +124,7 @@ export function AiToolbarSurface({
   return (
     <div
       className={cn(
-        "rounded-[22px] border border-white/50 bg-white/60 px-3 py-2.5 shadow-[0_10px_26px_rgba(54,36,22,0.045)] backdrop-blur-xl",
+        "rounded-[20px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-3 py-2.5 shadow-[0_14px_28px_-24px_rgba(54,36,22,0.22)] backdrop-blur-xl",
         className,
       )}
     >
@@ -143,11 +143,11 @@ export function AiModalCard({
   return (
     <div
       className={cn(
-        "rounded-[24px] border px-5 py-5 shadow-[0_12px_30px_-24px_rgba(0,0,0,0.14)] sm:px-6 sm:py-6",
+        "rounded-[22px] border px-4 py-4 shadow-[0_16px_32px_-28px_rgba(0,0,0,0.18)] sm:px-5 sm:py-5",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(248,244,237,0.66) 100%)",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.76) 0%, rgba(248,244,237,0.68) 100%)",
         borderColor: "rgba(95,111,82,0.12)",
         backdropFilter: "blur(14px) saturate(1.06)",
         WebkitBackdropFilter: "blur(14px) saturate(1.06)",
@@ -213,7 +213,7 @@ export function AiModalActionButton({
     <Button
       {...props}
       className={cn(
-        "h-14 rounded-[18px] px-5 text-[15px] font-semibold tracking-[-0.01em] shadow-[0_10px_24px_-18px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_14px_28px_-18px_rgba(0,0,0,0.2)]",
+        "h-12 rounded-[16px] px-5 text-[14px] font-semibold tracking-[-0.01em] shadow-[0_12px_24px_-18px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_16px_28px_-18px_rgba(0,0,0,0.2)]",
         className,
       )}
     />

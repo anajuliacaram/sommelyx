@@ -8,13 +8,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { generateWinePairing, analyzeWineList, buildUserProfile, normalizePairingResponse, normalizeWineListResponse, type GeneratedWinePairing, type WineListAnalysis, type WineListItem, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
 import { ModalBase } from "@/components/ui/ModalBase";
+import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import { prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface } from "@/components/ai-flow/ModalLayout";
 import {
   SectionHeader,
   PairingLoadingState,
@@ -1050,14 +1051,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         normalized: normalizedScanResults,
       });
       return (
-        <div className="surface-clarity p-6 text-center space-y-2">
-          <p className="text-sm text-foreground/70 font-medium">
-            Não conseguimos interpretar completamente a carta
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Tente novamente ou envie outro arquivo.
-          </p>
-        </div>
+        <AiModalCard className="p-0">
+          <PremiumEmptyState
+            icon={Camera}
+            title="Não conseguimos interpretar completamente a carta"
+            description="Tente novamente ou envie outro arquivo."
+            primaryAction={{
+              label: "Enviar outra foto",
+              onClick: () => {
+                setScanResults(null);
+                setPreview(null);
+                setStep("photo");
+              },
+            }}
+            className="border-0 bg-transparent px-5 py-8 shadow-none lg:py-9"
+          />
+        </AiModalCard>
       );
     }
   };
@@ -1436,60 +1445,60 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </p>
 
                   {/* Search input */}
-                  <div className="relative">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={wineSearch}
-                      onChange={(e) => setWineSearch(e.target.value)}
-                      placeholder="Buscar vinho na sua adega..."
-                      className="flex h-12 w-full rounded-2xl border border-border/50 bg-background/60 pl-10 pr-4 py-2.5 text-[14px] font-medium text-foreground backdrop-blur-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-3 focus:ring-primary/[0.10] focus:border-primary/30 transition-all duration-200"
-                      autoFocus
-                    />
-                  </div>
+                  <AiToolbarSurface className="mt-2 space-y-3">
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
+                      <input
+                        type="text"
+                        value={wineSearch}
+                        onChange={(e) => setWineSearch(e.target.value)}
+                        placeholder="Buscar vinho na sua adega..."
+                        className="flex h-11 w-full rounded-[16px] border border-white/70 bg-white/82 px-4 py-2.5 pl-10 text-[13.5px] font-medium text-foreground shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)] transition-all duration-200 placeholder:text-muted-foreground/40 focus:border-primary/25 focus:outline-none focus:ring-2 focus:ring-primary/[0.08]"
+                        autoFocus
+                      />
+                    </div>
 
-                  {/* Sort controls */}
-                  <div className="flex items-center gap-1.5 mt-3">
-                    {sortOptions.map((opt) => {
-                      const Icon = opt.icon;
-                      const active = sortKey === opt.key;
-                      return (
-                        <button
-                          key={opt.key}
-                          onClick={() => setSortKey(opt.key)}
-                          className={cn(
-                            "flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
-                            active
-                              ? "bg-primary/10 text-primary border border-primary/20"
-                              : "bg-background/40 text-muted-foreground/60 border border-border/30 hover:bg-muted/30 hover:text-muted-foreground"
-                          )}
-                        >
-                          <Icon className="h-3 w-3" />
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {sortOptions.map((opt) => {
+                        const Icon = opt.icon;
+                        const active = sortKey === opt.key;
+                        return (
+                          <button
+                            key={opt.key}
+                            onClick={() => setSortKey(opt.key)}
+                            className={cn(
+                              "flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
+                              active
+                                ? "border-primary/20 bg-primary/10 text-primary"
+                                : "border-white/70 bg-white/60 text-muted-foreground/65 hover:bg-white hover:text-foreground/75",
+                            )}
+                          >
+                            <Icon className="h-3 w-3" />
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
 
-                  {/* Style filter chips (color-coded by wine type) */}
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    {styleFilterOptions.map((opt) => {
-                      const active = wineStyleFilter === opt.key;
-                      return (
-                        <button
-                          key={opt.key}
-                          onClick={() => setWineStyleFilter(opt.key)}
-                          className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] border transition-all duration-150",
-                            active ? `${opt.bgActive} ${opt.borderActive} ${opt.textActive} shadow-[0_1px_4px_-2px_rgba(0,0,0,0.08)]` : `${opt.bg} ${opt.border} ${opt.text} hover:-translate-y-[1px]`
-                          )}
-                        >
-                          <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {styleFilterOptions.map((opt) => {
+                        const active = wineStyleFilter === opt.key;
+                        return (
+                          <button
+                            key={opt.key}
+                            onClick={() => setWineStyleFilter(opt.key)}
+                            className={cn(
+                              "flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
+                              active ? `${opt.bgActive} ${opt.borderActive} ${opt.textActive}` : `${opt.bg} ${opt.border} ${opt.text} hover:-translate-y-[1px]`,
+                            )}
+                          >
+                            <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </AiToolbarSurface>
                 </div>
 
                 {/* Wine list */}
@@ -1545,39 +1554,37 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
                     {/* Empty state */}
                     {filtered.length === 0 && availableWines.length > 0 && (
-                      <div className="text-center py-10 space-y-2">
-                        <Search className="h-7 w-7 text-muted-foreground/30 mx-auto" />
-                        <p className="text-[13px] font-medium text-muted-foreground/70">
-                          Nenhum vinho encontrado na sua adega
-                        </p>
-                        <p className="text-[11px] text-muted-foreground/45">
-                          Tente outro nome, produtor, uva ou região
-                        </p>
-                      </div>
+                      <AiModalCard className="p-0">
+                        <PremiumEmptyState
+                          icon={Search}
+                          title="Nenhum vinho encontrado na sua adega"
+                          description="Tente outro nome, produtor, uva ou região."
+                          className="border-0 bg-transparent px-4 py-7 shadow-none lg:py-8"
+                        />
+                      </AiModalCard>
                     )}
 
                     {availableWines.length === 0 && (
-                      <div className="text-center py-10 space-y-2">
-                        <WineIcon className="h-7 w-7 text-muted-foreground/30 mx-auto" />
-                        <p className="text-[13px] font-medium text-muted-foreground/70">
-                          Você ainda não adicionou vinhos na sua adega
-                        </p>
-                        <p className="text-[11px] text-muted-foreground/45">
-                          Adicione sua primeira garrafa para usar a harmonização
-                        </p>
-                      </div>
+                      <AiModalCard className="p-0">
+                        <PremiumEmptyState
+                          icon={WineIcon}
+                          title="Você ainda não adicionou vinhos na sua adega"
+                          description="Adicione sua primeira garrafa para usar a harmonização."
+                          className="border-0 bg-transparent px-4 py-7 shadow-none lg:py-8"
+                        />
+                      </AiModalCard>
                     )}
                   </div>
                 </ScrollArea>
 
                 {/* Selected wine preview */}
                 {selectedWine && (
-                  <div className="rounded-xl bg-primary/[0.04] border border-primary/10 p-3 space-y-0.5">
+                  <AiToolbarSurface className="space-y-0.5">
                     <p className="text-[13px] font-semibold text-foreground">{selectedWine.name}</p>
                     <p className="text-[11px] text-muted-foreground">
                       {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
                     </p>
-                  </div>
+                  </AiToolbarSurface>
                 )}
 
                 <Button

@@ -537,14 +537,16 @@ export default function CommercialDashboard() {
             }}
           />
         ) : totalBottles === 0 && isFiltered ? (
-            <div className="glass-card p-8 sm:p-10 text-center space-y-3">
-            <Filter className="h-8 w-8 text-muted-foreground/30 mx-auto" />
-            <p className="text-[15px] font-semibold text-foreground/70">Nenhum vinho encontrado com esses filtros</p>
-            <p className="text-[13px] text-muted-foreground/50">Tente remover um filtro ou ajuste a seleção para ver mais resultados</p>
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="mt-2">
-              Limpar filtros
-            </Button>
-          </div>
+          <PremiumEmptyState
+            icon={Filter}
+            title="Nenhum vinho encontrado com esses filtros"
+            description="Tente remover um filtro ou ajustar a seleção para ver mais resultados."
+            primaryAction={{
+              label: "Limpar filtros",
+              onClick: clearFilters,
+            }}
+            className="px-6 py-10 lg:py-12"
+          />
         ) : (
           <>
           <div className="grid grid-cols-12 gap-4 md:gap-5">

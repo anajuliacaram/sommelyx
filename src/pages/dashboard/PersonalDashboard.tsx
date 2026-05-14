@@ -25,6 +25,7 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
+import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import {
   Chip,
   EditorialCard,
@@ -447,40 +448,25 @@ export default function PersonalDashboard() {
 
               {/* List */}
               {ready.length === 0 ? (
-                <div className="editorial-empty py-10 md:py-12">
-                  <div
-                    className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-                    style={{ background: "rgba(95,111,82,0.08)", color: "rgba(95,111,82,0.5)" }}
-                  >
-                    <GlassWater className="h-5 w-5" />
-                  </div>
-                  <p
-                    className="font-serif text-[16px] font-semibold"
-                    style={{
-                      fontFamily: "'Libre Baskerville', Georgia, serif",
-                      color: "rgba(58,51,39,0.7)",
-                    }}
-                  >
-                    {totalBottles === 0 ? "Você ainda não adicionou vinhos" : "Nenhum vinho encontrado"}
-                  </p>
-                  <p
-                    className="mx-auto mt-1.5 max-w-[320px] text-[12px]"
-                    style={{ color: "rgba(58,51,39,0.48)" }}
-                  >
-                    {totalBottles === 0
+                <PremiumEmptyState
+                  icon={GlassWater}
+                  title={totalBottles === 0 ? "Você ainda não adicionou vinhos" : "Nenhum vinho encontrado"}
+                  description={
+                    totalBottles === 0
                       ? "Comece adicionando sua primeira garrafa para acompanhar estoque, consumo e valor."
-                      : "Ajuste busca ou filtros para encontrar um vinho específico."}
-                  </p>
-                  {totalBottles === 0 && (
-                    <button
-                      type="button"
-                      className="editorial-btn-primary mx-auto mt-5"
-                      onClick={() => setAddOpen(true)}
-                    >
-                      <Plus className="h-4 w-4" /> Adicionar vinho
-                    </button>
-                  )}
-                </div>
+                      : "Ajuste a busca ou os filtros para encontrar um vinho específico."
+                  }
+                  primaryAction={
+                    totalBottles === 0
+                      ? {
+                          label: "Adicionar vinho",
+                          onClick: () => setAddOpen(true),
+                          icon: <Plus className="h-4 w-4" />,
+                        }
+                      : undefined
+                  }
+                  className="px-6 py-10 lg:py-12"
+                />
               ) : (
                 <div className="flex flex-col">
                   {ready.map((w) => {
@@ -573,7 +559,7 @@ export default function PersonalDashboard() {
           {/* Right column */}
           <aside className="col-span-12 flex flex-col gap-5 lg:col-span-4">
             <div>
-              <EditorialCard style={{ padding: "20px 22px" }}>
+              <EditorialCard style={{ padding: "18px 18px" }}>
                 <h3 className="editorial-h3">Último aberto</h3>
                 {lastOpened ? (
                   <>
@@ -607,7 +593,7 @@ export default function PersonalDashboard() {
             </div>
 
             <div>
-              <EditorialCard style={{ padding: "16px 18px" }}>
+              <EditorialCard style={{ padding: "18px 18px" }}>
                 <div className="mb-2.5 flex items-baseline justify-between">
                   <h3 className="editorial-h3">Consumo · 6 meses</h3>
                   <span
@@ -622,7 +608,7 @@ export default function PersonalDashboard() {
             </div>
 
             <div>
-              <EditorialCard style={{ padding: "20px 22px" }}>
+              <EditorialCard style={{ padding: "18px 18px" }}>
                 <h3 className="editorial-h3 mb-3">Alertas</h3>
                 <div className="flex flex-col gap-px">
                   {[
@@ -667,7 +653,7 @@ export default function PersonalDashboard() {
 
             {/* Quick actions */}
             <div>
-              <EditorialCard style={{ padding: "20px 22px" }}>
+              <EditorialCard style={{ padding: "18px 18px" }}>
                 <h3 className="editorial-h3 mb-3">Atalhos</h3>
                 <div className="flex flex-col gap-2">
                   <button

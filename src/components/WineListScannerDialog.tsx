@@ -10,7 +10,8 @@ import { useWines } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
-import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiFilterChip, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody } from "@/components/ai-flow/ModalLayout";
+import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiFilterChip, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface } from "@/components/ai-flow/ModalLayout";
 import {
   PairingLoadingState,
   PairingErrorState,
@@ -522,7 +523,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             </div>
           )}
 
-          <AiModalCard className="space-y-3">
+          <AiToolbarSurface className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <AiSectionLabel>
                 Refinar a leitura
@@ -537,7 +538,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               value={mealQuery}
               onChange={(e) => setMealQuery(e.target.value)}
               placeholder="O que você vai comer?"
-              className="rounded-[18px]"
+              className="h-10 rounded-[16px] border-white/70 bg-white/82 shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)]"
             />
             <div className="space-y-1.5">
               <AiSectionLabel>Corpo</AiSectionLabel>
@@ -576,39 +577,36 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 ))}
               </div>
             </div>
-          </AiModalCard>
+          </AiToolbarSurface>
 
           {safeResults.wines.length === 0 ? (
-            <AiModalCard className="text-center space-y-2">
-              <p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">
-                {safeResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
-              </p>
-              <p className="text-[13.5px] leading-7 text-[#6B6B6B]">
-                {safeResults.fallback
-                  ? "Tente novamente ou envie outro arquivo."
-                  : "Tente outra foto ou envie um arquivo mais nítido."}
-              </p>
-              <AiModalActions className="pt-2">
-                <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                  Tentar novamente
-                </AiModalActionButton>
-                <AiModalActionButton
-                  variant="secondary"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-1"
-                >
-                  <Upload className="h-3.5 w-3.5 mr-1.5" />
-                  Enviar outro arquivo
-                </AiModalActionButton>
-              </AiModalActions>
+            <AiModalCard className="p-0">
+              <PremiumEmptyState
+                icon={Search}
+                title={safeResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
+                description={
+                  safeResults.fallback
+                    ? "Tente novamente ou envie outro arquivo."
+                    : "Tente outra foto ou envie um arquivo mais nítido."
+                }
+                primaryAction={{
+                  label: "Tentar novamente",
+                  onClick: reset,
+                  icon: <RotateCcw className="h-3.5 w-3.5" />,
+                }}
+                secondaryAction={{
+                  label: "Enviar outro arquivo",
+                  onClick: () => fileInputRef.current?.click(),
+                }}
+                className="border-0 bg-transparent px-5 py-8 shadow-none lg:py-9"
+              />
             </AiModalCard>
           ) : (
             <>
               {refinedWines.length === 0 ? (
-                <div className="rounded-xl border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-3 text-[13px] font-medium text-[#6B6258]">
+                <AiToolbarSurface className="text-[13px] font-medium text-[#6B6258]">
                   Os dados foram importados, mas não puderam ser exibidos. Tente outra foto.
-                </div>
+                </AiToolbarSurface>
               ) : null}
 
               <div className="max-h-[52vh] overflow-y-auto pr-1 cellar-scroll">
@@ -644,24 +642,23 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         normalized: results ?? EMPTY_WINE_LIST_ANALYSIS,
       });
       return (
-        <div className="rounded-2xl border border-border/30 bg-background/55 px-5 py-5 text-center space-y-2">
-          <p className="text-[15px] font-semibold text-foreground">Não conseguimos interpretar completamente a carta</p>
-          <p className="text-[13px] text-muted-foreground">Tente novamente ou envie outro arquivo.</p>
-            <AiModalActions className="pt-2">
-              <AiModalActionButton variant="outline" onClick={reset} className="flex-1">
-                <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                Tentar novamente
-              </AiModalActionButton>
-            <AiModalActionButton
-              variant="secondary"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex-1"
-            >
-              <Upload className="h-3.5 w-3.5 mr-1.5" />
-              Enviar outro arquivo
-            </AiModalActionButton>
-          </AiModalActions>
-        </div>
+        <AiModalCard className="p-0">
+          <PremiumEmptyState
+            icon={Search}
+            title="Não conseguimos interpretar completamente a carta"
+            description="Tente novamente ou envie outro arquivo."
+            primaryAction={{
+              label: "Tentar novamente",
+              onClick: reset,
+              icon: <RotateCcw className="h-3.5 w-3.5" />,
+            }}
+            secondaryAction={{
+              label: "Enviar outro arquivo",
+              onClick: () => fileInputRef.current?.click(),
+            }}
+            className="border-0 bg-transparent px-5 py-8 shadow-none lg:py-9"
+          />
+        </AiModalCard>
       );
     }
   };
@@ -687,9 +684,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              className="space-y-4"
+              className="space-y-3.5"
             >
-              <AiModalCard className="space-y-4">
+              <AiModalCard className="space-y-3.5">
                 {/* Drag & drop zone */}
                 <div
                   onDragOver={(e) => {
@@ -708,7 +705,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   onClick={() => fileInputRef.current?.click()}
                   role="button"
                   tabIndex={0}
-                  className="group relative flex flex-col items-center justify-center gap-3 rounded-[20px] py-9 px-5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01]"
+                  className="group relative flex flex-col items-center justify-center gap-3 rounded-[20px] px-5 py-8 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01]"
                   style={{
                     background: "rgba(255,255,255,0.78)",
                     border: "1.5px dashed rgba(123,30,43,0.22)",
@@ -821,7 +818,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.35 }}
       className={cn(
-        "list-none overflow-hidden rounded-[24px] transition-all duration-250 hover:-translate-y-0.5 active:scale-[0.99]",
+        "list-none overflow-hidden rounded-[22px] transition-all duration-250 hover:-translate-y-0.5 active:scale-[0.99]",
         isSelected && "ring-1 ring-primary/25"
       )}
       style={{
@@ -830,18 +827,18 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
         WebkitBackdropFilter: "blur(14px) saturate(1.08)",
         border: isSelected ? `1px solid rgba(123,30,43,0.16)` : "1px solid rgba(95,111,82,0.12)",
         boxShadow: isSelected
-          ? "0 14px 30px -18px rgba(123,30,43,0.18), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.72)"
-          : "0 10px 24px -18px rgba(30,20,20,0.10), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.72)",
+          ? "0 16px 32px -22px rgba(123,30,43,0.18), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.72)"
+          : "0 12px 24px -20px rgba(30,20,20,0.12), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.72)",
       }}
     >
-      <button type="button" onClick={onChooseWine} className="w-full p-3.5 text-left sm:p-4">
+      <button type="button" onClick={onChooseWine} className="w-full p-3.5 text-left sm:p-[18px]">
         <div className="space-y-2.5">
           {tags.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.055)] px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]"
+                  className="rounded-full border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.055)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]"
                 >
                   {tag}
                 </span>
@@ -851,7 +848,7 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
 
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1 space-y-1">
-              <h4 className="text-[18px] font-semibold tracking-[-0.03em] leading-tight text-[#1A1713] sm:text-[20px]">
+              <h4 className="text-[17px] font-semibold leading-tight tracking-[-0.03em] text-[#1A1713] sm:text-[19px]">
                 {wine.name}
               </h4>
               {originLine ? (
@@ -860,25 +857,25 @@ function WineListCard({ wine, index, isTopPick, isBestValue, isSelected, onChoos
                 </p>
               ) : null}
               {summaryText ? (
-                <p className="text-[13.5px] leading-7 text-[#3F362F]">
+                <p className="text-[13px] leading-6 text-[#3F362F]">
                   {summaryText}
                 </p>
               ) : null}
             </div>
 
             {wine.price != null && (
-              <span className="shrink-0 rounded-full bg-white/65 px-2.5 py-1 text-[14px] font-semibold tracking-tight text-[#1A1713] ring-1 ring-black/5">
-                R$ {wine.price.toFixed(0)}
-              </span>
-            )}
+                <span className="shrink-0 rounded-full bg-white/65 px-2.5 py-1 text-[13px] font-semibold tracking-tight text-[#1A1713] ring-1 ring-black/5">
+                  R$ {wine.price.toFixed(0)}
+                </span>
+              )}
           </div>
 
           {whyText ? (
-            <div className="rounded-[18px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-3.5 py-3">
+            <div className="rounded-[18px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-3.5 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">
                 Por que escolher
               </p>
-              <p className="mt-1.5 text-[13px] leading-6 text-[#3F362F]">
+              <p className="mt-1.5 text-[12.5px] leading-6 text-[#3F362F]">
                 {whyText}
               </p>
             </div>

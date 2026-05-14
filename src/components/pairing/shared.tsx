@@ -250,7 +250,7 @@ export function PremiumResultCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={cn("list-none rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5", extraClass)}
+      className={cn("list-none overflow-hidden rounded-[22px] transition-all duration-200 hover:-translate-y-0.5", extraClass)}
       style={{
         background: isHighlighted
           ? "rgba(255,255,255,0.92)"
@@ -261,12 +261,12 @@ export function PremiumResultCard({
           ? "1px solid rgba(0,0,0,0.05)"
           : "1px solid rgba(0,0,0,0.05)",
         boxShadow: isHighlighted
-          ? "0 10px 34px -12px rgba(44,20,31,0.12), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)"
-          : "0 6px 22px -10px rgba(30,20,20,0.06), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.62)",
+          ? "0 14px 32px -20px rgba(44,20,31,0.16), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)"
+          : "0 10px 24px -18px rgba(30,20,20,0.10), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.62)",
       }}
     >
       {accentColor && <div className="h-[2px] w-full" style={{ background: accentColor }} />}
-      <div className="p-4 space-y-3">
+      <div className="space-y-3 p-4 sm:p-[18px]">
         {children}
       </div>
     </motion.li>
@@ -280,8 +280,8 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border/30 bg-white/55 px-4 py-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12">
+    <div className="flex items-center gap-3 rounded-[20px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-4 py-2.5 shadow-[0_14px_28px_-24px_rgba(54,36,22,0.2)]">
+      <div className="flex h-9 w-9 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12">
         <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
       </div>
       <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6B6B6B]">
@@ -304,7 +304,7 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-4 py-10"
+      className="flex flex-col items-center gap-4 py-8 sm:py-10"
     >
       <div
         className="relative flex h-20 w-20 items-center justify-center rounded-3xl"
@@ -340,10 +340,9 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center gap-4 py-10"
+      className="rounded-[22px] border border-[rgba(198,167,104,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-5 py-7 text-center shadow-[0_16px_32px_-28px_rgba(54,36,22,0.18)]"
     >
-      <div
-        className="flex h-16 w-16 items-center justify-center rounded-2xl"
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px]"
         style={{
           background: "linear-gradient(135deg, rgba(220,38,38,0.08) 0%, rgba(185,28,28,0.03) 100%)",
           border: "1px solid rgba(220,38,38,0.12)",
@@ -351,11 +350,11 @@ export function PairingErrorState({
       >
         <X className="h-7 w-7 text-destructive/60" />
       </div>
-      <div className="space-y-1.5 text-center">
+      <div className="mt-4 space-y-1.5">
         <p className="text-[16px] font-semibold text-[#1A1A1A]">Não conseguimos concluir a leitura</p>
         <p className="mx-auto max-w-[320px] text-[13px] leading-relaxed text-[#888]">{message}</p>
       </div>
-      <AiModalActions className="w-full max-w-[320px]">
+      <AiModalActions className="mx-auto mt-4 w-full max-w-[320px]">
         <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">
           <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
         </AiModalActionButton>
@@ -414,7 +413,7 @@ export function WineSuggestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group list-none overflow-hidden rounded-[24px] border border-border/30 bg-[rgba(255,255,255,0.78)] shadow-[0_12px_32px_-26px_rgba(0,0,0,0.16)] transition-all duration-200 hover:-translate-y-0.5",
+        "group list-none overflow-hidden rounded-[22px] border border-border/30 bg-[rgba(255,255,255,0.82)] shadow-[0_16px_32px_-28px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5",
         className,
       )}
       style={{
@@ -423,11 +422,11 @@ export function WineSuggestionCard({
       }}
     >
       <div className="h-[2px] w-full bg-gradient-to-r from-[#7B1E2B]/70 via-[#C8A96A]/55 to-transparent" />
-      <div className="space-y-4 p-5 sm:p-6">
+      <div className="space-y-3.5 p-[18px] sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">Sugestão {index + 1}</p>
-            <h4 className="mt-1 text-[19px] font-semibold tracking-[-0.02em] leading-tight text-[#1A1713] sm:text-[22px]">
+            <h4 className="mt-1 text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[20px]">
               {wineName}
             </h4>
             {style ? (
@@ -438,26 +437,26 @@ export function WineSuggestionCard({
           </div>
         </div>
 
-        <div className="rounded-[22px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-4 sm:p-4.5">
+        <div className="rounded-[20px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-3.5 sm:p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
             Por que este vinho
           </p>
-          <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
+          <p className="mt-2 text-[13px] leading-6 text-[#3F362F]">
             {reason}
           </p>
         </div>
 
-        <div className="rounded-[22px] border border-black/5 bg-[#FBFAF7] p-4 sm:p-4.5">
+        <div className="rounded-[20px] border border-black/5 bg-[#FBFAF7] p-3.5 sm:p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B6258]">
             Características-chave
           </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
             {[
               { label: "Acidez", value: structureMatch.acidity },
               { label: "Tanino", value: structureMatch.tannin },
               { label: "Corpo", value: structureMatch.body },
             ].map((item) => (
-              <div key={item.label} className="space-y-1 rounded-2xl border border-black/5 bg-white/65 px-3 py-3">
+              <div key={item.label} className="space-y-1 rounded-[18px] border border-black/5 bg-white/65 px-3 py-2.5">
                 <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{item.label}</p>
                 <p className="text-[13px] font-medium leading-6 text-[#2B231D]">{item.value}</p>
               </div>
@@ -466,7 +465,7 @@ export function WineSuggestionCard({
         </div>
 
         {decisionSupport ? (
-          <div className="space-y-2 rounded-[22px] border border-border/30 bg-background/45 p-4">
+          <div className="space-y-2 rounded-[20px] border border-border/30 bg-background/45 p-3.5">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
               Leitura sommelier
             </p>
