@@ -31,11 +31,11 @@ function AnimatedMetricCard({ metric, index }: { metric: SummaryMetric; index: n
 
   return (
     <article
-      className="surface-clarity motion-card-hover motion-enter p-4"
+      className="surface-clarity motion-card-hover motion-enter rounded-[22px] p-4"
       style={motionDelay(index, 110)}
     >
       <div className="flex items-start gap-1.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-copper/20 bg-copper/[0.08]">
+        <div className="premium-chip-surface flex h-8 w-8 shrink-0 items-center justify-center rounded-[14px] border-copper/15 bg-copper/[0.08]">
           <Icon className="h-4 w-4 text-copper" />
         </div>
         <div className="min-w-0 flex-1">
@@ -91,7 +91,7 @@ export function DashboardExecutiveSummary({
 
       <div className="relative grid gap-6 xl:grid-cols-[1.35fr_0.9fr] xl:items-start">
         <div className="space-y-5">
-          <div className="inline-flex items-center gap-2 rounded-md border border-copper/20 bg-copper/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-copper relative z-10">
+          <div className="premium-chip-surface inline-flex items-center gap-2 rounded-full border-copper/18 bg-copper/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-copper relative z-10">
             <Sparkles className="h-3 w-3" />
             {eyebrow}
           </div>
@@ -109,7 +109,7 @@ export function DashboardExecutiveSummary({
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="inline-flex items-center rounded-md border border-white/30 bg-white/62 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#6B6B6B] relative z-10 backdrop-blur-md shadow-[0_4px_12px_-10px_rgba(58,51,39,0.18)]"
+                className="premium-chip-surface inline-flex items-center rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#6B6B6B] relative z-10"
               >
                 {badge}
               </span>
@@ -145,7 +145,7 @@ export function DashboardExecutiveSummary({
                   Um painel claro para decidir rápido.
                 </h2>
               </div>
-              <div className="rounded-lg border border-copper/15 bg-copper/[0.08] px-3 py-2 text-right shadow-[0_4px_12px_-10px_rgba(58,51,39,0.18)]">
+              <div className="premium-chip-surface rounded-[16px] border-copper/15 bg-copper/[0.08] px-3 py-2 text-right shadow-[0_4px_12px_-10px_rgba(58,51,39,0.18)]">
                 <p className="text-[9px] uppercase tracking-[0.10em] text-copper/60">Atalho</p>
                 <p className="text-[11px] font-medium text-copper">{commandHint ?? "Ctrl/Cmd + K"}</p>
               </div>

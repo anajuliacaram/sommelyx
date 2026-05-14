@@ -596,7 +596,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 <AiModalActionButton
                   variant="secondary"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 border border-black/5 bg-[rgba(255,255,255,0.74)] text-[#4F463D] hover:bg-[rgba(255,255,255,0.92)] hover:text-[#1A1713]"
+                  className="flex-1"
                 >
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
                   Enviar outro arquivo
@@ -655,7 +655,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             <AiModalActionButton
               variant="secondary"
               onClick={() => fileInputRef.current?.click()}
-              className="flex-1 border border-black/5 bg-[rgba(255,255,255,0.74)] text-[#4F463D] hover:bg-[rgba(255,255,255,0.92)] hover:text-[#1A1713]"
+              className="flex-1"
             >
               <Upload className="h-3.5 w-3.5 mr-1.5" />
               Enviar outro arquivo

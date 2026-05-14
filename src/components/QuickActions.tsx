@@ -42,7 +42,7 @@ export const QuickActions = memo(function QuickActions({
   /* ── Stacked layout (sidebar — dark context) ── */
   return (
     <div
-      className="rounded-[20px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.64)] p-3.5 backdrop-blur-md shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.58)]"
+      className="premium-card-surface rounded-[22px] p-3.5"
     >
       <div className="space-y-2.5">
         {/* ── Primary ── */}
@@ -60,7 +60,7 @@ export const QuickActions = memo(function QuickActions({
           <Button
             variant="secondary"
             onClick={onRegisterConsumption}
-            className="group h-11 w-full rounded-[18px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] text-[14px] font-semibold text-neutral-900 gap-1.5 px-4 backdrop-blur-md transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-[rgba(255,255,255,0.86)] hover:border-[rgba(123,30,43,0.14)] hover:shadow-[0_12px_24px_-18px_rgba(58,51,39,0.14)] active:translate-y-[0.5px]"
+            className="group h-11 w-full rounded-[18px] gap-1.5 px-4 text-[14px] font-semibold text-neutral-900 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] active:translate-y-[0.5px]"
           >
             <Wine className="h-[15px] w-[15px] shrink-0 text-[#7B1E2B] transition-colors group-hover:text-[#8E2433]" />
             {isCommercial ? "Registrar venda" : "Registrar consumo"}
@@ -72,7 +72,7 @@ export const QuickActions = memo(function QuickActions({
           <Button
             variant="ghost"
             onClick={onHarmonize}
-            className="group h-10 w-full rounded-[18px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.68)] text-[13.5px] font-semibold text-neutral-900 gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-[rgba(255,255,255,0.84)] hover:border-[rgba(183,121,31,0.16)] hover:shadow-[0_10px_20px_-16px_rgba(58,51,39,0.12)] active:translate-y-[0.5px]"
+            className="group h-10 w-full rounded-[18px] gap-1.5 px-4 text-[13.5px] font-semibold tracking-[-0.01em] text-neutral-900 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] active:translate-y-[0.5px]"
           >
             <UtensilsCrossed className="h-[15px] w-[15px] shrink-0 text-[#B7791F] transition-colors group-hover:text-[#C98922]" />
             Harmonizar
@@ -82,7 +82,7 @@ export const QuickActions = memo(function QuickActions({
           <Button
             variant="ghost"
             onClick={onAnalyzeList}
-            className="group h-10 w-full rounded-[18px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.68)] text-[13.5px] font-semibold text-neutral-900 gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-[rgba(255,255,255,0.84)] hover:border-[rgba(155,93,229,0.16)] hover:shadow-[0_10px_20px_-16px_rgba(58,51,39,0.12)] active:translate-y-[0.5px]"
+            className="group h-10 w-full rounded-[18px] gap-1.5 px-4 text-[13.5px] font-semibold tracking-[-0.01em] text-neutral-900 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] active:translate-y-[0.5px]"
           >
             <Sparkles className="h-[15px] w-[15px] shrink-0 text-[#9B5DE5] transition-colors group-hover:text-[#A776EA]" />
             Analisar carta

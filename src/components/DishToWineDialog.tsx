@@ -1036,7 +1036,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               setPreview(null);
               setStep("photo");
             }}
-            className="w-full text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 hover:shadow-sm transition-all duration-200"
+            className="w-full text-muted-foreground hover:text-foreground"
           >
             Enviar outra foto
           </AiModalActionButton>

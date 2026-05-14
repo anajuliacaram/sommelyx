@@ -109,8 +109,8 @@ export default function PersonalCellarPage() {
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<Wine | null>(null);
   const controlBase =
-    "inline-flex h-9 sm:h-10 items-center rounded-[12px] sm:rounded-[14px] border px-2.5 sm:px-3 text-[11.5px] sm:text-[12.5px] font-medium tracking-[-0.01em] transition-all outline-none";
-  const controlSurface = "bg-[rgba(255,255,255,0.78)] border-[rgba(95,111,82,0.12)] text-[#1a1713] shadow-[0_1px_0_rgba(95,111,82,0.04)]";
+    "premium-control-surface inline-flex h-9 items-center rounded-[14px] border px-2.5 text-[11.5px] font-medium tracking-[-0.01em] transition-all outline-none sm:h-10 sm:px-3 sm:text-[12.5px]";
+  const controlSurface = "text-[#1a1713]";
   const controlMuted = "bg-[rgba(255,255,255,0.68)] border-[rgba(95,111,82,0.10)] text-[rgba(58,51,39,0.72)]";
   const sectionLabel = "text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(58,51,39,0.48)]";
 
@@ -225,7 +225,7 @@ export default function PersonalCellarPage() {
                 <span className="min-w-0 truncate">{sortLabel}</span>
               </div>
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+            <SelectContent>
               <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
               <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
               <SelectItem value="value">Ordenar: Mais caros</SelectItem>
@@ -244,7 +244,7 @@ export default function PersonalCellarPage() {
                 <span className="min-w-0 truncate">{countryLabel}</span>
               </div>
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+            <SelectContent>
               <SelectItem value="all">País</SelectItem>
               {countryOptions.filter((o) => o.key !== "all").map((option) => (
                 <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
@@ -390,7 +390,7 @@ export default function PersonalCellarPage() {
                           <span className="min-w-0 truncate">{sortLabel}</span>
                         </div>
                       </SelectTrigger>
-                      <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                      <SelectContent>
                         <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
                         <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
                         <SelectItem value="value">Ordenar: Mais caros</SelectItem>
@@ -409,7 +409,7 @@ export default function PersonalCellarPage() {
                           <span className="min-w-0 truncate">{countryLabel}</span>
                         </div>
                       </SelectTrigger>
-                      <SelectContent className="rounded-2xl border border-black/10 bg-white/98 shadow-[0_20px_48px_-28px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-md">
+                      <SelectContent>
                         <SelectItem value="all">País</SelectItem>
                         {countryOptions.filter((o) => o.key !== "all").map((option) => (
                           <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>

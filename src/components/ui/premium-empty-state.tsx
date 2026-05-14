@@ -36,27 +36,27 @@ export function PremiumEmptyState({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "editorial-hero flex flex-col items-center justify-center py-12 lg:py-16 px-6 text-center relative",
+                "premium-card-surface flex flex-col items-center justify-center overflow-hidden px-6 py-12 text-center relative lg:py-16",
                 className
             )}
         >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[280px] max-h-[280px] bg-gradient-to-br from-copper/[0.06] to-transparent blur-[60px] rounded-full pointer-events-none" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-full max-h-[280px] w-full max-w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-copper/[0.08] via-[#7B1E2B]/[0.05] to-transparent blur-[60px]" />
 
             <motion.div
                 animate={reducedMotion ? {} : { y: [-2, 2, -2] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="relative flex items-center justify-center w-14 h-14 mb-6"
+                className="relative mb-6 flex h-14 w-14 items-center justify-center"
             >
-                <div className="absolute inset-0 bg-copper/[0.08] rounded-full blur-lg pointer-events-none" />
-                <div className="relative z-10 w-11 h-11 rounded-lg bg-[hsl(0_0%_100%/0.08)] border border-[hsl(0_0%_100%/0.10)] flex items-center justify-center">
+                <div className="pointer-events-none absolute inset-0 rounded-full bg-copper/[0.12] blur-lg" />
+                <div className="premium-chip-surface relative z-10 flex h-11 w-11 items-center justify-center rounded-[16px] border-white/55 bg-white/74">
                     <Icon className="w-4.5 h-4.5 text-copper" strokeWidth={1.5} />
                 </div>
             </motion.div>
 
-            <h3 className="font-serif text-[20px] font-semibold text-[hsl(var(--cream-warm))] tracking-[-0.01em] mb-1.5 relative z-10">
+            <h3 className="relative z-10 mb-1.5 font-serif text-[20px] font-semibold tracking-[-0.02em] text-[#1A1713]">
                 {title}
             </h3>
-            <p className="text-[13px] text-[hsl(var(--cream-warm)/0.62)] max-w-[340px] leading-relaxed mb-6 relative z-10">
+            <p className="relative z-10 mb-6 max-w-[340px] text-[13px] leading-relaxed text-[rgba(58,51,39,0.66)]">
                 {description}
             </p>
 

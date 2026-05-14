@@ -579,7 +579,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   <AiModalActionButton
                     variant="secondary"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
+                    className="w-full"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Escolher da Fototeca
@@ -710,12 +710,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 <AiModalActionButton
                   onClick={() => fileInputRef.current?.click()}
                   variant="secondary"
-                  className="w-full border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md"
+                  className="w-full"
                 >
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
                   Usar outra foto
                 </AiModalActionButton>
-                  <AiModalActionButton onClick={() => handleClose(false)} variant="ghost" className="w-full border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.88)] backdrop-blur-md">
+                  <AiModalActionButton onClick={() => handleClose(false)} variant="ghost" className="w-full">
                     Cadastrar manualmente
                   </AiModalActionButton>
                 </div>

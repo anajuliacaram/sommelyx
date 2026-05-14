@@ -77,10 +77,10 @@ export function MultiSelectDropdown({
                     variant="outline"
                     size="sm"
                     className={cn(
-                        "h-9 px-3.5 rounded-full text-[12.5px] font-medium flex items-center gap-1.5 border transition-all duration-200 ease-out hover:-translate-y-px active:scale-[0.98]",
+                        "premium-chip-surface h-9 rounded-full border px-3.5 text-[12.5px] font-medium flex items-center gap-1.5 transition-all duration-200 ease-out hover:-translate-y-px active:scale-[0.98]",
                         hasSelection
-                            ? "bg-[rgba(123,30,43,0.07)] text-[#7B1E2B] border-[rgba(123,30,43,0.20)] hover:bg-[rgba(123,30,43,0.10)]"
-                            : "bg-[rgba(255,255,255,0.76)] text-[#3A3327] border-[rgba(95,111,82,0.12)] hover:bg-black/[0.03] hover:border-[rgba(95,111,82,0.18)]"
+                            ? "premium-chip-surface--active text-[#7B1E2B] hover:bg-[rgba(123,30,43,0.10)]"
+                            : "text-[#3A3327] hover:bg-black/[0.03] hover:border-[rgba(95,111,82,0.18)]"
                     )}
                 >
                     <span className="truncate max-w-[120px]">{triggerLabel}</span>
@@ -101,7 +101,7 @@ export function MultiSelectDropdown({
                 align="start"
                 avoidCollisions={false}
                 sideOffset={6}
-                className="w-[92vw] max-w-[280px] sm:w-[260px] p-2.5 rounded-[18px] bg-white/[0.88] backdrop-blur-2xl border border-black/5 shadow-[0_24px_56px_-28px_rgba(58,51,39,0.28)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1"
+                className="w-[92vw] max-w-[280px] rounded-[18px] p-2.5 sm:w-[260px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1"
             >
                 <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-1.5 px-0.5">

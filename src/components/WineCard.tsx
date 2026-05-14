@@ -96,7 +96,7 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
 
   return (
     <motion.article
-      className={cn("group flex h-full flex-col overflow-hidden rounded-[20px] sm:rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.88)] shadow-[0_10px_22px_-20px_rgba(44,20,31,0.16)] sm:shadow-[0_12px_28px_-24px_rgba(44,20,31,0.16)] hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-28px_rgba(44,20,31,0.18)]")}
+      className={cn("premium-card-surface premium-card-surface-hover group flex h-full flex-col overflow-hidden rounded-[20px] sm:rounded-[28px]")}
       style={{ transition: "all 0.25s ease" }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -199,7 +199,7 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
             variant="secondary"
             size="sm"
             onClick={() => onOpen(wine)}
-            className="h-7 sm:h-9 rounded-full border-black/10 bg-white/80 px-2.5 sm:px-4 text-[10px] sm:text-[12px] font-medium text-[#55505A] shadow-none hover:border-black/15 hover:bg-white"
+            className="h-7 rounded-full px-2.5 text-[10px] font-medium text-[#55505A] shadow-none sm:h-9 sm:px-4 sm:text-[12px]"
           >
             Abrir
           </Button>

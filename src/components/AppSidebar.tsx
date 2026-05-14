@@ -138,7 +138,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-10 rounded-[18px] border border-[rgba(255,255,255,0.42)] bg-[rgba(255,255,255,0.72)] text-[13.5px] font-semibold text-neutral-900 gap-1.5 px-4 tracking-[-0.01em] backdrop-blur-md transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-[rgba(255,255,255,0.86)] hover:border-[rgba(95,111,82,0.14)] hover:shadow-[0_10px_20px_-16px_rgba(58,51,39,0.14)] active:translate-y-[0.5px]"
+                  className="group w-full h-10 rounded-[18px] gap-1.5 px-4 text-[13.5px] font-semibold tracking-[-0.01em] text-neutral-900 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] active:translate-y-[0.5px]"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-[15px] w-[15px] shrink-0 text-[#B7791F] transition-colors group-hover:text-[#C98922]" />
