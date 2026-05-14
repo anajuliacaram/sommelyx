@@ -37,14 +37,14 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         // Premium clean editorial standard (estilo "Harmonização IA")
-        "fixed inset-0 z-50 flex items-end justify-center overflow-hidden p-0 sm:items-center sm:p-4",
+        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-3 sm:p-4",
         className,
       )}
       {...props}
     >
       <div
           className={cn(
-          "relative w-full max-w-[640px] max-h-[calc(100dvh-8px)] overflow-hidden rounded-t-[24px] border border-black/[0.04] bg-[#F4F1EC] p-4 shadow-[0_26px_64px_rgba(0,0,0,0.10)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=open]:duration-180 data-[state=closed]:duration-150 sm:max-h-[90vh] sm:rounded-[24px] sm:p-6",
+          "relative h-[92dvh] max-h-[92dvh] w-[94vw] max-w-[880px] overflow-hidden rounded-[20px] border border-black/[0.04] bg-[linear-gradient(180deg,rgba(246,240,232,0.98)_0%,rgba(241,232,221,0.98)_100%)] p-0 shadow-[0_22px_52px_rgba(38,24,18,0.12)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=open]:duration-180 data-[state=closed]:duration-150",
           "premium-modal-shell",
           className,
         )}

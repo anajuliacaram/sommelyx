@@ -40,6 +40,8 @@ import {
   AiModalHeaderBar,
   AiModalBody,
   AiModalSplitLayout,
+  AiUploadPanel,
+  AI_MODAL_FIELD_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
 } from "@/components/ai-flow/ModalLayout";
@@ -451,7 +453,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Buscar rótulo, produtor, região"
-              className="h-9 rounded-[12px] border-white/70 bg-white/80 pl-9 text-[12.5px] shadow-none"
+              className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-9")}
             />
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -464,7 +466,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   onClick={() => setFilterMode(pill.key)}
                   className={cn(
                     "h-8 rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors",
-                    active ? "bg-[#7B1E2B]/10 text-[#5A1528]" : "bg-white/50 text-[#62584F] hover:bg-white",
+                    active ? "bg-[#7B1E2B]/10 text-[#5A1528]" : "bg-[rgba(255,251,244,0.70)] text-[#62584F] hover:bg-[rgba(255,251,244,0.86)]",
                   )}
                 >
                   {pill.label}
@@ -554,7 +556,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         className="space-y-3"
                       >
                         <AiModalCard className="space-y-3">
-                          <div
+                          <AiUploadPanel
                             onDragOver={(event) => {
                               event.preventDefault();
                               event.currentTarget.dataset.dragging = "true";
@@ -569,36 +571,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                               if (file) handleFile(file);
                             }}
                             onClick={() => fileInputRef.current?.click()}
-                            role="button"
-                            tabIndex={0}
-                            className="group relative flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[14px] px-4 py-5 transition-all duration-200 hover:-translate-y-0.5 data-[dragging=true]:scale-[1.01] sm:py-6"
-                            style={{
-                              background: "rgba(255,255,255,0.78)",
-                              border: "1.5px dashed rgba(123,30,43,0.22)",
-                              backdropFilter: "blur(10px)",
-                              WebkitBackdropFilter: "blur(10px)",
-                              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
-                            }}
-                          >
-                            <div
-                              className="flex h-10 w-10 items-center justify-center rounded-[14px] transition-transform duration-200 group-hover:scale-105"
-                              style={{
-                                background: "linear-gradient(135deg, rgba(123,30,43,0.10) 0%, rgba(200,169,106,0.10) 100%)",
-                                border: "1px solid rgba(123,30,43,0.14)",
-                                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
-                              }}
-                            >
-                              <Camera className="h-5 w-5 text-[#7B1E2B]" strokeWidth={1.75} />
-                            </div>
-                            <div className="max-w-[320px] text-center">
-                              <p className="text-[17px] font-semibold tracking-[-0.02em] text-[#1A1713]">
-                                Fotografe ou envie a carta
-                              </p>
-                              <p className="mt-1 text-[12.5px] leading-5 text-[rgba(58,51,39,0.6)]">
-                                A leitura extrai rótulos, preços e contexto para decidir rápido.
-                              </p>
-                            </div>
-                          </div>
+                            icon={<Camera className="h-5 w-5" strokeWidth={1.75} />}
+                            title="Fotografe ou envie a carta"
+                            description="A leitura extrai rótulos, preços e contexto para decidir rápido."
+                          />
 
                           <div className="grid gap-2.5 sm:grid-cols-2">
                             <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="w-full">
@@ -722,7 +698,7 @@ function WineListCard({
           ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)]"
           : isFeatured
             ? "bg-[linear-gradient(180deg,rgba(255,252,247,0.88)_0%,rgba(248,242,234,0.82)_100%)]"
-            : "bg-[rgba(255,255,255,0.68)]",
+            : "bg-[rgba(255,251,244,0.66)]",
       )}
       style={{
         backdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
@@ -822,7 +798,7 @@ function ActionPill({
         "inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition-all duration-200",
         disabled
           ? "cursor-not-allowed bg-[rgba(255,255,255,0.28)] text-[#9A9086]"
-          : "bg-[rgba(255,255,255,0.34)] text-[#433A32] shadow-[inset_0_1px_0_rgba(255,255,255,0.54)] hover:bg-[rgba(255,255,255,0.54)] hover:-translate-y-[1px]",
+          : "bg-[rgba(255,251,244,0.50)] text-[#433A32] shadow-none hover:bg-[rgba(255,251,244,0.72)] hover:-translate-y-[1px]",
       )}
       disabled={disabled}
     >

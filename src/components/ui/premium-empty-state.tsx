@@ -2,7 +2,7 @@ import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 
 interface PremiumEmptyStateProps {
     icon: LucideIcon;
@@ -36,49 +36,46 @@ export function PremiumEmptyState({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "premium-card-surface flex flex-col items-center justify-center overflow-hidden px-6 py-12 text-center relative lg:py-16",
+                "relative flex flex-col items-center justify-center overflow-hidden rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-4 py-7 text-center lg:py-8",
                 className
             )}
         >
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-full max-h-[280px] w-full max-w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-copper/[0.08] via-[#7B1E2B]/[0.05] to-transparent blur-[60px]" />
-
             <motion.div
                 animate={reducedMotion ? {} : { y: [-2, 2, -2] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="relative mb-6 flex h-14 w-14 items-center justify-center"
+                className="relative mb-3 flex h-10 w-10 items-center justify-center"
             >
-                <div className="pointer-events-none absolute inset-0 rounded-full bg-copper/[0.12] blur-lg" />
-                <div className="premium-chip-surface relative z-10 flex h-11 w-11 items-center justify-center rounded-[16px] border-white/55 bg-white/74">
-                    <Icon className="w-4.5 h-4.5 text-copper" strokeWidth={1.5} />
+                <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)]">
+                    <Icon className="w-4.5 h-4.5 text-[#7B1E2B]" strokeWidth={1.5} />
                 </div>
             </motion.div>
 
-            <h3 className="relative z-10 mb-1.5 font-serif text-[20px] font-semibold tracking-[-0.02em] text-[#1A1713]">
+            <h3 className="relative z-10 mb-1 text-[15px] font-semibold tracking-[-0.01em] text-[#1A1713]">
                 {title}
             </h3>
-            <p className="relative z-10 mb-6 max-w-[340px] text-[13px] leading-relaxed text-[rgba(58,51,39,0.66)]">
+            <p className="relative z-10 mb-4 max-w-[340px] text-[12.5px] leading-5 text-[#6B6258]">
                 {description}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row">
                 {primaryAction && (
-                    <Button
+                    <AiModalActionButton
                         variant="primary"
                         onClick={primaryAction.onClick}
-                        size="lg"
+                        className="w-full sm:w-auto"
                     >
                         {primaryAction.icon && <span className="mr-2">{primaryAction.icon}</span>}
                         {primaryAction.label}
-                    </Button>
+                    </AiModalActionButton>
                 )}
                 {secondaryAction && (
-                    <Button
+                    <AiModalActionButton
                         variant="outline"
                         onClick={secondaryAction.onClick}
-                        size="lg"
+                        className="w-full sm:w-auto"
                     >
                         {secondaryAction.label}
-                    </Button>
+                    </AiModalActionButton>
                 )}
             </div>
         </motion.div>

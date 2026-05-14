@@ -22,7 +22,18 @@ import { normalizeWineData, normalizeWineSearchText, normalizeWineText } from "@
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
 import { getMeaningfulScanFields, isMeaningfulScanValue, normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
-import { AiModalActionButton, AiModalCard, AiModalHeader, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
+import {
+  AI_MODAL_SHEET_CONTENT_CLASSNAME,
+  AI_MODAL_SHEET_CONTENT_STYLE,
+  AiModalActionButton,
+  AiModalBody,
+  AiModalCard,
+  AiModalHeader,
+  AiModalHeaderBar,
+  AiModalShell,
+  AiModalSplitLayout,
+  AiSectionLabel,
+} from "@/components/ai-flow/ModalLayout";
 
 interface AddWineDialogProps {
   open: boolean;
@@ -1011,28 +1022,22 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className="w-full sm:max-w-xl overflow-y-auto rounded-[20px] p-0 border border-black/[0.04] shadow-[0_22px_52px_rgba(38,24,18,0.12)]"
-        style={{
-          background: "#FAF8F6",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-          height: "auto",
-          maxHeight: "92dvh",
-          top: "50%",
-          bottom: "auto",
-          transform: "translateY(-50%)",
-        }}
+        className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+        style={AI_MODAL_SHEET_CONTENT_STYLE}
       >
           <SheetTitle className="sr-only">{isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}</SheetTitle>
 
-          <div className="px-3.5 py-3.5 flex h-auto flex-col sm:px-4">
+          <AiModalShell>
+          <AiModalHeaderBar>
             <AiModalHeader
-              className="mb-3"
               icon={<Wine className="h-5 w-5 text-[#7B1E2B]" />}
               title={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
               description="Cadastre por rótulo, planilha ou manualmente."
             />
+          </AiModalHeaderBar>
 
+          <AiModalBody>
+          <AiModalSplitLayout>
             <AnimatePresence mode="wait">
               {success ? (
                 <motion.div
@@ -1064,7 +1069,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <Button
                       type="button"
                       variant="secondary"
-                      className="h-10 flex-1 rounded-[12px] bg-white/82 border border-black/5 shadow-none"
+                      className="h-10 flex-1 rounded-[12px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] shadow-none"
                       onClick={() => { reset(); onOpenChange(false); }}
                     >
                       Concluir
@@ -1084,7 +1089,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-2.5">
                   {/* Scan Label Card */}
                   <div
-                    className="group cursor-pointer rounded-[14px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setScanOpen(true)}
                   >
                     <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
@@ -1099,8 +1104,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
 
                   {labelImagePreview && (
-                    <div className="rounded-[14px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5">
-                      <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border border-[rgba(255,255,255,0.45)] bg-white/50">
+                    <div className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-2.5 flex items-center gap-2.5">
+                      <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.62)]">
                         <img
                           src={labelImagePreview}
                           alt="Foto do rótulo analisado"
@@ -1118,7 +1123,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                   {/* Import File Card */}
                   <div
-                    className="group cursor-pointer rounded-[14px] border border-black/5 bg-white/82 p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
+                    className="group cursor-pointer rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
                     onClick={() => setImportCsvOpen(true)}
                   >
                     <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
@@ -1198,7 +1203,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </AiModalCard>
 
                   {isCommercial ? (
-                    <div className="rounded-[14px] border border-black/5 bg-white/82 p-3">
+                    <div className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: '#6F7F5B' }}>
@@ -1417,7 +1422,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       loading={addWine.isPending}
                       loadingText="Salvando…"
                       variant="primary"
-                      className="h-11 w-full rounded-[14px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
+                      className="h-10 w-full rounded-[12px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
                     >
                       <Plus className="h-4 w-4" />
                       {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
@@ -1439,7 +1444,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                 </motion.form>
               )}
             </AnimatePresence>
-          </div>
+          </AiModalSplitLayout>
+          </AiModalBody>
+          </AiModalShell>
         </SheetContent>
       </Sheet>
 

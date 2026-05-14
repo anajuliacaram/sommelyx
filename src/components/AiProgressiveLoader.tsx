@@ -29,7 +29,7 @@ export function AiProgressiveLoader({ steps, interval = 2500, subtitle }: AiProg
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center gap-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-[rgba(123,30,43,0.07)] text-primary/70">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)] text-primary/70">
           <Wine className="h-4.5 w-4.5" />
         </div>
         <div className="min-h-[36px] min-w-0 flex flex-col justify-center">

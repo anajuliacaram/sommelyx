@@ -1,7 +1,12 @@
-import type { ButtonHTMLAttributes, ReactNode, CSSProperties } from "react";
+import type { ButtonHTMLAttributes, ReactNode, CSSProperties, DragEventHandler } from "react";
 import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+export const AI_MODAL_SURFACE = "#F6F0E8";
+export const AI_MODAL_INK = "#1A1713";
+export const AI_MODAL_MUTED = "#6B6258";
+export const AI_MODAL_ACCENT = "#7B1E2B";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
   "left-1/2 top-1/2 right-auto bottom-auto h-[92dvh] max-h-[92dvh] w-[94vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border-0 p-0 gap-0";
@@ -17,11 +22,26 @@ export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   maxHeight: "92dvh",
   height: "92dvh",
   background:
-    "linear-gradient(145deg, rgba(249,245,239,0.98) 0%, rgba(243,236,228,0.98) 48%, rgba(236,228,216,0.98) 100%)",
+    "linear-gradient(180deg, rgba(246,240,232,0.98) 0%, rgba(241,232,221,0.98) 100%)",
   backdropFilter: "blur(18px) saturate(1.06)",
   WebkitBackdropFilter: "blur(18px) saturate(1.06)",
   boxShadow: "0 22px 52px rgba(38,24,18,0.12)",
 };
+
+export const AI_MODAL_DIALOG_CONTENT_CLASSNAME =
+  "items-center overflow-hidden rounded-[20px] border border-black/[0.04] p-0 shadow-[0_22px_52px_rgba(38,24,18,0.12)] sm:max-w-[880px]";
+
+export const AI_MODAL_DIALOG_CONTENT_STYLE: CSSProperties = {
+  background: "linear-gradient(180deg, rgba(246,240,232,0.98) 0%, rgba(241,232,221,0.98) 100%)",
+  backdropFilter: "blur(18px) saturate(1.06)",
+  WebkitBackdropFilter: "blur(18px) saturate(1.06)",
+};
+
+export const AI_MODAL_FIELD_CLASSNAME =
+  "h-10 rounded-[12px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.74)] px-3 text-[13px] font-medium text-[#1A1713] shadow-none transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.18)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/12 focus-visible:ring-offset-0";
+
+export const AI_MODAL_TEXTAREA_CLASSNAME =
+  "min-h-[86px] rounded-[12px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.74)] px-3 py-2.5 text-[13px] font-medium text-[#1A1713] shadow-none transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.18)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/12 focus-visible:ring-offset-0";
 
 export function AiModalShell({
   children,
@@ -47,7 +67,7 @@ export function AiModalHeaderBar({
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(249,245,239,0.92) 0%, rgba(249,245,239,0.76) 100%)",
+        background: "linear-gradient(180deg, rgba(246,240,232,0.94) 0%, rgba(246,240,232,0.78) 100%)",
         backdropFilter: "blur(18px) saturate(1.08)",
         WebkitBackdropFilter: "blur(18px) saturate(1.08)",
       }}
@@ -90,7 +110,7 @@ export function AiModalFooterBar({
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(249,245,239,0.76) 0%, rgba(249,245,239,0.92) 100%)",
+        background: "linear-gradient(180deg, rgba(246,240,232,0.78) 0%, rgba(246,240,232,0.94) 100%)",
         backdropFilter: "blur(18px) saturate(1.08)",
         WebkitBackdropFilter: "blur(18px) saturate(1.08)",
       }}
@@ -115,7 +135,7 @@ export function AiModalHeader({
     <SheetHeader className={cn("mb-0 flex flex-col gap-2.5 pr-11 sm:pr-12", className)}>
       <div className="flex items-start gap-3">
         {icon ? (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] bg-[linear-gradient(135deg,rgba(123,30,43,0.10),rgba(200,169,106,0.08))] text-[#7B1E2B]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.08)] bg-[rgba(255,251,244,0.58)] text-[#7B1E2B]">
             {icon}
           </div>
         ) : null}
@@ -196,7 +216,7 @@ export function AiToolbarSurface({
   return (
     <div
       className={cn(
-        "rounded-[14px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.76)_0%,rgba(247,242,235,0.68)_100%)] px-3 py-2 backdrop-blur-xl",
+        "rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.62)] px-3 py-2 backdrop-blur-xl",
         className,
       )}
     >
@@ -219,8 +239,8 @@ export function AiModalCard({
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(248,244,237,0.72) 100%)",
-        borderColor: "rgba(95,111,82,0.12)",
+        background: "rgba(255,251,244,0.70)",
+        borderColor: "rgba(58,51,39,0.08)",
         backdropFilter: "blur(16px) saturate(1.08)",
         WebkitBackdropFilter: "blur(16px) saturate(1.08)",
       }}
@@ -231,7 +251,7 @@ export function AiModalCard({
 }
 
 const metricToneClasses = {
-  neutral: "border-white/60 bg-white/72 text-[#5F5F5F]",
+  neutral: "border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] text-[#5F5F5F]",
   success: "border-emerald-100 bg-emerald-50/90 text-emerald-700",
   warning: "border-amber-100 bg-amber-50/90 text-amber-700",
   danger: "border-rose-100 bg-rose-50/90 text-rose-700",
@@ -292,6 +312,59 @@ export function AiModalActionButton({
   );
 }
 
+export function AiUploadPanel({
+  icon,
+  title,
+  description,
+  onClick,
+  children,
+  className,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+}: {
+  icon: ReactNode;
+  title: string;
+  description?: string;
+  onClick?: () => void;
+  children?: ReactNode;
+  className?: string;
+  onDragOver?: DragEventHandler<HTMLDivElement>;
+  onDragLeave?: DragEventHandler<HTMLDivElement>;
+  onDrop?: DragEventHandler<HTMLDivElement>;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(event) => {
+        if (!onClick) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      className={cn(
+        "group flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[14px] border border-dashed border-[rgba(123,30,43,0.18)] bg-[rgba(255,251,244,0.62)] px-4 py-5 text-center transition-all duration-180 hover:-translate-y-px hover:bg-[rgba(255,251,244,0.78)] data-[dragging=true]:bg-[rgba(255,251,244,0.86)] sm:py-6",
+        className,
+      )}
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)] text-[#7B1E2B] transition-transform duration-180 group-hover:scale-105">
+        {icon}
+      </div>
+      <div className="max-w-[320px]">
+        <p className="text-[16.5px] font-semibold tracking-[-0.018em] text-[#1A1713]">{title}</p>
+        {description ? <p className="mt-1 text-[12.5px] leading-5 text-[#6B6258]">{description}</p> : null}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export function AiStatusCard({
   icon,
   title,
@@ -314,7 +387,7 @@ export function AiStatusCard({
       }}
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-[11px] bg-white/75 ring-1 ring-black/5">
+        <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-[11px] bg-[rgba(255,251,244,0.74)] ring-1 ring-black/5">
           {icon}
         </div>
         <div className="min-w-0">

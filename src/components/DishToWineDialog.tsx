@@ -16,7 +16,7 @@ import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
 import { buildPresentationStructureLine, cleanAiPresentationText } from "@/lib/ai-presentation";
-import { AiModalHeader, AiModalCard, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AI_MODAL_FIELD_CLASSNAME, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 import {
   PairingLoadingState,
   PairingErrorState,
@@ -1162,7 +1162,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                         if (error) setError(null);
                       }}
                       placeholder="Digite o prato ou ingrediente…"
-                      className="pl-9"
+                      className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-9")}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -1214,7 +1214,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSearch(d)}
-                          className="h-8 rounded-[12px] px-2.5 text-[10.5px] font-medium border border-border/50 bg-background/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary"
+                          className="h-8 rounded-[12px] px-2.5 text-[10.5px] font-medium border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] hover:bg-[rgba(255,251,244,0.86)] hover:border-primary/20 hover:text-primary"
                         >
                           {d}
                         </Button>
@@ -1351,7 +1351,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 {
                   key: "all",
                   label: "Todos",
-                  bg: "bg-background/40",
+                  bg: "bg-[rgba(255,251,244,0.62)]",
                   bgActive: "bg-foreground/[0.06]",
                   border: "border-border/30",
                   borderActive: "border-foreground/20",
@@ -1427,7 +1427,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                         value={wineSearch}
                         onChange={(e) => setWineSearch(e.target.value)}
                         placeholder="Buscar vinho na sua adega..."
-                        className="flex h-10 w-full rounded-[12px] border border-white/70 bg-white/82 px-3 py-2 pl-9 text-[13px] font-medium text-foreground shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)] transition-all duration-200 placeholder:text-muted-foreground/40 focus:border-primary/25 focus:outline-none focus:ring-2 focus:ring-primary/[0.08]"
+                        className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-9")}
                         autoFocus
                       />
                     </div>
@@ -1444,7 +1444,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                               "flex h-7 items-center gap-1 rounded-full border px-2.5 py-0 text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
                               active
                                 ? "border-primary/20 bg-primary/10 text-primary"
-                                : "border-white/70 bg-white/60 text-muted-foreground/65 hover:bg-white hover:text-foreground/75",
+                                : "border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] text-muted-foreground/65 hover:bg-[rgba(255,251,244,0.86)] hover:text-foreground/75",
                             )}
                           >
                             <Icon className="h-3 w-3" />
@@ -1489,7 +1489,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             "w-full cursor-pointer text-left rounded-[14px] p-2.5 transition-all duration-[160ms] ease-[cubic-bezier(0.22,1,0.36,1)] group",
                             isSelected
                               ? "bg-primary/[0.10] border border-primary/20 ring-1 ring-primary/10"
-                              : "bg-background/40 border border-border/25 hover:bg-muted/30 hover:border-border/40 hover:-translate-y-[1px] active:scale-[0.99]"
+                              : "bg-[rgba(255,251,244,0.62)] border border-[rgba(58,51,39,0.08)] hover:bg-[rgba(255,251,244,0.82)] hover:-translate-y-[1px] active:scale-[0.99]"
                           )}
                         >
                           <div className="flex items-center gap-2.5">
@@ -1564,7 +1564,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <Button
                   onClick={handleSearchWinePairings}
                   disabled={!selectedWineId || loading}
-                  className="w-full h-11 text-[13px] font-medium"
+                  className="h-10 w-full rounded-[12px] text-[13px] font-medium"
                 >
                   {loading ? (
                     <>
@@ -1605,7 +1605,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       value={extWineName}
                       onChange={(e) => setExtWineName(e.target.value)}
                       placeholder="Nome do vinho no rótulo…"
-                      className="h-10 rounded-[12px] pl-9 text-[13px]"
+                      className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-9")}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && extWineName.trim()) {
                           e.preventDefault();
@@ -1637,7 +1637,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3 sm:space-y-3.5"
               >
-                <div className="rounded-[12px] bg-primary/[0.04] border border-primary/10 p-2.5">
+                <div className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.62)] p-2.5">
                   <p className="text-[12px] font-medium text-foreground">
                     Vinho: <span className="font-semibold">{extWineName}</span>
                   </p>
@@ -1717,7 +1717,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3 sm:space-y-3.5"
               >
-                <div className="rounded-[12px] bg-primary/[0.04] border border-primary/10 p-2.5">
+                <div className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.62)] p-2.5">
                   <p className="text-[12px] font-medium text-foreground">
                     Prato: <span className="font-semibold">{dish}</span>
                   </p>
@@ -1822,7 +1822,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     setPreview(null);
                     setStep(step === "wine-results" ? "select-wine" : step === "ext-menu-results" ? "ext-menu-photo" : "dish");
                   }}
-                  className="w-full text-muted-foreground hover:text-foreground border border-border/30 bg-background/40 backdrop-blur-sm hover:bg-background/60 transition-all duration-200"
+                  className="w-full text-muted-foreground hover:text-foreground border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.62)] backdrop-blur-sm hover:bg-[rgba(255,251,244,0.82)] transition-all duration-200"
                 >
                   {step === "wine-results"
                     ? "Escolher outro vinho"

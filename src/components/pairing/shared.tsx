@@ -167,7 +167,7 @@ export function FallbackAnalysisNotice({
 
   return (
     <div
-      className={cn("rounded-[14px] border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.08)] p-3", className)}
+      className={cn("rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-3", className)}
       role="status"
       aria-live="polite"
     >
@@ -281,8 +281,8 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-2.5 rounded-[14px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(247,242,235,0.70)_100%)] px-3 py-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#7B1E2B]/12 to-[#C8A96A]/12">
+    <div className="flex items-center gap-2.5 rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-3 py-2">
+      <div className="flex h-8 w-8 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)]">
         <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
       </div>
       <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6B6B6B]">
@@ -305,7 +305,7 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[14px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.72)_100%)] p-3"
+      className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-3"
     >
       <div className="space-y-2.5">
           {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
@@ -333,7 +333,7 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[14px] border border-[rgba(198,167,104,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(247,242,235,0.74)_100%)] px-4 py-4 text-center"
+      className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-4 py-4 text-center"
     >
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-[13px]"
         style={{
@@ -486,10 +486,10 @@ export function PairingSheetHero({
           compact ? "h-10 w-10" : "h-11 w-11",
         )}
         style={{
-          background: "rgba(255,255,255,0.6)",
+          background: "rgba(255,251,244,0.70)",
           backdropFilter: "blur(14px) saturate(1.1)",
           WebkitBackdropFilter: "blur(14px) saturate(1.1)",
-          border: "1px solid rgba(255,255,255,0.55)",
+          border: "1px solid rgba(58,51,39,0.08)",
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
         }}
       >
@@ -552,8 +552,8 @@ export function PremiumChoiceCard({
       whileTap={{ scale: 0.985 }}
       className="group w-full rounded-[14px] p-3 text-left transition-all duration-200"
       style={{
-        background: selected ? "rgba(123,30,43,0.05)" : "rgba(255,255,255,0.92)",
-        border: `1px solid ${selected ? accentColor : "rgba(0,0,0,0.06)"}`,
+        background: selected ? "rgba(123,30,43,0.06)" : "rgba(255,251,244,0.70)",
+        border: `1px solid ${selected ? accentColor : "rgba(58,51,39,0.08)"}`,
         boxShadow: selected
           ? `0 6px 18px -16px ${accentColor}33, inset 0 1px 0 rgba(255,255,255,0.7)`
           : "inset 0 1px 0 rgba(255,255,255,0.7)",

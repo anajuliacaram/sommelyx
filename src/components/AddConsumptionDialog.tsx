@@ -10,7 +10,17 @@ import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star, Search } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
-import { AiModalActionButton, AiModalCard, AiSectionLabel, AiModalSplitLayout } from "@/components/ai-flow/ModalLayout";
+import {
+  AI_MODAL_DIALOG_CONTENT_CLASSNAME,
+  AI_MODAL_DIALOG_CONTENT_STYLE,
+  AI_MODAL_FIELD_CLASSNAME,
+  AI_MODAL_SURFACE,
+  AI_MODAL_TEXTAREA_CLASSNAME,
+  AiModalActionButton,
+  AiModalCard,
+  AiSectionLabel,
+  AiModalSplitLayout,
+} from "@/components/ai-flow/ModalLayout";
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
 
@@ -67,8 +77,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [wineSearch, setWineSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<WineTypeFilter>("all");
   const [showWinePicker, setShowWinePicker] = useState(false);
-  const fieldClassName =
-    "h-10 rounded-[12px] border border-black/5 bg-white/78 px-3 text-[13px] text-[#1F1F1F] shadow-none transition-all duration-200 placeholder:text-[#8C8579] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/16 focus-visible:ring-offset-0";
+  const fieldClassName = AI_MODAL_FIELD_CLASSNAME;
   const selectionCardClassName =
     "flex min-h-[74px] flex-col justify-between rounded-[14px] border px-3 py-2.5 text-left shadow-none transition-all duration-200 hover:-translate-y-px";
 
@@ -197,7 +206,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
       <DialogContent
-        className="items-center overflow-hidden rounded-[20px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_22px_52px_rgba(38,24,18,0.12)] sm:max-w-[880px]"
+        className={AI_MODAL_DIALOG_CONTENT_CLASSNAME}
+        style={AI_MODAL_DIALOG_CONTENT_STYLE}
         aria-label="Registrar consumo"
       >
         <div
@@ -206,7 +216,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
         >
           <DialogHeader className="mb-3 text-left">
             <div className="flex items-start gap-3 pr-10">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] bg-[linear-gradient(135deg,rgba(123,30,43,0.10),rgba(200,169,106,0.08))] text-[#7B1E2B]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.08)] bg-[rgba(255,251,244,0.58)] text-[#7B1E2B]">
                 <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0 flex-1">
@@ -234,7 +244,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                       selectionCardClassName,
                       source === "cellar"
                         ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)]"
-                        : "border-black/5 bg-white/80 hover:bg-white/90",
+                        : "border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] hover:bg-[rgba(255,251,244,0.86)]",
                     )}
                     onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
                   >
@@ -254,7 +264,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                       selectionCardClassName,
                       source === "external"
                         ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.06)]"
-                        : "border-black/5 bg-white/80 hover:bg-white/90",
+                        : "border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] hover:bg-[rgba(255,251,244,0.86)]",
                     )}
                     onClick={() => {
                       setSource("external");
@@ -311,7 +321,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                             "h-7 shrink-0 rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition-all duration-200",
                             active
                               ? "border border-[rgba(123,30,43,0.14)] bg-[rgba(123,30,43,0.10)] text-[#5A1528]"
-                              : "border border-black/5 bg-white/72 text-[#5F5F5F] hover:bg-white/92 hover:text-[#1A1713]",
+                              : "border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] text-[#5F5F5F] hover:bg-[rgba(255,251,244,0.86)] hover:text-[#1A1713]",
                           )}
                         >
                           {f.label}
@@ -321,7 +331,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   </div>
 
                   <div
-                    className="cellar-scroll max-h-[260px] divide-y divide-black/5 overflow-y-auto rounded-[14px] border border-black/5 bg-white/78 pr-1 shadow-none"
+                    className="cellar-scroll max-h-[260px] divide-y divide-black/5 overflow-y-auto rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] pr-1 shadow-none"
                     style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
                   >
                     {filteredWines.length > 4 ? (
@@ -343,7 +353,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                             type="button"
                             onClick={() => handleSelectWine(w.id)}
                             className={cn(
-                              "flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-150 hover:bg-white/60 active:scale-[0.99]",
+                              "flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-150 hover:bg-[rgba(255,251,244,0.82)] active:scale-[0.99]",
                               selected ? "border-l-2 border-[#7B1E2B]/25 bg-[rgba(123,30,43,0.05)]" : "",
                             )}
                           >
@@ -378,7 +388,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-8 rounded-full border border-black/5 bg-white/75 px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#7B1E2B] shadow-none hover:bg-white"
+                      className="h-8 rounded-full border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#7B1E2B] shadow-none hover:bg-[rgba(255,251,244,0.86)]"
                       onClick={() => setShowWinePicker(true)}
                     >
                       Trocar
@@ -475,7 +485,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                           "h-8 rounded-[10px] border px-1 text-[10.5px] font-semibold transition-all duration-200",
                           rating === opt.value
                             ? "border-[#7B1E2B] bg-[#7B1E2B] text-white shadow-none"
-                            : "border-black/5 bg-white/78 text-[#4A4338] shadow-none hover:bg-white",
+                            : "border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] text-[#4A4338] shadow-none hover:bg-[rgba(255,251,244,0.86)]",
                         )}
                         onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
                       >
@@ -488,7 +498,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 <div className="space-y-1">
                   <Label className="text-[12px] font-semibold text-[#4A4338]">Notas de degustação</Label>
                   <Textarea
-                    className="min-h-[86px] rounded-[12px] border border-black/5 bg-white/78 px-3 py-2.5 text-[13px] text-[#1F1F1F] shadow-none placeholder:text-[#8C8579] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/16 focus-visible:ring-offset-0"
+                    className={AI_MODAL_TEXTAREA_CLASSNAME}
                     value={tastingNotes}
                     onChange={(e) => setTastingNotes(e.target.value)}
                     placeholder="Aromas, textura, equilíbrio, final."
@@ -499,12 +509,12 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
             </div>
             </AiModalSplitLayout>
 
-            <div className="mt-2.5 border-t border-black/5 bg-[#FAF8F6]/96 pt-2.5 backdrop-blur-md">
+            <div className="mt-2.5 border-t border-black/5 pt-2.5 backdrop-blur-md" style={{ backgroundColor: `${AI_MODAL_SURFACE}F5` }}>
               <AiModalActionButton
                 onClick={handleSubmit}
                 disabled={addConsumption.isPending}
                 variant="primary"
-                className="h-11 w-full rounded-[14px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
+                className="h-10 w-full rounded-[12px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
               >
                 {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
               </AiModalActionButton>

@@ -12,7 +12,7 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
-import { AiModalHeader, AiModalCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalSplitLayout, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalSplitLayout, AiUploadPanel, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -523,19 +523,12 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 className="space-y-3"
               >
                 <AiModalCard className="space-y-3">
-                  <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_200px] lg:items-center">
-                    <div className="space-y-2.5">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.07)]">
-                      <Camera className="h-5 w-5 text-[#7B1E2B]" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-[17px] font-semibold tracking-[-0.018em] text-[#1A1713]">Fotografe o rótulo</h3>
-                      <p className="max-w-[34rem] text-[12.5px] leading-5 text-[rgba(58,51,39,0.62)]">
-                        Se algum dado não estiver legível, ele ficará em branco.
-                      </p>
-                    </div>
-                  </div>
-                  </div>
+                  <AiUploadPanel
+                    icon={<Camera className="h-5 w-5" />}
+                    title="Fotografe o rótulo"
+                    description="Se algum dado não estiver legível, ele ficará em branco."
+                    onClick={() => cameraInputRef.current?.click()}
+                  />
 
                   <div className="grid w-full gap-2.5 sm:grid-cols-2">
                   <AiModalActionButton
