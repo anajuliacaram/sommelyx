@@ -1180,7 +1180,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       }}
                       placeholder="Digite o prato ou ingrediente…"
                       className="pl-9"
-                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSearch();
+                        }
+                      }}
                       autoFocus
                     />
                   </div>
@@ -1295,11 +1300,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 )}
 
-                {error && lastWineListAttachment && (
+                {error && !loading && (
                   <PairingErrorState
                     message={error}
-                    onRetry={runRetry}
-                    onClose={() => setStep("photo")}
+                    onRetry={() => handleSearchCellar(intent)}
+                    onClose={() => setError(null)}
                   />
                 )}
               </motion.div>
@@ -1620,7 +1625,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       onChange={(e) => setExtWineName(e.target.value)}
                       placeholder="Nome do vinho (ex: Malbec Catena Zapata)…"
                       className="pl-9 h-11 text-sm"
-                      onKeyDown={(e) => e.key === "Enter" && extWineName.trim() && setStep("ext-menu-photo")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && extWineName.trim()) {
+                          e.preventDefault();
+                          setStep("ext-menu-photo");
+                        }
+                      }}
                       autoFocus
                     />
                   </div>

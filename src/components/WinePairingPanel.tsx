@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Sparkles, BookOpen } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
@@ -35,13 +35,18 @@ export function WinePairingPanel({
   const [pairingResult, setPairingResult] = useState<GeneratedWinePairing | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestSeqRef = useRef(0);
 
   const handleFetch = async () => {
+    const requestSeq = requestSeqRef.current + 1;
+    requestSeqRef.current = requestSeq;
     setLoading(true);
     setError(null);
     setPairingResult(null);
     try {
-      const result = await generateWinePairing({
+      const requestId = crypto.randomUUID();
+      console.info("[WINE_PAIRING_PANEL_START]", {
+        requestId,
         wineName,
         wineStyle,
         wineGrape,
@@ -49,19 +54,41 @@ export function WinePairingPanel({
         wineProducer,
         wineVintage,
       });
+      const result = await generateWinePairing({
+        wineName,
+        wineStyle,
+        wineGrape,
+        wineRegion,
+        wineProducer,
+        wineVintage,
+        requestId,
+      });
+      if (requestSeq !== requestSeqRef.current) return;
       setPairingResult(result);
       notifySuccess("Harmonização pronta", {
         description: `${Math.min(result.pairings.length, 5)} sugestões pensadas para acidez, corpo e taninos.`,
         duration: 2800,
       });
+      console.info("[WINE_PAIRING_PANEL_SUCCESS]", {
+        requestId,
+        pairings: result.pairings.length,
+        fallback: Boolean(result.fallback),
+      });
     } catch (err: any) {
+      if (requestSeq !== requestSeqRef.current) return;
+      console.error("[WINE_PAIRING_PANEL_FAILED]", {
+        error: err?.message,
+        code: err?.code,
+        status: err?.status,
+        requestId: err?.requestId,
+      });
       setError(err.message || "Não conseguimos concluir a análise agora.");
     } finally {
-      setLoading(false);
+      if (requestSeq === requestSeqRef.current) setLoading(false);
     }
   };
 
-  if (!pairingResult && !loading) {
+  if (!pairingResult && !loading && !error) {
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-1.5">

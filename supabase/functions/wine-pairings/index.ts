@@ -812,7 +812,13 @@ INSTRUÇÕES:
 8. Para cada sugestão, inclua decision_support com sensory_profile, pairing_logic, when_to_choose e confidence_explanation em linguagem de sommelier`;
     } else {
       await logToDb(supabaseUrl, serviceKey, userId, "wine-pairings", 400, "validation_error", Date.now() - startTime, { mode });
-      return jsonResponse(req, { error: "Mode inválido" }, 400);
+      return jsonResponse(req, {
+        success: false,
+        code: "INVALID_REQUEST",
+        message: "Modo de harmonização inválido.",
+        requestId,
+        retryable: false,
+      }, 400);
     }
 
     const tools = mode === "wine-to-food" ? [
@@ -1040,8 +1046,20 @@ INSTRUÇÕES:
       });
 
       if (!result.ok) {
-        if (result.status === 429) return jsonResponse(req, { error: "Muitas requisições. Aguarde um momento e tente novamente." }, 429);
-        if (result.status === 402) return jsonResponse(req, { error: "Créditos de IA esgotados." }, 402);
+        if (result.status === 429) return jsonResponse(req, {
+          success: false,
+          code: "AI_RATE_LIMIT",
+          message: "Muitas requisições. Aguarde um momento e tente novamente.",
+          requestId,
+          retryable: true,
+        }, 429);
+        if (result.status === 402) return jsonResponse(req, {
+          success: false,
+          code: "AI_UNAVAILABLE",
+          message: "Não conseguimos completar a análise agora. Tente novamente em instantes.",
+          requestId,
+          retryable: true,
+        }, 402);
         if (result.status === 422) {
           console.warn("[wine-pairings] AI returned 422; falling back to degraded response", {
             request_id: requestId,
@@ -1052,9 +1070,21 @@ INSTRUÇÕES:
           validationResult = { passed: false, failures: ["INVALID_AI_RESPONSE"] };
           break;
         }
-        if (result.status === 504) return jsonResponse(req, { error: "A harmonização demorou mais que o esperado. Tente novamente." }, 504);
+        if (result.status === 504) return jsonResponse(req, {
+          success: false,
+          code: "AI_TIMEOUT",
+          message: "A harmonização demorou mais que o esperado. Tente novamente.",
+          requestId,
+          retryable: true,
+        }, 504);
         console.error("AI gateway error:", result.status, result.errText);
-        return jsonResponse(req, { error: result.errText || "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente." }, 500);
+        return jsonResponse(req, {
+          success: false,
+          code: "AI_UNAVAILABLE",
+          message: "Serviço de análise instável agora. Aguarde alguns segundos e tente novamente.",
+          requestId,
+          retryable: true,
+        }, 500);
       }
 
       if (!result.parsed) {
