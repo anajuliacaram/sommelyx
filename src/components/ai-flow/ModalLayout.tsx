@@ -311,7 +311,7 @@ export function AiModalActionButton({
     <Button
       {...props}
       className={cn(
-        "h-10 rounded-[12px] px-3.5 text-[12.5px] font-semibold tracking-[-0.005em] shadow-none transition-all duration-200 hover:-translate-y-px",
+        "h-10 rounded-[12px] px-3.5 text-[12.5px] font-semibold tracking-[-0.005em] shadow-none transition-colors duration-200",
         className,
       )}
     />
@@ -355,7 +355,7 @@ export function AiUploadPanel({
         }
       }}
       className={cn(
-        "group flex cursor-pointer items-center justify-start gap-3 rounded-[14px] border border-dashed border-[rgba(123,30,43,0.14)] bg-transparent px-3 py-3 text-left shadow-none transition-all duration-180 hover:bg-[rgba(255,251,244,0.42)] data-[dragging=true]:bg-[rgba(255,251,244,0.50)]",
+        "group flex cursor-pointer items-center justify-start gap-3 rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-transparent px-3 py-3 text-left shadow-none transition-colors duration-180 hover:bg-[rgba(255,251,244,0.42)] data-[dragging=true]:bg-[rgba(255,251,244,0.50)]",
         className,
       )}
     >

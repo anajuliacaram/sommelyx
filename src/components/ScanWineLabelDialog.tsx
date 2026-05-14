@@ -523,7 +523,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           <AiModalHeader
             icon={<Camera className="h-5 w-5" />}
             title="Escanear Rótulo"
-            description="Leia apenas o que estiver claro no rótulo."
+            description="Use somente dados legíveis."
           />
         </AiModalHeaderBar>
 
@@ -538,15 +538,15 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 exit={{ opacity: 0 }}
               className="space-y-3"
               >
-                <AiModalCard className="space-y-3">
+                <AiModalCard className="space-y-2.5 border-y border-x-0">
                   <AiUploadPanel
                     icon={<Camera className="h-5 w-5" />}
-                    title="Fotografe o rótulo"
-                    description="Se algum dado não estiver legível, ele ficará em branco."
+                    title="Enviar rótulo"
+                    description="Foto ou imagem."
                     onClick={() => cameraInputRef.current?.click()}
                   />
 
-                  <div className="grid w-full gap-2.5 sm:grid-cols-2">
+                  <div className="grid w-full gap-2 sm:grid-cols-2">
                   <AiModalActionButton
                     variant="primary"
                     onClick={() => cameraInputRef.current?.click()}

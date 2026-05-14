@@ -536,10 +536,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             <SheetTitle className="sr-only">Analisar Carta</SheetTitle>
             <AiModalShell>
               <AiModalHeaderBar>
-              <AiModalHeader
+                  <AiModalHeader
                   icon={<Sparkles className="h-5 w-5" />}
                   title="Analisar Carta"
-                  description="Leia os rótulos visíveis, encontre os destaques e decida com rapidez."
+                  description="Encontre os destaques da carta."
                 />
               </AiModalHeaderBar>
 
@@ -555,7 +555,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                         className="space-y-3"
                       >
-                        <AiModalCard className="space-y-3">
+                        <AiModalCard className="space-y-2.5 border-y border-x-0">
                           <AiUploadPanel
                             onDragOver={(event) => {
                               event.preventDefault();
@@ -572,18 +572,18 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             }}
                             onClick={() => fileInputRef.current?.click()}
                             icon={<Camera className="h-5 w-5" strokeWidth={1.75} />}
-                            title="Fotografe ou envie a carta"
-                            description="A leitura extrai rótulos, preços e contexto para decidir rápido."
+                            title="Enviar carta"
+                            description="Foto, imagem ou PDF."
                           />
 
-                          <div className="grid gap-2.5 sm:grid-cols-2">
+                          <div className="grid gap-2 sm:grid-cols-2">
                             <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="w-full">
                               <Camera className="mr-2 h-4 w-4" />
                               Tirar foto
                             </AiModalActionButton>
                             <AiModalActionButton variant="secondary" onClick={() => fileInputRef.current?.click()} className="w-full">
                               <Upload className="mr-2 h-4 w-4" />
-                              Escolher imagem ou PDF
+                              Arquivo
                             </AiModalActionButton>
                           </div>
 
@@ -691,7 +691,7 @@ function WineListCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden transition-all duration-200 hover:-translate-y-px",
+        "overflow-hidden transition-colors duration-200",
         AI_MODAL_CARD_CLASSNAME,
         isFeatured && "xl:col-span-1",
         rhythmClassName,
@@ -794,7 +794,7 @@ function ActionPill({
         "inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition-all duration-200",
         disabled
           ? "cursor-not-allowed border border-[rgba(58,51,39,0.06)] bg-[rgba(255,251,244,0.38)] text-[#9A9086]"
-          : "border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.58)] text-[#433A32] shadow-none hover:-translate-y-px hover:bg-[rgba(255,251,244,0.78)]",
+          : "border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.58)] text-[#433A32] shadow-none hover:bg-[rgba(255,251,244,0.78)]",
       )}
       disabled={disabled}
     >

@@ -760,12 +760,12 @@
      ────────────────────────────────────────── */
   .input-premium {
     width: 100%;
-    height: 40px;
-    padding: 0 12px;
+    height: 36px;
+    padding: 0 10px;
     font-size: 13px;
     font-weight: 500;
     color: #1A1713;
-    background: rgba(255, 251, 244, 0.74);
+    background: transparent;
     border-radius: 12px;
     border: 1px solid rgba(58, 51, 39, 0.08);
     outline: none;
@@ -1061,12 +1061,12 @@
 
   /* ── Premium Forms ── */
   .input-premium {
-    height: 2.5rem;
+    height: 2.25rem;
     width: 100%;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
     border-radius: 12px;
-    background: rgba(255, 251, 244, 0.74);
+    background: transparent;
     color: #1A1713;
     border: 1px solid rgba(58, 51, 39, 0.08);
     box-shadow: none;
@@ -1076,7 +1076,7 @@
 
   .input-premium:focus {
     border-color: rgba(123, 30, 43, 0.18);
-    background: rgba(255, 251, 244, 0.86);
+    background: rgba(255, 251, 244, 0.36);
     box-shadow: 0 0 0 2px rgba(123, 30, 43, 0.12);
     outline: none;
   }

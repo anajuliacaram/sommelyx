@@ -3183,25 +3183,25 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
                 <AiToolbarSurface className="flex shrink-0 flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" disabled={step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" disabled={step === "importing" || step === "done"}>
                       {editMode ? "Bloquear edição" : "Editar dados"}
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={() => void autoFixImportedRows()} className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" disabled={enriching || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={() => void autoFixImportedRows()} className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" disabled={enriching || step === "importing" || step === "done"}>
                       Corrigir automaticamente
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={applyDefaultPrice} className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" disabled={!editMode || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={applyDefaultPrice} className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" disabled={!editMode || step === "importing" || step === "done"}>
                       Preço padrão
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={addBlankRow} className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" disabled={!editMode || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={addBlankRow} className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" disabled={!editMode || step === "importing" || step === "done"}>
                       + Linha
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={removeInvalidRows} className="h-8 rounded-full px-3 text-[11px] text-rose-700 transition-all duration-150 hover:-translate-y-px" disabled={!editMode || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={removeInvalidRows} className="h-8 rounded-full px-3 text-[11px] text-rose-700 transition-colors duration-150" disabled={!editMode || step === "importing" || step === "done"}>
                       Remover vazios
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={removeSelectedRows} className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" disabled={!editMode || selectedRows.length === 0 || step === "importing" || step === "done"}>
+                    <Button variant="secondary" size="sm" onClick={removeSelectedRows} className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" disabled={!editMode || selectedRows.length === 0 || step === "importing" || step === "done"}>
                       Remover selecionados
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={reset} className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" disabled={step === "importing"}>
+                    <Button variant="ghost" size="sm" onClick={reset} className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" disabled={step === "importing"}>
                       <X className="mr-1 h-3.5 w-3.5" /> Trocar arquivo
                     </Button>
                   </div>
@@ -3217,10 +3217,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       {selectedRows.length} linha(s) selecionada(s)
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <Button variant="secondary" size="sm" className="h-8 rounded-full px-3 text-[11px] transition-all duration-150 hover:-translate-y-px" onClick={clearVisibleSelection}>
+                      <Button variant="secondary" size="sm" className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" onClick={clearVisibleSelection}>
                         Limpar seleção visível
                       </Button>
-                      <Button variant="secondary" size="sm" className="h-8 rounded-full px-3 text-[11px] text-rose-700 transition-all duration-150 hover:-translate-y-px" onClick={removeSelectedRows} disabled={!editMode || step === "importing" || step === "done"}>
+                      <Button variant="secondary" size="sm" className="h-8 rounded-full px-3 text-[11px] text-rose-700 transition-colors duration-150" onClick={removeSelectedRows} disabled={!editMode || step === "importing" || step === "done"}>
                         Remover selecionadas
                       </Button>
                     </div>

@@ -1049,21 +1049,18 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center justify-center gap-3 py-9"
                 >
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#6F7F5B,#7F8F67)' }}>
-                    <Check className="h-7 w-7 text-white" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(111,127,91,0.10)] text-[#6F7F5B]">
+                    <Check className="h-5 w-5" />
                   </div>
                   <p className="text-[15px] font-medium" style={{ color: '#1F1F1F' }}>
                     {isCommercial ? "Vinho cadastrado!" : `${parseInt(quantity) || 1} garrafa(s) adicionada(s)!`}
                   </p>
                   {missingFields.length > 0 && (
-                    <div
-                      className="w-full rounded-[14px] border px-3 py-2.5 text-left"
-                      style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
-                    >
-                      <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>
+                    <div className="w-full border-y border-[rgba(58,51,39,0.08)] px-1 py-2.5 text-left">
+                      <p className="mb-1 text-[12px] font-semibold text-[#5B4F44]">
                         Campos sugeridos para completar depois
                       </p>
-                      <p className="text-[11px] leading-relaxed" style={{ color: '#8B6B2B' }}>
+                      <p className="text-[11px] leading-5 text-[#6B6258]">
                         Faltaram {missingFields.join(", ")}. O cadastro já foi salvo e você pode editar essas informações quando quiser.
                       </p>
                     </div>
@@ -1095,14 +1092,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     className={cn("group flex cursor-pointer items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                     onClick={() => setScanOpen(true)}
                   >
-                    <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
+                    <div className="w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
                       <Camera className="h-4.5 w-4.5" style={{ color: '#6F7F5B' }} />
                     </div>
                     <div className="flex flex-col">
                       <p className="text-[14px] font-semibold" style={{ color: '#1F1F1F' }}>Escanear foto do rótulo</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6258' }}>
-                        Use câmera ou fototeca para ler a garrafa
-                      </p>
                     </div>
                   </div>
 
@@ -1117,9 +1111,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                       <div className="min-w-0">
                         <p className="text-[13px] font-semibold truncate" style={{ color: '#1F1F1F' }}>Foto do rótulo analisada</p>
-                        <p className="text-[11px] mt-0.5 leading-4" style={{ color: '#6B6B6B' }}>
-                          A imagem fica como referência visual durante o cadastro.
-                        </p>
                       </div>
                     </div>
                   )}
@@ -1129,18 +1120,15 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     className={cn("group flex cursor-pointer items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                     onClick={() => setImportCsvOpen(true)}
                   >
-                    <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
+                    <div className="w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
                       <FileSpreadsheet className="h-4 w-4" style={{ color: '#C8A96A' }} />
                     </div>
                     <div className="flex flex-col">
-                      <p className="text-[13px] font-semibold" style={{ color: '#1F1F1F' }}>Importar documento / planilha</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6B6B' }}>
-                        CSV, PDF ou Excel para cadastro em lote
-                      </p>
+                      <p className="text-[13px] font-semibold" style={{ color: '#1F1F1F' }}>Importar documento</p>
                     </div>
                   </div>
 
-                  <AiModalCard className="space-y-2.5 px-3 py-3">
+                  <AiModalCard className="space-y-2.5 border-y border-x-0">
                     <div className="space-y-0.5">
                       <AiSectionLabel>Essenciais</AiSectionLabel>
                     </div>
@@ -1206,7 +1194,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </AiModalCard>
 
                   {isCommercial ? (
-                    <AiModalCard className="p-3">
+                    <AiModalCard className="border-y border-x-0">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: '#6F7F5B' }}>
@@ -1286,7 +1274,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pt-2.5">
-                      <AiModalCard className="space-y-3 px-3 py-3">
+                      <AiModalCard className="space-y-3 border-y border-x-0">
                         <div className="grid grid-cols-2 gap-2.5">
                         <div>
                           <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">País</label>
@@ -1375,7 +1363,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                               <label className="block text-[12px] font-semibold tracking-[-0.01em] text-[#4A4338]">
                                 Valor atual estimado (R$)
                               </label>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: 'rgba(111,127,91,0.10)', color: '#6F7F5B' }}>
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6F7F5B]/80">
                                 <Sparkles className="h-3 w-3" />
                                 {estimating ? "Estimando..." : "Estimativa Sommelyx"}
                               </span>
@@ -1425,21 +1413,18 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       loading={addWine.isPending}
                       loadingText="Salvando…"
                       variant="primary"
-                      className="h-10 w-full rounded-[12px] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] shadow-none"
+                      className="h-9 w-full rounded-[12px] bg-[#7B1E2B] text-[12.5px] shadow-none hover:bg-[#6F1B27]"
                     >
                       <Plus className="h-4 w-4" />
                       {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
                     </AiModalActionButton>
 
                   {missingFields.length > 0 && (
-                    <div
-                      className="rounded-[14px] border px-3 py-2.5"
-                      style={{ backgroundColor: 'rgba(200,169,106,0.08)', borderColor: 'rgba(200,169,106,0.18)' }}
-                    >
-                      <p className="text-[12px] font-semibold mb-1" style={{ color: '#7C5C17' }}>
+                    <div className="border-y border-[rgba(58,51,39,0.08)] px-1 py-2.5">
+                      <p className="mb-1 text-[12px] font-semibold text-[#5B4F44]">
                         Campos sugeridos para completar depois
                       </p>
-                      <p className="text-[11px] leading-relaxed" style={{ color: '#8B6B2B' }}>
+                      <p className="text-[11px] leading-5 text-[#6B6258]">
                         Faltaram {missingFields.join(", ")}. O cadastro já foi salvo e você pode editar essas informações quando quiser.
                       </p>
                     </div>

@@ -136,6 +136,26 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     });
   }, [dish, source, step, subMode]);
 
+  useEffect(() => {
+    const pendingSteps: Step[] = ["scanning", "ext-menu-scanning", "wine-results"];
+    if (!loading || !pendingSteps.includes(step)) return;
+
+    const timeout = window.setTimeout(() => {
+      requestSeqRef.current += 1;
+      setLoading(false);
+      setDeepLinkLoading(false);
+      setError("A harmonização demorou mais que o esperado. Tente novamente.");
+      setStep((current) => {
+        if (current === "ext-menu-scanning") return "ext-menu-photo";
+        if (current === "wine-results") return "select-wine";
+        if (requestMode === "dish_only") return "dish";
+        return "photo";
+      });
+    }, 90_000);
+
+    return () => window.clearTimeout(timeout);
+  }, [loading, requestMode, step]);
+
   const resolveCellarWines = useCallback(async () => {
     const currentWines = Array.isArray(wines) ? wines : [];
     if (currentWines.length > 0) return currentWines;
@@ -894,6 +914,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     : dish.trim()
       ? `Carta para ${dish}`
       : "Leitura da carta";
+  const flowMicroLabel = source === "cellar"
+    ? "HARMONIZANDO COM SUA ADEGA"
+    : source === "external"
+      ? "HARMONIZANDO COM CARTA EXTERNA"
+      : null;
 
   const subModeTitle = source === "cellar" ? "Da minha adega" : "Adega externa";
 
@@ -1057,6 +1082,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         <AiModalBody>
           <AiModalSplitLayout>
           <div className="space-y-3">
+          {flowMicroLabel ? (
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#6B6258]/60">
+              {flowMicroLabel}
+            </p>
+          ) : null}
           {step !== "source" && (
             <Button
               variant="ghost"
