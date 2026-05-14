@@ -43,6 +43,7 @@ import {
   AiModalShell,
   AiModalHeaderBar,
   AiModalBody,
+  AiToolbarSurface,
   AiModalSplitLayout,
   AiModalEyebrow,
   AiModalKeyValue,
@@ -170,8 +171,8 @@ function buildDescriptorLine(wine: WineListItem) {
 }
 
 function buildPairingLine(wine: WineListItem) {
-  const dishes = (wine.pairings || [])
-    .map((pairing) => pairing.dish?.trim().toLowerCase())
+  const dishes = (Array.isArray(wine?.pairings) ? wine.pairings : [])
+    .map((pairing) => pairing?.dish?.trim().toLowerCase())
     .filter(Boolean)
     .slice(0, 3);
   return dishes.length > 0 ? dishes.join(" • ") : null;
@@ -197,16 +198,16 @@ function buildStatusTags(wine: WineListItem, isTopPick: boolean, isBestValue: bo
     .slice(0, 3);
 }
 
-function buildCurationNote(wine: WineListItem, options: { isTopPick: boolean; isBestValue: boolean; isFeatured: boolean; index: number }) {
-  if (options.isTopPick) return "Nossa abertura para esta carta";
-  if (options.isBestValue) return "O achado mais generoso da seleção";
-  if (wine.highlight === "premium" || wine.priceCategory === "luxury") return "Para quem quer subir o tom da mesa";
-  if (wine.tannin === "alto" || wine.body === "encorpado") return "Mais profundo e voltado à mesa";
-  if (wine.acidity === "alta") return "Passagem vibrante para pratos mais tensos";
-  if (wine.category === "sparkling") return "Uma entrada luminosa para começar";
-  if (wine.category === "white") return options.index < 3 ? "Leitura mais fresca e precisa" : "Um respiro de frescor dentro da carta";
-  if (options.isFeatured) return "Escolhido para orientar a seleção";
-  return options.index % 3 === 0 ? "Vale o desvio do olhar" : null;
+function buildCurationNote(wine: WineListItem | null | undefined, options: { isTopPick: boolean; isBestValue: boolean; isFeatured: boolean; index: number }) {
+  if (!wine) return null;
+  if (options.isTopPick) return "Escolha principal";
+  if (options.isBestValue) return "Best value";
+  if (options.isFeatured) return "Seleção";
+  if (wine.highlight === "most-complex") return "Mais raro";
+  if (wine.tannin === "alto" || wine.body === "encorpado") return "Mais amplo";
+  if (wine.acidity === "alta") return "Mais tenso";
+  if (wine.category === "sparkling") return "Mais leve";
+  return null;
 }
 
 function getCardRhythmClass(index: number, isFeatured: boolean) {
@@ -365,7 +366,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   }, [runScan, toast]);
 
   const matchedCellarMap = useMemo(() => {
-    const entries = (results ?? EMPTY_WINE_LIST_ANALYSIS).wines.map((wine) => [wine.name, findCellarMatch(wine, cellarWines)] as const);
+    const entries = (Array.isArray((results ?? EMPTY_WINE_LIST_ANALYSIS).wines) ? (results ?? EMPTY_WINE_LIST_ANALYSIS).wines : [])
+      .filter((wine): wine is WineListItem => Boolean(wine?.name))
+      .map((wine) => [wine.name, findCellarMatch(wine, cellarWines)] as const);
     return new Map(entries);
   }, [results, cellarWines]);
 
@@ -373,7 +376,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     const safeResults = results ?? EMPTY_WINE_LIST_ANALYSIS;
     const query = normalizeWineSearchText(searchQuery);
 
-    return safeResults.wines
+    const resultWines = Array.isArray(safeResults.wines) ? safeResults.wines.filter((wine): wine is WineListItem => Boolean(wine?.name)) : [];
+
+    return resultWines
       .filter((wine) => {
         if (filterMode !== "all" && detectWineType(wine.style) !== filterMode) return false;
         if (!matchesFocusFilter(wine, wine.name === safeResults.topPick, wine.name === safeResults.bestValue, focusFilter)) return false;
@@ -405,10 +410,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   const safeResults = results ?? EMPTY_WINE_LIST_ANALYSIS;
   const displayWines = refinedWines.slice(0, 100);
   const isTruncated = refinedWines.length > displayWines.length;
-  const pricedWines = safeResults.wines.filter((wine) => typeof wine.price === "number");
+  const resultWines = Array.isArray(safeResults.wines) ? safeResults.wines.filter((wine): wine is WineListItem => Boolean(wine?.name)) : [];
+  const pricedWines = resultWines.filter((wine) => typeof wine.price === "number");
   const avgPrice = pricedWines.length > 0 ? pricedWines.reduce((sum, wine) => sum + (wine.price || 0), 0) / pricedWines.length : null;
-  const cellarMatches = safeResults.wines.filter((wine) => matchedCellarMap.get(wine.name)).length;
-  const availableTypes = [...new Set(safeResults.wines.map((wine) => detectWineType(wine.style)).filter((type) => type !== "unknown"))] as WineType[];
+  const cellarMatches = resultWines.filter((wine) => matchedCellarMap.get(wine.name)).length;
+  const availableTypes = [...new Set(resultWines.map((wine) => detectWineType(wine.style)).filter((type) => type !== "unknown"))] as WineType[];
 
   const openSaveDialog = (wine: WineListItem) => {
     setPrefillWine({
@@ -487,7 +493,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
     const leadWine = displayWines[0];
     const trailingWines = displayWines.slice(1);
-    const topPickLabel = safeResults.topPick ? `Abrimos com ${safeResults.topPick}.` : "Abrimos pela garrafa que melhor organiza a leitura da carta.";
+    const topPickLabel = safeResults.topPick ? safeResults.topPick : "Primeira escolha";
     const companionHighlights = displayWines
       .slice(1, 3)
       .map((wine, index) => ({
@@ -497,7 +503,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           isBestValue: wine.name === safeResults.bestValue,
           isFeatured: false,
           index: index + 1,
-        }) || "Outro bom caminho dentro da seleção",
+        }),
       }));
 
     return (
@@ -574,13 +580,10 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             />
 
             <div className="space-y-4 px-1 pt-1 xl:pt-4">
-              <div className="space-y-2">
-                <AiModalEyebrow className="mb-0">Leitura da mesa</AiModalEyebrow>
+              <div className="space-y-1.5">
+                <AiModalEyebrow className="mb-0">Seleção</AiModalEyebrow>
                 <p className="font-serif text-[18px] leading-[1.1] tracking-[-0.04em] text-[#1A1713]">
                   {topPickLabel}
-                </p>
-                <p className="max-w-[24rem] text-[12px] leading-5 text-[#6B6258]">
-                  Uma sequência pensada para começar com segurança e abrir espaço para descobertas mais gastronômicas logo em seguida.
                 </p>
               </div>
 
@@ -591,9 +594,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                       <p className="font-serif text-[15px] leading-tight tracking-[-0.03em] text-[#1A1713]">
                         {highlight.name}
                       </p>
-                      <p className="text-[11px] leading-5 text-[#6B6258]">
-                        {highlight.note}
-                      </p>
+                      {highlight.note ? (
+                        <p className="text-[10.5px] uppercase tracking-[0.14em] text-[#7A6C60]">
+                          {highlight.note}
+                        </p>
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -1086,7 +1091,18 @@ function WineListCard({
         boxShadow: isFeatured && !isSelected ? "0 24px 52px -42px rgba(189,154,85,0.20), inset 0 1px 0 rgba(255,255,255,0.74)" : undefined,
       }}
     >
-      <button type="button" onClick={onSelect} className={cn("w-full text-left", isFeatured ? "px-4 py-4" : "px-3.5 py-3.5")}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onSelect}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelect();
+          }
+        }}
+        className={cn("w-full text-left", isFeatured ? "px-4 py-4" : "px-3.5 py-3.5")}
+      >
         <div className="space-y-2.5">
           {curationNote ? (
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[rgba(91,79,68,0.72)]">
@@ -1171,7 +1187,7 @@ function WineListCard({
             <ActionPill label="Registrar" icon={GlassWater} onClick={onConsume} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
           </div>
         </div>
-      </button>
+      </div>
     </motion.article>
   );
 }
