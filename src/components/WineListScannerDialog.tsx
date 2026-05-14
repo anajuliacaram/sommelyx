@@ -197,6 +197,26 @@ function buildStatusTags(wine: WineListItem, isTopPick: boolean, isBestValue: bo
     .slice(0, 3);
 }
 
+function buildCurationNote(wine: WineListItem, options: { isTopPick: boolean; isBestValue: boolean; isFeatured: boolean; index: number }) {
+  if (options.isTopPick) return "Nossa abertura para esta carta";
+  if (options.isBestValue) return "O achado mais generoso da seleção";
+  if (wine.highlight === "premium" || wine.priceCategory === "luxury") return "Para quem quer subir o tom da mesa";
+  if (wine.tannin === "alto" || wine.body === "encorpado") return "Mais profundo e voltado à mesa";
+  if (wine.acidity === "alta") return "Passagem vibrante para pratos mais tensos";
+  if (wine.category === "sparkling") return "Uma entrada luminosa para começar";
+  if (wine.category === "white") return options.index < 3 ? "Leitura mais fresca e precisa" : "Um respiro de frescor dentro da carta";
+  if (options.isFeatured) return "Escolhido para orientar a seleção";
+  return options.index % 3 === 0 ? "Vale o desvio do olhar" : null;
+}
+
+function getCardRhythmClass(index: number, isFeatured: boolean) {
+  if (isFeatured) return "";
+  if (index % 5 === 1) return "xl:translate-y-3";
+  if (index % 5 === 3) return "2xl:-translate-y-2";
+  if (index % 5 === 4) return "xl:translate-y-1";
+  return "";
+}
+
 function matchesFocusFilter(wine: WineListItem, isTopPick: boolean, isBestValue: boolean, filter: FocusFilter) {
   const tags = buildStatusTags(wine, isTopPick, isBestValue);
   if (filter === "all") return true;
@@ -465,6 +485,21 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       );
     }
 
+    const leadWine = displayWines[0];
+    const trailingWines = displayWines.slice(1);
+    const topPickLabel = safeResults.topPick ? `Abrimos com ${safeResults.topPick}.` : "Abrimos pela garrafa que melhor organiza a leitura da carta.";
+    const companionHighlights = displayWines
+      .slice(1, 3)
+      .map((wine, index) => ({
+        name: wine.name,
+        note: buildCurationNote(wine, {
+          isTopPick: wine.name === safeResults.topPick,
+          isBestValue: wine.name === safeResults.bestValue,
+          isFeatured: false,
+          index: index + 1,
+        }) || "Outro bom caminho dentro da seleção",
+      }));
+
     return (
       <motion.div
         key="results"
@@ -494,26 +529,38 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           </div>
         </section>
 
-        <section className="grid gap-3 xl:grid-cols-2 2xl:grid-cols-3">
-          {displayWines.map((wine, index) => {
-            const cellarMatch = matchedCellarMap.get(wine.name) || null;
-            const isFeatured = index === 0 || wine.name === safeResults.topPick;
-            return (
-              <WineListCard
-                key={`${wine.name}-${index}`}
-                wine={wine}
-                index={index}
-                isTopPick={wine.name === safeResults.topPick}
-                isBestValue={wine.name === safeResults.bestValue}
-                isSelected={selectedWineName === wine.name}
-                isFeatured={isFeatured}
-                cellarMatch={cellarMatch}
-                onSelect={() => setSelectedWineName(wine.name)}
-                onSave={() => openSaveDialog(wine)}
-                onWishlist={() => void saveToWishlist(wine)}
-                onPair={() => cellarMatch && setPairingWine(cellarMatch)}
-                onView={() => cellarMatch && setEditWine(cellarMatch)}
-                onConsume={() => cellarMatch && setConsumptionWine({
+        {leadWine ? (
+          <section className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(220px,0.8fr)] xl:items-start">
+            <WineListCard
+              key={`${leadWine.name}-lead`}
+              wine={leadWine}
+              index={0}
+              isTopPick={leadWine.name === safeResults.topPick}
+              isBestValue={leadWine.name === safeResults.bestValue}
+              isSelected={selectedWineName === leadWine.name}
+              isFeatured
+              rhythmClassName="xl:mr-2"
+              curationNote={buildCurationNote(leadWine, {
+                isTopPick: leadWine.name === safeResults.topPick,
+                isBestValue: leadWine.name === safeResults.bestValue,
+                isFeatured: true,
+                index: 0,
+              })}
+              cellarMatch={matchedCellarMap.get(leadWine.name) || null}
+              onSelect={() => setSelectedWineName(leadWine.name)}
+              onSave={() => openSaveDialog(leadWine)}
+              onWishlist={() => void saveToWishlist(leadWine)}
+              onPair={() => {
+                const cellarMatch = matchedCellarMap.get(leadWine.name) || null;
+                if (cellarMatch) setPairingWine(cellarMatch);
+              }}
+              onView={() => {
+                const cellarMatch = matchedCellarMap.get(leadWine.name) || null;
+                if (cellarMatch) setEditWine(cellarMatch);
+              }}
+              onConsume={() => {
+                const cellarMatch = matchedCellarMap.get(leadWine.name) || null;
+                if (cellarMatch) setConsumptionWine({
                   id: cellarMatch.id,
                   name: cellarMatch.name,
                   producer: cellarMatch.producer,
@@ -522,11 +569,82 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   grape: cellarMatch.grape,
                   style: cellarMatch.style,
                   vintage: cellarMatch.vintage,
-                })}
-              />
-            );
-          })}
-        </section>
+                });
+              }}
+            />
+
+            <div className="space-y-4 px-1 pt-1 xl:pt-4">
+              <div className="space-y-2">
+                <AiModalEyebrow className="mb-0">Leitura da mesa</AiModalEyebrow>
+                <p className="font-serif text-[18px] leading-[1.1] tracking-[-0.04em] text-[#1A1713]">
+                  {topPickLabel}
+                </p>
+                <p className="max-w-[24rem] text-[12px] leading-5 text-[#6B6258]">
+                  Uma sequência pensada para começar com segurança e abrir espaço para descobertas mais gastronômicas logo em seguida.
+                </p>
+              </div>
+
+              {companionHighlights.length > 0 ? (
+                <div className="space-y-3 border-l border-[rgba(123,30,43,0.10)] pl-4">
+                  {companionHighlights.map((highlight) => (
+                    <div key={highlight.name} className="space-y-0.5">
+                      <p className="font-serif text-[15px] leading-tight tracking-[-0.03em] text-[#1A1713]">
+                        {highlight.name}
+                      </p>
+                      <p className="text-[11px] leading-5 text-[#6B6258]">
+                        {highlight.note}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {trailingWines.length > 0 ? (
+          <section className="grid gap-x-3 gap-y-3.5 xl:grid-cols-2 2xl:grid-cols-3">
+            {trailingWines.map((wine, offsetIndex) => {
+              const index = offsetIndex + 1;
+              const cellarMatch = matchedCellarMap.get(wine.name) || null;
+              const isFeatured = wine.name === safeResults.topPick;
+              return (
+                <WineListCard
+                  key={`${wine.name}-${index}`}
+                  wine={wine}
+                  index={index}
+                  isTopPick={wine.name === safeResults.topPick}
+                  isBestValue={wine.name === safeResults.bestValue}
+                  isSelected={selectedWineName === wine.name}
+                  isFeatured={isFeatured}
+                  rhythmClassName={getCardRhythmClass(index, isFeatured)}
+                  curationNote={buildCurationNote(wine, {
+                    isTopPick: wine.name === safeResults.topPick,
+                    isBestValue: wine.name === safeResults.bestValue,
+                    isFeatured,
+                    index,
+                  })}
+                  cellarMatch={cellarMatch}
+                  onSelect={() => setSelectedWineName(wine.name)}
+                  onSave={() => openSaveDialog(wine)}
+                  onWishlist={() => void saveToWishlist(wine)}
+                  onPair={() => cellarMatch && setPairingWine(cellarMatch)}
+                  onView={() => cellarMatch && setEditWine(cellarMatch)}
+                  onConsume={() => cellarMatch && setConsumptionWine({
+                    id: cellarMatch.id,
+                    name: cellarMatch.name,
+                    producer: cellarMatch.producer,
+                    country: cellarMatch.country,
+                    region: cellarMatch.region,
+                    grape: cellarMatch.grape,
+                    style: cellarMatch.style,
+                    vintage: cellarMatch.vintage,
+                  })}
+                />
+              );
+            })}
+          </section>
+        ) : null}
 
         {isTruncated ? (
           <p className="text-[11px] font-medium text-[#6B6258]">
@@ -911,6 +1029,8 @@ function WineListCard({
   isBestValue,
   isSelected,
   isFeatured,
+  curationNote,
+  rhythmClassName,
   cellarMatch,
   onSelect,
   onSave,
@@ -925,6 +1045,8 @@ function WineListCard({
   isBestValue: boolean;
   isSelected: boolean;
   isFeatured: boolean;
+  curationNote: string | null;
+  rhythmClassName?: string;
   cellarMatch: Wine | null;
   onSelect: () => void;
   onSave: () => void;
@@ -951,6 +1073,7 @@ function WineListCard({
       className={cn(
         "overflow-hidden rounded-[22px] transition-all duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px]",
         isFeatured && "xl:col-span-2 2xl:col-span-2",
+        rhythmClassName,
         isSelected
           ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)] shadow-[0_24px_44px_-36px_rgba(123,30,43,0.18)]"
           : isFeatured
@@ -965,6 +1088,12 @@ function WineListCard({
     >
       <button type="button" onClick={onSelect} className={cn("w-full text-left", isFeatured ? "px-4 py-4" : "px-3.5 py-3.5")}>
         <div className="space-y-2.5">
+          {curationNote ? (
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[rgba(91,79,68,0.72)]">
+              {curationNote}
+            </p>
+          ) : null}
+
           <div className="flex items-start justify-between gap-2.5">
             {tags.length > 0 ? (
               <div className="flex min-w-0 flex-1 flex-wrap gap-1">
