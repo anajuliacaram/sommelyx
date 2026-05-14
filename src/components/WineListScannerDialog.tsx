@@ -701,14 +701,14 @@ function StatTile({
   return (
     <div
       className={cn(
-        "rounded-[16px] border px-3 py-2.5",
-        accent === "green" && "border-emerald-100 bg-emerald-50/80 text-emerald-900",
-        accent === "amber" && "border-amber-100 bg-amber-50/85 text-amber-900",
-        accent === "neutral" && "border-black/5 bg-white/70 text-[#1A1713]",
+        "rounded-[16px] px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.58)]",
+        accent === "green" && "bg-[linear-gradient(180deg,rgba(235,245,238,0.88)_0%,rgba(229,240,231,0.78)_100%)] text-emerald-950",
+        accent === "amber" && "bg-[linear-gradient(180deg,rgba(249,242,229,0.90)_0%,rgba(245,236,219,0.82)_100%)] text-amber-950",
+        accent === "neutral" && "bg-[rgba(255,255,255,0.52)] text-[#1A1713]",
       )}
     >
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[rgba(72,60,46,0.52)]">{label}</p>
-      <p className="mt-1 text-[18px] font-semibold tracking-[-0.03em]">{value}</p>
+      <p className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(72,60,46,0.46)]">{label}</p>
+      <p className="mt-1 font-serif text-[19px] tracking-[-0.04em]">{value}</p>
     </div>
   );
 }
@@ -750,14 +750,14 @@ function WorkspaceRail({
 }) {
   return (
     <aside
-      className="overflow-hidden rounded-[30px] border border-[rgba(255,255,255,0.58)] bg-[linear-gradient(180deg,rgba(255,255,255,0.90)_0%,rgba(245,238,229,0.82)_58%,rgba(234,227,216,0.84)_100%)] shadow-[0_24px_52px_-36px_rgba(34,21,13,0.30)] backdrop-blur-xl"
+      className="overflow-hidden rounded-[30px] border border-[rgba(255,255,255,0.42)] bg-[linear-gradient(180deg,rgba(252,250,246,0.90)_0%,rgba(246,239,230,0.82)_52%,rgba(233,226,215,0.80)_100%)] shadow-[0_28px_62px_-42px_rgba(34,21,13,0.24)] backdrop-blur-xl"
       style={{
         backdropFilter: "blur(18px) saturate(1.06)",
         WebkitBackdropFilter: "blur(18px) saturate(1.06)",
       }}
     >
       <div className="flex max-h-full flex-col xl:sticky xl:top-0">
-        <div className="space-y-4 border-b border-[rgba(24,21,17,0.07)] px-4 pb-4 pt-4 sm:px-5">
+        <div className="space-y-4 px-4 pb-4 pt-4 sm:px-5">
           <div className="space-y-1.5">
             <AiModalEyebrow>{step === "results" ? "Curadoria pronta" : "Entrada"}</AiModalEyebrow>
             <p className="font-serif text-[24px] leading-none tracking-[-0.05em] text-[#181511]">
@@ -765,14 +765,14 @@ function WorkspaceRail({
             </p>
             <p className="text-[12px] leading-5 text-[#6B6258]">
               {step === "results"
-                ? "Preview, filtros e destaques ficam concentrados neste rail."
+                ? "Uma mesa lateral para navegar a seleção com calma e contexto."
                 : "Envie uma carta nítida para abrir um workspace de curadoria."}
             </p>
           </div>
 
-          <div className="rounded-[22px] border border-[rgba(24,21,17,0.05)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(249,245,238,0.78)_100%)] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+          <div className="rounded-[22px] bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(248,243,235,0.74)_100%)] p-2.5 shadow-[0_18px_34px_-30px_rgba(42,30,22,0.18),inset_0_1px_0_rgba(255,255,255,0.78)]">
             <div className="flex items-center gap-3">
-              <div className="flex h-[60px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-white/65 bg-[#F6F0E8] shadow-[0_10px_18px_-16px_rgba(43,29,18,0.30)]">
+              <div className="flex h-[60px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-[#F6F0E8] shadow-[0_14px_24px_-18px_rgba(43,29,18,0.24)]">
                 {attachmentPreview?.url ? (
                   <img src={attachmentPreview.url} alt="Carta analisada" className="h-full w-full object-cover object-top" />
                 ) : (
@@ -790,7 +790,7 @@ function WorkspaceRail({
                   <button
                     type="button"
                     onClick={() => setPreviewExpanded((value) => !value)}
-                    className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6A5847]"
+                    className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6A5847] transition-opacity duration-300 hover:opacity-80"
                   >
                     {previewExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                     {previewExpanded ? "Recolher" : "Expandir"}
@@ -800,7 +800,7 @@ function WorkspaceRail({
             </div>
 
             {attachmentPreview?.url && previewExpanded ? (
-              <div className="mt-2.5 overflow-hidden rounded-[16px] border border-black/5">
+              <div className="mt-2.5 overflow-hidden rounded-[16px] shadow-[0_12px_28px_-24px_rgba(44,30,20,0.26)]">
                 <img src={attachmentPreview.url} alt="Carta ampliada" className="h-[220px] w-full object-cover object-top" />
               </div>
             ) : null}
@@ -828,7 +828,7 @@ function WorkspaceRail({
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Buscar produtor, região, prato"
-                className="h-9 rounded-[14px] border-white/70 bg-white/84 px-3 text-[12px] shadow-[inset_0_1px_2px_rgba(42,33,26,0.04)]"
+                className="h-9 rounded-[14px] border-white/40 bg-[rgba(255,255,255,0.62)] px-3 text-[12px] shadow-[inset_0_1px_2px_rgba(42,33,26,0.03)]"
               />
 
               <div className="space-y-1.5">
@@ -862,13 +862,13 @@ function WorkspaceRail({
               </div>
             </div>
 
-            <div className="space-y-2 border-t border-[rgba(24,21,17,0.08)] pt-3">
+            <div className="space-y-2 pt-1">
               <AiModalKeyValue label="Top pick" value={safeResults.topPick || "—"} />
               <AiModalKeyValue label="Best value" value={safeResults.bestValue || "—"} />
               <AiModalKeyValue label="Preço médio" value={avgPrice ? formatPrice(avgPrice) : "—"} />
             </div>
 
-            <AiModalActionButton variant="secondary" onClick={onReset} className="h-9 w-full rounded-[14px] px-4 text-[11px]">
+            <AiModalActionButton variant="secondary" onClick={onReset} className="h-9 w-full rounded-[14px] border-0 bg-[rgba(255,255,255,0.48)] px-4 text-[11px] shadow-none">
               <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
               Nova análise
             </AiModalActionButton>
@@ -893,10 +893,10 @@ function DensePill({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex h-7 items-center rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors",
+        "inline-flex h-7 items-center rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-[0.09em] transition-all duration-300",
         active
-          ? "border-[rgba(123,30,43,0.14)] bg-[rgba(123,30,43,0.10)] text-[#5A1528]"
-          : "border-black/5 bg-white/74 text-[#5F5F5F] hover:bg-white hover:text-[#1A1713]",
+          ? "bg-[rgba(123,30,43,0.08)] text-[#5A1528] shadow-[inset_0_1px_0_rgba(255,255,255,0.58)]"
+          : "bg-[rgba(255,255,255,0.38)] text-[#62584F] hover:bg-[rgba(255,255,255,0.58)] hover:text-[#1A1713]",
       )}
     >
       {children}
@@ -949,18 +949,18 @@ function WineListCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden rounded-[22px] transition-all duration-300 hover:-translate-y-[2px]",
+        "overflow-hidden rounded-[22px] transition-all duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px]",
         isFeatured && "xl:col-span-2 2xl:col-span-2",
         isSelected
-          ? "border border-[rgba(123,30,43,0.16)] bg-[rgba(255,255,255,0.94)] shadow-[0_24px_44px_-34px_rgba(123,30,43,0.24)]"
+          ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)] shadow-[0_24px_44px_-36px_rgba(123,30,43,0.18)]"
           : isFeatured
-            ? "border border-[rgba(198,167,104,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(249,245,238,0.86)_100%)] shadow-[0_24px_48px_-36px_rgba(56,34,22,0.24)]"
-            : "border border-[rgba(255,255,255,0.58)] bg-[rgba(255,255,255,0.82)] shadow-[0_16px_32px_-30px_rgba(27,19,14,0.24)]",
+            ? "bg-[linear-gradient(180deg,rgba(255,252,247,0.88)_0%,rgba(248,242,234,0.82)_100%)] shadow-[0_22px_44px_-38px_rgba(56,34,22,0.18)]"
+            : "bg-[rgba(255,255,255,0.72)] shadow-[0_14px_28px_-28px_rgba(27,19,14,0.16)]",
       )}
       style={{
         backdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
         WebkitBackdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
-        boxShadow: isFeatured && !isSelected ? "0 28px 56px -42px rgba(189,154,85,0.34), inset 0 1px 0 rgba(255,255,255,0.74)" : undefined,
+        boxShadow: isFeatured && !isSelected ? "0 24px 52px -42px rgba(189,154,85,0.20), inset 0 1px 0 rgba(255,255,255,0.74)" : undefined,
       }}
     >
       <button type="button" onClick={onSelect} className={cn("w-full text-left", isFeatured ? "px-4 py-4" : "px-3.5 py-3.5")}>
@@ -972,7 +972,7 @@ function WineListCard({
                   <span
                     key={tag}
                     className={cn(
-                      "rounded-full px-2 py-[5px] text-[9px] font-semibold uppercase tracking-[0.08em]",
+                      "rounded-full px-2 py-[5px] text-[9px] font-semibold uppercase tracking-[0.1em]",
                       tag === "Best value" && "bg-[rgba(95,111,82,0.10)] text-[#35533A]",
                       tag === "Premium" && "bg-[rgba(198,167,104,0.14)] text-[#7B6528]",
                       tag === "Beber agora" && "bg-[rgba(61,97,54,0.10)] text-[#35533A]",
@@ -1017,7 +1017,7 @@ function WineListCard({
               {structurePills.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-black/5 bg-[rgba(255,255,255,0.7)] px-2 py-[5px] text-[9px] font-medium uppercase tracking-[0.08em] text-[#51473F]"
+                  className="rounded-full bg-[rgba(255,255,255,0.38)] px-2 py-[5px] text-[9px] font-medium uppercase tracking-[0.1em] text-[#51473F] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]"
                 >
                   {item}
                 </span>
@@ -1034,7 +1034,7 @@ function WineListCard({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-1 border-t border-black/5 pt-2">
+          <div className="flex flex-wrap gap-1 pt-1.5">
             <ActionPill label={cellarMatch ? "Na adega" : "Salvar"} icon={Check} onClick={onSave} disabled={Boolean(cellarMatch)} disabledReason="Esse vinho já existe na sua adega." />
             <ActionPill label="Wishlist" icon={Heart} onClick={onWishlist} />
             <ActionPill label="Pair" icon={UtensilsCrossed} onClick={onPair} disabled={!cellarMatch} disabledReason="Salve na adega para harmonizar por garrafa." />
@@ -1068,10 +1068,10 @@ function ActionPill({
         if (!disabled) onClick();
       }}
       className={cn(
-        "inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-[9px] font-semibold uppercase tracking-[0.08em] transition-colors",
+        "inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition-all duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
         disabled
-          ? "cursor-not-allowed border-black/5 bg-white/55 text-[#9A9086]"
-          : "border-black/5 bg-white/78 text-[#433A32] hover:bg-white",
+          ? "cursor-not-allowed bg-[rgba(255,255,255,0.28)] text-[#9A9086]"
+          : "bg-[rgba(255,255,255,0.34)] text-[#433A32] shadow-[inset_0_1px_0_rgba(255,255,255,0.54)] hover:bg-[rgba(255,255,255,0.54)] hover:-translate-y-[1px]",
       )}
       disabled={disabled}
     >
