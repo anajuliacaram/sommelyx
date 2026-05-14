@@ -13,6 +13,7 @@ import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
 import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AiModalSidebarCard, AiModalEyebrow, AiModalKeyValue, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
+import { getAiPresentationStatus } from "@/lib/ai-presentation";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -43,16 +44,6 @@ function isAcceptedMobileImage(file: File) {
   const allowedMime = new Set(["image/jpeg", "image/jpg", "image/png", "image/heic", "image/heif"]);
   if (allowedMime.has(mime)) return true;
   return [".jpg", ".jpeg", ".png", ".heic", ".heif"].some((ext) => name.endsWith(ext));
-}
-
-function formatScanConfidence(result: { ocr_confidence?: unknown; ocrConfidence?: unknown }) {
-  const explicit = typeof result.ocr_confidence === "number"
-    ? result.ocr_confidence
-    : typeof result.ocrConfidence === "number"
-      ? result.ocrConfidence
-      : null;
-  if (explicit == null || !Number.isFinite(explicit)) return null;
-  return `${Math.round(Math.max(0, Math.min(1, explicit)) * 100)}%`;
 }
 
 export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: ScanWineLabelDialogProps) {
@@ -501,31 +492,31 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           ? <DataRow key="drink_window" label="Janela de consumo" value={`${scannedData.drink_from} – ${scannedData.drink_until}`} />
           : null,
         isMeaningfulScanValue(scannedData.food_pairing) ? <DataRow key="pairing" label="Harmonização" value={scannedData.food_pairing} /> : null,
-        formatScanConfidence(scannedData) ? <DataRow key="confidence" label="Confiança OCR" value={formatScanConfidence(scannedData) as string} /> : null,
       ].filter(Boolean)
     : [];
 
+  const successStatus = getAiPresentationStatus("label", scanOutcome === "success_partial");
   const resultStatus = scanOutcome === "success_partial"
     ? {
         icon: <Check className="h-4 w-4 text-amber-700" />,
-        title: "Leitura parcial",
+        title: successStatus.title,
         tone: "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]",
-        description: "Conseguimos ler parte do rótulo.",
-        warning: "Revise os dados antes de salvar.",
+        description: successStatus.description,
+        warning: null,
       }
     : scanOutcome === "success_full"
       ? {
           icon: <Check className="h-4 w-4 text-success" />,
-          title: "Leitura completa",
+          title: successStatus.title,
           tone: "bg-[rgba(95,111,82,0.08)] text-[#2F4A2B] ring-[rgba(95,111,82,0.16)]",
-          description: "O rótulo foi lido com segurança.",
+          description: successStatus.description,
           warning: null,
         }
       : {
           icon: <X className="h-4 w-4 text-destructive" />,
-          title: "Falha",
+          title: "Nova captura",
           tone: "bg-[rgba(180,80,80,0.08)] text-[#9B4444] ring-[rgba(180,80,80,0.16)]",
-          description: "Não foi possível ler o rótulo.",
+          description: "Vale uma nova foto para revelar melhor o rótulo.",
           warning: null,
         };
 
@@ -537,7 +528,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           {scannedData?.name || "Leitura do rótulo"}
         </p>
         <p className="text-[12.5px] leading-5 text-[#6B6258]">
-          O contexto visual continua visível, mas a revisão principal fica compacta e muito mais fácil de escanear.
+          A imagem permanece à vista enquanto a ficha principal se organiza com clareza editorial.
         </p>
       </div>
 
@@ -557,9 +548,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       )}
 
       <div className="space-y-2">
-        <AiModalKeyValue label="Leitura" value={step === "preview" ? "Pronta para uso" : step === "scanning" ? "Processando" : "Aguardando"} />
-        <AiModalKeyValue label="Confiança OCR" value={scannedData ? formatScanConfidence(scannedData) || "Estável" : "—"} />
-        <AiModalKeyValue label="Campos úteis" value={scannedData ? getMeaningfulScanFields(scannedData).length : 0} />
+        <AiModalKeyValue label="Curadoria" value={step === "preview" ? "Pronta" : step === "scanning" ? "Em preparo" : "Aguardando"} />
+        <AiModalKeyValue label="Ficha" value={scannedData ? getMeaningfulScanFields(scannedData).length : 0} />
       </div>
     </AiModalSidebarCard>
   );
@@ -575,7 +565,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           <AiModalHeader
             icon={<Camera className="h-5 w-5" />}
             title="Escanear Rótulo"
-            description="Fotografe o rótulo e revise os campos essenciais em uma leitura curta, clara e pronta para salvar."
+            description="Fotografe o rótulo e receba uma ficha enxuta, elegante e pronta para salvar."
           />
         </AiModalHeaderBar>
 
@@ -719,9 +709,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
               >
                 <AiStatusCard
                   icon={<X className="h-4 w-4 text-destructive" />}
-                  title="Não conseguimos ler o rótulo com clareza."
+                  title="Nova captura"
                   description={errorMsg}
-                  warning={supportCode ? `Código do suporte / Request ID: ${supportCode}` : undefined}
+                  warning={undefined}
                   toneClassName="bg-destructive/10 text-destructive ring-destructive/20"
                 />
                 <div className="flex w-full flex-col gap-2">

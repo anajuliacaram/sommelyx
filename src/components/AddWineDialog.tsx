@@ -1421,14 +1421,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                                 <Sparkles className="h-3 w-3" />
                                 {estimating ? "Estimando..." : "Estimativa Sommelyx"}
                               </span>
-                              {estimateConfidence && !estimating && (
-                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{
-                                  backgroundColor: estimateConfidence === 'alta' ? 'rgba(111,127,91,0.1)' : estimateConfidence === 'media' ? 'rgba(200,169,106,0.12)' : 'rgba(180,80,80,0.1)',
-                                  color: estimateConfidence === 'alta' ? '#6F7F5B' : estimateConfidence === 'media' ? '#8B6B2B' : '#9B4444',
-                                }}>
-                                  Confiança {estimateConfidence}
-                                </span>
-                              )}
                             </div>
                             <div className="relative">
                               <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0.00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
@@ -1439,7 +1431,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                               )}
                             </div>
                             <p className="mt-1.5 text-[12px]" style={{ color: '#6B6B6B' }}>
-                              Média estimada de valor de mercado atual, calculada pela inteligência Sommelyx com base no nome do vinho, vinícola, safra, uva e região.
+                              Referência de mercado atual, estimada a partir do vinho, safra, uva e origem.
                             </p>
                           </div>
                           <div>

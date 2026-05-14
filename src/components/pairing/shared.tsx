@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
 import type { WinePairingDecisionSupport } from "@/lib/sommelier-ai";
 import type { Recipe } from "@/lib/sommelier-ai";
+import { buildPresentationStructureLine, cleanAiPresentationText } from "@/lib/ai-presentation";
 
 /* ═══════════════════════════════════════════════
    COMPATIBILITY BADGE — Flagship visual element
@@ -135,13 +136,13 @@ export function FallbackAnalysisBadge({ size = "md" }: { size?: "sm" | "md" }) {
       }}
     >
       <Sparkles className="h-3 w-3 opacity-70" />
-      Leitura assistida
+      Curadoria assistida
     </span>
   );
 }
 
 export function FallbackAnalysisNotice({
-  message = "Esta é uma análise rápida com base nos dados disponíveis",
+  message = "Uma leitura inicial já organiza os caminhos mais promissores.",
   confidence = "limited",
   className,
 }: {
@@ -151,15 +152,15 @@ export function FallbackAnalysisNotice({
 }) {
   const confidenceConfig = {
     high: {
-      label: "Alta confiança",
+      label: "Assinatura precisa",
       textClassName: "text-[hsl(152_42%_28%)]",
     },
     medium: {
-      label: "Confiança média",
+      label: "Curadoria equilibrada",
       textClassName: "text-[#8B7730]",
     },
     limited: {
-      label: "Dados limitados",
+      label: "Seleção inicial",
       textClassName: "text-[#7b1e2b]",
     },
   }[confidence];
@@ -412,6 +413,19 @@ export function WineSuggestionCard({
   decisionSupport?: WinePairingDecisionSupport | null;
   className?: string;
 }) {
+  const summaryText = cleanAiPresentationText(reason, {
+    maxLength: 180,
+    fallback: buildPresentationStructureLine([
+      style,
+      `Acidez ${structureMatch.acidity}`,
+      `Corpo ${structureMatch.body}`,
+      `Taninos ${structureMatch.tannin}`,
+    ]) || "Curadoria da casa",
+  });
+  const aromaText = cleanAiPresentationText(decisionSupport?.sensory_profile.aroma, { maxLength: 90 });
+  const palateText = cleanAiPresentationText(decisionSupport?.sensory_profile.palate, { maxLength: 90 });
+  const momentText = cleanAiPresentationText(decisionSupport?.when_to_choose.ideal_scenario, { maxLength: 90 });
+
   return (
     <motion.li
       initial={{ opacity: 0, y: 10 }}
@@ -446,22 +460,28 @@ export function WineSuggestionCard({
         <div className="grid gap-3 xl:grid-cols-[minmax(0,1.7fr)_minmax(240px,1fr)]">
           <div className="rounded-[20px] border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.04)] p-3.5 sm:p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B1E2B]/70">
-              Direção
+              Perfil
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[#3F362F]">
-              {reason}
+              {summaryText}
             </p>
             {decisionSupport ? (
               <div className="mt-3 flex flex-wrap gap-1.5">
-                <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
-                  Aroma: {decisionSupport.sensory_profile.aroma}
-                </span>
-                <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
-                  Palato: {decisionSupport.sensory_profile.palate}
-                </span>
-                <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
-                  Ocasião: {decisionSupport.when_to_choose.ideal_scenario}
-                </span>
+                {aromaText ? (
+                  <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
+                    {aromaText}
+                  </span>
+                ) : null}
+                {palateText ? (
+                  <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
+                    {palateText}
+                  </span>
+                ) : null}
+                {momentText ? (
+                  <span className="rounded-full border border-black/5 bg-white/70 px-2.5 py-1 text-[10px] font-medium text-[#4D433A]">
+                    {momentText}
+                  </span>
+                ) : null}
               </div>
             ) : null}
           </div>

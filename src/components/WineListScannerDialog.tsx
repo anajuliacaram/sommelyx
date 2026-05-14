@@ -32,6 +32,7 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { useAddWishlist } from "@/hooks/useBusinessData";
 import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
+import { buildPresentationStructureLine, getAiPresentationStatus } from "@/lib/ai-presentation";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { cn } from "@/lib/utils";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
@@ -168,7 +169,7 @@ function buildDescriptorLine(wine: WineListItem) {
           : wine.acidity === "média"
             ? "Acidez equilibrada"
             : null;
-  return [styleLabel, wine.grape, bodyLabel, structureLabel].filter(Boolean).slice(0, 3).join(" • ");
+  return buildPresentationStructureLine([styleLabel, wine.grape, bodyLabel, structureLabel]);
 }
 
 function buildPairingLine(wine: WineListItem) {
@@ -427,7 +428,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     <>
       <AiModalSidebarCard className="space-y-3.5">
         <div className="space-y-1.5">
-          <AiModalEyebrow>{step === "results" ? "Leitura concluída" : "Entrada"}</AiModalEyebrow>
+          <AiModalEyebrow>{step === "results" ? "Curadoria pronta" : "Entrada"}</AiModalEyebrow>
           <p className="font-serif text-[24px] leading-none tracking-[-0.04em] text-[#181511]">
             {step === "results" ? "Carta analisada" : "Analisar Carta"}
           </p>
@@ -445,7 +446,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 {step === "results" ? `${safeResults.wines.length} vinhos encontrados` : attachmentPreview?.fileName || "Aguardando arquivo"}
               </p>
               <p className="text-[11px] text-[#6B6258]">
-                {safeResults.fallback ? "Leitura parcial" : step === "results" ? "Leitura completa" : attachmentPreview?.isPdf ? "PDF" : "Imagem"}
+                {safeResults.fallback ? "Seleção inicial" : step === "results" ? "Curadoria pronta" : attachmentPreview?.isPdf ? "PDF" : "Imagem"}
               </p>
             </div>
             {attachmentPreview?.url ? (
@@ -473,7 +474,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
         {step === "results" ? (
           <div className="grid grid-cols-2 gap-2">
-            <StatTile label="Leitura" value={safeResults.fallback ? "Parcial" : "OK"} accent={safeResults.fallback ? "amber" : "green"} />
+            <StatTile label="Seleção" value={safeResults.fallback ? "Inicial" : "Pronta"} accent={safeResults.fallback ? "amber" : "green"} />
             <StatTile label="Rótulos" value={safeResults.wines.length} />
             <StatTile label="Com preço" value={pricedWines.length} />
             <StatTile label="Na adega" value={cellarMatches} />
@@ -550,8 +551,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         <AiModalCard className="p-0">
           <PremiumEmptyState
             icon={Search}
-            title={safeResults.fallback ? "Leitura incompleta" : "Nenhum vinho encontrado"}
-            description={safeResults.fallback ? "Tente outra foto ou revise a carta enviada." : "Tente uma imagem mais nítida ou um PDF diferente."}
+            title={safeResults.fallback ? "Vale uma nova leitura da carta" : "Nenhum rótulo ganhou destaque nesta captura"}
+            description={safeResults.fallback ? "Uma nova foto pode abrir uma seleção mais completa." : "Vale tentar outra imagem com melhor enquadramento."}
             primaryAction={{
               label: "Tentar novamente",
               onClick: reset,
@@ -582,7 +583,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 {displayWines.length} rótulos para decidir
               </p>
               <p className="mt-1 text-[12px] leading-5 text-[#6B6258]">
-                Leitura {safeResults.fallback ? "parcial" : "completa"}, seleção enxuta e pronta para ação.
+                {getAiPresentationStatus("menu", safeResults.fallback).description}
               </p>
             </div>
 
@@ -844,8 +845,6 @@ function WineListCard({
   const descriptorLine = buildDescriptorLine(wine);
   const pairingLine = buildPairingLine(wine);
   const priceLabel = formatPrice(wine.price);
-  const confidencePercent = Math.round((wine.confidence || 0) * 100);
-
   return (
     <motion.article
       initial={{ opacity: 0, y: 8 }}
@@ -868,16 +867,6 @@ function WineListCard({
                 <h4 className="min-w-0 flex-1 font-serif text-[22px] leading-[1.02] tracking-[-0.04em] text-[#181511]">
                   {wine.name}
                 </h4>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex shrink-0 items-center rounded-full border border-black/5 bg-white/82 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6B6258]">
-                      {confidencePercent}%
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Confiança discreta: {confidencePercent}% com base na leitura da carta.
-                  </TooltipContent>
-                </Tooltip>
               </div>
 
               {originLine ? (

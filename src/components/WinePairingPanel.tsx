@@ -64,7 +64,9 @@ export function WinePairingPanel({
       if (requestSeq !== requestSeqRef.current) return;
       setPairingResult(result);
       notifySuccess("Harmonização pronta", {
-        description: `${Math.min(result.pairings.length, 5)} sugestões pensadas para acidez, corpo e taninos.`,
+        description: result.fallback
+          ? "Uma seleção elegante já está pronta para revisar."
+          : `${Math.min(result.pairings.length, 5)} sugestões à mesa.`,
         duration: 2800,
       });
       console.info("[WINE_PAIRING_PANEL_SUCCESS]", {
@@ -142,7 +144,7 @@ export function WinePairingPanel({
                 <span className="rounded-full border border-[rgba(198,167,104,0.18)] bg-[rgba(198,167,104,0.10)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7B6528]">
                   Curadoria assistida
                 </span>
-                <span className="text-[11px] font-medium text-[#6B6258]">Sugestões refinadas a partir do perfil do vinho.</span>
+                <span className="text-[11px] font-medium text-[#6B6258]">Uma leitura versátil para seguir à mesa.</span>
               </div>
             )}
             <div className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-3">

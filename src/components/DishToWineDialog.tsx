@@ -15,6 +15,7 @@ import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
+import { buildPresentationStructureLine, cleanAiPresentationText, getAiPresentationStatus, hasAiPresentationValue } from "@/lib/ai-presentation";
 import { AiModalHeader, AiModalCard, AiStatusCard, AiModalActions, AiModalActionButton, AiSectionLabel, AiModalShell, AiModalHeaderBar, AiModalBody, AiToolbarSurface, AiModalSplitLayout, AiModalSidebarCard, AiModalEyebrow, AiModalKeyValue, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 import {
   SectionHeader,
@@ -80,8 +81,8 @@ function buildWineProfileLine(wine: Pick<WineListItem, "body" | "acidity" | "tan
     wine.acidity ? `Acidez ${wine.acidity}` : null,
     wine.body ? `Corpo ${wine.body}` : null,
     wine.tannin ? `Taninos ${wine.tannin}` : null,
-  ].filter((value): value is string => Boolean(value));
-  return parts.length > 0 ? parts.join(" • ") : null;
+  ];
+  return buildPresentationStructureLine(parts);
 }
 
 export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWine }: DishToWineDialogProps) {
@@ -293,8 +294,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setPairingResult(normalized);
       notifySuccess("Sugestões prontas", {
         description: normalized.fallback
-          ? "Não foi possível concluir a leitura com total confiança, então exibimos uma versão simplificada para você revisar."
-          : `${normalized.pairings.length} opções pensadas para o prato.`,
+          ? "Uma seleção enxuta já está pronta para revisar."
+          : `${normalized.pairings.length} opções à mesa.`,
         duration: 2600,
       });
       setStep("results");
@@ -335,8 +336,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setPairingResult(normalized);
       notifySuccess("Harmonização pronta", {
         description: normalized.fallback
-          ? "A análise precisou de fallback, mas ainda retornou sugestões úteis para revisão."
-          : `${Math.min(normalized.pairings.length, 5)} sugestões com porquê técnico.`,
+          ? "Uma seleção versátil já está pronta para revisar."
+          : `${Math.min(normalized.pairings.length, 5)} sugestões à mesa.`,
         duration: 2600,
       });
       setStep("wine-results");
@@ -483,8 +484,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setPairingResult(normalized);
       notifySuccess("Harmonização pronta", {
         description: normalized.fallback
-          ? "A leitura precisou de fallback, mas ainda há sugestões úteis para revisar."
-          : `${Math.min(normalized.pairings.length, 5)} sugestões com porquê técnico.`,
+          ? "Uma seleção versátil já está pronta para revisar."
+          : `${Math.min(normalized.pairings.length, 5)} sugestões à mesa.`,
         duration: 2600,
       });
       setStep("results");
@@ -613,8 +614,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setScanResults(normalized);
           notifySuccess("Carta analisada", {
             description: normalized.fallback
-              ? "Não foi possível ler tudo com segurança; mantivemos uma versão simplificada para revisão."
-              : `${normalized.wines.length} vinhos lidos com sucesso.`,
+              ? "Os principais rótulos já estão organizados para revisar."
+              : `${normalized.wines.length} vinhos à mesa.`,
             duration: 2600,
           });
           setStep("scan-results");
@@ -638,8 +639,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setScanResults(normalized);
       notifySuccess("Carta analisada", {
         description: normalized.fallback
-          ? "Não foi possível ler tudo com segurança; mantivemos uma versão simplificada para revisão."
-          : `${normalized.wines.length} vinhos prontos para refinar.`,
+          ? "Os principais rótulos já estão organizados para revisar."
+          : `${normalized.wines.length} vinhos à mesa.`,
         duration: 2600,
       });
       setStep("scan-results");
@@ -733,8 +734,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setPairingResult(normalized);
           notifySuccess("Cardápio lido", {
             description: normalized.fallback
-              ? "A leitura precisou de fallback, mas a revisão continua possível."
-              : `${normalized.pairings.length} sugestões identificadas.`,
+              ? "Uma seleção enxuta já está pronta para revisar."
+              : `${normalized.pairings.length} sugestões à mesa.`,
             duration: 2600,
           });
           setStep("ext-menu-results");
@@ -757,8 +758,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       setPairingResult(normalized);
       notifySuccess("Cardápio lido", {
         description: normalized.fallback
-          ? "A leitura precisou de fallback, mas a revisão continua possível."
-          : `${normalized.pairings.length} sugestões identificadas.`,
+          ? "Uma seleção enxuta já está pronta para revisar."
+          : `${normalized.pairings.length} sugestões à mesa.`,
         duration: 2600,
       });
       setStep("ext-menu-results");
@@ -906,19 +907,20 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         fallback: Boolean(normalizedScanResults?.fallback),
         fallbackReason: typeof normalizedScanResults?.fallbackReason === "string" ? normalizedScanResults.fallbackReason : null,
       };
+      const scanStatus = getAiPresentationStatus("menu", safeScanResults.fallback);
       const resultStatus = safeScanResults.fallback
         ? {
             icon: <Sparkles className="h-4 w-4 text-amber-700" />,
-            title: "Leitura parcial",
+            title: scanStatus.title,
             tone: "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]",
-            description: "Conseguimos ler parte da carta.",
-            warning: "Revise os dados antes de salvar.",
+            description: scanStatus.description,
+            warning: null,
           }
         : {
             icon: <Check className="h-4 w-4 text-success" />,
-            title: "Leitura completa",
+            title: scanStatus.title,
             tone: "bg-[rgba(95,111,82,0.08)] text-[#2F4A2B] ring-[rgba(95,111,82,0.16)]",
-            description: "A carta foi lida com segurança.",
+            description: scanStatus.description,
             warning: null,
           };
 
@@ -962,10 +964,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           {safeScanResults.wines.length === 0 ? (
             <AiModalCard className="text-center space-y-2">
               <p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">
-                {safeScanResults.fallback ? "Não conseguimos interpretar completamente a carta" : "Nenhum vinho identificado com segurança"}
+                {safeScanResults.fallback ? "Vale uma nova leitura da carta" : "Nenhum rótulo ganhou destaque nesta captura"}
               </p>
               <p className="text-[13.5px] leading-7 text-[#6B6B6B]">
-                {safeScanResults.fallback ? "Tente novamente ou envie outro arquivo." : "Tente outra foto com melhor iluminação."}
+                {safeScanResults.fallback ? "Uma nova foto pode abrir uma seleção mais completa." : "Vale tentar outra imagem com melhor enquadramento."}
               </p>
             </AiModalCard>
           ) : (
@@ -973,8 +975,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               {safeScanResults.wines.map((w, i) => {
                 const highlightTag = w.highlight === "top-pick" ? "Melhor escolha" : w.highlight === "best-value" ? "Melhor custo-benefício" : null;
                 const originLine = [w.producer, w.region, w.country].filter((value): value is string => Boolean(value && value.trim())).join(" · ");
-                const summaryText = compactText(w.description || w.verdict || w.reasoning || "", 164) || null;
-                const whyText = compactText(w.reasoning || w.verdict || w.description || "", 220) || null;
+                const summaryText = cleanAiPresentationText(w.description || w.verdict || w.reasoning || "", { maxLength: 132 });
+                const whyText = cleanAiPresentationText(w.reasoning || w.verdict || w.description || "", { maxLength: 156 });
                 const profileLine = buildWineProfileLine(w);
                 return (
                   <motion.li
@@ -1017,9 +1019,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
                       {whyText ? (
                         <div className="rounded-[20px] border border-[rgba(198,167,104,0.16)] bg-[rgba(198,167,104,0.07)] px-4 py-3.5">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">
-                            Por que escolher
-                          </p>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7B6528]">À mesa</p>
                           <p className="mt-2 text-[13.5px] leading-7 text-[#3F362F]">
                             {whyText}
                           </p>
@@ -1890,34 +1890,50 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </AiModalCard>
                 )}
 
+                {(() => {
+                  const pairingStatus = getAiPresentationStatus("pairing", normalizedPairingResult.fallback);
+                  return (
                 <AiStatusCard
                   icon={normalizedPairingResult.fallback ? <Sparkles className="h-4 w-4 text-amber-700" /> : <Check className="h-4 w-4 text-success" />}
-                  title={normalizedPairingResult.fallback ? "Leitura parcial" : "Leitura completa"}
-                  description={normalizedPairingResult.fallback ? "Conseguimos ler parte da carta." : "A carta foi lida com segurança."}
-                  warning={normalizedPairingResult.fallback ? "Revise os dados antes de salvar." : null}
+                  title={pairingStatus.title}
+                  description={pairingStatus.description}
+                  warning={null}
                   toneClassName={normalizedPairingResult.fallback ? "bg-[rgba(198,167,104,0.10)] text-[#7B6528] ring-[rgba(198,167,104,0.18)]" : "bg-[rgba(95,111,82,0.10)] text-[#57704B] ring-[rgba(95,111,82,0.18)]"}
                 />
+                  );
+                })()}
 
-                <AiModalCard className="space-y-2.5 sm:space-y-3">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-primary/65" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Análise</span>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {[
-                      ["Acidez", normalizedPairingResult.analysis.acidity],
-                      ["Gordura", normalizedPairingResult.analysis.fat],
-                      ["Textura", normalizedPairingResult.analysis.texture],
-                      ["Perfil", normalizedPairingResult.analysis.flavor_profile],
-                      ["Preparo", normalizedPairingResult.analysis.cooking_method],
-                    ].map(([label, value]) => (
-                      <div key={label} className="rounded-xl border border-[rgba(0,0,0,0.05)] bg-white/55 p-3">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-                        <p className="mt-1 text-[12.5px] leading-relaxed text-foreground/75">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </AiModalCard>
+                {[
+                  ["Acidez", normalizedPairingResult.analysis.acidity],
+                  ["Gordura", normalizedPairingResult.analysis.fat],
+                  ["Textura", normalizedPairingResult.analysis.texture],
+                  ["Perfil", normalizedPairingResult.analysis.flavor_profile],
+                  ["Preparo", normalizedPairingResult.analysis.cooking_method],
+                ].some(([, value]) => hasAiPresentationValue(value)) && (
+                  <AiModalCard className="space-y-2.5 sm:space-y-3">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-primary/65" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Leitura do prato</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {[
+                        ["Acidez", normalizedPairingResult.analysis.acidity],
+                        ["Gordura", normalizedPairingResult.analysis.fat],
+                        ["Textura", normalizedPairingResult.analysis.texture],
+                        ["Perfil", normalizedPairingResult.analysis.flavor_profile],
+                        ["Preparo", normalizedPairingResult.analysis.cooking_method],
+                      ]
+                        .map(([label, value]) => [label, cleanAiPresentationText(value)] as const)
+                        .filter(([, value]) => value.length > 0)
+                        .map(([label, value]) => (
+                          <div key={label} className="rounded-xl border border-[rgba(0,0,0,0.05)] bg-white/55 p-3">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+                            <p className="mt-1 text-[12.5px] leading-relaxed text-foreground/75">{value}</p>
+                          </div>
+                        ))}
+                    </div>
+                  </AiModalCard>
+                )}
 
                 <SectionHeader
                   icon="chef"
