@@ -23,12 +23,12 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-2xl border px-4 py-3.5 shadow-[0_18px_50px_-32px_rgba(15,15,20,0.45),0_2px_8px_rgba(15,15,20,0.08)] transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full data-[state=open]:sm:slide-in-from-bottom-full",
+  "premium-floating-surface group pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-[20px] px-4 py-3.5 transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full data-[state=open]:sm:slide-in-from-bottom-full",
   {
     variants: {
       variant: {
-        default: "border-[#E6DED2] bg-[rgba(255,255,255,0.96)] text-[#1B1A18] backdrop-blur-xl",
-        destructive: "border-[#E7B5BD] bg-[#FFF7F8] text-[#5A1822] backdrop-blur-xl",
+        default: "text-[#1B1A18]",
+        destructive: "premium-state-surface--danger text-[#5A1822]",
       },
     },
     defaultVariants: {
@@ -52,7 +52,7 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white/70 px-3 text-sm font-medium text-[#1B1A18] shadow-sm ring-offset-background transition-colors hover:bg-white group-[.destructive]:border-[#E7B5BD] group-[.destructive]:bg-[#FFF1F4] group-[.destructive]:text-[#5A1822] group-[.destructive]:hover:bg-[#FFE9EE] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      "premium-chip-surface inline-flex h-8 shrink-0 items-center justify-center rounded-full px-3 text-sm font-medium text-[#1B1A18] ring-offset-background transition-colors hover:bg-white group-[.destructive]:border-[rgba(175,45,54,0.16)] group-[.destructive]:bg-[rgba(175,45,54,0.09)] group-[.destructive]:text-[#5A1822] group-[.destructive]:hover:bg-[#FFE9EE] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/20 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       className,
     )}
     {...props}

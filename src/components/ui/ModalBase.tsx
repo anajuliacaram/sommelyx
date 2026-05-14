@@ -30,20 +30,14 @@ export function ModalBase({
       <DialogOverlay />
       <DialogPrimitive.Content
         className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4"
-        style={{
-          backdropFilter: "none",
-          WebkitBackdropFilter: "none",
-        }}
+        style={undefined}
       >
         <div
           className={cn(
-            "relative flex w-full max-w-lg flex-col overflow-hidden rounded-t-[24px] border border-black/5 bg-[#F6F3EF] shadow-[0_20px_60px_rgba(0,0,0,0.12)] max-h-[calc(100dvh-8px)] sm:max-h-[90vh] sm:rounded-[24px]",
+            "premium-modal-shell relative flex w-full max-w-lg flex-col overflow-hidden rounded-t-[24px] max-h-[calc(100dvh-8px)] sm:max-h-[90vh] sm:rounded-[24px]",
             className,
           )}
-          style={{
-            backdropFilter: "blur(12px) saturate(1.02)",
-            WebkitBackdropFilter: "blur(12px) saturate(1.02)",
-          }}
+          style={undefined}
         >
           <div className="shrink-0 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6">
             <div className="flex items-start gap-4">

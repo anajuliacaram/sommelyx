@@ -19,7 +19,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-180 data-[state=closed]:duration-150",
+      "premium-modal-overlay fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-180 data-[state=closed]:duration-150",
       className,
     )}
     {...props}
@@ -57,14 +57,8 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
       <SheetOverlay />
       <SheetPrimitive.Content
           ref={ref}
-        className={cn(sheetVariants({ side }), className)}
-        style={{
-          background: "#F6F3EF",
-          backdropFilter: "blur(12px) saturate(1.02)",
-          WebkitBackdropFilter: "blur(12px) saturate(1.02)",
-          border: "1px solid rgba(0, 0, 0, 0.05)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
-        }}
+        className={cn("premium-modal-shell", sheetVariants({ side }), className)}
+        style={undefined}
         {...props}
       >
         {children}
@@ -91,7 +85,7 @@ const SheetTitle = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <SheetPrimitive.Title ref={ref} className={cn("text-[20px] sm:text-2xl font-semibold tracking-tight text-[#1E1E1E]", className)} {...props} />
+  <SheetPrimitive.Title ref={ref} className={cn("text-[20px] font-semibold tracking-[-0.02em] text-[#1A1713] sm:text-[28px]", className)} {...props} />
 ));
 SheetTitle.displayName = SheetPrimitive.Title.displayName;
 
@@ -99,7 +93,7 @@ const SheetDescription = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <SheetPrimitive.Description ref={ref} className={cn("mt-1 text-[15px] font-medium tracking-tight text-[#6B6B6B] leading-relaxed", className)} {...props} />
+  <SheetPrimitive.Description ref={ref} className={cn("mt-1 text-[14px] font-medium leading-6 tracking-[-0.01em] text-[#6B6B6B] sm:text-[15px]", className)} {...props} />
 ));
 SheetDescription.displayName = SheetPrimitive.Description.displayName;
 

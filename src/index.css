@@ -903,6 +903,89 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
+  .premium-modal-overlay {
+    background: rgba(18, 14, 16, 0.42);
+    backdrop-filter: blur(10px) saturate(1.02);
+    -webkit-backdrop-filter: blur(10px) saturate(1.02);
+  }
+
+  .premium-modal-shell {
+    background: linear-gradient(180deg, rgba(247, 242, 236, 0.97) 0%, rgba(243, 238, 232, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    box-shadow: 0 28px 68px -34px rgba(42, 33, 26, 0.28), 0 2px 10px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(18px) saturate(1.06);
+    -webkit-backdrop-filter: blur(18px) saturate(1.06);
+  }
+
+  .premium-header-shell {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.76) 0%, rgba(255, 255, 255, 0.62) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.46);
+    backdrop-filter: blur(16px) saturate(1.06);
+    -webkit-backdrop-filter: blur(16px) saturate(1.06);
+  }
+
+  .premium-footer-shell {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.60) 0%, rgba(255, 255, 255, 0.74) 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.46);
+    backdrop-filter: blur(16px) saturate(1.06);
+    -webkit-backdrop-filter: blur(16px) saturate(1.06);
+  }
+
+  .premium-control-surface {
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(58, 51, 39, 0.08);
+    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(12px) saturate(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(1.05);
+  }
+
+  .premium-control-surface:hover {
+    border-color: rgba(58, 51, 39, 0.12);
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  .premium-control-surface:focus-within {
+    border-color: rgba(123, 30, 43, 0.22);
+    box-shadow: 0 0 0 3px rgba(123, 30, 43, 0.08), 0 1px 2px rgba(58, 51, 39, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .premium-floating-surface {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.90) 56%, rgba(248, 244, 237, 0.92) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 24px 56px -28px rgba(58, 51, 39, 0.24), 0 2px 8px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
+  }
+
+  .premium-chip-surface {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(58, 51, 39, 0.08);
+    box-shadow: 0 1px 2px rgba(58, 51, 39, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .premium-chip-surface--active {
+    background: rgba(123, 30, 43, 0.09);
+    border-color: rgba(123, 30, 43, 0.16);
+    box-shadow: 0 8px 18px -16px rgba(123, 30, 43, 0.24);
+  }
+
+  .premium-state-surface--success {
+    background: rgba(31, 122, 87, 0.08);
+    border-color: rgba(31, 122, 87, 0.14);
+  }
+
+  .premium-state-surface--warning {
+    background: rgba(178, 127, 41, 0.09);
+    border-color: rgba(178, 127, 41, 0.16);
+  }
+
+  .premium-state-surface--danger {
+    background: rgba(175, 45, 54, 0.09);
+    border-color: rgba(175, 45, 54, 0.16);
+  }
+
   /* ── Wine Card — Glass ── */
   .wine-card-glass {
     border-radius: 20px;

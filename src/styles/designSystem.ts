@@ -10,8 +10,8 @@ export const COLORS = {
 } as const;
 
 export const TYPOGRAPHY = {
-  heading: "'Playfair Display', 'Fraunces', Georgia, serif",
-  body: "'Inter', system-ui, sans-serif",
+  heading: "'Libre Baskerville', Georgia, serif",
+  body: "'Plus Jakarta Sans', system-ui, sans-serif",
 } as const;
 
 export const SPACING = {
@@ -58,16 +58,16 @@ export const designSystem = {
     borderRadius: "20px",
   } as const,
   headerShell: {
-    backdropFilter: "blur(12px) saturate(1.12)",
-    WebkitBackdropFilter: "blur(12px) saturate(1.12)",
-    background: "linear-gradient(to bottom, rgba(255,255,255,0.96), rgba(255,255,255,0.82))",
+    backdropFilter: "blur(16px) saturate(1.06)",
+    WebkitBackdropFilter: "blur(16px) saturate(1.06)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.76) 0%, rgba(255,255,255,0.62) 100%)",
     boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
   } as const,
   footerShell: {
-    borderTop: "1px solid rgba(0,0,0,0.06)",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(248,244,237,0.94) 100%)",
-    backdropFilter: "blur(8px) saturate(1.02)",
-    WebkitBackdropFilter: "blur(8px) saturate(1.02)",
+    borderTop: "1px solid rgba(255,255,255,0.46)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0.74) 100%)",
+    backdropFilter: "blur(16px) saturate(1.06)",
+    WebkitBackdropFilter: "blur(16px) saturate(1.06)",
   } as const,
   socialIcon: {
     background: "rgba(255,255,255,0.82)",
@@ -76,13 +76,13 @@ export const designSystem = {
     boxShadow: "0 8px 18px -14px rgba(0,0,0,0.14)",
   } as const,
   primaryButton:
-    "h-11 sm:h-12 rounded-[12px] px-6 sm:px-7 text-[14px] font-semibold bg-[linear-gradient(135deg,#7b1e2b_0%,#9f2c3a_100%)] text-white shadow-[0_12px_24px_-16px_rgba(123,30,43,0.3)] transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:brightness-105 active:scale-[0.98]",
+    "h-11 sm:h-12 rounded-[16px] px-6 sm:px-7 text-[14px] font-semibold bg-[linear-gradient(135deg,#7b1e2b_0%,#9f2c3a_100%)] text-white shadow-[0_12px_24px_-16px_rgba(123,30,43,0.3)] transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:brightness-105 active:scale-[0.98]",
   secondaryButton:
-    "h-11 sm:h-12 rounded-[12px] border border-[rgba(0,0,0,0.08)] bg-white/72 px-6 sm:px-7 text-[14px] font-semibold text-[#2A2A2A] transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-white",
+    "h-11 sm:h-12 rounded-[16px] border border-[rgba(58,51,39,0.08)] bg-white/84 px-6 sm:px-7 text-[14px] font-semibold text-[#2A2A2A] transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:bg-white/92",
   pillButton:
-    "rounded-full px-4 py-2 text-[12px] font-semibold border border-black/10 bg-white/70 backdrop-blur-sm text-[#3A3A3A] hover:bg-white transition-colors",
+    "rounded-full px-4 py-2 text-[12px] font-semibold border border-[rgba(58,51,39,0.08)] bg-white/72 backdrop-blur-sm text-[#3A3A3A] hover:bg-white transition-colors",
   inputField:
-    "h-11 rounded-[10px] border border-[rgba(0,0,0,0.08)] bg-[#f5f5f5] px-4 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/50 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] focus:border-primary/25 focus:bg-white focus:ring-2 focus:ring-primary/[0.08]",
+    "h-11 rounded-[16px] border border-[rgba(58,51,39,0.08)] bg-white/84 px-4 text-[14px] font-medium text-foreground placeholder:text-muted-foreground/50 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] focus:border-primary/25 focus:bg-white focus:ring-2 focus:ring-primary/[0.08]",
   authShell:
     "relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary",
   authGrid:

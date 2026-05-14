@@ -11,30 +11,30 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "btn-primary-premium h-11 rounded-[12px] px-5 text-[15px] font-semibold text-white sm:h-12",
+          "btn-primary-premium h-11 rounded-[16px] px-5 text-[14px] font-semibold text-white sm:h-12 sm:text-[15px]",
         secondary:
-          "h-11 rounded-[12px] border border-[rgba(95,111,82,0.18)] bg-white px-4 text-[14px] text-[#3A3327] hover:bg-[rgba(0,0,0,0.03)] shadow-none",
+          "premium-control-surface h-11 rounded-[16px] px-4 text-[13.5px] font-semibold text-[#3A3327] hover:-translate-y-px sm:h-12 sm:text-[14px]",
         tertiary:
-          "h-11 rounded-[12px] bg-[#F5EFE6] px-4 text-[#6A1A28] hover:bg-[#EADFCC] shadow-none",
+          "h-11 rounded-[16px] border border-[rgba(198,167,104,0.18)] bg-[rgba(255,248,237,0.88)] px-4 text-[#6A1A28] shadow-[0_1px_2px_rgba(58,51,39,0.04)] backdrop-blur-sm hover:-translate-y-px hover:bg-[rgba(255,248,237,0.96)] sm:h-12",
         outline:
-          "h-11 rounded-[12px] border border-black/10 bg-white px-4 text-[#333] hover:bg-[#F8F8F8] hover:border-black/15 shadow-none",
+          "premium-control-surface h-11 rounded-[16px] px-4 text-[13.5px] text-[#3F362F] hover:-translate-y-px sm:h-12 sm:text-[14px]",
         ghost:
-          "h-11 rounded-[12px] bg-transparent px-3 text-[#6B6B6B] hover:bg-[#F5EFE6] hover:text-[#1A1A1A] shadow-none",
+          "h-11 rounded-[16px] border border-transparent bg-transparent px-3 text-[13.5px] text-[#6B6B6B] hover:-translate-y-px hover:bg-[rgba(255,255,255,0.52)] hover:text-[#1A1A1A] sm:h-12",
         danger:
-          "btn-primary-premium h-11 rounded-[12px] px-4 text-white sm:h-12",
+          "h-11 rounded-[16px] border border-[rgba(175,45,54,0.16)] bg-[linear-gradient(135deg,rgba(175,45,54,0.94)_0%,rgba(145,28,36,0.96)_100%)] px-4 text-white shadow-[0_10px_24px_-16px_rgba(175,45,54,0.32)] hover:-translate-y-px hover:shadow-[0_14px_28px_-18px_rgba(175,45,54,0.38)] sm:h-12",
         success:
-          "h-11 rounded-[12px] border border-black/10 bg-white px-4 text-[#333] hover:bg-[#F8F8F8] hover:border-black/15 shadow-none",
+          "premium-control-surface h-11 rounded-[16px] border-[rgba(31,122,87,0.12)] bg-[rgba(31,122,87,0.08)] px-4 text-[13.5px] text-[hsl(var(--success))] hover:-translate-y-px sm:h-12 sm:text-[14px]",
 
         // Back-compat aliases
         default:
-          "btn-primary-premium h-11 rounded-[12px] px-5 text-[15px] font-semibold text-white sm:h-12",
+          "btn-primary-premium h-11 rounded-[16px] px-5 text-[14px] font-semibold text-white sm:h-12 sm:text-[15px]",
         destructive:
-          "btn-primary-premium h-11 rounded-[12px] px-5 text-[15px] font-semibold text-white sm:h-12",
+          "h-11 rounded-[16px] border border-[rgba(175,45,54,0.16)] bg-[linear-gradient(135deg,rgba(175,45,54,0.94)_0%,rgba(145,28,36,0.96)_100%)] px-5 text-[14px] font-semibold text-white shadow-[0_10px_24px_-16px_rgba(175,45,54,0.32)] hover:-translate-y-px hover:shadow-[0_14px_28px_-18px_rgba(175,45,54,0.38)] sm:h-12 sm:text-[15px]",
         link: "h-11 rounded-[12px] bg-transparent px-0 text-[#6A1A28] underline-offset-4 hover:text-[#1A1A1A] hover:underline shadow-none",
         premium:
-          "btn-primary-premium h-11 rounded-[12px] px-5 text-[15px] font-semibold text-white sm:h-12",
+          "btn-primary-premium h-11 rounded-[16px] px-5 text-[14px] font-semibold text-white sm:h-12 sm:text-[15px]",
         glass:
-          "h-11 rounded-[12px] border border-[rgba(95,111,82,0.18)] bg-white px-4 text-[14px] text-[#3A3327] hover:bg-[rgba(0,0,0,0.03)] shadow-none",
+          "premium-control-surface h-11 rounded-[16px] px-4 text-[13.5px] text-[#3A3327] hover:-translate-y-px sm:h-12 sm:text-[14px]",
       },
       size: {
         default: "h-12 px-4 text-[15px]",
