@@ -17,7 +17,7 @@ import {
   UtensilsCrossed,
 } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   analyzeWineList,
@@ -654,7 +654,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     <>
       <TooltipProvider>
         <Sheet open={open} onOpenChange={handleClose}>
-          <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE}>
+          <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
+            <SheetTitle className="sr-only">Analisar Carta</SheetTitle>
             <AiModalShell>
               <AiModalHeaderBar>
               <AiModalHeader

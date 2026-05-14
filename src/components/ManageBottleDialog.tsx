@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -300,12 +300,12 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                 <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0 flex-1 pt-0.5">
-                <h2
+                <SheetTitle
                   className="text-[26px] sm:text-[28px] font-semibold text-[#1A1713] leading-[1.15]"
                   style={{ fontFamily: "'Libre Baskerville', Georgia, serif", letterSpacing: "-0.02em" }}
                 >
                   Adicionar Consumo
-                </h2>
+                </SheetTitle>
                 <p className="text-[13px] leading-relaxed text-[#3A3327]/60 mt-1">
                   Registre uma degustação da sua adega ou de um consumo externo
                 </p>

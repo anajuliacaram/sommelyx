@@ -3023,6 +3023,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       <SheetContent
         className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
+        aria-label="Importar planilha de vinhos"
       >
         <AiModalShell>
           <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3 pr-14">

@@ -226,7 +226,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="items-center overflow-hidden rounded-[24px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_24px_64px_rgba(38,24,18,0.14)] sm:max-w-[920px]">
+      <DialogContent
+        className="items-center overflow-hidden rounded-[24px] border border-black/[0.04] bg-[#FAF8F6] p-0 shadow-[0_24px_64px_rgba(38,24,18,0.14)] sm:max-w-[920px]"
+        aria-label="Registrar consumo"
+      >
         <div
           className="flex w-full max-h-[88dvh] min-h-0 flex-col rounded-[24px] p-4 sm:p-5"
           style={{ backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Check, X, RotateCcw, FileText } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
@@ -559,7 +559,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       <SheetContent
         className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
+        aria-label="Escanear Rótulo"
       >
+        <SheetTitle className="sr-only">Escanear Rótulo</SheetTitle>
         <AiModalShell>
         <AiModalHeaderBar>
           <AiModalHeader
