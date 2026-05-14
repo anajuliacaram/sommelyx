@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +14,14 @@ import {
   AI_MODAL_DIALOG_CONTENT_CLASSNAME,
   AI_MODAL_DIALOG_CONTENT_STYLE,
   AI_MODAL_FIELD_CLASSNAME,
-  AI_MODAL_SURFACE,
   AI_MODAL_TEXTAREA_CLASSNAME,
   AiModalActionButton,
+  AiModalBody,
   AiModalCard,
+  AiModalFooterBar,
+  AiModalHeader,
+  AiModalHeaderBar,
+  AiModalShell,
   AiSectionLabel,
   AiModalSplitLayout,
 } from "@/components/ai-flow/ModalLayout";
@@ -210,27 +214,16 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
         style={AI_MODAL_DIALOG_CONTENT_STYLE}
         aria-label="Registrar consumo"
       >
-        <div
-          className="flex w-full max-h-[92dvh] min-h-0 flex-col rounded-[20px] p-3.5 sm:p-4"
-          style={{ backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
-        >
-          <DialogHeader className="mb-3 text-left">
-            <div className="flex items-start gap-3 pr-10">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.08)] bg-[rgba(255,251,244,0.58)] text-[#7B1E2B]">
-                <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <DialogTitle className="text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[22px]">
-                  Registrar consumo
-                </DialogTitle>
-                <DialogDescription className="mt-1 text-[12px] font-medium leading-5 tracking-[-0.005em] text-[#6B6B6B]">
-                  Salve a garrafa, o lugar e a impressão essencial.
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
+        <AiModalShell>
+          <AiModalHeaderBar>
+            <AiModalHeader
+              icon={<WineIcon className="h-5 w-5 text-[#7B1E2B]" />}
+              title="Registrar consumo"
+              description="Salve a garrafa, o lugar e a impressão essencial."
+            />
+          </AiModalHeaderBar>
 
-          <div className="flex min-h-0 flex-1 flex-col">
+          <AiModalBody>
             <AiModalSplitLayout>
             <div className="space-y-2.5 overflow-y-auto pr-1">
               <AiModalCard className="space-y-2.5 px-3 py-3">
@@ -335,7 +328,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
                   >
                     {filteredWines.length > 4 ? (
-                      <div className="sticky top-0 z-10 border-b border-black/5 bg-gradient-to-b from-white/95 to-white/70 px-3 py-1 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]/60 backdrop-blur-sm">
+                      <div className="sticky top-0 z-10 border-b border-[rgba(58,51,39,0.07)] bg-[rgba(246,240,232,0.92)] px-3 py-1 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]/60 backdrop-blur-sm">
                         {filteredWines.length} opções
                       </div>
                     ) : null}
@@ -508,8 +501,9 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </AiModalCard>
             </div>
             </AiModalSplitLayout>
+          </AiModalBody>
 
-            <div className="mt-2.5 border-t border-black/5 pt-2.5 backdrop-blur-md" style={{ backgroundColor: `${AI_MODAL_SURFACE}F5` }}>
+          <AiModalFooterBar>
               <AiModalActionButton
                 onClick={handleSubmit}
                 disabled={addConsumption.isPending}
@@ -518,9 +512,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               >
                 {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
               </AiModalActionButton>
-            </div>
-          </div>
-        </div>
+          </AiModalFooterBar>
+        </AiModalShell>
       </DialogContent>
     </Dialog>
   );

@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Check, X, RotateCcw } from "@/icons/lucide";
+import { Camera, Upload, Check, RotateCcw } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { EdgeFunctionError, invokeEdgeFunction } from "@/lib/edge-invoke";
@@ -12,7 +12,23 @@ import { getAttachmentErrorMessage, prepareWineLabelScanAttachment } from "@/lib
 import { getClientDeviceType, logFileRequestStart } from "@/lib/observability";
 import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
-import { AiModalHeader, AiModalCard, AiModalActions, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalSplitLayout, AiUploadPanel, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
+import {
+  AI_MODAL_ACTION_TILE_CLASSNAME,
+  AI_MODAL_SHEET_CONTENT_CLASSNAME,
+  AI_MODAL_SHEET_CONTENT_STYLE,
+  AiModalHeader,
+  AiModalCard,
+  AiModalActions,
+  AiModalActionButton,
+  AiModalShell,
+  AiModalHeaderBar,
+  AiModalBody,
+  AiModalSplitLayout,
+  AiUploadPanel,
+  AiSectionLabel,
+} from "@/components/ai-flow/ModalLayout";
+import { PairingErrorState } from "@/components/pairing/shared";
+import { cn } from "@/lib/utils";
 
 interface ScannedWineData extends CanonicalScanResult {
   labelImagePreview?: string | null;
@@ -520,7 +536,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-3"
+              className="space-y-3"
               >
                 <AiModalCard className="space-y-3">
                   <AiUploadPanel
@@ -597,11 +613,23 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
+                {imagePreview ? (
+                  <div className={cn("flex items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}>
+                    <div className="h-16 w-12 shrink-0 overflow-hidden rounded-[12px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.58)]">
+                      <img src={imagePreview} alt="Rótulo analisado" className="h-full w-full object-cover" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold leading-tight text-[#1A1713]">Rótulo analisado</p>
+                      <p className="mt-0.5 text-[11.5px] leading-4 text-[#6B6258]">Somente dados legíveis serão aplicados.</p>
+                    </div>
+                  </div>
+                ) : null}
+
                 {resultRows.length > 0 && (
                   <AiModalCard className="space-y-2">
-                    <div className="border-b border-black/5 pb-2">
-                      <p className="text-[14.5px] font-semibold tracking-[-0.01em] text-[#1A1713]">Dados encontrados</p>
-                      <p className="mt-0.5 text-[11.5px] text-[#6B6258]">Revise antes de aplicar.</p>
+                    <div className="border-b border-[rgba(58,51,39,0.07)] pb-2">
+                      <AiSectionLabel>Dados encontrados</AiSectionLabel>
+                      <p className="mt-1 text-[12px] leading-5 text-[#6B6258]">Revise antes de aplicar.</p>
                     </div>
                     {resultRows}
                   </AiModalCard>
@@ -628,42 +656,21 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <AiModalCard className="space-y-1.5 border-destructive/15 bg-destructive/5">
-                  <div className="flex items-start gap-2.5">
-                    <X className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                    <div>
-                      <p className="text-[14px] font-semibold text-[#1A1713]">Nova captura</p>
-                      <p className="text-[12.5px] leading-5 text-[#6B6258]">{errorMsg}</p>
-                    </div>
-                  </div>
-                </AiModalCard>
-                <div className="flex w-full flex-col gap-2">
-                <AiModalActionButton
-                  onClick={() => {
+                <PairingErrorState
+                  message={errorMsg}
+                  onRetry={() => {
                     if (lastBase64) {
                       runScan(lastBase64);
                       return;
                     }
                     reset();
                   }}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                  Tentar novamente
-                </AiModalActionButton>
-                <AiModalActionButton
-                  onClick={() => fileInputRef.current?.click()}
-                  variant="secondary"
-                  className="w-full"
-                >
+                  onClose={() => handleClose(false)}
+                />
+                <AiModalActionButton onClick={() => fileInputRef.current?.click()} variant="secondary" className="w-full">
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
                   Usar outra foto
                 </AiModalActionButton>
-                  <AiModalActionButton onClick={() => handleClose(false)} variant="ghost" className="w-full">
-                    Cadastrar manualmente
-                  </AiModalActionButton>
-                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -678,8 +685,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-3 py-0.5">
-      <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</span>
-      <span className="text-right text-[12.5px] font-medium leading-5 text-foreground">{value}</span>
+      <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6B6258]">{label}</span>
+      <span className="text-right text-[12.5px] font-medium leading-5 text-[#1A1713]">{value}</span>
     </div>
   );
 }

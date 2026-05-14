@@ -1,17 +1,16 @@
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Sparkles, BookOpen } from "@/icons/lucide";
-import { Button } from "@/components/ui/button";
 import { generateWinePairing, type GeneratedWinePairing } from "@/lib/sommelier-ai";
 import { notifySuccess } from "@/lib/feedback";
-import { Dialog } from "@/components/ui/dialog";
-import { ModalBase } from "@/components/ui/ModalBase";
 import {
   SectionHeader,
   PairingLoadingState,
   PairingErrorState,
   WineSuggestionCard,
 } from "@/components/pairing/shared";
+import { AI_MODAL_CARD_CLASSNAME, AiModalActionButton, AiSectionLabel } from "@/components/ai-flow/ModalLayout";
+import { cn } from "@/lib/utils";
 
 interface WinePairingPanelProps {
   wineName: string;
@@ -93,20 +92,18 @@ export function WinePairingPanel({
       <div className="space-y-3">
         <div className="flex items-center gap-1.5">
           <UtensilsCrossed className="h-3.5 w-3.5 text-primary/70" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Harmonização
-          </span>
+          <AiSectionLabel>Harmonização</AiSectionLabel>
         </div>
-        <Button
-          variant="ghost"
+        <AiModalActionButton
+          variant="secondary"
           size="sm"
           onClick={handleFetch}
           disabled={loading}
-          className="h-9 px-3.5 text-[12px] font-semibold border border-border/40 bg-background/50 backdrop-blur-sm hover:bg-primary/5 hover:border-primary/20 hover:text-primary text-muted-foreground rounded-xl transition-all duration-200"
+          className="w-full justify-center sm:w-auto"
         >
           <Sparkles className="h-3.5 w-3.5 mr-1.5" />
           Sugerir pratos
-        </Button>
+        </AiModalActionButton>
       </div>
     );
   }
@@ -147,10 +144,10 @@ export function WinePairingPanel({
                 <span className="text-[11px] font-medium text-[#6B6258]">Uma leitura versátil para seguir à mesa.</span>
               </div>
             )}
-            <div className="surface-clarity rounded-2xl border border-[rgba(0,0,0,0.05)] p-4 space-y-3">
+            <div className={cn("space-y-3 p-3", AI_MODAL_CARD_CLASSNAME)}>
               <div className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5 text-primary/65" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary/65">Perfil do prato ideal</span>
+                <AiSectionLabel>Perfil do prato ideal</AiSectionLabel>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[
@@ -160,9 +157,9 @@ export function WinePairingPanel({
                   ["Perfil", pairingResult.analysis.flavor_profile],
                   ["Preparo", pairingResult.analysis.cooking_method],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-xl border border-[rgba(0,0,0,0.05)] bg-white/55 p-3">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-                    <p className="mt-1 text-[12.5px] leading-relaxed text-foreground/75">{value}</p>
+                  <div key={label} className="rounded-[12px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.58)] p-3">
+                    <p className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#6B6258]">{label}</p>
+                    <p className="mt-1 text-[12.5px] leading-5 text-[#433A32]">{value}</p>
                   </div>
                 ))}
               </div>

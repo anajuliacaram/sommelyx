@@ -40,7 +40,10 @@ import {
   AiModalHeaderBar,
   AiModalBody,
   AiModalSplitLayout,
+  AiFilterChip,
+  AiToolbarSurface,
   AiUploadPanel,
+  AI_MODAL_CARD_CLASSNAME,
   AI_MODAL_FIELD_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
@@ -432,7 +435,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         className="space-y-3"
       >
         <section className="space-y-2.5">
-          <div className="border-b border-[rgba(24,21,17,0.08)] pb-3">
+          <div className="border-b border-[rgba(58,51,39,0.07)] pb-3">
             <div>
               <p className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
                 {displayWines.length} rótulos para decidir
@@ -446,7 +449,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           </div>
         </section>
 
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+        <AiToolbarSurface className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#6B6258]/55" />
             <Input
@@ -460,27 +463,24 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             {TYPE_PILLS.filter((pill) => pill.key === "all" || availableTypes.includes(pill.key as WineType)).map((pill) => {
               const active = filterMode === pill.key;
               return (
-                <button
+                <AiFilterChip
                   key={pill.key}
                   type="button"
                   onClick={() => setFilterMode(pill.key)}
-                  className={cn(
-                    "h-8 rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors",
-                    active ? "bg-[#7B1E2B]/10 text-[#5A1528]" : "bg-[rgba(255,251,244,0.70)] text-[#62584F] hover:bg-[rgba(255,251,244,0.86)]",
-                  )}
+                  selected={active}
+                  className="h-8 px-2.5 text-[10px] uppercase tracking-[0.08em]"
                 >
                   {pill.label}
-                </button>
+                </AiFilterChip>
               );
             })}
           </div>
-        </div>
+        </AiToolbarSurface>
 
         {displayWines.length > 0 ? (
           <section className="space-y-2.5">
             {displayWines.map((wine, index) => {
               const cellarMatch = matchedCellarMap.get(wine.name) || null;
-              const isFeatured = wine.name === safeResults.topPick;
               return (
                 <WineListCard
                   key={`${wine.name}-${index}`}
@@ -691,19 +691,15 @@ function WineListCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden rounded-[14px] transition-all duration-200 hover:-translate-y-[1px]",
+        "overflow-hidden transition-all duration-200 hover:-translate-y-px",
+        AI_MODAL_CARD_CLASSNAME,
         isFeatured && "xl:col-span-1",
         rhythmClassName,
-        isSelected
-          ? "border border-[rgba(123,30,43,0.12)] bg-[rgba(255,252,248,0.92)]"
-          : isFeatured
-            ? "bg-[linear-gradient(180deg,rgba(255,252,247,0.88)_0%,rgba(248,242,234,0.82)_100%)]"
-            : "bg-[rgba(255,251,244,0.66)]",
+        isSelected ? "border-[rgba(123,30,43,0.16)] bg-[rgba(255,251,244,0.84)]" : "",
       )}
       style={{
-        backdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
-        WebkitBackdropFilter: isFeatured ? "blur(18px) saturate(1.08)" : "blur(14px) saturate(1.06)",
-        boxShadow: isFeatured && !isSelected ? "inset 0 1px 0 rgba(255,255,255,0.74)" : undefined,
+        backdropFilter: "blur(14px) saturate(1.06)",
+        WebkitBackdropFilter: "blur(14px) saturate(1.06)",
       }}
     >
       <div
@@ -749,7 +745,7 @@ function WineListCard({
             {tags.length > 0 ? (
               <div className="flex flex-wrap gap-1 pt-0.5">
                 {tags.slice(0, 1).map((tag) => (
-                  <span key={tag} className="rounded-full bg-[rgba(123,30,43,0.07)] px-2 py-[4px] text-[9px] font-semibold uppercase tracking-[0.08em] text-[#7B1E2B]">
+                  <span key={tag} className="rounded-full border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.07)] px-2 py-[4px] text-[9px] font-semibold uppercase tracking-[0.08em] text-[#7B1E2B]">
                     {tag}
                   </span>
                 ))}
@@ -797,8 +793,8 @@ function ActionPill({
       className={cn(
         "inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition-all duration-200",
         disabled
-          ? "cursor-not-allowed bg-[rgba(255,255,255,0.28)] text-[#9A9086]"
-          : "bg-[rgba(255,251,244,0.50)] text-[#433A32] shadow-none hover:bg-[rgba(255,251,244,0.72)] hover:-translate-y-[1px]",
+          ? "cursor-not-allowed border border-[rgba(58,51,39,0.06)] bg-[rgba(255,251,244,0.38)] text-[#9A9086]"
+          : "border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.58)] text-[#433A32] shadow-none hover:-translate-y-px hover:bg-[rgba(255,251,244,0.78)]",
       )}
       disabled={disabled}
     >

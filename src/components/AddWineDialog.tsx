@@ -22,9 +22,12 @@ import { normalizeWineData, normalizeWineSearchText, normalizeWineText } from "@
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
 import { getMeaningfulScanFields, isMeaningfulScanValue, normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
+import { cn } from "@/lib/utils";
 import {
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
+  AI_MODAL_ACTION_TILE_CLASSNAME,
+  AI_MODAL_TEXTAREA_CLASSNAME,
   AiModalActionButton,
   AiModalBody,
   AiModalCard,
@@ -1089,7 +1092,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                 <motion.form key="form" onSubmit={handleSubmit} className="space-y-2.5">
                   {/* Scan Label Card */}
                   <div
-                    className="group cursor-pointer rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
+                    className={cn("group flex cursor-pointer items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                     onClick={() => setScanOpen(true)}
                   >
                     <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(111,127,91,0.1)' }}>
@@ -1097,15 +1100,15 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                     <div className="flex flex-col">
                       <p className="text-[14px] font-semibold" style={{ color: '#1F1F1F' }}>Escanear foto do rótulo</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6B6B' }}>
+                      <p className="text-[11px] mt-0.5" style={{ color: '#6B6258' }}>
                         Use câmera ou fototeca para ler a garrafa
                       </p>
                     </div>
                   </div>
 
                   {labelImagePreview && (
-                    <div className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-2.5 flex items-center gap-2.5">
-                      <div className="w-16 h-20 rounded-xl overflow-hidden shrink-0 border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.62)]">
+                    <div className={cn("flex items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}>
+                      <div className="w-16 h-20 rounded-[12px] overflow-hidden shrink-0 border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.58)]">
                         <img
                           src={labelImagePreview}
                           alt="Foto do rótulo analisado"
@@ -1123,7 +1126,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                   {/* Import File Card */}
                   <div
-                    className="group cursor-pointer rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-2.5 flex items-center gap-2.5 transition-all duration-180 hover:-translate-y-[1px]"
+                    className={cn("group flex cursor-pointer items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                     onClick={() => setImportCsvOpen(true)}
                   >
                     <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105" style={{ backgroundColor: 'rgba(200,169,106,0.12)' }}>
@@ -1195,7 +1198,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? '#1F1F1F' : '#9A9A9A', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
                           <SelectValue placeholder="Selecionar estilo..." />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl border bg-white shadow-lg" style={{ borderColor: '#E5E2DC' }}>
+                        <SelectContent className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[#F6F0E8] shadow-none">
                           {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[15px]" style={{ color: '#1F1F1F' }}>{s.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -1203,7 +1206,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </AiModalCard>
 
                   {isCommercial ? (
-                    <div className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-3">
+                    <AiModalCard className="p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: '#6F7F5B' }}>
@@ -1261,7 +1264,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </AiModalCard>
                   ) : null}
 
                   {/* Collapsible advanced fields */}
@@ -1269,7 +1272,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     <CollapsibleTrigger asChild>
                       <button
                         type="button"
-                        className="w-full rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(248,244,237,0.66)_100%)] px-3 py-2 text-left backdrop-blur-[14px] transition-all duration-200 hover:-translate-y-px sm:px-3.5"
+                        className={cn("w-full px-3 py-2 text-left sm:px-3.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                       >
                         <div className="flex items-center justify-between gap-4">
                           <div>
@@ -1296,7 +1299,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </div>
                       {drinkFrom && drinkUntil && (
                         <p className="text-[11px] leading-relaxed" style={{ color: '#6B6B6B' }}>
-                          Janela de consumo sugerida: <span className="font-semibold text-foreground">{drinkFrom} – {drinkUntil}</span>
+                          Janela de consumo sugerida: <span className="font-semibold text-[#1A1713]">{drinkFrom} – {drinkUntil}</span>
                         </p>
                       )}
                       <div>
@@ -1406,7 +1409,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                               onChange={e => setNotes(e.target.value)}
                               placeholder="Aromas, sabores, impressões..."
                               rows={3}
-                              className="min-h-[86px] resize-none rounded-[12px]"
+                              className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "resize-none")}
                               style={aiFieldStyle("tasting_notes")}
                             />
                           </div>

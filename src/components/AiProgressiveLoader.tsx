@@ -40,13 +40,13 @@ export function AiProgressiveLoader({ steps, interval = 2500, subtitle }: AiProg
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.25 }}
-            className="text-[14px] font-semibold leading-snug text-foreground"
+            className="text-[14px] font-semibold leading-snug text-[#1A1713]"
           >
             {steps[currentStep]}
           </motion.p>
         </AnimatePresence>
         {subtitle && (
-          <p className="mt-0.5 text-[11.5px] leading-4 text-muted-foreground">{subtitle}</p>
+          <p className="mt-0.5 text-[11.5px] leading-4 text-[#6B6258]">{subtitle}</p>
         )}
         </div>
       </div>

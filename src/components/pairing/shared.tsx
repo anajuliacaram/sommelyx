@@ -3,7 +3,12 @@ import { Sparkles, UtensilsCrossed, ChefHat, BookOpen, RotateCcw, Wine, X } from
 import { Button } from "@/components/ui/button";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { cn } from "@/lib/utils";
-import { AiModalActions, AiModalActionButton } from "@/components/ai-flow/ModalLayout";
+import {
+  AI_MODAL_ACTION_TILE_CLASSNAME,
+  AI_MODAL_CARD_CLASSNAME,
+  AiModalActions,
+  AiModalActionButton,
+} from "@/components/ai-flow/ModalLayout";
 import type { WinePairingDecisionSupport } from "@/lib/sommelier-ai";
 import type { Recipe } from "@/lib/sommelier-ai";
 import { buildPresentationStructureLine, cleanAiPresentationText } from "@/lib/ai-presentation";
@@ -223,7 +228,7 @@ export function HarmonyTag({ type, label }: { type?: string | null; label?: stri
   const text = label || (type && harmonyLabelMap[type]);
   if (!text) return null;
   return (
-    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] bg-primary/[0.07] text-primary/75 border border-primary/[0.08]">
+    <span className="inline-flex items-center rounded-full border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.07)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#7B1E2B]">
       {text}
     </span>
   );
@@ -251,19 +256,10 @@ export function PremiumResultCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={cn("list-none overflow-hidden rounded-[14px] transition-all duration-200 hover:-translate-y-0.5", extraClass)}
+      className={cn("list-none overflow-hidden transition-all duration-200 hover:-translate-y-px", AI_MODAL_CARD_CLASSNAME, extraClass)}
       style={{
-        background: isHighlighted
-          ? "rgba(255,255,255,0.92)"
-          : "rgba(255,255,255,0.86)",
         backdropFilter: "blur(12px) saturate(1.05)",
         WebkitBackdropFilter: "blur(12px) saturate(1.05)",
-        border: isHighlighted
-          ? "1px solid rgba(0,0,0,0.05)"
-          : "1px solid rgba(0,0,0,0.05)",
-        boxShadow: isHighlighted
-          ? "0 8px 22px -18px rgba(44,20,31,0.14), inset 0 1px 0 rgba(255,255,255,0.7)"
-          : "0 4px 14px -14px rgba(30,20,20,0.08), inset 0 1px 0 rgba(255,255,255,0.62)",
       }}
     >
       {accentColor && <div className="h-[2px] w-full" style={{ background: accentColor }} />}
@@ -281,7 +277,7 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-2.5 rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-3 py-2">
+    <div className={cn("flex items-center gap-2.5 px-3 py-2", AI_MODAL_CARD_CLASSNAME)}>
       <div className="flex h-8 w-8 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)]">
         <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
       </div>
@@ -305,7 +301,7 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] p-3"
+      className={cn("p-3", AI_MODAL_CARD_CLASSNAME)}
     >
       <div className="space-y-2.5">
           {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
@@ -333,7 +329,7 @@ export function PairingErrorState({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-4 py-4 text-center"
+      className={cn("px-4 py-4 text-center", AI_MODAL_CARD_CLASSNAME)}
     >
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-[13px]"
         style={{
@@ -344,8 +340,8 @@ export function PairingErrorState({
         <X className="h-5 w-5 text-destructive/60" />
       </div>
       <div className="mt-3 space-y-1">
-        <p className="text-[15px] font-semibold text-[#1A1A1A]">Ainda não foi possível concluir</p>
-        <p className="mx-auto max-w-[360px] text-[13px] leading-relaxed text-[#6E665D]">{message}</p>
+        <p className="text-[15px] font-semibold text-[#1A1713]">Ainda não foi possível concluir</p>
+        <p className="mx-auto max-w-[360px] text-[12.5px] leading-5 text-[#6B6258]">{message}</p>
       </div>
       <AiModalActions className="mx-auto mt-3 w-full max-w-[320px]">
         <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">
@@ -371,7 +367,7 @@ export function RecipeButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       variant="ghost"
-      className="recipe-button min-h-9 h-auto px-3 py-2 rounded-full bg-[rgba(160,60,60,0.08)] text-[#7a2e2e] border border-[rgba(122,46,46,0.10)] hover:bg-[rgba(160,60,60,0.16)] hover:text-[#6B2424] hover:-translate-y-[1px] transition-all duration-200 shadow-none"
+      className="recipe-button min-h-9 h-auto rounded-[12px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.07)] px-3 py-2 text-[#7B1E2B] shadow-none transition-all duration-200 hover:-translate-y-px hover:bg-[rgba(123,30,43,0.10)] hover:text-[#5A1528]"
     >
       <BookOpen className="h-4 w-4" />
       Ver receita
@@ -424,7 +420,8 @@ export function WineSuggestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group list-none overflow-hidden rounded-[14px] border border-border/25 bg-[rgba(255,255,255,0.84)] transition-all duration-200 hover:-translate-y-0.5",
+        "group list-none overflow-hidden transition-all duration-200 hover:-translate-y-px",
+        AI_MODAL_ACTION_TILE_CLASSNAME,
         className,
       )}
       style={{
@@ -490,7 +487,7 @@ export function PairingSheetHero({
           backdropFilter: "blur(14px) saturate(1.1)",
           WebkitBackdropFilter: "blur(14px) saturate(1.1)",
           border: "1px solid rgba(58,51,39,0.08)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
+          boxShadow: "none",
         }}
       >
         <Icon className={cn("text-[#7B1E2B]", compact ? "h-5.5 w-5.5" : "h-6 w-6")} strokeWidth={1.75} />
@@ -554,9 +551,7 @@ export function PremiumChoiceCard({
       style={{
         background: selected ? "rgba(123,30,43,0.06)" : "rgba(255,251,244,0.70)",
         border: `1px solid ${selected ? accentColor : "rgba(58,51,39,0.08)"}`,
-        boxShadow: selected
-          ? `0 6px 18px -16px ${accentColor}33, inset 0 1px 0 rgba(255,255,255,0.7)`
-          : "inset 0 1px 0 rgba(255,255,255,0.7)",
+        boxShadow: "none",
       }}
     >
       <div className="flex items-center gap-2.5">
