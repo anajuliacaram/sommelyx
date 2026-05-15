@@ -301,10 +301,10 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="premium-card-surface rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)]"
+      className={cn("px-3 py-2.5", AI_MODAL_CARD_CLASSNAME)}
     >
-      <div className="space-y-2.5">
-          {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
+      <div className="space-y-2">
+          {subtitle ? <p className="text-[9.5px] font-medium uppercase tracking-[0.14em] text-primary/52">{subtitle}</p> : null}
           <AiProgressiveLoader steps={steps} interval={2200} />
       </div>
     </motion.div>
@@ -331,7 +331,7 @@ export function PairingErrorState({
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="premium-card-surface rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)]"
+      className={cn("px-3 py-3 text-center", AI_MODAL_CARD_CLASSNAME)}
     >
       <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-[11px]"
         style={{
@@ -343,8 +343,8 @@ export function PairingErrorState({
         <X className="h-4 w-4 text-destructive/60" />
       </div>
       <div className="mt-2.5 space-y-1">
-        <p className="text-[14px] font-semibold text-[#1A1713]">{title}</p>
-        <p className="mx-auto max-w-[360px] text-[12px] leading-5 text-[#6B6258]">{message}</p>
+        <p className="text-[13.5px] font-medium text-[#1A1713]">{title}</p>
+        <p className="mx-auto max-w-[360px] text-[11.5px] leading-[1.5] text-[#6B6258]">{message}</p>
       </div>
       <AiModalActions className="mx-auto mt-2.5 w-full max-w-[320px]">
         <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">
@@ -548,29 +548,29 @@ export function PremiumChoiceCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -1 }}
+      whileHover={{ y: -0.5 }}
       whileTap={{ scale: 0.985 }}
-      className="premium-card-surface group w-full rounded-[18px] border border-[rgba(95,111,82,0.10)] p-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-all duration-200"
+      className="premium-card-surface group w-full rounded-[16px] border border-[rgba(95,111,82,0.05)] p-2.25 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.52),0_8px_18px_-24px_rgba(58,51,39,0.10)] transition-all duration-200"
       style={{
         background: selected
-          ? "linear-gradient(180deg, rgba(255,255,255,0.90) 0%, rgba(249,241,242,0.84) 100%)"
-          : "linear-gradient(180deg, rgba(255,255,255,0.84) 0%, rgba(249,244,237,0.80) 100%)",
-        borderColor: selected ? `${accentColor}26` : "rgba(95,111,82,0.10)",
+          ? "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(249,241,242,0.72) 100%)"
+          : "linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(249,244,237,0.56) 100%)",
+        borderColor: selected ? `${accentColor}20` : "rgba(95,111,82,0.05)",
       }}
     >
       <div className="flex items-center gap-2.5">
         <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px] transition-all duration-200 group-hover:scale-105"
+          className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-[10px] transition-all duration-200 group-hover:scale-[1.03]"
           style={{
-            background: selected ? `${accentColor}1A` : "rgba(123,30,43,0.07)",
-            border: `1px solid ${selected ? `${accentColor}33` : "rgba(123,30,43,0.10)"}`,
+            background: selected ? `${accentColor}14` : "rgba(123,30,43,0.05)",
+            border: `1px solid ${selected ? `${accentColor}24` : "rgba(123,30,43,0.06)"}`,
           }}
         >
           <IconCmp className="h-[18px] w-[18px]" strokeWidth={1.8} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[13.5px] font-semibold tracking-[-0.005em] text-[#1A1713]">{title}</p>
-          <p className="mt-0.5 text-[11.5px] leading-4 text-[rgba(58,51,39,0.64)]">{description}</p>
+          <p className="text-[13px] font-medium tracking-[-0.01em] text-[#1A1713]">{title}</p>
+          <p className="mt-0.5 text-[11px] leading-[1.4] text-[rgba(58,51,39,0.62)]">{description}</p>
         </div>
       </div>
     </motion.button>

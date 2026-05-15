@@ -589,9 +589,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-              className="space-y-2.5"
+              className="space-y-2"
               >
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <AiUploadPanel
                     icon={<Camera className="h-5 w-5" />}
                     title="Enviar rótulo"
@@ -599,7 +599,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                     onClick={() => cameraInputRef.current?.click()}
                   />
 
-                  <div className="grid w-full gap-2 sm:grid-cols-2">
+                  <div className="grid w-full gap-1.5 sm:grid-cols-2">
                   <AiModalActionButton
                     variant="primary"
                     onClick={() => cameraInputRef.current?.click()}
@@ -664,7 +664,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="space-y-2.5"
+                className="space-y-2"
               >
                 {imagePreview ? (
                   <div className={cn("flex items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}>

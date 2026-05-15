@@ -1146,10 +1146,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                   )}
 
-                  <AiModalCard className="space-y-1.5">
-                    <div className="space-y-0.5">
-                      <AiSectionLabel>Essenciais</AiSectionLabel>
-                    </div>
+                  <AiModalCard className="space-y-2">
                     <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
                       <label htmlFor="name" className={AI_MODAL_LABEL_CLASSNAME}>{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
                       <input
@@ -1282,8 +1279,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       >
                         <div className="flex items-center justify-between gap-4">
                           <div>
-                            <AiSectionLabel>Detalhes extras</AiSectionLabel>
-                            <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                            <p className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(32,26,21,0.82)]">
+                              Detalhes extras
+                            </p>
+                            <p className={cn("mt-0.25", AI_MODAL_HELP_TEXT_CLASSNAME)}>
                               Origem, uva, valores e guarda.
                             </p>
                           </div>

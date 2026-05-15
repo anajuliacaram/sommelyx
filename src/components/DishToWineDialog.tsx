@@ -1453,65 +1453,65 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="flex min-h-0 flex-1 flex-col gap-1.5"
+                className="flex min-h-0 flex-1 flex-col gap-1"
               >
-                <div className="space-y-1">
-                  <p className="text-[9px] font-medium uppercase tracking-[0.14em] text-[#6B6258]/56 sm:text-[9.5px]">
-                    Qual vinho da sua adega?
-                  </p>
+                <div className="space-y-1 px-0.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[9px] font-medium uppercase tracking-[0.14em] text-[#6B6258]/52 sm:text-[9.5px]">
+                      Qual vinho da sua adega?
+                    </p>
+                    <span className={cn("hidden sm:inline", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                      {filtered.length} opções
+                    </span>
+                  </div>
 
-                  <div className="space-y-1.5">
-                    <div className="relative">
-                      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/46 sm:left-3 sm:h-3 sm:w-3" />
-                      <input
-                        type="text"
-                        value={wineSearch}
-                        onChange={(e) => setWineSearch(e.target.value)}
-                        placeholder="Buscar vinho na sua adega..."
-                        className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-7")}
-                        autoFocus
-                      />
-                    </div>
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/46 sm:left-3 sm:h-3 sm:w-3" />
+                    <input
+                      type="text"
+                      value={wineSearch}
+                      onChange={(e) => setWineSearch(e.target.value)}
+                      placeholder="Buscar vinho na sua adega..."
+                      className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-7")}
+                      autoFocus
+                    />
+                  </div>
 
-                    <div className="flex flex-wrap items-center gap-1">
-                      {sortOptions.map((opt) => {
-                        const Icon = opt.icon;
-                        const active = sortKey === opt.key;
-                        return (
-                          <AiFilterChip
-                            key={opt.key}
-                            onClick={() => setSortKey(opt.key)}
-                            selected={active}
-                            className="flex items-center gap-1 px-1.5 tracking-[0.05em] sm:px-2 sm:text-[9px]"
-                          >
-                            <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                            {opt.label}
-                          </AiFilterChip>
-                        );
-                      })}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-1">
-                      {styleFilterOptions.map((opt) => {
-                        const active = wineStyleFilter === opt.key;
-                        return (
-                          <AiFilterChip
-                            key={opt.key}
-                            onClick={() => setWineStyleFilter(opt.key)}
-                            selected={active}
-                            className="flex items-center gap-1 px-1.5 tracking-[0.05em] sm:px-2 sm:text-[9px]"
-                          >
-                            <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
-                            {opt.label}
-                          </AiFilterChip>
-                        );
-                      })}
-                    </div>
+                  <div className="flex flex-wrap items-center gap-1">
+                    {sortOptions.map((opt) => {
+                      const Icon = opt.icon;
+                      const active = sortKey === opt.key;
+                      return (
+                        <AiFilterChip
+                          key={opt.key}
+                          onClick={() => setSortKey(opt.key)}
+                          selected={active}
+                          className="flex items-center gap-1 px-1.25 tracking-[0.04em] sm:px-1.75"
+                        >
+                          <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                          {opt.label}
+                        </AiFilterChip>
+                      );
+                    })}
+                    {styleFilterOptions.map((opt) => {
+                      const active = wineStyleFilter === opt.key;
+                      return (
+                        <AiFilterChip
+                          key={opt.key}
+                          onClick={() => setWineStyleFilter(opt.key)}
+                          selected={active}
+                          className="flex items-center gap-1 px-1.25 tracking-[0.04em] sm:px-1.75"
+                        >
+                          <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
+                          {opt.label}
+                        </AiFilterChip>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <ScrollArea className="min-h-0 flex-1">
-                  <div className={cn("space-y-0.5 pb-20 sm:pb-24", AI_MODAL_LIST_SURFACE_CLASSNAME)}>
+                  <div className={cn("space-y-0.5 bg-transparent pb-20 sm:pb-24", AI_MODAL_LIST_SURFACE_CLASSNAME)}>
                     {filtered.map((w) => {
                       const isSelected = selectedWineId === w.id;
                       const meta = [w.style, w.grape, w.region].filter(Boolean).join(" · ");
@@ -1519,13 +1519,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                         <button
                           key={w.id}
                           onClick={() => setSelectedWineId(w.id)}
-                          className={cn(
-                            AI_MODAL_LIST_ROW_CLASSNAME,
-                            "w-full group",
-                            isSelected && AI_MODAL_LIST_ROW_SELECTED_CLASSNAME,
-                          )}
-                        >
-                          <div className="flex items-center gap-2.5">
+                            className={cn(AI_MODAL_LIST_ROW_CLASSNAME, "w-full group rounded-[10px] px-2 py-1.25", isSelected && AI_MODAL_LIST_ROW_SELECTED_CLASSNAME)}
+                          >
+                            <div className="flex items-center gap-2.5">
                             <div className={cn(
                               "flex h-5.5 w-5.5 items-center justify-center rounded-[8px] shrink-0 transition-colors duration-150",
                               isSelected ? "bg-[rgba(123,30,43,0.08)]" : "bg-transparent"
@@ -1581,7 +1577,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </ScrollArea>
 
-                <div className="z-20 mt-auto shrink-0 bg-[linear-gradient(180deg,rgba(250,245,239,0.34)_0%,rgba(251,247,241,0.92)_100%)] pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-2 shadow-[0_-8px_16px_-24px_rgba(38,24,18,0.18)] backdrop-blur-sm">
+                <div className="z-20 mt-auto shrink-0 bg-[linear-gradient(180deg,rgba(250,245,239,0.22)_0%,rgba(251,247,241,0.90)_100%)] pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-1.5 shadow-[0_-6px_14px_-24px_rgba(38,24,18,0.14)] backdrop-blur-sm">
                   {selectedWine ? (
                     <div className="space-y-1.5">
                       <div className="space-y-0.5 px-0.5">

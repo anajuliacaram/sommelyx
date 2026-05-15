@@ -54,7 +54,7 @@ export const AI_MODAL_TEXTAREA_CLASSNAME =
   "min-h-[72px] rounded-[13px] border border-[rgba(95,111,82,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(249,244,237,0.56)_100%)] px-3 py-2 text-[12px] font-medium text-[rgba(36,30,24,0.86)] shadow-[inset_0_1px_0_rgba(255,255,255,0.56),0_6px_14px_-18px_rgba(58,51,39,0.10)] transition-all duration-180 placeholder:text-[rgba(108,96,84,0.52)] focus-visible:border-[rgba(123,30,43,0.12)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.74)_0%,rgba(252,248,242,0.68)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/6 focus-visible:ring-offset-0 sm:text-[12.5px]";
 
 export const AI_MODAL_COMPACT_STACK_CLASSNAME = "space-y-1";
-export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-2";
+export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-1.5";
 export const AI_MODAL_LABEL_CLASSNAME =
   "text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]";
 export const AI_MODAL_HELP_TEXT_CLASSNAME =
@@ -133,7 +133,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 overflow-hidden px-3.5 pb-[calc(12px+env(safe-area-inset-bottom))] pt-2 sm:px-4 sm:pb-[calc(14px+env(safe-area-inset-bottom))] sm:pt-2.5",
+        "min-h-0 flex-1 overflow-hidden px-3.5 pb-[calc(12px+env(safe-area-inset-bottom))] pt-1.5 sm:px-4 sm:pb-[calc(14px+env(safe-area-inset-bottom))] sm:pt-2",
         className,
       )}
     >
@@ -227,11 +227,11 @@ export function AiModalSplitLayout({
   return (
     <div
       className={cn(
-        "grid h-full min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden",
+        "grid h-full min-h-0 flex-1 grid-cols-1 gap-1.5 overflow-hidden",
         className,
       )}
     >
-      <section className={cn("h-full min-h-0 pr-1", !hasCustomOverflow && "overflow-y-auto", contentClassName)}>{children}</section>
+      <section className={cn("h-full min-h-0 pr-0.5", !hasCustomOverflow && "overflow-y-auto", contentClassName)}>{children}</section>
     </div>
   );
 }

@@ -485,9 +485,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
-        className="space-y-2.5"
+        className="space-y-2"
       >
-        <section className="space-y-1.5">
+        <section className="space-y-1">
           <div className="pb-1">
             <div>
               <p className="text-[15px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:text-[17px]">
@@ -502,7 +502,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           </div>
         </section>
 
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/46 sm:left-3 sm:h-3 sm:w-3" />
             <Input
@@ -521,7 +521,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   type="button"
                   onClick={() => setFilterMode(pill.key)}
                   selected={active}
-                  className="px-1.5 uppercase tracking-[0.06em] sm:px-2 sm:text-[9px]"
+                  className="px-1.25 uppercase tracking-[0.04em] sm:px-1.75"
                 >
                   {pill.label}
                 </AiFilterChip>
@@ -531,7 +531,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         </div>
 
         {displayWines.length > 0 ? (
-          <section className="space-y-2">
+          <section className="space-y-1">
             {displayWines.map((wine, index) => {
               const cellarMatch = matchedCellarMap.get(wine.name) || null;
               return (
@@ -607,9 +607,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                        className="space-y-3"
+                        className="space-y-2.5"
                       >
-                        <div className="space-y-2.5">
+                        <div className="space-y-2">
                           <AiUploadPanel
                             onDragOver={(event) => {
                               event.preventDefault();
@@ -630,7 +630,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             description="Foto, imagem ou PDF."
                           />
 
-                          <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="grid gap-1.5 sm:grid-cols-2">
                             <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="w-full">
                               <Camera className="mr-2 h-4 w-4" />
                               Tirar foto
@@ -745,15 +745,14 @@ function WineListCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden transition-colors duration-200",
-        AI_MODAL_CARD_CLASSNAME,
+        "overflow-hidden rounded-[15px] border border-[rgba(95,111,82,0.04)] bg-[linear-gradient(180deg,rgba(255,255,255,0.42)_0%,rgba(249,244,237,0.34)_100%)] transition-colors duration-200",
         isFeatured && "xl:col-span-1",
         rhythmClassName,
-        isSelected ? "border-[rgba(123,30,43,0.10)] bg-[rgba(255,251,244,0.72)]" : "",
+        isSelected ? "border-[rgba(123,30,43,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.56)_0%,rgba(249,241,242,0.46)_100%)]" : "",
       )}
       style={{
-        backdropFilter: "blur(10px) saturate(1.03)",
-        WebkitBackdropFilter: "blur(10px) saturate(1.03)",
+        backdropFilter: "blur(8px) saturate(1.02)",
+        WebkitBackdropFilter: "blur(8px) saturate(1.02)",
       }}
     >
       <div
@@ -766,7 +765,7 @@ function WineListCard({
             onSelect();
           }
         }}
-        className="w-full px-3 py-2.5 text-left"
+        className="w-full px-3 py-2.25 text-left"
       >
         <div className="grid gap-2.5 sm:grid-cols-[28px_minmax(0,1fr)_auto] sm:items-start">
           <div className="flex items-center gap-2 sm:block">
@@ -797,9 +796,9 @@ function WineListCard({
               <p className={AI_MODAL_META_TEXT_CLASSNAME}>{pairingLine}</p>
             ) : null}
             {tags.length > 0 ? (
-              <div className="flex flex-wrap gap-1 pt-0.5">
+              <div className="flex flex-wrap gap-1 pt-0.25">
                 {tags.slice(0, 1).map((tag) => (
-                  <span key={tag} className="rounded-full border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.05)] px-1.5 py-0.5 text-[8.5px] font-medium uppercase tracking-[0.06em] text-[#7B1E2B]">
+                  <span key={tag} className="rounded-full border border-[rgba(123,30,43,0.06)] bg-[rgba(123,30,43,0.04)] px-1.25 py-0.5 text-[8px] font-medium uppercase tracking-[0.05em] text-[#7B1E2B]">
                     {tag}
                   </span>
                 ))}

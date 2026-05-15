@@ -239,9 +239,9 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
           <AiModalBody>
             <AiModalSplitLayout>
-            <div className="space-y-2 overflow-y-auto pr-1">
-              <div className="space-y-1.5">
-                <div className="space-y-0.5 px-0.5">
+            <div className="space-y-1.5 overflow-y-auto pr-1">
+              <div className="space-y-1 px-0.5">
+                <div className="space-y-0.5">
                   <AiSectionLabel>Origem</AiSectionLabel>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -302,9 +302,11 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </div>
 
               {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
-                <div className="space-y-1.5">
+                <div className="space-y-1 px-0.5">
                   <div className="flex items-center justify-between gap-3">
-                    <AiSectionLabel>Selecionar garrafa</AiSectionLabel>
+                    <p className="text-[9px] font-medium uppercase tracking-[0.14em] text-[#6B6258]/52 sm:text-[9.5px]">
+                      Selecionar garrafa
+                    </p>
                     <span className={AI_MODAL_HELP_TEXT_CLASSNAME}>{filteredWines.length} vinhos</span>
                   </div>
 
@@ -326,7 +328,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                           type="button"
                           onClick={() => setTypeFilter(f.id)}
                           selected={typeFilter === f.id}
-                          className="shrink-0 px-1.5 uppercase tracking-[0.05em]"
+                          className="shrink-0 px-1.25 uppercase tracking-[0.04em]"
                         >
                           <span className={cn("mr-1 inline-flex h-1.5 w-1.5 rounded-full", f.dot)} />
                           {f.label}
@@ -336,7 +338,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   </div>
 
                   <div
-                    className={cn("space-y-0.5", AI_MODAL_LIST_SURFACE_CLASSNAME)}
+                    className={cn("space-y-0.5 bg-transparent", AI_MODAL_LIST_SURFACE_CLASSNAME)}
                     style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
                   >
                     {filteredWines.length === 0 ? (
@@ -354,6 +356,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                             onClick={() => handleSelectWine(w.id)}
                             className={cn(
                               AI_MODAL_LIST_ROW_CLASSNAME,
+                              "rounded-[10px] px-2 py-1.25",
                               selected && AI_MODAL_LIST_ROW_SELECTED_CLASSNAME,
                             )}
                           >
@@ -387,7 +390,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               )}
 
               {source === "cellar" && selectedWine && !showWinePicker ? (
-                <div className="flex items-start justify-between gap-3 px-0.5">
+                <div className="flex items-start justify-between gap-3 px-0.5 pt-0.5">
                     <div className="min-w-0">
                       <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
                       <p className="mt-0.5 truncate text-[13px] font-medium tracking-[-0.018em] text-[rgba(32,26,21,0.88)]">{selectedWine.name}</p>
@@ -406,10 +409,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   </div>
               ) : null}
 
-              <AiModalCard className="space-y-2 px-3 py-2.5">
-                <div className="space-y-1.5">
-                  <AiSectionLabel>Dados do vinho</AiSectionLabel>
-
+              <div className="space-y-2.5 px-0.5 pt-0.5">
+                <div className="space-y-2">
                   <div className="space-y-1">
                     <Label className={AI_MODAL_LABEL_CLASSNAME}>
                       Nome do vinho <span className="text-primary">*</span>
@@ -454,9 +455,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <AiSectionLabel>Contexto da experiência</AiSectionLabel>
-
+                <div className="space-y-2 border-t border-[rgba(95,111,82,0.04)] pt-2">
                   <div className="grid grid-cols-2 gap-1.5">
                     <div className="space-y-1">
                       <Label className={cn("flex items-center gap-1", AI_MODAL_LABEL_CLASSNAME)}>
@@ -511,7 +510,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     />
                   </div>
                 </div>
-              </AiModalCard>
+              </div>
             </div>
             </AiModalSplitLayout>
           </AiModalBody>
