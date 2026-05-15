@@ -171,14 +171,15 @@ export function AiModalSplitLayout({
   contentClassName?: string;
   className?: string;
 }) {
+  const hasCustomOverflow = typeof contentClassName === "string" && /\boverflow(?:-[xy])?-/.test(contentClassName);
   return (
     <div
       className={cn(
-        "grid min-h-0 flex-1 grid-cols-1 gap-2.5",
+        "grid h-full min-h-0 flex-1 grid-cols-1 gap-2.5 overflow-hidden",
         className,
       )}
     >
-      <section className={cn("min-h-0 overflow-y-auto pr-1", contentClassName)}>{children}</section>
+      <section className={cn("h-full min-h-0 pr-1", !hasCustomOverflow && "overflow-y-auto", contentClassName)}>{children}</section>
     </div>
   );
 }

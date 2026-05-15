@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Search, Loader2, Wine as WineIcon, Sparkles, Camera, Upload, ArrowLeft, ChefHat, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
@@ -130,6 +131,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     const fn = lastRetryRef.current;
     if (fn) fn();
   }, []);
+
+  useEffect(() => {
+    console.info("HARMONIZE_SELECTION_STATE", {
+      step,
+      selectedWineId: selectedWineId || null,
+      hasSelection: Boolean(selectedWineId),
+    });
+  }, [selectedWineId, step]);
 
   useEffect(() => {
     console.info("[DishToWineDialog] step_state", {
@@ -338,7 +347,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   // Search food pairings for a selected wine
   const handleSearchWinePairings = useCallback(async () => {
     const wine = wines?.find((w) => w.id === selectedWineId);
-    if (!wine) return;
+    if (!wine) {
+      console.warn("HARMONIZE_SELECTION_STATE", {
+        step: "select-wine",
+        selectedWineId: selectedWineId || null,
+        hasSelection: Boolean(selectedWineId),
+        resolvedWine: false,
+      });
+      setError("Selecione um vinho válido para continuar.");
+      return;
+    }
+    console.info("HARMONIZE_SELECTION_STATE", {
+      step: "select-wine",
+      selectedWineId: wine.id,
+      hasSelection: true,
+      selectedWineName: wine.name,
+    });
     lastRetryRef.current = () => { handleSearchWinePairings(); };
     const reqId = nextRequestId();
     setLoading(true);
@@ -633,12 +657,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           setScanResults(null);
         try {
           const retryPayload = { ...payload, requestId: crypto.randomUUID(), signal: currentSignal() };
-          console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", retry: true, fileName: prepared.fileName, sourceType: prepared.sourceType });
+      console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", retry: true, fileName: prepared.fileName, sourceType: prepared.sourceType });
+          console.info("HARMONIZE_REQUEST_START", { mode: "dish-to-wine", requestId: retryPayload.requestId, fileName: prepared.fileName, sourceType: prepared.sourceType, retry: true, dish: dish.trim() || null });
           const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
           const result = await analyzeWineList(retryPayload, profile);
           if (!isLatest(retryId)) return;
           const normalized = normalizeWineListResponse(result);
           console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", retry: true, wines: normalized.wines.length });
+          console.info("HARMONIZE_REQUEST_SUCCESS", { mode: "dish-to-wine", requestId: retryPayload.requestId, retry: true, wines: normalized.wines.length, fallback: normalized.fallback ?? false });
           setError(null);
           setScanResults(normalized);
           notifySuccess("Carta analisada", {
@@ -651,6 +677,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         } catch (err: any) {
           if (!isLatest(retryId)) return;
           console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", retry: true, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
+          console.error("HARMONIZE_REQUEST_ERROR", { mode: "dish-to-wine", requestId: retryPayload.requestId, retry: true, error: err?.message, code: err?.code, status: err?.status });
           setError(err.message || "Não conseguimos concluir a leitura da carta.");
           setStep("photo");
         } finally {
@@ -660,10 +687,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
       const profile = wines ? buildUserProfile(wines.filter(w => w.quantity > 0)) : undefined;
       console.info("[DishToWineDialog] pairing_request_started", { step: "wine-list", fileName: prepared.fileName, sourceType: prepared.sourceType });
+      console.info("HARMONIZE_REQUEST_START", { mode: "dish-to-wine", requestId: payload.requestId, fileName: prepared.fileName, sourceType: prepared.sourceType, dish: dish.trim() || null });
       const result = await analyzeWineList({ ...payload, signal: currentSignal() }, profile);
       if (!isLatest(reqId)) return;
       const normalized = normalizeWineListResponse(result);
       console.info("[DishToWineDialog] pairing_request_completed", { step: "wine-list", id: reqId, wines: normalized.wines.length });
+      console.info("HARMONIZE_REQUEST_SUCCESS", { mode: "dish-to-wine", requestId: payload.requestId, wines: normalized.wines.length, fallback: normalized.fallback ?? false });
       setError(null);
       setScanResults(normalized);
       notifySuccess("Carta analisada", {
@@ -676,6 +705,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] pairing_request_failed", { step: "wine-list", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
+      console.error("HARMONIZE_REQUEST_ERROR", { mode: "dish-to-wine", requestId: reqId, error: err?.message, code: err?.code, status: err?.status });
       setError(getAttachmentErrorMessage(err, err?.message || "Não conseguimos concluir a leitura da carta."));
       setStep("photo");
     } finally {
@@ -755,10 +785,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         try {
           const edgeRequestId = crypto.randomUUID();
           console.info("[DishToWineDialog] pairing_request_started", { step: "menu", retry: true, wineName: extWineName, sourceType: prepared.sourceType });
+          console.info("HARMONIZE_REQUEST_START", { mode: "wine-to-dish", requestId: edgeRequestId, retry: true, wineName: extWineName, fileName: prepared.fileName, sourceType: prepared.sourceType });
           const result = await analyzeMenuForWine({ ...payload, requestId: edgeRequestId, signal: currentSignal() }, extWineName);
           if (!isLatest(retryId)) return;
           const normalized = normalizePairingResponse(adaptMenuAnalysisToGeneratedWinePairing(result, extWineName), currentDishContext);
           console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", retry: true, pairings: normalized.pairings.length });
+          console.info("HARMONIZE_REQUEST_SUCCESS", { mode: "wine-to-dish", requestId: edgeRequestId, retry: true, pairings: normalized.pairings.length, fallback: normalized.fallback ?? false });
           setError(null);
           setPairingResult(normalized);
           notifySuccess("Cardápio lido", {
@@ -771,18 +803,25 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         } catch (err: any) {
           if (!isLatest(retryId)) return;
           console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", retry: true, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-          setError(err.message || "Não conseguimos concluir a leitura do cardápio.");
-          setStep("ext-menu-photo");
+          console.error("HARMONIZE_REQUEST_ERROR", { mode: "wine-to-dish", requestId: retryId, retry: true, error: err?.message, code: err?.code, status: err?.status });
+          flushSync(() => {
+            setLoading(false);
+            setError(err.message || "Não conseguimos concluir a leitura do cardápio.");
+            setStep("ext-menu-photo");
+          });
         } finally {
           if (isLatest(retryId)) setLoading(false);
         }
       };
 
       console.info("[DishToWineDialog] pairing_request_started", { step: "menu", wineName: extWineName, sourceType: prepared.sourceType });
-      const result = await analyzeMenuForWine({ ...payload, signal: currentSignal() }, extWineName);
+      const menuRequestId = payload.requestId ?? crypto.randomUUID();
+      console.info("HARMONIZE_REQUEST_START", { mode: "wine-to-dish", requestId: menuRequestId, wineName: extWineName, fileName: prepared.fileName, sourceType: prepared.sourceType });
+      const result = await analyzeMenuForWine({ ...payload, requestId: menuRequestId, signal: currentSignal() }, extWineName);
       if (!isLatest(reqId)) return;
       const normalized = normalizePairingResponse(adaptMenuAnalysisToGeneratedWinePairing(result, extWineName), currentDishContext);
       console.info("[DishToWineDialog] pairing_request_completed", { step: "menu", id: reqId, pairings: normalized.pairings.length });
+      console.info("HARMONIZE_REQUEST_SUCCESS", { mode: "wine-to-dish", requestId: menuRequestId, pairings: normalized.pairings.length, fallback: normalized.fallback ?? false });
       setError(null);
       setPairingResult(normalized);
       notifySuccess("Cardápio lido", {
@@ -795,8 +834,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
     } catch (err: any) {
       if (!isLatest(reqId)) return;
       console.error("[DishToWineDialog] pairing_request_failed", { step: "menu", id: reqId, error: err?.message, code: err?.code, status: err?.status, requestId: err?.requestId, functionName: err?.functionName, rawBody: err?.rawBody });
-      setError(getAttachmentErrorMessage(err, err?.message || "Não conseguimos concluir a leitura do cardápio."));
-      setStep("ext-menu-photo");
+      console.error("HARMONIZE_REQUEST_ERROR", { mode: "wine-to-dish", requestId: reqId, error: err?.message, code: err?.code, status: err?.status });
+      const recoveryMessage = err?.message || "Não conseguimos concluir a leitura do cardápio.";
+      flushSync(() => {
+        setLoading(false);
+        setError(recoveryMessage);
+        setStep("ext-menu-photo");
+      });
     } finally {
       if (isLatest(reqId)) setLoading(false);
       e.target.value = "";
@@ -1090,10 +1134,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         </AiModalHeaderBar>
 
         <AiModalBody>
-          <AiModalSplitLayout>
-          <div className="space-y-3">
+          <AiModalSplitLayout contentClassName={cn(step === "select-wine" && "flex h-full flex-col overflow-hidden")}>
+          <div className={cn(step === "select-wine" ? "flex h-full min-h-0 flex-col gap-2.5" : "space-y-3")}>
           {flowMicroLabel ? (
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#6B6258]/60">
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6B6258]/58 sm:text-[10px] sm:tracking-[0.18em]">
               {flowMicroLabel}
             </p>
           ) : null}
@@ -1102,7 +1146,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               variant="ghost"
               size="sm"
               onClick={goBack}
-              className="-mt-1 px-2 text-[11px] font-medium text-[#6B6258] hover:text-[#1A1713]"
+              className="-mt-1 h-7 px-1.5 text-[10px] font-medium text-[#6B6258] hover:text-[#1A1713] sm:h-8 sm:px-2 sm:text-[11px]"
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Voltar
@@ -1410,27 +1454,27 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="flex min-h-0 flex-1 flex-col gap-2.5"
+                className="flex min-h-0 flex-1 flex-col gap-2"
               >
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#6B6258]">
+                <div className="space-y-1.5">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#6B6258] sm:text-[10px]">
                     Qual vinho da sua adega?
                   </p>
 
-                  <AiToolbarSurface className="space-y-2 px-0 py-1">
+                  <AiToolbarSurface className="space-y-1.5 px-0 py-0.5">
                     <div className="relative">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#6B6258]/55" />
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/55 sm:left-3 sm:h-3.5 sm:w-3.5" />
                       <input
                         type="text"
                         value={wineSearch}
                         onChange={(e) => setWineSearch(e.target.value)}
                         placeholder="Buscar vinho na sua adega..."
-                        className={cn(AI_MODAL_FIELD_CLASSNAME, "h-9 pl-8")}
+                        className={cn(AI_MODAL_FIELD_CLASSNAME, "h-8 pl-7 text-[12px] sm:h-9 sm:pl-8 sm:text-[13px]")}
                         autoFocus
                       />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1">
                       {sortOptions.map((opt) => {
                         const Icon = opt.icon;
                         const active = sortKey === opt.key;
@@ -1439,20 +1483,20 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             key={opt.key}
                             onClick={() => setSortKey(opt.key)}
                             className={cn(
-                              "flex h-6 items-center gap-1 rounded-full border px-2 py-0 text-[9.5px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
+                              "flex h-5.5 items-center gap-1 rounded-full border px-1.5 py-0 text-[8.5px] font-semibold uppercase tracking-[0.06em] transition-colors duration-150 sm:h-6 sm:px-2 sm:text-[9.5px]",
                               active
                                 ? "border-primary/20 bg-primary/10 text-primary"
                                 : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#1A1713]",
                             )}
                           >
-                            <Icon className="h-3 w-3" />
+                            <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                             {opt.label}
                           </button>
                         );
                       })}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1">
                       {styleFilterOptions.map((opt) => {
                         const active = wineStyleFilter === opt.key;
                         return (
@@ -1460,7 +1504,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             key={opt.key}
                             onClick={() => setWineStyleFilter(opt.key)}
                             className={cn(
-                              "flex h-6 items-center gap-1 rounded-full border px-2 py-0 text-[9.5px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
+                              "flex h-5.5 items-center gap-1 rounded-full border px-1.5 py-0 text-[8.5px] font-semibold uppercase tracking-[0.06em] transition-colors duration-150 sm:h-6 sm:px-2 sm:text-[9.5px]",
                               active
                                 ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.07)] text-[#7B1E2B]"
                                 : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#1A1713]",
@@ -1476,7 +1520,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 </div>
 
                 <ScrollArea className="min-h-0 flex-1 -mx-1 px-1">
-                  <div className="space-y-1">
+                  <div className="space-y-1 pb-20 sm:pb-24">
                     {filtered.map((w) => {
                       const isSelected = selectedWineId === w.id;
                       const meta = [w.style, w.grape, w.region].filter(Boolean).join(" · ");
@@ -1485,7 +1529,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           key={w.id}
                           onClick={() => setSelectedWineId(w.id)}
                           className={cn(
-                            "w-full cursor-pointer rounded-[14px] border-b px-2.5 py-2 text-left transition-colors duration-150 group",
+                            "w-full cursor-pointer rounded-[12px] border-b px-2 py-1.5 text-left transition-colors duration-150 group sm:rounded-[14px] sm:px-2.5 sm:py-2",
                             isSelected
                               ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.05)]"
                               : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)]"
@@ -1493,29 +1537,29 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                         >
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              "flex h-7 w-7 items-center justify-center rounded-[9px] shrink-0 transition-colors duration-150",
+                              "flex h-6 w-6 items-center justify-center rounded-[8px] shrink-0 transition-colors duration-150 sm:h-7 sm:w-7 sm:rounded-[9px]",
                               isSelected ? "bg-[rgba(123,30,43,0.08)]" : "bg-transparent"
                             )}>
                               {isSelected ? (
-                                <Check className="h-3.5 w-3.5 text-primary" />
+                                <Check className="h-3 w-3 text-primary sm:h-3.5 sm:w-3.5" />
                               ) : (
-                                <WineIcon className="h-3.5 w-3.5 text-[#6B6258]/55" />
+                                <WineIcon className="h-3 w-3 text-[#6B6258]/55 sm:h-3.5 sm:w-3.5" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(
-                                "truncate text-[13px] font-semibold",
+                                "truncate text-[12px] font-semibold sm:text-[13px]",
                                 isSelected ? "text-[#1A1713]" : "text-[#1A1713]/90"
                               )}>
                                 {w.name}
-                                {w.vintage ? <span className="text-[#6B6258]/70 font-normal ml-1.5">({w.vintage})</span> : null}
+                                {w.vintage ? <span className="text-[#6B6258]/70 font-normal ml-1">({w.vintage})</span> : null}
                               </p>
                               {meta && (
-                                <p className="mt-0.5 truncate text-[10.5px] text-[#6B6258]/70">{meta}</p>
+                                <p className="mt-0.5 truncate text-[9.5px] text-[#6B6258]/70 sm:text-[10.5px]">{meta}</p>
                               )}
                             </div>
                             <span className={cn(
-                              "shrink-0 rounded-lg px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
+                              "shrink-0 rounded-lg px-1 py-0.5 text-[9px] font-semibold tabular-nums sm:px-1.5 sm:text-[10px]",
                               isSelected ? "bg-[rgba(123,30,43,0.08)] text-[#7B1E2B]" : "bg-transparent text-[#6B6258]/60"
                             )}>
                               {w.quantity}×
@@ -1550,19 +1594,19 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </ScrollArea>
 
-                <div className="sticky bottom-0 z-10 -mx-1 border-t border-[rgba(58,51,39,0.06)] bg-[rgba(246,240,232,0.94)] px-1 pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)] pt-2 backdrop-blur-sm">
+                <div className="z-20 -mx-1 mt-auto shrink-0 border-t border-[rgba(58,51,39,0.06)] bg-[rgba(246,240,232,0.96)] px-1 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-2 backdrop-blur-sm">
                   {selectedWine ? (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <AiToolbarSurface className="space-y-0.5 border-0 px-0 py-0">
-                        <p className="text-[12.5px] font-semibold text-[#1A1713]">{selectedWine.name}</p>
-                        <p className="text-[10.5px] text-[#6B6258]">
+                        <p className="text-[11.5px] font-semibold text-[#1A1713] sm:text-[12.5px]">{selectedWine.name}</p>
+                        <p className="text-[9.5px] text-[#6B6258] sm:text-[10.5px]">
                           {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
                         </p>
                       </AiToolbarSurface>
                       <AiModalActionButton
                         onClick={handleSearchWinePairings}
                         disabled={!selectedWineId || loading}
-                        className="h-9 w-full"
+                        className="h-8.5 w-full sm:h-9"
                       >
                         {loading ? (
                           <>
@@ -1578,7 +1622,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                       </AiModalActionButton>
                     </div>
                   ) : (
-                    <AiToolbarSurface className="border-0 px-0 py-0 text-[11px] text-[#6B6258]">
+                    <AiToolbarSurface className="border-0 px-0 py-0 text-[10px] text-[#6B6258] sm:text-[11px]">
                       Selecione uma garrafa para continuar.
                     </AiToolbarSurface>
                   )}
@@ -1703,14 +1747,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
             {/* ── Ext: Menu scanning ── */}
             {step === "ext-menu-scanning" && (
-              <PairingLoadingState
-                steps={[
-                  "Lendo menu",
-                  "Comparando estrutura",
-                  "Preparando combinações",
-                ]}
-                subtitle={`Vinho: ${extWineName}`}
-              />
+              error ? (
+                <PairingErrorState
+                  message={error}
+                  onRetry={() => (lastMenuAttachment ? runRetry() : setStep("ext-menu-photo"))}
+                  onClose={() => setStep("ext-menu-photo")}
+                />
+              ) : (
+                <PairingLoadingState
+                  steps={[
+                    "Lendo menu",
+                    "Comparando estrutura",
+                    "Preparando combinações",
+                  ]}
+                  subtitle={`Vinho: ${extWineName}`}
+                />
+              )
             )}
 
             {/* ── Photo Upload (external dish → wine list) ── */}
@@ -1783,10 +1835,18 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
             {/* ── Scanning ── */}
             {step === "scanning" && (
-              <PairingLoadingState
-                steps={loadingSteps}
-                subtitle={loadingSubtitle}
-              />
+              error ? (
+                <PairingErrorState
+                  message={error}
+                  onRetry={() => (lastWineListAttachment ? runRetry() : setStep("photo"))}
+                  onClose={() => setStep(requestMode === "dish_only" ? "dish" : "photo")}
+                />
+              ) : (
+                <PairingLoadingState
+                  steps={loadingSteps}
+                  subtitle={loadingSubtitle}
+                />
+              )
             )}
 
             {(step === "results" || step === "wine-results" || step === "ext-menu-results") && normalizedPairingResult && (

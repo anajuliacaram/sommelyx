@@ -281,6 +281,27 @@ function buildLocalWineListFallbackFromText(rawText: string, fileName?: string):
   };
 }
 
+function hasRecoverableWineListFallback(rawText: string, fileName?: string, mimeType?: string) {
+  const normalizedOcr = normalizeWineListOcrText(rawText, { fileName, mimeType });
+  if (normalizedOcr.structured.candidates.length > 0) return true;
+
+  const lines = normalizedOcr.cleanText
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const wineLikeLines = lines.filter((line) => {
+    if (line.length < 14) return false;
+    return (
+      /\b(19|20)\d{2}\b/.test(line) ||
+      /(?:R\$|[$€£]|\bbranco\b|\btinto\b|\bros[eé]\b|\bespumante\b)/i.test(line) ||
+      /\b(chardonnay|cabernet|merlot|malbec|nebbiolo|sauvignon|pinot|riesling|tempranillo|sangiovese)\b/i.test(line)
+    );
+  });
+
+  return wineLikeLines.length >= 2;
+}
+
 const WINE_LIST_TAG_SYNONYMS: Array<{ pattern: RegExp; label: string }> = [
   { pattern: /top|melhor escolha|best pick|recomend/i, label: "Melhor escolha" },
   { pattern: /value|custo|beneficio|benefício|preco|preço/i, label: "Melhor custo-benefício" },
@@ -1725,30 +1746,30 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
   const finalDish = normalizeWinePairingInput(input);
   const requestId = typeof input === "string" ? undefined : input.requestId;
   const signal = typeof input === "string" ? undefined : input.signal;
+  const hasWineContext = typeof input !== "string" && Boolean(
+    input?.wineName ||
+    input?.wineStyle ||
+    input?.wineGrape ||
+    input?.wineRegion ||
+    input?.wineProducer ||
+    input?.wineVintage ||
+    input?.wineCountry,
+  );
+  const cellarWines = typeof input === "string"
+    ? undefined
+    : Array.isArray(input.cellarWines)
+      ? input.cellarWines
+      : undefined;
+  const requestMode = typeof input === "string"
+    ? "food-to-wine"
+    : hasWineContext
+      ? "wine-to-food"
+      : cellarWines?.length
+        ? "cellar"
+        : "food-to-wine";
   console.log("dish:", finalDish);
 
   try {
-    const hasWineContext = typeof input !== "string" && Boolean(
-      input?.wineName ||
-      input?.wineStyle ||
-      input?.wineGrape ||
-      input?.wineRegion ||
-      input?.wineProducer ||
-      input?.wineVintage ||
-      input?.wineCountry,
-    );
-    const cellarWines = typeof input === "string"
-      ? undefined
-      : Array.isArray(input.cellarWines)
-        ? input.cellarWines
-        : undefined;
-    const requestMode = typeof input === "string"
-      ? "food-to-wine"
-      : hasWineContext
-        ? "wine-to-food"
-        : cellarWines?.length
-          ? "cellar"
-          : "food-to-wine";
     const requestPayload = typeof input === "string"
       ? {
           mode: requestMode,
@@ -1767,7 +1788,7 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
           wineProducer: input.wineProducer,
           wineVintage: input.wineVintage,
           wineCountry: input.wineCountry,
-          dish: finalDish,
+          dish: undefined,
           intent: input.intent,
           cellarWines: cellarWines,
           userWines: cellarWines,
@@ -1780,6 +1801,14 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
             userWines: cellarWines,
           };
 
+    console.info("HARMONIZE_REQUEST_START", {
+      mode: requestMode,
+      hasWineContext,
+      cellarWinesCount: cellarWines?.length ?? 0,
+      requestId: requestId ?? null,
+      normalizedDish: finalDish,
+      payload: requestPayload,
+    });
     console.info("[generateWinePairing] request_payload", {
       mode: requestMode,
       hasWineContext,
@@ -1808,9 +1837,25 @@ export async function generateWinePairing(input: WinePairingInput): Promise<Gene
     console.log("parsed:", parsed);
 
     const normalized = normalizeGeneratedWinePairingResponse(parsed ?? response, finalDish);
+    console.info("HARMONIZE_REQUEST_SUCCESS", {
+      mode: requestMode,
+      requestId: requestId ?? null,
+      fallback: normalized.fallback ?? false,
+      pairings: normalized.pairings.length,
+    });
     return normalized;
   } catch (error) {
     const classified = classifyError(error);
+    console.error("HARMONIZE_REQUEST_ERROR", {
+      mode: requestMode,
+      requestId: requestId ?? null,
+      dish: finalDish,
+      type: classified.type,
+      code: classified.code,
+      status: classified.status,
+      retryable: classified.retryable,
+      message: classified.message,
+    });
     console.error("[PAIRING_REQUEST_FAILED]", {
       dish: finalDish,
       type: classified.type,
@@ -1971,8 +2016,8 @@ export async function analyzeWineList(
       type: classified.type,
       wineCount: 0,
     });
-    if (classified.type !== "auth" && classified.type !== "invalid_file") {
-      const fallback = fallbackCandidateCount > 0
+    if (classified.type === "parse" || classified.type === "empty") {
+      const fallback = hasRecoverableWineListFallback(fallbackSourceText, fallbackFileName, analysis.mimeType)
         ? buildLocalWineListFallbackFromText(fallbackSourceText, fallbackFileName)
         : null;
       if (fallback) {
@@ -2073,6 +2118,15 @@ export async function analyzeMenuForWine(
       code: classified.code,
       type: classified.type,
     });
+    if (
+      classified.type === "auth" ||
+      classified.type === "timeout" ||
+      classified.type === "ai_fail" ||
+      classified.type === "invalid_file" ||
+      classified.type === "unknown"
+    ) {
+      throw createClassifiedError(classified, classified.code || "ANALYZE_MENU_FOR_WINE_FAILED");
+    }
     const normalizedOcr = normalizeWineListOcrText(String(analysis.text || ""), {
       fileName: analysis.fileName,
       mimeType: analysis.mimeType,

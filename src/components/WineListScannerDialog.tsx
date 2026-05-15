@@ -296,11 +296,24 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     setStep("scanning");
     setErrorMsg("");
     const requestId = crypto.randomUUID();
+    console.info("[WineListScannerDialog] analyze_request_start", {
+      requestSeq,
+      requestId,
+      fileName: attachment.fileName ?? null,
+      mimeType: attachment.mimeType ?? null,
+      textLength: attachment.text?.length ?? 0,
+    });
     try {
       const profile = cellarWines.length >= 3 ? buildUserProfile(cellarWines) : undefined;
       const data = await analyzeWineList({ ...attachment, requestId, signal: abortRef.current?.signal }, profile);
       if (!isLatestRequest(requestSeq)) return;
       const normalized = normalizeWineListResponse(data);
+      console.info("[WineListScannerDialog] analyze_request_success", {
+        requestSeq,
+        requestId,
+        wines: normalized.wines.length,
+        fallback: normalized.fallback ?? false,
+      });
       setResults(normalized);
       if (normalized.wines.length > 0) {
         notifySuccess("Carta analisada", {
@@ -311,6 +324,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
       setStep("results");
     } catch (err: unknown) {
       if (!isLatestRequest(requestSeq)) return;
+      console.error("[WineListScannerDialog] analyze_request_error", {
+        requestSeq,
+        requestId,
+        message: err instanceof Error ? err.message : String(err),
+      });
       setErrorMsg(err instanceof Error && err.message ? err.message : "Não conseguimos extrair vinhos confiáveis desta carta. Tente uma imagem ou PDF mais nítido.");
       setStep("error");
     } finally {
@@ -468,14 +486,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         exit={{ opacity: 0 }}
         className="space-y-3"
       >
-        <section className="space-y-2.5">
+        <section className="space-y-2">
           <div className="border-b border-[rgba(58,51,39,0.07)] pb-3">
             <div>
-              <p className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
+              <p className="text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[18px]">
                 {displayWines.length} rótulos para decidir
               </p>
               {safeResults.topPick ? (
-                <p className="mt-1 text-[12.5px] leading-5 text-[#6B6258]">
+                <p className="mt-0.5 text-[11.5px] leading-5 text-[#6B6258] sm:text-[12.5px]">
                   Primeiro destaque: {safeResults.topPick}
                 </p>
               ) : null}
@@ -483,17 +501,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           </div>
         </section>
 
-        <AiToolbarSurface className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+        <AiToolbarSurface className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#6B6258]/55" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/55 sm:left-3 sm:h-3.5 sm:w-3.5" />
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Buscar rótulo, produtor, região"
-              className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-9")}
+              className={cn(AI_MODAL_FIELD_CLASSNAME, "h-8 pl-7 text-[12px] sm:h-10 sm:pl-9 sm:text-[13px]")}
             />
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {TYPE_PILLS.filter((pill) => pill.key === "all" || availableTypes.includes(pill.key as WineType)).map((pill) => {
               const active = filterMode === pill.key;
               return (
@@ -502,7 +520,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   type="button"
                   onClick={() => setFilterMode(pill.key)}
                   selected={active}
-                  className="h-8 px-2.5 text-[10px] uppercase tracking-[0.08em]"
+                  className="h-6 px-2 text-[8.5px] uppercase tracking-[0.08em] sm:h-8 sm:px-2.5 sm:text-[10px]"
                 >
                   {pill.label}
                 </AiFilterChip>
