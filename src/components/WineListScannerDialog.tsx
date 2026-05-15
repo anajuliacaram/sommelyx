@@ -41,10 +41,11 @@ import {
   AiModalBody,
   AiModalSplitLayout,
   AiFilterChip,
-  AiToolbarSurface,
   AiUploadPanel,
   AI_MODAL_CARD_CLASSNAME,
   AI_MODAL_FIELD_CLASSNAME,
+  AI_MODAL_HELP_TEXT_CLASSNAME,
+  AI_MODAL_META_TEXT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
 } from "@/components/ai-flow/ModalLayout";
@@ -484,16 +485,16 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
-        className="space-y-3"
+        className="space-y-2.5"
       >
-        <section className="space-y-2">
-          <div className="pb-2">
+        <section className="space-y-1.5">
+          <div className="pb-1">
             <div>
-              <p className="text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[18px]">
+              <p className="text-[15px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:text-[17px]">
                 {displayWines.length} rótulos para decidir
               </p>
               {safeResults.topPick ? (
-                <p className="mt-0.5 text-[11.5px] leading-5 text-[#6B6258] sm:text-[12.5px]">
+                <p className={cn("mt-0.5 sm:text-[12px]", AI_MODAL_HELP_TEXT_CLASSNAME)}>
                   Primeiro destaque: {safeResults.topPick}
                 </p>
               ) : null}
@@ -501,14 +502,14 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           </div>
         </section>
 
-        <AiToolbarSurface className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
+        <div className="space-y-1.5">
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/55 sm:left-3 sm:h-3.5 sm:w-3.5" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/46 sm:left-3 sm:h-3 sm:w-3" />
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Buscar rótulo, produtor, região"
-              className={cn(AI_MODAL_FIELD_CLASSNAME, "h-8 pl-7 text-[12px] sm:h-10 sm:pl-9 sm:text-[13px]")}
+              className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-7")}
             />
           </div>
           <div className="flex flex-wrap gap-1">
@@ -520,17 +521,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   type="button"
                   onClick={() => setFilterMode(pill.key)}
                   selected={active}
-                  className="h-6 px-2 text-[8.5px] uppercase tracking-[0.08em] sm:h-8 sm:px-2.5 sm:text-[10px]"
+                  className="px-1.5 uppercase tracking-[0.06em] sm:px-2 sm:text-[9px]"
                 >
                   {pill.label}
                 </AiFilterChip>
               );
             })}
           </div>
-        </AiToolbarSurface>
+        </div>
 
         {displayWines.length > 0 ? (
-          <section className="space-y-2.5">
+          <section className="space-y-2">
             {displayWines.map((wine, index) => {
               const cellarMatch = matchedCellarMap.get(wine.name) || null;
               return (
@@ -608,7 +609,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                         className="space-y-3"
                       >
-                        <AiModalCard className="space-y-2.5">
+                        <div className="space-y-2.5">
                           <AiUploadPanel
                             onDragOver={(event) => {
                               event.preventDefault();
@@ -642,7 +643,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
 
                           <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])} />
                           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" className="hidden" onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])} />
-                        </AiModalCard>
+                        </div>
                       </motion.div>
                     )}
 
@@ -748,11 +749,11 @@ function WineListCard({
         AI_MODAL_CARD_CLASSNAME,
         isFeatured && "xl:col-span-1",
         rhythmClassName,
-        isSelected ? "border-[rgba(123,30,43,0.16)] bg-[rgba(255,251,244,0.84)]" : "",
+        isSelected ? "border-[rgba(123,30,43,0.10)] bg-[rgba(255,251,244,0.72)]" : "",
       )}
       style={{
-        backdropFilter: "blur(14px) saturate(1.06)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.06)",
+        backdropFilter: "blur(10px) saturate(1.03)",
+        WebkitBackdropFilter: "blur(10px) saturate(1.03)",
       }}
     >
       <div
@@ -765,40 +766,40 @@ function WineListCard({
             onSelect();
           }
         }}
-        className="w-full px-3.5 py-3 text-left"
+        className="w-full px-3 py-2.5 text-left"
       >
-        <div className="grid gap-3 sm:grid-cols-[32px_minmax(0,1fr)_auto] sm:items-start">
+        <div className="grid gap-2.5 sm:grid-cols-[28px_minmax(0,1fr)_auto] sm:items-start">
           <div className="flex items-center gap-2 sm:block">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1A1713] text-[11px] font-semibold text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(32,26,21,0.88)] text-[10px] font-medium text-white">
               {index + 1}
             </span>
             {curationNote ? (
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(91,79,68,0.68)] sm:mt-2">
+              <p className="text-[9px] font-medium uppercase tracking-[0.10em] text-[rgba(91,79,68,0.58)] sm:mt-1.5">
                 {curationNote}
               </p>
             ) : null}
           </div>
-          <div className="min-w-0 space-y-1.5">
+          <div className="min-w-0 space-y-1">
             <div className="flex items-start justify-between gap-2 sm:hidden">
-              <h4 className="text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#181511]">{wine.name}</h4>
-              {priceLabel ? <span className="shrink-0 text-[14px] font-semibold tracking-[-0.02em] text-[#181511]">{priceLabel}</span> : null}
+              <h4 className="text-[15px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)]">{wine.name}</h4>
+              {priceLabel ? <span className="shrink-0 text-[13px] font-medium tracking-[-0.02em] text-[rgba(32,26,21,0.88)]">{priceLabel}</span> : null}
             </div>
-            <h4 className="hidden text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#181511] sm:block">
+            <h4 className="hidden text-[15px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:block">
               {wine.name}
             </h4>
             {originLine ? (
-              <p className="text-[12px] font-medium leading-5 text-[#6B6258]">{originLine}</p>
+              <p className={AI_MODAL_HELP_TEXT_CLASSNAME}>{originLine}</p>
             ) : null}
             {descriptorLine ? (
-              <p className="text-[12.5px] leading-5 text-[#433A32]">{descriptorLine}</p>
+              <p className={AI_MODAL_META_TEXT_CLASSNAME}>{descriptorLine}</p>
             ) : null}
             {pairingLine ? (
-              <p className="text-[11.5px] leading-5 text-[#5B4F44]">{pairingLine}</p>
+              <p className={AI_MODAL_META_TEXT_CLASSNAME}>{pairingLine}</p>
             ) : null}
             {tags.length > 0 ? (
               <div className="flex flex-wrap gap-1 pt-0.5">
                 {tags.slice(0, 1).map((tag) => (
-                  <span key={tag} className="rounded-full border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.07)] px-2 py-[4px] text-[9px] font-semibold uppercase tracking-[0.08em] text-[#7B1E2B]">
+                  <span key={tag} className="rounded-full border border-[rgba(123,30,43,0.08)] bg-[rgba(123,30,43,0.05)] px-1.5 py-0.5 text-[8.5px] font-medium uppercase tracking-[0.06em] text-[#7B1E2B]">
                     {tag}
                   </span>
                 ))}
@@ -807,7 +808,7 @@ function WineListCard({
           </div>
           <div className="flex flex-wrap items-center gap-1 sm:max-w-[210px] sm:justify-end">
             {priceLabel ? (
-              <span className="hidden shrink-0 pr-1 text-[14px] font-semibold tracking-[-0.02em] text-[#181511] sm:inline">
+              <span className="hidden shrink-0 pr-1 text-[13px] font-medium tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:inline">
                 {priceLabel}
               </span>
             ) : null}
@@ -815,7 +816,7 @@ function WineListCard({
             <ActionPill label="Wishlist" icon={Heart} onClick={onWishlist} />
             <ActionPill label="Harmonizar" icon={UtensilsCrossed} onClick={onPair} disabled={!cellarMatch} disabledReason="Salve na adega para harmonizar por garrafa." />
             <ActionPill label="Ver" icon={Eye} onClick={onView} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
-            <ActionPill label="Registrar" icon={GlassWater} onClick={onConsume} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
+            <ActionPill label="Consumo" icon={GlassWater} onClick={onConsume} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
           </div>
         </div>
       </div>
@@ -844,14 +845,14 @@ function ActionPill({
         if (!disabled) onClick();
       }}
       className={cn(
-        "inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] transition-all duration-200",
+        "inline-flex h-6 items-center gap-1 rounded-full px-2 text-[8.5px] font-medium uppercase tracking-[0.08em] transition-all duration-200",
         disabled
-          ? "cursor-not-allowed border border-[rgba(58,51,39,0.06)] bg-[rgba(255,251,244,0.38)] text-[#9A9086]"
-          : "border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.58)] text-[#433A32] shadow-none hover:bg-[rgba(255,251,244,0.78)]",
+          ? "cursor-not-allowed border border-[rgba(58,51,39,0.05)] bg-[rgba(255,251,244,0.30)] text-[#9A9086]"
+          : "border border-[rgba(58,51,39,0.05)] bg-[rgba(255,251,244,0.46)] text-[#433A32] shadow-none hover:bg-[rgba(255,251,244,0.62)]",
       )}
       disabled={disabled}
     >
-      <Icon className="h-3.5 w-3.5" />
+      <Icon className="h-3 w-3" />
       {label}
     </button>
   );

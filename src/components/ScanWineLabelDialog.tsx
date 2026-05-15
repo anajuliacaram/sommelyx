@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMeaningfulScanFields, hasMeaningfulScanResult, isMeaningfulScanValue, normalizeScanResult, type CanonicalScanResult, type NormalizedScanResult } from "@/lib/scan-normalizer";
 import {
   AI_MODAL_ACTION_TILE_CLASSNAME,
+  AI_MODAL_HELP_TEXT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
   AiModalHeader,
@@ -588,9 +589,9 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-              className="space-y-3"
+              className="space-y-2.5"
               >
-                <AiModalCard className="space-y-2.5">
+                <div className="space-y-2">
                   <AiUploadPanel
                     icon={<Camera className="h-5 w-5" />}
                     title="Enviar rótulo"
@@ -632,7 +633,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                     className="hidden"
                     onChange={handleSelectedFile}
                   />
-                </AiModalCard>
+                </div>
               </motion.div>
             )}
 
@@ -642,7 +643,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-3"
+                className="space-y-2.5"
               >
                 <AiModalCard>
                   <AiProgressiveLoader
@@ -663,7 +664,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="space-y-3"
+                className="space-y-2.5"
               >
                 {imagePreview ? (
                   <div className={cn("flex items-center gap-2.5 p-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}>
@@ -671,17 +672,17 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                       <img src={imagePreview} alt="Rótulo analisado" className="h-full w-full object-cover" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold leading-tight text-[#1A1713]">Rótulo analisado</p>
-                      <p className="mt-0.5 text-[11.5px] leading-4 text-[#6B6258]">Somente dados legíveis serão aplicados.</p>
+                      <p className="text-[12.5px] font-medium leading-tight text-[rgba(32,26,21,0.88)]">Rótulo analisado</p>
+                      <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>Somente dados legíveis serão aplicados.</p>
                     </div>
                   </div>
                 ) : null}
 
                 {resultRows.length > 0 && (
-                  <AiModalCard className="space-y-2">
+                  <AiModalCard className="space-y-1.5">
                     <div className="pb-1">
                       <AiSectionLabel>Dados encontrados</AiSectionLabel>
-                      <p className="mt-1 text-[12px] leading-5 text-[#6B6258]">Revise antes de aplicar.</p>
+                      <p className={cn("mt-1", AI_MODAL_HELP_TEXT_CLASSNAME)}>Revise antes de aplicar.</p>
                     </div>
                     {resultRows}
                   </AiModalCard>

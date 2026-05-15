@@ -1101,8 +1101,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit} className="space-y-2">
-                  <div className="space-y-2">
+                <motion.form key="form" onSubmit={handleSubmit} className="space-y-1.5">
+                  <div className="space-y-1.5">
                     <div
                       className={cn("group flex cursor-pointer items-center gap-2.5 px-3 py-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                       onClick={() => setScanOpen(true)}
@@ -1146,7 +1146,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                   )}
 
-                  <AiModalCard className={AI_MODAL_SECTION_STACK_CLASSNAME}>
+                  <AiModalCard className="space-y-1.5">
                     <div className="space-y-0.5">
                       <AiSectionLabel>Essenciais</AiSectionLabel>
                     </div>
@@ -1173,7 +1173,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         style={aiFieldStyle("producer")}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-2 gap-1.5">
                       <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
                         <label htmlFor="qty" className={AI_MODAL_LABEL_CLASSNAME}>Quantidade</label>
                         <input
@@ -1212,7 +1212,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </AiModalCard>
 
                   {isCommercial ? (
-                    <AiModalCard className={AI_MODAL_SECTION_STACK_CLASSNAME}>
+                    <AiModalCard className="space-y-1.5">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-medium uppercase tracking-[0.16em]" style={{ color: 'rgba(95,127,82,0.82)' }}>
@@ -1231,7 +1231,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           </div>
                         )}
                       </div>
-                      <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                      <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                         <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
                           <label className={AI_MODAL_LABEL_CLASSNAME}>
                             Preço de custo (R$)
@@ -1291,9 +1291,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         </div>
                       </button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-2.5">
-                      <AiModalCard className="space-y-2.5">
-                        <div className="grid grid-cols-2 gap-2.5">
+                    <CollapsibleContent className="pt-2">
+                      <AiModalCard className="space-y-2">
+                        <div className="grid grid-cols-2 gap-1.5">
                         <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
                           <label className={AI_MODAL_LABEL_CLASSNAME}>País</label>
                           <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País no rótulo" className="input-premium" style={aiFieldStyle("country")} />
@@ -1397,7 +1397,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           </div>
                           <div>
                             <p className={AI_MODAL_LABEL_CLASSNAME}>Janela de consumo</p>
-                            <div className="grid grid-cols-2 gap-2.5">
+                            <div className="grid grid-cols-2 gap-1.5">
                               <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
                                 <label className={AI_MODAL_LABEL_CLASSNAME}>A partir de</label>
                                 <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />

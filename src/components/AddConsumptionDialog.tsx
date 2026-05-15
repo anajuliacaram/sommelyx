@@ -5,19 +5,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAddConsumption } from "@/hooks/useConsumption";
-import { useWineEvent, useWines, Wine } from "@/hooks/useWines";
+import { useWineEvent, useWines } from "@/hooks/useWines";
 import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star, Search, Check } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import {
   AI_MODAL_FIELD_CLASSNAME,
+  AI_MODAL_HELP_TEXT_CLASSNAME,
+  AI_MODAL_INLINE_ACTION_CLASSNAME,
   AI_MODAL_LABEL_CLASSNAME,
-  AI_MODAL_SELECTION_CARD_CLASSNAME,
+  AI_MODAL_LIST_ROW_CLASSNAME,
+  AI_MODAL_LIST_ROW_SELECTED_CLASSNAME,
+  AI_MODAL_LIST_SURFACE_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME,
   AI_MODAL_SEGMENTED_BUTTON_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
   AI_MODAL_TEXTAREA_CLASSNAME,
+  AI_MODAL_TEXT_PRIMARY_CLASSNAME,
   AiModalActionButton,
   AiModalBody,
   AiModalCard,
@@ -28,7 +38,6 @@ import {
   AiModalShell,
   AiSectionLabel,
   AiModalSplitLayout,
-  AiToolbarSurface,
 } from "@/components/ai-flow/ModalLayout";
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
@@ -230,8 +239,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
           <AiModalBody>
             <AiModalSplitLayout>
-            <div className="space-y-1.5 overflow-y-auto pr-1">
-              <AiToolbarSurface className="space-y-1.5 px-2 py-2">
+            <div className="space-y-2 overflow-y-auto pr-1">
+              <div className="space-y-1.5">
                 <div className="space-y-0.5 px-0.5">
                   <AiSectionLabel>Origem</AiSectionLabel>
                 </div>
@@ -240,21 +249,19 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     type="button"
                     className={cn(
                       AI_MODAL_SELECTION_CARD_CLASSNAME,
-                      "min-h-0 rounded-[15px] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_10px_22px_-24px_rgba(58,51,39,0.16)]",
-                      source === "cellar"
-                        ? "border-[rgba(123,30,43,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,241,242,0.76)_100%)]"
-                        : "border-[rgba(95,111,82,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(249,244,237,0.64)_100%)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(252,248,242,0.74)_100%)]",
+                      "min-h-0 gap-1 px-2.5 py-2.25",
+                      source === "cellar" ? AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME : AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
                     )}
                     onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-[12.5px] font-medium tracking-[-0.016em] text-[rgba(32,26,21,0.88)]">Minha adega</p>
-                        <p className="mt-0.5 text-[10.5px] leading-[1.3] text-[rgba(72,60,46,0.58)]">
-                        Garrafa cadastrada
+                        <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Minha adega</p>
+                        <p className={AI_MODAL_HELP_TEXT_CLASSNAME}>
+                          Garrafa cadastrada
                         </p>
                       </div>
-                      <span className="shrink-0 rounded-full bg-[rgba(123,30,43,0.05)] px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B]/75">
+                      <span className="shrink-0 text-[9px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B]/68">
                         {cellarWines.length}
                       </span>
                     </div>
@@ -263,10 +270,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     type="button"
                     className={cn(
                       AI_MODAL_SELECTION_CARD_CLASSNAME,
-                      "min-h-0 rounded-[15px] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_10px_22px_-24px_rgba(58,51,39,0.16)]",
-                      source === "external"
-                        ? "border-[rgba(123,30,43,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,241,242,0.76)_100%)]"
-                        : "border-[rgba(95,111,82,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(249,244,237,0.64)_100%)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(252,248,242,0.74)_100%)]",
+                      "min-h-0 gap-1 px-2.5 py-2.25",
+                      source === "external" ? AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME : AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
                     )}
                     onClick={() => {
                       setSource("external");
@@ -283,24 +288,24 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-[12.5px] font-medium tracking-[-0.016em] text-[rgba(32,26,21,0.88)]">Experiência externa</p>
-                        <p className="mt-0.5 text-[10.5px] leading-[1.3] text-[rgba(72,60,46,0.58)]">
-                        Restaurante, viagem, jantar
+                        <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Experiência externa</p>
+                        <p className={AI_MODAL_HELP_TEXT_CLASSNAME}>
+                          Restaurante, viagem, jantar
                         </p>
                       </div>
-                      <span className="shrink-0 rounded-full bg-[rgba(123,30,43,0.05)] px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B]/75">
+                      <span className="shrink-0 text-[9px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B]/68">
                         Manual
                       </span>
                     </div>
                   </button>
                 </div>
-              </AiToolbarSurface>
+              </div>
 
               {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
-                <AiToolbarSurface className="space-y-1.5 px-2 py-2">
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-3">
                     <AiSectionLabel>Selecionar garrafa</AiSectionLabel>
-                    <span className="text-[10.5px] text-[rgba(72,60,46,0.58)]">{filteredWines.length} vinhos</span>
+                    <span className={AI_MODAL_HELP_TEXT_CLASSNAME}>{filteredWines.length} vinhos</span>
                   </div>
 
                   <div className="relative">
@@ -309,11 +314,11 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                       value={wineSearch}
                       onChange={(e) => setWineSearch(e.target.value)}
                       placeholder="Buscar rótulo, produtor, uva"
-                      className={cn(fieldClassName, "h-8 rounded-[13px] bg-[linear-gradient(180deg,rgba(255,255,255,0.68)_0%,rgba(249,244,237,0.62)_100%)] pl-7 text-[12px] shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_8px_18px_-20px_rgba(58,51,39,0.12)]")}
+                      className={cn(fieldClassName, "pl-7")}
                     />
                   </div>
 
-                  <AiToolbarSurface className="flex gap-1 overflow-x-auto border-0 bg-transparent px-0 py-0 shadow-none">
+                  <div className="flex gap-1 overflow-x-auto">
                     {TYPE_FILTERS.map((f) => {
                       return (
                         <AiFilterChip
@@ -321,28 +326,23 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                           type="button"
                           onClick={() => setTypeFilter(f.id)}
                           selected={typeFilter === f.id}
-                          className="h-5.5 shrink-0 px-1.5 text-[8.5px] font-medium uppercase tracking-[0.06em] shadow-[inset_0_1px_0_rgba(255,255,255,0.58),0_8px_16px_-20px_rgba(58,51,39,0.18)]"
+                          className="shrink-0 px-1.5 uppercase tracking-[0.05em]"
                         >
                           <span className={cn("mr-1 inline-flex h-1.5 w-1.5 rounded-full", f.dot)} />
                           {f.label}
                         </AiFilterChip>
                       );
                     })}
-                  </AiToolbarSurface>
+                  </div>
 
                   <div
-                    className="cellar-scroll max-h-[228px] overflow-y-auto rounded-[16px] border border-[rgba(95,111,82,0.07)] bg-[linear-gradient(180deg,rgba(255,255,255,0.64)_0%,rgba(249,244,237,0.58)_100%)] pr-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.54),0_10px_20px_-24px_rgba(58,51,39,0.14)]"
+                    className={cn("space-y-0.5", AI_MODAL_LIST_SURFACE_CLASSNAME)}
                     style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
                   >
-                    {filteredWines.length > 4 ? (
-                      <div className="sticky top-0 z-10 bg-[rgba(252,249,244,0.88)] px-3 py-1 text-[8.5px] font-medium uppercase tracking-[0.1em] text-[#7B1E2B]/52 backdrop-blur-sm">
-                        {filteredWines.length} opções
-                      </div>
-                    ) : null}
                     {filteredWines.length === 0 ? (
-                      <div className="px-4 py-6 text-center">
-                        <p className="text-[13px] font-medium text-[rgba(32,26,21,0.84)]">Nenhum vinho encontrado na adega</p>
-                        <p className="mt-1 text-[11px] text-[rgba(72,60,46,0.58)]">Use a busca ou ajuste os filtros.</p>
+                      <div className="px-3 py-4 text-center">
+                        <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Nenhum vinho encontrado na adega</p>
+                        <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>Use a busca ou ajuste os filtros.</p>
                       </div>
                     ) : (
                       filteredWines.map((w) => {
@@ -353,12 +353,12 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                             type="button"
                             onClick={() => handleSelectWine(w.id)}
                             className={cn(
-                              "flex w-full items-center gap-2 rounded-[13px] px-2.5 py-1.5 text-left transition-colors duration-150 hover:bg-[rgba(255,255,255,0.44)]",
-                              selected && "bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(249,241,242,0.74)_100%)]",
+                              AI_MODAL_LIST_ROW_CLASSNAME,
+                              selected && AI_MODAL_LIST_ROW_SELECTED_CLASSNAME,
                             )}
                           >
                             <div className={cn(
-                              "flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150",
+                              "flex h-5 w-5 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150",
                               selected ? "bg-[rgba(123,30,43,0.08)] text-[#7B1E2B]" : "bg-transparent text-[rgba(72,60,46,0.46)]",
                             )}>
                               {selected ? <Check className="h-3 w-3" /> : <WineIcon className="h-3 w-3" />}
@@ -383,139 +383,133 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                       })
                     )}
                   </div>
-                </AiToolbarSurface>
+                </div>
               )}
 
               {source === "cellar" && selectedWine && !showWinePicker ? (
-                <AiToolbarSurface className="px-2.5 py-2">
-                  <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 px-0.5">
                     <div className="min-w-0">
                       <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
-                      <p className="mt-1 truncate text-[13px] font-medium tracking-[-0.018em] text-[rgba(32,26,21,0.88)]">{selectedWine.name}</p>
-                      <p className="mt-0.5 truncate text-[10.5px] leading-[1.35] text-[rgba(72,60,46,0.58)]">
+                      <p className="mt-0.5 truncate text-[13px] font-medium tracking-[-0.018em] text-[rgba(32,26,21,0.88)]">{selectedWine.name}</p>
+                      <p className={cn("mt-0.5 truncate", AI_MODAL_HELP_TEXT_CLASSNAME)}>
                         {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
                       </p>
                     </div>
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-6 rounded-full border border-[rgba(58,51,39,0.06)] bg-transparent px-2.5 text-[9px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B]/82 shadow-none hover:bg-[rgba(255,251,244,0.56)]"
+                      className={AI_MODAL_INLINE_ACTION_CLASSNAME}
                       onClick={() => setShowWinePicker(true)}
                     >
                       Trocar
                     </Button>
                   </div>
-                </AiToolbarSurface>
               ) : null}
 
-              <AiModalCard className="space-y-1.5 px-3 py-2.5">
-                <div className="space-y-0.5">
+              <AiModalCard className="space-y-2 px-3 py-2.5">
+                <div className="space-y-1.5">
                   <AiSectionLabel>Dados do vinho</AiSectionLabel>
-                </div>
 
-                <div className="space-y-1">
-                  <Label className={AI_MODAL_LABEL_CLASSNAME}>
-                    Nome do vinho <span className="text-primary">*</span>
-                  </Label>
-                  <Input
-                    className={fieldClassName}
-                    value={wineName}
-                    onChange={(e) => setWineName(e.target.value)}
-                    placeholder="Nome do vinho"
-                    disabled={source === "cellar" && !!selectedWineId}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-1.5">
                   <div className="space-y-1">
-                    <Label className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">Produtor</Label>
-                    <Input className={fieldClassName} value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">Safra</Label>
-                    <Input className={fieldClassName} value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">País</Label>
-                    <Input className={fieldClassName} value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">Região</Label>
-                    <Input className={fieldClassName} value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <Label className={AI_MODAL_LABEL_CLASSNAME}>Uva / Blend</Label>
-                  <Input
-                    className={fieldClassName}
-                    value={grape}
-                    onChange={(e) => setGrape(e.target.value)}
-                    placeholder="Ex: Cabernet Sauvignon, Merlot"
-                    disabled={source === "cellar" && !!selectedWineId}
-                  />
-                </div>
-              </AiModalCard>
-
-              <AiModalCard className="space-y-1.5 px-3 py-2.5">
-                <div className="space-y-0.5">
-                  <AiSectionLabel>Contexto da experiência</AiSectionLabel>
-                </div>
-
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div className="space-y-1">
-                    <Label className="flex items-center gap-1 text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">
-                      <MapPin className="h-3 w-3 text-[#8E7A64]" />
-                      Local
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>
+                      Nome do vinho <span className="text-primary">*</span>
                     </Label>
-                    <Input className={fieldClassName} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
+                    <Input
+                      className={fieldClassName}
+                      value={wineName}
+                      onChange={(e) => setWineName(e.target.value)}
+                      placeholder="Nome do vinho"
+                      disabled={source === "cellar" && !!selectedWineId}
+                    />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className="space-y-1">
+                      <Label className={AI_MODAL_LABEL_CLASSNAME}>Produtor</Label>
+                      <Input className={fieldClassName} value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className={AI_MODAL_LABEL_CLASSNAME}>Safra</Label>
+                      <Input className={fieldClassName} value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className={AI_MODAL_LABEL_CLASSNAME}>País</Label>
+                      <Input className={fieldClassName} value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className={AI_MODAL_LABEL_CLASSNAME}>Região</Label>
+                      <Input className={fieldClassName} value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
-                    <Label className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">Data</Label>
-                    <Input className={fieldClassName} type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>Uva / Blend</Label>
+                    <Input
+                      className={fieldClassName}
+                      value={grape}
+                      onChange={(e) => setGrape(e.target.value)}
+                      placeholder="Ex: Cabernet Sauvignon, Merlot"
+                      disabled={source === "cellar" && !!selectedWineId}
+                    />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Label className="flex items-center gap-1 text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">
-                    <Star className="h-3 w-3 text-[#8E7A64]" />
-                    Avaliação
-                  </Label>
-                  <div className="grid grid-cols-5 gap-1">
-                    {([
-                      { value: 1, label: "Ruim" },
-                      { value: 2, label: "Regular" },
-                      { value: 3, label: "Bom" },
-                      { value: 4, label: "Muito bom" },
-                      { value: 5, label: "Excelente" },
-                    ] as const).map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={cn(
-                          AI_MODAL_SEGMENTED_BUTTON_CLASSNAME,
-                          "h-7 rounded-[11px] text-[9px]",
-                          rating === opt.value
-                            ? "border-[#7B1E2B]/90 bg-[linear-gradient(135deg,#7B1E2B,#8A2536)] text-white shadow-[0_10px_18px_-18px_rgba(122,20,30,0.26)]"
-                            : "border-[rgba(95,111,82,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.70)_0%,rgba(249,244,237,0.64)_100%)] text-[rgba(72,60,46,0.68)] shadow-[inset_0_1px_0_rgba(255,255,255,0.56),0_6px_16px_-20px_rgba(58,51,39,0.12)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(252,248,242,0.74)_100%)]",
-                        )}
-                        onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <div className="space-y-1.5">
+                  <AiSectionLabel>Contexto da experiência</AiSectionLabel>
 
-                <div className="space-y-1">
-                  <Label className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]">Notas de degustação</Label>
-                  <Textarea
-                    className={AI_MODAL_TEXTAREA_CLASSNAME}
-                    value={tastingNotes}
-                    onChange={(e) => setTastingNotes(e.target.value)}
-                    placeholder="Aromas, textura, equilíbrio, final."
-                    rows={2}
-                  />
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className="space-y-1">
+                      <Label className={cn("flex items-center gap-1", AI_MODAL_LABEL_CLASSNAME)}>
+                        <MapPin className="h-3 w-3 text-[#8E7A64]" />
+                        Local
+                      </Label>
+                      <Input className={fieldClassName} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className={AI_MODAL_LABEL_CLASSNAME}>Data</Label>
+                      <Input className={fieldClassName} type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className={cn("flex items-center gap-1", AI_MODAL_LABEL_CLASSNAME)}>
+                      <Star className="h-3 w-3 text-[#8E7A64]" />
+                      Avaliação
+                    </Label>
+                    <div className="grid grid-cols-5 gap-1">
+                      {([
+                        { value: 1, label: "Ruim" },
+                        { value: 2, label: "Regular" },
+                        { value: 3, label: "Bom" },
+                        { value: 4, label: "Muito bom" },
+                        { value: 5, label: "Excelente" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={cn(
+                            AI_MODAL_SEGMENTED_BUTTON_CLASSNAME,
+                            "h-6.5 rounded-[10px] text-[8.5px]",
+                            rating === opt.value ? AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME : AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME,
+                          )}
+                          onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>Notas de degustação</Label>
+                    <Textarea
+                      className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "min-h-[68px]")}
+                      value={tastingNotes}
+                      onChange={(e) => setTastingNotes(e.target.value)}
+                      placeholder="Aromas, textura, equilíbrio, final."
+                      rows={2}
+                    />
+                  </div>
                 </div>
               </AiModalCard>
             </div>
