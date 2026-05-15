@@ -211,29 +211,21 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent
-        className={AI_MODAL_DIALOG_CONTENT_CLASSNAME}
-        style={AI_MODAL_DIALOG_CONTENT_STYLE}
+    <Sheet open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
+      <SheetContent
+        className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+        style={AI_MODAL_SHEET_CONTENT_STYLE}
         aria-label="Adicionar consumo"
       >
+        <SheetTitle className="sr-only">Adicionar consumo</SheetTitle>
         <AiModalShell>
           <AiModalHeaderBar>
-            <div className="pr-11 sm:pr-12">
-              <div className="flex items-start gap-2.5">
-                <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.82)_0%,rgba(249,241,242,0.74)_100%)] text-[#7B1E2B] shadow-[inset_0_1px_0_rgba(255,255,255,0.66),0_8px_18px_-22px_rgba(122,20,30,0.14)]">
-                  <WineIcon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[17px] font-medium leading-tight tracking-[-0.022em] text-[rgba(32,26,21,0.86)] sm:text-[18px]">
-                    Adicionar consumo
-                  </p>
-                  <p className="mt-0.5 max-w-[34rem] text-[11px] leading-[1.42] text-[rgba(72,60,46,0.58)] sm:text-[11.5px]">
-                    Salve a garrafa, o lugar e a impressão essencial.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <AiModalHeader
+              icon={<WineIcon className="h-5 w-5" />}
+              title="Adicionar consumo"
+              description="Salve a garrafa, o lugar e a impressão essencial."
+              tone="wine"
+            />
           </AiModalHeaderBar>
 
           <AiModalBody>
