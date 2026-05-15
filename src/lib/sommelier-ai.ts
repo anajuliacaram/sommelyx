@@ -1834,12 +1834,18 @@ export async function analyzeWineList(
   },
 ): Promise<WineListAnalysis> {
   const totalStartedAt = nowMs();
+  let fallbackSourceText = "";
+  let fallbackFileName: string | undefined;
+  let fallbackCandidateCount = 0;
   try {
     const normalizedOcr = normalizeWineListOcrText(String(analysis.text || ""), {
       fileName: analysis.fileName,
       mimeType: analysis.mimeType,
     });
     const text = normalizedOcr.normalizedText.trim();
+    fallbackSourceText = String(analysis.text || "");
+    fallbackFileName = analysis.fileName;
+    fallbackCandidateCount = normalizedOcr.structured.candidates.length;
     if (text.length < 20) {
       console.warn("[WINE_LIST_ANALYZE_FAILED]", {
         fileName: analysis.fileName,
@@ -1966,11 +1972,13 @@ export async function analyzeWineList(
       wineCount: 0,
     });
     if (classified.type !== "auth" && classified.type !== "invalid_file") {
-      const fallback = buildLocalWineListFallbackFromText(String(analysis.text || ""), analysis.fileName);
+      const fallback = fallbackCandidateCount > 0
+        ? buildLocalWineListFallbackFromText(fallbackSourceText, fallbackFileName)
+        : null;
       if (fallback) {
         console.info("[sommelier-ai] local_fallback_used", {
           flow: "analyze-wine-list",
-          fileName: analysis.fileName,
+          fileName: fallbackFileName,
           code: classified.code,
           wineCount: fallback.wines.length,
         });

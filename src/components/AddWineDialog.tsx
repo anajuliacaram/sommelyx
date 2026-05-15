@@ -199,6 +199,7 @@ function keepOnlyConfidentScanValue(
   if (value == null || value === "") return "";
   const confidence = getScanConfidence(source, normalizedSource, field);
   if (confidence != null) return confidence >= 0.72 ? String(value) : "";
+  if (!rawOcrText.trim()) return String(value);
   const normalizedValue = normalizeWineSearchText(String(value));
   if (normalizedValue && rawOcrText.includes(normalizedValue)) return value;
   return "";
@@ -237,6 +238,15 @@ function sanitizeOcrLine(line: string) {
     .replace(/\s+/g, " ")
     .replace(/[|•·]/g, " ")
     .trim();
+}
+
+function base64ImageToBlob(base64: string, mimeType = "image/jpeg") {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return new Blob([bytes], { type: mimeType });
 }
 
 function splitOcrTextIntoLines(value: string) {
@@ -902,8 +912,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       if (labelImageBase64 && user) {
         try {
           const path = `${user.id}/${Date.now()}-${crypto.randomUUID()}.jpg`;
-          const response = await fetch(`data:image/jpeg;base64,${labelImageBase64}`);
-          const blob = await response.blob();
+          const blob = base64ImageToBlob(labelImageBase64, "image/jpeg");
           const { error } = await supabase.storage.from("wishlist-images").upload(path, blob, {
             cacheControl: "3600",
             upsert: false,

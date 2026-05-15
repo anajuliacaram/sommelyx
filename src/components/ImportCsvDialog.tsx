@@ -2290,7 +2290,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           fileType: file.type || "unknown",
           fileSizeBytes: file.size,
         });
-        const prepared = await prepareAiAnalysisAttachment(file);
+        const prepared = await prepareAiAnalysisAttachment(file, { signal: abortRef.current?.signal });
         console.info("IMPORT_IMAGE_PREPARED", {
           fileName: file.name,
           fileType: file.type || "unknown",
@@ -2343,7 +2343,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           fileType: file.type || "unknown",
           fileSizeBytes: file.size,
         });
-        const pdfPayload = await prepareSmartPdfImportAttachment(file);
+        const pdfPayload = await prepareSmartPdfImportAttachment(file, { signal: abortRef.current?.signal });
         setAnalysisStage("extracting");
         const smartContent = [
           `SMART PDF IMPORT MODE`,

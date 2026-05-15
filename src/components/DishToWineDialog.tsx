@@ -605,7 +605,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       isPdf: file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"),
     });
     try {
-      const prepared = await prepareWineListAnalysisTextAttachment(file);
+      const prepared = await prepareWineListAnalysisTextAttachment(file, { signal: currentSignal() });
       console.info("[DishToWineDialog] file_validated", { step: "wine-list", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, textLength: prepared.text?.length || 0 });
       const payload: WineListAnalysisTextInput = {
         text: prepared.text,
@@ -718,7 +718,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
       isPdf: file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"),
     });
     try {
-      const prepared = await prepareWineListAnalysisTextAttachment(file);
+      const prepared = await prepareWineListAnalysisTextAttachment(file, { signal: currentSignal() });
       console.info("[DishToWineDialog] file_validated", { step: "menu", sourceType: prepared.sourceType, fileName: prepared.fileName, mimeType: prepared.mimeType, textLength: prepared.text?.length || 0 });
       const payload: WineListAnalysisTextInput = {
         text: prepared.text,
@@ -1410,23 +1410,22 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-3 sm:space-y-3.5"
+                className="flex min-h-0 flex-1 flex-col gap-2.5"
               >
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#6B6258] mb-2">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#6B6258]">
                     Qual vinho da sua adega?
                   </p>
 
-                  {/* Search input */}
-                  <AiToolbarSurface className="mt-2 space-y-2.5">
+                  <AiToolbarSurface className="space-y-2 px-0 py-1">
                     <div className="relative">
-                      <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B6258]/55" />
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#6B6258]/55" />
                       <input
                         type="text"
                         value={wineSearch}
                         onChange={(e) => setWineSearch(e.target.value)}
                         placeholder="Buscar vinho na sua adega..."
-                        className={cn(AI_MODAL_FIELD_CLASSNAME, "pl-9")}
+                        className={cn(AI_MODAL_FIELD_CLASSNAME, "h-9 pl-8")}
                         autoFocus
                       />
                     </div>
@@ -1440,7 +1439,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             key={opt.key}
                             onClick={() => setSortKey(opt.key)}
                             className={cn(
-                              "flex h-7 items-center gap-1 rounded-full border px-2.5 py-0 text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
+                              "flex h-6 items-center gap-1 rounded-full border px-2 py-0 text-[9.5px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
                               active
                                 ? "border-primary/20 bg-primary/10 text-primary"
                                 : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#1A1713]",
@@ -1461,7 +1460,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             key={opt.key}
                             onClick={() => setWineStyleFilter(opt.key)}
                             className={cn(
-                              "flex h-7 items-center gap-1.5 rounded-full border px-2.5 py-0 text-[10px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
+                              "flex h-6 items-center gap-1 rounded-full border px-2 py-0 text-[9.5px] font-semibold uppercase tracking-[0.06em] transition-all duration-150",
                               active
                                 ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.07)] text-[#7B1E2B]"
                                 : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#1A1713]",
@@ -1476,9 +1475,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </AiToolbarSurface>
                 </div>
 
-                {/* Wine list */}
-                <ScrollArea className="h-[240px] sm:h-[300px] -mx-1 px-1">
-                  <div className="space-y-1.5">
+                <ScrollArea className="min-h-0 flex-1 -mx-1 px-1">
+                  <div className="space-y-1">
                     {filtered.map((w) => {
                       const isSelected = selectedWineId === w.id;
                       const meta = [w.style, w.grape, w.region].filter(Boolean).join(" · ");
@@ -1487,37 +1485,37 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           key={w.id}
                           onClick={() => setSelectedWineId(w.id)}
                           className={cn(
-                            "w-full cursor-pointer rounded-[14px] border-b p-2.5 text-left transition-all duration-[160ms] ease-[cubic-bezier(0.22,1,0.36,1)] group",
+                            "w-full cursor-pointer rounded-[14px] border-b px-2.5 py-2 text-left transition-colors duration-150 group",
                             isSelected
                               ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.05)]"
-                              : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)] active:scale-[0.99]"
+                              : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)]"
                           )}
                         >
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              "w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-colors duration-150",
+                              "flex h-7 w-7 items-center justify-center rounded-[9px] shrink-0 transition-colors duration-150",
                               isSelected ? "bg-[rgba(123,30,43,0.08)]" : "bg-transparent"
                             )}>
                               {isSelected ? (
-                                <Check className="h-4 w-4 text-primary" />
+                                <Check className="h-3.5 w-3.5 text-primary" />
                               ) : (
-                                <WineIcon className="h-4 w-4 text-[#6B6258]/55" />
+                                <WineIcon className="h-3.5 w-3.5 text-[#6B6258]/55" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(
-                                "text-[13.5px] font-semibold truncate",
+                                "truncate text-[13px] font-semibold",
                                 isSelected ? "text-[#1A1713]" : "text-[#1A1713]/90"
                               )}>
                                 {w.name}
                                 {w.vintage ? <span className="text-[#6B6258]/70 font-normal ml-1.5">({w.vintage})</span> : null}
                               </p>
                               {meta && (
-                                <p className="text-[11px] text-[#6B6258]/70 truncate mt-0.5">{meta}</p>
+                                <p className="mt-0.5 truncate text-[10.5px] text-[#6B6258]/70">{meta}</p>
                               )}
                             </div>
                             <span className={cn(
-                              "text-[11px] font-semibold tabular-nums shrink-0 px-2 py-0.5 rounded-lg",
+                              "shrink-0 rounded-lg px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
                               isSelected ? "bg-[rgba(123,30,43,0.08)] text-[#7B1E2B]" : "bg-transparent text-[#6B6258]/60"
                             )}>
                               {w.quantity}×
@@ -1534,7 +1532,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           icon={Search}
                           title="Nenhum vinho encontrado na sua adega"
                           description="Tente outro nome, produtor, uva ou região."
-                          className="border-0 bg-transparent px-4 py-6 shadow-none lg:py-7"
+                          className="border-0 bg-transparent px-4 py-4 shadow-none"
                         />
                       </AiModalCard>
                     )}
@@ -1545,40 +1543,46 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           icon={WineIcon}
                           title="Você ainda não adicionou vinhos na sua adega"
                           description="Adicione sua primeira garrafa para usar a harmonização."
-                          className="border-0 bg-transparent px-4 py-6 shadow-none lg:py-7"
+                          className="border-0 bg-transparent px-4 py-4 shadow-none"
                         />
                       </AiModalCard>
                     )}
                   </div>
                 </ScrollArea>
 
-                {/* Selected wine preview */}
-                {selectedWine && (
-                  <AiToolbarSurface className="space-y-0.5">
-                    <p className="text-[13px] font-semibold text-[#1A1713]">{selectedWine.name}</p>
-                    <p className="text-[11px] text-[#6B6258]">
-                      {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
-                    </p>
-                  </AiToolbarSurface>
-                )}
-
-                <Button
-                  onClick={handleSearchWinePairings}
-                  disabled={!selectedWineId || loading}
-                  className="h-10 w-full rounded-[12px] text-[13px] font-medium"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Consultando sommelier…
-                    </>
+                <div className="sticky bottom-0 z-10 -mx-1 border-t border-[rgba(58,51,39,0.06)] bg-[rgba(246,240,232,0.94)] px-1 pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)] pt-2 backdrop-blur-sm">
+                  {selectedWine ? (
+                    <div className="space-y-2">
+                      <AiToolbarSurface className="space-y-0.5 border-0 px-0 py-0">
+                        <p className="text-[12.5px] font-semibold text-[#1A1713]">{selectedWine.name}</p>
+                        <p className="text-[10.5px] text-[#6B6258]">
+                          {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
+                        </p>
+                      </AiToolbarSurface>
+                      <AiModalActionButton
+                        onClick={handleSearchWinePairings}
+                        disabled={!selectedWineId || loading}
+                        className="h-9 w-full"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Preparando harmonização
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Usar este vinho
+                          </>
+                        )}
+                      </AiModalActionButton>
+                    </div>
                   ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Sugerir pratos
-                    </>
+                    <AiToolbarSurface className="border-0 px-0 py-0 text-[11px] text-[#6B6258]">
+                      Selecione uma garrafa para continuar.
+                    </AiToolbarSurface>
                   )}
-                </Button>
+                </div>
 
                 {error && (
                   <PairingErrorState message={error} onRetry={runRetry} onClose={() => setStep("select-wine")} />

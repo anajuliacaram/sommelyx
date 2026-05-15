@@ -260,6 +260,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     abortRef.current?.abort();
     abortRef.current = null;
     requestSeqRef.current += 1;
+    requestBusyRef.current = false;
+    prepareBusyRef.current = false;
     setStep("capture");
     setAttachmentPreview(null);
     setResults(null);
@@ -333,7 +335,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     setAttachmentPreview({ url: null, fileName: file.name, isPdf });
 
     try {
-      const prepared = await prepareWineListAnalysisTextAttachment(file);
+      const prepared = await prepareWineListAnalysisTextAttachment(file, { signal: abortRef.current?.signal });
       if (!isLatestRequest(prepareSeq)) return;
       const payload: WineListAnalysisTextInput = {
         text: prepared.text,

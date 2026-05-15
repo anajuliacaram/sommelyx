@@ -52,6 +52,10 @@ interface ScanWineLabelDialogProps {
 
 type ScanStep = "capture" | "scanning" | "preview" | "error";
 type ScanOutcome = "success_full" | "success_partial" | "error" | null;
+type ScanRequestMetadata = {
+  mimeType?: string;
+  fileName?: string;
+};
 
 function isAcceptedMobileImage(file: File) {
   const mime = (file.type || "").toLowerCase();
@@ -59,6 +63,17 @@ function isAcceptedMobileImage(file: File) {
   const allowedMime = new Set(["image/jpeg", "image/jpg", "image/png", "image/heic", "image/heif"]);
   if (allowedMime.has(mime)) return true;
   return [".jpg", ".jpeg", ".png", ".heic", ".heif"].some((ext) => name.endsWith(ext));
+}
+
+function isCompleteScanResult(result: CanonicalScanResult, meaningfulFields: string[]) {
+  const hasCoreIdentity =
+    Boolean(result.name) &&
+    Boolean(result.style) &&
+    Boolean(result.vintage) &&
+    Boolean(result.producer || result.grape) &&
+    Boolean(result.country || result.region);
+
+  return hasCoreIdentity && meaningfulFields.length >= 7;
 }
 
 export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: ScanWineLabelDialogProps) {
@@ -77,6 +92,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
   const requestBusyRef = useRef(false);
   const autoCommitRef = useRef(false);
   const confirmBusyRef = useRef(false);
+  const lastScanMetadataRef = useRef<ScanRequestMetadata | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestSeqRef = useRef(0);
   const { toast } = useToast();
@@ -95,11 +111,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     abortRef.current?.abort();
     abortRef.current = null;
     requestSeqRef.current += 1;
+    requestBusyRef.current = false;
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = null;
     }
     selectedFileRef.current = null;
+    lastScanMetadataRef.current = null;
     autoCommitRef.current = false;
     confirmBusyRef.current = false;
     setStep("capture");
@@ -140,10 +158,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
   const runScan = useCallback(async (
     base64: string,
-    metadata?: {
-      mimeType?: string;
-      fileName?: string;
-    },
+    metadata?: ScanRequestMetadata,
   ) => {
     if (requestBusyRef.current) return;
     const requestSeq = beginRequest();
@@ -207,7 +222,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       const normalizedWine = normalizeScanResult(originalResponse);
       const meaningfulFields = getMeaningfulScanFields(normalizedWine);
       const hasIdentifyingData = hasMeaningfulScanResult(normalizedWine);
-      const isPartial = !normalizedWine.name || meaningfulFields.length < 4;
+      const isPartial = !isCompleteScanResult(normalizedWine, meaningfulFields);
       console.info("[SCAN NORMALIZED DATA]", {
         before: originalResponse,
         after: normalizedWine,
@@ -368,7 +383,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     setStep("scanning");
 
     try {
-      const prepared = await prepareWineLabelScanAttachment(file);
+      const prepared = await prepareWineLabelScanAttachment(file, { signal: abortRef.current?.signal });
       if (!isLatestRequest(prepareSeq)) return;
       console.info("[ScanWineLabelDialog] attachment_prepared", {
         fileName: prepared.fileName,
@@ -392,6 +407,10 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
       }
       setImagePreview(prepared.previewUrl || previewUrl);
       setLastBase64(prepared.imageBase64 || null);
+      lastScanMetadataRef.current = {
+        mimeType: prepared.mimeType,
+        fileName: prepared.fileName,
+      };
       if (!prepared.imageBase64) {
         throw Object.assign(new Error("Não foi possível preparar a imagem."), { code: "IMAGE_PROCESSING_FAILED" });
       }
@@ -692,7 +711,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   message={errorMsg}
                   onRetry={() => {
                     if (lastBase64) {
-                      runScan(lastBase64);
+                      runScan(lastBase64, lastScanMetadataRef.current ?? undefined);
                       return;
                     }
                     reset();

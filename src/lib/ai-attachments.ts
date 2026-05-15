@@ -101,6 +101,10 @@ type ImageAttachmentPreset = {
   preprocessMode?: "default" | "ocr";
 };
 
+type AttachmentPrepareOptions = {
+  signal?: AbortSignal;
+};
+
 async function getPdfJs() {
   if (!pdfJsPromise) {
     pdfJsPromise = import("pdfjs-dist");
@@ -124,6 +128,11 @@ function trace(stage: string, metadata?: Record<string, unknown>) {
 
 function createAttachmentError(code: AttachmentPrepErrorCode, message: string, details?: Record<string, unknown>) {
   return new AttachmentPrepError(code, message, details);
+}
+
+function throwIfAborted(signal?: AbortSignal) {
+  if (!signal?.aborted) return;
+  throw createAttachmentError("OCR_FAILED", "Solicitação cancelada.", { code: "ABORTED" });
 }
 
 export function getAttachmentErrorMessage(error: unknown, fallback = "Não foi possível preparar o arquivo."): string {
@@ -788,9 +797,11 @@ function normalizeOcrText(text: string) {
     .trim();
 }
 
-async function extractPdfOcrText(file: File) {
+async function extractPdfOcrText(file: File, options: AttachmentPrepareOptions = {}) {
+  throwIfAborted(options.signal);
   trace("ocr_started", { fileName: file.name, sizeBytes: file.size });
   const pdfBase64 = await fileToBase64(file);
+  throwIfAborted(options.signal);
   if (!isValidBase64(pdfBase64)) {
     throw createAttachmentError("INVALID_IMAGE", "Não conseguimos preparar a imagem para envio.", {
       fileName: file.name,
@@ -816,6 +827,7 @@ async function extractPdfOcrText(file: File) {
           ocrLength: 0,
           model: "gpt-4o-mini",
         },
+        signal: options.signal,
       },
     );
   } catch (error) {
@@ -833,7 +845,8 @@ async function extractPdfOcrText(file: File) {
   return text;
 }
 
-async function extractImageOcrText(file: File) {
+async function extractImageOcrText(file: File, options: AttachmentPrepareOptions = {}) {
+  throwIfAborted(options.signal);
   console.info("[AI_PIPELINE] step: image_ocr_started", { fileName: file.name, mimeType: file.type || inferMimeType(file), sizeBytes: file.size });
   const prepared = await prepareImageAttachment(file, {
     tracePrefix: "wine_list_ocr_upload",
@@ -842,6 +855,7 @@ async function extractImageOcrText(file: File) {
     maxBase64Length: isLikelyMobileDevice() ? 1_650_000 : 1_900_000,
     preprocessMode: "ocr",
   });
+  throwIfAborted(options.signal);
   trace("ocr_image_prepared", {
     fileName: file.name,
     mimeType: prepared.mimeType,
@@ -877,6 +891,7 @@ async function extractImageOcrText(file: File) {
           ocrLength: 0,
           model: "gpt-4o-mini",
         },
+        signal: options.signal,
       },
     );
   } catch (error) {
@@ -904,7 +919,7 @@ async function extractImageOcrText(file: File) {
   };
 }
 
-export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
+export async function prepareAiAnalysisAttachment(file: File, options: AttachmentPrepareOptions = {}): Promise<PreparedAiAnalysisAttachment> {
   const cacheKey = fileCacheKey(file);
   const cached = attachmentPreparationCache.get(cacheKey);
   if (cached) {
@@ -916,6 +931,7 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
     const startedAt = nowMs();
     const mimeType = inferMimeType(file);
     const mobile = isLikelyMobileDevice();
+    throwIfAborted(options.signal);
     trace("file_validated", { fileName: file.name, mimeType, sizeBytes: file.size, mobile });
 
     if (mimeType === "application/pdf") {
@@ -951,6 +967,7 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
 
       try {
         const rendered = await renderPdfAsImage(file);
+        throwIfAborted(options.signal);
         trace("attachment_timing", {
           stage: "prepare_attachment_total",
           fileName: file.name,
@@ -978,6 +995,7 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
     }
 
     const prepared = await prepareImageAttachment(file);
+    throwIfAborted(options.signal);
     trace("attachment_timing", {
       stage: "prepare_attachment_total",
       fileName: file.name,
@@ -996,9 +1014,10 @@ export async function prepareAiAnalysisAttachment(file: File): Promise<PreparedA
   }
 }
 
-export async function prepareWineListAnalysisTextAttachment(file: File): Promise<PreparedWineListTextAttachment> {
+export async function prepareWineListAnalysisTextAttachment(file: File, options: AttachmentPrepareOptions = {}): Promise<PreparedWineListTextAttachment> {
   const mimeType = inferMimeType(file);
   trace("wine_list_text_prepare_started", { fileName: file.name, mimeType, sizeBytes: file.size });
+  throwIfAborted(options.signal);
 
   if (mimeType === "application/pdf") {
     if (file.size > MAX_PDF_FILE_SIZE_BYTES) {
@@ -1007,7 +1026,7 @@ export async function prepareWineListAnalysisTextAttachment(file: File): Promise
       });
     }
 
-    const text = normalizeOcrText(await extractPdfOcrText(file).catch((error) => {
+    const text = normalizeOcrText(await extractPdfOcrText(file, options).catch((error) => {
       const err = error instanceof Error ? error : new Error("OCR_FAILED");
       (err as any).code = (err as any).code || "OCR_FAILED";
       throw err;
@@ -1028,10 +1047,10 @@ export async function prepareWineListAnalysisTextAttachment(file: File): Promise
     throw createAttachmentError("INVALID_FILE_TYPE", "Envie uma imagem ou PDF válido.", { mimeType });
   }
 
-  return await extractImageOcrText(file);
+  return await extractImageOcrText(file, options);
 }
 
-export async function prepareWineLabelScanAttachment(file: File): Promise<PreparedAiAnalysisAttachment> {
+export async function prepareWineLabelScanAttachment(file: File, options: AttachmentPrepareOptions = {}): Promise<PreparedAiAnalysisAttachment> {
   const cacheKey = `scan:${fileCacheKey(file)}`;
   const cached = attachmentPreparationCache.get(cacheKey);
   if (cached) {
@@ -1042,6 +1061,7 @@ export async function prepareWineLabelScanAttachment(file: File): Promise<Prepar
   const pending = (async () => {
     const startedAt = nowMs();
     const mimeType = inferMimeType(file);
+    throwIfAborted(options.signal);
     trace("file_validated", {
       fileName: file.name,
       mimeType,
@@ -1058,6 +1078,7 @@ export async function prepareWineLabelScanAttachment(file: File): Promise<Prepar
     }
 
     const prepared = await prepareScanImageAttachment(file);
+    throwIfAborted(options.signal);
     trace("attachment_timing", {
       stage: "prepare_attachment_total",
       fileName: file.name,
@@ -1076,8 +1097,9 @@ export async function prepareWineLabelScanAttachment(file: File): Promise<Prepar
   }
 }
 
-export async function prepareSmartPdfImportAttachment(file: File): Promise<PreparedSmartPdfImportAttachment> {
+export async function prepareSmartPdfImportAttachment(file: File, options: AttachmentPrepareOptions = {}): Promise<PreparedSmartPdfImportAttachment> {
   const mimeType = inferMimeType(file);
+  throwIfAborted(options.signal);
   if (mimeType !== "application/pdf") {
     throw new Error("O modo de importação inteligente é exclusivo para PDFs.");
   }
@@ -1100,7 +1122,7 @@ export async function prepareSmartPdfImportAttachment(file: File): Promise<Prepa
 
   if (!finalText || finalText.length < 1000) {
     ocrUsed = true;
-    ocrText = await extractPdfOcrText(file).catch(() => "");
+    ocrText = await extractPdfOcrText(file, options).catch(() => "");
     finalText = ocrText || "";
   }
 
@@ -1110,6 +1132,7 @@ export async function prepareSmartPdfImportAttachment(file: File): Promise<Prepa
 
   if (!finalText || finalText.length < 1000) {
     const rendered = await renderPdfAsImage(file);
+    throwIfAborted(options.signal);
     return {
       ...rendered,
       extractedText: finalText || "",

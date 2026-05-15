@@ -319,31 +319,33 @@ export function PairingErrorState({
   message,
   onRetry,
   onClose,
+  title = "Ainda não foi possível concluir",
 }: {
   message: string;
   onRetry: () => void;
   onClose?: () => void;
+  title?: string;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="border-y border-[rgba(58,51,39,0.06)] px-3 py-4 text-center"
+      className="border-y border-[rgba(58,51,39,0.06)] px-2 py-3 text-center"
     >
-      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-[13px]"
+      <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-[10px]"
         style={{
-          background: "linear-gradient(135deg, rgba(220,38,38,0.08) 0%, rgba(185,28,28,0.03) 100%)",
-          border: "1px solid rgba(220,38,38,0.12)",
+          background: "rgba(220,38,38,0.04)",
+          border: "1px solid rgba(220,38,38,0.10)",
         }}
       >
-        <X className="h-5 w-5 text-destructive/60" />
+        <X className="h-4 w-4 text-destructive/60" />
       </div>
-      <div className="mt-3 space-y-1">
-        <p className="text-[15px] font-semibold text-[#1A1713]">Ainda não foi possível concluir</p>
-        <p className="mx-auto max-w-[360px] text-[12.5px] leading-5 text-[#6B6258]">{message}</p>
+      <div className="mt-2.5 space-y-1">
+        <p className="text-[14px] font-semibold text-[#1A1713]">{title}</p>
+        <p className="mx-auto max-w-[360px] text-[12px] leading-5 text-[#6B6258]">{message}</p>
       </div>
-      <AiModalActions className="mx-auto mt-3 w-full max-w-[320px]">
+      <AiModalActions className="mx-auto mt-2.5 w-full max-w-[320px]">
         <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">
           <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Tentar novamente
         </AiModalActionButton>
