@@ -1,4 +1,4 @@
-import { Plus, Wine, UtensilsCrossed, Sparkles } from "@/icons/lucide";
+import { Plus, Wine, UtensilsCrossed, BookOpen } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { memo } from "react";
 
@@ -32,7 +32,7 @@ export const QuickActions = memo(function QuickActions({
         {onRegisterConsumption && (
           <Button variant="secondary" size="default" onClick={onRegisterConsumption}>
             <Wine className="mr-1.5 h-4 w-4 text-[#7B1E2B]" />
-            {isCommercial ? "Registrar venda" : "Consumo"}
+            {isCommercial ? "Registrar venda" : "Adicionar consumo"}
           </Button>
         )}
       </div>
@@ -63,7 +63,7 @@ export const QuickActions = memo(function QuickActions({
             className="group h-11 w-full rounded-[18px] gap-1.5 px-4 text-[14px] font-semibold text-neutral-900 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] active:translate-y-[0.5px]"
           >
             <Wine className="h-[15px] w-[15px] shrink-0 text-[#7B1E2B] transition-colors group-hover:text-[#8E2433]" />
-            {isCommercial ? "Registrar venda" : "Registrar consumo"}
+            {isCommercial ? "Registrar venda" : "Adicionar consumo"}
           </Button>
         )}
 
@@ -84,7 +84,7 @@ export const QuickActions = memo(function QuickActions({
             onClick={onAnalyzeList}
             className="group h-10 w-full rounded-[18px] gap-1.5 px-4 text-[13.5px] font-semibold tracking-[-0.01em] text-neutral-900 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] active:translate-y-[0.5px]"
           >
-            <Sparkles className="h-[15px] w-[15px] shrink-0 text-[#9B5DE5] transition-colors group-hover:text-[#A776EA]" />
+            <BookOpen className="h-[15px] w-[15px] shrink-0 text-[#9B5DE5] transition-colors group-hover:text-[#A776EA]" />
             Analisar carta
           </Button>
         )}

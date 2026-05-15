@@ -14,10 +14,28 @@ import {
   AI_MODAL_DIALOG_CONTENT_CLASSNAME,
   AI_MODAL_DIALOG_CONTENT_STYLE,
   AI_MODAL_FIELD_CLASSNAME,
+  AI_MODAL_HELP_TEXT_CLASSNAME,
+  AI_MODAL_INLINE_ACTION_CLASSNAME,
+  AI_MODAL_LABEL_CLASSNAME,
+  AI_MODAL_LIST_ROW_CLASSNAME,
+  AI_MODAL_LIST_ROW_SELECTED_CLASSNAME,
+  AI_MODAL_LIST_SURFACE_CLASSNAME,
+  AI_MODAL_META_TEXT_CLASSNAME,
+  AI_MODAL_PILL_TEXT_CLASSNAME,
+  AI_MODAL_SECTION_STACK_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
   AI_MODAL_TEXTAREA_CLASSNAME,
+  AI_MODAL_TEXT_PRIMARY_CLASSNAME,
+  AI_MODAL_TEXT_SECONDARY_CLASSNAME,
   AiModalActionButton,
   AiModalBody,
   AiModalCard,
+  AiFilterChip,
   AiModalFooterBar,
   AiModalHeader,
   AiModalHeaderBar,
@@ -83,8 +101,6 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [typeFilter, setTypeFilter] = useState<WineTypeFilter>("all");
   const [showWinePicker, setShowWinePicker] = useState(false);
   const fieldClassName = AI_MODAL_FIELD_CLASSNAME;
-  const selectionCardClassName =
-    "premium-card-surface flex min-h-[60px] flex-col justify-between rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-colors duration-150";
 
   useEffect(() => {
     if (open && preSelectedWine) {
@@ -200,7 +216,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
         throw consumptionError;
       }
 
-      toast.success("Consumo registrado com sucesso!");
+      toast.success("Consumo adicionado com sucesso!");
       resetForm();
       onOpenChange(false);
     } catch {
@@ -213,13 +229,13 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
       <DialogContent
         className={AI_MODAL_DIALOG_CONTENT_CLASSNAME}
         style={AI_MODAL_DIALOG_CONTENT_STYLE}
-        aria-label="Registrar consumo"
+        aria-label="Adicionar consumo"
       >
         <AiModalShell>
           <AiModalHeaderBar>
             <AiModalHeader
               icon={<WineIcon className="h-5 w-5 text-[#7B1E2B]" />}
-              title="Registrar consumo"
+              title="Adicionar consumo"
               description="Salve a garrafa, o lugar e a impressão essencial."
               tone="wine"
             />
@@ -228,7 +244,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           <AiModalBody>
             <AiModalSplitLayout>
             <div className="space-y-2 overflow-y-auto pr-1">
-              <AiModalCard className="space-y-2">
+              <AiModalCard className="space-y-1.5">
                 <div className="space-y-0.5">
                   <AiSectionLabel>Origem</AiSectionLabel>
                 </div>
@@ -236,30 +252,30 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   <button
                     type="button"
                     className={cn(
-                      selectionCardClassName,
+                      AI_MODAL_SELECTION_CARD_CLASSNAME,
                       source === "cellar"
-                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.05)]"
-                        : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)]",
+                        ? AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME
+                        : AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
                     )}
                     onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
                   >
                     <div>
-                      <p className="text-[14px] font-semibold tracking-[-0.02em] text-[#1A1713]">Minha adega</p>
-                      <p className="mt-0.5 text-[11.5px] leading-5 text-[#6B6B6B]">
+                      <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Minha adega</p>
+                      <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>
                         Garrafa cadastrada
                       </p>
                     </div>
-                    <span className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]">
+                    <span className={cn(AI_MODAL_PILL_TEXT_CLASSNAME, "text-[#7B1E2B]")}>
                       {cellarWines.length} disponíveis
                     </span>
                   </button>
                   <button
                     type="button"
                     className={cn(
-                      selectionCardClassName,
+                      AI_MODAL_SELECTION_CARD_CLASSNAME,
                       source === "external"
-                        ? "border-[rgba(123,30,43,0.16)] bg-[rgba(123,30,43,0.05)]"
-                        : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)]",
+                        ? AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME
+                        : AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
                     )}
                     onClick={() => {
                       setSource("external");
@@ -275,12 +291,12 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     }}
                   >
                     <div>
-                      <p className="text-[14px] font-semibold tracking-[-0.02em] text-[#1A1713]">Experiência externa</p>
-                      <p className="mt-0.5 text-[11.5px] leading-5 text-[#6B6B6B]">
+                      <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Experiência externa</p>
+                      <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>
                         Restaurante, viagem, jantar
                       </p>
                     </div>
-                    <span className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]">
+                    <span className={cn(AI_MODAL_PILL_TEXT_CLASSNAME, "text-[#7B1E2B]")}>
                       Manual
                     </span>
                   </button>
@@ -288,10 +304,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </AiModalCard>
 
               {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
-                <AiModalCard className="space-y-2">
+                <AiModalCard className="space-y-1.5">
                   <div className="flex items-center justify-between gap-3">
                     <AiSectionLabel>Selecionar garrafa</AiSectionLabel>
-                    <span className="text-[11px] font-medium text-[#6B6258]">{filteredWines.length} vinhos</span>
+                    <span className={AI_MODAL_META_TEXT_CLASSNAME}>{filteredWines.length} vinhos</span>
                   </div>
 
                   <div className="relative">
@@ -306,28 +322,23 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
                   <AiToolbarSurface className="flex gap-1.5 overflow-x-auto px-0 py-0 shadow-none">
                     {TYPE_FILTERS.map((f) => {
-                      const active = typeFilter === f.id;
                       return (
-                        <button
+                        <AiFilterChip
                           key={f.id}
                           type="button"
                           onClick={() => setTypeFilter(f.id)}
-                          className={cn(
-                            "h-6 shrink-0 rounded-full px-2 text-[9.5px] font-semibold uppercase tracking-[0.08em] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_10px_20px_-22px_rgba(58,51,39,0.22)] transition-colors duration-150",
-                            active
-                              ? "border border-[rgba(123,30,43,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.90)_0%,rgba(249,241,242,0.84)_100%)] text-[#5A1528]"
-                              : "border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] text-[#5F5F5F] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] hover:text-[#1A1713]",
-                          )}
+                          selected={typeFilter === f.id}
+                          className="h-6 shrink-0 px-2 text-[9.5px] uppercase tracking-[0.08em]"
                         >
                           <span className={cn("mr-1 inline-flex h-1.5 w-1.5 rounded-full", f.dot)} />
                           {f.label}
-                        </button>
+                        </AiFilterChip>
                       );
                     })}
                   </AiToolbarSurface>
 
                   <div
-                    className="cellar-scroll max-h-[240px] overflow-y-auto rounded-[18px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,244,237,0.80)_100%)] pr-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)]"
+                    className={AI_MODAL_LIST_SURFACE_CLASSNAME}
                     style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
                   >
                     {filteredWines.length > 4 ? (
@@ -337,8 +348,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     ) : null}
                     {filteredWines.length === 0 ? (
                       <div className="px-4 py-8 text-center">
-                        <p className="text-sm font-medium text-[#1C1C1C]">Nenhum vinho encontrado na adega</p>
-                        <p className="mt-1 text-xs text-black/50">Use a busca ou ajuste os filtros.</p>
+                        <p className="text-sm font-medium text-[rgba(26,23,19,0.9)]">Nenhum vinho encontrado na adega</p>
+                        <p className="mt-1 text-xs text-[rgba(72,60,46,0.62)]">Use a busca ou ajuste os filtros.</p>
                       </div>
                     ) : (
                       filteredWines.map((w) => {
@@ -349,18 +360,18 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                             type="button"
                             onClick={() => handleSelectWine(w.id)}
                             className={cn(
-                              "flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2 text-left transition-colors duration-150 hover:bg-[rgba(255,255,255,0.68)]",
-                              selected ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.90)_0%,rgba(249,241,242,0.84)_100%)]" : "",
+                              AI_MODAL_LIST_ROW_CLASSNAME,
+                              selected && AI_MODAL_LIST_ROW_SELECTED_CLASSNAME,
                             )}
                           >
                             <span className={cn("h-2 w-2 shrink-0 rounded-full", dotForWine(w.style))} />
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[13px] font-semibold tracking-[-0.01em] text-[#1C1C1C]">{w.name}</p>
-                              <p className="truncate text-[11px] text-black/55">
+                              <p className={cn("truncate", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>{w.name}</p>
+                              <p className={cn("truncate", AI_MODAL_META_TEXT_CLASSNAME)}>
                                 {[w.grape, w.vintage, w.country].filter(Boolean).join(" · ") || w.producer || "Garrafa da adega"}
                               </p>
                             </div>
-                            <span className="shrink-0 text-[10.5px] font-medium text-black/55">
+                            <span className="shrink-0 text-[10.5px] font-normal text-[rgba(72,60,46,0.64)]">
                               {w.quantity} gf{w.quantity !== 1 ? "s" : ""}
                             </span>
                           </button>
@@ -376,15 +387,15 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
-                      <p className="mt-1.5 truncate text-[16px] font-semibold tracking-[-0.02em] text-[#1A1713]">{selectedWine.name}</p>
-                      <p className="mt-0.5 truncate text-[12px] leading-5 text-[#6B6B6B]">
+                      <p className={cn("mt-1 truncate", AI_MODAL_TEXT_SECONDARY_CLASSNAME)}>{selectedWine.name}</p>
+                      <p className={cn("mt-0.5 truncate text-[12px]", AI_MODAL_HELP_TEXT_CLASSNAME)}>
                         {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
                       </p>
                     </div>
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-7 rounded-full border border-[rgba(58,51,39,0.08)] bg-transparent px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#7B1E2B] shadow-none hover:bg-[rgba(255,251,244,0.62)]"
+                      className={AI_MODAL_INLINE_ACTION_CLASSNAME}
                       onClick={() => setShowWinePicker(true)}
                     >
                       Trocar
@@ -393,13 +404,13 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 </AiModalCard>
               ) : null}
 
-              <AiModalCard className="space-y-2.5">
+              <AiModalCard className={AI_MODAL_SECTION_STACK_CLASSNAME}>
                 <div className="space-y-0.5">
                   <AiSectionLabel>Dados do vinho</AiSectionLabel>
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-[12px] font-semibold text-[#4A4338]">
+                  <Label className={AI_MODAL_LABEL_CLASSNAME}>
                     Nome do vinho <span className="text-primary">*</span>
                   </Label>
                   <Input
@@ -413,25 +424,25 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-[12px] font-semibold text-[#4A4338]">Produtor</Label>
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>Produtor</Label>
                     <Input className={fieldClassName} value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="Produtor" disabled={source === "cellar" && !!selectedWineId} />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[12px] font-semibold text-[#4A4338]">Safra</Label>
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>Safra</Label>
                     <Input className={fieldClassName} value={vintage} onChange={(e) => setVintage(e.target.value)} placeholder="2020" type="number" disabled={source === "cellar" && !!selectedWineId} />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[12px] font-semibold text-[#4A4338]">País</Label>
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>País</Label>
                     <Input className={fieldClassName} value={country} onChange={(e) => setCountry(e.target.value)} placeholder="País" disabled={source === "cellar" && !!selectedWineId} />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[12px] font-semibold text-[#4A4338]">Região</Label>
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>Região</Label>
                     <Input className={fieldClassName} value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Região" disabled={source === "cellar" && !!selectedWineId} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-[12px] font-semibold text-[#4A4338]">Uva / Blend</Label>
+                  <Label className={AI_MODAL_LABEL_CLASSNAME}>Uva / Blend</Label>
                   <Input
                     className={fieldClassName}
                     value={grape}
@@ -442,27 +453,27 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 </div>
               </AiModalCard>
 
-              <AiModalCard className="space-y-2.5">
+              <AiModalCard className={AI_MODAL_SECTION_STACK_CLASSNAME}>
                 <div className="space-y-0.5">
                   <AiSectionLabel>Contexto da experiência</AiSectionLabel>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="flex items-center gap-1 text-[12px] font-semibold text-[#4A4338]">
+                    <Label className={cn("flex items-center gap-1", AI_MODAL_LABEL_CLASSNAME)}>
                       <MapPin className="h-3.5 w-3.5 text-[#8E7A64]" />
                       Local
                     </Label>
                     <Input className={fieldClassName} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Restaurante, casa..." />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[12px] font-semibold text-[#4A4338]">Data</Label>
+                    <Label className={AI_MODAL_LABEL_CLASSNAME}>Data</Label>
                     <Input className={fieldClassName} type="date" value={consumedAt} onChange={(e) => setConsumedAt(e.target.value)} />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="flex items-center gap-1 text-[12px] font-semibold text-[#4A4338]">
+                  <Label className={cn("flex items-center gap-1", AI_MODAL_LABEL_CLASSNAME)}>
                     <Star className="h-3.5 w-3.5 text-[#8E7A64]" />
                     Avaliação
                   </Label>
@@ -478,10 +489,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                         key={opt.value}
                         type="button"
                         className={cn(
-                          "h-8 rounded-[10px] border px-1 text-[10px] font-semibold transition-colors duration-150",
+                          AI_MODAL_SEGMENTED_BUTTON_CLASSNAME,
                           rating === opt.value
-                            ? "border-[#7B1E2B] bg-[#7B1E2B] text-white shadow-none"
-                            : "border-[rgba(58,51,39,0.08)] bg-transparent text-[#4A4338] shadow-none hover:bg-[rgba(255,251,244,0.62)]",
+                            ? AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME
+                            : AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME,
                         )}
                         onClick={() => setRating(rating === opt.value ? 0 : opt.value)}
                       >
@@ -492,7 +503,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-[12px] font-semibold text-[#4A4338]">Notas de degustação</Label>
+                  <Label className={AI_MODAL_LABEL_CLASSNAME}>Notas de degustação</Label>
                   <Textarea
                     className={AI_MODAL_TEXTAREA_CLASSNAME}
                     value={tastingNotes}
@@ -513,7 +524,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 variant="primary"
                 className="w-full"
               >
-                {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
+                {addConsumption.isPending ? "Salvando..." : "Adicionar consumo"}
               </AiModalActionButton>
           </AiModalFooterBar>
         </AiModalShell>

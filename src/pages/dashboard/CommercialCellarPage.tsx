@@ -1073,7 +1073,7 @@ export default function CellarPage() {
                     </td>
                     <td className="px-3 py-2.25 text-right align-middle">
                       <div className="flex gap-0.5 justify-end">
-                        <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Registrar consumo" onClick={() => setConsumptionWine(wine)}>
+                        <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Adicionar consumo" onClick={() => setConsumptionWine(wine)}>
                           <UtensilsCrossed className="h-2.75 w-2.75" />
                         </Button>
                         <Button size="sm" variant="secondary" className="h-5.5 w-5.5 p-0 transition-[transform,background-color,filter] duration-200 ease-out active:scale-[0.98] hover:brightness-[1.03] cursor-pointer" title="Abrir garrafa" onClick={() => handleOpen(wine)}>

@@ -4,8 +4,8 @@ import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const AI_MODAL_SURFACE = "#FBF8F3";
-export const AI_MODAL_INK = "#1A1713";
-export const AI_MODAL_MUTED = "#6B6258";
+export const AI_MODAL_INK = "rgba(26,23,19,0.92)";
+export const AI_MODAL_MUTED = "rgba(72,60,46,0.72)";
 export const AI_MODAL_ACCENT = "#7B1E2B";
 export const AI_MODAL_CARD_SURFACE = "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(249,244,237,0.82) 100%)";
 export const AI_MODAL_CARD_BORDER = "rgba(95,111,82,0.10)";
@@ -48,10 +48,45 @@ export const AI_MODAL_DIALOG_CONTENT_STYLE: CSSProperties = {
 };
 
 export const AI_MODAL_FIELD_CLASSNAME =
-  "h-9 rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] px-3 text-[12.5px] font-medium text-[#1A1713] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_18px_-18px_rgba(58,51,39,0.18)] transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.16)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/10 focus-visible:ring-offset-0 disabled:opacity-60 sm:h-10 sm:text-[13px]";
+  "h-9 rounded-[14px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.76)_0%,rgba(249,244,237,0.70)_100%)] px-3 text-[12.5px] font-medium text-[rgba(36,30,24,0.88)] shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_8px_18px_-18px_rgba(58,51,39,0.16)] transition-all duration-180 placeholder:text-[rgba(108,96,84,0.58)] focus-visible:border-[rgba(123,30,43,0.14)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.86)_0%,rgba(252,248,242,0.82)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/8 focus-visible:ring-offset-0 disabled:opacity-60 sm:h-10 sm:text-[13px]";
 
 export const AI_MODAL_TEXTAREA_CLASSNAME =
-  "min-h-[82px] rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] px-3 py-2.5 text-[12.5px] font-medium text-[#1A1713] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_18px_-18px_rgba(58,51,39,0.18)] transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.16)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/10 focus-visible:ring-offset-0 sm:text-[13px]";
+  "min-h-[82px] rounded-[14px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.76)_0%,rgba(249,244,237,0.70)_100%)] px-3 py-2.5 text-[12.5px] font-medium text-[rgba(36,30,24,0.88)] shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_8px_18px_-18px_rgba(58,51,39,0.16)] transition-all duration-180 placeholder:text-[rgba(108,96,84,0.58)] focus-visible:border-[rgba(123,30,43,0.14)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.86)_0%,rgba(252,248,242,0.82)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/8 focus-visible:ring-offset-0 sm:text-[13px]";
+
+export const AI_MODAL_COMPACT_STACK_CLASSNAME = "space-y-1";
+export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-2";
+export const AI_MODAL_LABEL_CLASSNAME =
+  "text-[11.5px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.68)]";
+export const AI_MODAL_HELP_TEXT_CLASSNAME =
+  "text-[11.5px] leading-5 text-[rgba(72,60,46,0.68)]";
+export const AI_MODAL_META_TEXT_CLASSNAME =
+  "text-[11px] leading-5 text-[rgba(72,60,46,0.64)]";
+export const AI_MODAL_TEXT_PRIMARY_CLASSNAME =
+  "text-[13.5px] font-medium tracking-[-0.018em] text-[rgba(26,23,19,0.9)]";
+export const AI_MODAL_TEXT_SECONDARY_CLASSNAME =
+  "text-[15px] font-medium tracking-[-0.02em] text-[rgba(26,23,19,0.9)]";
+export const AI_MODAL_PILL_TEXT_CLASSNAME =
+  "text-[9.5px] font-medium uppercase tracking-[0.12em]";
+export const AI_MODAL_SELECTION_CARD_CLASSNAME =
+  "premium-card-surface flex min-h-[56px] flex-col justify-between rounded-[18px] border px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-colors duration-150";
+export const AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME =
+  "border-[rgba(123,30,43,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)]";
+export const AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME =
+  "border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.80)_0%,rgba(249,244,237,0.74)_100%)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(252,248,242,0.82)_100%)]";
+export const AI_MODAL_LIST_SURFACE_CLASSNAME =
+  "cellar-scroll max-h-[240px] overflow-y-auto rounded-[18px] border border-[rgba(95,111,82,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.76)_0%,rgba(249,244,237,0.70)_100%)] pr-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_14px_24px_-28px_rgba(58,51,39,0.18)]";
+export const AI_MODAL_LIST_ROW_CLASSNAME =
+  "flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2 text-left transition-colors duration-150 hover:bg-[rgba(255,255,255,0.62)]";
+export const AI_MODAL_LIST_ROW_SELECTED_CLASSNAME =
+  "bg-[linear-gradient(180deg,rgba(255,255,255,0.90)_0%,rgba(249,241,242,0.84)_100%)]";
+export const AI_MODAL_INLINE_ACTION_CLASSNAME =
+  "h-7 rounded-full border border-[rgba(58,51,39,0.08)] bg-transparent px-3 text-[10px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B] shadow-none hover:bg-[rgba(255,251,244,0.62)]";
+export const AI_MODAL_SEGMENTED_BUTTON_CLASSNAME =
+  "h-8 rounded-[12px] border px-1 text-[10px] font-medium transition-colors duration-150";
+export const AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME =
+  "border-[#7B1E2B] bg-[linear-gradient(135deg,#7B1E2B,#8F2436)] text-white shadow-[0_12px_22px_-18px_rgba(122,20,30,0.3)]";
+export const AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME =
+  "border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(249,244,237,0.72)_100%)] text-[rgba(72,60,46,0.76)] shadow-[inset_0_1px_0_rgba(255,255,255,0.62),0_8px_18px_-20px_rgba(58,51,39,0.18)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.86)_0%,rgba(252,248,242,0.8)_100%)]";
 
 export function AiModalShell({
   children,
@@ -165,11 +200,11 @@ export function AiModalHeader({
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
-          <SheetTitle className="text-[20px] font-semibold leading-tight tracking-[-0.018em] text-[#1A1713] sm:text-[22px]">
+          <SheetTitle className="text-[20px] font-semibold leading-tight tracking-[-0.018em] text-[rgba(26,23,19,0.92)] sm:text-[22px]">
             {title}
           </SheetTitle>
           {description ? (
-            <SheetDescription className="mt-0.5 max-w-[38rem] text-[12px] font-medium leading-[1.5] text-[#6B6258] sm:text-[12.5px]">
+            <SheetDescription className="mt-0.5 max-w-[38rem] text-[12px] font-normal leading-[1.5] text-[rgba(72,60,46,0.72)] sm:text-[12.5px]">
               {description}
             </SheetDescription>
           ) : null}
@@ -209,7 +244,7 @@ export function AiModalEyebrow({
   className?: string;
 }) {
   return (
-    <p className={cn("text-[10px] font-bold uppercase tracking-[0.16em] text-[rgba(72,60,46,0.52)]", className)}>
+    <p className={cn("text-[10px] font-semibold uppercase tracking-[0.16em] text-[rgba(72,60,46,0.48)]", className)}>
       {children}
     </p>
   );
@@ -226,8 +261,8 @@ export function AiModalKeyValue({
 }) {
   return (
     <div className={cn("flex items-start justify-between gap-3", className)}>
-      <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.5)]">{label}</span>
-      <span className="text-right text-[12.5px] font-medium leading-5 text-[#241d18]">{value}</span>
+      <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[rgba(72,60,46,0.48)]">{label}</span>
+      <span className="text-right text-[12.5px] font-medium leading-5 text-[rgba(36,30,24,0.88)]">{value}</span>
     </div>
   );
 }
@@ -386,8 +421,8 @@ export function AiUploadPanel({
         {icon}
       </div>
       <div className="max-w-[320px]">
-        <p className="text-[14px] font-semibold tracking-[-0.012em] text-[#1A1713]">{title}</p>
-        {description ? <p className="mt-0.5 text-[12px] leading-5 text-[#6B6258]">{description}</p> : null}
+        <p className="text-[14px] font-semibold tracking-[-0.012em] text-[rgba(26,23,19,0.92)]">{title}</p>
+        {description ? <p className="mt-0.5 text-[12px] leading-5 text-[rgba(72,60,46,0.72)]">{description}</p> : null}
       </div>
       {children}
     </div>
@@ -420,8 +455,8 @@ export function AiStatusCard({
           {icon}
         </div>
         <div className="min-w-0">
-          <p className="text-[14px] font-semibold leading-5 tracking-[-0.01em] sm:text-[15px]">{title}</p>
-          <p className="text-[12.5px] leading-5 text-[#5F5F5F]">{description}</p>
+          <p className="text-[14px] font-semibold leading-5 tracking-[-0.01em] text-[rgba(26,23,19,0.92)] sm:text-[15px]">{title}</p>
+          <p className="text-[12.5px] leading-5 text-[rgba(72,60,46,0.72)]">{description}</p>
           {warning ? <p className="mt-1 text-[12px] leading-5 font-medium text-[#8B7730]">{warning}</p> : null}
         </div>
       </div>
@@ -442,7 +477,7 @@ export function AiFilterChip({
       {...props}
       variant="ghost"
       className={cn(
-        "h-7 rounded-full px-2.5 text-[10.5px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_10px_20px_-22px_rgba(58,51,39,0.22)] transition-all duration-180",
+        "h-7 rounded-full px-2.5 text-[10.5px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_10px_20px_-22px_rgba(58,51,39,0.22)] transition-all duration-180",
         selected
           ? "border border-[rgba(123,30,43,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] text-[#5A1528] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(249,241,242,0.9)_100%)]"
           : "border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] text-[#5F5F5F] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] hover:text-[#1A1713]",
@@ -462,7 +497,7 @@ export function AiSectionLabel({
   className?: string;
 }) {
   return (
-    <p className={cn("text-[10px] font-bold uppercase tracking-[0.18em] text-[#6B6258]", className)}>
+    <p className={cn("text-[10px] font-semibold uppercase tracking-[0.18em] text-[rgba(72,60,46,0.52)]", className)}>
       {children}
     </p>
   );

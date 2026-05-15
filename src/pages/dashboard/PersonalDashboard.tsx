@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bell,
+  BookOpen,
   Clock,
   GlassWater,
   Layers,
@@ -668,7 +669,7 @@ export default function PersonalDashboard() {
                     className="editorial-btn-ghost w-full justify-center"
                     onClick={() => setManageOpen(true)}
                   >
-                    <GlassWater className="h-4 w-4" /> Registrar consumo
+                    <GlassWater className="h-4 w-4" /> Adicionar consumo
                   </button>
                   <button
                     type="button"
@@ -682,7 +683,7 @@ export default function PersonalDashboard() {
                     className="editorial-btn-ghost w-full justify-center"
                     onClick={() => setWineListScanOpen(true)}
                   >
-                    <Search className="h-4 w-4" /> Analisar carta
+                    <BookOpen className="h-4 w-4" /> Analisar carta
                   </button>
                 </div>
               </EditorialCard>
