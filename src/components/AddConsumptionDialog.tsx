@@ -533,7 +533,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </AiModalActionButton>
           </AiModalFooterBar>
         </AiModalShell>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
