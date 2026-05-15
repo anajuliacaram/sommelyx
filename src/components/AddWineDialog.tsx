@@ -1045,6 +1045,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
               icon={<Wine className="h-5 w-5 text-[#7B1E2B]" />}
               title={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
               description="Cadastre por rótulo, planilha ou manualmente."
+              tone="wine"
             />
           </AiModalHeaderBar>
 
@@ -1065,7 +1066,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     {isCommercial ? "Vinho cadastrado!" : `${parseInt(quantity) || 1} garrafa(s) adicionada(s)!`}
                   </p>
                   {missingFields.length > 0 && (
-                    <div className="w-full border-y border-[rgba(58,51,39,0.08)] px-1 py-2.5 text-left">
+                    <div className="premium-card-surface w-full rounded-[16px] border border-[rgba(95,111,82,0.10)] px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_14px_26px_-28px_rgba(58,51,39,0.22)]">
                       <p className="mb-1 text-[12px] font-semibold text-[#5B4F44]">
                         Campos sugeridos para completar depois
                       </p>
@@ -1137,7 +1138,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                   </div>
 
-                  <AiModalCard className="space-y-2.5 border-y border-x-0">
+                  <AiModalCard className="space-y-2.5">
                     <div className="space-y-0.5">
                       <AiSectionLabel>Essenciais</AiSectionLabel>
                     </div>
@@ -1203,7 +1204,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </AiModalCard>
 
                   {isCommercial ? (
-                    <AiModalCard className="border-y border-x-0">
+                    <AiModalCard>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: '#6F7F5B' }}>
@@ -1283,7 +1284,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pt-2.5">
-                      <AiModalCard className="space-y-3 border-y border-x-0">
+                      <AiModalCard className="space-y-3">
                         <div className="grid grid-cols-2 gap-2.5">
                         <div>
                           <label className="block text-[12px] font-semibold tracking-[-0.01em] mb-1 text-[#4A4338]">País</label>
@@ -1422,14 +1423,14 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       loading={addWine.isPending}
                       loadingText="Salvando…"
                       variant="primary"
-                      className="h-9 w-full rounded-[12px] bg-[#7B1E2B] text-[12.5px] shadow-none hover:bg-[#6F1B27]"
+                      className="w-full"
                     >
                       <Plus className="h-4 w-4" />
                       {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
                     </AiModalActionButton>
 
                   {missingFields.length > 0 && (
-                    <div className="border-y border-[rgba(58,51,39,0.08)] px-1 py-2.5">
+                    <div className="premium-card-surface rounded-[16px] border border-[rgba(95,111,82,0.10)] px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_14px_26px_-28px_rgba(58,51,39,0.22)]">
                       <p className="mb-1 text-[12px] font-semibold text-[#5B4F44]">
                         Campos sugeridos para completar depois
                       </p>

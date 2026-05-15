@@ -5,7 +5,7 @@ import {
   Upload,
   RotateCcw,
   Check,
-  Sparkles,
+  BookOpen,
   Search,
   Heart,
   GlassWater,
@@ -487,7 +487,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         className="space-y-3"
       >
         <section className="space-y-2">
-          <div className="border-b border-[rgba(58,51,39,0.07)] pb-3">
+          <div className="pb-2">
             <div>
               <p className="text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713] sm:text-[18px]">
                 {displayWines.length} rótulos para decidir
@@ -588,10 +588,11 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
             <SheetTitle className="sr-only">Analisar Carta</SheetTitle>
             <AiModalShell>
               <AiModalHeaderBar>
-                  <AiModalHeader
-                  icon={<Sparkles className="h-5 w-5" />}
+                <AiModalHeader
+                  icon={<BookOpen className="h-5 w-5" />}
                   title="Analisar Carta"
                   description="Encontre os destaques da carta."
+                  tone="purple"
                 />
               </AiModalHeaderBar>
 
@@ -607,7 +608,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                         className="space-y-3"
                       >
-                        <AiModalCard className="space-y-2.5 border-y border-x-0">
+                        <AiModalCard className="space-y-2.5">
                           <AiUploadPanel
                             onDragOver={(event) => {
                               event.preventDefault();

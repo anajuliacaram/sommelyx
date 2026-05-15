@@ -3,19 +3,19 @@ import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const AI_MODAL_SURFACE = "#F6F0E8";
+export const AI_MODAL_SURFACE = "#FBF8F3";
 export const AI_MODAL_INK = "#1A1713";
 export const AI_MODAL_MUTED = "#6B6258";
 export const AI_MODAL_ACCENT = "#7B1E2B";
-export const AI_MODAL_CARD_SURFACE = "rgba(255,251,244,0.70)";
-export const AI_MODAL_CARD_BORDER = "rgba(58,51,39,0.08)";
-export const AI_MODAL_SOFT_SURFACE = "rgba(255,251,244,0.58)";
+export const AI_MODAL_CARD_SURFACE = "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(249,244,237,0.82) 100%)";
+export const AI_MODAL_CARD_BORDER = "rgba(95,111,82,0.10)";
+export const AI_MODAL_SOFT_SURFACE = "linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(249,244,237,0.76) 100%)";
 
 export const AI_MODAL_CARD_CLASSNAME =
-  "rounded-[14px] border border-[rgba(58,51,39,0.05)] bg-transparent shadow-none";
+  "premium-card-surface rounded-[18px] border border-[rgba(95,111,82,0.10)] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_18px_32px_-30px_rgba(58,51,39,0.24)]";
 
 export const AI_MODAL_ACTION_TILE_CLASSNAME =
-  "rounded-[14px] border border-[rgba(58,51,39,0.06)] bg-transparent shadow-none transition-all duration-180 hover:bg-[rgba(255,251,244,0.42)]";
+  "premium-card-surface premium-card-surface-hover rounded-[18px] border border-[rgba(95,111,82,0.10)] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)]";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
   "left-1/2 top-1/2 right-auto bottom-auto h-[88dvh] max-h-[88dvh] w-[94vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border-0 p-0 gap-0";
@@ -30,26 +30,28 @@ export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   maxWidth: "880px",
   maxHeight: "88dvh",
   height: "88dvh",
-  background: "linear-gradient(180deg, rgba(246,240,232,0.98) 0%, rgba(242,234,224,0.98) 100%)",
-  backdropFilter: "blur(18px) saturate(1.06)",
-  WebkitBackdropFilter: "blur(18px) saturate(1.06)",
-  boxShadow: "0 22px 52px rgba(38,24,18,0.12)",
+  background: "linear-gradient(180deg, rgba(252,249,244,0.98) 0%, rgba(246,240,233,0.97) 100%)",
+  border: "1px solid rgba(95,111,82,0.10)",
+  backdropFilter: "blur(22px) saturate(1.08)",
+  WebkitBackdropFilter: "blur(22px) saturate(1.08)",
+  boxShadow: "0 28px 64px rgba(38,24,18,0.16), inset 0 1px 0 rgba(255,255,255,0.56)",
 };
 
 export const AI_MODAL_DIALOG_CONTENT_CLASSNAME =
-  "items-center overflow-hidden rounded-[20px] border border-[rgba(58,51,39,0.06)] p-0 shadow-[0_22px_52px_rgba(38,24,18,0.12)] sm:max-w-[880px]";
+  "items-center overflow-hidden rounded-[20px] border border-[rgba(95,111,82,0.10)] p-0 shadow-[0_28px_64px_rgba(38,24,18,0.16)] sm:max-w-[880px]";
 
 export const AI_MODAL_DIALOG_CONTENT_STYLE: CSSProperties = {
-  background: "linear-gradient(180deg, rgba(246,240,232,0.98) 0%, rgba(242,234,224,0.98) 100%)",
-  backdropFilter: "blur(18px) saturate(1.06)",
-  WebkitBackdropFilter: "blur(18px) saturate(1.06)",
+  background: "linear-gradient(180deg, rgba(252,249,244,0.98) 0%, rgba(246,240,233,0.97) 100%)",
+  backdropFilter: "blur(22px) saturate(1.08)",
+  WebkitBackdropFilter: "blur(22px) saturate(1.08)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.56)",
 };
 
 export const AI_MODAL_FIELD_CLASSNAME =
-  "h-10 rounded-[12px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.74)] px-3 text-[13px] font-medium text-[#1A1713] shadow-none transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.18)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/12 focus-visible:ring-offset-0 disabled:opacity-60";
+  "h-9 rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] px-3 text-[12.5px] font-medium text-[#1A1713] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_18px_-18px_rgba(58,51,39,0.18)] transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.16)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/10 focus-visible:ring-offset-0 disabled:opacity-60 sm:h-10 sm:text-[13px]";
 
 export const AI_MODAL_TEXTAREA_CLASSNAME =
-  "min-h-[86px] rounded-[12px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.74)] px-3 py-2.5 text-[13px] font-medium text-[#1A1713] shadow-none transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.18)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/12 focus-visible:ring-offset-0";
+  "min-h-[82px] rounded-[14px] border border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] px-3 py-2.5 text-[12.5px] font-medium text-[#1A1713] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_18px_-18px_rgba(58,51,39,0.18)] transition-all duration-180 placeholder:text-[#8C8579] focus-visible:border-[rgba(123,30,43,0.16)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/10 focus-visible:ring-offset-0 sm:text-[13px]";
 
 export function AiModalShell({
   children,
@@ -71,13 +73,14 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 shrink-0 border-b border-[rgba(58,51,39,0.07)] px-3.5 py-3 sm:px-4 sm:py-3.5",
+        "sticky top-0 z-20 shrink-0 px-3.5 py-3 sm:px-4 sm:py-3.5",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(246,240,232,0.96) 0%, rgba(246,240,232,0.82) 100%)",
-        backdropFilter: "blur(18px) saturate(1.08)",
-        WebkitBackdropFilter: "blur(18px) saturate(1.08)",
+        background: "linear-gradient(180deg, rgba(252,249,244,0.94) 0%, rgba(250,245,239,0.82) 100%)",
+        backdropFilter: "blur(20px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.08)",
+        boxShadow: "0 10px 24px -24px rgba(38,24,18,0.36)",
       }}
     >
       {children}
@@ -114,13 +117,14 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "sticky bottom-0 z-20 shrink-0 border-t border-[rgba(58,51,39,0.07)] px-3.5 py-2.5 sm:px-4",
+        "sticky bottom-0 z-20 shrink-0 px-3.5 py-2.5 sm:px-4",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(246,240,232,0.82) 0%, rgba(246,240,232,0.96) 100%)",
-        backdropFilter: "blur(18px) saturate(1.08)",
-        WebkitBackdropFilter: "blur(18px) saturate(1.08)",
+        background: "linear-gradient(180deg, rgba(250,245,239,0.82) 0%, rgba(252,249,244,0.95) 100%)",
+        backdropFilter: "blur(20px) saturate(1.08)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.08)",
+        boxShadow: "0 -10px 24px -24px rgba(38,24,18,0.36)",
       }}
     >
       {children}
@@ -132,18 +136,31 @@ export function AiModalHeader({
   icon,
   title,
   description,
+  tone = "wine",
   className,
 }: {
   icon?: ReactNode;
   title: string;
   description?: string;
+  tone?: "wine" | "gold" | "purple" | "neutral";
   className?: string;
-  }) {
+}) {
+  const toneClasses = {
+    wine:
+      "border-[rgba(123,30,43,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] text-[#7B1E2B] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(122,20,30,0.20)]",
+    gold:
+      "border-[rgba(183,121,31,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,244,232,0.82)_100%)] text-[#B7791F] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(183,121,31,0.22)]",
+    purple:
+      "border-[rgba(155,93,229,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(244,239,251,0.82)_100%)] text-[#9B5DE5] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(155,93,229,0.22)]",
+    neutral:
+      "border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(248,244,238,0.82)_100%)] text-[#5F6F52] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(58,51,39,0.18)]",
+  } as const;
+
   return (
-    <SheetHeader className={cn("mb-0 flex flex-col gap-2.5 pr-11 sm:pr-12", className)}>
+    <SheetHeader className={cn("mb-0 flex flex-col gap-2 pr-11 sm:pr-12", className)}>
       <div className="flex items-start gap-3">
         {icon ? (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.08)] bg-[rgba(255,251,244,0.58)] text-[#7B1E2B]">
+          <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border", toneClasses[tone])}>
             {icon}
           </div>
         ) : null}
@@ -225,7 +242,7 @@ export function AiToolbarSurface({
   return (
     <div
       className={cn(
-        "rounded-[14px] border border-[rgba(58,51,39,0.05)] bg-transparent px-0 py-1.5 shadow-none",
+        "premium-card-surface rounded-[16px] border border-[rgba(95,111,82,0.10)] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.68),0_14px_26px_-26px_rgba(58,51,39,0.22)]",
         className,
       )}
     >
@@ -244,13 +261,9 @@ export function AiModalCard({
   return (
     <div
       className={cn(
-        "rounded-[14px] border px-0 py-2 shadow-none sm:px-0 sm:py-2.5",
+        "premium-card-surface rounded-[18px] border px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_18px_32px_-30px_rgba(58,51,39,0.24)] sm:px-3.5 sm:py-3",
         className,
       )}
-      style={{
-        background: "transparent",
-        borderColor: "rgba(58,51,39,0.05)",
-      }}
     >
       {children}
     </div>
@@ -308,11 +321,20 @@ export function AiModalActionButton({
   className,
   ...props
 }: ButtonProps) {
+  const variant = props.variant ?? "primary";
+  const variantClassName =
+    variant === "ghost"
+      ? "h-9 rounded-[16px] px-3.5 text-[12.5px] font-semibold text-[#4A4338] hover:bg-[rgba(255,255,255,0.56)] hover:text-[#1A1713]"
+      : variant === "secondary" || variant === "outline" || variant === "success"
+        ? "h-9 rounded-[16px] px-4 text-[12.5px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_14px_24px_-24px_rgba(58,51,39,0.24)]"
+        : "h-9 rounded-[16px] px-4 text-[12.5px] font-semibold shadow-[0_14px_26px_-18px_rgba(122,20,30,0.24)] hover:shadow-[0_18px_30px_-20px_rgba(122,20,30,0.28)]";
+
   return (
     <Button
       {...props}
       className={cn(
-        "h-10 rounded-[12px] px-3.5 text-[12.5px] font-semibold tracking-[-0.005em] shadow-none transition-colors duration-200",
+        "tracking-[-0.005em] transition-all duration-180 active:translate-y-[0.5px] sm:h-10 sm:text-[13px]",
+        variantClassName,
         className,
       )}
     />
@@ -356,11 +378,11 @@ export function AiUploadPanel({
         }
       }}
       className={cn(
-        "group flex cursor-pointer items-center justify-start gap-3 rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-transparent px-3 py-3 text-left shadow-none transition-colors duration-180 hover:bg-[rgba(255,251,244,0.42)] data-[dragging=true]:bg-[rgba(255,251,244,0.50)]",
+        "premium-card-surface premium-card-surface-hover group flex cursor-pointer items-center justify-start gap-3 rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-all duration-180 data-[dragging=true]:bg-[rgba(255,255,255,0.9)]",
         className,
       )}
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.08)] bg-transparent text-[#7B1E2B] transition-transform duration-180 group-hover:scale-105">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,244,237,0.82)_100%)] text-[#7B1E2B] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_12px_24px_-22px_rgba(122,20,30,0.18)] transition-transform duration-180 group-hover:scale-105">
         {icon}
       </div>
       <div className="max-w-[320px]">
@@ -387,7 +409,7 @@ export function AiStatusCard({
 }) {
   return (
     <div
-      className={cn("rounded-[14px] border border-[rgba(58,51,39,0.05)] bg-transparent px-3 py-3 shadow-none sm:px-3.5 sm:py-3.5", toneClassName)}
+      className={cn("premium-card-surface rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] sm:px-3.5 sm:py-3.5", toneClassName)}
       style={{
         backdropFilter: "blur(10px) saturate(1.04)",
         WebkitBackdropFilter: "blur(10px) saturate(1.04)",
@@ -420,10 +442,10 @@ export function AiFilterChip({
       {...props}
       variant="ghost"
       className={cn(
-        "h-8 rounded-full px-3 text-[11px] font-semibold shadow-none transition-all duration-200",
+        "h-7 rounded-full px-2.5 text-[10.5px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_10px_20px_-22px_rgba(58,51,39,0.22)] transition-all duration-180",
         selected
-          ? "bg-[rgba(123,30,43,0.10)] text-[#5A1528] border border-[rgba(123,30,43,0.14)] hover:bg-[rgba(123,30,43,0.12)]"
-          : "border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] text-[#5F5F5F] hover:bg-[rgba(255,251,244,0.86)] hover:text-[#1A1713]",
+          ? "border border-[rgba(123,30,43,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] text-[#5A1528] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(249,241,242,0.9)_100%)]"
+          : "border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] text-[#5F5F5F] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] hover:text-[#1A1713]",
         className,
       )}
     >

@@ -575,6 +575,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
             icon={<Camera className="h-5 w-5" />}
             title="Escanear Rótulo"
             description="Use somente dados legíveis."
+            tone="wine"
           />
         </AiModalHeaderBar>
 
@@ -589,7 +590,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                 exit={{ opacity: 0 }}
               className="space-y-3"
               >
-                <AiModalCard className="space-y-2.5 border-y border-x-0">
+                <AiModalCard className="space-y-2.5">
                   <AiUploadPanel
                     icon={<Camera className="h-5 w-5" />}
                     title="Enviar rótulo"
@@ -678,7 +679,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
 
                 {resultRows.length > 0 && (
                   <AiModalCard className="space-y-2">
-                    <div className="border-b border-[rgba(58,51,39,0.07)] pb-2">
+                    <div className="pb-1">
                       <AiSectionLabel>Dados encontrados</AiSectionLabel>
                       <p className="mt-1 text-[12px] leading-5 text-[#6B6258]">Revise antes de aplicar.</p>
                     </div>

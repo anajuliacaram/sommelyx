@@ -277,8 +277,8 @@ export function PremiumResultCard({
 export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "chef" | "wine"; label: string; count?: number }) {
   const Icon = icon === "chef" ? ChefHat : icon === "wine" ? Wine : Sparkles;
   return (
-    <div className="flex items-center gap-2.5 border-b border-[rgba(58,51,39,0.06)] px-0 pb-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)]">
+    <div className="flex items-center gap-2.5 px-0 pb-1.5">
+      <div className="flex h-8 w-8 items-center justify-center rounded-[12px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_12px_24px_-24px_rgba(122,20,30,0.18)]">
         <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
       </div>
       <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6B6B6B]">
@@ -301,7 +301,7 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="border-y border-[rgba(58,51,39,0.06)] px-0 py-3"
+      className="premium-card-surface rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)]"
     >
       <div className="space-y-2.5">
           {subtitle ? <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary/55">{subtitle}</p> : null}
@@ -331,12 +331,13 @@ export function PairingErrorState({
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="border-y border-[rgba(58,51,39,0.06)] px-2 py-3 text-center"
+      className="premium-card-surface rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)]"
     >
-      <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-[10px]"
+      <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-[11px]"
         style={{
-          background: "rgba(220,38,38,0.04)",
+          background: "linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(251,240,240,0.82) 100%)",
           border: "1px solid rgba(220,38,38,0.10)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 12px 24px -24px rgba(220,38,38,0.24)",
         }}
       >
         <X className="h-4 w-4 text-destructive/60" />
@@ -549,11 +550,12 @@ export function PremiumChoiceCard({
       transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.985 }}
-      className="group w-full rounded-[14px] border-b border-[rgba(58,51,39,0.06)] p-2.5 text-left transition-all duration-200"
+      className="premium-card-surface group w-full rounded-[18px] border border-[rgba(95,111,82,0.10)] p-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-all duration-200"
       style={{
-        background: selected ? "rgba(123,30,43,0.05)" : "transparent",
-        borderColor: selected ? `${accentColor}26` : "rgba(58,51,39,0.06)",
-        boxShadow: "none",
+        background: selected
+          ? "linear-gradient(180deg, rgba(255,255,255,0.90) 0%, rgba(249,241,242,0.84) 100%)"
+          : "linear-gradient(180deg, rgba(255,255,255,0.84) 0%, rgba(249,244,237,0.80) 100%)",
+        borderColor: selected ? `${accentColor}26` : "rgba(95,111,82,0.10)",
       }}
     >
       <div className="flex items-center gap-2.5">

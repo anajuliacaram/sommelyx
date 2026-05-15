@@ -993,7 +993,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           exit={{ opacity: 0 }}
           className="space-y-3"
         >
-          <div className="border-b border-[rgba(58,51,39,0.06)] pb-3">
+          <div className="pb-2">
             <div>
               <p className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
                 Melhores vinhos para {dish}
@@ -1027,9 +1027,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08, duration: 0.3 }}
-                    className={cn(
-                      "space-y-2.5 rounded-[14px] border-b border-[rgba(58,51,39,0.06)] p-3 transition-all duration-200",
-                    )}
+                    className="premium-card-surface space-y-2.5 rounded-[18px] border border-[rgba(95,111,82,0.10)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-all duration-200"
                   >
                     <div className="space-y-2.5">
                       {highlightTag ? (
@@ -1130,6 +1128,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
             icon={<UtensilsCrossed className="h-5 w-5" />}
             title="Harmonizar"
             description="Escolha o vinho certo para o prato, ou o prato certo para a garrafa."
+            tone="gold"
           />
         </AiModalHeaderBar>
 
@@ -1137,7 +1136,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           <AiModalSplitLayout contentClassName={cn(step === "select-wine" && "flex h-full flex-col overflow-hidden")}>
           <div className={cn(step === "select-wine" ? "flex h-full min-h-0 flex-col gap-2.5" : "space-y-3")}>
           {flowMicroLabel ? (
-            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6B6258]/58 sm:text-[10px] sm:tracking-[0.18em]">
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6B6258]/52 sm:text-[10px] sm:tracking-[0.18em]">
               {flowMicroLabel}
             </p>
           ) : null}
@@ -1457,11 +1456,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 className="flex min-h-0 flex-1 flex-col gap-2"
               >
                 <div className="space-y-1.5">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#6B6258] sm:text-[10px]">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#6B6258]/72 sm:text-[10px]">
                     Qual vinho da sua adega?
                   </p>
 
-                  <AiToolbarSurface className="space-y-1.5 px-0 py-0.5">
+                  <AiToolbarSurface className="space-y-1.5 px-2 py-2">
                     <div className="relative">
                       <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/55 sm:left-3 sm:h-3.5 sm:w-3.5" />
                       <input
@@ -1483,10 +1482,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             key={opt.key}
                             onClick={() => setSortKey(opt.key)}
                             className={cn(
-                              "flex h-5.5 items-center gap-1 rounded-full border px-1.5 py-0 text-[8.5px] font-semibold uppercase tracking-[0.06em] transition-colors duration-150 sm:h-6 sm:px-2 sm:text-[9.5px]",
+                              "flex h-6 items-center gap-1 rounded-full border px-2 py-0 text-[8.5px] font-semibold uppercase tracking-[0.06em] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_10px_20px_-22px_rgba(58,51,39,0.22)] transition-colors duration-150 sm:px-2.5 sm:text-[9.5px]",
                               active
-                                ? "border-primary/20 bg-primary/10 text-primary"
-                                : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#1A1713]",
+                                ? "border-primary/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(249,241,242,0.84)_100%)] text-primary"
+                                : "border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] text-[#6B6258] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] hover:text-[#1A1713]",
                             )}
                           >
                             <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -1504,10 +1503,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                             key={opt.key}
                             onClick={() => setWineStyleFilter(opt.key)}
                             className={cn(
-                              "flex h-5.5 items-center gap-1 rounded-full border px-1.5 py-0 text-[8.5px] font-semibold uppercase tracking-[0.06em] transition-colors duration-150 sm:h-6 sm:px-2 sm:text-[9.5px]",
+                              "flex h-6 items-center gap-1 rounded-full border px-2 py-0 text-[8.5px] font-semibold uppercase tracking-[0.06em] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_10px_20px_-22px_rgba(58,51,39,0.22)] transition-colors duration-150 sm:px-2.5 sm:text-[9.5px]",
                               active
-                                ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.07)] text-[#7B1E2B]"
-                                : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#1A1713]",
+                                ? "border-[#7B1E2B]/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(249,241,242,0.84)_100%)] text-[#7B1E2B]"
+                                : "border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] text-[#6B6258] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] hover:text-[#1A1713]",
                             )}
                           >
                             <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
@@ -1529,10 +1528,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                           key={w.id}
                           onClick={() => setSelectedWineId(w.id)}
                           className={cn(
-                            "w-full cursor-pointer rounded-[12px] border-b px-2 py-1.5 text-left transition-colors duration-150 group sm:rounded-[14px] sm:px-2.5 sm:py-2",
+                            "premium-card-surface w-full cursor-pointer rounded-[16px] border px-2.5 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_12px_24px_-24px_rgba(58,51,39,0.22)] transition-colors duration-150 group sm:px-3 sm:py-2.5",
                             isSelected
-                              ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.05)]"
-                              : "border-[rgba(58,51,39,0.06)] bg-transparent hover:bg-[rgba(255,251,244,0.42)]"
+                              ? "border-[#7B1E2B]/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(249,241,242,0.84)_100%)]"
+                              : "border-[rgba(95,111,82,0.10)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)]"
                           )}
                         >
                           <div className="flex items-center gap-2.5">
@@ -1594,10 +1593,10 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </ScrollArea>
 
-                <div className="z-20 -mx-1 mt-auto shrink-0 border-t border-[rgba(58,51,39,0.06)] bg-[rgba(246,240,232,0.96)] px-1 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-2 backdrop-blur-sm">
+                <div className="z-20 -mx-1 mt-auto shrink-0 bg-[linear-gradient(180deg,rgba(250,245,239,0.58)_0%,rgba(252,249,244,0.96)_100%)] px-1 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-2 shadow-[0_-14px_30px_-28px_rgba(38,24,18,0.34)] backdrop-blur-md">
                   {selectedWine ? (
                     <div className="space-y-1.5">
-                      <AiToolbarSurface className="space-y-0.5 border-0 px-0 py-0">
+                      <AiToolbarSurface className="space-y-0.5 border-0 px-0 py-0 shadow-none">
                         <p className="text-[11.5px] font-semibold text-[#1A1713] sm:text-[12.5px]">{selectedWine.name}</p>
                         <p className="text-[9.5px] text-[#6B6258] sm:text-[10.5px]">
                           {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
@@ -1686,7 +1685,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3 sm:space-y-3.5"
               >
-                <div className="border-b border-[rgba(58,51,39,0.06)] pb-2">
+                <div className="pb-1">
                   <p className="text-[12px] font-medium text-[#6B6258]">
                     Vinho: <span className="font-semibold">{extWineName}</span>
                   </p>
@@ -1774,7 +1773,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-3 sm:space-y-3.5"
               >
-                <div className="border-b border-[rgba(58,51,39,0.06)] pb-2">
+                <div className="pb-1">
                   <p className="text-[12px] font-medium text-[#6B6258]">
                     Prato: <span className="font-semibold">{dish}</span>
                   </p>
@@ -1857,7 +1856,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0 }}
                 className="space-y-3"
               >
-                <div className="border-b border-[rgba(58,51,39,0.06)] pb-3">
+                <div className="pb-2">
                   <p className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1713]">
                     {step === "wine-results" ? "Melhores pratos" : "Melhores harmonizações"}
                   </p>

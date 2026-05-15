@@ -24,6 +24,7 @@ import {
   AiModalShell,
   AiSectionLabel,
   AiModalSplitLayout,
+  AiToolbarSurface,
 } from "@/components/ai-flow/ModalLayout";
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
@@ -83,7 +84,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const [showWinePicker, setShowWinePicker] = useState(false);
   const fieldClassName = AI_MODAL_FIELD_CLASSNAME;
   const selectionCardClassName =
-    "flex min-h-[60px] flex-col justify-between rounded-[14px] border px-3 py-2.5 text-left shadow-none transition-colors duration-150";
+    "premium-card-surface flex min-h-[60px] flex-col justify-between rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-colors duration-150";
 
   useEffect(() => {
     if (open && preSelectedWine) {
@@ -220,13 +221,14 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               icon={<WineIcon className="h-5 w-5 text-[#7B1E2B]" />}
               title="Registrar consumo"
               description="Salve a garrafa, o lugar e a impressão essencial."
+              tone="wine"
             />
           </AiModalHeaderBar>
 
           <AiModalBody>
             <AiModalSplitLayout>
             <div className="space-y-2 overflow-y-auto pr-1">
-              <AiModalCard className="space-y-2 border-y border-x-0 px-0 py-2.5">
+              <AiModalCard className="space-y-2">
                 <div className="space-y-0.5">
                   <AiSectionLabel>Origem</AiSectionLabel>
                 </div>
@@ -286,7 +288,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </AiModalCard>
 
               {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
-                <AiModalCard className="space-y-2 border-y border-x-0 px-0 py-2.5">
+                <AiModalCard className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     <AiSectionLabel>Selecionar garrafa</AiSectionLabel>
                     <span className="text-[11px] font-medium text-[#6B6258]">{filteredWines.length} vinhos</span>
@@ -302,7 +304,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     />
                   </div>
 
-                  <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+                  <AiToolbarSurface className="flex gap-1.5 overflow-x-auto px-0 py-0 shadow-none">
                     {TYPE_FILTERS.map((f) => {
                       const active = typeFilter === f.id;
                       return (
@@ -311,10 +313,10 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                           type="button"
                           onClick={() => setTypeFilter(f.id)}
                           className={cn(
-                            "h-6 shrink-0 rounded-full px-2 text-[9.5px] font-semibold uppercase tracking-[0.08em] transition-colors duration-150",
+                            "h-6 shrink-0 rounded-full px-2 text-[9.5px] font-semibold uppercase tracking-[0.08em] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_10px_20px_-22px_rgba(58,51,39,0.22)] transition-colors duration-150",
                             active
-                              ? "border border-[rgba(123,30,43,0.14)] bg-[rgba(123,30,43,0.10)] text-[#5A1528]"
-                              : "border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] text-[#5F5F5F] hover:bg-[rgba(255,251,244,0.86)] hover:text-[#1A1713]",
+                              ? "border border-[rgba(123,30,43,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.90)_0%,rgba(249,241,242,0.84)_100%)] text-[#5A1528]"
+                              : "border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,246,241,0.80)_100%)] text-[#5F5F5F] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,252,248,0.90)_100%)] hover:text-[#1A1713]",
                           )}
                         >
                           <span className={cn("mr-1 inline-flex h-1.5 w-1.5 rounded-full", f.dot)} />
@@ -322,14 +324,14 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                         </button>
                       );
                     })}
-                  </div>
+                  </AiToolbarSurface>
 
                   <div
-                    className="cellar-scroll max-h-[240px] divide-y divide-black/5 overflow-y-auto rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-transparent pr-1 shadow-none"
+                    className="cellar-scroll max-h-[240px] overflow-y-auto rounded-[18px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84)_0%,rgba(249,244,237,0.80)_100%)] pr-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)]"
                     style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(123,30,43,0.35) rgba(0,0,0,0.05)" }}
                   >
                     {filteredWines.length > 4 ? (
-                      <div className="sticky top-0 z-10 border-b border-[rgba(58,51,39,0.07)] bg-[rgba(246,240,232,0.92)] px-3 py-1 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]/60 backdrop-blur-sm">
+                      <div className="sticky top-0 z-10 bg-[rgba(252,249,244,0.94)] px-3 py-1 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#7B1E2B]/60 backdrop-blur-sm">
                         {filteredWines.length} opções
                       </div>
                     ) : null}
@@ -347,8 +349,8 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                             type="button"
                             onClick={() => handleSelectWine(w.id)}
                             className={cn(
-                              "flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors duration-150 hover:bg-[rgba(255,251,244,0.68)]",
-                              selected ? "border-l-2 border-[#7B1E2B]/25 bg-[rgba(123,30,43,0.05)]" : "",
+                              "flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2 text-left transition-colors duration-150 hover:bg-[rgba(255,255,255,0.68)]",
+                              selected ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.90)_0%,rgba(249,241,242,0.84)_100%)]" : "",
                             )}
                           >
                             <span className={cn("h-2 w-2 shrink-0 rounded-full", dotForWine(w.style))} />
@@ -370,7 +372,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               )}
 
               {source === "cellar" && selectedWine && !showWinePicker ? (
-                <AiModalCard className="border-y border-x-0 px-0 py-2.5">
+                <AiModalCard>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
@@ -391,7 +393,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 </AiModalCard>
               ) : null}
 
-              <AiModalCard className="space-y-2.5 border-y border-x-0 px-0 py-2.5">
+              <AiModalCard className="space-y-2.5">
                 <div className="space-y-0.5">
                   <AiSectionLabel>Dados do vinho</AiSectionLabel>
                 </div>
@@ -440,7 +442,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 </div>
               </AiModalCard>
 
-              <AiModalCard className="space-y-2.5 border-y border-x-0 px-0 py-2.5">
+              <AiModalCard className="space-y-2.5">
                 <div className="space-y-0.5">
                   <AiSectionLabel>Contexto da experiência</AiSectionLabel>
                 </div>
@@ -509,7 +511,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 onClick={handleSubmit}
                 disabled={addConsumption.isPending}
                 variant="primary"
-                className="h-9 w-full rounded-[12px] bg-[#7B1E2B] text-[12.5px] shadow-none hover:bg-[#6F1B27]"
+                className="w-full"
               >
                 {addConsumption.isPending ? "Salvando..." : "Registrar consumo"}
               </AiModalActionButton>

@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Upload, Check, AlertTriangle, X, Sparkles, Loader2, Search } from "@/icons/lucide";
+import { Upload, Check, AlertTriangle, X, FileSpreadsheet, Loader2, Search } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -3057,8 +3057,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         <AiModalShell>
           <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3 pr-12">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.08)] bg-transparent">
-                <Sparkles className="h-5 w-5 text-[#7B1E2B]" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_12px_24px_-22px_rgba(122,20,30,0.18)]">
+                <FileSpreadsheet className="h-4.5 w-4.5 text-[#7B1E2B]" />
               </div>
               <div className="min-w-0">
                 <SheetTitle className="text-[20px] font-semibold leading-tight tracking-[-0.018em] text-[#1A1713]">
@@ -3094,7 +3094,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             {hasDraftRows ? (
               <div className="flex min-h-0 flex-1 flex-col gap-2.5">
                 {step === "importing" ? (
-                  <div className="shrink-0 border-b border-[rgba(58,51,39,0.07)] px-1 py-2">
+                  <div className="shrink-0 px-1 py-2">
                     <div className="mb-2 flex items-center justify-between gap-3 text-[12px] font-semibold text-[#2A211A]">
                       <span>Importando vinhos...</span>
                       <span>{importProgress}%</span>
@@ -3106,7 +3106,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 ) : null}
 
                 {step === "done" ? (
-                  <div className="shrink-0 border-b border-emerald-100 px-1 py-2 text-[#2F4A2B]">
+                  <div className="shrink-0 px-1 py-2 text-[#2F4A2B]">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white">
                         <Check className="h-4 w-4" />
@@ -3119,7 +3119,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                <AiToolbarSurface className="grid shrink-0 gap-2 border-b border-[rgba(58,51,39,0.06)] pb-2 xl:grid-cols-[minmax(280px,1fr)_auto]">
+                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[minmax(280px,1fr)_auto]">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <div className="relative min-w-[260px] flex-1">
                       <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8A8075]/70" />
@@ -3251,7 +3251,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </AiToolbarSurface>
                 ) : null}
 
-                <AiToolbarSurface className="grid shrink-0 gap-2 border-t border-[rgba(58,51,39,0.06)] pt-2 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
+                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
                   <Select value={bulkTargetField} onValueChange={(value) => setBulkTargetField(value as BulkTargetField)}>
                     <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
                       <SelectValue placeholder="Campo" />
@@ -3301,7 +3301,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 </AiToolbarSurface>
 
                 {(enriching || processingTotal > 0) ? (
-                  <div className="shrink-0 border-y border-[rgba(58,51,39,0.06)] px-1 py-2 text-[12px] text-[#5F5F5F]">
+                  <div className="premium-card-surface shrink-0 rounded-[16px] border border-[rgba(95,111,82,0.10)] px-3 py-2 text-[12px] text-[#5F5F5F] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_14px_26px_-28px_rgba(58,51,39,0.22)]">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <span className="font-medium">{enriching ? "Corrigindo automaticamente..." : "Processando importação"}</span>
                       {processingTotal > 0 ? <span className="font-semibold text-[#7B1E2B]">{processingRows}/{processingTotal}</span> : null}
@@ -3315,7 +3315,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 ) : null}
 
                 {parseErrors.length > 0 ? (
-                  <div className="shrink-0 space-y-1 border-y border-amber-200 px-1 py-2">
+                  <div className="premium-card-surface shrink-0 space-y-1 rounded-[16px] border border-amber-200 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_14px_26px_-28px_rgba(58,51,39,0.22)]">
                     {parseErrors.map((error, index) => (
                       <p key={index} className="flex items-center gap-1.5 text-[12px] font-medium text-amber-800">
                         <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -3406,8 +3406,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[210px]">
                     <div
                       className={cn(
-                        "flex items-center gap-3 rounded-[14px] border border-dashed border-[rgba(123,30,43,0.14)] px-3 py-3 text-left transition-colors",
-                        loading ? "cursor-wait opacity-80" : "cursor-pointer hover:bg-[rgba(255,251,244,0.42)]",
+                        "premium-card-surface premium-card-surface-hover flex items-center gap-3 rounded-[18px] border border-[rgba(95,111,82,0.10)] px-3 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_16px_30px_-30px_rgba(58,51,39,0.22)] transition-all duration-180",
+                        loading ? "cursor-wait opacity-80" : "cursor-pointer",
                       )}
                       onClick={() => { if (!loading) fileRef.current?.click(); }}
                       onDragOver={(e) => e.preventDefault()}
