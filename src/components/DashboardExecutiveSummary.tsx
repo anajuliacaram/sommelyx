@@ -83,24 +83,24 @@ export function DashboardExecutiveSummary({
   commandHint,
 }: DashboardExecutiveSummaryProps) {
   return (
-    <section className="card-depth motion-card-hover motion-enter relative p-5 sm:p-6">
+    <section className="card-depth motion-card-hover motion-enter relative p-4 sm:p-5">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-10 top-[-60px] h-32 w-32 rounded-full bg-copper/[0.08] blur-[60px]" />
         <div className="absolute right-[-30px] top-10 h-28 w-28 rounded-full bg-[hsl(0_0%_100%/0.04)] blur-[60px]" />
       </div>
 
-      <div className="relative grid gap-6 xl:grid-cols-[1.35fr_0.9fr] xl:items-start">
-        <div className="space-y-5">
-          <div className="premium-chip-surface inline-flex items-center gap-2 rounded-full border-copper/18 bg-copper/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-copper relative z-10">
+      <div className="relative grid gap-5 xl:grid-cols-[1.35fr_0.9fr] xl:items-start">
+        <div className="space-y-4">
+          <div className="premium-chip-surface inline-flex items-center gap-2 rounded-full border-copper/14 bg-copper/[0.06] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-copper relative z-10">
             <Sparkles className="h-3 w-3" />
             {eyebrow}
           </div>
 
           <div className="space-y-2">
-            <h1 className="max-w-2xl font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#1C1C1C] sm:text-[34px] relative z-10">
+            <h1 className="max-w-2xl font-serif text-[26px] font-semibold leading-[1.08] tracking-[-0.02em] text-[rgba(26,23,19,0.92)] sm:text-[32px] relative z-10">
               {title}
             </h1>
-            <p className="max-w-2xl text-[14px] leading-relaxed text-[#6B6B6B] sm:text-[15px] relative z-10">
+            <p className="max-w-2xl text-[13px] leading-relaxed text-[rgba(72,60,46,0.72)] sm:text-[14px] relative z-10">
               {description}
             </p>
           </div>
@@ -109,7 +109,7 @@ export function DashboardExecutiveSummary({
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="premium-chip-surface inline-flex items-center rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#6B6B6B] relative z-10"
+                className="premium-chip-surface inline-flex items-center rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[rgba(72,60,46,0.64)] relative z-10"
               >
                 {badge}
               </span>
@@ -138,19 +138,19 @@ export function DashboardExecutiveSummary({
           <div className="surface-clarity p-4 text-foreground relative z-10">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/80">
-                  Experiência guiada
+                <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-copper/72">
+                  Navegação rápida
                 </p>
-                <h2 className="mt-2 font-serif text-[20px] font-semibold tracking-[-0.02em] text-[#1C1C1C]">
-                  Um painel claro para decidir rápido.
+                <h2 className="mt-2 font-serif text-[19px] font-semibold tracking-[-0.02em] text-[rgba(26,23,19,0.92)]">
+                  Um painel claro para decidir sem atrito.
                 </h2>
               </div>
-              <div className="premium-chip-surface rounded-[16px] border-copper/15 bg-copper/[0.08] px-3 py-2 text-right shadow-[0_4px_12px_-10px_rgba(58,51,39,0.18)]">
+              <div className="premium-chip-surface rounded-[14px] border-copper/12 bg-copper/[0.06] px-3 py-2 text-right">
                 <p className="text-[9px] uppercase tracking-[0.10em] text-copper/60">Atalho</p>
                 <p className="text-[11px] font-medium text-copper">{commandHint ?? "Ctrl/Cmd + K"}</p>
               </div>
             </div>
-            <p className="mt-3 text-[13px] leading-relaxed text-[#6B6B6B]">
+            <p className="mt-3 text-[13px] leading-relaxed text-[rgba(72,60,46,0.72)]">
               Abra o menu rápido para navegar, localizar rótulos e disparar ações sem quebrar o foco.
             </p>
           </div>

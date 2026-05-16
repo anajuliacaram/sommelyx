@@ -34,7 +34,7 @@ export function Kicker({ children, className }: { children: ReactNode; className
   return (
     <p
       className={cn(
-        "text-[10px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.5)]",
+        "text-[9.5px] font-semibold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.46)]",
         className,
       )}
     >
@@ -110,13 +110,13 @@ export function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex h-[26px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[10.5px] font-semibold uppercase leading-none tracking-[0.05em] transition-all duration-150 ease-out hover:-translate-y-px hover:scale-[1.01] active:scale-[0.97]",
+        "inline-flex h-[24px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.25 text-[10px] font-medium uppercase leading-none tracking-[0.05em] transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.985]",
         className,
       )}
       style={{
-        background: active ? palette.bg : "rgba(255,255,255,0.76)",
-        color: active ? palette.color : "rgba(26,23,21,0.72)",
-        border: `1px solid ${active ? palette.border : "rgba(95,111,82,0.10)"}`,
+        background: active ? palette.bg : "rgba(255,253,248,0.68)",
+        color: active ? palette.color : "rgba(36,30,24,0.68)",
+        border: `1px solid ${active ? palette.border : "rgba(58,51,39,0.06)"}`,
       }}
     >
       {children}
@@ -222,7 +222,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         </div>
         <span
           className={cn(
-            "min-w-0 font-medium uppercase leading-[1.2] tracking-[0.08em] text-[rgba(58,51,39,0.58)]",
+            "min-w-0 font-medium uppercase leading-[1.2] tracking-[0.08em] text-[rgba(58,51,39,0.5)]",
             isRow ? "whitespace-normal break-words text-[11px] sm:text-[12px]" : "whitespace-normal break-words text-[11px] sm:text-[12px]",
           )}
         >
@@ -231,22 +231,22 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
       </div>
       {isRow ? (
         <div className="mt-0.5 flex min-w-0 max-w-[180px] items-baseline gap-1.5">
-          <div className="shrink-0 text-[21px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
+            <div className="shrink-0 text-[21px] font-semibold leading-[1.1] tracking-[-0.03em] text-[rgba(26,23,19,0.92)] tabular-nums sm:text-[22px] lg:text-[22px]">
             {animatedValueNode}
           </div>
           {sub ? (
-            <span className="min-w-0 max-w-[12ch] truncate text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.62)] sm:text-[13px]">
+            <span className="min-w-0 max-w-[12ch] truncate text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.56)] sm:text-[13px]">
               {sub}
             </span>
           ) : null}
         </div>
       ) : (
         <>
-          <div className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1a1713] tabular-nums sm:text-[22px] lg:text-[22px]">
+          <div className="text-[20px] font-semibold leading-[1.1] tracking-[-0.03em] text-[rgba(26,23,19,0.92)] tabular-nums sm:text-[22px] lg:text-[22px]">
             {animatedValueNode}
           </div>
           {sub && (
-            <span className="mt-[2px] text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.42)] sm:text-[13px]">
+            <span className="mt-[2px] text-[12px] font-medium leading-[1.2] text-[rgba(58,51,39,0.38)] sm:text-[13px]">
               {sub}
             </span>
           )}

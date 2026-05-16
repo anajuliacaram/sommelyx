@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ChevronLeft, ArrowRight, Sparkles, ShieldCheck, BarChart3, MailCheck, RefreshCcw } from "@/icons/lucide";
+import { Eye, EyeOff, ChevronLeft, ArrowRight, Sparkles, ShieldCheck, BarChart3, MailCheck, RefreshCcw, Check } from "@/icons/lucide";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,32 +104,31 @@ export default function Signup() {
               <BrandName className={designSystem.authBrand} />
             </Link>
 
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-6 md:mt-8">
-              <span className="inline-flex items-center gap-2 rounded-full border border-wine/12 bg-wine/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-wine">
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-4 md:mt-6">
+              <span className="inline-flex items-center gap-2 rounded-full border border-wine/10 bg-wine/[0.04] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-wine/85">
                 <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
               </span>
               <h1 className={`mt-4 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
                 Configure sua <span className="gradient-text">conta</span> e evolua sua adega.
               </h1>
-              <p className={`mt-4 max-w-[420px] ${designSystem.authBody}`}>
-                Cadastre-se para começar a organizar sua adega com clareza e precisão.
+              <p className={`mt-3 max-w-[400px] ${designSystem.authBody}`}>
+                Abra sua conta e comece com um fluxo mais simples, claro e confiável.
               </p>
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-6 grid gap-3 sm:grid-cols-3">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-6 space-y-3">
             {[
-              { icon: BarChart3, label: "Organização", desc: "Base estruturada desde o primeiro dia", bg: "bg-wine/[0.06]", color: "text-wine" },
-              { icon: ShieldCheck, label: "Confiabilidade", desc: "Fluxo seguro para iniciar sua operação", bg: "bg-gold/10", color: "text-gold" },
-              { icon: Sparkles, label: "Escala", desc: "Pronta para crescer com você", bg: "bg-foreground/[0.06]", color: "text-foreground" },
+              { icon: BarChart3, text: "Comece com uma base organizada desde o primeiro acesso." },
+              { icon: ShieldCheck, text: "Confirmação segura e continuidade sem ruído operacional." },
+              { icon: Check, text: "Sua adega pessoal ou comercial cresce no mesmo ambiente." },
             ].map((item) => (
-              <article key={item.label} className="glass-card p-4">
-                <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
-                  <item.icon className="h-4 w-4" />
+              <div key={item.text} className="flex items-start gap-3 text-[13px] leading-relaxed text-[rgba(72,60,46,0.76)]">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/40 text-wine/85">
+                  <item.icon className="h-3.5 w-3.5" />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{item.label}</p>
-                <p className="mt-1 text-[13px] font-semibold text-foreground">{item.desc}</p>
-              </article>
+                <p>{item.text}</p>
+              </div>
             ))}
           </motion.div>
         </section>
@@ -151,17 +150,13 @@ export default function Signup() {
 
             {awaitingEmailConfirmation ? (
               <>
-                <div className="mb-6">
+                <div className="mb-5">
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-wine/[0.06] text-wine">
                     <MailCheck className="h-6 w-6" />
                   </div>
                   <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Confira seu e-mail</h2>
-                  <p className={`mt-4 ${designSystem.authBody}`}>
-                    Enviamos um link de confirmação para o endereço informado.
-                    <br />
-                    Abra sua caixa de entrada e clique no link para ativar sua conta.
-                    <br />
-                    Depois disso, você será direcionado automaticamente para sua área.
+                  <p className={`mt-3 ${designSystem.authBody}`}>
+                    Enviamos o link de confirmação. Abra sua caixa de entrada para ativar a conta e continuar.
                   </p>
                   {(confirmationEmail || email) && (
                     <p className="mt-4 text-[13px] font-semibold text-wine">{confirmationEmail || email}</p>
@@ -192,28 +187,28 @@ export default function Signup() {
               </>
             ) : (
               <>
-                <div className="mb-6">
+                <div className="mb-5">
                   <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Criar conta grátis</h2>
-                  <p className={`mt-3 ${designSystem.authBody}`}>Crie sua conta e comece a registrar sua adega.</p>
+                  <p className={`mt-2 ${designSystem.authBody}`}>Comece sua conta com um fluxo mais simples.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    <Label htmlFor="name" className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.58)]">
                       Nome completo
                     </Label>
                     <Input id="name" type="text" autoComplete="name" placeholder="João Silva" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.58)]">
                       E-mail
                     </Label>
                     <Input id="email" type="email" autoComplete="email" placeholder="nome@empresa.com" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    <Label htmlFor="password" className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.58)]">
                       Senha
                     </Label>
                     <div className="relative">
@@ -255,7 +250,7 @@ export default function Signup() {
                   </div>
                 </form>
 
-                <div className="relative mt-5 flex items-center gap-3">
+                <div className="relative mt-4 flex items-center gap-3">
                   <div className="h-px flex-1 bg-border/50" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">ou</span>
                   <div className="h-px flex-1 bg-border/50" />
@@ -268,7 +263,7 @@ export default function Signup() {
                     const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
                     if (error) toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                   }}
-                  className={`mt-4 flex h-11 w-full items-center justify-center gap-3 ${designSystem.secondaryButton}`}
+                  className={`mt-3.5 flex h-10.5 w-full items-center justify-center gap-3 ${designSystem.secondaryButton}`}
                 >
                   <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -279,7 +274,7 @@ export default function Signup() {
                   Cadastrar com Google
                 </Button>
 
-                <div className="mt-5 border-t border-border/40 pt-5 text-center">
+                <div className="mt-4 border-t border-border/30 pt-4 text-center">
                   <p className="text-[13px] font-medium text-muted-foreground">
                     Já tem acesso?{" "}
                     <Link to="/login" className="font-bold text-foreground transition-colors hover:text-wine hover:underline">

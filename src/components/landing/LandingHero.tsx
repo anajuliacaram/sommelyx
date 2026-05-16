@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Layers, TrendingUp, AlertTriangle, Wine, Sparkles, Clock, Star, Calendar } from "@/icons/lucide";
+import { ArrowRight, Check, TrendingUp, AlertTriangle, Wine, Sparkles, Clock, Star, Calendar } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { designSystem } from "@/styles/designSystem";
@@ -20,9 +20,9 @@ const float = (delay: number) => ({
 });
 
 const floatLoop = {
-  y: [0, -7, 0],
+  y: [0, -4, 0],
   transition: {
-    duration: 7.2,
+    duration: 9.5,
     repeat: Infinity,
     repeatType: "loop" as const,
     ease: "easeInOut" as const,
@@ -65,7 +65,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="max-w-[36rem] text-[1.65rem] sm:text-5xl font-medium leading-[1.05] sm:leading-[1.02] tracking-[-0.02em]"
+            className="max-w-[34rem] text-[1.7rem] sm:text-[3.4rem] font-medium leading-[1.05] sm:leading-[1.01] tracking-[-0.025em]"
             style={{
               color: "#1A1A1A",
               fontFamily: "'Playfair Display', 'Fraunces', 'Libre Baskerville', Georgia, serif",
@@ -73,7 +73,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               fontVariationSettings: '"wght" 560',
             }}
           >
-            Gestão inteligente da sua adega, com clareza de{" "}
+            Gestão da sua adega, com clareza de{" "}
             <span className="gradient-text sm:whitespace-nowrap">
               estoque, valor e giro.
             </span>
@@ -84,20 +84,9 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={2}
-            className="mt-3 sm:mt-4 max-w-[38rem] text-[14px] sm:text-[15px] leading-relaxed text-[#4F4A45]"
+            className="mt-3 sm:mt-4 max-w-[33rem] text-[14px] sm:text-[15px] leading-relaxed text-[#4F4A45]"
           >
-            Sommelyx é uma plataforma de gestão de vinhos para adega pessoal e comercial.
-            Ela organiza seu estoque, analisa cartas, lê rótulos e sugere harmonizações com IA.
-          </motion.p>
-
-          <motion.p
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={2.5}
-            className="mt-2 max-w-lg text-[13px] sm:text-[14px] leading-relaxed text-[#6A655E]"
-          >
-            Controle total, decisões rápidas e insights reais para vinho, sem planilhas.
+            Uma plataforma para organizar estoque, analisar cartas, ler rótulos e orientar harmonizações sem ruído operacional.
           </motion.p>
 
           <motion.div
@@ -143,7 +132,6 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             </span>
           </motion.div>
 
-          {/* Mini value cards — Estoque / Giro / Reposição (proporcionais, sob os CTAs) */}
           <motion.div
             initial="hidden"
             animate="visible"
@@ -153,9 +141,9 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
           >
             {[
               {
-                icon: Layers,
+                icon: Wine,
                 title: "Estoque",
-                desc: "Saiba o que você tem, em segundos.",
+                desc: "Leitura clara do que está em adega.",
                 color: "hsl(var(--wine))",
                 bg: "rgba(123,30,43,0.08)",
                 border: "rgba(123,30,43,0.14)",
@@ -163,7 +151,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               {
                 icon: TrendingUp,
                 title: "Giro",
-                desc: "Entenda o que vende mais.",
+                desc: "Movimento e valor no mesmo ritmo.",
                 color: "#5F6F52",
                 bg: "rgba(95,111,82,0.10)",
                 border: "rgba(95,111,82,0.18)",
@@ -171,19 +159,17 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               {
                 icon: AlertTriangle,
                 title: "Reposição",
-                desc: "Nunca perca uma oportunidade.",
+                desc: "Rótulos certos, no momento certo.",
                 color: "#B8860B",
                 bg: "rgba(198,167,104,0.12)",
                 border: "rgba(198,167,104,0.22)",
               },
             ].map((item) => (
-              <motion.div
+              <div
                 key={item.title}
-                whileHover={{ y: -2 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                className="rounded-xl p-2.5"
-                  style={designSystem.glassCard}
-                >
+                className="rounded-[18px] p-3"
+                style={designSystem.glassCardSoft}
+              >
                 <div className="flex items-start gap-2">
                   <div
                     className="flex h-7 w-7 items-center justify-center rounded-lg shrink-0"
@@ -192,46 +178,20 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
                     <item.icon className="h-3.5 w-3.5" style={{ color: item.color }} strokeWidth={1.8} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[9.5px] font-semibold uppercase tracking-[0.10em] text-[#1A1A1A]">{item.title}</p>
-                    <p className="mt-0.5 text-[11px] leading-snug text-[#5F5F5F]">{item.desc}</p>
+                    <p className="text-[9.5px] font-semibold uppercase tracking-[0.10em] text-[rgba(36,30,24,0.82)]">{item.title}</p>
+                    <p className="mt-0.5 text-[11px] leading-snug text-[rgba(72,60,46,0.72)]">{item.desc}</p>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Inteligência Sommelyx — destaque sob os 3 mini cards */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={6}
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-3 sm:mt-3.5 rounded-2xl p-4 max-w-xl"
-              style={{
-                ...designSystem.glassCard,
-                background: "linear-gradient(160deg, rgba(55,30,36,0.96) 0%, rgba(28,15,20,1) 100%)",
-                border: "1px solid rgba(198,167,104,0.22)",
-              }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.18)", border: "1px solid rgba(198,167,104,0.28)" }}>
-                <Sparkles className="h-3.5 w-3.5 text-[#C6A768]" />
               </div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.10em] text-[#C6A768]">Inteligência Sommelyx</p>
-            </div>
-            <p className="text-[12px] leading-relaxed font-medium text-[#F8F6F3]">
-              "Seu Brunello 2018 está na <span className="text-[#C6A768]">janela ideal</span>. Considere abrir nos próximos 60 dias."
-            </p>
+            ))}
           </motion.div>
         </div>
 
         {/* Right: Organized grid of dashboard cards */}
         <div className="relative lg:pt-24 xl:pt-32">
           {/* Glow background */}
-          <div className="pointer-events-none absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.18)", filter: "blur(84px)" }} />
-          <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.18)", filter: "blur(96px)" }} />
+          <div className="pointer-events-none absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.12)", filter: "blur(84px)" }} />
+          <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.14)", filter: "blur(96px)" }} />
 
           <motion.div
             className="relative grid grid-cols-2 gap-3 sm:gap-3.5"

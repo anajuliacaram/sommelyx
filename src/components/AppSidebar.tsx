@@ -1,4 +1,4 @@
-import { LayoutDashboard, GlassWater, Heart, BarChart3, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings, Plus, Wine, Camera, PenLine, AlertTriangle, ClipboardList, UtensilsCrossed, Sparkles } from "@/icons/lucide";
+import { LayoutDashboard, GlassWater, Heart, CreditCard, Package, ShoppingCart, Users, FileText, LogOut, Bell, Settings, Plus, AlertTriangle, ClipboardList, Wine } from "@/icons/lucide";
 import { NavLink } from "@/components/NavLink";
 import { BrandName } from "@/components/BrandName";
 import { useAuth } from "@/contexts/AuthContext";
@@ -82,25 +82,25 @@ export function AppSidebar() {
         collapsible="offcanvas"
         className="w-[256px]"
         style={{
-          background: "linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(246, 242, 234, 0.96) 100%)",
-          backdropFilter: "blur(12px) saturate(1.02)",
-          WebkitBackdropFilter: "blur(12px) saturate(1.02)",
-          borderColor: "rgba(95, 111, 82, 0.10)",
-          boxShadow: "0 28px 60px -44px rgba(58, 51, 39, 0.32)",
+          background: "linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 243, 236, 0.94) 100%)",
+          backdropFilter: "blur(16px) saturate(1.02)",
+          WebkitBackdropFilter: "blur(16px) saturate(1.02)",
+          borderColor: "rgba(58, 51, 39, 0.06)",
+          boxShadow: "0 26px 58px -46px rgba(58, 51, 39, 0.24)",
         }}
       >
         <SidebarHeader className="pt-4 md:pt-4 px-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex w-full items-center gap-4 px-4 py-4 mb-3 rounded-[22px] transition-[background-color,border-color,box-shadow,transform] hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15 overflow-hidden"
+            className="flex w-full items-center gap-4 px-4 py-4 mb-2 rounded-[20px] transition-[background-color,border-color,box-shadow,transform] hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15 overflow-hidden"
             aria-label="Ir para o início do dashboard"
             style={{
-              background: "linear-gradient(135deg, rgba(21, 33, 25, 0.98) 0%, rgba(37, 51, 41, 0.97) 48%, rgba(24, 35, 27, 0.98) 100%)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
+              background: "linear-gradient(135deg, rgba(28, 28, 24, 0.95) 0%, rgba(42, 36, 31, 0.94) 52%, rgba(31, 26, 23, 0.96) 100%)",
+              border: "1px solid rgba(255, 255, 255, 0.06)",
               backdropFilter: "blur(8px) saturate(1.02)",
               WebkitBackdropFilter: "blur(8px) saturate(1.02)",
-              boxShadow: "0 20px 38px -28px rgba(12, 18, 14, 0.72)",
+              boxShadow: "0 18px 34px -28px rgba(30, 24, 20, 0.42)",
             }}
           >
             <div className="flex items-center gap-0">
@@ -109,7 +109,7 @@ export function AppSidebar() {
               <div className="flex flex-col text-left -ml-3">
                 <BrandName tone="light" className="text-[22px] leading-none" />
 
-                <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] py-[3px] rounded-full bg-white/12 text-white/80 backdrop-blur-sm w-fit px-0">
+                <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] py-[3px] rounded-full text-white/72 backdrop-blur-sm w-fit px-0">
                   {isCommercial ? "COMERCIAL" : "PESSOAL"}
                 </span>
               </div>
@@ -122,7 +122,7 @@ export function AppSidebar() {
               <div className="space-y-2.5">
                 <Button
                   variant="primary"
-                  className="w-full h-12 text-[14px] font-semibold rounded-[18px] gap-1.5 px-4 shadow-[0_12px_24px_-16px_hsl(var(--primary)/0.28)] hover:shadow-[0_14px_28px_-18px_hsl(var(--primary)/0.32)]"
+                  className="w-full h-11 text-[13px] font-semibold rounded-[16px] gap-1.5 px-4 shadow-[0_12px_22px_-18px_hsl(var(--primary)/0.26)] hover:shadow-[0_14px_24px_-20px_hsl(var(--primary)/0.3)]"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-[15px] w-[15px] shrink-0" />
@@ -130,7 +130,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-11 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-2xl shadow-[0_8px_20px_-10px_rgba(123,30,43,0.38)] transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] flex items-center justify-center gap-2 font-semibold text-[14px]"
+                  className="group w-full h-10.5 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-[16px] shadow-[0_8px_18px_-12px_rgba(123,30,43,0.32)] transition-all duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center justify-center gap-2 font-semibold text-[13px]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
                   <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-white/90 transition-colors group-hover:text-white" />
@@ -138,7 +138,7 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-10 rounded-[18px] gap-1.5 px-4 text-[13.5px] font-semibold tracking-[-0.01em] text-neutral-900 transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] active:translate-y-[0.5px]"
+                  className="group w-full h-9.5 rounded-[16px] gap-1.5 px-4 text-[12.5px] font-semibold tracking-[-0.01em] text-[rgba(36,30,24,0.82)] transition-all duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] active:translate-y-[0.5px]"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
                   <AlertTriangle className="h-[15px] w-[15px] shrink-0 text-[#B7791F] transition-colors group-hover:text-[#C98922]" />
@@ -160,7 +160,7 @@ export function AppSidebar() {
 
         <SidebarContent className="px-3 pt-1 gap-0">
           <SidebarGroup className="py-0">
-            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-bold mb-2 mt-3 px-3 text-neutral-600">
+            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-semibold mb-2 mt-2 px-3 text-[rgba(72,60,46,0.54)]">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -186,7 +186,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-0 py-0">
-            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-bold mb-2 mt-3 px-3 text-neutral-600">
+            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-semibold mb-2 mt-2 px-3 text-[rgba(72,60,46,0.54)]">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
