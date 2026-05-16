@@ -379,33 +379,29 @@ export default function CommercialDashboard() {
         />
       )}
 
-      <div className="max-w-[1280px] space-y-5 sm:space-y-7">
-        {/* ─── Header ─── */}
-        <div>
-        <div className="surface-clarity rounded-[24px] px-3 py-3 sm:px-5 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="editorial-page max-w-[1240px]">
+        <section className="px-1 pt-1">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="min-w-0">
-              <h1 className="t-title">Resumo da operação</h1>
-              <p className="t-subtitle mt-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.46)]">
+                Operação comercial
+              </p>
+              <h1 className="editorial-page-h1 mt-1">A operação em um único plano</h1>
+              <p className="mt-2 max-w-[620px] text-[13px] leading-[1.5] text-[rgba(58,51,39,0.64)]">
                 {isFiltered
-                  ? `${uniqueLabels} rótulos · ${totalBottles} garrafas · ${formatBRL(totalValue)}`
-                  : `${totalBottles} unidades em estoque`}
-                {lowStock > 0 && !isFiltered && (
-                  <> · <span className="text-primary font-medium">{lowStock} para repor</span></>
-                )}
+                  ? `${uniqueLabels} rótulos, ${totalBottles} garrafas e ${formatBRL(totalValue)} no recorte atual.`
+                  : `${totalBottles} garrafas em estoque com ${lowStock} itens pedindo reposição e ${formatBRL(totalValue)} em produto.`}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant={filtersOpen ? "default" : "outline"}
                 size="default"
                 onClick={() => setFiltersOpen(!filtersOpen)}
-                className={cn(
-                  "gap-2",
-                  isFiltered && !filtersOpen && "border-primary/30 text-primary"
-                )}
+                className={cn("gap-2", isFiltered && !filtersOpen && "border-primary/30 text-primary")}
               >
                 <Filter className="h-4 w-4" />
-                Filtros
+                Refinar
                 {isFiltered && (
                   <span className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
                     {activeFilterLabels.length}
@@ -423,103 +419,67 @@ export default function CommercialDashboard() {
               </Button>
             </div>
           </div>
-        </div>
 
-        {/* ─── Filter Panel ─── */}
+          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.05] pt-4 md:grid-cols-4">
+            {isLoading ? (
+              [1, 2, 3, 4].map((i) => (
+                <div key={i}>
+                  <Skeleton className="mb-2 h-3 w-20 rounded-lg" />
+                  <Skeleton className="h-6 w-24 rounded-lg" />
+                </div>
+              ))
+            ) : (
+              kpis.map((kpi) => (
+                <div key={kpi.label}>
+                  <p className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[rgba(58,51,39,0.46)]">
+                    {kpi.label}
+                  </p>
+                  <div className="mt-1 text-[20px] font-semibold leading-none tracking-[-0.03em] text-[rgba(26,23,19,0.92)]">
+                    {kpi.format(kpi.value)}
+                  </div>
+                  <p className="mt-1 text-[11px] text-[rgba(58,51,39,0.54)]">{kpi.detail}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
         {filtersOpen && (
-          <div className="chart-surface p-4 sm:p-5 space-y-3.5">
+          <div className="surface-clarity space-y-3 rounded-[22px] p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <p className="text-[13px] font-semibold text-foreground">Filtrar estoque</p>
               {isFiltered && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-[11px] text-muted-foreground gap-1">
-                  <X className="h-3 w-3" /> Limpar tudo
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 gap-1 text-[11px] text-muted-foreground">
+                  <X className="h-3 w-3" /> Limpar
                 </Button>
               )}
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
-              <FilterChipGroup
-                label="Tipo"
-                options={filterOptions.style}
-                selected={filters.style}
-                onToggle={(v) => toggleFilter("style", v)}
-              />
-              <FilterChipGroup
-                label="País"
-                options={filterOptions.country}
-                selected={filters.country}
-                onToggle={(v) => toggleFilter("country", v)}
-              />
-              <FilterChipGroup
-                label="Região"
-                options={filterOptions.region}
-                selected={filters.region}
-                onToggle={(v) => toggleFilter("region", v)}
-              />
-              <FilterChipGroup
-                label="Uva"
-                options={filterOptions.grape}
-                selected={filters.grape}
-                onToggle={(v) => toggleFilter("grape", v)}
-              />
+              <FilterChipGroup label="Tipo" options={filterOptions.style} selected={filters.style} onToggle={(v) => toggleFilter("style", v)} />
+              <FilterChipGroup label="País" options={filterOptions.country} selected={filters.country} onToggle={(v) => toggleFilter("country", v)} />
+              <FilterChipGroup label="Região" options={filterOptions.region} selected={filters.region} onToggle={(v) => toggleFilter("region", v)} />
+              <FilterChipGroup label="Uva" options={filterOptions.grape} selected={filters.grape} onToggle={(v) => toggleFilter("grape", v)} />
             </div>
           </div>
         )}
 
-        {/* ─── Active Filter Context Bar ─── */}
         {isFiltered && !filtersOpen && (
-          <div className="surface-clarity flex items-center gap-2 flex-wrap rounded-xl px-4 py-3">
-            <span className="text-[11px] font-semibold text-foreground/72 shrink-0">Visualizando:</span>
+          <div className="flex flex-wrap items-center gap-2 px-1">
             {activeFilterLabels.map(({ key, value }) => (
               <button
                 key={`${key}-${value}`}
                 onClick={() => toggleFilter(key, value)}
-                className="inline-flex items-center gap-1 rounded-lg bg-primary/12 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/18 transition-colors"
+                className="inline-flex items-center gap-1 rounded-full bg-primary/8 px-2.5 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/14"
               >
                 {value}
                 <X className="h-2.5 w-2.5" />
               </button>
             ))}
-            <span className="text-[11px] text-foreground/60">
-              · {uniqueLabels} rótulos · {totalBottles} garrafas · {formatBRL(totalValue)}
-            </span>
-            <button
-              onClick={clearFilters}
-              className="ml-auto text-[10px] font-semibold text-foreground/60 hover:text-foreground transition-colors"
-            >
-              Limpar
+            <button onClick={clearFilters} className="text-[11px] font-medium text-[rgba(58,51,39,0.56)] transition-colors hover:text-foreground">
+              limpar recorte
             </button>
           </div>
         )}
-
-        {/* ─── KPI Strip ─── */}
-        <div>
-        <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
-            {isLoading ? (
-              [1, 2, 3, 4].map((i) => (
-                <div key={i} className="card-depth p-3 sm:p-4">
-                  <Skeleton className="h-3 w-20 mb-2 rounded-lg" />
-                  <Skeleton className="h-6 w-24 rounded-lg" />
-                </div>
-              ))
-            ) : (
-              kpis.map((kpi, index) => (
-                <EditorialKpiCard
-                key={kpi.label}
-                icon={<kpi.icon className="h-3.5 w-3.5" strokeWidth={1.75} />}
-                label={kpi.label}
-                value={kpi.value}
-                sub={kpi.detail}
-                accent={kpi.accent}
-                layout="row"
-                animatedValue={kpi.value}
-                valueFormatter={(value) => kpi.format(value)}
-                motionIndex={index}
-                className="rounded-[18px] !p-3 sm:!p-4"
-              />
-            ))
-          )}
-          </div>
-        </div>
 
         {totalBottles === 0 && !isFiltered ? (
           <PremiumEmptyState
@@ -549,15 +509,14 @@ export default function CommercialDashboard() {
           />
         ) : (
           <>
-          <div className="grid grid-cols-12 gap-4 md:gap-5">
-              {/* ─── Stock Table ─── */}
+            <div className="grid grid-cols-12 gap-4 md:gap-5">
               <div className="col-span-12 lg:col-span-7">
-          <div className="chart-surface p-4 sm:p-6">
+                <div className="surface-clarity p-4 sm:p-6">
                   <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
                     <div className="min-w-0">
                       <p className="chart-surface-kicker">Estoque</p>
                       <h2 className="mt-1 text-[18px] font-semibold tracking-[-0.01em] text-foreground">
-                        Itens de maior impacto
+                        O que sustenta a operação agora
                       </h2>
                     </div>
                     <Button variant="ghost" size="sm" className="text-[12px] font-semibold text-muted-foreground hover:text-foreground" onClick={() => navigate("/dashboard/inventory")}>
@@ -565,20 +524,20 @@ export default function CommercialDashboard() {
                     </Button>
                   </div>
 
-                  <div className="chart-surface overflow-hidden p-0">
-                    <div className="grid grid-cols-12 gap-2 px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 bg-muted/12 sm:px-5 sm:py-3">
+                  <div className="overflow-hidden rounded-[20px] bg-white/32">
+                    <div className="grid grid-cols-12 gap-2 px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 sm:px-5 sm:py-3">
                       <div className="col-span-6">Produto</div>
                       <div className="col-span-2 text-center">Tipo</div>
                       <div className="col-span-2 text-right">Qtd.</div>
                       <div className="col-span-2 text-right">Valor</div>
                     </div>
-                    <div className="divide-y divide-border/12">
+                    <div className="divide-y divide-border/8">
                       {stockRows.map((row) => (
                         <button
                           key={row.id}
                           type="button"
                           onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(row.name)}`)}
-                          className="grid w-full grid-cols-12 items-center gap-2 px-3 py-2.75 text-left transition-all duration-200 hover:bg-muted/8 sm:px-5 sm:py-3.25"
+                          className="grid w-full grid-cols-12 items-center gap-2 px-3 py-3 text-left transition-all duration-200 hover:bg-white/24 sm:px-5"
                         >
                           <div className="col-span-6 min-w-0">
                             <div className="flex items-center gap-2.5">
@@ -609,225 +568,59 @@ export default function CommercialDashboard() {
                 </div>
               </div>
 
-              {/* ─── Right Column ─── */}
-              <div className="col-span-12 grid gap-4 lg:col-span-5">
-                {/* Alerts */}
-                <div>
-                <div className="chart-surface p-4 sm:p-6">
-                  <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="col-span-12 lg:col-span-5">
+                <div className="surface-clarity p-4 sm:p-6">
+                  <div className="space-y-6">
                     <div>
-                        <p className="chart-surface-kicker">Alertas</p>
-                        <h2 className="mt-1 text-[18px] font-bold tracking-[-0.01em] text-foreground">Reposição</h2>
-                      </div>
-                      <Button variant="ghost" size="sm" className="text-[12px] font-semibold text-muted-foreground hover:text-foreground" onClick={() => navigate("/dashboard/inventory")}>
-                        Ajustar
-                      </Button>
+                      <p className="chart-surface-kicker">Operação</p>
+                      <h2 className="mt-1 text-[18px] font-semibold tracking-[-0.01em] text-foreground">Onde agir primeiro</h2>
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="space-y-3">
                       {lowStockRows.length === 0 ? (
-                        <div className="rounded-2xl border border-white/28 bg-white/60 py-6 text-center shadow-[0_10px_20px_-18px_rgba(44,20,31,0.10)] sm:py-8">
-                          <p className="text-[13px] text-muted-foreground/40 font-medium">Nenhum vinho com estoque baixo</p>
-                        </div>
+                        <p className="text-[13px] text-muted-foreground/50">Nenhum item em ruptura agora.</p>
                       ) : (
-                        lowStockRows.map((w) => (
-                          <div key={w.id} className="flex items-center gap-3 rounded-2xl border border-white/24 bg-white/62 px-3 py-2.5 shadow-[0_10px_22px_-20px_rgba(58,51,39,0.12)] transition-all duration-200 hover:bg-white/76 hover:shadow-[0_14px_24px_-20px_rgba(58,51,39,0.16)] sm:gap-3.5 sm:px-4 sm:py-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/8 text-primary shrink-0">
+                        lowStockRows.slice(0, 6).map((w) => (
+                          <button
+                            key={w.id}
+                            type="button"
+                            onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(w.name)}`)}
+                            className="flex w-full items-center gap-3 text-left"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/8 text-primary shrink-0">
                               <ArrowDownRight className="h-3.5 w-3.5" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-[13px] font-semibold text-foreground">{w.name}</p>
-                              {w.producer && (
-                                <p className="mt-0.5 truncate text-[11px] text-muted-foreground/50">{w.producer}</p>
-                              )}
+                              {w.producer && <p className="mt-0.5 truncate text-[11px] text-muted-foreground/50">{w.producer}</p>}
                             </div>
-                            <span className="rounded-xl bg-primary/8 px-2.5 py-0.5 text-[11px] font-bold text-primary tabular-nums">
-                              {w.quantity} un.
-                            </span>
-                          </div>
+                            <span className="text-[12px] font-semibold text-primary tabular-nums">{w.quantity}</span>
+                          </button>
                         ))
                       )}
                     </div>
-                  </div>
-                </div>
 
-                {/* Quick Links */}
-                <div>
-                <div className="chart-surface p-4 sm:p-6">
-                    <p className="chart-surface-kicker mb-3.5">Atalhos</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        { icon: Package, label: "Estoque", route: "/dashboard/inventory" },
-                        { icon: ShoppingCart, label: "Vendas", route: "/dashboard/sales" },
-                        { icon: Users, label: "Cadastros", route: "/dashboard/registers" },
-                        { icon: FileText, label: "Relatórios", route: "/dashboard/reports" },
-                      ].map((item) => (
-                        <Button
-                          key={item.label}
-                          type="button"
-                          variant="ghost"
-                          onClick={() => navigate(item.route)}
-                          className="flex h-10 items-center gap-3 rounded-2xl border border-white/24 bg-white/62 px-3.5 text-left shadow-[0_10px_22px_-20px_rgba(58,51,39,0.10)] hover:bg-white/78 transition-all duration-200 sm:h-11 sm:px-4"
-                        >
-                          <item.icon className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                          <span className="text-[12px] font-semibold text-foreground">{item.label}</span>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ─── Breakdown Section ─── */}
-            <div>
-              <div className="grid grid-cols-1 gap-3 md:gap-5 lg:grid-cols-2">
-                {/* By Style */}
-                <div className="chart-surface p-4 sm:p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="h-4 w-4 text-foreground/50" />
-                    <h3 className="chart-surface-title">Por tipo</h3>
-                  </div>
-                  {breakdownByStyle.length === 0 ? (
-                    <p className="text-[13px] text-muted-foreground/40 py-4 text-center">Sem dados</p>
-                  ) : (
-                    <div className="flex items-start gap-4 sm:gap-6">
-                      <div className="h-[108px] w-[108px] shrink-0 sm:h-[120px] sm:w-[120px]">
-                        <ResponsiveContainer width="100%" height={100}>
-                          <PieChart>
-                            <Pie
-                              data={breakdownByStyle}
-                              dataKey="bottles"
-                              nameKey="name"
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={55}
-                              innerRadius={30}
-                              strokeWidth={2}
-                              stroke="rgba(255,255,255,0.92)"
-                            >
-                              {breakdownByStyle.map((_, i) => (
-                                <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <div className="flex-1 space-y-1.5 sm:space-y-2">
-                        {breakdownByStyle.map((d, i) => {
-                          const pct = totalBottles > 0 ? Math.round((d.bottles / totalBottles) * 100) : 0;
-                          return (
-                            <div key={d.name} className="flex items-center gap-2.5">
-                              <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                              <span className="text-[12px] font-semibold text-foreground flex-1 truncate">{d.name}</span>
-                              <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{d.bottles} un.</span>
-                              <span className="text-[10px] font-semibold text-muted-foreground/40 tabular-nums w-[32px] text-right">{pct}%</span>
-                            </div>
-                          );
-                        })}
+                    <div className="border-t border-black/[0.05] pt-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { icon: Package, label: "Estoque", route: "/dashboard/inventory" },
+                          { icon: ShoppingCart, label: "Vendas", route: "/dashboard/sales" },
+                          { icon: Users, label: "Cadastros", route: "/dashboard/registers" },
+                          { icon: FileText, label: "Relatórios", route: "/dashboard/reports" },
+                        ].map((item) => (
+                          <Button
+                            key={item.label}
+                            type="button"
+                            variant="ghost"
+                            onClick={() => navigate(item.route)}
+                            className="flex h-10 items-center gap-3 rounded-2xl bg-transparent px-3.5 text-left hover:bg-white/24 sm:h-11 sm:px-4"
+                          >
+                            <item.icon className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                            <span className="text-[12px] font-semibold text-foreground">{item.label}</span>
+                          </Button>
+                        ))}
                       </div>
                     </div>
-                  )}
-                </div>
-
-                {/* By Region */}
-                <div className="chart-surface p-4 sm:p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="h-4 w-4 text-foreground/50" />
-                    <h3 className="chart-surface-title">Por região</h3>
-                  </div>
-                  {breakdownByRegion.length === 0 ? (
-                    <p className="text-[13px] text-muted-foreground/40 py-4 text-center">Sem dados</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {breakdownByRegion.map((d, i) => {
-                        const pct = totalBottles > 0 ? Math.round((d.bottles / totalBottles) * 100) : 0;
-                        return (
-                          <div key={d.name}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-[12px] font-semibold text-foreground truncate">{d.name}</span>
-                              <div className="flex items-center gap-3">
-                                <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{d.bottles} un.</span>
-                                <span className="text-[11px] font-semibold text-muted-foreground/50 tabular-nums">{formatBRL(d.value)}</span>
-                              </div>
-                            </div>
-                            <div className="h-1.5 rounded-full bg-muted/20 overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${pct}%`,
-                                  backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
-                                }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* ─── Charts ─── */}
-            <div className="grid grid-cols-1 gap-3 md:gap-5 lg:grid-cols-3">
-              <div>
-                <div className="chart-surface p-4 sm:p-6">
-                  <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="chart-surface-title">Vendas</h3>
-                    <span className="chart-surface-kicker">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
-                  </div>
-                  <div className="h-[110px] sm:h-[120px]">
-                    <ResponsiveContainer width="100%" height={100}>
-                      <BarChart data={salesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip contentStyle={chartTooltipStyle} formatter={(v: any) => formatBRL(Number(v))} />
-                        <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" shape={(props) => <AnimatedBarShape {...props} />} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="chart-surface p-4 sm:p-6">
-                  <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="chart-surface-title">Movimentação</h3>
-                    <span className="chart-surface-kicker">{isFiltered ? "6 meses · filtro ativo" : "6 meses"}</span>
-                  </div>
-                  <div className="h-[110px] sm:h-[120px]">
-                    <ResponsiveContainer width="100%" height={100}>
-                      <BarChart data={stockMovesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip contentStyle={chartTooltipStyle} />
-                        <Bar dataKey="in" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--gold))" name="Entrada" shape={(props) => <AnimatedBarShape {...props} />} />
-                        <Bar dataKey="out" stackId="a" radius={[8, 8, 0, 0]} fill="hsl(var(--wine))" name="Saída" shape={(props) => <AnimatedBarShape {...props} />} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="chart-surface p-4 sm:p-6">
-                  <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="chart-surface-title">Saldo mensal</h3>
-                    <span className="chart-surface-kicker">{isFiltered ? "recorte atual" : "net"}</span>
-                  </div>
-                  <div className="h-[110px] sm:h-[120px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={stockMovesMonthly}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.16)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.72)", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--foreground) / 0.56)" }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip contentStyle={chartTooltipStyle} />
-                        <Area type="monotone" dataKey="net" stroke="hsl(var(--wine))" fill="hsl(var(--wine) / 0.08)" strokeWidth={2.5} />
-                      </AreaChart>
-                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>

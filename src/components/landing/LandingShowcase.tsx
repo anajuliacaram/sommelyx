@@ -269,7 +269,7 @@ export function LandingShowcase() {
   const activeTab = tabs.find((t) => t.key === active)!;
 
   return (
-    <section className="relative px-4 sm:px-8 pt-3 pb-7 z-10">
+    <section id="features" className="relative px-4 sm:px-8 pt-5 pb-8 z-10">
       <div className="mx-auto max-w-5xl">
         <motion.div
           className="text-center mx-auto max-w-2xl mb-6"
@@ -280,13 +280,13 @@ export function LandingShowcase() {
           custom={0}
         >
           <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.14em] text-wine mb-3">
-            Por dentro do produto
+            O ambiente Sommelyx
           </span>
           <h2 className="text-[26px] sm:text-[34px] font-semibold tracking-[-0.02em] text-[#1A1A1A] leading-[1.1]">
-            Veja o <BrandName className="text-[26px] sm:text-[34px]" /> em ação
+            Uma experiência única para operar, escolher e decidir melhor
           </h2>
           <p className="mt-3 text-[14px] sm:text-[15px] leading-relaxed text-[#5F5F5F]">
-            Três telas que mostram o nível de clareza e densidade do produto.
+            Estoque, adega e harmonização no mesmo ritmo visual, sem troca de linguagem.
           </p>
         </motion.div>
 

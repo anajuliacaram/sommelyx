@@ -6,14 +6,12 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  Bell,
   BookOpen,
   Clock,
   GlassWater,
   Layers,
   Plus,
   Search,
-  Settings,
   Sparkles,
   Star,
   Wine as WineIcon,
@@ -22,7 +20,6 @@ import {
 
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
-import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
@@ -31,7 +28,6 @@ import {
   Chip,
   EditorialCard,
   EditorialHeroBand,
-  EditorialKpiCard,
   Kicker,
   Sparkbar,
   STYLE_COLORS,
@@ -79,7 +75,6 @@ export default function PersonalDashboard() {
   const wineEvent = useWineEvent();
 
   const [addOpen, setAddOpen] = useState(false);
-  const [manageOpen, setManageOpen] = useState(false);
   const [dishToWineOpen, setDishToWineOpen] = useState(false);
   const [pairingInitialWineId, setPairingInitialWineId] = useState<string | null>(null);
   const [wineListScanOpen, setWineListScanOpen] = useState(false);
@@ -205,134 +200,75 @@ export default function PersonalDashboard() {
       )}
 
       <div className="editorial-page">
-        {/* ─── HERO + KPIs ─── */}
-        <section>
-          <EditorialCard style={isMobile ? { padding: "14px 14px 12px" } : undefined}>
-            <div className="mb-2 flex items-start justify-between gap-3 md:mb-6 md:gap-6">
-              <div className="min-w-0">
-                <Kicker>
-                  {new Date().toLocaleDateString("pt-BR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                  })}
-                </Kicker>
-                <h1 className={`editorial-h1 mt-1 ${isMobile ? "!text-[26px] leading-[1.02]" : ""}`}>
-                  Olá,{" "}
-                  <span
-                    style={{
-                      backgroundImage: "linear-gradient(145deg, #7B1E2B, #5A141F)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    {firstName}
-                  </span>
-                </h1>
-                <p
-                  className={`mt-1.5 max-w-[520px] text-[12.5px] leading-[1.45] md:mt-2 md:text-[13px] md:leading-[1.5] ${isMobile ? "!text-[12px] !leading-[1.35]" : ""}`}
-                  style={{ color: "rgba(58,51,39,0.64)" }}
+        <section className="px-1 pt-1">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="min-w-0">
+              <Kicker>
+                {new Date().toLocaleDateString("pt-BR", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
+              </Kicker>
+              <h1 className={`editorial-page-h1 mt-1 ${isMobile ? "!text-[27px] leading-[1.02]" : ""}`}>
+                Olá,{" "}
+                <span
+                  style={{
+                    backgroundImage: "linear-gradient(145deg, #7B1E2B, #5A141F)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
                 >
-                  {totalBottles > 0 ? (
-                    <>
-                      Sua adega guarda{" "}
-                      <b style={{ color: "#1a1713", fontWeight: 700 }}>
-                        {totalBottles} {totalBottles === 1 ? "garrafa" : "garrafas"}
-                      </b>
-                      .{" "}
-                      <b style={{ color: "#5F7F52", fontWeight: 700 }}>
-                        {drinkNow} {drinkNow === 1 ? "está pronta" : "estão prontas"}
-                      </b>{" "}
-                      para abrir hoje — {inGuard} ainda em guarda.
-                    </>
-                  ) : (
-                    <>
-                      Sua adega está vazia. Adicione o primeiro vinho para começar a acompanhar
-                      janelas de consumo e valor.
-                    </>
-                  )}
-                </p>
-              </div>
-              <div className="hidden items-center gap-2 md:flex">
-                <button
-                  type="button"
-                  className="editorial-btn-ghost relative h-10 w-10 justify-center px-0"
-                  onClick={() => navigate("/dashboard/alerts")}
-                  aria-label="Alertas"
-                >
-                  <Bell className="h-4 w-4" />
-                  {(drinkNow + pastPeak) > 0 && (
-                    <span
-                      className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full"
-                      style={{ background: "#C96B55" }}
-                    />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="editorial-btn-ghost h-10 w-10 justify-center px-0"
-                  onClick={() => navigate("/dashboard/settings")}
-                  aria-label="Configurações"
-                >
-                  <Settings className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  className="editorial-btn-primary"
-                  onClick={() => setAddOpen(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Adicionar vinho</span>
-                </button>
-              </div>
+                  {firstName}
+                </span>
+              </h1>
+              <p
+                className={`mt-2 max-w-[560px] text-[13px] leading-[1.5] ${isMobile ? "!text-[12px] !leading-[1.38]" : ""}`}
+                style={{ color: "rgba(58,51,39,0.64)" }}
+              >
+                {totalBottles > 0
+                  ? `Sua adega guarda ${totalBottles} ${totalBottles === 1 ? "garrafa" : "garrafas"}. ${drinkNow} ${drinkNow === 1 ? "está pronta" : "estão prontas"} para abrir hoje, enquanto ${inGuard} seguem em guarda.`
+                  : "Sua adega está vazia. Adicione o primeiro vinho para começar a acompanhar consumo, janelas e valor."}
+              </p>
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" className="editorial-btn-primary" onClick={() => setAddOpen(true)}>
+                <Plus className="h-4 w-4" />
+                <span>Adicionar vinho</span>
+              </button>
+              <button
+                type="button"
+                className="editorial-btn-ghost"
+                onClick={() => {
+                  setPreSelectedWine(null);
+                  setConsumptionOpen(true);
+                }}
+              >
+                <GlassWater className="h-4 w-4" />
+                <span>Adicionar consumo</span>
+              </button>
+            </div>
+          </div>
 
-            {/* KPI grid */}
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-              <EditorialKpiCard
-                icon={<Layers className="h-4 w-4" />}
-                accent="#5F7F52"
-                label="Garrafas"
-                value={totalBottles}
-                sub="em estoque"
-                layout="row"
-                animatedValue={totalBottles}
-                motionIndex={0}
-              />
-              <EditorialKpiCard
-                icon={<Star className="h-4 w-4" />}
-                accent="#B48C3A"
-                label="Valor estimado"
-                value={formatCurrencyShort(totalValue)}
-                sub="atualizado hoje"
-                layout="row"
-                animatedValue={totalValue}
-                valueFormatter={(value) => formatCurrencyShort(value)}
-                motionIndex={1}
-              />
-              <EditorialKpiCard
-                icon={<GlassWater className="h-4 w-4" />}
-                accent="#5F7F52"
-                label="Beber agora"
-                value={drinkNow}
-                sub="em janela ideal"
-                layout="row"
-                animatedValue={drinkNow}
-                motionIndex={2}
-              />
-              <EditorialKpiCard
-                icon={<Clock className="h-4 w-4" />}
-                accent="#6B8298"
-                label="Em guarda"
-                value={inGuard}
-                sub="aguardando"
-                layout="row"
-                animatedValue={inGuard}
-                motionIndex={3}
-              />
-            </div>
-          </EditorialCard>
+          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.05] pt-4 md:grid-cols-4">
+            {[
+              { label: "Garrafas", value: totalBottles.toLocaleString("pt-BR"), detail: "em estoque" },
+              { label: "Valor estimado", value: formatCurrencyShort(totalValue), detail: "atualizado hoje" },
+              { label: "Beber agora", value: String(drinkNow), detail: "em janela ideal" },
+              { label: "Em guarda", value: String(inGuard), detail: "aguardando" },
+            ].map((metric) => (
+              <div key={metric.label} className="min-w-0">
+                <p className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[rgba(58,51,39,0.46)]">
+                  {metric.label}
+                </p>
+                <div className="mt-1 text-[20px] font-semibold leading-none tracking-[-0.03em] text-[rgba(26,23,19,0.92)]">
+                  {metric.value}
+                </div>
+                <p className="mt-1 text-[11px] text-[rgba(58,51,39,0.54)]">{metric.detail}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ─── INSIGHT BAND ─── */}
@@ -389,22 +325,20 @@ export default function PersonalDashboard() {
           </div>
         )}
 
-        {/* ─── MAIN GRID ─── */}
         <div className="grid grid-cols-12 gap-4 lg:gap-5">
-          {/* Prontos para abrir — coluna principal */}
           <section className="col-span-12 lg:col-span-8">
             <EditorialCard>
-              <div className="mb-3 flex flex-col gap-2 md:mb-4 md:flex-row md:items-center md:justify-between md:gap-3">
+              <div className="mb-3 flex flex-col gap-2 md:mb-4 md:flex-row md:items-end md:justify-between md:gap-3">
                 <div className="min-w-0">
-                  <h2 className="editorial-h2 text-[19px] md:text-[22px]">Prontos para abrir</h2>
+                  <h2 className="editorial-h2 text-[19px] md:text-[22px]">Escolha a próxima garrafa</h2>
                   <p
                     className="mt-0.5 text-[11px] leading-[1.25] md:text-[12px]"
                     style={{ color: "rgba(58,51,39,0.56)" }}
                   >
                     {ready.length}{" "}
                     {ready.length === 1
-                      ? "vinho em janela ideal de consumo este ano"
-                      : "vinhos em janela ideal de consumo este ano"}
+                      ? "vinho pronto para abrir agora"
+                      : "vinhos prontos para abrir agora"}
                   </p>
                 </div>
                 <button
@@ -416,7 +350,6 @@ export default function PersonalDashboard() {
                 </button>
               </div>
 
-              {/* Search + filter chips */}
               <div className="editorial-search mb-2.5 h-9 md:mb-3 md:h-10">
                 <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
                 <input
@@ -447,7 +380,6 @@ export default function PersonalDashboard() {
                 </div>
               </div>
 
-              {/* List */}
               {ready.length === 0 ? (
                 <PremiumEmptyState
                   icon={GlassWater}
@@ -524,10 +456,7 @@ export default function PersonalDashboard() {
                         </div>
                         <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
                           {w.rating != null && (
-                            <div
-                              className="flex items-center gap-1 text-[12.5px] font-semibold tabular-nums"
-                              style={{ color: "#B48C3A" }}
-                            >
+                            <div className="flex items-center gap-1 text-[12.5px] font-semibold tabular-nums" style={{ color: "#B48C3A" }}>
                               <Star className="h-3.5 w-3.5 fill-current" />
                               <span>{Number(w.rating).toFixed(1)}</span>
                             </div>
@@ -557,143 +486,105 @@ export default function PersonalDashboard() {
             </EditorialCard>
           </section>
 
-          {/* Right column */}
-          <aside className="col-span-12 flex flex-col gap-5 lg:col-span-4">
-            <div>
-              <EditorialCard style={{ padding: "18px 18px" }}>
-                <h3 className="editorial-h3">Último aberto</h3>
-                {lastOpened ? (
-                  <>
-                    <Kicker className="mt-2.5">
-                      há {daysAgo} dia{daysAgo !== 1 ? "s" : ""}
-                    </Kicker>
-                    <div
-                      className="mt-0.5 font-serif text-[18px] font-semibold"
-                      style={{
-                        fontFamily: "'Libre Baskerville', Georgia, serif",
-                        letterSpacing: "-0.01em",
-                        color: "#1a1713",
-                      }}
-                    >
-                      {lastOpened.wine_name}
-                    </div>
-                    <div className="mt-1 text-[12px]" style={{ color: "rgba(58,51,39,0.58)" }}>
-                      {lastOpened.tasting_notes ||
-                        lastOpened.location ||
-                        (lastOpened.rating != null
-                          ? `Nota ${Number(lastOpened.rating).toFixed(1)}`
-                          : "Consumo registrado")}
-                    </div>
-                  </>
-                ) : (
-                  <p className="mt-3 text-[12px]" style={{ color: "rgba(58,51,39,0.5)" }}>
-                    Nenhum consumo registrado ainda.
-                  </p>
-                )}
-              </EditorialCard>
-            </div>
-
-            <div>
-              <EditorialCard style={{ padding: "18px 18px" }}>
-                <div className="mb-2.5 flex items-baseline justify-between">
-                  <h3 className="editorial-h3">Consumo · 6 meses</h3>
-                  <span
-                    className="text-[11px] font-bold tabular-nums"
-                    style={{ color: "#7B1E2B" }}
-                  >
-                    {consumption.length}
-                  </span>
-                </div>
-                <Sparkbar data={consumptionMonthly} accent="#7B1E2B" height={72} />
-              </EditorialCard>
-            </div>
-
-            <div>
-              <EditorialCard style={{ padding: "18px 18px" }}>
-                <h3 className="editorial-h3 mb-3">Alertas</h3>
-                <div className="flex flex-col gap-px">
-                  {[
-                    { label: "Beber agora", value: drinkNow, tone: "#5F7F52" },
-                    { label: "Em guarda", value: inGuard, tone: "#6B8298" },
-                    { label: "Beber em breve", value: pastPeak, tone: "#B48C3A" },
-                  ].map((a) => (
-                    <button
-                      key={a.label}
-                      type="button"
-                      onClick={() => navigate("/dashboard/alerts")}
-                      className="flex items-center justify-between rounded-lg px-1 py-2.5 text-left transition-all hover:bg-black/[0.03]"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          className="h-1.5 w-1.5 rounded-full"
-                          style={{ background: a.tone }}
-                        />
-                        <span
-                          className="text-[12px] font-medium"
-                          style={{ color: "rgba(58,51,39,0.7)" }}
-                        >
-                          {a.label}
-                        </span>
-                      </div>
-                      <span
-                        className="tabular-nums"
+          <aside className="col-span-12 lg:col-span-4">
+            <EditorialCard style={{ padding: "18px 18px" }}>
+              <div className="space-y-6">
+                <div>
+                  <Kicker>Hoje</Kicker>
+                  {lastOpened ? (
+                    <>
+                      <div
+                        className="mt-2 font-serif text-[18px] font-semibold"
                         style={{
-                          fontSize: 20,
-                          fontWeight: 700,
-                          letterSpacing: "-0.02em",
-                          color: a.value > 0 ? a.tone : "rgba(58,51,39,0.2)",
+                          fontFamily: "'Libre Baskerville', Georgia, serif",
+                          letterSpacing: "-0.01em",
+                          color: "#1a1713",
                         }}
                       >
-                        {a.value}
-                      </span>
-                    </button>
-                  ))}
+                        {lastOpened.wine_name}
+                      </div>
+                      <p className="mt-1 text-[12px]" style={{ color: "rgba(58,51,39,0.58)" }}>
+                        {lastOpened.tasting_notes ||
+                          lastOpened.location ||
+                          (lastOpened.rating != null
+                            ? `Nota ${Number(lastOpened.rating).toFixed(1)}`
+                            : "Consumo registrado")}
+                      </p>
+                      <p className="mt-2 text-[11px] font-medium" style={{ color: "rgba(58,51,39,0.52)" }}>
+                        há {daysAgo} dia{daysAgo !== 1 ? "s" : ""}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-2 text-[12px]" style={{ color: "rgba(58,51,39,0.5)" }}>
+                      Nenhum consumo registrado ainda.
+                    </p>
+                  )}
                 </div>
-              </EditorialCard>
-            </div>
 
-            {/* Quick actions */}
-            <div>
-              <EditorialCard style={{ padding: "18px 18px" }}>
-                <h3 className="editorial-h3 mb-3">Atalhos</h3>
-                <div className="flex flex-col gap-2">
-                  <button
-                    type="button"
-                    className="editorial-btn-primary w-full justify-center"
-                    onClick={() => setAddOpen(true)}
-                  >
-                    <Plus className="h-4 w-4" /> Adicionar vinho
-                  </button>
-                  <button
-                    type="button"
-                    className="editorial-btn-ghost w-full justify-center"
-                    onClick={() => setManageOpen(true)}
-                  >
-                    <GlassWater className="h-4 w-4" /> Adicionar consumo
-                  </button>
-                  <button
-                    type="button"
-                    className="editorial-btn-ghost w-full justify-center"
-                    onClick={() => setDishToWineOpen(true)}
-                  >
-                    <Sparkles className="h-4 w-4" /> Harmonizar prato
-                  </button>
-                  <button
-                    type="button"
-                    className="editorial-btn-ghost w-full justify-center"
-                    onClick={() => setWineListScanOpen(true)}
-                  >
-                    <BookOpen className="h-4 w-4" /> Analisar carta
-                  </button>
+                <div className="border-t border-black/[0.05] pt-4">
+                  <div className="mb-2.5 flex items-baseline justify-between">
+                    <h3 className="editorial-h3">Consumo recente</h3>
+                    <span className="text-[11px] font-semibold tabular-nums" style={{ color: "#7B1E2B" }}>
+                      {consumption.length}
+                    </span>
+                  </div>
+                  <Sparkbar data={consumptionMonthly} accent="#7B1E2B" height={68} />
                 </div>
-              </EditorialCard>
-            </div>
+
+                <div className="border-t border-black/[0.05] pt-4">
+                  <div className="space-y-2.5">
+                    {[
+                      { label: "Beber agora", value: drinkNow, tone: "#5F7F52" },
+                      { label: "Em guarda", value: inGuard, tone: "#6B8298" },
+                      { label: "Passaram do auge", value: pastPeak, tone: "#B48C3A" },
+                    ].map((a) => (
+                      <button
+                        key={a.label}
+                        type="button"
+                        onClick={() => navigate("/dashboard/alerts")}
+                        className="flex w-full items-center justify-between text-left"
+                      >
+                        <span className="text-[12px] font-medium" style={{ color: "rgba(58,51,39,0.68)" }}>
+                          {a.label}
+                        </span>
+                        <span className="text-[18px] font-semibold tracking-[-0.02em] tabular-nums" style={{ color: a.value > 0 ? a.tone : "rgba(58,51,39,0.24)" }}>
+                          {a.value}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-black/[0.05] pt-4">
+                  <div className="flex flex-col gap-2">
+                    <button type="button" className="editorial-btn-primary w-full justify-center" onClick={() => setAddOpen(true)}>
+                      <Plus className="h-4 w-4" /> Adicionar vinho
+                    </button>
+                    <button
+                      type="button"
+                      className="editorial-btn-ghost w-full justify-center"
+                      onClick={() => {
+                        setPreSelectedWine(null);
+                        setConsumptionOpen(true);
+                      }}
+                    >
+                      <GlassWater className="h-4 w-4" /> Adicionar consumo
+                    </button>
+                    <button type="button" className="editorial-btn-ghost w-full justify-center" onClick={() => setDishToWineOpen(true)}>
+                      <Sparkles className="h-4 w-4" /> Harmonizar prato
+                    </button>
+                    <button type="button" className="editorial-btn-ghost w-full justify-center" onClick={() => setWineListScanOpen(true)}>
+                      <BookOpen className="h-4 w-4" /> Analisar carta
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </EditorialCard>
           </aside>
         </div>
       </div>
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
-      <ManageBottleDialog open={manageOpen} onOpenChange={setManageOpen} />
       <DishToWineDialog
         open={dishToWineOpen}
         onOpenChange={(v) => {
