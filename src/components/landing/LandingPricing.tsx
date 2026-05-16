@@ -47,8 +47,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
         <motion.div
           className="mx-auto max-w-2xl text-center"
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          animate="visible"
           variants={fadeUp}
           custom={0}
         >
@@ -67,8 +66,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
               <motion.div
                 key={plan.name}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
+                animate="visible"
                 variants={fadeUp}
                 custom={index + 1}
                 className="grid gap-5 p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-6"
@@ -120,8 +118,7 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
         <motion.p
           className="mx-auto mt-6 max-w-xl text-center text-[12px] leading-relaxed text-[rgba(58,51,39,0.56)]"
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          animate="visible"
           variants={fadeUp}
           custom={3}
         >

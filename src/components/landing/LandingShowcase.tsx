@@ -39,8 +39,7 @@ export function LandingShowcase() {
         <motion.div
           className="mx-auto max-w-2xl text-center"
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          animate="visible"
           variants={fadeUp}
           custom={0}
         >
@@ -58,8 +57,7 @@ export function LandingShowcase() {
             <motion.article
               key={scene.label}
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-60px" }}
+              animate="visible"
               variants={fadeUp}
               custom={index + 1}
               className="group min-h-[260px] rounded-[28px] p-5 sm:p-6"
